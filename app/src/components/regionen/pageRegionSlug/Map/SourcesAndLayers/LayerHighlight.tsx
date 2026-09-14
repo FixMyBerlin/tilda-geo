@@ -50,7 +50,7 @@ export const LayerHighlight = ({
   const { mode } = useCurrentMode()
   // Selected uses the mode accent (QA purple, notes blue, …). Default hover stays orange so
   // pointer interest stays distinct from “this feature is open in the panel”.
-  const selectedColor = modeIdentity[mode].accent
+  const selectedColor = modeIdentity[mode].accent.hex
   const opacity = createMatchExpression({
     valueNone: 0,
     valueHover: 0.5,

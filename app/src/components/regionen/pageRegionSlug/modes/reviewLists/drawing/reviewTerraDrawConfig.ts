@@ -11,7 +11,7 @@ import type { ReviewGeometryFamily } from './reviewGeometryParts'
 
 /** Review drawing palette (mode accent, in-progress sky, move orange). */
 const COLORS = {
-  draw: modeIdentity.reviewLists.accent as HexColor,
+  draw: modeIdentity.reviewLists.accent.hex as HexColor,
   point: '#0ea5e9' as HexColor, // sky-500
   move: REVIEW_ENTRY_MOVE_COLOR as HexColor,
 }

@@ -2,7 +2,7 @@ import { MapPinIcon } from '@heroicons/react/24/solid'
 import { useEffect, useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
-import { modeAccentInvertedClassName, modeAccentStyle, modeIdentity } from '../../modeIdentity'
+import { modeIdentity } from '../../modeIdentity'
 import { useNotesComposeActive } from '../useNotesComposeActive'
 
 /**
@@ -31,14 +31,17 @@ const NotesNewCenterPinSession = () => {
     [mainMap, showHint],
   )
 
-  const notesAccentStyle = modeAccentStyle(modeIdentity.notes.accent)
+  const { accent } = modeIdentity.notes
 
   return (
-    <div className="pointer-events-none absolute inset-0 z-10" style={notesAccentStyle}>
+    <div className="pointer-events-none absolute inset-0 z-10">
       {/* Crosshair center = map canvas center; pin tucks into the upper notch (old NotesNewMap stack). */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
         <div
-          className="relative size-7 text-(--mode-accent) drop-shadow-[0_0_1px_rgba(255,255,255,0.95)]"
+          className={twJoin(
+            'relative size-7 drop-shadow-[0_0_1px_rgba(255,255,255,0.95)]',
+            accent.textClassName,
+          )}
           aria-hidden
         >
           <span className="absolute top-1/2 left-1/2 h-0.5 w-full -translate-x-1/2 -translate-y-1/2 rotate-45 rounded-full bg-current" />
@@ -53,7 +56,7 @@ const NotesNewCenterPinSession = () => {
         <div
           className={twJoin(
             'absolute inset-x-4 top-[calc(50%+2.5rem)] z-50 rounded-sm p-1.5 text-center text-sm text-white shadow-sm sm:inset-x-20 sm:p-2',
-            modeAccentInvertedClassName,
+            accent.className,
           )}
         >
           Bewegen Sie die Karte, um das Kreuz dort zu positionieren, wo Sie Ihren Hinweis eintragen

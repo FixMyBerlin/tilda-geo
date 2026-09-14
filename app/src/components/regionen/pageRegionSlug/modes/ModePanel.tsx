@@ -6,13 +6,7 @@ import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { MotionCollapse } from '@/components/shared/motion/MotionCollapse'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 import { PanelResizeHandle } from '../PanelResizeHandle'
-import {
-  modeAccentInvertedClassName,
-  modeAccentInvertedFgClassName,
-  modeAccentInvertedMutedClassName,
-  modeAccentStyle,
-  modeIdentity,
-} from './modeIdentity'
+import { modeIdentity } from './modeIdentity'
 import {
   modePanelBackButtonClassName,
   modePanelClassName,
@@ -87,6 +81,7 @@ export const ModePanel = ({
 }: Props) => {
   const { mode } = useCurrentMode()
   const identity = modeIdentity[mode]
+  const { accent } = identity
   const Icon = identity.icon
   const isDesktop = useBreakpoint('sm')
   const { panelRef, onResizeHandlePointerDown } = useResizableModePanelWidth({
@@ -100,8 +95,7 @@ export const ModePanel = ({
     <section
       ref={panelRef}
       aria-label={identity.label}
-      className={modePanelClassName}
-      style={modeAccentStyle(identity.accent)}
+      className={twJoin(modePanelClassName, accent.tintClassName)}
     >
       {isDesktop ? (
         <PanelResizeHandle
@@ -112,8 +106,8 @@ export const ModePanel = ({
       <header
         className={twJoin(
           isDetail ? 'flex items-stretch border-b border-gray-200' : 'border-b border-gray-200',
-          modeAccentInvertedClassName,
-          modeAccentInvertedFgClassName(mode),
+          accent.className,
+          accent.invertedFgClassName,
         )}
       >
         {isDetail ? (
@@ -148,7 +142,7 @@ export const ModePanel = ({
                 <ModePanelListHeading
                   title={title}
                   subtitle={subtitle}
-                  mutedClassName={modeAccentInvertedMutedClassName(mode)}
+                  mutedClassName={accent.invertedMutedClassName}
                 />
               </div>
               {actions && <div className={modePanelListHeaderActionsClassName}>{actions}</div>}
@@ -171,7 +165,7 @@ export const ModePanel = ({
                       <ModePanelListHeading
                         title={title}
                         subtitle={subtitle}
-                        mutedClassName={modeAccentInvertedMutedClassName(mode)}
+                        mutedClassName={accent.invertedMutedClassName}
                       />
                     </div>
                     <ChevronDownIcon
@@ -199,7 +193,7 @@ export const ModePanel = ({
               <ModePanelListHeading
                 title={title}
                 subtitle={subtitle}
-                mutedClassName={modeAccentInvertedMutedClassName(mode)}
+                mutedClassName={accent.invertedMutedClassName}
               />
             </div>
             {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}

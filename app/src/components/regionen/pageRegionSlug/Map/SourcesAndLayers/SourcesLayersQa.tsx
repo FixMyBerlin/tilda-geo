@@ -136,7 +136,7 @@ export const SourcesLayersQa = () => {
             }
             layout={{ 'line-cap': 'round', 'line-join': 'round' }}
             paint={{
-              'line-color': modeIdentity.qa.accent,
+              'line-color': modeIdentity.qa.accent.hex,
               'line-opacity': 0.85,
               'line-width': 10,
               'line-offset': -5,
@@ -149,7 +149,7 @@ export const SourcesLayersQa = () => {
           source-layer={vectorSourceName}
           type="fill"
           paint={{}}
-          hoverColor={modeIdentity.qa.accent}
+          hoverColor={modeIdentity.qa.accent.hex}
           includeSelected={false}
         />
         <LayerHighlight
@@ -160,7 +160,7 @@ export const SourcesLayersQa = () => {
           paint={{
             'line-width': 3,
           }}
-          hoverColor={modeIdentity.qa.accent}
+          hoverColor={modeIdentity.qa.accent.hex}
           includeSelected={false}
         />
       </Fragment>

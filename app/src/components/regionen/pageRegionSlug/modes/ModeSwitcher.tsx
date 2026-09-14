@@ -3,12 +3,7 @@ import { motion } from 'motion/react'
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { UI_SPRING } from '@/components/shared/motion/spring.const'
-import {
-  modeAccentInvertedClassName,
-  modeAccentInvertedFgClassName,
-  modeAccentStyle,
-  modeIdentity,
-} from './modeIdentity'
+import { modeIdentity } from './modeIdentity'
 import { modeSwitcherSearch } from './modeSwitcherSearch'
 import {
   type RegionMode,
@@ -169,14 +164,13 @@ const ModeSwitcherNav = () => {
           className={twJoin(
             'pointer-events-none absolute top-1 bottom-1 left-0 z-10 overflow-hidden',
             modeSwitcherPillElevationClassName,
-            modeAccentInvertedClassName,
           )}
-          style={{ borderRadius: 4, ...modeAccentStyle(highlightedIdentity.accent) }}
+          style={{ borderRadius: 4 }}
           initial={false}
           animate={{
             x: pill.left,
             width: pill.width,
-            backgroundColor: highlightedIdentity.accent,
+            backgroundColor: highlightedIdentity.accent.hex,
           }}
           transition={UI_SPRING}
         >
@@ -193,7 +187,7 @@ const ModeSwitcherNav = () => {
               return (
                 <span
                   key={mode}
-                  className={twJoin(tabLayoutClassName, modeAccentInvertedFgClassName(mode))}
+                  className={twJoin(tabLayoutClassName, identity.accent.invertedFgClassName)}
                 >
                   <Icon className="h-4 w-4 shrink-0" aria-hidden />
                   {identity.label}

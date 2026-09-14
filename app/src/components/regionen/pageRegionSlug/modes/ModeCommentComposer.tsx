@@ -76,14 +76,7 @@ export const ModeCommentComposer = ({
             placeholder={placeholder}
           />
           <form.Subscribe selector={(state) => state.isSubmitting}>
-            {(isSubmitting) => (
-              <ModeFormSubmit
-                label={submitLabel}
-                variant="yellow"
-                spinner="inside"
-                pending={isSubmitting}
-              />
-            )}
+            {(isSubmitting) => <ModeFormSubmit label={submitLabel} pending={isSubmitting} />}
           </form.Subscribe>
         </>
       )}

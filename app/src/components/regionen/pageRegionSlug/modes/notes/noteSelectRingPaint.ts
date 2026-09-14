@@ -5,6 +5,6 @@ export const noteSelectRingPaint = {
   'circle-color': 'transparent',
   'circle-radius': 10,
   'circle-stroke-width': 2,
-  'circle-stroke-color': modeIdentity.notes.accent,
+  'circle-stroke-color': modeIdentity.notes.accent.hex,
   'circle-stroke-opacity': 0.8,
 } as const

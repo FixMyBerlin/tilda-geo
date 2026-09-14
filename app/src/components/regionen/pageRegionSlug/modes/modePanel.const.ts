@@ -1,29 +1,34 @@
-import { twJoin, twMerge } from 'tailwind-merge'
+import { twMerge } from 'tailwind-merge'
 import {
   mapOverlayActionOutlineClassName,
   mapOverlayControlSizeClassName,
 } from '../mapOverlayChrome.const'
-import { modeAccentTintClassName } from './modeIdentity'
 
 /**
- * Shared Tailwind classes for the mode sidebar (`ModePanel`). Body uses the mode accent wash;
- * the inverted header is painted separately. Separation from the map / inspector is the outline
- * hairline + left shadow on `ModeColumnShell` (not a layout `border-l`).
+ * Shared Tailwind classes for the mode sidebar (`ModePanel`). Tint wash is applied at the
+ * component from `modeIdentity[mode].accent.tintClassName`. The inverted header is painted
+ * separately. Separation from the map / inspector is the outline hairline + left shadow on
+ * `ModeColumnShell` (not a layout `border-l`).
  *
  * Shadow stack (desktop region layout): header (`z-40 shadow-md`) → mode column (`z-30`) →
  * inspector (`z-20`) → map.
  */
-export const modePanelClassName = twJoin(
-  'relative flex h-full w-full shrink-0 flex-col overflow-y-hidden text-gray-900',
-  modeAccentTintClassName,
-)
+export const modePanelClassName =
+  'relative flex h-full w-full shrink-0 flex-col overflow-y-hidden text-gray-900'
 
 /**
  * Mode column casts onto the map/inspector to the left — same strength as button `shadow-md`,
  * but horizontal (`-4px` / `-2px` instead of downward `4px` / `2px`).
+ * Mobile dock uses `modeMobileDockElevationClassName` (Y-up).
  */
 export const modeColumnElevationClassName =
   'shadow-[-4px_0_6px_-1px_rgb(0_0_0/0.1),-2px_0_4px_-2px_rgb(0_0_0/0.1)]'
+
+/**
+ * Mobile dock casts onto the map above — same md recipe as `modeColumnElevationClassName`, Y-up.
+ */
+export const modeMobileDockElevationClassName =
+  'shadow-[0_-4px_6px_-1px_rgb(0_0_0/0.1),0_-2px_4px_-2px_rgb(0_0_0/0.1)]'
 
 export const modePanelCollectionClassName = 'border-t border-white/60 px-4 py-2'
 

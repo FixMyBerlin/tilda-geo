@@ -14,10 +14,6 @@ import { useRef } from 'react'
 import { twJoin } from 'tailwind-merge'
 import {
   type ModeAccentMode,
-  modeAccentInvertedClassName,
-  modeAccentInvertedFgClassName,
-  modeAccentStyle,
-  modeAccentTintClassName,
   modeIdentity,
 } from '@/components/regionen/pageRegionSlug/modes/modeIdentity'
 import {
@@ -103,7 +99,7 @@ export const ModalDialog = ({
   } satisfies Record<ModalIcon, { bgClass: string; iconClass: string; Icon: typeof PencilIcon }>
 
   const { bgClass, iconClass, Icon } = iconComponent[icon]
-  const modeAccent = mode ? modeIdentity[mode].accent : undefined
+  const accent = mode ? modeIdentity[mode].accent : undefined
 
   // Motion + `Dialog static` (same split as MobileBottomSheet): Headless UI keeps the
   // a11y plumbing (focus trap, Escape, outside click), Motion runs enter/exit springs.
@@ -144,16 +140,13 @@ export const ModalDialog = ({
                   data-testid={panelTestId}
                   className={twJoin(
                     'relative w-full transform overflow-hidden rounded-lg px-4 pt-3 pb-4 text-left shadow-xl sm:px-6 sm:pt-4 sm:pb-6',
-                    modeAccent ? modeAccentTintClassName : 'bg-white',
+                    accent ? accent.tintClassName : 'bg-white',
                   )}
-                  style={modeAccent ? modeAccentStyle(modeAccent) : undefined}
                 >
                   <div className="flex items-center gap-3">
                     <div
                       className={twJoin(
-                        mode
-                          ? twJoin(modeAccentInvertedClassName, modeAccentInvertedFgClassName(mode))
-                          : bgClass,
+                        accent ? twJoin(accent.className, accent.invertedFgClassName) : bgClass,
                         'flex size-10 shrink-0 items-center justify-center rounded-full',
                       )}
                     >
@@ -174,7 +167,7 @@ export const ModalDialog = ({
                       type="button"
                       className={twJoin(
                         'inline-flex size-8 shrink-0 items-center justify-center rounded-md text-gray-500 transition-colors hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500',
-                        modeAccent ? 'hover:bg-white/60' : 'hover:bg-gray-100',
+                        accent ? 'hover:bg-white/60' : 'hover:bg-gray-100',
                       )}
                       onClick={() => setOpen(false)}
                       ref={closeButtonRef}

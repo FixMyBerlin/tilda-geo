@@ -173,8 +173,6 @@ export const InternalNotesNewForm = () => {
               {(isSubmitting) => (
                 <ModeFormSubmit
                   label="Speichern"
-                  variant="yellow"
-                  spinner="inside"
                   pending={isSubmitting || isPending}
                   cancel={{
                     onClick: () => {

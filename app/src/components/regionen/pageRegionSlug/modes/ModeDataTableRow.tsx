@@ -2,12 +2,6 @@ import { type KeyboardEvent, type ReactNode, useEffect, useRef } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { useModeListActions } from './mode-list-store'
 import {
-  modeDataTableActionsCellClass,
-  modeDataTableActionsRowClass,
-  modeDataTableBodyCellClass,
-  modeDataTableBodyRowClass,
-} from './modeDataTable.const'
-import {
   modePanelListItemActiveClassName,
   modePanelListItemHoverClassName,
 } from './modePanel.const'
@@ -47,7 +41,7 @@ export const ModeDataTableCellsRow = ({
       <tr
         ref={ref}
         className={twJoin(
-          modeDataTableBodyRowClass,
+          'group/row border-b border-gray-100 @[36rem]:table-row',
           active ? modePanelListItemActiveClassName : modePanelListItemHoverClassName,
           'cursor-pointer select-none',
         )}
@@ -66,14 +60,14 @@ export const ModeDataTableCellsRow = ({
         aria-current={active ? 'true' : undefined}
       >
         {cells.map((cell, index) => (
-          <td key={index} className={modeDataTableBodyCellClass}>
+          <td key={index} className="px-3 py-2 align-top text-sm">
             {cell}
           </td>
         ))}
       </tr>
       {actions ? (
-        <tr className={modeDataTableActionsRowClass}>
-          <td colSpan={cells.length} className={modeDataTableActionsCellClass}>
+        <tr className="border-b border-gray-100 bg-gray-50/80">
+          <td colSpan={cells.length} className="px-3 py-2">
             {actions}
           </td>
         </tr>

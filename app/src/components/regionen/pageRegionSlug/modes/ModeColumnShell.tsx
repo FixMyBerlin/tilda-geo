@@ -11,7 +11,7 @@ import {
   useModePanelWidthActions,
   useModePanelWidthDragging,
 } from './mode-panel-width-store'
-import { modeAccentStyle, modeAccentTintClassName, modeIdentity } from './modeIdentity'
+import { modeIdentity } from './modeIdentity'
 import { ModeMobileDock } from './ModeMobileDock'
 import { modeColumnElevationClassName } from './modePanel.const'
 import { readModePanelWidth } from './modePanelWidthStorage'
@@ -71,11 +71,10 @@ export const ModeColumnShell = () => {
           key="mode-column"
           className={twMerge(
             'relative z-30 h-full shrink-0',
-            modeAccentTintClassName,
+            modeIdentity[optimisticMode].accent.tintClassName,
             mapOverlayHairlineClassName,
             modeColumnElevationClassName,
           )}
-          style={modeAccentStyle(modeIdentity[optimisticMode].accent)}
           initial={{ width: 0, overflow: 'hidden' }}
           animate={{ width: panelWidth, overflow: isDragging ? 'hidden' : 'visible' }}
           exit={{ width: 0, overflow: 'hidden' }}

@@ -7,7 +7,7 @@ import {
   LIST_HOVER_RING_PX,
 } from './mapListHoverMarkerPosition'
 import { useHoveredListItem } from './mode-list-store'
-import { modeAccentRgba, modeIdentity } from './modeIdentity'
+import { modeIdentity } from './modeIdentity'
 import { useCurrentMode } from './useCurrentMode'
 import { useListHoverMarkerPosition } from './useListHoverMarkerPosition'
 
@@ -21,7 +21,8 @@ export const MapListHoverMarker = () => {
   const { mode } = useCurrentMode()
   if (!position || !hoveredListItem) return null
 
-  const accent = modeIdentity[mode].accent
+  const { hex, rgb } = modeIdentity[mode].accent
+  const rgba = (alpha: number) => `rgba(${rgb.join(',')}, ${alpha})`
   const size = position.atEdge ? LIST_HOVER_EDGE_RING_PX : LIST_HOVER_RING_PX
   const jump = position.atEdge ? edgeJumpOffset(position.edges) : { x: 0, y: 0 }
 
@@ -51,9 +52,9 @@ export const MapListHoverMarker = () => {
         style={{
           width: size,
           height: size,
-          borderColor: accent,
-          backgroundColor: modeAccentRgba(accent, position.atEdge ? 0.55 : 0.35),
-          boxShadow: `0 0 0 3px rgba(255,255,255,0.9), 0 0 16px ${modeAccentRgba(accent, 0.7)}`,
+          borderColor: hex,
+          backgroundColor: rgba(position.atEdge ? 0.55 : 0.35),
+          boxShadow: `0 0 0 3px rgba(255,255,255,0.9), 0 0 16px ${rgba(0.7)}`,
         }}
       />
     </Marker>

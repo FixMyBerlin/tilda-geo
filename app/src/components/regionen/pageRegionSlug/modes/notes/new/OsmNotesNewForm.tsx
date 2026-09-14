@@ -199,8 +199,6 @@ export const OsmNotesNewForm = () => {
                 {(isSubmitting) => (
                   <ModeFormSubmit
                     label="Veröffentlichen"
-                    variant="yellow"
-                    spinner="inside"
                     pending={isSubmitting || isPending}
                     cancel={{
                       onClick: () => {

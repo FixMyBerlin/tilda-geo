@@ -8,14 +8,9 @@ import { playwrightTestId } from '@/components/shared/utils/playwright'
 import { mapOverlayHairlineClassName } from '../mapOverlayChrome.const'
 import { SheetGrabHandle } from '../mobile/SheetGrabHandle'
 import { useInspectorRenderableFeatures } from '../SidebarInspector/useInspectorRenderableFeatures'
-import {
-  modeAccentInvertedClassName,
-  modeAccentInvertedFgClassName,
-  modeAccentStyle,
-  modeAccentTintClassName,
-  modeIdentity,
-} from './modeIdentity'
+import { modeIdentity } from './modeIdentity'
 import { applyModeMapCameraPadding, resetModeMapCameraPadding } from './modeMapCameraPadding'
+import { modeMobileDockElevationClassName } from './modePanel.const'
 import { useNotesComposeActive } from './notes/useNotesComposeActive'
 import { useReviewDrawActive } from './reviewLists/useReviewDrawActive'
 import { useOptimisticMode } from './useCurrentMode'
@@ -23,6 +18,7 @@ import { useOptimisticMode } from './useCurrentMode'
 const MODE_MOBILE_DOCK_PEEK = '5.5rem'
 const MODE_MOBILE_DOCK_EXPANDED = '62dvh'
 
+/** Required: `mapOverlayBottomRightControlsClassName` and `getModeMapCameraPadding` read this var; height is measured via ResizeObserver. */
 const setModeMobileDockHeightCssVar = (height: string) =>
   document.documentElement.style.setProperty('--mode-mobile-dock-height', height)
 
@@ -34,6 +30,7 @@ export const ModeMobileDock = () => {
   const { mainMap } = useMap()
   const optimisticMode = useOptimisticMode()
   const identity = modeIdentity[optimisticMode]
+  const { accent } = identity
   const inspectorOpen = useInspectorRenderableFeatures().length > 0
   const notesComposeActive = useNotesComposeActive()
   const reviewDrawActive = useReviewDrawActive()
@@ -99,11 +96,10 @@ export const ModeMobileDock = () => {
       data-expanded={expanded ? 'true' : 'false'}
       className={twMerge(
         'pointer-events-auto fixed inset-x-0 bottom-0 z-20 flex flex-col overflow-hidden rounded-t-xl pb-[env(safe-area-inset-bottom)]',
-        modeAccentTintClassName,
+        accent.tintClassName,
         mapOverlayHairlineClassName,
-        'shadow-[0_-4px_6px_-1px_rgb(0_0_0/0.1),0_-2px_4px_-2px_rgb(0_0_0/0.1)]',
+        modeMobileDockElevationClassName,
       )}
-      style={modeAccentStyle(identity.accent)}
       initial={reduceMotion ? false : { y: '100%' }}
       animate={{ y: 0, height }}
       transition={reduceMotion ? { duration: 0 } : UI_SPRING}
@@ -123,12 +119,7 @@ export const ModeMobileDock = () => {
         }
       }}
     >
-      <div
-        className={twMerge(
-          modeAccentInvertedClassName,
-          modeAccentInvertedFgClassName(optimisticMode),
-        )}
-      >
+      <div className={twMerge(accent.className, accent.invertedFgClassName)}>
         <SheetGrabHandle
           onClick={toggleExpanded}
           onPointerDown={(event) => dragControls.start(event)}

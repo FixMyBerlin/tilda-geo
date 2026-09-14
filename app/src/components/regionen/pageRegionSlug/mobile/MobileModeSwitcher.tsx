@@ -3,7 +3,7 @@ import { ChevronDownIcon } from '@heroicons/react/20/solid'
 import { getRouteApi, Link } from '@tanstack/react-router'
 import { twJoin, twMerge } from 'tailwind-merge'
 import { mapOverlayMenuClassName } from '../mapOverlayChrome.const'
-import { modeIdentity, modeShortLabel } from '../modes/modeIdentity'
+import { modeIdentity } from '../modes/modeIdentity'
 import { modeSwitcherSearch } from '../modes/modeSwitcherSearch'
 import { regionModeOrder, modeRoutePaths, useOptimisticMode } from '../modes/useCurrentMode'
 import {
@@ -40,7 +40,7 @@ export const MobileModeSwitcher = () => {
             )}
           >
             <CurrentIcon className="size-5 shrink-0" aria-hidden />
-            <span className="truncate text-sm font-medium">{modeShortLabel[optimisticMode]}</span>
+            <span className="truncate text-sm font-medium">{current.shortLabel}</span>
             <ChevronDownIcon className="size-4 shrink-0 text-gray-500" aria-hidden />
           </MenuButton>
           <MenuItems

@@ -8,9 +8,6 @@ import type React from 'react'
 import { twJoin } from 'tailwind-merge'
 import {
   type ModeAccentMode,
-  modeAccentInvertedClassName,
-  modeAccentStyle,
-  modeAccentTintClassName,
   modeIdentity,
 } from '@/components/regionen/pageRegionSlug/modes/modeIdentity'
 import { MotionCollapse } from '@/components/shared/motion/MotionCollapse'
@@ -34,24 +31,24 @@ export const Disclosure = ({
   defaultOpen = true,
   mode,
 }: Props) => {
-  const accentStyle = mode ? modeAccentStyle(modeIdentity[mode].accent) : undefined
+  const accent = mode ? modeIdentity[mode].accent : undefined
 
   return (
     <HeadlessUiDisclosure
       defaultOpen={defaultOpen}
       as="section"
       className="overflow-clip rounded-lg border border-gray-300"
-      style={accentStyle}
     >
       {({ open }) => (
         <>
           <DisclosureButton
             className={twJoin(
               'group focus-visible:ring-opacity-75 flex w-full items-center justify-between py-2 pr-2 pl-2.5 text-left text-sm leading-tight font-semibold focus:outline-none focus-visible:ring focus-visible:ring-gray-500',
-              mode
+              accent
                 ? twJoin(
-                    modeAccentInvertedClassName,
-                    'text-white hover:bg-yellow-100 hover:text-gray-900',
+                    accent.className,
+                    accent.invertedFgClassName,
+                    'hover:bg-yellow-100 hover:text-gray-900',
                   )
                 : twJoin('bg-gray-50 text-gray-900 hover:bg-yellow-100', open ? 'bg-gray-100' : ''),
               open ? 'rounded-b-none border-b border-b-gray-200' : '',
@@ -94,7 +91,7 @@ export const Disclosure = ({
               static
               className={twJoin(
                 'text-sm text-gray-500',
-                mode ? modeAccentTintClassName : 'bg-gray-50',
+                accent ? accent.tintClassName : 'bg-gray-50',
               )}
             >
               {children}

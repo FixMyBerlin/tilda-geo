@@ -1,10 +1,7 @@
 import dompurify from 'dompurify'
 import { twJoin } from 'tailwind-merge'
 import { ObjectDump } from '@/components/admin/ObjectDump'
-import {
-  modeAccentTintClassName,
-  modeAccentTintEmphasisClassName,
-} from '@/components/regionen/pageRegionSlug/modes/modeIdentity'
+import { modeIdentity } from '@/components/regionen/pageRegionSlug/modes/modeIdentity'
 import { useOsmNotesQuery } from '@/components/regionen/pageRegionSlug/modes/notes/useOsmNotesQuery'
 import { SvgNotesCheckmark } from '@/components/regionen/pageRegionSlug/SidebarInspector/icons/SvgNotesCheckmark'
 import { SvgNotesQuestionmark } from '@/components/regionen/pageRegionSlug/SidebarInspector/icons/SvgNotesQuestionmark'
@@ -45,7 +42,9 @@ export const NotesDetailOsm = ({ noteId }: Props) => {
             key={`${thread.id}-${comment.date}`}
             className={twJoin(
               'border-b border-b-gray-200 px-3 py-5',
-              userHasPermssionOnRegion ? modeAccentTintEmphasisClassName : modeAccentTintClassName,
+              userHasPermssionOnRegion
+                ? modeIdentity.notes.accent.tintEmphasisClassName
+                : modeIdentity.notes.accent.tintClassName,
             )}
           >
             <div className="text-black">

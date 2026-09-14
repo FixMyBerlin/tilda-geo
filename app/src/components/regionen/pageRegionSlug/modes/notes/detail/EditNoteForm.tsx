@@ -108,7 +108,6 @@ export const EditNoteForm = ({ note }: Props) => {
         primaryAction={
           <ModeFormSubmit
             label="Änderung speichern"
-            variant="yellow"
             pending={isPending}
             form={formId}
             buttonClassName="w-full sm:w-auto"
