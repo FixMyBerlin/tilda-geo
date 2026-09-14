@@ -154,7 +154,9 @@ export const ReviewListsModeList = ({
   }
 
   if (selectedListId === undefined) {
-    return <p className={twJoin('px-4 py-3', modePanelMutedClassName)}>Wählen Sie eine Prüfliste.</p>
+    return (
+      <p className={twJoin('px-4 py-3', modePanelMutedClassName)}>Wählen Sie eine Prüfliste.</p>
+    )
   }
   if (isLoading) {
     return (
