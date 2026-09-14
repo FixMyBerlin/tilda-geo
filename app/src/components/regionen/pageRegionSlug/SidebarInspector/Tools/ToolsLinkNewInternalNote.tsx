@@ -6,6 +6,10 @@ import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapSta
 import { useOsmNotesActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/userMapNotes'
 import { serializeMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import type { MapDataOsmIdConfig } from '@/components/regionen/pageRegionSlug/mapData/types'
+import {
+  compactNotesModeParam,
+  zodNotesModeParam,
+} from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
 import { useAllowInternalNotes } from '@/components/regionen/pageRegionSlug/modes/notes/useAllowInternalNotes'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { buttonStyles } from '@/components/shared/links/styles'
@@ -49,7 +53,12 @@ export const ToolsLinkNewInternalNote = ({ properties, geometry, osmIdConfig }: 
           to: '/regionen/$regionSlug/hinweise',
           search: (prev) => {
             const next = { ...prev }
-            next[searchParamsRegistry.internalNote] = serializeMapParam({ zoom: 18, lng, lat })
+            const prevNotes =
+              zodNotesModeParam.safeParse(prev[searchParamsRegistry.notes]).data ?? {}
+            next[searchParamsRegistry.notes] = compactNotesModeParam({
+              ...prevNotes,
+              new: serializeMapParam({ zoom: 18, lng, lat }),
+            })
             delete next[searchParamsRegistry.f]
             return next
           },

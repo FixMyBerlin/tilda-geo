@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { zodInternalNotesFilterParam } from '@/shared/regionen/regionSearchZod'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
+import { foldNotesComposePinIntoNotesJson } from './foldNotesComposePinIntoNotesJson'
 import type { UrlMigration } from './types'
 
 /** Known QA config slugs. `slug--style` bookmarks for these become `{ key }` with the same slug. */
@@ -117,9 +118,10 @@ const migrateQaParam = (params: URLSearchParams) => {
 
 /**
  * MIGRATION: Notes + QA URL params (v3).
- * - `atlasNote` → `internalNote`. Visibility keys `osmNotes` / `notes` stay for the path redirect.
  * - `notes` → `internalNotes` (legacy TILDA visibility flag; stripped after redirect).
+ * - Visibility keys `osmNotes` / `internalNotes` stay for the path redirect.
  * - `osmNotesFilter` / `atlasNotesFilter` → flat `notes` JSON. Old filter keys deleted.
+ * - Then sibling compose pins (`osmNote` / `internalNote` / `atlasNote`) fold into `notes.new`.
  * - JSON `qa` with a string `key` is kept (unknown slugs included); leftover `qaFilter.users` is merged.
  * - `qa` `slug--style` plus `qaFilter.users` → one `qa` object (same slug). Unknown slug/status drops `qa`.
  * Does not change the pathname.
@@ -136,7 +138,6 @@ const migration: UrlMigration = (initialUrl) => {
   }
 
   rename('notes', 'internalNotes')
-  rename('atlasNote', 'internalNote')
 
   const osmFilter = parseNotesFilter(params.get('osmNotesFilter'))
   const atlasFilter = parseNotesFilter(params.get('atlasNotesFilter'))
@@ -151,6 +152,8 @@ const migration: UrlMigration = (initialUrl) => {
   if (Object.keys(notes).length > 0 && !params.has(notesKey)) {
     params.set(notesKey, JSON.stringify(notes))
   }
+
+  foldNotesComposePinIntoNotesJson(params)
 
   migrateQaParam(params)
 

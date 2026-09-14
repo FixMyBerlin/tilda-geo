@@ -6,7 +6,7 @@ import {
   useOsmNewNoteFeature,
   useOsmNotesActions,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/userMapNotes'
-import { useNewInternalNoteMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNewInternalNoteMapParam'
+import { useNotesComposePin } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesComposePin'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import {
   osmOrgUrl,
@@ -57,7 +57,7 @@ function buildFullInternalNoteBody(
 export const InternalNotesNewForm = () => {
   const queryClient = useQueryClient()
   const queryKey = useInternalNotesQueryKey()
-  const { newInternalNoteMapParam, setNewInternalNoteMapParam } = useNewInternalNoteMapParam()
+  const { composePin, clearComposeParams } = useNotesComposePin()
   const { mainMap } = useMap()
   const regionSlug = useRegionSlug()
   const osmNewNoteFeature = useOsmNewNoteFeature()
@@ -80,17 +80,17 @@ export const InternalNotesNewForm = () => {
     onSuccess: () => {
       clearDraft()
       queryClient.invalidateQueries({ queryKey })
-      setNewInternalNoteMapParam(null)
+      clearComposeParams()
       setOsmNewNoteFeature(undefined)
     },
   })
 
   const closeCompose = () => {
-    setNewInternalNoteMapParam(null)
+    clearComposeParams()
     setOsmNewNoteFeature(undefined)
   }
 
-  if (!newInternalNoteMapParam || !regionSlug) {
+  if (!composePin || !regionSlug) {
     return null
   }
 

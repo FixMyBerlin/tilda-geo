@@ -28,7 +28,7 @@ The inspector still shows the selected feature. Hovering a list row draws a mode
 
 ## Hinweise
 
-Lists the region's notes. Today that is OSM **or** TILDA internal notes, not both. Search, extent, and chips live in `notes`. Pins render only in this mode. From the default-map inspector, "new note" still jumps here (`osmNote` / `internalNote` compose pins).
+Lists the region's notes. Today that is OSM **or** TILDA internal notes, not both. Search, extent, and chips live in `notes`. Pins render only in this mode. From the default-map inspector, "new note" still jumps here (`notes.new` compose pin).
 
 OSM notes are public. Internal notes are member-only. The Hinweise route is member-only when the region has only internal notes.
 

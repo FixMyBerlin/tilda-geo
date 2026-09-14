@@ -73,8 +73,6 @@ export const regionSearchSchema = z.object({
   [searchParamsRegistry.bg]: backgroundSearchParam(),
   [searchParamsRegistry.bg3d]: searchBoolean(false),
   [searchParamsRegistry.draw]: optionalSearchString(),
-  [searchParamsRegistry.osmNote]: optionalSearchString(),
-  [searchParamsRegistry.internalNote]: optionalSearchString(),
   [searchParamsRegistry.debugMap]: optionalSearchBoolean(),
   [searchParamsRegistry.qa]: optionalSearchJson(zodQaParam),
   // Invalid values (e.g. ?dialog=foo) clear rather than throwing the region route into error UI.

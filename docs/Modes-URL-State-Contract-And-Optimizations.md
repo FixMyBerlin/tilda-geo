@@ -10,17 +10,17 @@ Search uses the layout `validateSearch` (`regionSearchSchema`). `draw` still use
 
 Mode filters sit on that shared layout search (not on child `validateSearch`) so switching modes keeps one URL. Each mode owns **one JSON object**:
 
-| URL key  | Schema                    | Shape (compact: omit defaults)                                           |
-| -------- | ------------------------- | ------------------------------------------------------------------------ |
-| `qa`     | `zodQaParam`              | `{ key, status?, users?, search?, extent? }`                             |
-| `notes`  | `zodNotesModeParam`       | `{ key?, search?, extent?, completed?, commented?, notReacted?, user? }` |
-| `review` | `zodReviewListsModeParam` | `{ key?, search?, extent?, status?, source?, new?, move? }`              |
+| URL key  | Schema                    | Shape (compact: omit defaults)                                                                                           |
+| -------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `qa`     | `zodQaParam`              | `{ key, status?, users?, search?, extent? }`                                                                             |
+| `notes`  | `zodNotesModeParam`       | `{ key?, search?, extent?, completed?, commented?, notReacted?, user?, new? }` (`new` is a map-param string compose pin) |
+| `review` | `zodReviewListsModeParam` | `{ key?, search?, extent?, status?, source?, new?, move? }`                                                              |
 
 `optionalSearchJson` drops the whole object if the Zod object fails. Each field therefore uses `.catch` so a stale bookmark field (retired status, bad chip) does not wipe the rest. QA `key` stays strict — without it there is nothing to show.
 
 QA `search` and `extent` live in that `qa` object, not in React `useState`. The QA route loader omits free-text `search` from `loaderDeps` so typing does not re-run the loader; the map/panel query still follows URL state.
 
-Other encodings stay as they are: `map` (`zoom/lat/lng`), `config` (v2 compressed), `f` (pipe-delimited), `bg` / `data` / compose pins. Do not invent a seventh.
+Other encodings stay as they are: `map` (`zoom/lat/lng`), `config` (v2 compressed), `f` (pipe-delimited), `bg` / `data`. Do not invent a seventh.
 
 ## `v`
 

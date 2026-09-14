@@ -6,7 +6,7 @@ import {
   useOsmNewNoteFeature,
   useOsmNotesActions,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/userMapNotes'
-import { useNewOsmNoteMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesOsmParams'
+import { useNotesComposePin } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesComposePin'
 import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
 import {
   osmOrgUrl,
@@ -18,6 +18,7 @@ import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { getAppBaseUrl } from '@/components/shared/utils/getAppBaseUrl'
 import { createOsmNoteFn } from '@/server/osm/osm.functions'
+import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 import { ComposerDraftAutosave } from '../../composerDrafts/ComposerDraftAutosave'
 import { osmNewNoteDraftId } from '../../composerDrafts/composerDraftIds'
 import { toComposerDraftStringValues } from '../../composerDrafts/composerDraftStorage'
@@ -27,11 +28,27 @@ import {
 } from '../../composerDrafts/useComposerDraft'
 import { ModeFormSubmit } from '../../ModeFormSubmit'
 import { modePanelMutedClassName } from '../../modePanel.const'
+import { compactNotesModeParam, zodNotesModeParam } from '../notesModeParam'
 import { osmNotesQueryKey } from '../osmNotesQueryOptions'
 import type { OsmApiNotesThreadType } from '../osmNotesSchema'
 import { useOsmNotesBbox } from '../useOsmNotesBbox'
 
 const OsmNoteSchema = z.object({ comment: z.string().min(1, 'Bitte Hinweistext eingeben.') })
+
+const stripNotesComposePin = (params: URLSearchParams) => {
+  const notesKey = searchParamsRegistry.notes
+  const raw = params.get(notesKey)
+  if (!raw) return
+  try {
+    const parsed = zodNotesModeParam.safeParse(JSON.parse(raw))
+    if (!parsed.success) return
+    const compact = compactNotesModeParam({ ...parsed.data, new: undefined })
+    if (compact) params.set(notesKey, JSON.stringify(compact))
+    else params.delete(notesKey)
+  } catch {
+    // leave notes as-is if it is not JSON
+  }
+}
 
 function buildFullComment(
   userComment: string,
@@ -51,7 +68,7 @@ function buildFullComment(
           const params = opts.searchParams
             ? new URLSearchParams(opts.searchParams.toString())
             : new URLSearchParams()
-          params.delete('osmNote')
+          stripNotesComposePin(params)
           const paramString = params.toString()
           return paramString
             ? getAppBaseUrl(`/regionen/${opts.regionSlug}?${paramString}`, 'production')
@@ -74,7 +91,7 @@ function buildFullComment(
 }
 
 export const OsmNotesNewForm = () => {
-  const { newOsmNoteMapParam, setNewOsmNoteMapParam } = useNewOsmNoteMapParam()
+  const { composePin, clearComposeParams } = useNotesComposePin()
   const { mainMap } = useMap()
   const queryClient = useQueryClient()
   const queryKey = osmNotesQueryKey(useOsmNotesBbox())
@@ -106,13 +123,13 @@ export const OsmNotesNewForm = () => {
     },
     onSuccess: () => {
       clearDraft()
-      setNewOsmNoteMapParam(null)
+      clearComposeParams()
       setOsmNewNoteFeature(undefined)
       queryClient.invalidateQueries({ queryKey })
     },
   })
 
-  if (!newOsmNoteMapParam) return null
+  if (!composePin) return null
 
   if (!isReady) {
     return (
@@ -195,7 +212,7 @@ export const OsmNotesNewForm = () => {
                           return
                         }
                         clearDraft()
-                        setNewOsmNoteMapParam(null)
+                        clearComposeParams()
                         setOsmNewNoteFeature(undefined)
                       },
                     }}

@@ -28,6 +28,7 @@ import { NotesNewLoginNotice } from './new/NotesNewLoginNotice'
 import { OsmNotesNewForm } from './new/OsmNotesNewForm'
 import { NotesModeFilterBar } from './NotesModeFilterBar'
 import { NotesModeList } from './NotesModeList'
+import { compactNotesModeParam } from './notesModeParam'
 import { useNotesModeListData } from './useNotesModeListData'
 import { useNotesModeParam } from './useNotesModeParam'
 
@@ -39,7 +40,7 @@ export const PageModeNotes = () => {
   const { setOsmNewNoteFeature } = useOsmNotesActions()
   const { selected, clearModeDetail } = useModeDetailSelection()
   const { notesMode, setNotesModeParam } = useNotesModeParam()
-  const { composingOsm, isComposing, clearComposeParams } = useNotesComposePin()
+  const { isComposing, clearComposeParams } = useNotesComposePin()
   const { updateSearch } = useRegionSearchNavigation()
   useFlyMainMapToComposePin()
 
@@ -76,7 +77,10 @@ export const PageModeNotes = () => {
     clearInspectorFeatures()
     updateSearch(
       {
-        [capabilities.composeParamKey]: serializeMapParam(mapParam),
+        [searchParamsRegistry.notes]: compactNotesModeParam({
+          ...notesMode,
+          new: serializeMapParam(mapParam),
+        }),
         [searchParamsRegistry.f]: undefined,
       },
       { replace: true },
@@ -90,11 +94,11 @@ export const PageModeNotes = () => {
 
   const composeDetail = isComposing
     ? {
-        title: composingOsm ? 'Neuer Hinweis auf OpenStreetMap' : 'Neuer interner Hinweis',
+        title: showingOsm ? 'Neuer Hinweis auf OpenStreetMap' : 'Neuer interner Hinweis',
         onBack: closeCompose,
         children: !isAuthenticated ? (
           <NotesNewLoginNotice />
-        ) : composingOsm ? (
+        ) : showingOsm ? (
           <OsmNotesNewForm />
         ) : (
           <InternalNotesNewForm />

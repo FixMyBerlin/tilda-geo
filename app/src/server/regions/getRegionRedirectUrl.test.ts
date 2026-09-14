@@ -294,25 +294,27 @@ describe('getRegionRedirectUrl()', () => {
       expect(resultUrl.searchParams.has('qa')).toBe(false)
     })
 
-    test('?osmNote=<map param> on the root stays on the root, osmNote preserved', async () => {
+    test('?osmNote=<map param> on the root stays on the root, pin folded into notes.new', async () => {
       const url = 'http://127.0.0.1:5173/regionen/berlin?osmNote=15/52.5/13.4'
       const redirectUrl = await redirectOnly(url, 'berlin')
       expect(redirectUrl).toBeTruthy()
       const resultUrl = getUrl(redirectUrl)
       expect(resultUrl.pathname).toBe('/regionen/berlin')
-      expect(resultUrl.searchParams.get('osmNote')).toBe('15/52.5/13.4')
+      expect(JSON.parse(resultUrl.searchParams.get('notes')!)).toEqual({ new: '15/52.5/13.4' })
+      expect(resultUrl.searchParams.has('osmNote')).toBe(false)
     })
 
-    test('?internalNote=<map param> on the root stays on the root, internalNote preserved', async () => {
+    test('?internalNote=<map param> on the root stays on the root, pin folded into notes.new', async () => {
       const url = 'http://127.0.0.1:5173/regionen/berlin?internalNote=15/52.5/13.4'
       const redirectUrl = await redirectOnly(url, 'berlin')
       expect(redirectUrl).toBeTruthy()
       const resultUrl = getUrl(redirectUrl)
       expect(resultUrl.pathname).toBe('/regionen/berlin')
-      expect(resultUrl.searchParams.get('internalNote')).toBe('15/52.5/13.4')
+      expect(JSON.parse(resultUrl.searchParams.get('notes')!)).toEqual({ new: '15/52.5/13.4' })
+      expect(resultUrl.searchParams.has('internalNote')).toBe(false)
     })
 
-    test('root + live qa JSON + osmNote stays on the region root', async () => {
+    test('root + live qa JSON + osmNote stays on the region root, pin folded into notes.new', async () => {
       const url =
         'http://127.0.0.1:5173/regionen/berlin?qa={"key":"euvm-parkraum-2026"}&osmNote=15/52.5/13.4'
       const redirectUrl = await redirectOnly(url, 'berlin')
@@ -322,12 +324,23 @@ describe('getRegionRedirectUrl()', () => {
       expect(JSON.parse(resultUrl.searchParams.get('qa')!)).toEqual({
         key: 'euvm-parkraum-2026',
       })
-      expect(resultUrl.searchParams.get('osmNote')).toBe('15/52.5/13.4')
+      expect(JSON.parse(resultUrl.searchParams.get('notes')!)).toEqual({ new: '15/52.5/13.4' })
+      expect(resultUrl.searchParams.has('osmNote')).toBe(false)
+    })
+
+    test('v=3 osmNote on the root folds into notes.new without a path rewrite', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin?v=3&osmNote=15/52.5/13.4'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      expect(redirectUrl).toBeTruthy()
+      const resultUrl = getUrl(redirectUrl)
+      expect(resultUrl.pathname).toBe('/regionen/berlin')
+      expect(JSON.parse(resultUrl.searchParams.get('notes')!)).toEqual({ new: '15/52.5/13.4' })
+      expect(resultUrl.searchParams.has('osmNote')).toBe(false)
     })
   })
 
   describe('v3: notes param cleanup', () => {
-    test('renames atlasNote and converts filter params into notes', async () => {
+    test('renames atlasNote into notes.new and converts filter params into notes', async () => {
       const url =
         'http://127.0.0.1:5173/regionen/berlin?notes=true&atlasNote=15/52.5/13.4&atlasNotesFilter=%7B%7D&osmNotesFilter=%7B%7D&v=2'
       const redirectUrl = await redirectOnly(url, 'berlin')
@@ -335,8 +348,8 @@ describe('getRegionRedirectUrl()', () => {
       const params = getUrl(redirectUrl).searchParams
 
       expect(getUrl(redirectUrl).pathname).toBe('/regionen/berlin/hinweise')
-      expect(params.get('internalNote')).toBe('15/52.5/13.4')
-      expect(params.has('notes')).toBe(false)
+      expect(JSON.parse(params.get('notes')!)).toEqual({ new: '15/52.5/13.4' })
+      expect(params.has('internalNote')).toBe(false)
       expect(params.has('internalNotes')).toBe(false)
       expect(params.has('atlasNote')).toBe(false)
       expect(params.has('atlasNotesFilter')).toBe(false)

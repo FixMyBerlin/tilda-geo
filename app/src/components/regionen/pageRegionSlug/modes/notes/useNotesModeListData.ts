@@ -5,7 +5,6 @@ import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useR
 import { authClient } from '@/components/shared/auth/auth-client'
 import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { internalNotesQueryOptions } from '@/server/regions/regionQueryOptions'
-import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 import { useHasNewNoteComposerDraft } from '../composerDrafts/useHasComposerDraft'
 import { notesAuthorFilterOptions, uniqueOsmNoteAuthorNames } from './notesModeFilters'
 import { internalNotesToListEntries, osmNotesToListEntries } from './notesModeListEntry'
@@ -82,9 +81,6 @@ export const useNotesModeListData = () => {
     capabilities: {
       showDownload: !showingOsm,
       showReactionFilter: !showingOsm,
-      composeParamKey: showingOsm
-        ? searchParamsRegistry.osmNote
-        : searchParamsRegistry.internalNote,
       draftKind,
       collectionOptions,
     },

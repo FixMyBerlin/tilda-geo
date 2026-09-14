@@ -5,19 +5,18 @@ import {
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useOsmNotesActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/userMapNotes'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
-import { useNewInternalNoteMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNewInternalNoteMapParam'
-import { useNewOsmNoteMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesOsmParams'
 import {
   filterInspectorFeaturesForMode,
   filterUrlFeaturesForMode,
 } from '@/components/regionen/pageRegionSlug/modes/modeScopedSelection'
+import { useNotesModeParam } from '@/components/regionen/pageRegionSlug/modes/notes/useNotesModeParam'
 import { useReviewListsModeParam } from '@/components/regionen/pageRegionSlug/modes/reviewLists/useReviewListsModeParam'
 import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
 
 /**
  * Clears inspector / URL `f` selections that belong only to another mode, and exits Hinweise
- * compose (`osmNote` / `internalNote`) when leaving notes mode, and Prüflisten compose/move
- * (`rl.new` / `rl.move`) when leaving review lists, so the map returns to normal interaction.
+ * compose (`notes.new`) when leaving notes mode, and Prüflisten compose/move
+ * (`review.new` / `review.move`) when leaving review lists, so the map returns to normal interaction.
  * Mounted once in `MapInterface`. Uses `replace: true` so it does not add history.
  * Covers ModeSwitcher, deep links, and back/forward.
  */
@@ -26,8 +25,7 @@ export const ModeScopedSelectionReset = () => {
   const inspectorFeatures = useMapInspectorFeatures()
   const { featuresParam, setFeaturesParam } = useFeaturesParam()
   const { replaceInspectorFeatures } = useMapActions()
-  const { newOsmNoteMapParam, setNewOsmNoteMapParam } = useNewOsmNoteMapParam()
-  const { newInternalNoteMapParam, setNewInternalNoteMapParam } = useNewInternalNoteMapParam()
+  const { notesMode, setNotesModeParam } = useNotesModeParam()
   const { setOsmNewNoteFeature } = useOsmNotesActions()
   const { reviewListsMode, setReviewListsModeParam } = useReviewListsModeParam()
 
@@ -49,19 +47,11 @@ export const ModeScopedSelectionReset = () => {
   useEffect(
     function exitNotesComposeWhenLeavingNotesMode() {
       if (mode === 'notes') return
-      if (!newOsmNoteMapParam && !newInternalNoteMapParam) return
-      if (newOsmNoteMapParam) setNewOsmNoteMapParam(null)
-      if (newInternalNoteMapParam) setNewInternalNoteMapParam(null)
+      if (!notesMode.new) return
+      setNotesModeParam({ ...notesMode, new: undefined })
       setOsmNewNoteFeature(undefined)
     },
-    [
-      mode,
-      newOsmNoteMapParam,
-      newInternalNoteMapParam,
-      setNewOsmNoteMapParam,
-      setNewInternalNoteMapParam,
-      setOsmNewNoteFeature,
-    ],
+    [mode, notesMode, setNotesModeParam, setOsmNewNoteFeature],
   )
 
   useEffect(

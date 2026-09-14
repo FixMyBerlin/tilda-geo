@@ -7,13 +7,37 @@ const run = (search: string) => {
 }
 
 describe('0003_notes_params migration', () => {
-  test('renames atlasNote → internalNote and keeps visibility flags', () => {
-    const params = run('?notes=true&atlasNote=15/52.5/13.4&osmNotes=true')
-    expect(params.get('internalNotes')).toBe('true')
-    expect(params.get('internalNote')).toBe('15/52.5/13.4')
+  test('folds atlasNote into notes.new and keeps visibility flags', () => {
+    const params = run('?atlasNote=15/52.5/13.4&osmNotes=true')
+    expect(JSON.parse(params.get('notes')!)).toEqual({ new: '15/52.5/13.4' })
     expect(params.get('osmNotes')).toBe('true')
-    expect(params.has('notes')).toBe(false)
+    expect(params.has('internalNote')).toBe(false)
     expect(params.has('atlasNote')).toBe(false)
+  })
+
+  test('folds osmNote into notes.new', () => {
+    const params = run('?osmNote=18/52.5/13.4')
+    expect(JSON.parse(params.get('notes')!)).toEqual({ new: '18/52.5/13.4' })
+    expect(params.has('osmNote')).toBe(false)
+  })
+
+  test('merges osmNote into existing notes filter JSON', () => {
+    const filter = encodeURIComponent(JSON.stringify({ query: 'kreuzung' }))
+    const params = run(`?osmNotesFilter=${filter}&osmNote=18/52.5/13.4`)
+    expect(JSON.parse(params.get('notes')!)).toEqual({
+      search: 'kreuzung',
+      new: '18/52.5/13.4',
+    })
+    expect(params.has('osmNote')).toBe(false)
+    expect(params.has('osmNotesFilter')).toBe(false)
+  })
+
+  test('notes=true + atlasNote produces internalNotes=true and notes.new', () => {
+    const params = run('?notes=true&atlasNote=15/52.5/13.4')
+    expect(params.get('internalNotes')).toBe('true')
+    expect(JSON.parse(params.get('notes')!)).toEqual({ new: '15/52.5/13.4' })
+    expect(params.has('atlasNote')).toBe(false)
+    expect(params.has('internalNote')).toBe(false)
   })
 
   test('renames notes=true then writes filter JSON onto notes', () => {

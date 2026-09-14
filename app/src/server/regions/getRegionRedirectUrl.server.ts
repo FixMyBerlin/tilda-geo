@@ -1,5 +1,6 @@
 import { createFreshCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/createFreshCategoriesConfig'
 import { migrateUrl } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/migrateUrl'
+import { foldNotesComposePinIntoNotesJson } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/migrations/foldNotesComposePinIntoNotesJson'
 import type {
   MapDataCategoryConfig,
   MapDataCategoryParam,
@@ -12,6 +13,10 @@ import {
   serializeMapParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import { mapParamFallback } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParamFallback.const'
+import {
+  compactNotesModeParam,
+  zodNotesModeParam,
+} from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
 import { zodQaParam } from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
 import { getRegion } from '@/server/regions/queries/getRegion.server'
 import type { TRegion } from '@/server/regions/regionConfigMapper.server'
@@ -33,7 +38,7 @@ const qaParamHasKey = (qaValue: string | null) => {
 /** Legacy overlay bookmark: `qa` is present but is not already live JSON with a key. */
 const isLegacyQaBookmark = (qaValue: string | null) => Boolean(qaValue) && !qaParamHasKey(qaValue)
 
-/** Truthy overlay flags and/or pre-migration `atlasNote`. Live `osmNote`/`internalNote` are compose params. */
+/** Truthy overlay flags and/or pre-migration `atlasNote`. Live `notes.new` is a compose pin, not an overlay bookmark. */
 const isLegacyNotesOverlayBookmark = (params: URLSearchParams) =>
   isTruthySearchFlag(params.get('osmNotes')) ||
   isTruthySearchFlag(params.get('notes')) ||
@@ -163,8 +168,8 @@ function migrateConfigCategoryIds(urlConfig: ReturnType<typeof parseConfig>) {
  * (not beforeLoad — search-param navigations must not re-run this), so it also runs for mode child
  * routes (`/regionen/berlin/hinweise`, …). Pathname is mode identity; root rewrites are only for
  * unmigrated overlay bookmarks (legacy `osmNotes`/`notes`/`internalNotes` flags, pre-migration
- * `atlasNote`, or a legacy `qa=` string), not for live `qa`/`notes` JSON or compose params (`osmNote` /
- * `internalNote`). Region-rename rewrites only the slug segment; existing mode paths are not nested.
+ * `atlasNote`, or a legacy `qa=` string), not for live `qa`/`notes` JSON or compose (`notes.new`).
+ * Region-rename rewrites only the slug segment; existing mode paths are not nested.
  *
  * Routes that trigger this:
  * - `/regionen/berlin` → normalizes search params (map, config, etc.)
@@ -194,7 +199,8 @@ export async function getRegionRedirectUrl(locationHref: string, regionSlug: str
   }
 
   // Snapshot overlay-bookmark signals before migrateUrl: after migration, a legacy `qa=` string
-  // becomes live JSON and `atlasNote` becomes `internalNote`, which ModeSwitcher also copies.
+  // becomes live JSON. `atlasNote` still counts as an overlay bookmark; live compose (`notes.new`)
+  // does not.
   const preMigrationParams = new URL(migratedUrl).searchParams
   const hadLegacyQaBookmark = isLegacyQaBookmark(preMigrationParams.get('qa'))
   const hadLegacyNotesOverlay = isLegacyNotesOverlayBookmark(preMigrationParams)
@@ -208,7 +214,7 @@ export async function getRegionRedirectUrl(locationHref: string, regionSlug: str
   const regionEnablesNotes = Boolean(region.notesOsm || region.notesInternal)
 
   // Mode identity is the pathname. Root rewrites are only for unmigrated overlay bookmarks
-  // (legacy flags / legacy qa string), not for live `qa`/`notes` JSON or compose params.
+  // (legacy flags / legacy qa string), not for live `qa`/`notes` JSON or compose (`notes.new`).
   // QA wins when both legacy signals are on. Already on a mode path: do not nest `/qa/qa`.
   if (u.pathname === regionRootPath) {
     if (hadLegacyQaBookmark && qaParamHasKey(params.get('qa'))) {
@@ -226,8 +232,26 @@ export async function getRegionRedirectUrl(locationHref: string, regionSlug: str
     params.delete(searchParamsRegistry.notes)
   }
 
-  if (!region.notesOsm) params.delete('osmNote')
-  if (!region.notesInternal) params.delete('internalNote')
+  // Always fold sibling compose keys, including this branch's v=3 `osmNote`/`internalNote` URLs
+  // that skip 0003. Must run before the unknown-key strip (those keys left the registry).
+  foldNotesComposePinIntoNotesJson(params)
+
+  if (!region.notesOsm && !region.notesInternal) {
+    const notesKey = searchParamsRegistry.notes
+    const raw = params.get(notesKey)
+    if (raw?.trim().startsWith('{')) {
+      try {
+        const parsed = zodNotesModeParam.safeParse(JSON.parse(raw))
+        if (parsed.success) {
+          const compact = compactNotesModeParam({ ...parsed.data, new: undefined })
+          if (compact) params.set(notesKey, JSON.stringify(compact))
+          else params.delete(notesKey)
+        }
+      } catch {
+        // leave notes as-is if it is not JSON
+      }
+    }
+  }
 
   const usedParams = Object.values(searchParamsRegistry)
   Array.from(params.keys()).forEach((key) => {

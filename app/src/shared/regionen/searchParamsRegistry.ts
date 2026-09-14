@@ -8,12 +8,10 @@ export const searchParamsRegistry = {
   bg: 'bg',
   bg3d: 'bg3d',
   draw: 'draw',
-  osmNote: 'osmNote', // notes compose open + pin (zoom/lat/lng)
-  internalNote: 'internalNote', // notes compose open + pin (zoom/lat/lng)
   debugMap: 'debugMap',
   qa: 'qa', // QA mode JSON: key, status, users, search
   dialog: 'dialog',
   welcomeSkipDialog: '__skipDialog',
-  notes: 'notes', // JSON: key, search, extent, chips (`notesModeParam.ts`)
+  notes: 'notes', // JSON: key, search, extent, chips, new (compose pin) (`notesModeParam.ts`)
   review: 'review', // JSON: key, search, extent, status, source, new, move (`reviewListsModeParam.ts`)
 } as const

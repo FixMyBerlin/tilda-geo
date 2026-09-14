@@ -1,28 +1,24 @@
 import { useEffect } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
-import { useNewInternalNoteMapParam } from './useNewInternalNoteMapParam'
-import { useNewOsmNoteMapParam } from './useNotesOsmParams'
+import { useNotesModeParam } from '@/components/regionen/pageRegionSlug/modes/notes/useNotesModeParam'
+import { parseMapParam } from './utils/mapParam'
 
 /**
- * Compose pin from `osmNote` or `internalNote`. Parsing and rounding stay in
- * `parseMapParam` / `serializeMapParam` (same encoding as `map=*`) via the per-key readers.
+ * Compose pin from `notes.new`. Parsing and rounding stay in `parseMapParam` /
+ * `serializeMapParam` (same encoding as `map=*`). Kind (OSM vs internal) is region XOR /
+ * `showingOsm` from the list, not a URL key.
  */
 export const useNotesComposePin = () => {
-  const { newOsmNoteMapParam, setNewOsmNoteMapParam } = useNewOsmNoteMapParam()
-  const { newInternalNoteMapParam, setNewInternalNoteMapParam } = useNewInternalNoteMapParam()
-  const composePin = newOsmNoteMapParam ?? newInternalNoteMapParam
-  const composingOsm = Boolean(newOsmNoteMapParam)
-  const composingInternal = Boolean(newInternalNoteMapParam)
+  const { notesMode, setNotesModeParam } = useNotesModeParam()
+  const composePin = notesMode.new ? parseMapParam(notesMode.new) : null
 
   const clearComposeParams = () => {
-    setNewOsmNoteMapParam(null)
-    setNewInternalNoteMapParam(null)
+    setNotesModeParam({ ...notesMode, new: undefined })
   }
 
   return {
     composePin,
-    composingOsm,
-    isComposing: composingOsm || composingInternal,
+    isComposing: Boolean(composePin),
     clearComposeParams,
   }
 }

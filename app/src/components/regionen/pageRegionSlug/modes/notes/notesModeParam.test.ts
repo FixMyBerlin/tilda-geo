@@ -20,4 +20,15 @@ describe('notesMode search param', () => {
       search: 'foo',
     })
   })
+
+  test('compactNotesModeParam keeps a compose pin on new', () => {
+    expect(compactNotesModeParam({ new: '18/52.5/13.4' })).toEqual({ new: '18/52.5/13.4' })
+    expect(compactNotesModeParam({ new: '' })).toBeUndefined()
+  })
+
+  test('invalid new is dropped, other fields kept', () => {
+    expect(zodNotesModeParam.parse({ search: 'kreuzung', new: true })).toEqual({
+      search: 'kreuzung',
+    })
+  })
 })
