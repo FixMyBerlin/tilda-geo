@@ -29,19 +29,38 @@ export type QaOrphanedEvaluation = {
 
 export type QaOrphanedEvaluationsResult = PaginatedList<QaOrphanedEvaluation>
 
-type OrphanRow = {
+type OrphanLatestEvaluation = {
   areaId: string
   systemStatus: QaSystemStatus
   userStatus: QaEvaluationStatus | null
   createdAt: Date
   evaluatorType: QaEvaluatorType
-  authorOsmName: string | null
-  authorFirstName: string | null
-  authorLastName: string | null
-  evaluation_count: bigint | number | null
-  comment_count: bigint | number | null
-  user_evaluation_count: bigint | number | null
-  total_count: bigint | number | null
+  author: {
+    osmName: string | null
+    firstName: string | null
+    lastName: string | null
+  } | null
+}
+
+type OrphanAreaCounts = {
+  evaluationCount: number
+  commentCount: number
+  userEvaluationCount: number
+}
+
+type CommentBodyRow = {
+  areaId: string
+  body: string | null
+}
+
+/** Matches SQL `btrim(body) <> ''`: NULL, empty, and whitespace-only bodies do not count. */
+export function countNonBlankCommentBodies(rows: CommentBodyRow[]) {
+  const commentCountByAreaId = new Map<string, number>()
+  for (const row of rows) {
+    if (row.body == null || row.body.trim() === '') continue
+    commentCountByAreaId.set(row.areaId, (commentCountByAreaId.get(row.areaId) ?? 0) + 1)
+  }
+  return commentCountByAreaId
 }
 
 /** Neither sibling map-table query handles a missing relation; catch 42P01 so the admin page still renders. */
@@ -50,38 +69,52 @@ function isMissingMapTableError(error: unknown) {
   return /relation .+ does not exist|42P01/i.test(error.message)
 }
 
-export function buildQaOrphanedEvaluationsSql(tableName: string) {
-  // User evaluations and comments first: those orphans carry human work an admin must act on.
-  return `
-WITH latest AS (
-  SELECT DISTINCT ON (e."areaId")
-         e."areaId", e."systemStatus", e."userStatus", e."createdAt", e."evaluatorType", e."userId"
-  FROM prisma."QaEvaluation" e
-  WHERE e."configId" = $1
-  ORDER BY e."areaId", e."createdAt" DESC, e.id DESC
-),
-stats AS (
-  SELECT e."areaId",
-         count(*)::int AS evaluation_count,
-         count(*) FILTER (WHERE e.body IS NOT NULL AND btrim(e.body) <> '')::int AS comment_count,
-         count(*) FILTER (WHERE e."evaluatorType" = 'USER')::int AS user_evaluation_count
-  FROM prisma."QaEvaluation" e
-  WHERE e."configId" = $1
-  GROUP BY e."areaId"
-)
-SELECT l."areaId", l."systemStatus", l."userStatus", l."createdAt", l."evaluatorType",
-       u."osmName" AS "authorOsmName", u."firstName" AS "authorFirstName", u."lastName" AS "authorLastName",
-       s.evaluation_count, s.comment_count, s.user_evaluation_count,
-       count(*) OVER () AS total_count
-FROM latest l
-JOIN stats s ON s."areaId" = l."areaId"
-LEFT JOIN prisma."User" u ON u.id = l."userId"
-LEFT JOIN ${tableName} a ON a.id = l."areaId"
-WHERE a.id IS NULL
-ORDER BY s.user_evaluation_count DESC, s.comment_count DESC, l."createdAt" DESC
-LIMIT $2
-OFFSET $3
-`
+/** Orphans first by human work (user evals, then comments), then recency; then skip/take. */
+export function selectQaOrphanedEvaluationPage(
+  latestEvaluations: OrphanLatestEvaluation[],
+  mapIdSet: Set<string>,
+  countsByAreaId: Map<string, OrphanAreaCounts>,
+  skip: number,
+  take: number,
+) {
+  const orphans = latestEvaluations
+    .filter((evaluation) => !mapIdSet.has(evaluation.areaId))
+    .map((evaluation) => {
+      const counts = countsByAreaId.get(evaluation.areaId) ?? {
+        evaluationCount: 0,
+        commentCount: 0,
+        userEvaluationCount: 0,
+      }
+      return {
+        areaId: evaluation.areaId,
+        systemStatus: evaluation.systemStatus,
+        userStatus: evaluation.userStatus,
+        createdAt: evaluation.createdAt,
+        evaluatorType: evaluation.evaluatorType,
+        authorOsmName: evaluation.author?.osmName ?? null,
+        authorFirstName: evaluation.author?.firstName ?? null,
+        authorLastName: evaluation.author?.lastName ?? null,
+        evaluationCount: counts.evaluationCount,
+        commentCount: counts.commentCount,
+        userEvaluationCount: counts.userEvaluationCount,
+      } satisfies QaOrphanedEvaluation
+    })
+    .sort((a, b) => {
+      if (b.userEvaluationCount !== a.userEvaluationCount) {
+        return b.userEvaluationCount - a.userEvaluationCount
+      }
+      if (b.commentCount !== a.commentCount) {
+        return b.commentCount - a.commentCount
+      }
+      return b.createdAt.getTime() - a.createdAt.getTime()
+    })
+
+  return {
+    rows: orphans.slice(skip, skip + take),
+    total: orphans.length,
+    skip,
+    take,
+  } satisfies QaOrphanedEvaluationsResult
 }
 
 export async function getQaOrphanedEvaluationsForAdmin(
@@ -94,40 +127,70 @@ export async function getQaOrphanedEvaluationsForAdmin(
   const tableName = getQaTableName(mapTable)
   const emptyResult = { rows: [], total: 0, skip, take } satisfies QaOrphanedEvaluationsResult
 
+  // Fetch map ids and test membership in JS. Prisma `notIn` would bind every map id.
+  let mapIdRows: Array<{ id: string }>
   try {
-    const rows = await db.$queryRawUnsafe<OrphanRow[]>(
-      buildQaOrphanedEvaluationsSql(tableName),
-      configId,
-      take,
-      skip,
+    mapIdRows = await db.$queryRawUnsafe<Array<{ id: string }>>(
+      `SELECT id::text AS id FROM ${tableName}`,
     )
-    const total = rows[0] ? Number(rows[0].total_count ?? 0) : 0
-
-    return {
-      rows: rows.map(
-        (row) =>
-          ({
-            areaId: row.areaId,
-            systemStatus: row.systemStatus,
-            userStatus: row.userStatus,
-            createdAt: row.createdAt,
-            evaluatorType: row.evaluatorType,
-            authorOsmName: row.authorOsmName,
-            authorFirstName: row.authorFirstName,
-            authorLastName: row.authorLastName,
-            evaluationCount: Number(row.evaluation_count ?? 0),
-            commentCount: Number(row.comment_count ?? 0),
-            userEvaluationCount: Number(row.user_evaluation_count ?? 0),
-          }) satisfies QaOrphanedEvaluation,
-      ),
-      total,
-      skip,
-      take,
-    } satisfies QaOrphanedEvaluationsResult
   } catch (error) {
     if (isMissingMapTableError(error)) {
       return emptyResult
     }
     throw error
   }
+
+  const mapIdSet = new Set(mapIdRows.map((row) => row.id))
+
+  const [latestEvaluations, countGroups, commentBodies] = await Promise.all([
+    db.qaEvaluation.findMany({
+      where: { configId },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      distinct: ['areaId'],
+      select: {
+        areaId: true,
+        systemStatus: true,
+        userStatus: true,
+        createdAt: true,
+        evaluatorType: true,
+        author: {
+          select: {
+            osmName: true,
+            firstName: true,
+            lastName: true,
+          },
+        },
+      },
+    }),
+    db.qaEvaluation.groupBy({
+      by: ['areaId', 'evaluatorType'],
+      where: { configId },
+      _count: { _all: true },
+    }),
+    // groupBy cannot btrim; load bodies and count non-blank in JS.
+    db.qaEvaluation.findMany({
+      where: { configId, body: { not: null } },
+      select: { areaId: true, body: true },
+    }),
+  ])
+
+  const countsByAreaId = new Map<string, OrphanAreaCounts>()
+  for (const group of countGroups) {
+    const current = countsByAreaId.get(group.areaId) ?? {
+      evaluationCount: 0,
+      commentCount: 0,
+      userEvaluationCount: 0,
+    }
+    current.evaluationCount += group._count._all
+    if (group.evaluatorType === 'USER') {
+      current.userEvaluationCount = group._count._all
+    }
+    countsByAreaId.set(group.areaId, current)
+  }
+  for (const [areaId, commentCount] of countNonBlankCommentBodies(commentBodies)) {
+    const current = countsByAreaId.get(areaId)
+    if (current) current.commentCount = commentCount
+  }
+
+  return selectQaOrphanedEvaluationPage(latestEvaluations, mapIdSet, countsByAreaId, skip, take)
 }

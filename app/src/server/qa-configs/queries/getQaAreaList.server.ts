@@ -1,5 +1,10 @@
 import { z } from 'zod'
-import { zodQaParamStatus } from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
+import {
+  QA_STATUS_OPTIONS,
+  QA_STATUS_SELECT_ALL,
+  type QaStatusParam,
+  zodQaParamStatus,
+} from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
 import type { QaEvaluationStatus, QaEvaluatorType, QaSystemStatus } from '@/prisma/generated/client'
 import { getAppSession } from '@/server/auth/session.server'
 import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
@@ -8,12 +13,8 @@ import {
   QA_AREA_LIST_LIMIT_ALL,
   QA_AREA_LIST_LIMIT_VIEW,
 } from '@/server/qa-configs/qaAreaList.const'
-import {
-  QA_ABSOLUTE_CHANGE_SORT_SQL,
-  qaSearchSqlPredicate,
-  qaStatusSqlPredicate,
-} from '@/server/qa-configs/qaAreaListPredicates'
 import { getQaTableName } from '../utils/getQaTableName'
+import { qaSearchSqlPredicate } from './qaSearchSql'
 
 /** Shared with the `getQaAreaListFn` validator so the RPC boundary and the query cannot drift. */
 export const QaAreaListSchema = z.object({
@@ -65,6 +66,45 @@ type ListRow = {
 
 const emptyResult = (limit: number) =>
   ({ items: [], totalCount: 0, limit }) satisfies QaAreaListResult
+
+type SqlFragment = {
+  sql: string
+  params: string[]
+}
+
+/** Status filter on the latest-per-area CTE alias `l`. `'all'` / undefined → no constraint. */
+export function qaStatusSqlPredicate(status: QaStatusParam | undefined, nextParamIndex: number) {
+  if (status === undefined || status === QA_STATUS_SELECT_ALL) {
+    return { sql: 'TRUE', params: [] } satisfies SqlFragment
+  }
+  const option = QA_STATUS_OPTIONS.find((entry) => entry.key === status)
+  // Unreachable: `zodQaParamStatus` is built from these same options. Fail loudly rather than
+  // falling back to no constraint, which would answer a status filter with every area.
+  if (!option) {
+    throw new Error(`Unknown QA status key: ${status}`)
+  }
+
+  const clauses: string[] = []
+  const params: string[] = []
+  let index = nextParamIndex
+
+  if (option.userStatus === null) {
+    clauses.push('l."userStatus" IS NULL')
+  } else {
+    clauses.push(`l."userStatus"::text = $${index}`)
+    params.push(option.userStatus)
+    index += 1
+  }
+
+  if (option.systemStatus !== null) {
+    clauses.push(`l."systemStatus"::text = $${index}`)
+    params.push(option.systemStatus)
+  }
+
+  return { sql: clauses.join(' AND '), params } satisfies SqlFragment
+}
+
+const QA_ABSOLUTE_CHANGE_SORT_SQL = `CASE WHEN l."decisionData"->>'absoluteChange' ~ '^-?[0-9]+(\\.[0-9]+)?$' THEN abs((l."decisionData"->>'absoluteChange')::numeric) END`
 
 export async function getQaAreaList(input: z.infer<typeof QaAreaListSchema>, headers: Headers) {
   const appSession = await getAppSession(headers)

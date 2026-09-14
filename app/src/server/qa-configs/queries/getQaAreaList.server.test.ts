@@ -3,7 +3,7 @@ import {
   QA_STATUS_OPTIONS,
   type QaStatusParam,
 } from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
-import { qaStatusSqlPredicate } from './qaAreaListPredicates'
+import { qaStatusSqlPredicate } from './getQaAreaList.server'
 
 describe('qaStatusSqlPredicate', () => {
   test('all and undefined emit TRUE with no params', () => {

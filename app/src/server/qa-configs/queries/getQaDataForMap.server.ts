@@ -8,7 +8,7 @@ import type { QaEvaluationStatus, QaSystemStatus } from '@/prisma/generated/clie
 import { getAppSession } from '@/server/auth/session.server'
 import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
-import { qaSearchSqlPredicate } from '@/server/qa-configs/qaAreaListPredicates'
+import { qaSearchSqlPredicate } from './qaSearchSql'
 
 const Schema = z.object({
   configSlug: z.string(),
