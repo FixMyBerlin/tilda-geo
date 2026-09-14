@@ -1,16 +1,8 @@
-# Region modes: concept summary
+# Region modes
 
-User-facing overview of TILDA region modes: why they exist, the shared UX, and what each mode is for. Tracking: [private-issues#3134 (comment)](https://github.com/FixMyBerlin/private-issues/issues/3134#issuecomment-5130056823). URL mechanics: [Modes-URL-State-Contract-And-Optimizations.md](./Modes-URL-State-Contract-And-Optimizations.md).
+A region has a shared map and extra pages that reconfigure the UI around it. The default map stays `/regionen/<region>`. Hinweise, Qualitätssicherung, and Prüflisten are their own routes. They show up in the main navigation when the region has the matching data (notes flags, at least one QA config, review lists). Members can open Prüflisten before the first list exists so they can create one.
 
-## Purpose
-
-Explain the product shape of Hinweise, Qualitätssicherung, and Prüflisten for reviewers and future maintainers — not the implementation history.
-
-## Why modes?
-
-A region used to have one map page. Notes, quality assurance, the parking calculator, and similar tools were switched on inside that view. That layout does not scale.
-
-Modes are extra pages per region that reuse the same central map and reconfigure the UI around it. They appear in the main navigation when the region has the underlying data (notes flags, QA configs, review lists). Members/admins can open Prüflisten before the first list exists, so they can create one.
+URL keys and filters: [Modes-URL-State-Contract-And-Optimizations.md](./Modes-URL-State-Contract-And-Optimizations.md). Selection `f`: [Features-Parameter-Deeplinks.md](./Features-Parameter-Deeplinks.md).
 
 | Mode               | URL                              |
 | ------------------ | -------------------------------- |
@@ -19,37 +11,65 @@ Modes are extra pages per region that reuse the same central map and reconfigure
 | Qualitätssicherung | `/regionen/<region>/qa`          |
 | Prüflisten         | `/regionen/<region>/prueflisten` |
 
-## Shared panel layout
+Switching modes keeps map position and layer configuration. Each mode stores its filters in one JSON search object (`notes`, `qa`, `review`) and restores them when you come back.
 
-Each mode page gets a right panel beside the map (`ModePanel`): heading, a collection selector (QA config / Prüfliste; read-only for Hinweise), a filter bar (search, chips/status, “only current map view” vs “all”), and a list of compact previews. On desktop the panel sits on the map’s right edge and is resizable.
+## Shared panel
 
-The existing right inspector still shows the selected feature. Hovering a list row places a mode-accent ring on the map (edge-clamped when off-screen). Clicking the map or a row selects via the shared `f` param, scrolls the row into view, and opens details. Hover alone does not select.
+The right `ModePanel` has a heading, a collection selector (QA config or Prüfliste; read-only for Hinweise), a filter bar (search, chips or status, current map view vs all), and a list of compact previews. On desktop the panel sits on the map edge and is resizable.
 
-Switching modes keeps map position and layer configuration. Mode-specific filters live in that mode’s URL object and come back when you return. Modes add state on top of the shared map; they do not each get a full map configuration.
+The inspector still shows the selected feature. Hovering a list row draws a mode-accent ring on the map (clamped to the viewport when the geometry is off-screen). Clicking the map or a row writes `f`, scrolls the row into view, and opens details. Hover does not select.
 
-| Feature            | On default map?                                                     | Dedicated mode?                           |
-| ------------------ | ------------------------------------------------------------------- | ----------------------------------------- |
-| Hinweise           | Inspector “new note” tools navigate into the mode; no note markers  | Yes. One list for the region’s notes kind |
-| Qualitätssicherung | No                                                                  | Yes only                                  |
-| Prüflisten         | No                                                                  | Yes only                                  |
-| Calculator         | Yes. Drawing + totals on the map; “Summieren: …” in the category UI | No. Not a region mode                     |
+| Feature                     | Default map                                                                            | Dedicated mode                              |
+| --------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------- |
+| Hinweise                    | Inspector "new note" tools navigate into the mode. No note markers on the default map. | Yes. One list for the region's notes kind.  |
+| Qualitätssicherung          | No                                                                                     | Yes only                                    |
+| Prüflisten                  | No                                                                                     | Yes only                                    |
+| Calculator (parking totals) | Yes. Drawing and totals on the map. "Summieren: …" stays in the category UI.           | No. Not a region mode. No `/rechner` route. |
 
-## Hinweise (notes)
+## Hinweise
 
-Lists the region’s one notes kind — OSM **or** TILDA internal notes, not both (`regionWriteSchema` rejects enabling both). Search, extent, and chip filters live in `notes`. There are no folders. Note pins render only in this mode. From the default-map inspector, “new note” tools still jump here (`osmNote` / `internalNote` compose params).
+Lists the region's notes. Today that is OSM **or** TILDA internal notes, not both. Search, extent, and chips live in `notes`. Pins render only in this mode. From the default-map inspector, "new note" still jumps here (`osmNote` / `internalNote` compose pins).
 
-OSM notes are public; internal notes are member-only. Hinweise is member-only when the region has only internal notes.
+OSM notes are public. Internal notes are member-only. The Hinweise route is member-only when the region has only internal notes.
 
-## Qualitätssicherung (QA)
+Folders are not in the product yet. When they are, OSM and internal notes may both be enabled on a region, but the list and map show one collection at a time: OSM **or** one internal folder.
 
-Dedicated `/qa` mode: pick a QA configuration, filter by status / users / search / extent, work through the area list; details stay in the inspector. QA layers and the old category/dialog entry points are gone from the default map. Bookmarks that still carried legacy QA query params are steered toward `/qa`.
+## Qualitätssicherung
 
-## Prüflisten (review lists)
+`/qa` is the only place QA layers and the area list exist. Pick a config, filter by status / users / search / extent, work the list. Details stay in the inspector.
 
-GeoJSON lists of candidates to check (points, lines, polygons, including Multi\*): pick a list, browse entries, set status, comment. Lists are stored in the database, can be assigned to several regions, and support upload/download. Users can draw new entries (point / line / polygon) and edit existing geometry; source is tracked as upload vs manual.
+Bookmarks that still carried the old in-map QA query params are steered here.
 
-UI naming is **Prüfliste / Prüfeintrag**. Status/comments exist; a richer evaluation workflow is still placeholder-level by design. Admin surface: `/admin/review-lists`.
+### Status
 
-## Calculator (not a mode)
+Each area has a **system** status from nightly comparison of reference vs current counts, and optionally a **user** status from a person.
 
-The summing tool (today: parking) stays on the default map. Drawing controls and totals mount with `<Calculator>` on `RegionMap`. “Summieren: …” subcategories stay in the category UI. There is no `/rechner` route and no Rechner entry in the mode switcher.
+System: `GOOD` (green), `NEEDS_REVIEW` (yellow), `PROBLEMATIC` (red). No evaluation paints gray.
+
+User (overrides the system color when set):
+
+- `OK_STRUCTURAL_CHANGE` — OK, construction or structural change
+- `OK_REFERENCE_ERROR` — OK, wrong reference data
+- `OK_QA_TOOLING_ERROR` — OK, QA geometry or definition error (teal in the UI)
+- `NOT_OK_DATA_ERROR` — not OK, current data needs a fix
+- `NOT_OK_PROCESSING_ERROR` — not OK, processing needs a fix
+
+Absolute difference is checked before percent. If `|absoluteDifference|` is at most `QaConfig.absoluteDifferenceThreshold`, the effective system status is `GOOD` even when the percent looks worse.
+
+### What nightly processing does
+
+First run on an area always writes a system evaluation. After that it writes a new row only when the effective system status changed, or when a user decision must be cleared.
+
+- Structural-change and reference-error OK stay forever.
+- Tooling-error OK and both NOT_OK values stay until the effective system status becomes `GOOD`. Then the user fields are cleared (`userStatus`, `body`, `userId` null).
+- Users never set system status. `NEEDS_REVIEW` is system-only.
+
+The tables live in [`qaEvaluationRules.ts`](../app/src/server/qa-configs/evaluation/qaEvaluationRules.ts) (`getQaUpdateDecision`). Map coloring and cache: [QA-Map-Status-Payload.md](./QA-Map-Status-Payload.md). Parking freeze baseline: [Parking-Client-Freeze-QA.md](./Parking-Client-Freeze-QA.md).
+
+New configs are created in admin. The source table needs a string `id`, comparison counts, and polygon geometry. Set `mapTable` to that table.
+
+## Prüflisten
+
+GeoJSON lists of candidates (points, lines, polygons, including Multi\*). Pick a list, set status, comment. Lists live in the database, can be assigned to several regions, and support upload/download. Members can draw new entries and edit geometry. Source is upload or manual.
+
+UI names: **Prüfliste** / **Prüfeintrag**. Status and comments exist. A richer evaluation workflow is still placeholder-level. Admin: `/admin/review-lists`.

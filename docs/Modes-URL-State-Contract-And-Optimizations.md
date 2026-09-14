@@ -1,16 +1,12 @@
 # Region modes: URL state
 
-How region mode URL state is owned today. Related: [Features-Parameter-Deeplinks.md](./Features-Parameter-Deeplinks.md) (`f`), [TanStack-Start-App-Structure-And-Conventions.md](./TanStack-Start-App-Structure-And-Conventions.md).
-
-## Purpose
-
-A maintainer should be able to answer: which query keys exist, who validates them, how each mode stores its filters, and why `v` is not dropped on client navigations.
+How region mode URL state is owned today. Product shape: [Modes-Concept-Summary.md](./Modes-Concept-Summary.md). Related: [Features-Parameter-Deeplinks.md](./Features-Parameter-Deeplinks.md) (`f`), [TanStack-Start-App-Structure-And-Conventions.md](./TanStack-Start-App-Structure-And-Conventions.md).
 
 ## Contract
 
 All region search lives under `/regionen/$regionSlug[/<mode>]`. The layout route (`app/src/routes/regionen/$regionSlug/route.tsx`) is the single `validateSearch` owner: `regionSearchSchema` in `app/src/shared/regionen/regionSearchSchemas.ts`. Keys are listed once in `app/src/shared/regionen/searchParamsRegistry.ts`; `getRegionRedirectUrl` strips anything not in that registry.
 
-nuqs is gone. The only remaining mentions in `app/src` are comments that describe old parser defaults. The router uses shared `routerSearch` JSON parse/stringify (`app/src/router.tsx`); `draw` still uses jsurl inside its own hook.
+Search uses the layout `validateSearch` (`regionSearchSchema`). `draw` still uses jsurl inside its own hook.
 
 Mode filters sit on that shared layout search (not on child `validateSearch`) so switching modes keeps one URL. Each mode owns **one JSON object**:
 
@@ -26,11 +22,9 @@ QA `search` and `extent` live in that `qa` object, not in React `useState`. The 
 
 Other encodings stay as they are: `map` (`zoom/lat/lng`), `config` (v2 compressed), `f` (pipe-delimited), `bg` / `data` / compose pins. Do not invent a seventh.
 
-## Version `v` and migrations
+## `v`
 
-`migrateUrl` (`app/src/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/migrateUrl.ts`) writes `v` to the current migration number (today `3`). `v` is in the typed search so client navigations preserve it and the layout loader does not re-run migrations.
-
-Migration 0003 keeps any JSON `qa` that already has a string `key` (unknown slugs included) and merges leftover `qaFilter.users`. Legacy `slug--style` values for known slugs become `{ key }` plus mapped `status`/`users`; an unknown slug or style drops `qa`.
+`migrateUrl` writes `v` (today `3`) so the layout loader does not re-run category-config migrations on every client navigation. Old in-map QA query shapes are folded into `qa` on first load. Details: [`migrateUrl.ts`](../app/src/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/migrateUrl.ts).
 
 ## Child mode routes
 
