@@ -16,7 +16,6 @@ import { ModeMobileDock } from './ModeMobileDock'
 import { modeColumnElevationClassName } from './modePanel.const'
 import { readModePanelWidth } from './modePanelWidthStorage'
 import { useOptimisticMode } from './useCurrentMode'
-import { useIsModeRoute } from './useIsModeRoute'
 
 const setModePanelWidthCssVar = (width: number) =>
   document.documentElement.style.setProperty('--mode-panel-width', `${width}px`)
@@ -37,8 +36,8 @@ const setModePanelWidthCssVar = (width: number) =>
  * inspector (`z-20`) → map.
  */
 export const ModeColumnShell = () => {
-  const isModeRoute = useIsModeRoute()
   const optimisticMode = useOptimisticMode()
+  const isModeRoute = optimisticMode !== 'map'
   const isDesktop = useBreakpoint('sm')
   const panelWidth = useModePanelWidth()
   const isDragging = useModePanelWidthDragging()
