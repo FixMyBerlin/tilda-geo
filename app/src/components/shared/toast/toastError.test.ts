@@ -26,4 +26,11 @@ describe('toastError', () => {
     expect(spy).toHaveBeenCalledWith('Nope')
     spy.mockRestore()
   })
+
+  test('falls back when message is [object Object]', () => {
+    const spy = vi.spyOn(toast, 'error').mockImplementation(() => '')
+    toastError(new Error('[object Object]'), 'Nope')
+    expect(spy).toHaveBeenCalledWith('Nope')
+    spy.mockRestore()
+  })
 })

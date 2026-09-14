@@ -1,3 +1,4 @@
+import { twJoin } from 'tailwind-merge'
 import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
 import type { InspectorFeatureProperty } from '../Inspector'
 import { TagsTableRowColor, tableKeysColor } from './compositTableRows/TagsTableRowColor'
@@ -71,13 +72,21 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
           <tr>
             <th
               scope="col"
-              className={`py-1.5 pr-2 pl-2 text-left text-sm ${tagsTableLeadingClass} font-semibold text-gray-900`}
+              className={twJoin(
+                'py-1.5 pr-2 pl-2 text-left text-sm',
+                tagsTableLeadingClass,
+                'font-semibold text-gray-900',
+              )}
             >
               Schlüssel
             </th>
             <th
               scope="col"
-              className={`px-2 py-1.5 text-left text-sm ${tagsTableLeadingClass} font-semibold text-gray-900`}
+              className={twJoin(
+                'px-2 py-1.5 text-left text-sm',
+                tagsTableLeadingClass,
+                'font-semibold text-gray-900',
+              )}
             >
               Wert
             </th>

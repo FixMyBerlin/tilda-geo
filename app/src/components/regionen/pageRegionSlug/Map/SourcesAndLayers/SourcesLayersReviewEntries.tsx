@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import type { ExpressionSpecification } from 'maplibre-gl'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
-import { REVIEW_ENTRY_SELECT_HALO } from '@/components/regionen/pageRegionSlug/modes/reviewLists/reviewEntryMapColors'
+import { modeIdentity } from '@/components/regionen/pageRegionSlug/modes/modeIdentity'
 import { useReviewListsModeValue } from '@/components/regionen/pageRegionSlug/modes/reviewLists/useReviewListsModeParam'
 import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
@@ -88,7 +88,7 @@ export const SourcesLayersReviewEntries = () => {
               ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
               ['in', ['get', 'id'], ['literal', haloIds]],
             ]}
-            paint={{ 'fill-color': REVIEW_ENTRY_SELECT_HALO, 'fill-opacity': 0.12 }}
+            paint={{ 'fill-color': modeIdentity.reviewLists.accent.hex, 'fill-opacity': 0.12 }}
           />
           <Layer
             id={`${reviewEntriesLayerId}-halo-line`}
@@ -106,7 +106,7 @@ export const SourcesLayersReviewEntries = () => {
               ['in', ['get', 'id'], ['literal', haloIds]],
             ]}
             paint={{
-              'line-color': REVIEW_ENTRY_SELECT_HALO,
+              'line-color': modeIdentity.reviewLists.accent.hex,
               'line-width': 8,
               'line-opacity': 0.45,
             }}
@@ -123,9 +123,9 @@ export const SourcesLayersReviewEntries = () => {
             ]}
             paint={{
               'circle-radius': 11,
-              'circle-color': REVIEW_ENTRY_SELECT_HALO,
+              'circle-color': modeIdentity.reviewLists.accent.hex,
               'circle-opacity': 0.28,
-              'circle-stroke-color': REVIEW_ENTRY_SELECT_HALO,
+              'circle-stroke-color': modeIdentity.reviewLists.accent.hex,
               'circle-stroke-width': 2.5,
               'circle-stroke-opacity': 0.9,
             }}

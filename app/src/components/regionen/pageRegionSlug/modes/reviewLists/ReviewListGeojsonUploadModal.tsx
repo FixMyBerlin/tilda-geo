@@ -13,7 +13,8 @@ import {
   type ImportFeatureClassification,
 } from '@/shared/reviewLists/reviewEntryImport'
 
-const GEOJSON_ACCEPT = '.geojson,.json,application/geo+json,application/json'
+// Extensions only (same as Trassenscout getAcceptAttribute / REGION_UPLOAD_ACCEPT), not MIME.
+const GEOJSON_ACCEPT = '.geojson,.json'
 const REVIEW_UPLOAD_MAX_BYTES = 10 * 1024 * 1024
 
 type ExistingFeature = Parameters<typeof classifyImportFeatures>[1][number]

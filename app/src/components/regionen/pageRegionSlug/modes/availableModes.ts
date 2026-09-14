@@ -29,20 +29,11 @@ export const deriveAvailableModes = ({
   } satisfies AvailableModes
 }
 
-const regionModePath = (segment: string) => new RegExp(`^/regionen/[^/]+/${segment}/?$`)
-
-const qaModePath = regionModePath('qa')
-const reviewListsModePath = regionModePath('prueflisten')
-const notesModePath = regionModePath('hinweise')
-
 /** QA and Prüflisten are always member-only. Hinweise is when the region has only internal notes. */
-export const isMemberOnlyModePathname = (
-  pathname: string,
-  region?: Pick<TRegion, 'notesOsm' | 'notesInternal'>,
+export const isMemberOnlyMode = (
+  mode: Exclude<RegionMode, 'map'>,
+  region: Pick<TRegion, 'notesOsm' | 'notesInternal'>,
 ) => {
-  if (qaModePath.test(pathname) || reviewListsModePath.test(pathname)) return true
-  if (region?.notesInternal && !region.notesOsm && notesModePath.test(pathname)) {
-    return true
-  }
-  return false
+  if (mode === 'qa' || mode === 'reviewLists') return true
+  return Boolean(region.notesInternal && !region.notesOsm)
 }

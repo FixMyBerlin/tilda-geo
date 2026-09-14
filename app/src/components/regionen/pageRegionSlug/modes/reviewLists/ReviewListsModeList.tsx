@@ -1,5 +1,7 @@
 import { ArrowUpTrayIcon, PlusIcon } from '@heroicons/react/24/outline'
+import type { Geometry } from 'geojson'
 import { useMap } from 'react-map-gl/maplibre'
+import { twJoin } from 'tailwind-merge'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { reviewEntriesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/reviewEntriesLayers.const'
 import { mergeModeUrlFeature } from '@/components/regionen/pageRegionSlug/Map/utils/partitionClickedFeatures'
@@ -23,9 +25,8 @@ import { formatReviewEntryDataSummary } from './reviewEntryDataSummary'
 import { STATUS_LABEL, type ReviewStatus } from './reviewListsModeFilters'
 import { useReviewListsModeParam } from './useReviewListsModeParam'
 
-/** First `[lng, lat]` in a GeoJSON geometry, or null if empty or malformed (those rows are skipped). */
-const firstPosition = (geometry: unknown) => {
-  if (!geometry || typeof geometry !== 'object' || !('coordinates' in geometry)) return null
+const firstPosition = (geometry: Geometry) => {
+  if (!('coordinates' in geometry)) return null
   let coords: unknown = geometry.coordinates
   while (Array.isArray(coords) && Array.isArray(coords[0])) coords = coords[0]
   if (!Array.isArray(coords)) return null
@@ -64,7 +65,7 @@ const ReviewStatusBadge = ({ status }: { status: ReviewStatus }) => {
 }
 
 type ReviewListEntryFeature = {
-  geometry: unknown
+  geometry: Geometry
   properties: {
     id: number
     status: ReviewStatus
@@ -72,7 +73,7 @@ type ReviewListEntryFeature = {
     geometryType: string
     authorName?: string | null
     commentCount: number
-    data?: unknown
+    data?: Record<string, string>
   }
 }
 
@@ -153,11 +154,11 @@ export const ReviewListsModeList = ({
   }
 
   if (selectedListId === undefined) {
-    return <p className={`px-4 py-3 ${modePanelMutedClassName}`}>Wählen Sie eine Prüfliste.</p>
+    return <p className={twJoin('px-4 py-3', modePanelMutedClassName)}>Wählen Sie eine Prüfliste.</p>
   }
   if (isLoading) {
     return (
-      <div className={`flex items-center gap-2 px-4 py-3 ${modePanelMutedClassName}`}>
+      <div className={twJoin('flex items-center gap-2 px-4 py-3', modePanelMutedClassName)}>
         <SmallSpinner /> Lädt…
       </div>
     )
@@ -226,7 +227,7 @@ export const ReviewListsModeList = ({
                   <ReviewStatusBadge status={props.status} />
                   <ComposerDraftDot draftId={reviewCommentDraftId(id)} />
                 </div>
-                <div className={`mt-0.5 ${modePanelListMetaClassName}`}>
+                <div className={twJoin('mt-0.5', modePanelListMetaClassName)}>
                   {props.geometryType} · {props.source === 'MANUAL' ? 'manuell' : 'Upload'}
                   {props.commentCount > 0 ? ` · ${props.commentCount} Kommentar(e)` : ''}
                 </div>
@@ -249,7 +250,7 @@ export const ReviewListsModeList = ({
             active={active}
             onClick={() => selectEntry(id, coordinates)}
             cells={[
-              <span key="id" className={`relative ${modePanelListTitleClassName}`}>
+              <span key="id" className={twJoin('relative', modePanelListTitleClassName)}>
                 #{id}
                 <ComposerDraftDot draftId={reviewCommentDraftId(id)} />
               </span>,
@@ -260,13 +261,13 @@ export const ReviewListsModeList = ({
               <span key="source" className={modePanelListMetaClassName}>
                 {props.source === 'MANUAL' ? 'manuell' : 'Upload'}
               </span>,
-              <span key="author" className={`line-clamp-1 ${modePanelListMetaClassName}`}>
+              <span key="author" className={twJoin('line-clamp-1', modePanelListMetaClassName)}>
                 {props.authorName ?? '—'}
               </span>,
               <span key="comments" className={modePanelListMetaClassName}>
                 {props.commentCount > 0 ? props.commentCount : '—'}
               </span>,
-              <span key="data" className={`line-clamp-2 ${modePanelListMetaClassName}`}>
+              <span key="data" className={twJoin('line-clamp-2', modePanelListMetaClassName)}>
                 {dataSummary || '—'}
               </span>,
             ]}

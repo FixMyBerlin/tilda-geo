@@ -1,9 +1,6 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { LayoutRegionSlug } from '@/components/regionen/LayoutRegionSlug'
-import {
-  deriveAvailableModes,
-  isMemberOnlyModePathname,
-} from '@/components/regionen/pageRegionSlug/modes/availableModes'
+import { deriveAvailableModes } from '@/components/regionen/pageRegionSlug/modes/availableModes'
 import RegionError from '@/components/regionen/pageRegionSlug/RegionError'
 import RegionPagePending from '@/components/regionen/pageRegionSlug/RegionPagePending'
 import { getSafeSignInCallbackURL } from '@/components/shared/hooks/useSignInUrl'
@@ -24,7 +21,8 @@ import { regionSearchSchema } from '@/shared/regionen/regionSearchSchemas'
 
 /**
  * Region layout route, shared by the default map page (`index.tsx`) and the mode pages
- * (`hinweise.tsx`, …). The loader resolves redirect + auth + region (getRegionPageDataFn) and (1)
+ * (`hinweise.tsx`, …). Member-only mode access-denied redirects live in those child loaders
+ * (`isMemberOnlyMode`). The loader resolves redirect + auth + region (getRegionPageDataFn) and (1)
  * returns that page data (plus derived `availableModes`) and (2) preloads the React Query cache with
  * region-specific data (QA config list, review lists, uploads, processing metadata). QA map data and
  * style/filter changes load on demand in the client via useQaMapData / useQaMapState — same pattern
@@ -84,12 +82,6 @@ export const Route = createFileRoute('/regionen/$regionSlug')({
     }
 
     const region = pageData.region!
-    if (!pageData.hasPermissions && isMemberOnlyModePathname(location.pathname, region)) {
-      throw redirect({
-        to: '/access-denied',
-        search: { from },
-      })
-    }
 
     const { queryClient } = context
     const regionSlug = params.regionSlug

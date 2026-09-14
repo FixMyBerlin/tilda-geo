@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import type { TRegion } from '@/server/regions/regionConfigMapper.server'
-import { deriveAvailableModes, isMemberOnlyModePathname } from './availableModes'
+import { deriveAvailableModes, isMemberOnlyMode } from './availableModes'
 
 const region = (overrides: Partial<Pick<TRegion, 'notesOsm' | 'notesInternal'>>) => {
   return {
@@ -39,26 +39,16 @@ describe('deriveAvailableModes()', () => {
   })
 })
 
-describe('isMemberOnlyModePathname()', () => {
+describe('isMemberOnlyMode()', () => {
   test('QA and Prüflisten are always member-only', () => {
-    expect(isMemberOnlyModePathname('/regionen/foo/qa')).toBe(true)
-    expect(isMemberOnlyModePathname('/regionen/foo/prueflisten')).toBe(true)
-    expect(isMemberOnlyModePathname('/regionen/foo')).toBe(false)
-    expect(isMemberOnlyModePathname('/regionen/foo/hinweise')).toBe(false)
+    expect(isMemberOnlyMode('qa', region({}))).toBe(true)
+    expect(isMemberOnlyMode('reviewLists', region({}))).toBe(true)
   })
 
   test('Hinweise is member-only only when the region has internal notes and no OSM notes', () => {
-    expect(
-      isMemberOnlyModePathname('/regionen/foo/hinweise', region({ notesInternal: true })),
-    ).toBe(true)
-    expect(
-      isMemberOnlyModePathname('/regionen/foo/hinweise', {
-        notesOsm: true,
-        notesInternal: true,
-      }),
-    ).toBe(false)
-    expect(isMemberOnlyModePathname('/regionen/foo/hinweise', region({ notesOsm: true }))).toBe(
-      false,
-    )
+    expect(isMemberOnlyMode('notes', region({ notesInternal: true }))).toBe(true)
+    expect(isMemberOnlyMode('notes', { notesOsm: true, notesInternal: true })).toBe(false)
+    expect(isMemberOnlyMode('notes', region({ notesOsm: true }))).toBe(false)
+    expect(isMemberOnlyMode('notes', region({}))).toBe(false)
   })
 })

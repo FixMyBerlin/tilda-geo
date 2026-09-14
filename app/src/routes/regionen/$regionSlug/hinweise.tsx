@@ -1,12 +1,15 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
+import { isMemberOnlyMode } from '@/components/regionen/pageRegionSlug/modes/availableModes'
 import { notesModeToServerFilter } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
 import { PageModeNotes } from '@/components/regionen/pageRegionSlug/modes/notes/PageModeNotes'
+import { getSafeSignInCallbackURL } from '@/components/shared/hooks/useSignInUrl'
 import { internalNotesQueryOptions } from '@/server/regions/regionQueryOptions'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 
 /**
  * Notes mode ("Hinweise"). Redirects to the region root unless OSM or TILDA notes are enabled
- * (`availableModes.ts`). `notes` JSON is validated on the parent region route.
+ * (`availableModes.ts`). `notes` JSON is validated on the parent region route. Guests may open OSM
+ * notes; internal-only notes redirect to /access-denied (`isMemberOnlyMode`).
  */
 export const Route = createFileRoute('/regionen/$regionSlug/hinweise')({
   ssr: 'data-only',
@@ -20,9 +23,20 @@ export const Route = createFileRoute('/regionen/$regionSlug/hinweise')({
       user: notesMode?.user,
     }
   },
-  loader: async ({ context, params, deps, parentMatchPromise }) => {
+  loader: async ({ context, params, deps, location, parentMatchPromise }) => {
     const parent = await parentMatchPromise
-    if (!parent.loaderData?.availableModes.notes) {
+    if (!parent.loaderData?.authorized) {
+      return
+    }
+    if (!parent.loaderData.hasPermissions && isMemberOnlyMode('notes', parent.loaderData.region)) {
+      throw redirect({
+        to: '/access-denied',
+        search: {
+          from: getSafeSignInCallbackURL(`${location.pathname}${location.searchStr}`),
+        },
+      })
+    }
+    if (!parent.loaderData.availableModes.notes) {
       throw redirect({
         from: '/regionen/$regionSlug/hinweise',
         to: '/regionen/$regionSlug',

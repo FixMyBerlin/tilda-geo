@@ -1,4 +1,5 @@
 import { useMap } from 'react-map-gl/maplibre'
+import { twMerge } from 'tailwind-merge'
 import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
 import { qaMinZoom } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersQa'
 import { modePanelSmallButtonClassName } from '../modePanel.const'
@@ -17,7 +18,7 @@ export const QaZoomNotice = () => {
       </p>
       <button
         type="button"
-        className={`${modePanelSmallButtonClassName} shrink-0 border-yellow-300 bg-white`}
+        className={twMerge(modePanelSmallButtonClassName, 'shrink-0 border-yellow-300 bg-white')}
         disabled={!mainMap}
         onClick={() => {
           mainMap?.zoomTo(qaMinZoom, { duration: 600 })

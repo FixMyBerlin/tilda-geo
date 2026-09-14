@@ -1,3 +1,4 @@
+import { twJoin } from 'tailwind-merge'
 import { Markdown } from '@/components/shared/text/Markdown'
 import { Pill } from '@/components/shared/text/Pill'
 import { tagsTableLeadingClass, tagsTableRowClass } from '../tagsTableLayout'
@@ -15,7 +16,11 @@ export const TagsTableRowCompositTrassencoutSurveyResponse = ({ properties }: Co
   return (
     <tr className={tagsTableRowClass}>
       <td
-        className={`space-y-3 border-l-2 py-2 pr-2 pl-2 text-sm ${tagsTableLeadingClass} font-medium text-gray-900`}
+        className={twJoin(
+          'space-y-3 border-l-2 py-2 pr-2 pl-2 text-sm',
+          tagsTableLeadingClass,
+          'font-medium text-gray-900',
+        )}
         colSpan={2}
         style={{ borderColor: color }}
       >

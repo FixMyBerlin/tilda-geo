@@ -1,9 +1,11 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
+import { isMemberOnlyMode } from '@/components/regionen/pageRegionSlug/modes/availableModes'
 import { PageModeQa } from '@/components/regionen/pageRegionSlug/modes/qa/PageModeQa'
 import {
   compactQaParam,
   QA_DEFAULT_STATUS_KEY,
 } from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
+import { getSafeSignInCallbackURL } from '@/components/shared/hooks/useSignInUrl'
 import {
   qaDataForMapQueryOptions,
   regionQaConfigsQueryOptions,
@@ -14,7 +16,8 @@ import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 /**
  * QA mode ("Qualitätssicherung"). Redirects to the region root unless the region has at least one
  * active QA config (`availableModes.ts`). QA layers and selector live only here, not on the default
- * map. Parent layout validates `qa` (`regionSearchSchema`).
+ * map. Parent layout validates `qa` (`regionSearchSchema`). Guests are redirected to /access-denied
+ * here (QA is always member-only).
  */
 export const Route = createFileRoute('/regionen/$regionSlug/qa')({
   ssr: 'data-only',
@@ -26,11 +29,20 @@ export const Route = createFileRoute('/regionen/$regionSlug/qa')({
       users: qa?.users,
     }
   },
-  loader: async ({ params, context, deps, parentMatchPromise }) => {
+  loader: async ({ params, context, deps, location, parentMatchPromise }) => {
     const parent = await parentMatchPromise
-    // Parent throws /access-denied for guests; do not race a zero-config bounce to the map.
-    if (!parent.loaderData?.authorized || !parent.loaderData.hasPermissions) {
+    // Parent throws /access-denied when the region itself is unauthorized; do not race a
+    // zero-config bounce to the map.
+    if (!parent.loaderData?.authorized) {
       return
+    }
+    if (!parent.loaderData.hasPermissions && isMemberOnlyMode('qa', parent.loaderData.region)) {
+      throw redirect({
+        to: '/access-denied',
+        search: {
+          from: getSafeSignInCallbackURL(`${location.pathname}${location.searchStr}`),
+        },
+      })
     }
 
     if (!parent.loaderData.availableModes.qa) {

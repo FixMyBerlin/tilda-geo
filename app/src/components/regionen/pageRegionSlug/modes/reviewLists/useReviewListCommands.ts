@@ -1,7 +1,8 @@
 import { useUploadFile } from '@better-upload/client'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { useRef, useState } from 'react'
+import { useState } from 'react'
 import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
+import { getErrorMessage } from '@/components/shared/toast/toastError'
 import {
   reviewEntriesQueryOptions,
   reviewListsQueryOptions,
@@ -37,18 +38,11 @@ export const useReviewListCommands = ({
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
   const [createdCount, setCreatedCount] = useState<number | null>(null)
   const [nameModal, setNameModal] = useState<'create' | 'rename' | null>(null)
-  const successCloseTimerRef = useRef<number | null>(null)
 
   const { data: listEntries, isSuccess: existingFeaturesReady } = useQuery(
     reviewEntriesQueryOptions(regionSlug, selectedListId),
   )
   const existingFeatures = listEntries?.featureCollection.features ?? []
-
-  const clearSuccessCloseTimer = () => {
-    if (successCloseTimerRef.current === null) return
-    window.clearTimeout(successCloseTimerRef.current)
-    successCloseTimerRef.current = null
-  }
 
   const openNameModal = (kind: 'create' | 'rename', origin?: HTMLElement) => {
     if (origin) captureModalOpenOrigin(origin)
@@ -68,18 +62,6 @@ export const useReviewListCommands = ({
     onAfterCreate: (list) => onSelect(list.id),
   })
 
-  const uploadErrorMessage = (error: unknown) => {
-    if (error instanceof Error && error.message && error.message !== '[object Object]') {
-      return error.message
-    }
-    if (typeof error === 'string') return error
-    if (error && typeof error === 'object' && 'message' in error) {
-      const { message } = error
-      if (typeof message === 'string' && message.length > 0) return message
-    }
-    return 'Upload fehlgeschlagen'
-  }
-
   const importFromS3 = useMutation({
     mutationFn: (input: { listId: number; s3Key: string; filename: string }) =>
       createReviewEntriesFromGeojsonFn({
@@ -94,15 +76,9 @@ export const useReviewListCommands = ({
       setUploadError(null)
       setCreatedCount(result.count)
       invalidate()
-      clearSuccessCloseTimer()
-      successCloseTimerRef.current = window.setTimeout(() => {
-        setUploadModalOpen(false)
-        setCreatedCount(null)
-        successCloseTimerRef.current = null
-      }, 1600)
     },
     onError: (error) => {
-      setUploadError(uploadErrorMessage(error))
+      setUploadError(getErrorMessage(error, 'Upload fehlgeschlagen'))
     },
   })
 
@@ -110,7 +86,7 @@ export const useReviewListCommands = ({
     api: '/api/review-lists/upload',
     route: 'reviewListGeojson',
     onError: (error) => {
-      setUploadError(uploadErrorMessage(error))
+      setUploadError(getErrorMessage(error, 'Upload fehlgeschlagen'))
     },
     onUploadComplete: async ({ metadata }) => {
       try {
@@ -121,7 +97,7 @@ export const useReviewListCommands = ({
           filename: parsed.filename,
         })
       } catch (error) {
-        setUploadError(uploadErrorMessage(error))
+        setUploadError(getErrorMessage(error, 'Upload fehlgeschlagen'))
       }
     },
   })
@@ -142,7 +118,6 @@ export const useReviewListCommands = ({
 
   const openUploadModal = (origin?: HTMLElement) => {
     if (origin) captureModalOpenOrigin(origin)
-    clearSuccessCloseTimer()
     setUploadError(null)
     setCreatedCount(null)
     setUploadModalOpen(true)
@@ -150,7 +125,6 @@ export const useReviewListCommands = ({
 
   const closeUploadModal = () => {
     if (uploadPending) return
-    clearSuccessCloseTimer()
     setUploadModalOpen(false)
     setCreatedCount(null)
   }
