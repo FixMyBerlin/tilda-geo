@@ -18,7 +18,7 @@ import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { resolveConfigTemplate } from '@/server/regions/regionConfigTemplates.server'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 
-const isTruthySearchFlag = (value: string | null) => value === 'true' || value === '1'
+const isTruthySearchFlag = (value: string | null) => value === 'true'
 
 const qaParamHasKey = (qaValue: string | null) => {
   if (!qaValue) return false
@@ -221,9 +221,9 @@ export async function getRegionRedirectUrl(locationHref: string, regionSlug: str
   params.delete('osmNotes')
   params.delete('internalNotes')
   // Legacy overlay flag `notes=true` (already renamed in 0003). Keep live `notes` JSON.
-  const notesWire = params.get(searchParamsRegistry.notesMode)
+  const notesWire = params.get(searchParamsRegistry.notes)
   if (notesWire !== null && !notesWire.trim().startsWith('{')) {
-    params.delete(searchParamsRegistry.notesMode)
+    params.delete(searchParamsRegistry.notes)
   }
 
   if (!region.notesOsm) params.delete('osmNote')

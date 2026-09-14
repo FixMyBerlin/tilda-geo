@@ -11,7 +11,7 @@ import {
 export const useReviewListsModeValue = () => {
   const value = useSearch({
     strict: false,
-    select: (search) => search[searchParamsRegistry.reviewLists],
+    select: (search) => search[searchParamsRegistry.review],
   })
   return zodReviewListsModeParam.safeParse(value).data ?? {}
 }
@@ -23,7 +23,7 @@ export const useReviewListsModeParam = () => {
 
   const setReviewListsModeParam = (next: ReviewListsModeParam) => {
     updateSearch(
-      { [searchParamsRegistry.reviewLists]: compactReviewListsModeParam(next) },
+      { [searchParamsRegistry.review]: compactReviewListsModeParam(next) },
       { replace: true },
     )
   }

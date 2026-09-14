@@ -85,8 +85,8 @@ export const regionSearchSchema = z.object({
     .catch(undefined),
   // Mode filters stay on the shared region search so switching modes keeps one URL without
   // per-child validateSearch schemas.
-  [searchParamsRegistry.notesMode]: optionalSearchJson(zodNotesModeParam),
-  [searchParamsRegistry.reviewLists]: optionalSearchJson(zodReviewListsModeParam),
+  [searchParamsRegistry.notes]: optionalSearchJson(zodNotesModeParam),
+  [searchParamsRegistry.review]: optionalSearchJson(zodReviewListsModeParam),
 })
 
 export type RegionSearch = z.infer<typeof regionSearchSchema>

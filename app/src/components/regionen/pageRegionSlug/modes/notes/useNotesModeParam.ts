@@ -10,7 +10,7 @@ import { compactNotesModeParam, zodNotesModeParam, type NotesModeParam } from '.
 export const useNotesModeValue = () => {
   const notesMode = useSearch({
     strict: false,
-    select: (search) => search[searchParamsRegistry.notesMode],
+    select: (search) => search[searchParamsRegistry.notes],
   })
   return zodNotesModeParam.safeParse(notesMode).data ?? {}
 }
@@ -24,10 +24,7 @@ export const useNotesModeParam = () => {
   const { updateSearch } = useRegionSearchNavigation()
 
   const setNotesModeParam = (next: NotesModeParam) => {
-    updateSearch(
-      { [searchParamsRegistry.notesMode]: compactNotesModeParam(next) },
-      { replace: true },
-    )
+    updateSearch({ [searchParamsRegistry.notes]: compactNotesModeParam(next) }, { replace: true })
   }
 
   return { notesMode, setNotesModeParam }

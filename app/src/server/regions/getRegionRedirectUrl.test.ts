@@ -228,6 +228,14 @@ describe('getRegionRedirectUrl()', () => {
       expect(resultUrl.searchParams.has('osmNotes')).toBe(false)
     })
 
+    test('?osmNotes=1 on the root does not redirect to /hinweise', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin?osmNotes=1'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      const resultUrl = redirectUrl ? getUrl(redirectUrl) : new URL(url)
+      expect(resultUrl.pathname).toBe('/regionen/berlin')
+      expect(resultUrl.searchParams.has('osmNotes')).toBe(false)
+    })
+
     test('?osmNotes=true on /hinweise stays, flag stripped', async () => {
       const url = 'http://127.0.0.1:5173/regionen/berlin/hinweise?osmNotes=true'
       const redirectUrl = await redirectOnly(url, 'berlin')

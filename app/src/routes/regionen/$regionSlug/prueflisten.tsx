@@ -14,7 +14,7 @@ import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
  */
 export const Route = createFileRoute('/regionen/$regionSlug/prueflisten')({
   ssr: 'data-only',
-  loaderDeps: ({ search }) => ({ key: search[searchParamsRegistry.reviewLists]?.key }),
+  loaderDeps: ({ search }) => ({ key: search[searchParamsRegistry.review]?.key }),
   loader: async ({ params, context, deps, parentMatchPromise }) => {
     const parent = await parentMatchPromise
     if (!parent.loaderData?.authorized || !parent.loaderData.hasPermissions) {

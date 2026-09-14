@@ -11,7 +11,7 @@ import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 export const Route = createFileRoute('/regionen/$regionSlug/hinweise')({
   ssr: 'data-only',
   loaderDeps: ({ search }) => {
-    const notesMode = search[searchParamsRegistry.notesMode]
+    const notesMode = search[searchParamsRegistry.notes]
     // Free-text `search` is omitted so typing does not re-run the loader; the panel query follows URL state.
     return {
       completed: notesMode?.completed,

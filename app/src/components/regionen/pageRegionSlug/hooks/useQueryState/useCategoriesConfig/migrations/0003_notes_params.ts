@@ -147,7 +147,7 @@ const migration: UrlMigration = (initialUrl) => {
     ...(osmFilter ? flattenNotesFilter(osmFilter) : {}),
     ...(atlasFilter ? flattenNotesFilter(atlasFilter) : {}),
   }
-  const notesKey = searchParamsRegistry.notesMode
+  const notesKey = searchParamsRegistry.notes
   if (Object.keys(notes).length > 0 && !params.has(notesKey)) {
     params.set(notesKey, JSON.stringify(notes))
   }

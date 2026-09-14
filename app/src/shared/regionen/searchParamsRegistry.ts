@@ -14,6 +14,6 @@ export const searchParamsRegistry = {
   qa: 'qa', // QA mode JSON: key, status, users, search
   dialog: 'dialog',
   welcomeSkipDialog: '__skipDialog',
-  notesMode: 'notes', // JSON: key, search, extent, chips (`notesModeParam.ts`)
-  reviewLists: 'review', // JSON: key, search, extent, status, source, new, move (`reviewListsModeParam.ts`)
+  notes: 'notes', // JSON: key, search, extent, chips (`notesModeParam.ts`)
+  review: 'review', // JSON: key, search, extent, status, source, new, move (`reviewListsModeParam.ts`)
 } as const
