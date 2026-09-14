@@ -138,9 +138,9 @@ Add `DEV_PORT_SLOT=1` (or another slot) if Vite **5173** is already taken, e.g. 
 | 4    | 5436 | 3004  | 5177 | `http://127.0.0.1:5177` |
 | 5    | 5437 | 3005  | 5178 | `http://127.0.0.1:5178` |
 
-Predev derives `DATABASE_PORT`, `TILES_PORT`, `VITE_TILES_PORT`, `VITE_APP_ORIGIN`, Vite/HMR from the slot. Prisma CLI uses the same mapping. `listRunningDevStacks` (stop-others) only sees default ports; attach resolves any running stack id including slots. Each slot origin needs an OSM OAuth redirect URL.
+Predev derives `DATABASE_PORT`, `TILES_PORT`, `VITE_TILES_PORT`, `VITE_APP_ORIGIN`, Vite/HMR from the slot. Prisma CLI uses the same mapping. `listRunningDevStacks` (stop-others) only sees default ports; attach resolves any running stack id including slots. Each slot origin needs an OSM OAuth redirect URL. Predev also writes the git-ignored `app/.claude/launch.json` (Claude desktop preview) with the slot's Vite port.
 
-Editing predev: `docker compose -p <DEV_STACK_ID>` (never `COMPOSE_PROJECT_NAME` in YAML); `COMPOSE_DEV_CONTAINER_PREFIX` is runtime-only. Files: `app/scripts/setup-worktree.ts`, `app/scripts/predev/{ensureDevStack,devPortSlot,envLocalBranch,devStackDiscovery,checkDocker,syncEnvLocal}.ts`, `app/.husky/post-checkout`.
+Editing predev: `docker compose -p <DEV_STACK_ID>` (never `COMPOSE_PROJECT_NAME` in YAML); `COMPOSE_DEV_CONTAINER_PREFIX` is runtime-only. Files: `app/scripts/setup-worktree.ts`, `app/scripts/predev/{ensureDevStack,devPortSlot,envLocalBranch,devStackDiscovery,checkDocker,syncEnvLocal,writeLaunchJson}.ts`, `app/.husky/post-checkout`.
 
 ---
 
