@@ -16,6 +16,11 @@ export const QA_STYLE_OPTIONS = [
     listable: true,
   },
   {
+    key: 'system-trusted-editor-change',
+    label: `System-Entscheidung ${frenchQuote(systemStatusConfig.TRUSTED_EDITOR_CHANGE.label)}`,
+    listable: true,
+  },
+  {
     key: 'user-not-ok-processing',
     label: `Nutzer: ${userStatusConfig.NOT_OK_PROCESSING_ERROR.label}`,
     listable: true,

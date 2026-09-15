@@ -13,6 +13,7 @@ export type QaConfigStats = {
       GOOD: number
       NEEDS_REVIEW: number
       PROBLEMATIC: number
+      TRUSTED_EDITOR_CHANGE: number
     }
     USER: {
       OK_STRUCTURAL_CHANGE: number
@@ -48,6 +49,7 @@ export async function getQaConfigStatsForAdmin(input: z.infer<typeof Schema>, he
         GOOD: 0,
         NEEDS_REVIEW: 0,
         PROBLEMATIC: 0,
+        TRUSTED_EDITOR_CHANGE: 0,
       },
       USER: {
         OK_STRUCTURAL_CHANGE: 0,
@@ -72,6 +74,9 @@ export async function getQaConfigStatsForAdmin(input: z.infer<typeof Schema>, he
             break
           case 'PROBLEMATIC':
             stats.evaluationStats.SYSTEM.PROBLEMATIC++
+            break
+          case 'TRUSTED_EDITOR_CHANGE':
+            stats.evaluationStats.SYSTEM.TRUSTED_EDITOR_CHANGE++
             break
         }
         break

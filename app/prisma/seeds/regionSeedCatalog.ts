@@ -255,6 +255,7 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       categories: ['parkingTilda', 'parkingLars', 'mapillary'],
       ...withDownloads(13.0883, 52.3382, 13.7611, 52.6755, [
         'parkings',
+        'parkings_edges',
         'parkings_no',
         'parkings_separate',
       ]),
@@ -431,6 +432,7 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       backgroundSources: [...cityParkraumBackgroundSources],
       ...withDownloads(13.0883, 52.3382, 13.7611, 52.6755, [
         'parkings',
+        'parkings_edges',
         'off_street_parking_areas',
         'off_street_parking_points',
         'parkings_no',

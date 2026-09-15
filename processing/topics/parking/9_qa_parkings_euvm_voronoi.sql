@@ -3,13 +3,15 @@
 -- Splits by priority (data.euvm_qa_voronoi_2026.priority boolean): false -> qa_parkings_euvm, true -> qa_parkings_euvm_priority.
 -- Source data.euvm_qa_voronoi_2026 is expected to be pre-clipped to Berlin and
 -- pre-normalized to valid MultiPolygon (docs/qa_create_new_voronoi_baseline.sql).
--- 1. Preserve values in *_previous tables and load reference voronoi (filtered by priority)
--- 2. Count current parkings on full-precision geometry
+-- 1. Rebuild main + previous tables (previous run's values preserved) and load reference voronoi (filtered by priority)
+-- 2. Count current parkings and collect last_editors per cell, on full-precision geometry
 -- 3. Difference and relative
 -- 4. Previous relative
 -- 5. Snap to grid (2 m) for presentation only; preserves shared edges
 -- INPUT: data.euvm_qa_voronoi_2026 (polygon, priority boolean), public.parkings_quantized, public.off_street_parking_quantized
 -- OUTPUT: public.qa_parkings_euvm (priority false), public.qa_parkings_euvm_priority (priority true)
+--         both carry `last_editors` JSONB: [{osmUser, spaceCount, updatedAt}, ...] per cell, ordered by updatedAt desc
+--         (updatedAt is Unix epoch seconds from meta.updated_at; the app filters entries by a cutoff timestamp)
 --
 DO $$ BEGIN RAISE NOTICE 'START qa parking euvm voronoi at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
@@ -60,88 +62,49 @@ WHERE
 
 CREATE INDEX _parking_parkings_quantized_geom_idx ON _parking_parkings_quantized USING GIST (geom);
 
--- Create table if it doesn't exist
-CREATE TABLE IF NOT EXISTS public.qa_parkings_euvm (
+-- 1. Keep the previous run's relative values for step 4, then rebuild the main tables.
+-- On a fresh DB there is no previous run, so empty main tables are created to copy from.
+CREATE TABLE IF NOT EXISTS public.qa_parkings_euvm (id TEXT, relative NUMERIC);
+
+CREATE TABLE IF NOT EXISTS public.qa_parkings_euvm_priority (id TEXT, relative NUMERIC);
+
+DROP TABLE IF EXISTS public.qa_parkings_euvm_previous;
+
+CREATE TABLE public.qa_parkings_euvm_previous AS
+SELECT id, relative FROM public.qa_parkings_euvm;
+
+DROP TABLE IF EXISTS public.qa_parkings_euvm_priority_previous;
+
+CREATE TABLE public.qa_parkings_euvm_priority_previous AS
+SELECT id, relative FROM public.qa_parkings_euvm_priority;
+
+DROP TABLE public.qa_parkings_euvm;
+
+CREATE TABLE public.qa_parkings_euvm (
   id TEXT PRIMARY KEY,
   geom geometry (MultiPolygon, 3857), -- 3857 for Martin vector tiles
   count_reference INTEGER,
   count_current INTEGER,
   difference INTEGER,
   previous_relative NUMERIC,
-  relative NUMERIC
+  relative NUMERIC,
+  last_editors JSONB NOT NULL DEFAULT '[]'::jsonb
 );
 
--- Create previous table if it doesn't exist (same structure as main table)
-CREATE TABLE IF NOT EXISTS public.qa_parkings_euvm_previous (
+DROP TABLE IF EXISTS public.qa_parkings_euvm_priority;
+
+CREATE TABLE public.qa_parkings_euvm_priority (
   id TEXT PRIMARY KEY,
   geom geometry (MultiPolygon, 3857),
   count_reference INTEGER,
   count_current INTEGER,
   difference INTEGER,
   previous_relative NUMERIC,
-  relative NUMERIC
+  relative NUMERIC,
+  last_editors JSONB NOT NULL DEFAULT '[]'::jsonb
 );
 
-CREATE TABLE IF NOT EXISTS public.qa_parkings_euvm_priority (
-  id TEXT PRIMARY KEY,
-  geom geometry (MultiPolygon, 3857),
-  count_reference INTEGER,
-  count_current INTEGER,
-  difference INTEGER,
-  previous_relative NUMERIC,
-  relative NUMERIC
-);
-
-CREATE TABLE IF NOT EXISTS public.qa_parkings_euvm_priority_previous (
-  id TEXT PRIMARY KEY,
-  geom geometry (MultiPolygon, 3857),
-  count_reference INTEGER,
-  count_current INTEGER,
-  difference INTEGER,
-  previous_relative NUMERIC,
-  relative NUMERIC
-);
-
--- RUN ONCE PER ENV, THEN DELETE.
--- CREATE TABLE IF NOT EXISTS ignores a changed column type on existing DBs
--- (Geometry/3857 → MultiPolygon/3857). After the next parking processing run
--- on each environment this is a no-op. Remove this block once all envs have
--- run it; delete by end of 2026 in any case.
-DO $$
-DECLARE
-  t text;
-  current_type text;
-  current_srid integer;
-BEGIN
-  FOREACH t IN ARRAY ARRAY[
-    'qa_parkings_euvm',
-    'qa_parkings_euvm_previous',
-    'qa_parkings_euvm_priority',
-    'qa_parkings_euvm_priority_previous'
-  ]
-  LOOP
-    SELECT type, srid
-    INTO current_type, current_srid
-    FROM public.geometry_columns
-    WHERE f_table_schema = 'public'
-      AND f_table_name = t
-      AND f_geometry_column = 'geom';
-
-    IF current_type IS DISTINCT FROM 'MULTIPOLYGON' OR current_srid IS DISTINCT FROM 3857 THEN
-      EXECUTE format(
-        'ALTER TABLE public.%I ALTER COLUMN geom TYPE geometry(MultiPolygon, 3857) USING ST_Multi(ST_CollectionExtract(ST_MakeValid(geom), 3))',
-        t
-      );
-    END IF;
-  END LOOP;
-END $$;
-
--- 1. Preserve previous and clear main (priority false)
-TRUNCATE TABLE public.qa_parkings_euvm_previous;
-INSERT INTO public.qa_parkings_euvm_previous (id, geom, count_reference, count_current, difference, previous_relative, relative)
-SELECT id, geom, count_reference, count_current, difference, previous_relative, relative FROM public.qa_parkings_euvm;
-
-TRUNCATE TABLE public.qa_parkings_euvm;
+-- 1a. Load reference voronoi (priority false)
 -- Cheap guard for stale sources that were not yet repaired/re-imported; not a re-implementation of the Berlin clip.
 INSERT INTO public.qa_parkings_euvm (id, count_reference, geom)
 SELECT id, count_reference, geom
@@ -155,12 +118,7 @@ FROM (
 ) src
 WHERE NOT ST_IsEmpty(src.geom);
 
--- 1b. Preserve previous and clear main (priority true)
-TRUNCATE TABLE public.qa_parkings_euvm_priority_previous;
-INSERT INTO public.qa_parkings_euvm_priority_previous (id, geom, count_reference, count_current, difference, previous_relative, relative)
-SELECT id, geom, count_reference, count_current, difference, previous_relative, relative FROM public.qa_parkings_euvm_priority;
-
-TRUNCATE TABLE public.qa_parkings_euvm_priority;
+-- 1b. Load reference voronoi (priority true)
 INSERT INTO public.qa_parkings_euvm_priority (id, count_reference, geom)
 SELECT id, count_reference, geom
 FROM (
@@ -207,29 +165,79 @@ BEGIN
   END IF;
 END $$;
 
--- 2. Count current parkings on full-precision geometry (priority false)
-WITH counts AS (
-  SELECT v.id AS id, COUNT(p.*) AS count_current
-  FROM public.qa_parkings_euvm v
-  LEFT JOIN _parking_parkings_quantized p ON ST_Contains(ST_Transform(v.geom, 5243), p.geom)
-  GROUP BY v.id
-)
-UPDATE public.qa_parkings_euvm pv
-SET count_current = COALESCE(c.count_current, 0)
-FROM counts c
-WHERE pv.id = c.id;
+-- 2. Count current parkings + last editors per cell (priority false), via a single spatial join.
+-- Step A: per (cell, osm_user, updated_at) space_count.
+-- COUNT(p.id), not COUNT(*): a LEFT JOIN miss (cell without points) must count as 0 spaces, not 1.
+DROP TABLE IF EXISTS _qa_parkings_euvm_editors;
 
--- 2b. Count current parkings on full-precision geometry (priority true)
-WITH counts AS (
-  SELECT v.id AS id, COUNT(p.*) AS count_current
-  FROM public.qa_parkings_euvm_priority v
-  LEFT JOIN _parking_parkings_quantized p ON ST_Contains(ST_Transform(v.geom, 5243), p.geom)
-  GROUP BY v.id
-)
+CREATE TEMP TABLE _qa_parkings_euvm_editors AS
+SELECT
+  v.id AS cell_id,
+  p.meta ->> 'updated_by' AS osm_user,
+  (p.meta ->> 'updated_at')::BIGINT AS updated_at,
+  COUNT(p.id) AS space_count -- each quantized point = 1 space (tags capacity = 1)
+FROM public.qa_parkings_euvm v
+LEFT JOIN _parking_parkings_quantized p ON ST_Contains(ST_Transform(v.geom, 5243), p.geom)
+GROUP BY
+  v.id,
+  p.meta ->> 'updated_by',
+  (p.meta ->> 'updated_at')::BIGINT;
+
+-- Step B: aggregate per cell. FILTER (WHERE space_count > 0) drops the LEFT-JOIN-miss placeholder
+-- row (osm_user=NULL, space_count=0) from last_editors so it doesn't create a fake entry; it still
+-- contributes 0 to count_current via SUM. One entry per (osmUser, updatedAt) pair — not collapsed
+-- to one entry per user — because the app filters entries by a cutoff timestamp.
+UPDATE public.qa_parkings_euvm pv
+SET
+  count_current = COALESCE(agg.count_current, 0),
+  last_editors = COALESCE(agg.last_editors, '[]'::jsonb)
+FROM (
+  SELECT
+    cell_id,
+    SUM(space_count) AS count_current,
+    jsonb_agg(
+      jsonb_build_object('osmUser', osm_user, 'spaceCount', space_count, 'updatedAt', updated_at)
+      ORDER BY updated_at DESC, osm_user
+    ) FILTER (WHERE space_count > 0) AS last_editors
+  FROM _qa_parkings_euvm_editors
+  GROUP BY cell_id
+) agg
+WHERE pv.id = agg.cell_id;
+
+-- 2b. Count current parkings + last editors per cell (priority true). Same logic as step 2.
+DROP TABLE IF EXISTS _qa_parkings_euvm_editors;
+
+CREATE TEMP TABLE _qa_parkings_euvm_editors AS
+SELECT
+  v.id AS cell_id,
+  p.meta ->> 'updated_by' AS osm_user,
+  (p.meta ->> 'updated_at')::BIGINT AS updated_at,
+  COUNT(p.id) AS space_count
+FROM public.qa_parkings_euvm_priority v
+LEFT JOIN _parking_parkings_quantized p ON ST_Contains(ST_Transform(v.geom, 5243), p.geom)
+GROUP BY
+  v.id,
+  p.meta ->> 'updated_by',
+  (p.meta ->> 'updated_at')::BIGINT;
+
 UPDATE public.qa_parkings_euvm_priority pv
-SET count_current = COALESCE(c.count_current, 0)
-FROM counts c
-WHERE pv.id = c.id;
+SET
+  count_current = COALESCE(agg.count_current, 0),
+  last_editors = COALESCE(agg.last_editors, '[]'::jsonb)
+FROM (
+  SELECT
+    cell_id,
+    SUM(space_count) AS count_current,
+    jsonb_agg(
+      jsonb_build_object('osmUser', osm_user, 'spaceCount', space_count, 'updatedAt', updated_at)
+      ORDER BY updated_at DESC, osm_user
+    ) FILTER (WHERE space_count > 0) AS last_editors
+  FROM _qa_parkings_euvm_editors
+  GROUP BY cell_id
+) agg
+WHERE pv.id = agg.cell_id;
+
+DROP TABLE IF EXISTS _qa_parkings_euvm_editors;
 
 -- 3. Difference and relative (priority false)
 UPDATE public.qa_parkings_euvm SET difference = count_reference - count_current;

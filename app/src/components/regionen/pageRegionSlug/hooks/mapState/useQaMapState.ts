@@ -1,3 +1,4 @@
+import type { MapSourceDataEvent } from 'maplibre-gl'
 import { useCallback, useEffect } from 'react'
 import type { MapGeoJSONFeature } from 'react-map-gl/maplibre'
 import { useMap } from 'react-map-gl/maplibre'
@@ -79,7 +80,7 @@ export const useQaMapState = () => {
     function resyncFeatureStatesWhenQaSourceLoads() {
       if (!mainMap) return
 
-      const handleData = (event: { sourceId?: string }) => {
+      const handleSourceData = (event: MapSourceDataEvent) => {
         if (event.sourceId === qaSourceId && shouldUpdateFeatureStates) {
           startFeatureStateSync()
           updateFeatureStates()
@@ -87,10 +88,10 @@ export const useQaMapState = () => {
         }
       }
 
-      mainMap.getMap().on('data', handleData)
+      mainMap.getMap().on('sourcedata', handleSourceData)
 
       return function removeQaSourceDataListener() {
-        mainMap.getMap().off('data', handleData)
+        mainMap.getMap().off('sourcedata', handleSourceData)
       }
     },
     [

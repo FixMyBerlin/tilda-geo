@@ -41,7 +41,7 @@ SELECT
     )
     ELSE tags || '{"reason": "parking_tag"}'::JSONB
   END,
-  '{}'::JSONB,
+  p.meta,
   ST_Transform (geom, 3857),
   0
 FROM
@@ -55,7 +55,7 @@ INSERT INTO
 SELECT
   id,
   tags || '{"reason": "missing_data"}'::JSONB,
-  '{}'::JSONB,
+  p.meta,
   ST_Transform (geom, 3857),
   0
 FROM
@@ -71,7 +71,7 @@ INSERT INTO
 SELECT
   id,
   tags || '{"reason": "capacity_below_zero"}'::JSONB,
-  '{}'::JSONB,
+  meta,
   ST_Transform (geom, 3857),
   0
 FROM

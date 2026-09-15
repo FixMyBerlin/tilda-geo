@@ -13,6 +13,8 @@ attributes:
     ref: off_street_parking_areas.capacity
   - key: condition_category
     ref: off_street_parking_areas.condition_category
+  - key: condition_category_primary
+    ref: off_street_parking_areas.condition_category_primary
   - key: access
     ref: off_street_parking_areas.access
   - key: area

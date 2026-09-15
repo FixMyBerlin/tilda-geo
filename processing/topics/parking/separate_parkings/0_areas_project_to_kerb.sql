@@ -6,6 +6,9 @@
 -- INPUT: `_parking_separate_parking_areas` (polygon)
 -- OUTPUT: `_parking_separate_parking_areas_projected` (linestring)
 --
+-- BE AWARE: Output geometry is NOT snapped to `_parking_kerbs`; it is the polygon's
+-- road-facing edge. `11_create_edges.sql` matches these lines with a 6 m tolerance.
+--
 DO $$ BEGIN RAISE NOTICE 'START projecting obstacle areas at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- PREPARE

@@ -89,7 +89,7 @@ bun run setup-worktree -- my-branch --dir my-worktree
 
 FYI: manual `git worktree add` also works, but agents should prefer `bun run setup-worktree` unless the user explicitly asks for manual setup.
 
-Two remotes (`origin` = public, `private` = experimental mirror) are org-wide shared via the main checkout's `.git` store. See [tilda-geo-private-repo](../tilda-geo-private-repo/SKILL.md) for sync and PR recipes.
+Two remotes (`origin` = public, `private` = experimental mirror) are org-wide shared via the main checkout's `.git` store. See [tilda-geo-private-repo](../tilda-geo-private-repo/SKILL.md) for the private remote and private PRs.
 
 Stack / `.env.local` rules: [section 2](#2-docker-and-predev-envlocal). `setup-worktree` needs the branch free in this checkout (`git checkout develop` first if the feature branch is already here).
 

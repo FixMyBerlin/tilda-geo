@@ -16,6 +16,7 @@ const seedQaConfigs = async () => {
       needsReviewThreshold: 0.2,
       absoluteDifferenceThreshold: 4,
       regionId: parkraumRegion.id,
+      referenceFrozenAt: new Date('2025-06-30'),
     },
   })
 }

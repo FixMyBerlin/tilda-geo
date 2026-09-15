@@ -22,7 +22,7 @@ const topicDocAttributeFormatSchema = z.enum([
   'ignore',
 ])
 
-const topicDocAttributePurposeSchema = z.enum(['experimentation', 'processing', 'qa'])
+const topicDocAttributePurposeSchema = z.enum(['experimentation', 'processing', 'qa', 'rendering'])
 
 const chapterLinkSchema = z.strictObject({
   chapterId: z.string().min(1),

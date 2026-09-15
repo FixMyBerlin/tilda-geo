@@ -11,8 +11,8 @@ Research-Dokument für die Kartendarstellung in TILDA Geo. Ziel: verstehen, in w
 
 Die Style Spec kennt **keine Metereinheit**. Um eine Straßenbreite in Metern darzustellen, muss man entweder:
 
-1. die Geometrie vor dem Rendern in Metern verschieben/verbreitern (PostGIS, wie bei Bikespuren), oder
-2. in Style-Expressions Pixelwerte aus Metern berechnen (zoom- und breitengradabhängig).
+1. die Geometrie vor dem Rendern in Metern verschieben/verbreitern (PostGIS, z. B. Parken-Kerb-Offset), oder
+2. in Style-Expressions Pixelwerte aus Metern berechnen (zoom- und breitengradabhängig — seit 2026 für Bikespuren).
 
 ---
 
@@ -253,7 +253,44 @@ Korrekt wäre z. B.:
 
 ## Aktueller Stand in TILDA Geo
 
-### Styles: zoom-interpolierte Pixelwerte (nicht metergenau)
+### Bikespuren: datengetriebener `line-offset` im Kartenstil
+
+Bikelane-Geometrien liegen in den Daten auf der **Straßen-Mittellinie**. Der seitliche Versatz wird rein visuell über MapLibre `line-offset` angewendet — nicht mehr per PostGIS `ST_OffsetCurve` in der Pipeline (ehemals `2_move_bikelanes.sql`, entfernt).
+
+1. **Offset-Berechnung (Lua):** [`processing/topics/roads_bikelanes/bikelanes/extract_bikelanes.lua`](../processing/topics/roads_bikelanes/bikelanes/extract_bikelanes.lua)
+
+   ```lua
+   result_tags.offset = side_sign_map[transformed_tags._side] * road_width(object_tags) / 2
+   ```
+
+   `road_width` kommt aus [`processing/topics/helper/road_width.lua`](../processing/topics/helper/road_width.lua) (OSM-`width`-Tag oder Highway-Fallback in Metern). Das `offset`-Attribut ist vorzeichenbehaftet: positiv = links, negativ = rechts der Mittellinie (halbe Straßenbreite).
+
+2. **Visueller Versatz (MapLibre Style):** [`app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/bikelaneLineOffset.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/bikelaneLineOffset.ts)
+
+   ```typescript
+   // z < minzoom (aktuell 9): ± halbe Strichstärke anhand von id (`…/left` / `…/right`)
+   // z ≥ minzoom: offset (Meter) × zoom-skalierte px/m-Faktoren
+   // `['zoom']` darf laut Style-Spec nur Input eines Top-Level `interpolate`/`step` sein,
+   // deshalb stecken Feature-Werte in den Stop-Outputs.
+   'line-offset': [
+     'interpolate', ['exponential', 2], ['zoom'],
+     0, compactHalfStrokeFromId,
+     8, compactHalfStrokeFromId,
+     9, ['*', ['coalesce', ['get', 'offset'], 0], pxPerMeterAtZoom9],
+     24, ['*', ['coalesce', ['get', 'offset'], 0], pxPerMeterAtZoom24],
+   ]
+   ```
+
+   `withBikelaneVisualLineOffset()` wendet dies auf alle `line`-Layer der Bikespur-Subkategorien an (`subcat_bikelanes`, `subcat_radinfra_*`, `subcat_surface_bikelane`). Unterhalb der Interaktivitätsgrenze (`bikelanes.minzoom`, aktuell 9) nutzen die Tiles kein `offset` (`stylingKeys`); der Stil versetzt links/rechts nur um die halbe Strichstärke anhand von `id` (`…/left` / `…/right`), ohne Straßenbreiten-Lücke. Ab `minzoom` kommt der metergenaue Versatz aus dem dann vollständigen `offset`-Attribut.
+
+   **Einschränkungen:**
+   - Meter→Pixel-Kalibrierung bei Referenz-Breitengrad ~52,5° (Mitte Deutschland); Abweichung grob ±9 % an den Rändern Deutschlands.
+   - MapLibre `line-offset` ist positiv nach **rechts** relativ zur Linienrichtung; das Vorzeichen des `offset`-Attributs ist invertiert (PostGIS-`ST_OffsetCurve`-Konvention).
+   - Nur `line`-Layer können versetzt werden. Symbol-/Text-Layer mit `symbol-placement: line-center` (Breiten-, Oberflächen-, Verkehrszeichen-Beschriftungen) bleiben auf der Mittellinie.
+
+   Mehr Kontext: Topic-Doc-Kapitel [`versetzte-geometrien`](../topic-docs/roads_bikelanes/chapters/versetzte-geometrien.md), [`processing/CHANGELOG.md`](../processing/CHANGELOG.md).
+
+### Andere Layer: zoom-interpolierte Pixelwerte (nicht metergenau)
 
 Die MapLibre-Styles kommen aus Mapbox Studio und werden per `bun run mapbox-styles-update` generiert — siehe [`app/scripts/MapboxStyles/README.md`](../app/scripts/MapboxStyles/README.md).
 
@@ -269,47 +306,37 @@ Das sind **handkalibrierte Pixelstops**, die grob mit Zoom skalieren, aber **nic
 
 Das `width`-Attribut in Styles wie [`radinfra_width.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/radinfra_width.ts) steuert nur die **Farbe** (Interpolation über `["get", "width"]` in Metern), nicht die Linienbreite auf der Karte.
 
-### Processing: Meter in der Geometrie (datengetrieben)
+### Parken: Meter in der Geometrie (PostGIS)
 
-Für Bikespuren verschiebt das Processing die Geometrie in **echten Metern**, nicht über MapLibre-Offset:
+Für Parken-Kerbe verschiebt das Processing die Geometrie weiterhin in **echten Metern** via `ST_OffsetCurve`:
 
-1. **Offset-Berechnung (Lua):** [`processing/topics/roads_bikelanes/bikelanes/extract_bikelanes.lua`](../processing/topics/roads_bikelanes/bikelanes/extract_bikelanes.lua)
+- [`processing/topics/parking/roads/0_create_kerbs.sql`](../processing/topics/parking/roads/0_create_kerbs.sql)
+- [`processing/topics/parking/roads/helper/road_width_tags.lua`](../processing/topics/parking/roads/helper/road_width_tags.lua) — `road_width` in Metern mit Confidence/Source
 
-   ```lua
-   result_tags.offset = side_sign_map[transformed_tags._side] * road_width(object_tags) / 2
-   ```
+**Fazit:** TILDA Geo nutzt je nach Thema unterschiedliche Ansätze:
 
-   `road_width` kommt aus [`processing/topics/helper/road_width.lua`](../processing/topics/helper/road_width.lua) (OSM-`width`-Tag oder Highway-Fallback in Metern).
-
-2. **Geometrie-Verschiebung (SQL):** [`processing/topics/roads_bikelanes/2_move_bikelanes.sql`](../processing/topics/roads_bikelanes/2_move_bikelanes.sql)
-
-   ```sql
-   ST_OffsetCurve(..., (tags ->> 'offset')::numeric)  -- Meter in EPSG:5243
-   ```
-
-3. **Parken:** [`processing/topics/parking/roads/helper/road_width_tags.lua`](../processing/topics/parking/roads/helper/road_width_tags.lua) — `road_width` in Metern mit Confidence/Source; wird als Attribut exportiert, nicht für MapLibre-Offset genutzt.
-
-**Fazit:** TILDA Geo nutzt heute zwei getrennte Welten:
-
-| Ansatz                                | Wo                  | Einheit | Datengetrieben    |
-| ------------------------------------- | ------------------- | ------- | ----------------- |
-| MapLibre `line-offset` / `line-width` | Mapbox-Styles       | Pixel   | Nein (Zoom-Stops) |
-| `ST_OffsetCurve` + `offset`-Tag       | Bikespuren-Pipeline | Meter   | Ja (`road_width`) |
+| Ansatz                                             | Wo                                    | Einheit                      | Datengetrieben               |
+| -------------------------------------------------- | ------------------------------------- | ---------------------------- | ---------------------------- |
+| MapLibre `line-offset` aus `offset`-Attribut       | Bikespuren (Kartenstil)               | Pixel (aus Metern berechnet) | Ja (`road_width` → `offset`) |
+| MapLibre `line-offset` / `line-width` (Zoom-Stops) | Mapbox-Studio-Styles (z. B. Presence) | Pixel                        | Nein                         |
+| `ST_OffsetCurve`                                   | Parken-Kerbe                          | Meter                        | Ja (`road_width`)            |
 
 ---
 
 ## Empfehlungen für meterbasierte Darstellung
 
-### Option A: Geometrie im Processing anpassen (bewährt)
+### Option A: Geometrie im Processing anpassen (Parken)
 
-Wie bei Bikespuren: Offset und Breite als Meter in PostGIS anwenden, Style nur noch für Farbe/Symbolik.
+Wie bei Parken-Kerben: Offset und Breite als Meter in PostGIS anwenden, Style nur noch für Farbe/Symbolik.
 
 - **Vorteil:** zoom-unabhängig korrekt, kein Expression-Hokuspokus
 - **Nachteil:** mehr Processing, separate Geometrien pro Darstellungsebene
 
-### Option B: Style-Expressions mit `road_width`
+Bikespuren nutzten diesen Ansatz früher (`ST_OffsetCurve` in `2_move_bikelanes.sql`, entfernt). Geometrie bleibt jetzt auf der Mittellinie; siehe Option B.
 
-`line-width` und `line-offset` aus `["get", "road_width"]` ableiten, mit `interpolate`/`exponential` über `zoom` und optional Breitengrad-Korrektur.
+### Option B: Style-Expressions mit Meter-Attribut (Bikespuren)
+
+`line-offset` aus `["get", "offset"]` ableiten, mit `interpolate`/`exponential` über `zoom` und Referenz-Breitengrad — implementiert in [`bikelaneLineOffset.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/bikelaneLineOffset.ts).
 
 - **Vorteil:** eine Zentroidlinie, dynamische Darstellung
 - **Nachteil:** komplexe Expressions; Genauigkeit variiert mit Latitude; Performance bei vielen Layern testen
@@ -379,8 +406,8 @@ MapLibre-API-Äquivalent zur Laufzeit: `map.getZoom()` + `MercatorCoordinate.fro
 | [`app/scripts/MapLibreToMasterportal/`](../app/scripts/MapLibreToMasterportal/)                                                                                                       | Konvertierung MapLibre → Masterportal (Pixelbreiten werden bei festem Zoom ausgelesen) |
 | [`processing/topics/helper/road_width.lua`](../processing/topics/helper/road_width.lua)                                                                                               | Straßenbreite in Metern (Bikespuren)                                                   |
 | [`processing/topics/parking/roads/helper/road_width_tags.lua`](../processing/topics/parking/roads/helper/road_width_tags.lua)                                                         | `road_width`-Attribut für Parken                                                       |
-| [`processing/topics/roads_bikelanes/2_move_bikelanes.sql`](../processing/topics/roads_bikelanes/2_move_bikelanes.sql)                                                                 | Meter-Offset via `ST_OffsetCurve`                                                      |
-| [`app/.../mapboxStyles/groups/atlas_bikelane_presence.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/atlas_bikelane_presence.ts) | Beispiel: pixelbasierte `line-offset`-Stops                                            |
+| [`app/.../mapboxStyles/bikelaneLineOffset.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/bikelaneLineOffset.ts)                         | Datengetriebener `line-offset` für Bikespuren (Meter → Pixel)                          |
+| [`app/.../mapboxStyles/groups/atlas_bikelane_presence.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/atlas_bikelane_presence.ts) | Beispiel: pixelbasierte `line-offset`-Stops (nicht datengetrieben)                     |
 | [`app/package.json`](../app/package.json)                                                                                                                                             | `maplibre-gl@6.0.0`, `@maplibre/maplibre-gl-style-spec@^26.2.1`                        |
 
 ---

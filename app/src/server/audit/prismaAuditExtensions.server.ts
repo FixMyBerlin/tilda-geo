@@ -105,9 +105,9 @@ export function extendWithAuditLog(client: PrismaClient) {
             'accessToken',
             'refreshToken',
             'hashedToken',
-            // better-auth OAuth secrets on audited models: Verification.value holds the OAuth state
-            // incl. the PKCE codeVerifier; Account.idToken is an OIDC JWT. Mask so these short-lived
-            // secrets don't become durable, admin-readable AuditLog rows.
+            // idToken masks the OIDC JWT on Account. value is kept as a guard for Better Auth's
+            // Verification.value (OAuth state incl. PKCE codeVerifier) in case that model is ever
+            // re-added to AUDITED_MODELS.
             'value',
             'idToken',
           ],

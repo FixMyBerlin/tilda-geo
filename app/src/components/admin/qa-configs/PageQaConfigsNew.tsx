@@ -39,6 +39,8 @@ export function PageQaConfigsNew() {
           needsReviewThreshold: QaConfigFormInputSchema.needsReviewThreshold,
           absoluteDifferenceThreshold: QaConfigFormInputSchema.absoluteDifferenceThreshold,
           regionId: QaConfigFormInputSchema.regionId,
+          trustedOsmUsernames: QaConfigFormInputSchema.trustedOsmUsernames,
+          referenceFrozenAt: QaConfigFormInputSchema.referenceFrozenAt,
         }}
         submitLabel="QA Konfiguration erstellen"
         regions={regions}

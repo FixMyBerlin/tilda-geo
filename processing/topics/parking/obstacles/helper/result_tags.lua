@@ -20,7 +20,7 @@ local function result_tags_obstacles(result)
   end
   merge_table(result_tags, result.category:get_tags(result.object.tags)) -- those are sanitized already
 
-  local result_meta = metadata(result)
+  local result_meta = metadata(result.object)
 
   local cleaned_tags, replaced_tags = CLEANER.separate_tags(result_tags, result.object.tags)
 

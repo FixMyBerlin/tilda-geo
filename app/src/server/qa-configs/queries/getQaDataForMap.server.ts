@@ -15,7 +15,7 @@ const Schema = z.object({
 
 export type QaMapData = {
   areaId: string
-  systemStatus: string | null // Letter representing system status (G, N, P)
+  systemStatus: string | null // Letter representing system status (G, N, P, T)
   userStatus: string | null // Letter representing user status (S, R, D, P, QA)
 }
 

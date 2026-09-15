@@ -45,6 +45,10 @@ export const filterQaDataByStyle = (data: QaMapData[], style: string) => {
       return data.filter((item) => {
         return item.userStatus === null && item.systemStatus === 'P'
       })
+    case 'system-trusted-editor-change':
+      return data.filter((item) => {
+        return item.userStatus === null && item.systemStatus === 'T'
+      })
     case 'user-selected':
       // Filtering by users happens server-side, so just return all data
       return data

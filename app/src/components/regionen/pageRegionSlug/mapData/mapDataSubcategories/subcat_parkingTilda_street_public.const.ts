@@ -1,4 +1,4 @@
-import type { FileMapDataSubcategory } from '../types'
+import type { FileMapDataSubcategory, FileMapDataSubcategoryStyleLegend } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
 import { mapboxStyleGroupLayers_park_street_areas_shadow } from './mapboxStyles/groups/park_street_areas_shadow'
 import { mapboxStyleGroupLayers_park_street_default } from './mapboxStyles/groups/park_street_default'
@@ -8,6 +8,7 @@ import { mapboxStyleGroupLayers_park_street_pattern } from './mapboxStyles/group
 import { mapboxStyleGroupLayers_park_street_surface } from './mapboxStyles/groups/park_street_surface'
 import type { MapboxStyleLayersProps } from './mapboxStyles/mapboxStyleLayers'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { parkingTildaEdgesLayersByStyle } from './parkingTildaEdgesLayers.const'
 import {
   parkingTildaStreetDefaultLegends,
   parkingTildaStreetKindLegends,
@@ -44,12 +45,14 @@ const createStreetStyleLayers = (filter: MapboxStyleLayersProps['additionalFilte
       additionalFilter: filter,
       source,
       sourceLayer,
+      minzoom: 14,
     }),
     ...mapboxStyleLayers({
       layers: mapboxStyleGroupLayers_park_street_pattern,
       additionalFilter: filter,
       source,
       sourceLayer,
+      minzoom: 14,
     }),
     ...mapboxStyleLayers({
       layers: mapboxStyleGroupLayers_park_street_label,
@@ -74,12 +77,14 @@ const createStreetSurfaceStyleLayers = (filter: MapboxStyleLayersProps['addition
       additionalFilter: filter,
       source,
       sourceLayer,
+      minzoom: 14,
     }),
     ...mapboxStyleLayers({
       layers: mapboxStyleGroupLayers_park_street_pattern,
       additionalFilter: filter,
       source,
       sourceLayer,
+      minzoom: 14,
     }),
     ...mapboxStyleLayers({
       layers: mapboxStyleGroupLayers_park_street_label,
@@ -104,12 +109,14 @@ const createStreetKindStyleLayers = (filter: MapboxStyleLayersProps['additionalF
       additionalFilter: filter,
       source,
       sourceLayer,
+      minzoom: 14,
     }),
     ...mapboxStyleLayers({
       layers: mapboxStyleGroupLayers_park_street_pattern,
       additionalFilter: filter,
       source,
       sourceLayer,
+      minzoom: 14,
     }),
     ...mapboxStyleLayers({
       layers: mapboxStyleGroupLayers_park_street_label,
@@ -150,6 +157,42 @@ export const createSharedStreetStyles = (filter: MapboxStyleLayersProps['additio
     },
   ] satisfies FileMapDataSubcategory['styles']
 
+const parkingTildaPublicDefaultLegend = {
+  id: 'edges-sum',
+  name: 'Summe je Straßenseite (öffentlich, grau gepunktet bis Zoom 16)',
+  style: { type: 'line', color: '#6B7280' },
+} satisfies FileMapDataSubcategoryStyleLegend
+
+export const parkingTildaPrivateDefaultLegend = {
+  id: 'edges-sum-private',
+  name: 'Summe je Straßenseite (privat, orange gepunktet bis Zoom 16)',
+  style: { type: 'line', color: '#FF7162' },
+} satisfies FileMapDataSubcategoryStyleLegend
+
+export const attachParkingTildaEdges = (
+  styles: ReturnType<typeof createSharedStreetStyles>,
+  operatorType: 'public' | 'private',
+  edgesLegend: typeof parkingTildaPublicDefaultLegend | typeof parkingTildaPrivateDefaultLegend,
+) => {
+  const layersByStyle = parkingTildaEdgesLayersByStyle(operatorType)
+  return styles.map((style) => {
+    if (style.id === 'default' || style.id === 'surface' || style.id === 'kind') {
+      const edgeLayers = mapboxStyleLayers({
+        layers: layersByStyle[style.id],
+        source,
+        sourceLayer: 'parkings_edges',
+        interactive: false,
+      })
+      return {
+        ...style,
+        layers: [...edgeLayers, ...style.layers],
+        legends: [edgesLegend, ...(style.legends ?? [])],
+      }
+    }
+    return style
+  })
+}
+
 export const subcat_parkingTilda_street_public: FileMapDataSubcategory = {
   id: subcatId,
   name: 'Öffentliches Straßenparken',
@@ -157,5 +200,9 @@ export const subcat_parkingTilda_street_public: FileMapDataSubcategory = {
   ui: 'dropdown',
   sourceId: source,
   beforeId: undefined,
-  styles: createSharedStreetStyles(publicFilter),
+  styles: attachParkingTildaEdges(
+    createSharedStreetStyles(publicFilter),
+    'public',
+    parkingTildaPublicDefaultLegend,
+  ),
 }

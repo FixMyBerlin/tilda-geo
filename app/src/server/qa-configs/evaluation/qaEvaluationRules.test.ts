@@ -1,5 +1,11 @@
 import { describe, expect, test } from 'vitest'
-import { calculateSystemStatus, getQaUpdateDecision } from './qaEvaluationRules'
+import {
+  calculateSystemStatus,
+  checkTrustedEditors,
+  getEffectiveSystemStatus,
+  getQaUpdateDecision,
+  type QaLastEditor,
+} from './qaEvaluationRules'
 
 function getRelative(referenceCount: number, currentCount: number) {
   if (referenceCount === 0 && currentCount === 0) return 1
@@ -26,6 +32,7 @@ function getDecisionInput(
       currentRelative,
       absoluteDifference: referenceCount - currentCount,
       absoluteDifferenceThreshold: 4,
+      changedByTrustedEditors: false,
     },
   } as const
 }
@@ -67,6 +74,7 @@ describe('getQaUpdateDecision()', () => {
         currentRelative: 0.84,
         absoluteDifference: 4,
         absoluteDifferenceThreshold: 4,
+        changedByTrustedEditors: false,
       },
     })
 
@@ -85,6 +93,7 @@ describe('getQaUpdateDecision()', () => {
         currentRelative: 1,
         absoluteDifference: 0,
         absoluteDifferenceThreshold: 4,
+        changedByTrustedEditors: false,
       },
     })
 
@@ -101,6 +110,7 @@ describe('getQaUpdateDecision()', () => {
         currentRelative: 0.7,
         absoluteDifference: 10,
         absoluteDifferenceThreshold: 4,
+        changedByTrustedEditors: false,
       },
     })
 
@@ -120,6 +130,7 @@ describe('getQaUpdateDecision()', () => {
         currentRelative: 0.7,
         absoluteDifference: 50,
         absoluteDifferenceThreshold: 4,
+        changedByTrustedEditors: false,
       },
     })
 
@@ -137,6 +148,7 @@ describe('getQaUpdateDecision()', () => {
         currentRelative: 1,
         absoluteDifference: 0,
         absoluteDifferenceThreshold: 4,
+        changedByTrustedEditors: false,
       },
     })
 
@@ -153,6 +165,7 @@ describe('getQaUpdateDecision()', () => {
         currentRelative: 2.2,
         absoluteDifference: 4,
         absoluteDifferenceThreshold: 4,
+        changedByTrustedEditors: false,
       },
     })
 
@@ -170,9 +183,28 @@ describe('getQaUpdateDecision()', () => {
         currentRelative: 1,
         absoluteDifference: 0,
         absoluteDifferenceThreshold: 4,
+        changedByTrustedEditors: false,
       },
     })
 
+    expect(result.shouldReset).toBe(false)
+    expect(result.shouldCreate).toBe(false)
+  })
+
+  test('a trusted editor change never resets a human decision (only GOOD does)', () => {
+    const result = getQaUpdateDecision({
+      previousEvaluation: { systemStatus: 'PROBLEMATIC', userStatus: 'NOT_OK_DATA_ERROR' },
+      evaluation: {
+        systemStatus: 'PROBLEMATIC',
+        previousRelative: 2,
+        currentRelative: 2.2,
+        absoluteDifference: 50,
+        absoluteDifferenceThreshold: 4,
+        changedByTrustedEditors: true,
+      },
+    })
+
+    expect(result.effectiveSystemStatus).toBe('TRUSTED_EDITOR_CHANGE')
     expect(result.shouldReset).toBe(false)
     expect(result.shouldCreate).toBe(false)
   })
@@ -214,5 +246,143 @@ describe('calculateSystemStatus()', () => {
 
     expect(calculateSystemStatus(1.25, config)).toBe('PROBLEMATIC')
     expect(calculateSystemStatus(0.8, config)).toBe('PROBLEMATIC')
+  })
+})
+
+describe('getEffectiveSystemStatus()', () => {
+  test('absolute difference within threshold always wins, even when changed by trusted editors', () => {
+    const result = getEffectiveSystemStatus({
+      systemStatus: 'PROBLEMATIC',
+      absoluteDifference: 4,
+      absoluteDifferenceThreshold: 4,
+      changedByTrustedEditors: true,
+    })
+
+    expect(result.effectiveSystemStatus).toBe('GOOD')
+  })
+
+  test('a bad percent status changed by trusted editors becomes TRUSTED_EDITOR_CHANGE', () => {
+    const result = getEffectiveSystemStatus({
+      systemStatus: 'PROBLEMATIC',
+      absoluteDifference: 50,
+      absoluteDifferenceThreshold: 4,
+      changedByTrustedEditors: true,
+    })
+
+    expect(result.effectiveSystemStatus).toBe('TRUSTED_EDITOR_CHANGE')
+  })
+
+  test('a bad percent status not changed by trusted editors stays as-is', () => {
+    const result = getEffectiveSystemStatus({
+      systemStatus: 'PROBLEMATIC',
+      absoluteDifference: 50,
+      absoluteDifferenceThreshold: 4,
+      changedByTrustedEditors: false,
+    })
+
+    expect(result.effectiveSystemStatus).toBe('PROBLEMATIC')
+  })
+
+  test('a GOOD percent status is never turned into TRUSTED_EDITOR_CHANGE', () => {
+    const result = getEffectiveSystemStatus({
+      systemStatus: 'GOOD',
+      absoluteDifference: 50,
+      absoluteDifferenceThreshold: 4,
+      changedByTrustedEditors: true,
+    })
+
+    expect(result.effectiveSystemStatus).toBe('GOOD')
+  })
+})
+
+describe('checkTrustedEditors()', () => {
+  const referenceFrozenAt = new Date('2026-01-01T00:00:00Z')
+  const afterCutoffSeconds = Math.floor(referenceFrozenAt.getTime() / 1000) + 3600
+  const beforeCutoffSeconds = Math.floor(referenceFrozenAt.getTime() / 1000) - 3600
+  const exactCutoffSeconds = Math.floor(referenceFrozenAt.getTime() / 1000)
+
+  function check(
+    lastEditors: QaLastEditor[],
+    overrides: Partial<Parameters<typeof checkTrustedEditors>[0]> = {},
+  ) {
+    return checkTrustedEditors({
+      lastEditors,
+      trustedOsmUsernames: ['alice', 'bob'],
+      referenceFrozenAt,
+      absoluteDifferenceThreshold: 4,
+      ...overrides,
+    })
+  }
+
+  test('passes when a trusted editor made the only post-cutoff edit', () => {
+    const result = check([{ osmUser: 'Alice', spaceCount: 3, updatedAt: afterCutoffSeconds }])
+
+    expect(result).toEqual({ passed: true, trustedEditors: ['Alice'], untrustedSpaceCount: 0 })
+  })
+
+  test('untrusted space count equal to the threshold still passes', () => {
+    const result = check([
+      { osmUser: 'Alice', spaceCount: 1, updatedAt: afterCutoffSeconds },
+      { osmUser: 'Carol', spaceCount: 4, updatedAt: afterCutoffSeconds },
+    ])
+
+    expect(result.untrustedSpaceCount).toBe(4)
+    expect(result.passed).toBe(true)
+  })
+
+  test('untrusted space count above the threshold fails', () => {
+    const result = check([
+      { osmUser: 'Alice', spaceCount: 1, updatedAt: afterCutoffSeconds },
+      { osmUser: 'Carol', spaceCount: 5, updatedAt: afterCutoffSeconds },
+    ])
+
+    expect(result.untrustedSpaceCount).toBe(5)
+    expect(result.passed).toBe(false)
+  })
+
+  test('null osmUser is never trusted', () => {
+    const result = check([{ osmUser: null, spaceCount: 2, updatedAt: afterCutoffSeconds }])
+
+    expect(result).toEqual({ passed: false, trustedEditors: [], untrustedSpaceCount: 2 })
+  })
+
+  test('cell with no points (empty last_editors) never passes', () => {
+    expect(check([])).toEqual({ passed: false, trustedEditors: [], untrustedSpaceCount: 0 })
+  })
+
+  test('entries edited before the freeze day are ignored entirely', () => {
+    const result = check([{ osmUser: 'Carol', spaceCount: 10, updatedAt: beforeCutoffSeconds }])
+
+    expect(result).toEqual({ passed: false, trustedEditors: [], untrustedSpaceCount: 0 })
+  })
+
+  test('an edit exactly at 00:00 UTC of the freeze day counts', () => {
+    const result = check([{ osmUser: 'Alice', spaceCount: 3, updatedAt: exactCutoffSeconds }])
+
+    expect(result).toEqual({ passed: true, trustedEditors: ['Alice'], untrustedSpaceCount: 0 })
+  })
+
+  test('matches case-insensitively against the already-normalized trusted list', () => {
+    const result = check([{ osmUser: 'Alice', spaceCount: 0, updatedAt: afterCutoffSeconds }])
+
+    expect(result).toEqual({ passed: true, trustedEditors: ['Alice'], untrustedSpaceCount: 0 })
+  })
+
+  test('returns trusted editors unique and sorted', () => {
+    const result = check([
+      { osmUser: 'Bob', spaceCount: 0, updatedAt: afterCutoffSeconds },
+      { osmUser: 'Alice', spaceCount: 0, updatedAt: afterCutoffSeconds },
+      { osmUser: 'Bob', spaceCount: 0, updatedAt: afterCutoffSeconds + 1 },
+    ])
+
+    expect(result.trustedEditors).toEqual(['Alice', 'Bob'])
+  })
+
+  test('fails when the trusted username list is empty', () => {
+    const result = check([{ osmUser: 'Alice', spaceCount: 0, updatedAt: afterCutoffSeconds }], {
+      trustedOsmUsernames: [],
+    })
+
+    expect(result.passed).toBe(false)
   })
 })

@@ -34,7 +34,7 @@ type CompiledAttribute = {
     | 'date'
     | 'sanitized_strings'
     | 'ignore'
-  purpose?: 'experimentation' | 'processing' | 'qa'
+  purpose?: 'experimentation' | 'processing' | 'qa' | 'rendering'
   values?: Array<CompiledValue>
 }
 
@@ -386,7 +386,7 @@ const run = async () => {
 
         const skipValueChecks =
           SKIP_ENUMERATED_VALUE_COVERAGE_KEYS.has(key) ||
-          (documentedType === 'number' && !hasExplicitValues) ||
+          (topicDocNumericFormatSet.has(documentedType) && !hasExplicitValues) ||
           (documentedType === 'string' && !hasExplicitValues) ||
           (documentedType === 'sanitized_strings' && !hasExplicitValues) ||
           (documentedType === 'ignore' && !hasExplicitValues)

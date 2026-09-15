@@ -23,23 +23,21 @@ export const Route = createFileRoute('/api/boundary')({
 
         const osmRelationIds = parsed.data.ids.map((id) => Number(id))
 
-        let geom
         try {
-          geom = await fetchBoundaryGeometry(osmRelationIds)
+          const { geometry } = await fetchBoundaryGeometry(osmRelationIds)
+          return new Response(JSON.stringify(geometry), {
+            status: 200,
+            headers: {
+              'Content-Type': 'application/json; charset=utf-8',
+              'Content-Disposition': 'attachment; filename="boundary.geojson"',
+            },
+          })
         } catch (e) {
           if (e instanceof BoundaryNotFoundError) {
             return new Response(e.message, { status: 404 })
           }
           throw e
         }
-
-        return new Response(JSON.stringify(geom), {
-          status: 200,
-          headers: {
-            'Content-Type': 'application/json; charset=utf-8',
-            'Content-Disposition': 'attachment; filename="boundary.geojson"',
-          },
-        })
       },
     },
   },

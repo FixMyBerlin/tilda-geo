@@ -1,5 +1,6 @@
 import type { FileMapDataSubcategory, FileMapDataSubcategoryStyle } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
+import { withBikelaneVisualLineOffset } from './mapboxStyles/bikelaneLineOffset'
 import { mapboxStyleGroupLayers_atlas_bikelanes_default } from './mapboxStyles/groups/atlas_bikelanes_default'
 import { mapboxStyleGroupLayers_atlas_bikelanes_details } from './mapboxStyles/groups/atlas_bikelanes_details'
 import { mapboxStyleGroupLayers_atlas_bikelanes_widths } from './mapboxStyles/groups/atlas_bikelanes_widths'
@@ -26,7 +27,7 @@ export const bikelanesDefaultStyle: FileMapDataSubcategoryStyle = {
   name: 'Führungsform einfach',
   layers: [
     ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_atlas_bikelanes_default,
+      layers: withBikelaneVisualLineOffset(mapboxStyleGroupLayers_atlas_bikelanes_default),
       source,
       sourceLayer,
     }),
@@ -99,7 +100,7 @@ export const bikelanesDetailsStyle: FileMapDataSubcategoryStyle = {
   name: 'Führungsform details',
   layers: [
     ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_atlas_bikelanes_details,
+      layers: withBikelaneVisualLineOffset(mapboxStyleGroupLayers_atlas_bikelanes_details),
       source,
       sourceLayer,
     }),
@@ -224,7 +225,7 @@ const bikelanesWidthStyle: FileMapDataSubcategoryStyle = {
   name: 'Breite RVA',
   layers: [
     ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_atlas_bikelanes_widths,
+      layers: withBikelaneVisualLineOffset(mapboxStyleGroupLayers_atlas_bikelanes_widths),
       source,
       sourceLayer,
     }),

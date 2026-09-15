@@ -19,6 +19,7 @@ SELECT
   geom,
   tag_source,
   geom_source,
+  meta,
   (tags ->> 'capacity')::NUMERIC AS capacity,
   (tags ->> 'area')::NUMERIC AS area,
   jsonb_build_object(
@@ -128,6 +129,15 @@ WITH
       /* sql-formatter-disable */
       string_agg(id::TEXT, '-' ORDER BY id) AS original_ids,
       /* sql-formatter-enable */
+      -- Keep the meta (last OSM editor) of the cluster member edited most recently.
+      (
+        array_agg(
+          meta
+          ORDER BY
+            (meta ->> 'updated_at')::BIGINT DESC,
+            id
+        )
+      )[1] AS meta,
       -- Merge geometries chain:
       -- 1. ST_Collect(geom): Groups all linestring geometries in the cluster into a MultiLineString
       -- 2. ST_Node(...): Adds nodes at all intersection points between linestrings. This ensures that linestrings that touch or cross each other share common nodes, which is required for ST_LineMerge to work correctly.
@@ -184,6 +194,7 @@ WITH
       id,
       cluster_id,
       tags,
+      meta,
       original_ids,
       geom
     FROM
@@ -200,6 +211,7 @@ SELECT
   id,
   cluster_id,
   tags,
+  meta,
   original_ids,
   geom INTO TEMP TABLE _merge_fallback_input
 FROM
@@ -215,21 +227,23 @@ WHERE
   );
 
 INSERT INTO
-  _parking_parkings_merged (id, cluster_id, tags, original_ids, path, geom)
+  _parking_parkings_merged (id, cluster_id, tags, meta, original_ids, path, geom)
 SELECT
   fg.id,
   fg.cluster_id,
   fg.tags,
+  fg.meta,
   fg.original_ids,
   (fg.d).path,
   (fg.d).geom
 FROM
   (
     SELECT
-      meta.id,
-      meta.cluster_id,
-      meta.tags,
-      meta.original_ids,
+      cluster_info.id,
+      cluster_info.cluster_id,
+      cluster_info.tags,
+      cluster_info.meta,
+      cluster_info.original_ids,
       ST_Dump (ST_LineMerge (ST_Collect (noded.geom))) AS d
     FROM
       (
@@ -237,25 +251,27 @@ FROM
           id,
           cluster_id,
           tags,
+          meta,
           original_ids
         FROM
           _merge_fallback_input
-      ) meta,
+      ) cluster_info,
       LATERAL (
         SELECT
           (ST_Dump (ST_Node (ST_Union (i.geom)))).geom AS geom
         FROM
           _merge_fallback_input i
         WHERE
-          i.id = meta.id
+          i.id = cluster_info.id
       ) AS noded
     WHERE
       ST_Length (noded.geom) > 0.5
     GROUP BY
-      meta.id,
-      meta.cluster_id,
-      meta.tags,
-      meta.original_ids
+      cluster_info.id,
+      cluster_info.cluster_id,
+      cluster_info.tags,
+      cluster_info.meta,
+      cluster_info.original_ids
   ) fg;
 
 DROP TABLE IF EXISTS _merge_fallback_input;

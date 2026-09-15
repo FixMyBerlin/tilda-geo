@@ -12,7 +12,7 @@ local db_table = osm2pgsql.define_table({
   columns = {
     { column = 'id',      type = 'text',      not_null = true },
     { column = 'tags',    type = 'jsonb' },
-    { column = 'meta',    type = 'jsonb' },
+    { column = 'meta',    type = 'jsonb', not_null = true },
     { column = 'geom',    type = 'polygon', projection = 5243 },
   },
 })

@@ -22,6 +22,7 @@ export type TableId =
   // | 'aggregated_lengths' // Statistik; Does not work, see https://github.com/FixMyBerlin/private-issues/issues/2240
   | 'todos_lines'
   | 'parkings'
+  | 'parkings_edges'
   | 'parkings_labels'
   | 'parkings_cutouts'
   | 'parkings_quantized'
