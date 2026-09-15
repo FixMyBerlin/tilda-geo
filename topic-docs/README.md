@@ -75,6 +75,7 @@ Each `attributes[]` entry supports:
 - `purpose` (optional):
   - `experimentation`
   - `processing`
+  - `rendering`
   - `qa`
 
 Each value entry in `values` and `valuesAdd` supports:

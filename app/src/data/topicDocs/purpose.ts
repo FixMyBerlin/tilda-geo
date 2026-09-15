@@ -13,6 +13,12 @@ export const topicDocPurposeMeta = {
     pillClassName: 'border border-sky-200 bg-sky-100 text-sky-900',
     legendText: 'Technische Hilfswerte aus dem Verarbeitungsprozess',
   },
+  rendering: {
+    heading: 'Nur Darstellung',
+    pillLabel: 'Rendering',
+    pillClassName: 'border border-slate-200 bg-slate-100 text-slate-800',
+    legendText: 'Existiert nur zur Kartendarstellung',
+  },
   qa: {
     heading: 'QA-Tags',
     pillLabel: 'QA',
@@ -32,5 +38,6 @@ export const topicDocPurposeMeta = {
 export const topicDocPurposeOrder = [
   'experimentation',
   'processing',
+  'rendering',
   'qa',
 ] as const satisfies ReadonlyArray<TopicDocAttributePurpose>

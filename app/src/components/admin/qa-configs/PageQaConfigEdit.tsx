@@ -86,6 +86,8 @@ export function PageQaConfigEdit() {
           needsReviewThreshold: qaConfig.needsReviewThreshold.toString(),
           absoluteDifferenceThreshold: qaConfig.absoluteDifferenceThreshold.toString(),
           regionId: qaConfig.regionId.toString(),
+          trustedOsmUsernames: qaConfig.trustedOsmUsernames.join('\n'),
+          referenceFrozenAt: qaConfig.referenceFrozenAt.toISOString().slice(0, 10),
         }}
         submitLabel="QA Konfiguration aktualisieren"
         regions={regions}

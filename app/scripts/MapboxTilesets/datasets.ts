@@ -122,6 +122,11 @@ export const tilesetConfigs: Record<
     uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.3fc178dr/#14/52.51622/13.37036',
     bbox: bboxBrandenburg,
   },
+  parkings_edges: {
+    sourceLayer: 'parkings_edges',
+    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.TODO/#14/52.51622/13.37036',
+    bbox: bboxBrandenburg,
+  },
   parkings_labels: {
     sourceLayer: 'parkings_labels',
     uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.7xxxj3s3/#14/52.51622/13.37036',

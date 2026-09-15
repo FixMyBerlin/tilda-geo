@@ -22,6 +22,7 @@ export const exportApiIdentifier = [
   'todos_lines',
   // Parking tables
   'parkings',
+  'parkings_edges',
   'parkings_labels',
   'parkings_cutouts',
   'parkings_quantized',

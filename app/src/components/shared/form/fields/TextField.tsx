@@ -11,7 +11,7 @@ type Props<T extends Record<string, unknown>> = FieldProps & {
   name: DeepKeys<T>
   /** Text input with dot decimals (EN), for coordinates and other geo numbers. */
   decimalEn?: boolean
-  type?: 'text' | 'email' | 'password' | 'number'
+  type?: 'text' | 'email' | 'password' | 'number' | 'date'
 } & Omit<React.JSX.IntrinsicElements['input'], 'name' | 'form' | 'type'>
 
 export function TextField<T extends Record<string, unknown>>({

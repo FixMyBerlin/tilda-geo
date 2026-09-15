@@ -138,6 +138,10 @@ local function bikelanes(object_tags, object_geom)
         if transformed_tags._side ~= 'self' then
           result_tags._id = default_id({ type = object_tags._type, id = object_tags._id }) .. '/' .. transformed_tags._prefix .. '/' .. transformed_tags._side
           result_tags._parent_highway = transformed_tags._parent_highway
+          -- Recommended sideways offset in meters (signed: + left / - right of the
+          -- centerline). The geometry itself stays on the road centerline; this value
+          -- is exported as the `offset` attribute and consumed purely visually by the
+          -- map style (`line-offset`). See topic-doc chapter `versetzte-geometrien`.
           result_tags.offset = side_sign_map[transformed_tags._side] * road_width(object_tags) / 2
         end
 

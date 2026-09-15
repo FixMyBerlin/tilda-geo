@@ -10,6 +10,14 @@ export const exportConfigssTildaParking: MapDataExportConfig[] = [
     licence: 'ODbL',
   },
   {
+    id: 'parkings_edges',
+    title: 'Straßenparken Kanten',
+    desc: 'Zusammengefasste Straßenkanten mit Stellplatzsumme je Straßenseite (`capacity_*` öffentlich, `capacity_private_*` privat).',
+    attributionHtml:
+      '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
+    licence: 'ODbL',
+  },
+  {
     id: 'parkings_no',
     title: 'Park- und Halteverbote',
     desc: 'Bereiche mit Park- und Halteverboten sowie Angaben zur Vollständigkeit und Qualitätssicherung.',

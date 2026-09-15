@@ -10,7 +10,7 @@ description: Add or update a Postgres data.* table via data-schema (spec, verify
 - **Use** for datasets that `processing/` SQL reads from Postgres `data.*`.
 - **Do not use** for map tiles / GeoJSON served to the map — use [add-static-dataset](../add-static-dataset/SKILL.md) instead.
 
-Specs live at repo-root `data-schema/<table>/` (gitignored). The recipe is **`spec.yaml`**; source data is `.geojson` / `.gpkg` next to it. `--file` only if the source stays elsewhere (Downloads, a large file). Commands run from `app/`. Updating an existing table: `bun run data-schema-pull -- --table <table>` first so the local spec matches S3. Pull/publish compare spec **content**; the CLI asks when local and S3 specs differ.
+Specs live at repo-root `data-schema/<table>/` (gitignored). The recipe is **`spec.yaml`**; source data is `.geojson` / `.gpkg` / `.sql` next to it. Use `.sql` when the table’s exact DDL must be preserved (e.g. a text primary key that ogr2ogr would replace with `ogc_fid`) — typical for production-generated baselines such as the QA voronoi tables. `--file` only if the source stays elsewhere (Downloads, a large file). Commands run from `app/`. Updating an existing table: `bun run data-schema-pull -- --table <table>` first so the local spec matches S3. Pull/publish compare spec **content**; the CLI asks when local and S3 specs differ.
 
 ## Steps
 
@@ -43,9 +43,10 @@ indexes:
 consumedBy: processing/topics/parking/cutouts/2_external_cutouts_euvm.sql
 ```
 
-- `source.file`: basename of the usual local geojson/gpkg. Load prefers this file when it exists in the table folder; otherwise it picks the only `.geojson`/`.gpkg` there. Not stored on S3.
+- `source.file`: basename of the usual local geojson/gpkg/sql. Load prefers this file when it exists in the table folder; otherwise it picks the only `.geojson`/`.gpkg`/`.sql` there. Not stored on S3.
 - `source.provider`: optional short label in admin.
 - `source.documentation`: optional Markdown — how to get or generate that file next time.
+- `import`: required for `.geojson`/`.gpkg` (ogr2ogr options). **Omit for `.sql` dumps** — the dump carries its own DDL; ogr2ogr is not used.
 - `consumedBy`: optional path of processing SQL that reads this table. Shown in admin; nothing validates it against the SQL.
 - Geometry names are WKB-style (`MultiPolygon`, `LineString`). `data-schema-load` treats ogrinfo’s spaced forms (`Multi Polygon`) as the same.
 
@@ -68,11 +69,11 @@ Verify parses the spec with the same Zod schema load/publish use. Fix errors bef
 
 ### 3. Source file + load
 
-Load needs a geojson/gpkg. Resolve the path in this order:
+Load needs a `.geojson`, `.gpkg`, or `.sql`. Resolve the path in this order:
 
 1. `--file` when the source is not in the table folder.
 2. `data-schema/<table>/<spec.source.file>` if that file exists.
-3. The only `.geojson` or `.gpkg` in `data-schema/<table>/`.
+3. The only `.geojson`, `.gpkg`, or `.sql` in `data-schema/<table>/`.
 4. Otherwise **ask the user** to put the file next to the spec (or pass `--file` for Downloads / a large file they do not want to copy).
 
 ```bash
@@ -83,7 +84,7 @@ bun run data-schema-load -- --table <table> --file /abs/path
 
 Omitting `--table` on a TTY lists local `data-schema/*/spec.yaml` and asks which table. Non-interactive runs need `--table`.
 
-`--file` is only for a source outside the table folder. Columns, SRID, geometry type, and indexes still come from the spec. Load runs host `ogr2ogr` (GDAL 3.8+, `brew install gdal`) into local `data.<table>` and checks feature count vs Postgres.
+`--file` is only for a source outside the table folder. For `.geojson`/`.gpkg`, columns, SRID, geometry type, and indexes come from the spec and load runs host `ogr2ogr` (GDAL 3.8+, `brew install gdal`). For `.sql`, load runs the dump via `psql` (Docker Postgres CLI) and then applies any indexes declared in the spec; the `import` block must be omitted.
 
 ### 4. Publish
 

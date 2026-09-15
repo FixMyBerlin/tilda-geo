@@ -8,14 +8,21 @@ import { PrismaClient } from '@/prisma/generated/client'
 import { getBaseDatabaseUrl } from '../../src/server/database-url.server'
 import { applyDevPortSlotToProcessEnv } from '../predev/devPortSlot'
 
-export const ALLOWED_SCHEMAS = ['prisma', 'data'] as const
+export const ALLOWED_SCHEMAS = ['prisma'] as const
 export const ALLOWED_SOURCES = ['production', 'staging'] as const
 
 export type AllowedSchema = (typeof ALLOWED_SCHEMAS)[number]
 export type AllowedSource = (typeof ALLOWED_SOURCES)[number]
 
 const REQUIRED_RESTORE_ENVIRONMENT = 'development'
-/** Publish + db-pull `pg_dump`/`psql`. Same major as Postgres — data-schema/README.md#postgres-major-versions */
+const remoteDatabaseUrlSchema = z.string().trim().min(1)
+const restoreEnvironmentSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .pipe(z.literal(REQUIRED_RESTORE_ENVIRONMENT))
+
+/** Image for publish and db-pull `pg_dump`/`psql`. Same Postgres major; see data-schema/README.md#postgres-major-versions. */
 export const POSTGRES_CLI_IMAGE = 'postgres:17-alpine'
 const sourceArgSchema = z.string().trim().pipe(z.enum(ALLOWED_SOURCES))
 const schemaArgSchema = z.string().trim().pipe(z.enum(ALLOWED_SCHEMAS))
@@ -42,13 +49,31 @@ export function parseCliArgs(argv: string[]) {
   return cliValuesSchema.parse(values)
 }
 
+/** Prompt for schema only when more than one is allowed. `null` means the user cancelled. */
+export async function resolveSchemaArg(schemaArg: AllowedSchema | undefined) {
+  if (schemaArg) return schemaArg
+  if (ALLOWED_SCHEMAS.length === 1) return ALLOWED_SCHEMAS[0]
+  if (!process.stdin.isTTY) {
+    throw new Error(
+      `Missing required arg in non-interactive mode. Pass --schema <${ALLOWED_SCHEMAS.join('|')}>.`,
+    )
+  }
+  const selected = await p.select({
+    message: 'Select schema',
+    initialValue: ALLOWED_SCHEMAS[0],
+    options: ALLOWED_SCHEMAS.map((value) => ({ value, label: value })),
+  })
+  if (p.isCancel(selected)) return null
+  return z.enum(ALLOWED_SCHEMAS).parse(selected)
+}
+
 export function getRemoteDatabaseUrl(source: AllowedSource) {
   const key = source === 'production' ? 'DATABASE_URL_PRODUCTION' : 'DATABASE_URL_STAGING'
-  const value = process.env[key]?.trim()
-  if (!value) {
+  const parsed = remoteDatabaseUrlSchema.safeParse(process.env[key])
+  if (!parsed.success) {
     throw new Error(`Missing ${key}. Add it to your local .env before running db pull.`)
   }
-  return value
+  return parsed.data
 }
 
 export function looksLikeConnectionError(message: string) {
@@ -74,7 +99,7 @@ export function printRemoteConnectionGuidance(source: AllowedSource, _remoteUrl:
       ? 'ssh tilda-production-postgres-tunnel'
       : 'ssh tilda-staging-postgres-tunnel'
 
-  p.log.warn(`Connection to ${source} DB failed — start the SSH tunnel first.`)
+  p.log.warn(`Connection to ${source} DB failed. Start the SSH tunnel first.`)
   p.note(
     [
       `1) Terminal 1: start SSH tunnel for ${source}`,
@@ -90,12 +115,12 @@ export function printRemoteConnectionGuidance(source: AllowedSource, _remoteUrl:
 }
 
 export function getLocalTargetDatabaseUrl() {
-  // Match predev / prisma.config: DEV_PORT_SLOT=1 → DATABASE_PORT=5433, etc.
+  // Same as predev / prisma.config. DEV_PORT_SLOT=1 sets DATABASE_PORT=5433, and so on.
   applyDevPortSlotToProcessEnv()
   return getBaseDatabaseUrl()
 }
 
-/** Prisma client without audit extensions — for bulk restore/sanitize writes. */
+/** No audit extensions. Used for bulk restore and sanitize writes. */
 export function createUnauditedPrismaClient() {
   const adapter = new PrismaPg({
     connectionString: getLocalTargetDatabaseUrl(),
@@ -112,8 +137,9 @@ export function toDockerNetworkUrl(databaseUrl: string) {
 }
 
 export function assertLocalRestoreTarget(databaseUrl: string) {
-  const environment = process.env.ENVIRONMENT?.trim().toLowerCase()
-  if (environment !== REQUIRED_RESTORE_ENVIRONMENT) {
+  const parsedEnvironment = restoreEnvironmentSchema.safeParse(process.env.ENVIRONMENT)
+  if (!parsedEnvironment.success) {
+    const environment = process.env.ENVIRONMENT?.trim().toLowerCase()
     throw new Error(
       `Refusing restore: ENVIRONMENT must be "${REQUIRED_RESTORE_ENVIRONMENT}" (got "${environment ?? 'unset'}").`,
     )

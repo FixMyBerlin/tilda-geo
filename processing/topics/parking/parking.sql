@@ -19,11 +19,13 @@
 \i '/processing/topics/parking/custom_functions/extend_crossing_for_kerb_intersection.sql'
 -- * … FOR KERBS
 \i '/processing/topics/parking/custom_functions/line_azimuth_at_index.sql'
+\i '/processing/topics/parking/custom_functions/estimate_road_crossing.sql'
 \i '/processing/topics/parking/custom_functions/trim_kerb_at_corner.sql'
 -- * … FOR INTERSECTIONS
 \i '/processing/topics/parking/custom_functions/estimate_capacity.sql'
 \i '/processing/topics/parking/custom_functions/explode_parkings.sql'
 \i '/processing/topics/parking/custom_functions/round_capacity.sql'
+\i '/processing/topics/parking/custom_functions/condition_category_primary.sql'
 \i '/processing/topics/parking/custom_functions/osm_ref.sql'
 
 -- * … FOR SEPARATE PARKINGS
@@ -81,6 +83,7 @@
 -- CLEANUP, FINALIZE
 \i '/processing/topics/parking/6_filter_parkings.sql'
 \i '/processing/topics/parking/7_finalize_parkings.sql'
+\i '/processing/topics/parking/7a_off_street_condition_category_primary.sql'
 
 -- CREATE QUANTIZED TABLES
 \i '/processing/topics/parking/8_create_quantized_tables.sql'
@@ -90,5 +93,8 @@
 
 -- LABELS
 \i '/processing/topics/parking/10_create_labels.sql'
+
+-- EDGES (zoomed-out on-street parking lines)
+\i '/processing/topics/parking/11_create_edges.sql'
 
 DO $$ BEGIN RAISE NOTICE 'FINISH topics/parking/parking.sql at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

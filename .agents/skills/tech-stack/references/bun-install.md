@@ -8,9 +8,12 @@ Load for global store setup, Vite dev with globalStore, or phantom deps.
 
 - Bun [≥ 1.3.14](https://bun.com/blog/bun-v1.3.14) — `rm -rf node_modules && bun install` after Bun or bunfig changes
 - Commit `bunfig.toml` per repo ([template](../examples/bunfig.toml.template)); overrides `~/.bunfig.toml`
-- Vite dev: extend [server.fs.allow](https://vite.dev/config/server-options.html#server-fs-allow) with `~/.bun/install/cache/links` (extend defaults — do not replace the project root) — do **not** disable globalStore first
+- Force Bun for CLIs that ship a Node shebang (notably Vite): [`bun --bun`](https://bun.sh/docs/cli/run) — e.g. `FORCE_COLOR=1 bun --bun vite dev …`. Without `--bun`, `bun run` can still end up on Node via the binary’s shebang
+- Keep a root [`.nvmrc`](https://github.com/nvm-sh/nvm#nvmrc). Document `nvm use` for tools that still spawn Node (Prisma, Playwright). App `dev` under Bun is separate from that Node toolchain
+- Vite + globalStore: extend [server.fs.allow](https://vite.dev/config/server-options.html#server-fs-allow) with `~/.bun/install/cache/links` (extend defaults — do not replace the project root) — do **not** disable globalStore first
 - Explicit dep enforcement (your imports): [knip.md](knip.md)
 - **Docker images:** Do **not** `COPY` `bunfig.toml` before image `bun install` — `globalStore` links into `/root/.bun/…` and breaks non-root `USER` (`EACCES`). Install from `package.json` + lockfile only (or `BUN_INSTALL_GLOBAL_STORE=0`)
+- **TanStack Start** (Nitro `start` / `preview`, matching production `preset: bun`): skill `tanstack-start-conventions` → [local-runtime.md](../../tanstack-start-conventions/references/local-runtime.md)
 
 ## Phantom dependencies under `globalStore`
 

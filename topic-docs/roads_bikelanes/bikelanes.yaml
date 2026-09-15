@@ -114,6 +114,8 @@ attributes:
   - key: prefix
     label: Quellpräfix
     purpose: processing
+    chapterRefs:
+      - chapterId: versetzte-geometrien
     description: Kennzeichnet, aus welcher OSM-Tagfamilie die Radverkehrsinformationen für dieses Objekt extrahiert wurden. Der Wert wird im Processing gesetzt und beschreibt die verwendete Tag-Präfixlogik, nicht die Quelle im Sinne eines externen Datensatzes.
     values:
       - value: cycleway
@@ -271,9 +273,12 @@ attributes:
     ref: roads.covered
   - key: offset
     format: meter
-    purpose: processing
+    purpose: rendering
     label: Linien-Offset
-    description: Seitlicher Versatz der Liniengeometrie in Metern. Der Wert wird im Processing aus der halben Straßenbreite berechnet; positive Werte liegen links der Referenzlinie, negative rechts.
+    chapterRefs:
+      - chapterId: versetzte-geometrien
+    description: >-
+      Reiner Darstellungswert für den Kartenstil – empfohlener seitlicher Versatz in Metern. Die Geometrie bleibt auf der Straßen-Mittellinie; der Versatz wird ausschließlich visuell als `line-offset` angewendet und verändert die Daten nicht. Vorzeichen: positiv = links, negativ = rechts der Mittellinie. Der Betrag wird im Processing aus der halben Straßenbreite berechnet.
   - key: surface
     ref: roads.surface
   - key: surface_source

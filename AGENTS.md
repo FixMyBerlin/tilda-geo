@@ -6,4 +6,4 @@ Most agent commands run from `app/`. Do not hand-craft `docker compose` for db/t
 
 Refactoring: When moving or renaming exports, update all importers and delete the old export—do not add re-export shims (`export { x } from '…'`) or `@deprecated` wrappers. Leave no forwarding layer. Exception: staged migrations (e.g. URL/config version migrations) may keep temporary compatibility code until the migration is complete.
 
-Agent orchestration (premium parent + Composer workers): see [`.cursor/rules/orchestrator-worker.md`](.cursor/rules/orchestrator-worker.md) (`@orchestrator-worker`).
+Agent orchestration (Grok 4.6 High parent + cursor-grok-4.6-low workers): see [`.cursor/rules/orchestrator-worker.md`](.cursor/rules/orchestrator-worker.md) (`@orchestrator-worker`).

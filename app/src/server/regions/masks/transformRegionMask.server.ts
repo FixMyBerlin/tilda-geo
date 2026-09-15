@@ -1,27 +1,13 @@
-import { buffer, difference, feature, featureCollection, polygon, simplify } from '@turf/turf'
+import { difference, feature, featureCollection, polygon } from '@turf/turf'
 import type { MultiPolygon, Polygon } from 'geojson'
 
 export function transformRegionMask({
   geometry,
-  bufferDistanceKm,
+  bufferedGeometry,
 }: {
   geometry: Polygon | MultiPolygon
-  bufferDistanceKm: number
+  bufferedGeometry: Polygon | MultiPolygon
 }) {
-  const regionFeature = feature(geometry, {})
-  const regionCollection = featureCollection([regionFeature])
-
-  const simplifiedRegion = simplify(regionCollection, { tolerance: 0.0001, highQuality: false })
-
-  const bufferedResult = buffer(simplifiedRegion, bufferDistanceKm, { units: 'kilometers' })
-  if (!bufferedResult) {
-    throw new Error('Failed to buffer region geometry')
-  }
-
-  if (bufferedResult.features.length === 0) {
-    throw new Error('Failed to get buffered features')
-  }
-
   const worldPolygon = polygon(
     [
       [
@@ -35,8 +21,7 @@ export function transformRegionMask({
     {},
   )
 
-  const allFeaturesForDifference = [worldPolygon, ...bufferedResult.features]
-  const mask = difference(featureCollection(allFeaturesForDifference))
+  const mask = difference(featureCollection([worldPolygon, feature(bufferedGeometry, {})]))
 
   if (!mask) {
     throw new Error('Failed to create mask from region geometry')

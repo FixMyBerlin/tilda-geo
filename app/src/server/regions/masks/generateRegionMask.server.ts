@@ -62,22 +62,19 @@ export async function generateRegionMask(input: {
 
   const uploadSlug = regionMaskUploadSlug(regionSlug)
 
-  let boundaryGeometry
+  let boundary
   try {
-    boundaryGeometry = await fetchBoundaryGeometry(maskOsmRelationIds)
+    boundary = await fetchBoundaryGeometry(maskOsmRelationIds, maskBufferKm)
   } catch (error) {
     if (error instanceof BoundaryNotFoundError) {
       throw new Error(
-        `OSM Relation ID(s) nicht gefunden: ${maskOsmRelationIds.join(', ')}. Mindestens eine ID ist falsch oder fehlt in der Boundaries-Datenbank.`,
+        `OSM Relation ID(s) nicht gefunden: ${error.missingOsmIds.join(', ')}. Diese ID(s) sind falsch oder fehlen in der Boundaries-Datenbank.`,
       )
     }
     throw error
   }
 
-  const transformed = transformRegionMask({
-    geometry: boundaryGeometry,
-    bufferDistanceKm: maskBufferKm,
-  })
+  const transformed = transformRegionMask(boundary)
   const withIds = addUniqueIds(transformed)
   const geojsonBody = JSON.stringify(withIds)
 

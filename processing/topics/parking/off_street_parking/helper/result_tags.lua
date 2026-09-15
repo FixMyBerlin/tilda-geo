@@ -8,6 +8,7 @@ local SANITIZE_PARKING_TAGS = require('topics.parking.helper.sanitize_parking_ta
 local round = require('topics.helper.round')
 local SURFACE_TAGS = require('topics.parking.helper.surface_tags')
 local operator_type = require('topics.parking.helper.operator_type_for_road_parking')
+local area_minzoom = require('topics.parking.off_street_parking.helper.area_minzoom')
 
 local function result_tags_off_street_parking(result, area)
   local id = default_id(result.object)
@@ -74,7 +75,7 @@ local function result_tags_off_street_parking(result, area)
     _log_unexpected_amenity_values = SANITIZE_PARKING_TAGS.amenity_off_street_parking(result.object.tags.amenity),
   }
 
-  local result_meta = metadata(result)
+  local result_meta = metadata(result.object)
 
   local cleaned_tags, replaced_tags = CLEANER.separate_tags(result_tags, result.object.tags)
 
@@ -82,7 +83,7 @@ local function result_tags_off_street_parking(result, area)
     id = id,
     tags = cleaned_tags,
     meta = result_meta,
-    minzoom = 0,
+    minzoom = area_minzoom(area),
   }, replaced_tags
 end
 

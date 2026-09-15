@@ -15,6 +15,20 @@ const QaConfigSchema = z.object({
 
 const trueOrFalse = z.enum(['true', 'false']).transform((v) => v === 'true')
 
+// Textarea input (one OSM username per line) -> deduped, lowercased string[]; names are stored
+// lowercase, one per user, so the nightly trusted-editor check is a plain lookup
+const trustedOsmUsernamesFromTextarea = z.string().transform((value) => [
+  ...new Set(
+    value
+      .split('\n')
+      .map((line) => line.trim().toLowerCase())
+      .filter(Boolean),
+  ),
+])
+
+// `date` input string (e.g. "2025-06-30") -> Date; a date-only ISO string parses as 00:00 UTC
+const referenceFrozenAtFromDateInput = z.iso.date().transform((value) => new Date(value))
+
 // Schema for creating QA configs
 export const CreateQaConfigFormSchema = QaConfigSchema.omit({
   id: true,
@@ -34,6 +48,8 @@ export const CreateQaConfigFormSchema = QaConfigSchema.omit({
     .string()
     .optional()
     .transform((v) => v || null), // Convert empty/undefined to null for Prisma
+  trustedOsmUsernames: trustedOsmUsernamesFromTextarea,
+  referenceFrozenAt: referenceFrozenAtFromDateInput,
 })
 
 // Schema for updating QA configs (includes id)

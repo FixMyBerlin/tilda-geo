@@ -4,7 +4,7 @@ description: >-
   Review and merge open Dependabot PRs in the current workspace repo:
   changelog triage, risk classification, CI verification, and rebase merge.
   Use for "/review dependabot" or similar — always scoped to the repo you have
-  open. Weekly Bun/GitHub Actions/Docker bumps, grouped patches, security
+  open. Scheduled Bun/GitHub Actions/Docker bumps, grouped patches, security
   updates, semver-major upgrades.
 ---
 
@@ -12,7 +12,7 @@ description: >-
 
 Workflow for FMC geo React apps. Dependabot **config** (groups, schedule, ignores) lives in skill `tech-stack` — [dependabot.md](../tech-stack/references/dependabot.md). This skill covers **review and merge decisions**.
 
-After merge, use skill `babysit` only if the PR needs conflict/CI/comment follow-up on a feature branch — not for routine weekly bumps on `develop`.
+After merge, use skill `babysit` only if the PR needs conflict/CI/comment follow-up on a feature branch — not for routine scheduled bumps on `develop`.
 
 ## Repo scope
 

@@ -12,6 +12,7 @@ const QA_SYSTEM_STATUS_COLORS = {
   GOOD: '#009E73', // Green - no review needed
   NEEDS_REVIEW: '#E69F00', // Yellow - requires human evaluation
   PROBLEMATIC: '#D55E00', // Red - action needed
+  TRUSTED_EDITOR_CHANGE: '#0072B2', // Blue - over threshold, edited by trusted OSM users
 } as const satisfies Record<QaSystemStatus, `#${string}`>
 
 // QA User Status Colors (from specification)
@@ -28,6 +29,7 @@ export const SYSTEM_STATUS_TO_LETTER = {
   GOOD: 'G', // Good
   NEEDS_REVIEW: 'N', // Needs Review
   PROBLEMATIC: 'P', // Problematic
+  TRUSTED_EDITOR_CHANGE: 'T', // Trusted editor change
 } as const satisfies Record<QaSystemStatus, string>
 
 // Letter to system status mapping for translation back
@@ -68,6 +70,14 @@ export const systemStatusConfig = {
     hexColor: QA_SYSTEM_STATUS_COLORS.PROBLEMATIC,
     icon: ExclamationTriangleIcon,
     description: 'Große Abweichung - dringende Überprüfung erforderlich',
+  },
+  TRUSTED_EDITOR_CHANGE: {
+    label: 'Gut (Vertrauensliste)',
+    color: 'bg-blue-600',
+    textColor: 'text-blue-600',
+    hexColor: QA_SYSTEM_STATUS_COLORS.TRUSTED_EDITOR_CHANGE,
+    icon: CheckCircleIcon,
+    description: 'Abweichung, aber zuletzt von Mapper:innen der Vertrauensliste bearbeitet',
   },
 } as const satisfies Record<QaSystemStatus, object>
 

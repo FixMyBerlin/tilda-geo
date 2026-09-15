@@ -15,11 +15,11 @@ export function pickFolderSourceFile(input: { table: string; specFile: string; f
   if (allowed.length === 1) return allowed[0]!
   if (allowed.length === 0) {
     throw new Error(
-      `No .geojson or .gpkg in data-schema/${input.table}/. Put the source next to spec.yaml, or pass --file.`,
+      `No .geojson, .gpkg or .sql in data-schema/${input.table}/. Put the source next to spec.yaml, or pass --file.`,
     )
   }
   throw new Error(
-    `Several source files in data-schema/${input.table}/:\n${allowed.map((file) => `  ${file}`).join('\n')}\nLeave one .geojson/.gpkg, or pass --file.`,
+    `Several source files in data-schema/${input.table}/:\n${allowed.map((file) => `  ${file}`).join('\n')}\nLeave one .geojson/.gpkg/.sql, or pass --file.`,
   )
 }
 

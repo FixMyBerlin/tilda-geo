@@ -33,6 +33,7 @@ Use for FMC `schema.prisma` work. Relation field names are Prisma Client API nam
 ## Audit Rules
 
 - Strongly prefer `createdBy` and `updatedBy` relations on user-edited tables.
+- Each always pairs with a FK scalar (`createdById` / `updatedById`): the `*Id` is the DB column; the relation is Prisma Client-only for joins (`include` / `.osmName`) — not a second stored field.
 - If table changes need an audit trail beyond `createdBy` / `updatedBy`, use [`@explita/prisma-audit-log`](https://www.npmjs.com/package/@explita/prisma-audit-log) with audit context instead of inventing ad hoc log tables.
 
 ## Workflows
@@ -41,10 +42,13 @@ Adding schema: add singular model, camelCase scalars, `{name}Id` FK scalars, rel
 
 Renaming relation fields: rename only in `schema.prisma`; no DB migration is needed for the rename itself. Regenerate Prisma Client, grep old names in `include`, `select`, `_count`, and nested writes, update TypeScript, then run checks.
 
+Undeployed PR-local migrations (several files from one branch that never shipped) may be squashed into the fewest files that express the final schema — skill `unslop-code` → `undeployed-wip.md`. Do not squash migrations already applied to a live DB.
+
 ## Related
 
 - DB inspection: skill `tech-stack` -> `references/cursor-mcp.md`
 - Better Auth adapter: skill `tanstack-start-auth`
+- Undeployed PR-local migration squash: skill `unslop-code` → `references/undeployed-wip.md`
 
 ## Sources
 

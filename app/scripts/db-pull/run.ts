@@ -3,23 +3,25 @@
 import * as p from '@clack/prompts'
 import { $ } from 'bun'
 import { z } from 'zod'
-import { ALLOWED_SCHEMAS, ALLOWED_SOURCES, parseCliArgs } from './db-helpers'
+import { ALLOWED_SCHEMAS, ALLOWED_SOURCES, parseCliArgs, resolveSchemaArg } from './db-helpers'
 
 function printHelp() {
   process.stdout.write(`db-pull (pull + restore)
 
-Run remote pull and local restore in sequence.
+Runs pull, then restore.
 
 Usage:
-  bun scripts/db-pull/run.ts [--source production|staging] [--schema prisma|data]
+  bun scripts/db-pull/run.ts [--source production|staging] [--schema ${ALLOWED_SCHEMAS.join('|')}]
 
 Examples:
   bun scripts/db-pull/run.ts
-  bun scripts/db-pull/run.ts --source staging --schema prisma
+  bun scripts/db-pull/run.ts --source staging
 
 Notes:
-  - In interactive mode (TTY), missing args are prompted once.
-  - In non-interactive mode, pass both --source and --schema.
+  - Allowed schemas: ${ALLOWED_SCHEMAS.join(', ')}
+  - Schema is prompted only when more than one is allowed.
+  - In interactive mode (TTY), missing --source is prompted once.
+  - In non-interactive mode, pass --source.
   - This command runs:
       1) bun run db-pull:pull -- --source <source> --schema <schema>
       2) bun run db-pull:restore -- --source <source> --schema <schema>
@@ -34,47 +36,36 @@ async function main() {
   }
 
   let source = sourceArg
-  let schema = schemaArg
+  const schema = await resolveSchemaArg(schemaArg)
+  if (schema === null) {
+    p.cancel('Cancelled.')
+    return
+  }
 
-  if (!source || !schema) {
+  if (!source) {
     if (!process.stdin.isTTY) {
       throw new Error(
-        'Missing required args in non-interactive mode. Pass --source <production|staging> and --schema <prisma|data>.',
+        'Missing required arg in non-interactive mode. Pass --source <production|staging>.',
       )
     }
 
     printHelp()
     p.intro('db-pull')
 
-    if (!source) {
-      const selected = await p.select({
-        message: 'Select source database',
-        initialValue: 'production',
-        options: ALLOWED_SOURCES.map((value) => ({ value, label: value })),
-      })
-      if (p.isCancel(selected)) {
-        p.cancel('Cancelled.')
-        return
-      }
-      source = z.enum(ALLOWED_SOURCES).parse(selected)
+    const selected = await p.select({
+      message: 'Select source database',
+      initialValue: 'production',
+      options: ALLOWED_SOURCES.map((value) => ({ value, label: value })),
+    })
+    if (p.isCancel(selected)) {
+      p.cancel('Cancelled.')
+      return
     }
-
-    if (!schema) {
-      const selected = await p.select({
-        message: 'Select schema',
-        initialValue: 'prisma',
-        options: ALLOWED_SCHEMAS.map((value) => ({ value, label: value })),
-      })
-      if (p.isCancel(selected)) {
-        p.cancel('Cancelled.')
-        return
-      }
-      schema = z.enum(ALLOWED_SCHEMAS).parse(selected)
-    }
+    source = z.enum(ALLOWED_SOURCES).parse(selected)
   }
 
-  if (!source || !schema) {
-    throw new Error('Missing source/schema after argument resolution.')
+  if (!source) {
+    throw new Error('Missing source after argument resolution.')
   }
 
   const pullResult =

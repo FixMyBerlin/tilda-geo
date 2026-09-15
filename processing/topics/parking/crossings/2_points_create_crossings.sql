@@ -1,22 +1,5 @@
 DO $$ BEGIN RAISE NOTICE 'START creating kerb tangents %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
---
-CREATE OR REPLACE FUNCTION tilda_estimate_road_crossing (road_id BIGINT, idx INTEGER, length NUMERIC) RETURNS geometry AS $$
-DECLARE
-  road_geom geometry;
-  point_geom geometry;
-  azimuth double precision;
-BEGIN
-  SELECT geom INTO road_geom FROM _parking_roads WHERE osm_id = road_id;
-
-  point_geom := ST_PointN(road_geom, idx);
-
-  azimuth := tilda_line_azimuth_at_index(road_geom, idx, 1) - pi() / 2 ;
-
-  RETURN ST_MakeLine(point_geom, ST_Project(point_geom, length, azimuth));
-END;
-$$ LANGUAGE plpgsql STABLE;
-
 DROP TABLE IF EXISTS _parking_crossings;
 
 -- INSERT "parking_crossings" from located crossing points

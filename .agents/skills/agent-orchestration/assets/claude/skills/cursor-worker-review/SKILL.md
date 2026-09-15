@@ -1,7 +1,7 @@
 ---
 name: cursor-worker-review
 description: >-
-  Independent read-only review via cursor-agent CLI (Composer 2.5, ask mode).
+  Independent read-only review via cursor-agent CLI (Grok 4.6 Low, ask mode).
   Use for skeptical validation of diffs, plans, or claimed completion before
   Fable declares done. Requires cursor-agent on PATH.
 user-invocable: true
@@ -28,7 +28,7 @@ which cursor-agent
 REPO="$(git rev-parse --show-toplevel)"
 cursor-agent -p --trust --mode ask --output-format json \
   --workspace "$REPO" \
-  --model composer-2.5 \
+  --model 'cursor-grok-4.6-low[fast=false]' \
   "Review target: [describe]. Inspect git diff and relevant files. Output: Verified (with evidence), Issues (must-fix), Gaps (unverified), Verdict (ready/not ready). Do not edit files."
 ```
 

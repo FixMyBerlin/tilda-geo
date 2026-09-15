@@ -1,4 +1,5 @@
 import type { FileMapDataSubcategory, FileMapDataSubcategoryStyleLegend } from '../types'
+import { withBikelaneVisualLineOffset } from './mapboxStyles/bikelaneLineOffset'
 import { mapboxStyleGroupLayers_radinfra_width } from './mapboxStyles/groups/radinfra_width'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
@@ -61,7 +62,7 @@ export const subcat_radinfra_width: FileMapDataSubcategory = {
       id: 'default',
       name: 'RVA Breite', // field hidden
       layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_radinfra_width,
+        layers: withBikelaneVisualLineOffset(mapboxStyleGroupLayers_radinfra_width),
         source,
         sourceLayer,
       }),

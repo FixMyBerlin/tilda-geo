@@ -44,7 +44,8 @@ local function off_street_parking_areas(object)
 
   local result = categorize_off_street_parking(object, off_street_parking_area_categories)
   if result.object then
-    local row_data, replaced_tags = result_tags(result, area_sqm(result.object))
+    local area = area_sqm(result.object)
+    local row_data, replaced_tags = result_tags(result, area)
     local row = merge_table({ geom = result.object:as_multipolygon() }, row_data)
 
     LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'off_street_parking_areas')
@@ -61,7 +62,7 @@ local function off_street_parking_areas(object)
         },
         meta = {},
         geom = row.geom:pole_of_inaccessibility(),
-        minzoom = label_minzoom(),
+        minzoom = label_minzoom(area),
       }
       db_table_label:insert(label_row)
     else

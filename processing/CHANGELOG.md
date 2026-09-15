@@ -2,6 +2,42 @@
 
 Manual and incomplete list of changes to processing output. Attribute documentation for all datasets lives in `topic-docs/` YAML (built into in-app docs via `topic-docs-build`); this file tracks schema and value-contract changes over time.
 
+## 2026-09
+
+### `parkings`, `parkings_no`, `parkings_quantized`
+
+- `meta` (`updated_at`, `updated_by`, `changeset_id`) is filled again (was `{}`). A merged parking line keeps the meta of its most recently edited source way; quantized points inherit it.
+
+### `off_street_parking_areas`, `off_street_parking_quantized`
+
+- `meta` now comes from the OSM object and carries `updated_at`, `updated_by` and `changeset_id` (was empty). Obstacle and crossing source data got the same fix.
+
+### `parkings_edges`
+
+- New table: zoomed-out on-street parking network. One linestring per chain between graph vertices (degree ≠ 2). Object id is the OSM node pair `start_node`-`end_node` (suffix when two geometries share the same pair). The network is the same `has_parking` ways as on-street parking lines (including service/driveways with explicit `parking:*` tags).
+- `capacity_left` / `capacity_right` are the public stall sums on that kerb (`operator_type=public`). `capacity_private_left` / `capacity_private_right` are the private sums when present (omitted when 0). `parkings_no` is excluded.
+- Per side, the operator with more (rounded) capacity wins (tie → public). `operator_type_*`, `condition_category_*`, `parking_*`, and `surface_*` come from that subset only and are omitted when the rounded capacity is 0.
+- `minzoom`: length < 50 m → 13, else 0. On-street `parkings` lines are no longer tiled below z14; this table is the overview.
+- Capacity on each edge comes from `parkings` that overlap that edge's clipped kerb (node-node piece), not a length share of the whole OSM way. A parking line that straddles a junction is split by intersection length. Separately mapped parking areas (`source=separate_parking_areas`, street_side and lane) are matched to the nearest kerb within 6 m; a parking whose pieces are all below 20% of its length keeps its largest piece.
+
+### `parkings`
+
+- `minzoom` is 14 (was 0). The TILDA map at low zoom shows `parkings_edges`.
+- Add `condition_category_primary`: first matching token from `condition_category` in the map-style priority list. Rendering only; the full string remains in `condition_category`.
+- Separate `street_side` `side` (left/right) uses the highest-scoring nearby road, not a sum of all nearby ways. Any weakly matching neighbour (not only footways) can no longer flip the side with an unweighted ±1 vote.
+
+### `off_street_parking_areas`
+
+- `minzoom` follows polygon area (m²): < 200 → 14, ≥ 200 → 13, ≥ 600 → 12, ≥ 2500 → 11, ≥ 10000 → 10 (was always 0). Labels stay at least z11.
+- Add `condition_category_primary` (same as `parkings`). Also written on `off_street_parking_points`; quantized points inherit it from areas.
+
+### `bikelanes`
+
+- Geometry now stays on the road **centerline**. Bikelane geometries derived from the centerline are no longer shifted sideways in the database (removed the `ST_OffsetCurve` step in the former `2_move_bikelanes.sql`). This makes geometry-based analyses simpler: no artificial left/right displacement to account for, and the two sides of a street share the same reference line.
+- **Geometry direction** of derived bikelanes changed as a consequence: all `…/left` and `…/right` geometries now run in the **OSM way direction** (identical to the parent road, no `ST_Simplify` either). Previously the removed SQL step reversed `…/left` geometries so each side ran in its right-hand-traffic flow direction. Direction-relative attributes (`mapillary_forward`/`mapillary_backward`, `traffic_sign_forward`/`traffic_sign_backward`) were always relative to the OSM way direction, so for `…/left` lanes they now match the exported geometry direction where they did not before. Consumers that derived travel direction from left-side geometry direction need to use `oneway` and `offset` (sign = side) instead.
+- The `offset` attribute is unchanged in meaning (signed meters, `+` left / `-` right, half the road width) but is now consumed **only by the map style** for a visual `line-offset`, not by the database geometry. It was added to the bikelanes tile `stylingKeys` so it is available at all rendered zoom levels.
+- Map-style note: the sideways separation is reproduced visually for **line** layers via a zoom-scaled `line-offset` derived from `offset`. The meter→pixel conversion is calibrated for ~52.5° latitude (center of Germany) and is off by roughly ±9% at the edges of Germany. **Symbol/text** layers placed along the line (width/surface/traffic-sign labels, `symbol-placement: line-center`) cannot be perpendicular-offset via the style and now render on the centerline.
+
 ## 2026-06
 
 ### All tables

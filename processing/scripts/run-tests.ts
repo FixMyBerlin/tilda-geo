@@ -18,9 +18,9 @@ if (dockerCheck.exitCode !== 0) {
 const pingCheck = await $`ping -q -c 1 -W 1 8.8.8.8`.quiet().nothrow()
 if (pingCheck.exitCode === 0) {
   console.log('Internet available - building Docker image...')
-  await $`docker build --target testing -f ${root}/processing.Dockerfile -t test_img ${root}`
+  await $`docker build --target testing -f ${root}/processing.Dockerfile -t processing_run_tests ${root}`
 } else {
   console.warn('No internet connection - skipping Docker build and using cached image.')
 }
 
-await $`docker run --rm -v ${root}/processing:/processing test_img`
+await $`docker run --rm -v ${root}/processing:/processing processing_run_tests`

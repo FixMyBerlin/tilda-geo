@@ -2,7 +2,8 @@ FROM debian:trixie AS testing
 WORKDIR /processing
 
 # Install Lua and "luarocks" (Lua package manager) – https://luarocks.org/
-RUN apt update && apt install -y lua5.3 liblua5.3-dev luarocks
+# curl: LuaLS download in typecheck-lua-in-container.ts; bun installer below.
+RUN apt update && apt install -y lua5.3 liblua5.3-dev luarocks curl
 
 # `busted` is our testing framework https://lunarmodules.github.io/busted/
 # `inspect` is to print / inspect tables https://github.com/kikito/inspect.lua
@@ -14,6 +15,10 @@ RUN luarocks install busted && \
     luarocks install inspect && \
     luarocks install penlight && \
     luarocks install ftcsv
+
+# bun: Lua typecheck runner (`typecheck-lua-in-container.ts`); inherited by `processing`.
+RUN curl -fsSL https://bun.sh/install | bash
+ENV PATH=/root/.bun/bin:$PATH
 
 ENTRYPOINT [ "busted" ]
 CMD ["--pattern=%.test%.lua$", "/processing/topics/"]
@@ -40,9 +45,6 @@ RUN apt update && \
 
 # 'data' folder is root
 RUN mkdir /data
-
-RUN curl -fsSL https://bun.sh/install | bash
-ENV PATH=/root/.bun/bin:$PATH
 
 # copy the source code
 COPY processing /processing/

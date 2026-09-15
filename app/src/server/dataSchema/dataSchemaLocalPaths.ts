@@ -30,7 +30,7 @@ export async function writeLocalSpec(table: string, spec: DataSchemaSpec) {
 
 export function dataSchemaLocalSourcePath(table: string, sourceFile: string) {
   if (!isDataSchemaSourceFile(sourceFile)) {
-    throw new Error(`Invalid sourceFile "${sourceFile}" (.geojson or .gpkg basename only).`)
+    throw new Error(`Invalid sourceFile "${sourceFile}" (.geojson, .gpkg or .sql basename only).`)
   }
   return resolve(dataSchemaTableDir(table), sourceFile)
 }

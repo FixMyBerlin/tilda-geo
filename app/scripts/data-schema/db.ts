@@ -1,3 +1,4 @@
+import { basename, dirname } from 'node:path'
 import { $ } from 'bun'
 import { assertDataSchemaTableName } from '@/server/dataSchema/dataSchemaS3Keys'
 import {
@@ -26,6 +27,21 @@ export async function runPsql(command: string) {
       .nothrow()
   if (result.exitCode !== 0) {
     throw new Error(result.stderr.toString().trim() || `psql failed (${result.exitCode})`)
+  }
+  return result.stdout.toString().trim()
+}
+
+/** Run a SQL dump against the local DB (data-schema-load for .sql sources). */
+export async function runPsqlFile(filePath: string) {
+  const dockerUrl = toDockerNetworkUrl(getLocalTargetDatabaseUrl())
+  const hostDir = dirname(filePath)
+  const fileName = basename(filePath)
+  const result =
+    await $`docker run --rm --add-host=host.docker.internal:host-gateway --volume ${hostDir}:/sql:ro --entrypoint psql ${POSTGRES_CLI_IMAGE} --set=ON_ERROR_STOP=1 --file=/sql/${fileName} ${dockerUrl}`
+      .quiet()
+      .nothrow()
+  if (result.exitCode !== 0) {
+    throw new Error(result.stderr.toString().trim() || `psql --file failed (${result.exitCode})`)
   }
   return result.stdout.toString().trim()
 }

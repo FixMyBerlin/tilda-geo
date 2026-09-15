@@ -2,7 +2,7 @@ import { AdminConsoleDumpButton } from '@/components/admin/AdminConsoleDumpButto
 import { AdminTable, adminTableClasses } from '@/components/admin/AdminTable'
 import type { AdminTableHeaderCell } from '@/components/admin/AdminTable'
 import { AuditActionPill, auditChangeSourceColor } from '@/components/admin/audit-log/auditLogPills'
-import { formatAuditLogUser } from '@/components/admin/audit-log/formatAuditLogUser'
+import { AuditLogUserCell } from '@/components/admin/audit-log/AuditLogUserCell'
 import { formatDateTimeBerlin } from '@/components/shared/date/formatDateBerlin'
 import { Pill } from '@/components/shared/text/Pill'
 import type { AuditLogRow } from '@/server/audit/queries/listAuditLog.server'
@@ -21,7 +21,7 @@ const buildHeader = (showModel: boolean, showRecordId: boolean) => {
   const header: AdminTableHeaderCell[] = ['Zeitpunkt']
   if (showModel) header.push('Modell')
   if (showRecordId) header.push('ID')
-  header.push('Aktion', 'Quelle', 'User', 'Felder', { id: 'audit-diff', label: '' })
+  header.push('Aktion', 'Quelle', 'User', 'Felder')
   return header
 }
 
@@ -54,12 +54,20 @@ const AuditLogTableRow = ({
         '—'
       )}
     </td>
-    <td className={adminTableClasses.td}>{formatAuditLogUser(row)}</td>
     <td className={adminTableClasses.td}>
-      {row.changedFields.length > 0 ? row.changedFields.join(', ') : '—'}
+      <AuditLogUserCell row={row} />
     </td>
     <td className={adminTableClasses.td}>
-      <AdminConsoleDumpButton name={`audit-${row.id}`} data={row} />
+      <div className="flex min-w-0 items-center gap-2">
+        <AdminConsoleDumpButton name={`audit-${row.id}`} data={row} />
+        {row.changedFields.length > 0 ? (
+          <span className="min-w-0 truncate" title={row.changedFields.join(', ')}>
+            {row.changedFields.join(', ')}
+          </span>
+        ) : (
+          '—'
+        )}
+      </div>
     </td>
   </tr>
 )
@@ -71,16 +79,18 @@ export const AuditLogTable = ({ rows, fixedModel, fixedRecordId, footer }: Props
     fixedRecordId === undefined || rows.some((row) => row.recordId !== fixedRecordId)
 
   const table = (
-    <AdminTable header={buildHeader(showModel, showRecordId)}>
-      {rows.map((row) => (
-        <AuditLogTableRow
-          key={row.id}
-          row={row}
-          showModel={showModel}
-          showRecordId={showRecordId}
-        />
-      ))}
-    </AdminTable>
+    <div className="min-w-0 overflow-x-auto">
+      <AdminTable header={buildHeader(showModel, showRecordId)}>
+        {rows.map((row) => (
+          <AuditLogTableRow
+            key={row.id}
+            row={row}
+            showModel={showModel}
+            showRecordId={showRecordId}
+          />
+        ))}
+      </AdminTable>
+    </div>
   )
 
   if (!footer) return table

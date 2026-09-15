@@ -15,13 +15,13 @@ import {
   REGION_WELCOME_IMAGE_RECOMMENDED_WIDTH_PX,
 } from '@/server/regions/regionWelcomeImage.const'
 import type { RegionFormInput } from '@/server/regions/regionWriteSchema'
-import { withSortOrder } from '@/shared/orderedList/assignSortOrder'
-import { newClientListKey } from '@/shared/orderedList/clientListKey'
 import {
   REGION_UPLOAD_ACCEPT,
   REGION_UPLOAD_MAX_MB,
-  useRegionUploadFile,
-} from './useRegionUploadFile'
+} from '@/server/regions/uploads/regionUploadImage.const'
+import { withSortOrder } from '@/shared/orderedList/assignSortOrder'
+import { newClientListKey } from '@/shared/orderedList/clientListKey'
+import { useRegionUploadFile } from './useRegionUploadFile'
 
 type Props = {
   form: FormApi<RegionFormInput>

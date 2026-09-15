@@ -1,4 +1,5 @@
 import type { FileMapDataSubcategory, FileMapDataSubcategoryStyleLegend } from '../types'
+import { withBikelaneVisualLineOffset } from './mapboxStyles/bikelaneLineOffset'
 import { mapboxStyleGroupLayers_radinfra_oneway } from './mapboxStyles/groups/radinfra_oneway'
 import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
 
@@ -72,7 +73,7 @@ export const subcat_radinfra_oneway: FileMapDataSubcategory = {
       id: 'default',
       name: 'Verkehrsrichtung', // field hidden
       layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_radinfra_oneway,
+        layers: withBikelaneVisualLineOffset(mapboxStyleGroupLayers_radinfra_oneway),
         source,
         sourceLayer,
       }),

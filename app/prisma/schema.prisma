@@ -538,6 +538,11 @@ model QaConfig {
   needsReviewThreshold        Float @default(0.2) // relative <= 0.2 difference = NEEDS_REVIEW
   absoluteDifferenceThreshold Int   @default(4) // absolute difference <= this value is not considered a change
 
+  // Lowercase OSM display names, one entry per user
+  trustedOsmUsernames String[] @default([])
+  // Day the reference voronoi baseline was frozen; OSM edits from 00:00 UTC of this day on are checked against trustedOsmUsernames
+  referenceFrozenAt   DateTime @db.Date
+
   region   Region @relation(fields: [regionId], references: [id])
   regionId Int
 
@@ -579,6 +584,7 @@ model QaEvaluation {
   // Remove unique constraint to allow evaluation history
   // @@unique([configId, areaId])  // REMOVED
 
+  @@index([configId, areaId, createdAt(sort: Desc), id(sort: Desc)])
   @@map("QaEvaluation")
   @@schema("prisma")
 }
@@ -587,6 +593,7 @@ enum QaSystemStatus {
   GOOD // Green - no review needed
   NEEDS_REVIEW // Yellow - medium difference
   PROBLEMATIC // Red - large difference
+  TRUSTED_EDITOR_CHANGE // Over threshold, but the changed spaces were last edited by trusted OSM users
 
   @@schema("prisma")
 }

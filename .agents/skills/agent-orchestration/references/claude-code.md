@@ -1,6 +1,6 @@
 # Agent orchestration — Claude Code
 
-**Fable 5** orchestrates in Claude Code (desktop or CLI). **Composer 2.5** runs bulk work via **`cursor-agent` CLI** (Cursor subscription). Claude Code cannot pin Composer on subagent `model:` — shell out instead.
+**Fable 5** orchestrates in Claude Code (desktop or CLI). **Grok 4.6 Low** runs bulk work via **`cursor-agent` CLI** (Cursor subscription). Claude Code cannot pin Grok on subagent `model:` — shell out instead.
 
 ---
 
@@ -12,14 +12,14 @@
 | Worker skills         | `.claude/skills/cursor-worker-*`  | `init-claude.sh`                                        |
 | Orchestration rules   | `CLAUDE.md`                       | Merge `docs/claude-orchestration-snippet.md` after init |
 | Parent model          | Claude Code model picker          | You pick Fable 5 each session                           |
-| Composer execution    | `cursor-agent` on PATH            | Cursor subscription auth                                |
+| Worker execution      | `cursor-agent` on PATH            | Cursor subscription auth                                |
 
 ```mermaid
 flowchart LR
   Fable["Fable 5"]
   CMd["CLAUDE.md"]
   Skills["cursor-worker-* skills"]
-  CLI["cursor-agent composer-2.5"]
+  CLI["cursor-agent cursor-grok-4.6-low[fast=false]"]
   Fable --> CMd --> Skills --> CLI
 ```
 
@@ -45,7 +45,7 @@ Reset templates: re-run `init-claude.sh` (overwrites copied skills and snippet).
 
 ```bash
 which cursor-agent
-cursor-agent --list-models   # must list composer-2.5
+cursor-agent --list-models   # must list cursor-grok-4.6-low (use [fast=false])
 ```
 
 Auth uses your **Cursor** subscription — not a separate OpenAI/Codex stack.
@@ -70,7 +70,7 @@ Delegation: bulk edits → `cursor-worker-implement`; review → `cursor-worker-
 ## Cost traps
 
 - Bulk edits on Fable when `cursor-agent` was available.
-- `composer-2.5-fast` unless intentional.
+- Passing Composer, Grok High, or Fast (`*-fast`) to `cursor-agent` unless intentional.
 - Parallel `cursor-agent` runs = parallel Cursor usage.
 - Wrapper stages still cost Claude tokens — keep wrapper on Sonnet low.
 

@@ -34,10 +34,10 @@ Usage:
   bun run data-schema-load [-- --table <name>] [--file <path>]
 
 Local dev computer only. Requires data-schema/<table>/spec.yaml first (write it,
-or data-schema-pull). Reads that spec, ogr2ogr into data.<table>, then verifies
-row count and creates indexes. Looks in data-schema/<table>/ for a .geojson or
-.gpkg (prefers spec.source.file when that file is there). --file is only for a
-source that is not in that folder.
+or data-schema-pull). Reads that spec and loads into data.<table> (.geojson/.gpkg via
+ogr2ogr, .sql via psql), then verifies row count and creates indexes. Looks in
+data-schema/<table>/ for a .geojson, .gpkg or .sql (prefers spec.source.file when
+that file is there). --file is only for a source that is not in that folder.
 
 Does not export or upload — run data-schema-publish after you have checked the table.
 
@@ -47,7 +47,7 @@ Options:
   --file <path>   Source outside the table folder (Downloads, a one-off path)
   -h, --help      This message
 
-Requires: GDAL 3.8+ (see app/README.md#host-binaries-local-vs-server), Docker (psql for CREATE SCHEMA / indexes), ENVIRONMENT=development.
+Requires: Docker (psql). GDAL 3.8+ only for .geojson/.gpkg (see app/README.md#host-binaries-local-vs-server). ENVIRONMENT=development.
 
 ${formatDataSchemaDocsHelp('new-or-updated-data')}
 `)

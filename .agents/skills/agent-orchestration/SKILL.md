@@ -1,17 +1,17 @@
 ---
 name: agent-orchestration
 description: >-
-  Orchestrator (default Grok 4.5) with composer-2.5[fast=false] workers. Two
-  separate setups: Cursor IDE (subagents in .cursor/agents) or Claude Code
-  (cursor-agent CLI + .claude/skills). Use when configuring orchestration;
-  pick the guide for your host.
+  Orchestrator (default Grok 4.6 High, standard speed) with
+  cursor-grok-4.6-low[fast=false] workers. Two separate setups: Cursor IDE
+  (subagents in .cursor/agents) or Claude Code (cursor-agent CLI + .claude/skills).
+  Use when configuring orchestration; pick the guide for your host.
 user-invocable: true
 disable-model-invocation: true
 ---
 
 # Agent orchestration
 
-**Goal:** **Grok 4.5** (default orchestrator) plans; **`composer-2.5[fast=false]`** executes bulk work cheaper.
+**Goal:** **Grok 4.6 High** standard / not Fast (default orchestrator) plans; **`cursor-grok-4.6-low[fast=false]`** executes bulk work at Composer-like cost with better quality.
 
 Install once, then run **only** the init for your host from `.agents/skills/agent-orchestration/`:
 

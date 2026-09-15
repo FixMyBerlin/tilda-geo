@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import type { z } from 'zod'
 import { RadioGroup } from '@/components/shared/form/fields/RadioGroup'
 import { Select } from '@/components/shared/form/fields/Select'
+import { Textarea } from '@/components/shared/form/fields/Textarea'
 import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form } from '@/components/shared/form/Form'
 import type { FormState } from '@/server/utils/validation'
@@ -17,6 +18,8 @@ export const QaConfigFormInputSchema = {
   needsReviewThreshold: '0.2',
   absoluteDifferenceThreshold: '4',
   regionId: '',
+  trustedOsmUsernames: '',
+  referenceFrozenAt: '',
 } as const
 
 type QaConfigFormBaseValues = {
@@ -29,6 +32,8 @@ type QaConfigFormBaseValues = {
   needsReviewThreshold: string
   absoluteDifferenceThreshold: string
   regionId: string
+  trustedOsmUsernames: string
+  referenceFrozenAt: string
 }
 
 type QaConfigFormProps<TSchema extends z.ZodTypeAny> = {
@@ -133,6 +138,21 @@ export function QaConfigForm<TSchema extends z.ZodTypeAny>({
             label="Absolute Difference Threshold"
             type="number"
             help="Maximale absolute Differenz, die nicht als Änderung betrachtet wird."
+          />
+          <TextField
+            form={form}
+            name="referenceFrozenAt"
+            label="Referenz eingefroren am"
+            type="date"
+            help="Tag, an dem die Referenz (Voronoi-Baseline) eingefroren wurde. OSM-Bearbeitungen ab 00:00 Uhr (UTC) dieses Tages zählen als neu und werden gegen die Liste vertrauenswürdiger OSM-Nutzer:innen geprüft."
+          />
+          <Textarea
+            form={form}
+            name="trustedOsmUsernames"
+            label="Vertrauensliste (OSM-Benutzernamen)"
+            optional
+            rows={5}
+            help="Ein OSM-Benutzername pro Zeile, wird kleingeschrieben gespeichert. Leere Liste = aus. Eine gelb/rot bewertete Zelle bekommt den System-Status »Gut (Vertrauensliste)«, wenn die seit dem Freeze bearbeiteten Stellplätze zuletzt von diesen Nutzer:innen bearbeitet wurden; bis zu »Absolute Difference Threshold« Stellplätze anderer Bearbeiter:innen sind erlaubt. Umbenannte OSM-Accounts hier nachtragen."
           />
           <RadioGroup
             form={form}

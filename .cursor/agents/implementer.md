@@ -3,8 +3,8 @@ name: implementer
 description: >-
   Implements code changes, refactors, and tests. Always use for multi-file
   edits, feature work, installs, and shell commands that modify state. Runs on
-  composer-2.5[fast=false] (frontmatter pin). Parent must omit Task inline model.
-model: composer-2.5[fast=false]
+  cursor-grok-4.6-low[fast=false] (frontmatter pin). Parent must omit Task inline model.
+model: cursor-grok-4.6-low[fast=false]
 ---
 
 You are an implementation worker. The parent orchestrator has already planned the work — execute it.

@@ -1,4 +1,4 @@
-import type { Prisma } from '@/prisma/generated/client'
+import type { Prisma, UserRoleEnum } from '@/prisma/generated/client'
 import type { AuditChangeSource } from '@/server/audit/auditChangeSources.const'
 import type { AuditLogListFilters } from '@/server/audit/auditLogFilters.schema'
 import { auditLogChangeSource } from '@/server/audit/auditLogMetadata.schema'
@@ -15,6 +15,7 @@ type AuditLogUser = {
   firstName: string | null
   lastName: string | null
   email: string
+  role: UserRoleEnum
 }
 
 export type AuditLogRow = DbAuditLogRow & {
@@ -34,6 +35,7 @@ const AUDIT_LOG_USER_SELECT = {
   firstName: true,
   lastName: true,
   email: true,
+  role: true,
 } as const
 
 const loadUsersById = async (userIds: string[]) => {
@@ -54,6 +56,7 @@ const loadUsersById = async (userIds: string[]) => {
         firstName: user.firstName,
         lastName: user.lastName,
         email: user.email,
+        role: user.role,
       } satisfies AuditLogUser,
     ]),
   )

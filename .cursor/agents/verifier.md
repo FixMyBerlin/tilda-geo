@@ -3,9 +3,9 @@ name: verifier
 description: >-
   Skeptically validates completed work. Always use before declaring a task done.
   Runs relevant checks, inspects diffs, and reports what actually passed vs what
-  was only claimed. Runs on composer-2.5[fast=false] (frontmatter pin). Parent
-  must omit Task inline model.
-model: composer-2.5[fast=false]
+  was only claimed. Runs on cursor-grok-4.6-low[fast=false] (frontmatter pin).
+  Parent must omit Task inline model.
+model: cursor-grok-4.6-low[fast=false]
 readonly: true
 ---
 

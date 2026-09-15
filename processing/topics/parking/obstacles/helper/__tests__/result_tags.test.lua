@@ -12,7 +12,11 @@ describe('`result_tags`', function()
         mapillary = '123'
       },
       id = 1,
-      type = 'node'
+      type = 'node',
+      -- Fields osm2pgsql attaches to the OSM object; used by `metadata()` to build `meta`.
+      user = 'test_user',
+      timestamp = 1700000000,
+      changeset = 42,
     }
     local result = categorize_obstacle_points(input_object)
     local result_tags = result_tags(result)
@@ -20,6 +24,10 @@ describe('`result_tags`', function()
     assert.are.equal(result_tags.id, 'node/'..input_object.id)
     assert.are.equal(result_tags.tags.category, 'bollard')
     assert.are.equal(result_tags.tags.osm_mapillary, input_object.tags.mapillary)
+    -- `metadata()` must read the OSM object (`result.object`), not `result` itself.
+    assert.are.equal(result_tags.meta.updated_by, 'test_user')
+    assert.are.equal(result_tags.meta.updated_at, 1700000000)
+    assert.are.equal(result_tags.meta.changeset_id, 42)
   end)
 
   it('check tags, tags_cc', function()

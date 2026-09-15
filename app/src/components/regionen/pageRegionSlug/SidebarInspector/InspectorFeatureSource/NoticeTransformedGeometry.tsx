@@ -9,10 +9,11 @@ export const NoticeTransformedGeometry = ({ visible }: Props) => {
         Hinweis: Transformierte Geometrie
       </summary>
       <p className="my-0 ml-3">
-        Diese Geometrie wurde im Rahmen der Datenaufbereitung künstlich erstellt. In OpenStreetMap
-        sind die Daten an der Straßen-Geometrie erfasst. Durch die Datenaufbereitung können die
-        Attribute kompfortabler analysiert und geprüft werden. Sie sorgt aber auch dafür, dass
-        Verbindungspunkte kleine Kanten und Lücken aufweisen können.
+        Diese Geometrie wurde im Rahmen der Datenaufbereitung künstlich aus der Straßen-Geometrie
+        abgeleitet. In OpenStreetMap sind die Daten an der Straße erfasst. Durch die Aufbereitung
+        können die Attribute komfortabler analysiert und geprüft werden. Die Geometrie liegt dabei
+        auf der Straßen-Mittellinie; der seitliche Versatz nach links bzw. rechts erfolgt nur
+        visuell im Kartenstil.
       </p>
     </details>
   )

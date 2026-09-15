@@ -11,6 +11,7 @@ import seedRegions from './seeds/regions'
 import seedUsers from './seeds/users'
 
 const seed = async () => {
+  // Bbox: `seed-herrfurthplatz` in `app/scripts/processing-generate-command/bboxPresets.ts`
   await runGeoBootstrap()
 
   await seedRegions()

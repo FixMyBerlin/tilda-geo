@@ -13,13 +13,14 @@ Most FMC apps share the same core (plugins, type-aware lint, switch exhaustivene
 - **`sortTailwindcss.stylesheet`** — point at your global CSS entry.
 - **Custom oxlint `jsPlugins`** — e.g. TanStack Start auth-boundary rules; see skill `tanstack-start-auth` → [endpoint-auth-lint.md](../../tanstack-start-auth/references/endpoint-auth-lint.md).
 - **`eslint-plugin-compat`** — `compat/compat` on client-shipped paths; scoped override in [browser-target.md](browser-target.md). JS-plugin load issues under Bun `globalStore`: [bun-install.md](bun-install.md).
-- **`eslint/no-unused-vars`** — template sets `^_` ignore patterns (including bare `_`); needed because configuring the rule with an object clears oxlint’s defaults (which ignore `_foo` but not `_`).
+- **`eslint/no-unused-vars`** — configuring the rule with an object clears oxlint’s defaults, so the template restates the `^_` patterns (oxlint ignores `_foo` but not bare `_`).
 
 ## React Compiler
 
-Enable the oxlint **`react`** plugin. Correctness compiler rules (immutability, set-state-in-effect, purity, void-use-memo, …) are on by default — no nursery `react/react-compiler` and no `eslint-plugin-react-hooks` / `oxlint-config-react-hooks-js` jsPlugin. Explicitly set `'react/unsupported-syntax': 'error'` (restriction category). See [examples/oxlint.config.mjs](../examples/oxlint.config.mjs) and [Oxc React Compiler Support](https://oxc.rs/blog/2026-08-18-react-compiler-support). Component conventions: skill `react-dev`.
+- **Lint:** oxlint `react` plugin — correctness compiler rules are on by default; add `'react/unsupported-syntax': 'error'` (restriction). No `react/react-compiler`, no `eslint-plugin-react-hooks` jsPlugin.
+- **Build:** `@vitejs/plugin-react` ≥ 6.1 with `viteReact({ compiler: true })` + peer `oxc-transform-react` — not Babel.
 
-Vite: `@vitejs/plugin-react` ≥ 6.1 with `viteReact({ compiler: true })` and peer `oxc-transform-react` (experimental Rust compiler; not Babel / `@rolldown/plugin-babel`).
+[Oxc React Compiler Support](https://oxc.rs/blog/2026-08-18-react-compiler-support) · [examples/oxlint.config.mjs](../examples/oxlint.config.mjs) · component conventions: skill `react-dev`.
 
 ## Type-aware linting
 
