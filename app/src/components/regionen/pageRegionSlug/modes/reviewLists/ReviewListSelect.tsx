@@ -12,7 +12,6 @@ import type { ReviewListCommands } from './useReviewListCommands'
 
 type SelectProps = {
   lists: ReviewListForRegion[]
-  canManage: boolean
   selectedListId: number | undefined
   onSelect: (listId: number) => void
 }
@@ -28,11 +27,10 @@ const menuHeadingClassName = 'px-3 pt-2 pb-1 text-xs font-semibold tracking-wide
  */
 export const ReviewListSelect = ({
   lists,
-  canManage,
   selectedListId,
   onSelect,
   commands: { uploadError, create, rename, selectedList, nameModal, openNameModal, closeNameModal },
-}: Pick<SelectProps, 'lists' | 'canManage' | 'selectedListId' | 'onSelect'> & {
+}: Pick<SelectProps, 'lists' | 'selectedListId' | 'onSelect'> & {
   commands: ReviewListCommands
 }) => {
   return (
@@ -51,16 +49,14 @@ export const ReviewListSelect = ({
           onChange={(next) => onSelect(Number(next))}
         />
       ) : null}
-      {canManage ? (
-        <button
-          type="button"
-          onClick={(event) => openNameModal('create', event.currentTarget)}
-          className="flex w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-white/90 select-none hover:bg-white/10"
-        >
-          <PlusIcon className="size-4 shrink-0" aria-hidden />
-          <span>Neue Prüfliste…</span>
-        </button>
-      ) : null}
+      <button
+        type="button"
+        onClick={(event) => openNameModal('create', event.currentTarget)}
+        className="flex w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-white/90 select-none hover:bg-white/10"
+      >
+        <PlusIcon className="size-4 shrink-0" aria-hidden />
+        <span>Neue Prüfliste…</span>
+      </button>
       {uploadError ? <p className="text-xs text-red-200">{uploadError}</p> : null}
       <ReviewListNameModal
         kind={nameModal}
@@ -83,7 +79,6 @@ export const ReviewListSelect = ({
 /** Header ⋯ menu: GeoJSON for entries, rename/delete for the list. */
 export const ReviewListManageMenu = ({
   regionSlug: _regionSlug,
-  canManage,
   selectedListId,
   commands: {
     setUploadError,
@@ -101,7 +96,7 @@ export const ReviewListManageMenu = ({
     existingFeaturesReady,
     createdCount,
   },
-}: Pick<SelectProps, 'canManage' | 'selectedListId'> & {
+}: Pick<SelectProps, 'selectedListId'> & {
   regionSlug: string
   commands: ReviewListCommands
 }) => {
@@ -123,63 +118,57 @@ export const ReviewListManageMenu = ({
                 Herunterladen (GeoJSON)
               </button>
             </MenuItem>
-            {canManage ? (
-              <MenuItem disabled={uploadPending || selectedListId === undefined}>
-                <button
-                  type="button"
-                  onClick={(event) => openUploadModal(event.currentTarget)}
-                  className={menuItemClassName}
-                >
-                  {uploadPending ? 'Wird hinzugefügt…' : 'Einträge hinzufügen (GeoJSON)'}
-                </button>
-              </MenuItem>
-            ) : null}
+            <MenuItem disabled={uploadPending || selectedListId === undefined}>
+              <button
+                type="button"
+                onClick={(event) => openUploadModal(event.currentTarget)}
+                className={menuItemClassName}
+              >
+                {uploadPending ? 'Wird hinzugefügt…' : 'Einträge hinzufügen (GeoJSON)'}
+              </button>
+            </MenuItem>
           </MenuSection>
-          {canManage ? (
-            <MenuSection>
-              <MenuHeading className={menuHeadingClassName}>Liste</MenuHeading>
-              <MenuItem>
-                <button
-                  type="button"
-                  onClick={(event) => openNameModal('rename', event.currentTarget)}
-                  className={menuItemClassName}
-                >
-                  Umbenennen
-                </button>
-              </MenuItem>
-              <MenuItem disabled={remove.isPending || (selectedList?.entryCount ?? 0) > 0}>
-                <button
-                  type="button"
-                  title={
-                    selectedList && selectedList.entryCount > 0
-                      ? 'Nur leere Listen können gelöscht werden'
-                      : undefined
-                  }
-                  onClick={() => {
-                    if (selectedList) remove.mutate(selectedList.id)
-                  }}
-                  className={menuItemClassName}
-                >
-                  Löschen
-                </button>
-              </MenuItem>
-            </MenuSection>
-          ) : null}
+          <MenuSection>
+            <MenuHeading className={menuHeadingClassName}>Liste</MenuHeading>
+            <MenuItem>
+              <button
+                type="button"
+                onClick={(event) => openNameModal('rename', event.currentTarget)}
+                className={menuItemClassName}
+              >
+                Umbenennen
+              </button>
+            </MenuItem>
+            <MenuItem disabled={remove.isPending || (selectedList?.entryCount ?? 0) > 0}>
+              <button
+                type="button"
+                title={
+                  selectedList && selectedList.entryCount > 0
+                    ? 'Nur leere Listen können gelöscht werden'
+                    : undefined
+                }
+                onClick={() => {
+                  if (selectedList) remove.mutate(selectedList.id)
+                }}
+                className={menuItemClassName}
+              >
+                Löschen
+              </button>
+            </MenuItem>
+          </MenuSection>
         </MenuItems>
       </Menu>
-      {canManage ? (
-        <ReviewListGeojsonUploadModal
-          open={uploadModalOpen}
-          isPending={uploadPending}
-          error={uploadError}
-          createdCount={createdCount}
-          existingFeatures={existingFeatures}
-          existingFeaturesReady={existingFeaturesReady}
-          onClose={closeUploadModal}
-          onErrorDismiss={() => setUploadError(null)}
-          onConfirm={uploadGeojsonFile}
-        />
-      ) : null}
+      <ReviewListGeojsonUploadModal
+        open={uploadModalOpen}
+        isPending={uploadPending}
+        error={uploadError}
+        createdCount={createdCount}
+        existingFeatures={existingFeatures}
+        existingFeaturesReady={existingFeaturesReady}
+        onClose={closeUploadModal}
+        onErrorDismiss={() => setUploadError(null)}
+        onConfirm={uploadGeojsonFile}
+      />
     </>
   )
 }

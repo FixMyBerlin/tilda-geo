@@ -81,7 +81,6 @@ type Props = {
   features: ReviewListEntryFeature[]
   isLoading: boolean
   selectedListId: number | undefined
-  canManage: boolean
   onOpenNewEntry: () => void
   onOpenUpload: (origin: HTMLElement) => void
 }
@@ -94,7 +93,6 @@ export const ReviewListsModeList = ({
   features,
   isLoading,
   selectedListId,
-  canManage,
   onOpenNewEntry,
   onOpenUpload,
 }: Props) => {
@@ -178,7 +176,6 @@ export const ReviewListsModeList = ({
     )
   }
   if (entries.length === 0) {
-    if (!canManage) return <ModePanelEmpty label="Keine Einträge." />
     return (
       <div className="flex flex-col gap-3 px-4 py-4" role="status">
         <div className="flex items-center justify-between gap-3">

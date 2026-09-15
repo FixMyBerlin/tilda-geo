@@ -3,7 +3,6 @@ import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
-import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { frenchQuote } from '@/components/shared/text/Quotes'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 import {
@@ -26,7 +25,6 @@ import { useReviewListsModeParam } from './useReviewListsModeParam'
 
 export const PageModeReviewLists = () => {
   const region = useRegion()
-  const canManage = useHasPermissions()
   const { setFeaturesParam } = useFeaturesParam()
   const { clearInspectorFeatures } = useMapActions()
   const { selected, clearModeDetail } = useModeDetailSelection()
@@ -106,7 +104,6 @@ export const PageModeReviewLists = () => {
       collection={
         <ReviewListSelect
           lists={lists}
-          canManage={canManage}
           selectedListId={selectedListId}
           onSelect={onSelectList}
           commands={reviewListCommands}
@@ -114,40 +111,34 @@ export const PageModeReviewLists = () => {
       }
       actions={
         composeDetail ? undefined : reviewDetail &&
-          canManage &&
           selectedEntryId !== undefined &&
           selectedListId !== undefined ? (
           <ReviewEntryDetailActions entryId={selectedEntryId} listId={selectedListId} />
         ) : lists.length === 0 ? (
-          canManage ? (
-            <Tooltip text="Neue Prüfliste">
+          <Tooltip text="Neue Prüfliste">
+            <button
+              type="button"
+              onClick={(event) => reviewListCommands.openNameModal('create', event.currentTarget)}
+              aria-label="Neue Prüfliste"
+              className={modePanelHeaderIconButtonClassName}
+            >
+              <PlusIcon className="size-5" aria-hidden />
+            </button>
+          </Tooltip>
+        ) : (
+          <>
+            <Tooltip text="Neuer Eintrag">
               <button
                 type="button"
-                onClick={(event) => reviewListCommands.openNameModal('create', event.currentTarget)}
-                aria-label="Neue Prüfliste"
+                onClick={openNewEntry}
+                aria-label="Neuer Eintrag"
                 className={modePanelHeaderIconButtonClassName}
               >
                 <PlusIcon className="size-5" aria-hidden />
               </button>
             </Tooltip>
-          ) : undefined
-        ) : (
-          <>
-            {canManage ? (
-              <Tooltip text="Neuer Eintrag">
-                <button
-                  type="button"
-                  onClick={openNewEntry}
-                  aria-label="Neuer Eintrag"
-                  className={modePanelHeaderIconButtonClassName}
-                >
-                  <PlusIcon className="size-5" aria-hidden />
-                </button>
-              </Tooltip>
-            ) : null}
             <ReviewListManageMenu
               regionSlug={region.slug}
-              canManage={canManage}
               selectedListId={selectedListId}
               commands={reviewListCommands}
             />
@@ -180,7 +171,6 @@ export const PageModeReviewLists = () => {
         features={features}
         isLoading={isLoading}
         selectedListId={selectedListId}
-        canManage={canManage}
         onOpenNewEntry={openNewEntry}
         onOpenUpload={reviewListCommands.openUploadModal}
       />
