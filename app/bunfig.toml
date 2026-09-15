@@ -15,5 +15,10 @@ minimumReleaseAgeExcludes = [
 # (publicHoistPattern does not help packages in the global store). Do not use an npm alias
 # (e.g. npm:nitro-nightly): trustedDependencies only matches the published package name.
 # @see https://bun.com/docs/pm/global-store
+#
+# package.json `overrides.rolldown`: Vite and nitro must share one rolldown version. With Vite on
+# rolldown 1.2.6 and nitro 3.0.260903-beta, the nitro server bundle referenced an undeclared
+# `ssr_exports` in .output/server/_ssr/ssr.mjs → every request 500s at runtime (build still passes).
+# Check `grep -n 'var ssr_exports' .output/server/_ssr/ssr.mjs` before removing the override.
 linker = "isolated"
 globalStore = true

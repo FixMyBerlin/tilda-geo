@@ -256,5 +256,8 @@
     "framer-motion",
     "motion",
     "nitro"
-  ]
+  ],
+  "overrides": {
+    "rolldown": "1.2.8"
+  }
 }
