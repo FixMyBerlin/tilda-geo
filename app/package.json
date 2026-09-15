@@ -255,6 +255,6 @@
     "eslint-plugin-compat",
     "framer-motion",
     "motion",
-    "nitro"
+    "nitro-nightly"
   ]
 }
