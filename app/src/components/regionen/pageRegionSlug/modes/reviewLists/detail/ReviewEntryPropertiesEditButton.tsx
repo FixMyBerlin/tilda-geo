@@ -9,7 +9,6 @@ import {
   inputNormal,
   labelClass,
 } from '@/components/shared/form/fields/sharedStyles'
-import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { buttonStylesOnYellow } from '@/components/shared/links/styles'
 import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
 import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
@@ -29,7 +28,6 @@ import {
 type Props = { entryId: number; listId: number }
 
 export const ReviewEntryPropertiesEditButton = ({ entryId, listId }: Props) => {
-  const hasPermissions = useHasPermissions()
   const regionSlug = useRegionSlug()
   const queryClient = useQueryClient()
   const formId = useId()
@@ -57,8 +55,6 @@ export const ReviewEntryPropertiesEditButton = ({ entryId, listId }: Props) => {
     },
     onError: (error) => toastError(error, 'Attribute konnten nicht gespeichert werden.'),
   })
-
-  if (!hasPermissions) return null
 
   const handleOpen = (event: MouseEvent<HTMLButtonElement>) => {
     captureModalOpenOrigin(event.currentTarget)

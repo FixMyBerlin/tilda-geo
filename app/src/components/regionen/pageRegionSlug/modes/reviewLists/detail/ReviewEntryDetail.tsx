@@ -3,7 +3,6 @@ import { twMerge } from 'tailwind-merge'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { formatRelativeTime } from '@/components/shared/date/relativeTime'
 import { TimeWithRelativeTooltip } from '@/components/shared/date/TimeWithRelativeTooltip'
-import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { buttonStyles, buttonStylesOnYellow } from '@/components/shared/links/styles'
 import { ReviewEntryStatus } from '@/prisma/generated/enums'
 import {
@@ -23,7 +22,6 @@ type Props = { entryId: number }
 
 export const ReviewEntryDetail = ({ entryId }: Props) => {
   const regionSlug = useRegionSlug()
-  const hasPermissions = useHasPermissions()
   const { move: isMoveArmed } = useReviewListsModeValue()
   const queryClient = useQueryClient()
 
@@ -72,38 +70,36 @@ export const ReviewEntryDetail = ({ entryId }: Props) => {
           {entry.updatedBy?.osmName ? ` von ${entry.updatedBy.osmName}` : ''}
         </div>
       ) : null}
-      {hasPermissions ? (
-        <p className="text-xs text-gray-500">
-          {isMoveArmed ? (
-            <>
-              Geometrie-Bearbeitung ist aktiv (
-              <span className="inline-flex items-center gap-1 font-medium text-gray-700">
-                <span
-                  className="inline-block size-2.5 rounded-full"
-                  style={{ backgroundColor: REVIEW_ENTRY_MOVE_COLOR }}
-                  aria-hidden
-                />
-                {REVIEW_ENTRY_MOVE_COLOR_LABEL}
-              </span>
-              ). Das Element auf der Karte ziehen oder über die Werkzeugleiste Teile hinzufügen und
-              löschen.
-            </>
-          ) : (
-            <>
-              Mit dem Stift-Button oben die Geometrie-Bearbeitung starten (
-              <span className="inline-flex items-center gap-1 font-medium text-gray-700">
-                <span
-                  className="inline-block size-2.5 rounded-full"
-                  style={{ backgroundColor: REVIEW_ENTRY_MOVE_COLOR }}
-                  aria-hidden
-                />
-                {REVIEW_ENTRY_MOVE_COLOR_LABEL}
-              </span>
-              ). Danach das Element auf der Karte ziehen.
-            </>
-          )}
-        </p>
-      ) : null}
+      <p className="text-xs text-gray-500">
+        {isMoveArmed ? (
+          <>
+            Geometrie-Bearbeitung ist aktiv (
+            <span className="inline-flex items-center gap-1 font-medium text-gray-700">
+              <span
+                className="inline-block size-2.5 rounded-full"
+                style={{ backgroundColor: REVIEW_ENTRY_MOVE_COLOR }}
+                aria-hidden
+              />
+              {REVIEW_ENTRY_MOVE_COLOR_LABEL}
+            </span>
+            ). Das Element auf der Karte ziehen oder über die Werkzeugleiste Teile hinzufügen und
+            löschen.
+          </>
+        ) : (
+          <>
+            Mit dem Stift-Button oben die Geometrie-Bearbeitung starten (
+            <span className="inline-flex items-center gap-1 font-medium text-gray-700">
+              <span
+                className="inline-block size-2.5 rounded-full"
+                style={{ backgroundColor: REVIEW_ENTRY_MOVE_COLOR }}
+                aria-hidden
+              />
+              {REVIEW_ENTRY_MOVE_COLOR_LABEL}
+            </span>
+            ). Danach das Element auf der Karte ziehen.
+          </>
+        )}
+      </p>
 
       {/* Status */}
       <div className="isolate inline-flex rounded-md shadow-sm" role="group" aria-label="Status">
@@ -111,7 +107,7 @@ export const ReviewEntryDetail = ({ entryId }: Props) => {
           <button
             key={status}
             type="button"
-            disabled={!hasPermissions || setStatus.isPending}
+            disabled={setStatus.isPending}
             onClick={() => setStatus.mutate(status)}
             className={twMerge(
               entry.status === status ? buttonStylesOnYellow : buttonStyles,
@@ -150,17 +146,15 @@ export const ReviewEntryDetail = ({ entryId }: Props) => {
             <ModeCommentMarkdown markdown={c.body} />
           </div>
         ))}
-        {hasPermissions ? (
-          <ModeCommentComposer
-            draftId={reviewCommentDraftId(entryId)}
-            label="Kommentar (Markdown)"
-            submitLabel="Kommentieren"
-            placeholder="Kommentar hinzufügen…"
-            onSubmit={async (body) => {
-              await addComment.mutateAsync(body)
-            }}
-          />
-        ) : null}
+        <ModeCommentComposer
+          draftId={reviewCommentDraftId(entryId)}
+          label="Kommentar (Markdown)"
+          submitLabel="Kommentieren"
+          placeholder="Kommentar hinzufügen…"
+          onSubmit={async (body) => {
+            await addComment.mutateAsync(body)
+          }}
+        />
       </div>
     </div>
   )

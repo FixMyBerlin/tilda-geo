@@ -14,7 +14,7 @@ type Props = {
 const DELETE_DISABLED_TITLE =
   'Der Eintrag braucht mindestens eine Geometrie – nutzen Sie den Löschen-Button oben, um den ganzen Eintrag zu löschen.'
 
-const segmentClassName = (active: boolean, disabled: boolean) =>
+const segmentClassName = ({ active, disabled }: { active: boolean; disabled: boolean }) =>
   twJoin(
     '-ml-px inline-flex min-h-10 items-center gap-1.5 px-3 py-1.5 text-sm font-semibold ring-1 ring-inset focus:z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500',
     active
@@ -34,15 +34,17 @@ export const ReviewEditToolbar = ({
 }: Props) => {
   const addMode = family ? REVIEW_DRAW_MODE[family] : null
   const canAddPart = addMode !== null
+  const selectPressed = mode === REVIEW_DRAW_MODE.select
+  const addPressed = canAddPart && mode === addMode
 
   return (
     <div className="pointer-events-auto absolute top-14 left-1/2 isolate z-1000 inline-flex -translate-x-1/2 rounded-md shadow-xs sm:top-[10px]">
       <button
         type="button"
-        aria-pressed={mode === REVIEW_DRAW_MODE.select}
+        aria-pressed={selectPressed}
         onClick={() => onModeChange(REVIEW_DRAW_MODE.select)}
         className={twJoin(
-          segmentClassName(mode === REVIEW_DRAW_MODE.select, false),
+          segmentClassName({ active: selectPressed, disabled: false }),
           'rounded-l-md',
         )}
       >
@@ -51,13 +53,13 @@ export const ReviewEditToolbar = ({
       </button>
       <button
         type="button"
-        aria-pressed={addMode !== null && mode === addMode}
+        aria-pressed={addPressed}
         disabled={!canAddPart}
         onClick={() => {
           if (!addMode) return
           onModeChange(addMode)
         }}
-        className={segmentClassName(addMode !== null && mode === addMode, !canAddPart)}
+        className={segmentClassName({ active: addPressed, disabled: !canAddPart })}
       >
         <PlusIcon className="size-4" aria-hidden />
         Teil hinzufügen
@@ -67,7 +69,10 @@ export const ReviewEditToolbar = ({
         disabled={!canDeletePart}
         title={canDeletePart ? undefined : DELETE_DISABLED_TITLE}
         onClick={onDeletePart}
-        className={twJoin(segmentClassName(false, !canDeletePart), 'rounded-r-md')}
+        className={twJoin(
+          segmentClassName({ active: false, disabled: !canDeletePart }),
+          'rounded-r-md',
+        )}
       >
         <TrashIcon className="size-4" aria-hidden />
         Teil löschen

@@ -4,7 +4,6 @@ import { useControl } from 'react-map-gl/maplibre'
 import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
 import { useModeDetailSelection } from '@/components/regionen/pageRegionSlug/modes/useModeDetailSelection'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
-import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { toastError } from '@/components/shared/toast/toastError'
 import {
   reviewEntriesQueryOptions,
@@ -25,14 +24,13 @@ import { type ReviewDrawMode } from './reviewTerraDrawConfig'
 
 /**
  * Map drawing for Prüflisten: compose toolbar (`rl.new`) or geometry-edit (`rl.move`)
- * after the header pencil is toggled. While a real draw session is active (member +
- * compose, or member + move with a selected review entry), `useReviewDrawActive` is
- * true and RegionMap swallows clicks / drops interactive layers. A leftover `rl.move`
- * after delete or for a non-member is not a draw session, so map clicks work again.
+ * after the header pencil is toggled. While a real draw session is active (compose,
+ * or move with a selected review entry), `useReviewDrawActive` is true and RegionMap
+ * swallows clicks / drops interactive layers. A leftover `rl.move` after delete is
+ * not a draw session, so map clicks work again.
  */
 export const ReviewMapDrawing = () => {
   const currentMode = useCurrentMode()
-  const canManage = useHasPermissions()
   const regionSlug = useRegionSlug()
   const queryClient = useQueryClient()
   const { selected } = useModeDetailSelection()
@@ -199,10 +197,7 @@ export const ReviewMapDrawing = () => {
   useEffect(
     function syncReviewDrawEnabledWithSession() {
       const enabled =
-        currentMode.isReviewLists &&
-        canManage &&
-        activeListId !== undefined &&
-        drawSession !== 'idle'
+        currentMode.isReviewLists && activeListId !== undefined && drawSession !== 'idle'
       // Session start mode is kind-based, not toolbar state: compose → point, edit → select.
       // Must run before setEnabled so pendingMode is applied instead of a leftover select.
       // Do not depend on `mode` — the edit toolbar calls setMode directly when adding a part.
@@ -211,16 +206,16 @@ export const ReviewMapDrawing = () => {
       }
       control.setEnabled(enabled)
     },
-    [currentMode.isReviewLists, canManage, activeListId, drawSession, sessionKind, control],
+    [currentMode.isReviewLists, activeListId, drawSession, sessionKind, control],
   )
 
   useEffect(
     function syncComposeDrawMode() {
       if (sessionKind !== 'compose') return
-      if (!(currentMode.isReviewLists && canManage && activeListId !== undefined)) return
+      if (!(currentMode.isReviewLists && activeListId !== undefined)) return
       control.setMode(reviewDrawStartMode('compose', mode))
     },
-    [currentMode.isReviewLists, canManage, activeListId, drawSession, sessionKind, mode, control],
+    [currentMode.isReviewLists, activeListId, drawSession, sessionKind, mode, control],
   )
 
   useEffect(
@@ -240,12 +235,7 @@ export const ReviewMapDrawing = () => {
     [drawSession, editingEntryId, editingGeometry, control],
   )
 
-  if (
-    !currentMode.isReviewLists ||
-    !canManage ||
-    activeListId === undefined ||
-    drawSession === 'idle'
-  ) {
+  if (!currentMode.isReviewLists || activeListId === undefined || drawSession === 'idle') {
     return null
   }
 

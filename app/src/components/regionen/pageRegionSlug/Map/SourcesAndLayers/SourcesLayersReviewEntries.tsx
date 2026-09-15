@@ -6,7 +6,6 @@ import { modeIdentity } from '@/components/regionen/pageRegionSlug/modes/modeIde
 import { useReviewListsModeValue } from '@/components/regionen/pageRegionSlug/modes/reviewLists/useReviewListsModeParam'
 import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
-import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import {
   reviewEntriesQueryOptions,
   reviewListsQueryOptions,
@@ -35,7 +34,6 @@ const STATUS_COLOR: ExpressionSpecification = [
  */
 export const SourcesLayersReviewEntries = () => {
   const currentMode = useCurrentMode()
-  const canManage = useHasPermissions()
   const regionSlug = useRegionSlug()
   const { key, new: isComposing, move: isMoveArmed } = useReviewListsModeValue()
   const { featuresParam } = useFeaturesParam()
@@ -57,9 +55,7 @@ export const SourcesLayersReviewEntries = () => {
     .filter((feature) => feature.sourceId === reviewEntriesSourceId)
     .map((feature) => Number(feature.id))
   const editingId =
-    canManage && !isComposing && isMoveArmed && selectedIds.length === 1
-      ? selectedIds[0]
-      : undefined
+    !isComposing && isMoveArmed && selectedIds.length === 1 ? selectedIds[0] : undefined
   const haloIds = selectedIds.filter((id) => id !== editingId)
 
   const notEditing = (filter: ExpressionSpecification) =>
