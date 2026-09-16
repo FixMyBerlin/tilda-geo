@@ -42,7 +42,7 @@ curl -fSL --retry 3 -o "$OUTDIR/bikelanes.geojson" "${BASE}?${BBOX}&format=geojs
 curl -fSL --retry 3 -o "$OUTDIR/bikelanes.gpkg"    "${BASE}?${BBOX}&format=gpkg&apiKey=${ATLAS_API_KEY}"
 ```
 
-Large bboxes can take 30s+. Use `curl -f` so HTTP errors fail loudly. Response filename is in `Content-Disposition` (e.g. `bikelanes_2026-07-19.geojson`).
+Large bboxes can take 30s+. Use `curl -f` so HTTP errors fail loudly. Response filename is in `Content-Disposition` (e.g. `deutschland_bikelanes_2026-07-19.geojson`).
 
 ## Auth note
 
