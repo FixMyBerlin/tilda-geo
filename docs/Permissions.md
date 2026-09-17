@@ -41,17 +41,17 @@ Core helpers in `app/src/server/authorization/`:
 
 When a region is denied, the page data is redacted before it reaches the client (`redactRegionForDeniedAccess.server.ts`): map, mask, bbox, categories, background sources, exports, contract, welcome, and logo are removed. Only slug, name, status, and product stay for the denied screen.
 
-Tests: `redactRegionForDeniedAccess.server.test.ts`, `app/tests/pages/region-welcome.spec.ts`, `app/tests/pages/docs-region-downloads.spec.ts`. `checkRegionAuthorization` itself has no unit test.
+Tests: `redactRegionForDeniedAccess.server.test.ts`, `app/tests/pages/region-welcome.spec.ts`, `app/tests/pages/docs-region-downloads.spec.ts`. `checkRegionAuthorization.server.test.ts` (status × viewer table).
 
 ## Public pages
 
-| Page                                          | Access                          | Notes                                                                                                                             |
-| --------------------------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
-| `/` (marketing), `/kontakt` (incl. Impressum) | Public                          | Indexed                                                                                                                           |
-| `/datenschutz`                                | Public                          | `noindex`                                                                                                                         |
-| `/docs/$tableName`                            | Public                          | `noindex`. Optional `?r=<region>` adds region context only when the region is open to the viewer; downloads there need membership |
-| `/access-denied`, `/oAuthError`               | Public                          | `noindex`                                                                                                                         |
-| `/settings/user`                              | Signed-in users (404 otherwise) | `noindex`. Edits only the user's own profile                                                                                      |
+| Page                                         | Access                          | Notes                                                                                                                             |
+| -------------------------------------------- | ------------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `/` (marketing)                              | Public                          | Indexed                                                                                                                           |
+| `/kontakt` (incl. Impressum), `/datenschutz` | Public                          | `noindex`                                                                                                                         |
+| `/docs/$tableName`                           | Public                          | `noindex`. Optional `?r=<region>` adds region context only when the region is open to the viewer; downloads there need membership |
+| `/access-denied`, `/oAuthError`              | Public                          | `noindex`                                                                                                                         |
+| `/settings/user`                             | Signed-in users (404 otherwise) | `noindex`. Edits only the user's own profile                                                                                      |
 
 Non-production builds are `noindex` globally (`app/src/routes/__root.tsx`).
 
@@ -81,7 +81,7 @@ Two kinds of keys:
 
 `checkApiKey` accepts every request when `NODE_ENV=development`. Never set that on a reachable deployment.
 
-Tests: none at request level for `api/**` auth, the `ATLAS_API_KEY` bypass, or `/mcp`. Export membership is covered by `app/tests/pages/docs-region-downloads.spec.ts`.
+Tests: `checkApiKey.server.test.ts` (`ATLAS_API_KEY`, incl. the development skip), `guardAdminApi.server.test.ts` (`/mcp` and `api/admin/*` tokens: missing, unknown, revoked, demoted owner), `authGuards.server.test.ts` (`guardRegionMembership`). Export membership: `app/tests/pages/docs-region-downloads.spec.ts`.
 
 ## Region data
 
@@ -92,7 +92,7 @@ Tests: none at request level for `api/**` auth, the `ATLAS_API_KEY` bypass, or `
 | Static datasets / uploads | `public` flag per upload. Non-public files need member/admin, checked on the file route (`api/uploads.$slug.ts`). Non-public entries show a lock icon | Admin                 |
 | Exports                   | Region config decides **which** tables. Downloading **always** needs member/admin (or `ATLAS_API_KEY`), also on PUBLIC regions                        | Admin (region config) |
 
-Tests: `docs-region-downloads.spec.ts` (export: guest denied on PUBLIC, admin allowed), `regionModalAccess.test.ts` (which tables are offered). No test for the non-public upload file route.
+Tests: `docs-region-downloads.spec.ts` (export: guest denied on PUBLIC, admin allowed), `regionModalAccess.test.ts` (which tables are offered). Non-public upload files: `app/tests/pages/uploads-access.stubbed-auth.spec.ts` (guest 401, non-member 403, member passes).
 
 ## Region modes
 
@@ -110,7 +110,7 @@ Tests: `availableModes.test.ts`, `app/tests/smoke/region-modes.spec.ts` (guests 
 ### Hinweise: OSM notes
 
 - **Read:** fetched in the browser from the public OSM API. Visible wherever the Hinweise page opens.
-- **Create:** any signed-in user, posted to openstreetmap.org under their own OSM account (`createOsmNote.server.ts`). Not tied to a region or membership, because the note lands in public OSM data anyway.
+- **Create:** any signed-in user, posted to openstreetmap.org under their own OSM account (`createOsmNote.server.ts`). Not tied to a region or membership, because the note lands in public OSM data anyway. The compose UI only exists where OSM notes can be read (Hinweise mode, and the inspector link when the region has OSM notes), so this is an accepted gap.
 
 ### Hinweise: internal notes
 
@@ -125,7 +125,7 @@ Internal notes are always member-only, including on PUBLIC regions.
 
 Folders do not exist yet. When they do, linking a folder to other regions is planned as admin-only.
 
-Tests: `getNotesAndCommentsForRegion.server.test.ts` (non-member gets nothing). No tests for create/edit/delete or author-only rules.
+Tests: `getNotesAndCommentsForRegion.server.test.ts` (non-member gets nothing). `notesAuthorOnly.server.test.ts` (edit/delete of notes and comments: author only, another member and admin rejected).
 
 ### Qualitätssicherung
 
@@ -137,7 +137,7 @@ Everything is member/admin-only: navigation, map styles (status colors), area li
 | Create evaluation (status + comment)                    | Member, admin (`createQaEvaluation`). Author edits the comment (`updateQaEvaluationBody`); status and delete are not editable |
 | Create / edit / delete QA config                        | Admin                                                                                                                         |
 
-Tests: `app/tests/pages/qa-mode.stubbed-auth.spec.ts` (admin happy path), mode tests above. No unit test for the QA read/write checks or QA config admin checks.
+Tests: `app/tests/pages/qa-mode.stubbed-auth.spec.ts` (admin happy path), mode tests above. `qaConfigAdminOnly.server.test.ts` (config create/update/delete reject non-admins).
 
 ### Prüflisten
 
@@ -164,11 +164,10 @@ Comments share the access of the object they belong to. Only the author edits a 
 | QA evaluations | Yes, comment only (`updateQaEvaluationBody`) | No                 | No                 |
 | Prüfeinträge   | Yes (`updateReviewEntryComment`)             | No                 | No                 |
 
-Tests: `updateQaEvaluationBody.server.test.ts`, `updateReviewEntryComment.server.test.ts`. No test for internal note comments.
+Tests: `updateQaEvaluationBody.server.test.ts`, `updateReviewEntryComment.server.test.ts`, `notesAuthorOnly.server.test.ts`.
 
 ## Known gaps and open decisions
 
 - **Author vs. admin:** product memory was "author or admin may edit". The code is author-only everywhere. Decide before adding an admin bypass.
 - **Exports:** members-only is not a per-region setting; it is always on.
-- **Impressum:** it is part of `/kontakt` and indexed; only `/datenschutz` is `noindex`.
-- **Missing tests** for security-relevant checks: `checkRegionAuthorization`, `api/uploads.$slug` (non-public files), `ATLAS_API_KEY` bypasses, `/mcp`, QA config admin mutations, internal note author-only rules.
+- **Not tested on purpose:** each individual `requireAdmin` call site in admin server functions (covered by the `/admin` route guard test and code review).
