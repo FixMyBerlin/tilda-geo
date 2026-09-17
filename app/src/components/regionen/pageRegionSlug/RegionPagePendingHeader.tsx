@@ -1,11 +1,15 @@
 import { twJoin } from 'tailwind-merge'
+import { mapOverlayButtonElevationClassName } from '@/components/regionen/pageRegionSlug/mapOverlayChrome.const'
 
 const pulseBlock = 'animate-pulse rounded-md bg-gray-600/60'
 
 export function RegionPagePendingHeader() {
   return (
     <nav
-      className="z-10 w-full shrink-0 bg-gray-800 px-4 shadow-xl sm:px-6 lg:px-8 print:hidden"
+      className={twJoin(
+        'z-10 w-full shrink-0 bg-gray-800 px-4 sm:px-6 lg:px-8 print:hidden',
+        mapOverlayButtonElevationClassName,
+      )}
       aria-hidden="true"
     >
       <div className="relative flex min-h-16 items-center justify-between gap-4 sm:h-16">

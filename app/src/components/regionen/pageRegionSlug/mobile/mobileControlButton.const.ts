@@ -1,40 +1,52 @@
 import { twMerge } from 'tailwind-merge'
+import {
+  mapOverlayActionOutlineClassName,
+  mapOverlayButtonElevationClassName,
+  mapOverlayControlSizeClassName,
+} from '../mapOverlayChrome.const'
 
 /**
  * Shared appearance for the floating control buttons in the mobile map header
  * (region menu, layers, search, user). Sizing is added per button (most are
- * `size-10`; the region/logo button is width-flexible). Keeps them visually
+ * `size-8.5`; the region/logo button is width-flexible). Keeps them visually
  * consistent with each other and with the bottom-right map controls.
+ *
+ * Plus control recipe: gray-300 action outline (not layout `border`) + shared map elevation.
  */
-export const mobileControlButtonClassName =
-  'flex items-center justify-center rounded-md border border-gray-300 bg-white text-gray-700 shadow-md hover:bg-yellow-50 focus:ring-2 focus:ring-yellow-500 focus:outline-none'
+export const mobileControlButtonClassName = twMerge(
+  'flex items-center justify-center rounded-md bg-white text-gray-700 hover:bg-yellow-50 focus:ring-2 focus:ring-yellow-500 focus:outline-none',
+  mapOverlayActionOutlineClassName,
+  mapOverlayButtonElevationClassName,
+)
 
-/** Square map control button (globe, notes toggle, etc.). */
-export const mobileMapIconButtonClassName = twMerge(mobileControlButtonClassName, 'size-10')
+/** Square map control button (globe, notes new, etc.). */
+export const mobileMapIconButtonClassName = twMerge(
+  mobileControlButtonClassName,
+  mapOverlayControlSizeClassName,
+)
 
 /**
- * Middle segment of a split notes control group (filter, download).
- * `-ml-px` overlaps borders with the previous segment. Outer rounding is on the first/last segments.
+ * Outline Heroicon inside a map control. Search (`MagnifyingGlassIcon` at `size-6`) is the
+ * reference: 24px canvas, default 1.5 stroke. Use this for the overlay buttons
+ * (search, zoom, download, globe, debug). The layers control stays a larger icon by design.
  */
-export const notesSplitControlSegmentClassName = twMerge(
-  mobileMapIconButtonClassName,
-  'z-0 -ml-px rounded-none shadow-none',
+export const mapControlIconClassName = 'size-6'
+
+/**
+ * Vertical connected group (zoom ±). `-space-y-px` overlaps per-segment hairlines into a
+ * single outer edge + internal dividers; shadow lives on the group wrapper.
+ */
+export const mapControlButtonGroupClassName = twMerge(
+  'isolate flex flex-col -space-y-px rounded-md',
+  mapOverlayButtonElevationClassName,
 )
 
-/** Toggle button when the split group is open (left segment). */
-export const notesSplitControlFirstSegmentClassName = 'rounded-l-md rounded-r-none shadow-none'
-
-/** Plus button (right segment). Square inner corners avoid white gaps at the group radius. */
-export const notesSplitControlLastSegmentClassName = twMerge(
-  notesSplitControlSegmentClassName,
-  'rounded-l-none rounded-r-md',
-)
-
-/** Wrapper when the notes control is expanded into a split button group. */
-export const notesSplitControlGroupClassName = 'isolate flex rounded-md shadow-md'
+/** Trigger inside a mapControlButtonGroup — radius/shadow on group; hairline on each segment. */
+export const mapControlButtonGroupSegmentClassName =
+  'rounded-none shadow-none focus:relative focus:z-10'
 
 /**
  * Applied (via `twMerge`) on top of the base when the button's panel/sheet is open,
- * so the background indicates "this panel is open". Overrides the base border/bg.
+ * so the background indicates "this panel is open". Overrides the base hairline/bg.
  */
-export const mobileControlButtonActiveClassName = 'border-yellow-400 bg-yellow-100 text-yellow-900'
+export const mobileControlButtonActiveClassName = 'outline-yellow-400 bg-yellow-100 text-yellow-900'

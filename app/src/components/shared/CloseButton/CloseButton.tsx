@@ -1,6 +1,10 @@
 import { XMarkIcon } from '@heroicons/react/24/outline'
 import type { ComponentPropsWithoutRef, Ref } from 'react'
-import { twJoin } from 'tailwind-merge'
+import { twMerge } from 'tailwind-merge'
+
+/** Shared by CloseButton on light overlay sheets (inspector, modals). */
+const overlayIconButtonClassName =
+  'inline-flex items-center justify-center rounded-md border border-gray-300 p-1.5 text-gray-900 transition-colors hover:bg-gray-700 hover:text-white focus:ring-2 focus:ring-white focus:outline-none focus:ring-inset'
 
 type Props = {
   onClick: () => void
@@ -15,10 +19,7 @@ export function CloseButton({ onClick, positionClasses = 'top-2 right-2', ref, .
       ref={ref}
       type="button"
       onClick={onClick}
-      className={twJoin(
-        positionClasses,
-        'absolute inline-flex items-center justify-center rounded-md border border-gray-300 p-1.5 text-gray-900 transition-colors hover:bg-gray-700 hover:text-white focus:ring-2 focus:ring-white focus:outline-none focus:ring-inset',
-      )}
+      className={twMerge('absolute top-2 right-2', positionClasses, overlayIconButtonClassName)}
       {...props}
     >
       <span className="sr-only">Schließen</span>

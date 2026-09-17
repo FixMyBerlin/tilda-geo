@@ -2,9 +2,35 @@
  * With highlightEnable={false} the highlighted <pre> is omitted, so the absolute
  * textarea no longer gets a sized parent. Tailwind preflight (`resize`) and
  * @tailwindcss/forms (border/focus ring) also fight the library styles.
+ *
+ * Outer border/radius/focus come from form field classes on `.markdown-editor`.
  */
+.markdown-editor .w-md-editor {
+  border: 0 !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+  background-color: var(--color-white, #fff) !important;
+}
+
+.markdown-editor .w-md-editor-toolbar {
+  border-bottom: 1px solid var(--color-gray-300, #d1d5db);
+  background-color: var(--color-gray-50, #f9fafb);
+  padding-inline: 0.25rem;
+}
+
+.markdown-editor .w-md-editor-toolbar ul > li > button {
+  color: var(--color-gray-600, #4b5563);
+}
+
 .markdown-editor .w-md-editor-text {
   height: 100%;
+  background-color: var(--color-white, #fff);
+}
+
+.markdown-editor .w-md-editor-content,
+.markdown-editor .w-md-editor-area,
+.markdown-editor .w-md-editor-input {
+  background-color: var(--color-white, #fff);
 }
 
 .markdown-editor textarea.w-md-editor-text-input {
@@ -15,11 +41,13 @@
   resize: none !important;
   border: 0 !important;
   border-radius: 0 !important;
-  background-color: transparent !important;
+  background-color: var(--color-white, #fff) !important;
   box-shadow: none !important;
   outline: none !important;
   --tw-ring-shadow: 0 0 #0000 !important;
   --tw-ring-offset-shadow: 0 0 #0000 !important;
-  padding: inherit !important;
+  padding: 0.5rem 0.75rem !important;
   margin: 0 !important;
+  font-size: 0.875rem !important;
+  line-height: 1.25rem !important;
 }

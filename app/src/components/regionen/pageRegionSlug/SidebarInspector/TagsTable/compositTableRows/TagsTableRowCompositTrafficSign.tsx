@@ -1,6 +1,7 @@
 import { loadTrafficSignSvg } from '@osm-traffic-signs/converter'
 import { Suspense, use } from 'react'
 import { Img } from '@/components/shared/Img'
+import { tagsTableLeadingClass } from '../tagsTableLayout'
 import { TagsTableRow } from '../TagsTableRow'
 import { ConditionalFormattedKey } from '../translations/ConditionalFormattedKey'
 import { ConditionalFormattedValue } from '../translations/ConditionalFormattedValue'
@@ -124,7 +125,9 @@ function Sign({ item }: { item: TrafficSignDisplayItem }) {
 
   return (
     <div className="flex flex-col items-start justify-center px-3 first:pl-0 last:pr-0">
-      <p className={showImage ? 'mb-1 leading-tight' : 'leading-tight'}>{item.label}</p>
+      <p className={showImage ? `mb-1 ${tagsTableLeadingClass}` : tagsTableLeadingClass}>
+        {item.label}
+      </p>
       {item.svgName && (
         <Suspense fallback={null}>
           <TrafficSignImg osmValuePart={item.key} />

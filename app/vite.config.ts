@@ -126,19 +126,24 @@ export default defineConfig({
     },
   },
   plugins: [
-    // Dev-only: let `<img src="/api/...">` (Sec-Fetch-Dest: image) reach the route handlers instead
-    // of Vite's static-asset pipeline (which 404s). Must run before Vite's asset middleware.
-    forwardApiRequestsPastViteAssetMiddleware(),
+    // First: strips `<TanStackDevtools>` and inline panel imports from production builds.
     devtools({
       injectSource: {
         enabled: true,
         ignore: {
+          // react-map-gl spreads remaining props into map.addSource/addLayer; `data-tsd-source`
+          // fails MapLibre validation if those props leak onto a Source/Layer. The files regex
+          // below does not cover Source/Layer outside Map/ (notes compose related geometry).
+          components: ['Source', 'Layer'],
           // Skip source injection for the map subtree: these files are large/high-churn and make
           // TanStack Devtools slower and noisier during local debugging.
           files: [/src\/components\/regionen\/pageRegionSlug\/Map\//],
         },
       },
     }),
+    // Dev-only: let `<img src="/api/...">` (Sec-Fetch-Dest: image) reach the route handlers instead
+    // of Vite's static-asset pipeline (which 404s). Must run before Vite's asset middleware.
+    forwardApiRequestsPastViteAssetMiddleware(),
     nitro({
       preset: 'bun',
       plugins: [

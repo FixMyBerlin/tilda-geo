@@ -40,8 +40,14 @@ export const useSelectedFeatures = (run: boolean) => {
 
   return featuresParam.map((urlFeature) => {
     const mapFeature = renderedFeatures.find(
-      (f) => f.id === urlFeature.id && !isLayerHighlightId(f.layer.id),
+      (f) => featureIdsEqual(f.id, urlFeature.id) && !isLayerHighlightId(f.layer.id),
     )
     return { urlFeature, mapFeature }
   })
 }
+
+/** URL `f` may coerce numeric ids; MapLibre promoteId may keep string tile ids. */
+export const featureIdsEqual = (
+  a: string | number | undefined | null,
+  b: string | number | undefined | null,
+) => a != null && b != null && String(a) === String(b)

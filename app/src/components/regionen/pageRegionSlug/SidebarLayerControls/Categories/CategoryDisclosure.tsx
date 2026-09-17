@@ -2,6 +2,7 @@ import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react
 import { ChevronDownIcon, ChevronLeftIcon } from '@heroicons/react/20/solid'
 import { produce } from 'immer'
 import { Fragment } from 'react'
+import { twJoin } from 'tailwind-merge'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import type { MapDataCategoryConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
 import { useCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/useCategoriesConfig'
@@ -31,19 +32,30 @@ export const CategoryDisclosure = ({ categoryConfig: currCategoryConfig, active 
     <Disclosure
       as="div"
       key={currCategoryConfig.name}
-      className="border-t border-t-gray-200 first:border-t-transparent"
+      className="border-t border-t-gray-200 first:border-t-0"
     >
       {({ open }) => (
         <>
           <header className="flex min-w-0 justify-between">
             <CategoryHeadlineToggle
               active={active}
+              open={open}
               handleChange={() => selectCategory(currCategoryConfig.id)}
             >
-              <h2 className="font-semibold">{currCategoryConfig.name}</h2>
+              <h2
+                className={twJoin(
+                  'w-full font-semibold',
+                  open ? '' : 'overflow-hidden text-ellipsis whitespace-nowrap',
+                )}
+              >
+                {currCategoryConfig.name}
+              </h2>
               <p
-                className="mt-0.5 max-w-full overflow-hidden text-xs leading-4 text-ellipsis whitespace-nowrap text-gray-400"
-                title={currCategoryConfig.desc}
+                className={twJoin(
+                  'mt-0.5 w-full text-xs leading-3 text-gray-400',
+                  open ? '' : 'overflow-hidden text-ellipsis whitespace-nowrap',
+                )}
+                title={open ? undefined : currCategoryConfig.desc}
               >
                 {currCategoryConfig.desc}
               </p>

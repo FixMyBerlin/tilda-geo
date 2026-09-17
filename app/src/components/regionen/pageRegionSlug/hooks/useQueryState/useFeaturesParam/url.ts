@@ -1,5 +1,3 @@
-import { internalNotesSourceId } from '../../../Map/SourcesAndLayers/SourcesLayersInternalNotes'
-import { osmNotesSourceId } from '../../../Map/SourcesAndLayers/SourcesLayersOsmNotes'
 import type { SourcesId } from '../../../mapData/mapDataSources/sources.const'
 
 // ABOUT:
@@ -10,12 +8,19 @@ import type { SourcesId } from '../../../mapData/mapDataSources/sources.const'
 // Initially generated with:
 // `const numericSourceIds= {...{1: 'osm-notes'}, ...Object.fromEntries(sources.map((s, i) => [i+2, s.id]))}`
 //
-// useFeatureParams supports sources that are not specified in sources.const which we have to list here
-export const additionalSourceKeys = [osmNotesSourceId, internalNotesSourceId] as const
+// useFeatureParams supports sources that are not specified in sources.const which we have to list here.
+// String literals (not imports from SourcesLayers*) so this module can load before those layers,
+// which import useFeaturesParam and would otherwise cycle back into this file.
+export const additionalSourceKeys = [
+  'osm-notes-source',
+  'internal-notes-source',
+  'review-entries-source',
+  'qa-source',
+] as const
 type AdditionalSourceId = (typeof additionalSourceKeys)[number]
 type SourceNames = SourcesId | AdditionalSourceId
 export const numericSourceIds: Record<number, SourceNames> = {
-  1: osmNotesSourceId,
+  1: 'osm-notes-source',
   2: 'lars_parking',
   3: 'lars_parking_debug',
   4: 'lars_parking_points',
@@ -47,7 +52,9 @@ export const numericSourceIds: Record<number, SourceNames> = {
   30: 'tilda_parkings_no',
   31: 'tilda_parkings_off_street',
   32: 'tilda_parkings_off_street_quantized',
-  33: internalNotesSourceId,
+  33: 'internal-notes-source',
+  34: 'review-entries-source',
+  35: 'qa-source',
 }
 
 export const persistableSourceKeys = new Set(Object.values(numericSourceIds))

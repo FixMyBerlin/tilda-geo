@@ -1,7 +1,7 @@
 import { UserIcon } from '@heroicons/react/24/outline'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
-import { twJoin, twMerge } from 'tailwind-merge'
+import { twMerge } from 'tailwind-merge'
 import { useLogout } from '@/components/layouts/Header/User/useLogout'
 import { UserMenuContent } from '@/components/layouts/Header/User/UserMenuContent'
 import { useUserHasTodos } from '@/components/layouts/Header/User/useUserHasTodos'
@@ -14,7 +14,7 @@ import { ControlButtonDot } from '../ControlButtonDot'
 import { MobileBottomSheet } from './MobileBottomSheet'
 import {
   mobileControlButtonActiveClassName,
-  mobileControlButtonClassName,
+  mobileMapIconButtonClassName,
 } from './mobileControlButton.const'
 
 const MobileUserLoggedIn = ({ user }: { user: NonNullable<CurrentUser> }) => {
@@ -31,8 +31,8 @@ const MobileUserLoggedIn = ({ user }: { user: NonNullable<CurrentUser> }) => {
         aria-expanded={open}
         data-testid={playwrightTestId('user-info')}
         className={twMerge(
-          mobileControlButtonClassName,
-          'relative size-10',
+          mobileMapIconButtonClassName,
+          'relative',
           open && mobileControlButtonActiveClassName,
         )}
       >
@@ -77,11 +77,7 @@ const MobileUserLoggedOut = () => {
   const signInHref = useSignInUrl()
 
   return (
-    <a
-      href={signInHref}
-      aria-label="Anmelden"
-      className={twJoin(mobileControlButtonClassName, 'size-10')}
-    >
+    <a href={signInHref} aria-label="Anmelden" className={mobileMapIconButtonClassName}>
       <UserIcon className="size-6" aria-hidden="true" />
     </a>
   )

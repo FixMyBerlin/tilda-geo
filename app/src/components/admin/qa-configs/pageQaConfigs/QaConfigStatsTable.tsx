@@ -4,7 +4,7 @@ import {
   evaluatorTypeConfig,
   systemStatusConfig,
   userStatusConfig,
-} from '@/components/regionen/pageRegionSlug/SidebarInspector/InspectorQa/qaConfigs'
+} from '@/components/regionen/pageRegionSlug/modes/qa/detail/qaConfigs'
 import type { QaConfigStats } from '@/server/qa-configs/queries/getQaConfigStatsForAdmin.server'
 
 export function QaConfigStatsTable({ stats }: { stats: QaConfigStats | undefined }) {
