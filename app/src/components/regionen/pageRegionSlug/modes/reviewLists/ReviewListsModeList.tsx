@@ -12,6 +12,7 @@ import { ModeDataTable } from '../ModeDataTable'
 import { ModeDataTableCellsRow } from '../ModeDataTableRow'
 import { modeListFilterEmptyMessage } from '../modeListFilterEmptyMessage'
 import { ModeListItem } from '../ModeListItem'
+import { reviewListItemId } from '../modeListItemId'
 import {
   modePanelBadgeClassName,
   modePanelHeaderIconButtonClassName,
@@ -216,7 +217,7 @@ export const ReviewListsModeList = ({
             return (
               <ModeListItem
                 key={id}
-                id={`review-${id}`}
+                id={reviewListItemId(id)}
                 coordinates={coordinates}
                 active={active}
                 onClick={() => selectEntry(id, coordinates)}
@@ -244,7 +245,7 @@ export const ReviewListsModeList = ({
         return (
           <ModeDataTableCellsRow
             key={id}
-            id={`review-${id}`}
+            id={reviewListItemId(id)}
             coordinates={coordinates}
             active={active}
             onClick={() => selectEntry(id, coordinates)}

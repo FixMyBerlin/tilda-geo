@@ -1,9 +1,10 @@
 import { type KeyboardEvent, type ReactNode, useEffect, useRef } from 'react'
 import { twMerge } from 'tailwind-merge'
-import { useModeListActions } from './mode-list-store'
+import { useIsHoveredMapListItem, useModeListActions } from './mode-list-store'
 import {
   modePanelListItemActiveClassName,
   modePanelListItemHoverClassName,
+  modePanelListItemHoveredClassName,
 } from './modePanel.const'
 
 type Props = {
@@ -27,6 +28,7 @@ export const ModeDataTableCellsRow = ({
   className,
 }: Props) => {
   const { hoverListItem, unhoverListItem } = useModeListActions()
+  const hoveredFromMap = useIsHoveredMapListItem(id)
   const ref = useRef<HTMLTableRowElement>(null)
 
   useEffect(
@@ -44,7 +46,11 @@ export const ModeDataTableCellsRow = ({
         ref={ref}
         className={twMerge(
           'group/row border-b border-gray-100 @[36rem]:table-row',
-          active ? modePanelListItemActiveClassName : modePanelListItemHoverClassName,
+          active
+            ? modePanelListItemActiveClassName
+            : hoveredFromMap
+              ? modePanelListItemHoveredClassName
+              : modePanelListItemHoverClassName,
           'cursor-pointer select-none',
           className,
         )}

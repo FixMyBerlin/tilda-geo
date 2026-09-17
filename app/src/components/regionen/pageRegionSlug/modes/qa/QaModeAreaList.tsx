@@ -18,6 +18,7 @@ import { qaEvalDraftId } from '../composerDrafts/composerDraftIds'
 import { ComposerDraftDot } from '../composerDrafts/DraftIndicatorDot'
 import { modeListFilterEmptyMessage } from '../modeListFilterEmptyMessage'
 import { ModeListItem } from '../ModeListItem'
+import { qaListItemId } from '../modeListItemId'
 import {
   modePanelListHintClassName,
   modePanelListMetaClassName,
@@ -152,7 +153,7 @@ export const QaModeAreaList = ({
           return (
             <ModeListItem
               key={area.areaId}
-              id={`qa-${area.areaId}`}
+              id={qaListItemId(area.areaId)}
               coordinates={area.center}
               active={activeIds.has(area.areaId)}
               onClick={() => {

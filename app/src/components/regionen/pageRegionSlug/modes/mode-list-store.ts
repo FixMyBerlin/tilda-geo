@@ -1,10 +1,12 @@
 import { create } from 'zustand'
 
 /**
- * Shared hover state for the mode list and map. Hovering a row stores the row's `[lng, lat]` so
- * `MapListHoverMarker` can place a ring from the current viewport alone — the map feature does
- * not need to be loaded. Off-screen items get an edge ring; in-view items get the same ring on
- * the point. Map clicks use existing selection params. The list reacts to those.
+ * Shared hover state for the mode list and map. Two channels, so they cannot echo each other:
+ * - List → map: `{ id, coordinates }` for `MapListHoverMarker` / highlight discs. Off-screen items
+ *   get an edge ring; in-view notes paint a disc under the icon.
+ * - Map → list: mode-prefixed row id only. Rows apply the hover background; this never carries
+ *   coordinates, so it cannot light the centroid ring.
+ * Map clicks use existing selection params. The list reacts to those.
  */
 type HoveredListItem = {
   id: string
@@ -13,6 +15,7 @@ type HoveredListItem = {
 
 type ModeListStore = {
   hoveredListItem: HoveredListItem | null
+  hoveredMapItemId: string | null
   /** Bumped from <Map onMove/onResize> so the list-hover marker can re-project without map.on(). */
   mapViewEpoch: number
   actions: {
@@ -20,12 +23,15 @@ type ModeListStore = {
     unhoverListItem: (id: string) => void
     /** Drop list→map hover (e.g. after a map click so a stale disc does not linger). */
     clearHoveredListItem: () => void
+    hoverMapItem: (id: string) => void
+    clearHoveredMapItem: () => void
     notifyMapViewChanged: () => void
   }
 }
 
 const useModeListStore = create<ModeListStore>()((set) => ({
   hoveredListItem: null,
+  hoveredMapItemId: null,
   mapViewEpoch: 0,
   actions: {
     hoverListItem: (item) =>
@@ -35,12 +41,19 @@ const useModeListStore = create<ModeListStore>()((set) => ({
     unhoverListItem: (id) =>
       set((state) => (state.hoveredListItem?.id === id ? { hoveredListItem: null } : state)),
     clearHoveredListItem: () => set({ hoveredListItem: null }),
+    hoverMapItem: (id) =>
+      set((state) => (state.hoveredMapItemId === id ? state : { hoveredMapItemId: id })),
+    clearHoveredMapItem: () =>
+      set((state) => (state.hoveredMapItemId === null ? state : { hoveredMapItemId: null })),
     notifyMapViewChanged: () =>
       set((state) => (state.hoveredListItem ? { mapViewEpoch: state.mapViewEpoch + 1 } : state)),
   },
 }))
 
 export const useHoveredListItem = () => useModeListStore((state) => state.hoveredListItem)
+export const useHoveredMapItemId = () => useModeListStore((state) => state.hoveredMapItemId)
+export const useIsHoveredMapListItem = (id: string) =>
+  useModeListStore((state) => state.hoveredMapItemId === id)
 export const useModeListActions = () => useModeListStore((state) => state.actions)
 /** Camera ticks while a list item is hovered; 0 otherwise so unused pans skip re-renders. */
 export const useHoveredMapViewEpoch = () =>

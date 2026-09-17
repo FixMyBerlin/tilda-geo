@@ -1,10 +1,11 @@
 import { type ReactNode, useEffect, useRef } from 'react'
 import { twMerge } from 'tailwind-merge'
-import { useModeListActions } from './mode-list-store'
+import { useIsHoveredMapListItem, useModeListActions } from './mode-list-store'
 import {
   modePanelListItemActiveClassName,
   modePanelListItemBorderClassName,
   modePanelListItemHoverClassName,
+  modePanelListItemHoveredClassName,
 } from './modePanel.const'
 
 type Props = {
@@ -25,10 +26,11 @@ type Props = {
 }
 
 /**
- * One row in a mode page's item list. Hovering anywhere on the row highlights the item on the map
- * (via the mode list store); when it becomes active (e.g. by clicking its feature on the map) it
- * scrolls into view. The clickable summary is a button; interactive `actions` render outside it so
- * nested interactive elements stay valid.
+ * One row in a mode page's item list. Hovering the row highlights the item on the map (via the
+ * list store). Hovering the matching map feature highlights this row without writing coordinates,
+ * so the centroid ring does not appear. When it becomes active it scrolls into view. The clickable
+ * summary is a button; interactive `actions` render outside it so nested interactive elements stay
+ * valid.
  */
 export const ModeListItem = ({
   id,
@@ -41,6 +43,7 @@ export const ModeListItem = ({
   buttonClassName,
 }: Props) => {
   const { hoverListItem, unhoverListItem } = useModeListActions()
+  const hoveredFromMap = useIsHoveredMapListItem(id)
   const ref = useRef<HTMLLIElement>(null)
 
   useEffect(
@@ -71,7 +74,11 @@ export const ModeListItem = ({
         onBlur={() => unhoverListItem(id)}
         className={twMerge(
           'block w-full cursor-pointer px-4 py-3 text-left text-sm select-none',
-          active ? '' : modePanelListItemHoverClassName,
+          active
+            ? ''
+            : hoveredFromMap
+              ? modePanelListItemHoveredClassName
+              : modePanelListItemHoverClassName,
           buttonClassName,
         )}
         aria-current={active ? 'true' : undefined}

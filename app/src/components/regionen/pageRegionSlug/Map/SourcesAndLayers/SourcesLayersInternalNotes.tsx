@@ -1,12 +1,15 @@
 import { useQuery } from '@tanstack/react-query'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
-import { useHoveredListItem } from '@/components/regionen/pageRegionSlug/modes/mode-list-store'
+import {
+  useHoveredListItem,
+  useHoveredMapItemId,
+} from '@/components/regionen/pageRegionSlug/modes/mode-list-store'
 import {
   noteHighlightCirclePaint,
   noteHighlightFilter,
 } from '@/components/regionen/pageRegionSlug/modes/notes/noteSelectRingPaint'
-import { parseNotesListHoverId } from '@/components/regionen/pageRegionSlug/modes/notes/notesListHoverId'
+import { notesHighlightIds } from '@/components/regionen/pageRegionSlug/modes/notes/notesListHoverId'
 import { notesModeToServerFilter } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
 import { useAllowInternalNotes } from '@/components/regionen/pageRegionSlug/modes/notes/useAllowInternalNotes'
 import { useNotesModeValue } from '@/components/regionen/pageRegionSlug/modes/notes/useNotesModeParam'
@@ -24,6 +27,7 @@ export const SourcesLayersInternalNotes = () => {
   const currentMode = useCurrentMode()
   const notesModeValue = useNotesModeValue()
   const hoveredListItem = useHoveredListItem()
+  const hoveredMapItemId = useHoveredMapItemId()
   const showLayers = currentMode.isNotes && region.notesInternal && allowInternalNotes
   const { data: result } = useQuery({
     ...internalNotesQueryOptions(region.slug, notesModeToServerFilter(notesModeValue)),
@@ -36,9 +40,12 @@ export const SourcesLayersInternalNotes = () => {
   const selectedFeatureIds = featuresParam
     .filter((feature) => feature.sourceId === internalNotesSourceId)
     .map((feature) => Number(feature.id))
-  const hoveredNoteId = parseNotesListHoverId(hoveredListItem?.id, internalNotesSourceId)
-
-  const highlightIds = [...selectedFeatureIds, ...(hoveredNoteId == null ? [] : [hoveredNoteId])]
+  const highlightIds = notesHighlightIds(
+    selectedFeatureIds,
+    hoveredListItem?.id,
+    hoveredMapItemId,
+    internalNotesSourceId,
+  )
 
   return (
     <>
@@ -47,6 +54,7 @@ export const SourcesLayersInternalNotes = () => {
         key={internalNotesSourceId}
         type="geojson"
         data={result.featureCollection}
+        promoteId="id"
         // attribution="" Internal data / copyrighted
       />
       <Layer

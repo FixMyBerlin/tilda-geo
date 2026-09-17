@@ -1,11 +1,14 @@
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
-import { useHoveredListItem } from '@/components/regionen/pageRegionSlug/modes/mode-list-store'
+import {
+  useHoveredListItem,
+  useHoveredMapItemId,
+} from '@/components/regionen/pageRegionSlug/modes/mode-list-store'
 import {
   noteHighlightCirclePaint,
   noteHighlightFilter,
 } from '@/components/regionen/pageRegionSlug/modes/notes/noteSelectRingPaint'
-import { parseNotesListHoverId } from '@/components/regionen/pageRegionSlug/modes/notes/notesListHoverId'
+import { notesHighlightIds } from '@/components/regionen/pageRegionSlug/modes/notes/notesListHoverId'
 import { notesModeToServerFilter } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
 import { useNotesModeValue } from '@/components/regionen/pageRegionSlug/modes/notes/useNotesModeParam'
 import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
@@ -21,6 +24,7 @@ export const SourcesLayersOsmNotes = () => {
   const currentMode = useCurrentMode()
   const notesModeValue = useNotesModeValue()
   const hoveredListItem = useHoveredListItem()
+  const hoveredMapItemId = useHoveredMapItemId()
   const showLayers = currentMode.isNotes && region.notesOsm
   const filteredFeatures = useFilteredOsmNotes(
     showLayers ? notesModeToServerFilter(notesModeValue) : undefined,
@@ -31,9 +35,12 @@ export const SourcesLayersOsmNotes = () => {
   const selectedFeatureIds = featuresParam
     .filter((feature) => feature.sourceId === osmNotesSourceId)
     .map((feature) => Number(feature.id))
-  const hoveredNoteId = parseNotesListHoverId(hoveredListItem?.id, osmNotesSourceId)
-
-  const highlightIds = [...selectedFeatureIds, ...(hoveredNoteId == null ? [] : [hoveredNoteId])]
+  const highlightIds = notesHighlightIds(
+    selectedFeatureIds,
+    hoveredListItem?.id,
+    hoveredMapItemId,
+    osmNotesSourceId,
+  )
 
   return (
     <>
@@ -42,6 +49,7 @@ export const SourcesLayersOsmNotes = () => {
         key={osmNotesSourceId}
         type="geojson"
         data={filteredFeatures}
+        promoteId="id"
         attribution="Notes: openstreetmap.org"
       />
       {/* Highlight "tilda" notes */}

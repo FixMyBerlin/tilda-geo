@@ -33,6 +33,7 @@ import { MAP_STYLE_URL } from '@/server/api/map-style/mapStyleUrl.const'
 import { SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
 import { MapListHoverMarker } from '../modes/MapListHoverMarker'
 import { useModeListActions } from '../modes/mode-list-store'
+import { listItemIdFromMapFeatures } from '../modes/modeListItemId'
 import { NotesNewRelatedGeometry } from '../modes/notes/new/NotesNewRelatedGeometry'
 import { useNotesComposeActive } from '../modes/notes/useNotesComposeActive'
 import { ReviewMapDrawing } from '../modes/reviewLists/drawing/ReviewMapDrawing'
@@ -94,7 +95,8 @@ export const RegionMap = () => {
   const [cursorStyle, setCursorStyle] = useState('grab')
   const { data: regionDatasets } = useRegionDatasetsQuery()
   const currentMode = useCurrentMode()
-  const { notifyMapViewChanged, clearHoveredListItem } = useModeListActions()
+  const { notifyMapViewChanged, clearHoveredListItem, hoverMapItem, clearHoveredMapItem } =
+    useModeListActions()
 
   const { mainMap } = useMap()
 
@@ -177,15 +179,23 @@ export const RegionMap = () => {
     hoveredFeatures.current = current
   }
 
+  const updateMapListHover = (features: MapGeoJSONFeature[] | undefined) => {
+    const listId = containMaskFeature(features) ? null : listItemIdFromMapFeatures(features)
+    if (listId) hoverMapItem(listId)
+    else clearHoveredMapItem()
+  }
+
   const handleMouseMove = ({ features }: MapLayerMouseEvent) => {
     features = extractInteractiveFeatures(mapParam, features)
     updateCursor(features)
     updateHover(features)
+    updateMapListHover(features)
   }
 
   const handleMouseLeave = (_e: MapLayerMouseEvent) => {
     updateCursor([])
     updateHover([])
+    updateMapListHover([])
   }
 
   const handleLoad = (event: MapLibreEvent) => {

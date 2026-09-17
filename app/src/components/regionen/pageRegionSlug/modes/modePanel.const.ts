@@ -90,6 +90,9 @@ export const modePanelListItemActiveClassName = 'bg-yellow-50'
 
 export const modePanelListItemHoverClassName = 'hover:bg-gray-50'
 
+/** Solid hover fill for map-driven row highlight (`hover:` does not apply then). */
+export const modePanelListItemHoveredClassName = 'bg-gray-50'
+
 export const modePanelListTitleClassName = 'font-medium text-gray-900'
 
 export const modePanelListMetaClassName = 'text-xs text-gray-500'
