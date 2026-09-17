@@ -61,7 +61,6 @@ export const mapOverlayAnchoredMenuMaxHeightClassName = 'max-h-(--map-chrome-max
  * `right` is inspector width + `--map-overlay-inset` (10px from the map edge), plus
  * another inset only while the inspector has width so zoom/search stay 10px off
  * the inspector. Absolute in MapInterface, so the mode panel does not need subtracting.
- * Bottom-right controls stay on the map edge (`z-10`) so the inspector (`z-20`) covers them.
  */
 const mapOverlayInspectorAwareRightClassName =
   'right-[calc(var(--inspector-width)+var(--map-overlay-inset)+min(var(--inspector-width),var(--map-overlay-inset)))]'
@@ -83,8 +82,10 @@ export const mapOverlayTopRightControlsClassName = twMerge(
   mapOverlayInspectorAwareRightClassName,
 )
 
+/** Bottom-right: `z-10` so the inspector (`z-20`) covers the buttons; `has-data-open:z-30`
+ * so an upward listbox (background maps) paints over the top-right search/zoom column. */
 export const mapOverlayBottomRightControlsClassName =
-  'pointer-events-none z-10 flex items-end gap-2 *:pointer-events-auto max-sm:fixed max-sm:right-[calc(env(safe-area-inset-right)+0.5rem)] max-sm:bottom-[calc(env(safe-area-inset-bottom)+0.5rem+var(--mode-mobile-dock-height,0px))] sm:absolute sm:right-(--map-overlay-inset) sm:bottom-(--map-overlay-inset) sm:w-8.5 sm:flex-col sm:overflow-x-visible'
+  'pointer-events-none z-10 has-data-open:z-30 flex items-end gap-2 *:pointer-events-auto max-sm:fixed max-sm:right-[calc(env(safe-area-inset-right)+0.5rem)] max-sm:bottom-[calc(env(safe-area-inset-bottom)+0.5rem+var(--mode-mobile-dock-height,0px))] sm:absolute sm:right-(--map-overlay-inset) sm:bottom-(--map-overlay-inset) sm:w-8.5 sm:flex-col sm:overflow-x-visible'
 
 /** Separate buttons stacked with 8px `gap-2`. Zoom ± stays a glued group. */
 export const mapOverlayControlStackClassName = 'flex w-8.5 flex-col items-end gap-2'
