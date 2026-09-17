@@ -14,31 +14,41 @@ import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
  *
  * Panels must be referenced inline in `plugins` (not via local wrapper components)
  * so the strip plugin can detect and remove their imports.
+ *
+ * The trigger is `position: fixed` (TanStack). `w-28` reserves that width in the
+ * parent flex row so siblings can sit next to it.
  */
 export function TanStackAppDevtools() {
   return (
-    <ClientOnly fallback={null}>
-      <TanStackDevtools
-        config={{
-          hideUntilHover: false,
-          position: 'bottom-left',
-          panelLocation: 'bottom',
-        }}
-        eventBusConfig={{
-          connectToServerBus: true,
-        }}
-        plugins={[
-          {
-            name: 'TanStack Query',
-            render: <ReactQueryDevtoolsPanel />,
-          },
-          {
-            name: 'TanStack Router',
-            render: <TanStackRouterDevtoolsPanel />,
-          },
-          formDevtoolsPlugin(),
-        ]}
-      />
-    </ClientOnly>
+    <div className="pointer-events-auto w-28 shrink-0">
+      <ClientOnly fallback={null}>
+        <TanStackDevtools
+          config={{
+            hideUntilHover: false,
+            position: 'bottom-left',
+            panelLocation: 'bottom',
+            customTrigger: (
+              <span className="flex h-5 w-28 flex-row items-center rounded border border-white/70 bg-pink-300 px-1 text-xs shadow-xl hover:underline">
+                TanStack Debug
+              </span>
+            ),
+          }}
+          eventBusConfig={{
+            connectToServerBus: true,
+          }}
+          plugins={[
+            {
+              name: 'TanStack Query',
+              render: <ReactQueryDevtoolsPanel />,
+            },
+            {
+              name: 'TanStack Router',
+              render: <TanStackRouterDevtoolsPanel />,
+            },
+            formDevtoolsPlugin(),
+          ]}
+        />
+      </ClientOnly>
+    </div>
   )
 }

@@ -4,8 +4,7 @@ import { StrictMode } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { Footer } from '@/components/layouts/Footer/Footer'
 import { HeaderApp } from '@/components/layouts/Header/HeaderApp/HeaderApp'
-import { TailwindResponsiveHelper } from '@/components/layouts/helper/TailwindResponsiveHelper'
-import { TanStackAppDevtools } from '@/components/shared/devtools/TanStackAppDevtools'
+import { DevHelpers } from '@/components/layouts/helper/DevHelpers'
 import { ErrorBoundary, RootErrorFallback } from '@/components/shared/error/ErrorBoundary'
 import { useVisibleViewportHeightVar } from '@/components/shared/hooks/viewport/useVisibleViewportHeightVar'
 import { Provider as TanStackQueryProvider } from '@/components/shared/providers/tanstack-query/root-provider'
@@ -52,8 +51,7 @@ export function LayoutRoot() {
               </div>
               {!hideAppChrome && <Footer />}
               <AppToaster />
-              <TanStackAppDevtools />
-              <TailwindResponsiveHelper />
+              <DevHelpers />
             </TanStackQueryProvider>
           </MotionConfig>
         </StrictMode>
