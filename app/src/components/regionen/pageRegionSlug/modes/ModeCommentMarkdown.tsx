@@ -9,11 +9,11 @@ type Props = {
 }
 
 const commentMarkdownClasses = twJoin(
-  'prose-sm prose-p:leading-tight prose-p:text-gray-700 prose-ol:leading-tight prose-ul:leading-tight prose-li:m-0',
+  'prose-sm min-w-0 wrap-anywhere prose-p:leading-tight prose-p:text-gray-700 prose-a:wrap-anywhere prose-ol:leading-tight prose-ul:leading-tight prose-li:m-0',
 )
 
 const notesVariantClasses = twJoin(
-  'border-l-4 border-gray-200 pl-3 prose-a:underline hover:prose-a:text-yellow-700 hover:prose-a:decoration-yellow-700',
+  'border-l-4 border-gray-200 pl-3 prose-a:underline prose-a:hover:text-yellow-700 prose-a:hover:decoration-yellow-700',
 )
 
 export const ModeCommentMarkdown = ({ markdown, className, variant = 'default' }: Props) => (

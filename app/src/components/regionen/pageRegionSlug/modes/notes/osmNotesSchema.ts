@@ -1,7 +1,21 @@
+import { tz } from '@date-fns/tz'
+import { parse } from 'date-fns'
 import { z } from 'zod'
 
+const OSM_API_DATE_FORMAT = "yyyy-MM-dd HH:mm:ss 'UTC'"
+
+export const parseOsmApiDate = (value: string) =>
+  new Date(parse(value, OSM_API_DATE_FORMAT, new Date(), { in: tz('UTC') }))
+
+const osmApiDateSchema = z.string().transform(parseOsmApiDate)
+
+const osmApiDateSchemaNullish = z
+  .string()
+  .nullish()
+  .transform((value) => (value ? parseOsmApiDate(value) : null))
+
 const osmNotesCommentSchema = z.object({
-  date: z.string(),
+  date: osmApiDateSchema,
   action: z.enum(['opened', 'commented', 'closed', 'reopened']),
   // Apparently can be blank, see https://github.com/openstreetmap/openstreetmap-website/blob/master/app/views/api/notes/_note.xml.builder#L30-L33
   text: z.string().optional(),
@@ -16,8 +30,8 @@ const osmApiNoteSchema = z.object({
   id: z.number(),
   url: z.url(), // `https://api.openstreetmap.org/api/0.6/notes/${number}.json`
   status: z.enum(['open', 'closed']),
-  date_created: z.string(),
-  closed_at: z.string().nullish(), // ONLY when `status=closed`
+  date_created: osmApiDateSchema,
+  closed_at: osmApiDateSchemaNullish, // ONLY when `status=closed`
   comment_url: z.url().nullish(), // ONLY when `status=open` `https://api.openstreetmap.org/api/0.6/notes/${number}/comment.json`
   reopen_url: z.url().nullish(), // ONLY when `status=closed` `https://api.openstreetmap.org/api/0.6/notes/${number}/reopen.json`
   close_url: z.url().nullish(), // ONLY when `status=closed` `https://api.openstreetmap.org/api/0.6/notes/${number}/close.json`
@@ -38,7 +52,7 @@ const sharedFeaturePointSchema = z.object({
 const osmApiFeaturePointSchema = sharedFeaturePointSchema.extend({
   properties: osmApiNoteSchema,
 })
-export const osmFeaturePointSchema = sharedFeaturePointSchema.extend({
+const osmFeaturePointSchema = sharedFeaturePointSchema.extend({
   id: z.number(),
   properties: osmNoteSchema,
 })

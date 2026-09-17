@@ -22,7 +22,11 @@ import { ModePanel } from '../ModePanel'
 import { modePanelPrimaryButtonClassName } from '../modePanel.const'
 import { useModeDetailSelection } from '../useModeDetailSelection'
 import { NotesDetailInternal } from './detail/NotesDetailInternal'
-import { NotesDetailOsm } from './detail/NotesDetailOsm'
+import {
+  NotesDetailOsm,
+  NotesDetailOsmHeaderMeta,
+  NotesDetailOsmStatusBadge,
+} from './detail/NotesDetailOsm'
 import { InternalNotesDownloadModal } from './InternalNotesDownloadModal'
 import { InternalNotesNewForm } from './new/InternalNotesNewForm'
 import { NotesNewLoginNotice } from './new/NotesNewLoginNotice'
@@ -123,7 +127,7 @@ export const PageModeNotes = () => {
   const noteDetailTitle = (() => {
     if (selectedNoteId === undefined || Number.isNaN(selectedNoteId)) return 'Hinweis'
     if (selected?.sourceId === osmNotesSourceId) {
-      return selectedListEntry?.title ?? `OSM-Hinweis #${selectedNoteId}`
+      return `OSM-Hinweis #${selectedNoteId}`
     }
     return selectedInternalNote?.subject || selectedListEntry?.title || `Hinweis #${selectedNoteId}`
   })()
@@ -132,12 +136,20 @@ export const PageModeNotes = () => {
     !isComposing && selected && selectedNoteId !== undefined && !Number.isNaN(selectedNoteId)
       ? {
           title: noteDetailTitle,
+          titleBadge:
+            selected.sourceId === osmNotesSourceId ? (
+              <NotesDetailOsmStatusBadge key={selectedNoteId} noteId={selectedNoteId} />
+            ) : undefined,
+          subtitle:
+            selected.sourceId === osmNotesSourceId ? (
+              <NotesDetailOsmHeaderMeta key={selectedNoteId} noteId={selectedNoteId} />
+            ) : undefined,
           onBack: clearModeDetail,
           children:
             selected.sourceId === osmNotesSourceId ? (
-              <NotesDetailOsm noteId={selectedNoteId} />
+              <NotesDetailOsm key={selectedNoteId} noteId={selectedNoteId} />
             ) : (
-              <NotesDetailInternal noteId={selectedNoteId} />
+              <NotesDetailInternal key={selectedNoteId} noteId={selectedNoteId} />
             ),
         }
       : undefined

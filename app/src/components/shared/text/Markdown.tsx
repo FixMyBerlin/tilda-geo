@@ -186,6 +186,7 @@ export const Markdown = ({
 
   const body = (
     <ReactMarkdown
+      key={markdown}
       remarkPlugins={inline ? [remarkGfm] : [remarkGfm, remarkBreaks]}
       components={components}
     >

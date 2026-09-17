@@ -15,7 +15,7 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import type React from 'react'
 import { useState } from 'react'
-import { twJoin } from 'tailwind-merge'
+import { twMerge } from 'tailwind-merge'
 import { UI_SPRING } from '@/components/shared/motion/spring.const'
 
 type Props = {
@@ -75,7 +75,7 @@ export const Tooltip = ({
 
   return (
     <Wrapper
-      className={twJoin('relative', Wrapper === 'span' && 'inline-flex', className)}
+      className={twMerge('relative', Wrapper === 'span' && 'inline-flex', className)}
       {...getReferenceProps({ ref: refs.setReference, 'aria-label': ariaLabel })}
     >
       {children}

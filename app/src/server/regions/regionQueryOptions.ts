@@ -5,6 +5,7 @@ import {
   STALE_TIME_LONG_CACHE_MS,
   STALE_TIME_NOTES_MS,
 } from '@/config/queryStaleTimes'
+import { getRegionMemberOsmNamesFn } from '@/server/memberships/memberships.functions'
 import { getNotesAndCommentsForRegionFn } from '@/server/notes/notes.functions'
 import {
   getQaConfigsForRegionFn,
@@ -17,6 +18,14 @@ import {
 import type { zodInternalNotesFilterParam } from '@/shared/regionen/regionSearchZod'
 
 type InternalNotesFilter = z.infer<typeof zodInternalNotesFilterParam>
+
+export const regionMemberOsmNamesQueryOptions = (regionSlug: string) => {
+  return queryOptions({
+    queryKey: ['region', regionSlug, 'memberOsmNames'] as const,
+    queryFn: () => getRegionMemberOsmNamesFn({ data: { regionSlug } }),
+    staleTime: STALE_TIME_LONG_CACHE_MS,
+  })
+}
 
 export const internalNotesQueryKey = ['notes', 'getNotesAndCommentsForRegion'] as const
 

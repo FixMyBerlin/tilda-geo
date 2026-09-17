@@ -24,6 +24,10 @@ import { useResizableModePanelWidth } from './useResizableModePanelWidth'
 
 type ModePanelDetail = {
   title: string
+  /** Second line under the detail title (e.g. OSM note created date). */
+  subtitle?: ReactNode
+  /** Status flag at the end of the title row (e.g. OSM open/closed pill). */
+  titleBadge?: ReactNode
   onBack: () => void
   children: ReactNode
 }
@@ -121,16 +125,28 @@ export const ModePanel = ({
               <ArrowLeftIcon className="size-5" aria-hidden />
             </button>
             <div className={twJoin(modePanelHeaderBarClassName, 'grow justify-between')}>
-              <Tooltip text={detail.title} className="max-w-full min-w-0">
-                <h1
-                  className={twJoin(
-                    modePanelTitleClassName,
-                    'line-clamp-2 min-w-0 leading-snug text-inherit',
-                  )}
-                >
-                  {detail.title}
-                </h1>
-              </Tooltip>
+              <div className="flex min-w-0 flex-col justify-center gap-0 leading-tight">
+                <div className="flex min-w-0 items-center gap-1.5">
+                  <Tooltip text={detail.title} className="max-w-full min-w-0">
+                    <h1
+                      className={twJoin(
+                        modePanelTitleClassName,
+                        'line-clamp-2 min-w-0 leading-tight text-inherit',
+                      )}
+                    >
+                      {detail.title}
+                    </h1>
+                  </Tooltip>
+                  {detail.titleBadge}
+                </div>
+                {detail.subtitle ? (
+                  <div
+                    className={twJoin('min-w-0 text-xs leading-3', accent.invertedMutedClassName)}
+                  >
+                    {detail.subtitle}
+                  </div>
+                ) : null}
+              </div>
               {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
             </div>
           </>

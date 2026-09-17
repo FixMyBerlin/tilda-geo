@@ -111,6 +111,29 @@ describe('ModePanel', () => {
     expect(screen.getByText('Neuer Hinweis')).toBeTruthy()
   })
 
+  test('detail header shows subtitle below the title', () => {
+    useCurrentMode.mockReturnValue(currentModeFlags('notes'))
+    useListHoverMarkerPosition.mockReturnValue(null)
+    render(
+      <ModePanel
+        title="Hinweise"
+        detail={{
+          title: 'OSM-Hinweis #4874752',
+          titleBadge: <span>offen</span>,
+          subtitle: 'Erstellt Fr, 25.07.2025 18:30',
+          onBack: () => {},
+          children: <p>Detail body</p>,
+        }}
+      >
+        <p>List body</p>
+      </ModePanel>,
+    )
+
+    expect(screen.getByRole('heading', { name: 'OSM-Hinweis #4874752' })).toBeTruthy()
+    expect(screen.getByText('offen')).toBeTruthy()
+    expect(screen.getByText('Erstellt Fr, 25.07.2025 18:30')).toBeTruthy()
+  })
+
   test('detail header shows back button and detail title without list chrome', () => {
     useCurrentMode.mockReturnValue(currentModeFlags('notes'))
     useListHoverMarkerPosition.mockReturnValue(atEdgePosition)

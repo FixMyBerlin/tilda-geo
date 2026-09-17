@@ -1,7 +1,7 @@
-import type { Feature, FeatureCollection } from 'geojson'
+import type { FeatureCollection } from 'geojson'
 import { internalNotesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersInternalNotes'
 import { osmNotesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersOsmNotes'
-import { osmFeaturePointSchema } from '@/components/regionen/pageRegionSlug/modes/notes/osmNotesSchema'
+import type { OsmFeaturePointType } from '@/components/regionen/pageRegionSlug/modes/notes/osmNotesSchema'
 
 /** Normalized note row shown in the notes mode list, for both internal and OSM notes. */
 export type NotesModeListEntry = {
@@ -42,25 +42,26 @@ export const internalNotesToListEntries = (collection: FeatureCollection | undef
 }
 
 /** Map the OSM-notes feature collection (Query cache) to read-only list entries. */
-export const osmNotesToListEntries = (features: Feature[] | undefined) => {
+export const osmNotesToListEntries = (
+  features:
+    | { geometry: OsmFeaturePointType['geometry']; properties: OsmFeaturePointType['properties'] }[]
+    | undefined,
+) => {
   if (!features) return []
   return features.flatMap((feature) => {
-    const parsed = osmFeaturePointSchema.safeParse(feature)
-    if (!parsed.success) return []
-    const { properties: props, geometry } = parsed.data
+    const { properties: props, geometry } = feature
     const [lng, lat] = geometry.coordinates
     if (typeof lng !== 'number' || typeof lat !== 'number') return []
     const firstComment = props.comments[0]
-    const lastComment = props.comments[props.comments.length - 1]
     return [
       {
         id: props.id,
         sourceId: osmNotesSourceId,
         coordinates: [lng, lat],
         status: props.status,
-        title: firstComment?.text ? truncate(firstComment.text) : `OSM-Hinweis #${props.id}`,
+        title: `OSM-Hinweis #${props.id}`,
         subtitle: firstComment?.user || undefined,
-        commentPreview: lastComment?.text ? truncate(lastComment.text) : undefined,
+        commentPreview: firstComment?.text ? truncate(firstComment.text) : undefined,
         commentCount: props.comments.length,
       } satisfies NotesModeListEntry,
     ]
