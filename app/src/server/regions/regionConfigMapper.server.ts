@@ -5,12 +5,7 @@ import type {
   TableId,
   UnionTiles,
 } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/tables.const'
-import type {
-  Prisma,
-  RegionNotesMode,
-  RegionProduct,
-  RegionStatus,
-} from '@/prisma/generated/client'
+import type { Prisma, RegionProduct, RegionStatus } from '@/prisma/generated/client'
 import type { InternalPath } from '@/router'
 import { prismaJsonField } from '@/server/prismaJsonField.server'
 import {
@@ -170,7 +165,10 @@ export type TRegion = {
   name: string
   fullName: string
   product: RegionProduct
-  notes: RegionNotesMode
+  /** OSM notes. Mutually exclusive with `notesInternal`. */
+  notesOsm: boolean
+  /** TILDA (Atlas) notes. Mutually exclusive with `notesOsm`. */
+  notesInternal: boolean
   showSearch?: boolean
   mask: { osmRelationIds: number[]; bufferKm: number } | null
   map: { lat: number; lng: number; zoom: number }
