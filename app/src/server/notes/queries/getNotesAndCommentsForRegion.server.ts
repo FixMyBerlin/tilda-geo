@@ -1,7 +1,7 @@
 import { featureCollection, point } from '@turf/turf'
 import { z } from 'zod'
 import { getAppSession } from '@/server/auth/session.server'
-import { checkRegionAuthorization } from '@/server/authorization/checkRegionAuthorization.server'
+import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
 import { zodInternalNotesFilterParam } from '@/shared/regionen/regionSearchZod'
 
@@ -16,9 +16,9 @@ export async function getNotesAndCommentsForRegion(
 ) {
   const { regionSlug, filter } = Schema.parse(input)
 
-  // Check authorization using the helper
+  // Internal notes are member/admin-only, also on PUBLIC regions (region status is not note access).
   const session = await getAppSession(headers)
-  const { isAuthorized } = await checkRegionAuthorization(session, regionSlug)
+  const { isAuthorized } = await canAccessMemberModeForRegion(session, regionSlug)
   if (!isAuthorized) {
     return { featureCollection: featureCollection([]) }
   }
@@ -48,13 +48,19 @@ export async function getNotesAndCommentsForRegion(
 
   const notePoints = notes.map((note) => {
     const coordinates = [note.longitude, note.latitude]
-    // We transform the properties for <SourcesLayersInternalNotes />
+    // Properties are shared by the map layer <SourcesLayersInternalNotes /> and the notes mode
+    // list panel; the latter additionally reads subject/comment preview.
     const properties = {
       id: note.id,
       status: note.resolvedAt ? 'closed' : 'open',
       regionId: note.regionId,
+      subject: note.subject,
       authorId: note.author.id,
+      authorName: note.author.osmName ?? '',
       hasComments: note.noteComments.length > 0,
+      commentCount: note.noteComments.length,
+      // Newest comment first (orderBy desc) — used as a compact preview line in the list.
+      latestComment: note.noteComments[0]?.body ?? null,
       lastCommentFromUser:
         note.noteComments.length > 0 && note.noteComments[0]?.userId === session?.userId,
       isAuthor: note.author.id === session?.userId,
