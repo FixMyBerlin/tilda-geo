@@ -12,7 +12,14 @@ import { motion } from 'motion/react'
 import { useEffect, useRef, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 import { FadeSlideIn } from '@/components/shared/motion/FadeSlideIn'
-import { mobileControlButtonClassName } from '../../mobile/mobileControlButton.const'
+import {
+  mapOverlayMenuClassName,
+  mapOverlaySearchFieldClassName,
+} from '../../mapOverlayChrome.const'
+import {
+  mapControlIconClassName,
+  mobileMapIconButtonClassName,
+} from '../../mobile/mobileControlButton.const'
 import { useRegion } from '../../regionUtils/useRegion'
 import { type GeoFeature, type PlaceType, useGeocodingSearch } from './useGeocodingSearch'
 
@@ -127,9 +134,9 @@ export const PlaceSearch = ({ className }: Props) => {
         aria-expanded={open}
         aria-hidden={open}
         tabIndex={open ? -1 : undefined}
-        className={twMerge(mobileControlButtonClassName, 'size-10', open && 'pointer-events-none')}
+        className={twMerge(mobileMapIconButtonClassName, open && 'pointer-events-none')}
       >
-        <MagnifyingGlassIcon className="size-6" aria-hidden="true" />
+        <MagnifyingGlassIcon className={mapControlIconClassName} aria-hidden="true" />
       </button>
 
       {/* Dim the map below the open search (mobile) so the panel + results stand out.
@@ -162,7 +169,7 @@ export const PlaceSearch = ({ className }: Props) => {
               }
             }}
           >
-            <div className="flex h-10 items-stretch overflow-hidden rounded-md border border-gray-300 bg-white shadow-md">
+            <div className={mapOverlaySearchFieldClassName}>
               <MagnifyingGlassIcon
                 className={twMerge(
                   'ml-2 size-5 shrink-0 self-center',
@@ -212,7 +219,10 @@ export const PlaceSearch = ({ className }: Props) => {
                 <ComboboxOptions
                   modal={false}
                   static
-                  className="mt-1 max-h-80 overflow-y-auto rounded-md border border-gray-200 bg-white py-1 text-sm shadow-lg"
+                  className={twMerge(
+                    'mt-1 max-h-80 overflow-y-auto py-1 text-sm',
+                    mapOverlayMenuClassName,
+                  )}
                 >
                   {results.map((feature) => {
                     const Icon = resultIcon(feature)

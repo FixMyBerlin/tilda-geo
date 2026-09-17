@@ -11,11 +11,12 @@ import { deleteQaConfigFn, updateQaConfigFn } from '@/server/qa-configs/qa-confi
 import { UpdateQaConfigFormSchema } from '@/server/qa-configs/schemas'
 import { QaConfigExportSection } from './pageQaConfigs/QaConfigExportSection'
 import { QaConfigForm } from './pageQaConfigs/QaConfigForm'
+import { QaConfigOrphanedEvaluationsSection } from './pageQaConfigs/QaConfigOrphanedEvaluationsSection'
 
 const routeApi = getRouteApi('/admin/qa-configs/$id/edit')
 
 export function PageQaConfigEdit() {
-  const { qaConfig, regions, auditHistory } = routeApi.useLoaderData()
+  const { qaConfig, regions, auditHistory, orphanedEvaluations } = routeApi.useLoaderData()
   const router = useRouter()
   const navigate = useNavigate()
 
@@ -64,6 +65,8 @@ export function PageQaConfigEdit() {
         slug={qaConfig.slug}
         mapTable={qaConfig.mapTable}
       />
+
+      <QaConfigOrphanedEvaluationsSection orphanedEvaluations={orphanedEvaluations} />
 
       <QaConfigForm
         actionBarRight={
