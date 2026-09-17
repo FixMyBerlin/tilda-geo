@@ -141,7 +141,6 @@
     "@tanstack/react-form",
     "motion",
     "eslint-plugin-compat",
-    "nitro",
     "@headlessui/react",
     "framer-motion",
   ],
