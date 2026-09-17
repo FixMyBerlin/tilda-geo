@@ -1,6 +1,12 @@
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
-import { noteSelectRingPaint } from '@/components/regionen/pageRegionSlug/modes/notes/noteSelectRingPaint'
+import { useHoveredListItem } from '@/components/regionen/pageRegionSlug/modes/mode-list-store'
+import {
+  noteHoverCirclePaint,
+  noteHoverFilter,
+  noteSelectRingPaint,
+} from '@/components/regionen/pageRegionSlug/modes/notes/noteSelectRingPaint'
+import { parseNotesListHoverId } from '@/components/regionen/pageRegionSlug/modes/notes/notesListHoverId'
 import { notesModeToServerFilter } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
 import { useNotesModeValue } from '@/components/regionen/pageRegionSlug/modes/notes/useNotesModeParam'
 import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
@@ -15,6 +21,7 @@ export const SourcesLayersOsmNotes = () => {
   const { featuresParam } = useFeaturesParam()
   const currentMode = useCurrentMode()
   const notesModeValue = useNotesModeValue()
+  const hoveredListItem = useHoveredListItem()
   const showLayers = currentMode.isNotes && region.notesOsm
   const filteredFeatures = useFilteredOsmNotes(
     showLayers ? notesModeToServerFilter(notesModeValue) : undefined,
@@ -25,6 +32,7 @@ export const SourcesLayersOsmNotes = () => {
   const selectedFeatureIds = featuresParam
     .filter((feature) => feature.sourceId === osmNotesSourceId)
     .map((feature) => Number(feature.id))
+  const hoveredNoteId = parseNotesListHoverId(hoveredListItem?.id, osmNotesSourceId)
 
   return (
     <>
@@ -46,6 +54,15 @@ export const SourcesLayersOsmNotes = () => {
           'circle-color': '#fed7aa', // orange-200 https://tailwindcss.com/docs/customizing-colors
         }}
         filter={['get', 'tilda']}
+      />
+      {/* Hover disc under the icon (list hover). No stroke — a ring is not concentric with the sprite. */}
+      <Layer
+        id={`${osmNotesLayerId}-hover`}
+        key={`${osmNotesLayerId}-hover`}
+        source={osmNotesSourceId}
+        type="circle"
+        paint={noteHoverCirclePaint}
+        filter={noteHoverFilter(hoveredNoteId)}
       />
       {/* Selection ring under the icon (same as LayerHighlight for symbols). */}
       <Layer

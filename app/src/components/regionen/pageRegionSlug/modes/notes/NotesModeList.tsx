@@ -17,6 +17,7 @@ import {
 } from '../modePanel.const'
 import { ModePanelEmpty } from '../ModePanelEmpty'
 import { useMapExtentFilter, type ModeListExtent } from '../useMapExtentFilter'
+import { notesListItemId } from './notesListHoverId'
 import type { NotesModeListEntry } from './notesModeListEntry'
 import type { NotesSelection } from './notesSelection'
 
@@ -107,7 +108,7 @@ export const NotesModeList = ({
             return (
               <ModeListItem
                 key={`${entry.sourceId}-${entry.id}`}
-                id={`note-${entry.sourceId}-${entry.id}`}
+                id={notesListItemId(entry.sourceId, entry.id)}
                 coordinates={entry.coordinates}
                 active={active}
                 onClick={() => selectEntry(entry)}
@@ -141,7 +142,7 @@ export const NotesModeList = ({
         return (
           <ModeDataTableCellsRow
             key={`${entry.sourceId}-${entry.id}`}
-            id={`note-${entry.sourceId}-${entry.id}`}
+            id={notesListItemId(entry.sourceId, entry.id)}
             coordinates={entry.coordinates}
             active={active}
             onClick={() => selectEntry(entry)}

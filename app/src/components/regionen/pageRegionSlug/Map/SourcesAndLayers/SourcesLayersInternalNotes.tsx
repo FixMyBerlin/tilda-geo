@@ -1,7 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
-import { noteSelectRingPaint } from '@/components/regionen/pageRegionSlug/modes/notes/noteSelectRingPaint'
+import { useHoveredListItem } from '@/components/regionen/pageRegionSlug/modes/mode-list-store'
+import {
+  noteHoverCirclePaint,
+  noteHoverFilter,
+  noteSelectRingPaint,
+} from '@/components/regionen/pageRegionSlug/modes/notes/noteSelectRingPaint'
+import { parseNotesListHoverId } from '@/components/regionen/pageRegionSlug/modes/notes/notesListHoverId'
 import { notesModeToServerFilter } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
 import { useAllowInternalNotes } from '@/components/regionen/pageRegionSlug/modes/notes/useAllowInternalNotes'
 import { useNotesModeValue } from '@/components/regionen/pageRegionSlug/modes/notes/useNotesModeParam'
@@ -18,6 +24,7 @@ export const SourcesLayersInternalNotes = () => {
   const { featuresParam } = useFeaturesParam()
   const currentMode = useCurrentMode()
   const notesModeValue = useNotesModeValue()
+  const hoveredListItem = useHoveredListItem()
   const showLayers = currentMode.isNotes && region.notesInternal && allowInternalNotes
   const { data: result } = useQuery({
     ...internalNotesQueryOptions(region.slug, notesModeToServerFilter(notesModeValue)),
@@ -30,6 +37,7 @@ export const SourcesLayersInternalNotes = () => {
   const selectedFeatureIds = featuresParam
     .filter((feature) => feature.sourceId === internalNotesSourceId)
     .map((feature) => Number(feature.id))
+  const hoveredNoteId = parseNotesListHoverId(hoveredListItem?.id, internalNotesSourceId)
 
   return (
     <>
@@ -39,6 +47,15 @@ export const SourcesLayersInternalNotes = () => {
         type="geojson"
         data={result.featureCollection}
         // attribution="" Internal data / copyrighted
+      />
+      {/* Hover disc under the icon (list hover). Always mounted so it stays below the symbol. */}
+      <Layer
+        id={`${internalNotesLayerId}-hover`}
+        key={`${internalNotesLayerId}-hover`}
+        source={internalNotesSourceId}
+        type="circle"
+        paint={noteHoverCirclePaint}
+        filter={noteHoverFilter(hoveredNoteId)}
       />
       {/* Selection ring under the icon. Always mounted so it stays below the symbol. */}
       <Layer
