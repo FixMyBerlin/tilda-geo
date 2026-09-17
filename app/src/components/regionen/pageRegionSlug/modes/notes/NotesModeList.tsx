@@ -1,4 +1,3 @@
-import { useMap } from 'react-map-gl/maplibre'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { mergeModeUrlFeature } from '@/components/regionen/pageRegionSlug/Map/utils/partitionClickedFeatures'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
@@ -10,16 +9,17 @@ import { modeListFilterEmptyMessage } from '../modeListFilterEmptyMessage'
 import { ModeListItem } from '../ModeListItem'
 import {
   modePanelListBodyClassName,
-  modePanelListHintClassName,
   modePanelListMetaClassName,
   modePanelListTitleClassName,
   modePanelMutedClassName,
+  modePanelTintHairlineBottomClassName,
 } from '../modePanel.const'
 import { ModePanelEmpty } from '../ModePanelEmpty'
 import { useMapExtentFilter, type ModeListExtent } from '../useMapExtentFilter'
 import { notesListItemId } from './notesListHoverId'
 import type { NotesModeListEntry } from './notesModeListEntry'
 import type { NotesSelection } from './notesSelection'
+import { NotesCommentsPill, NotesOpenClosedIcon } from './notesStatusBadge'
 
 const NOTES_TABLE_COLUMNS = [
   { id: 'title', label: 'Titel', className: 'w-[28%]' },
@@ -29,17 +29,7 @@ const NOTES_TABLE_COLUMNS = [
   { id: 'preview', label: 'Vorschau', className: 'w-[36%]' },
 ] as const
 
-const NoteStatusBadge = ({ status }: { status: 'open' | 'closed' }) => (
-  <span
-    className={
-      status === 'closed'
-        ? 'inline-block rounded bg-green-100 px-1.5 py-0.5 text-xs text-green-800'
-        : 'inline-block rounded bg-amber-100 px-1.5 py-0.5 text-xs text-amber-800'
-    }
-  >
-    {status === 'closed' ? 'erledigt' : 'offen'}
-  </span>
-)
+const notesListItemButtonClassName = 'px-3 pt-3.5 pb-4'
 
 type Props = {
   entries: NotesModeListEntry[]
@@ -53,7 +43,7 @@ type Props = {
 
 /**
  * Notes mode list rows (OSM + internal). Extent filtering runs here; status/author filters are
- * applied by the parent query. Clicking a row selects it in `f` and flies the map to the pin.
+ * applied by the parent query. Clicking a row selects it in `f` without moving the map.
  */
 export const NotesModeList = ({
   entries,
@@ -64,7 +54,6 @@ export const NotesModeList = ({
   isOsmError,
   extent,
 }: Props) => {
-  const { mainMap } = useMap()
   const { featuresParam, setFeaturesParam } = useFeaturesParam()
   const passesExtent = useMapExtentFilter(extent)
   const visibleEntries = entries.filter((entry) => passesExtent(entry.coordinates))
@@ -81,7 +70,6 @@ export const NotesModeList = ({
         coordinates: entry.coordinates,
       }),
     )
-    mainMap?.flyTo({ center: entry.coordinates, zoom: Math.max(mainMap.getZoom(), 15) })
   }
 
   const emptyNotes =
@@ -112,23 +100,28 @@ export const NotesModeList = ({
                 coordinates={entry.coordinates}
                 active={active}
                 onClick={() => selectEntry(entry)}
+                className={modePanelTintHairlineBottomClassName}
+                buttonClassName={notesListItemButtonClassName}
               >
-                <div className="relative flex items-start justify-between gap-2">
-                  <span className={modePanelListTitleClassName}>{entry.title}</span>
-                  <NoteStatusBadge status={entry.status} />
-                  {!showingOsm && <ComposerDraftDot draftId={noteCommentDraftId(entry.id)} />}
+                <div className="flex items-start justify-between gap-2">
+                  <div className="relative flex min-w-0 items-start gap-1.5">
+                    <NotesOpenClosedIcon
+                      status={entry.status}
+                      className="mt-0.5 size-5 shrink-0 text-teal-700"
+                    />
+                    <span className={modePanelListTitleClassName}>{entry.title}</span>
+                    {!showingOsm && <ComposerDraftDot draftId={noteCommentDraftId(entry.id)} />}
+                  </div>
+                  <NotesCommentsPill count={entry.commentCount} />
                 </div>
                 {entry.subtitle && (
-                  <div className={`mt-0.5 ${modePanelListMetaClassName}`}>{entry.subtitle}</div>
-                )}
-                {entry.commentPreview && (
-                  <div className={`mt-1 line-clamp-2 italic ${modePanelListBodyClassName}`}>
-                    {entry.commentPreview}
+                  <div className={`mt-0.5 pl-6.5 ${modePanelListMetaClassName}`}>
+                    {entry.subtitle}
                   </div>
                 )}
-                {entry.commentCount > 0 && (
-                  <div className={`mt-0.5 ${modePanelListHintClassName}`}>
-                    {entry.commentCount} Kommentar{entry.commentCount === 1 ? '' : 'e'}
+                {entry.commentPreview && (
+                  <div className={`mt-1 line-clamp-2 pl-6.5 italic ${modePanelListBodyClassName}`}>
+                    {entry.commentPreview}
                   </div>
                 )}
               </ModeListItem>
@@ -146,18 +139,17 @@ export const NotesModeList = ({
             coordinates={entry.coordinates}
             active={active}
             onClick={() => selectEntry(entry)}
+            className={modePanelTintHairlineBottomClassName}
             cells={[
               <span key="title" className={`relative ${modePanelListTitleClassName}`}>
                 <span className="line-clamp-2">{entry.title}</span>
                 {!showingOsm && <ComposerDraftDot draftId={noteCommentDraftId(entry.id)} />}
               </span>,
-              <NoteStatusBadge key="status" status={entry.status} />,
+              <NotesOpenClosedIcon key="status" status={entry.status} />,
               <span key="author" className={`line-clamp-1 ${modePanelListMetaClassName}`}>
                 {entry.subtitle ?? '—'}
               </span>,
-              <span key="count" className={modePanelListHintClassName}>
-                {entry.commentCount > 0 ? entry.commentCount : '—'}
-              </span>,
+              <NotesCommentsPill key="count" count={entry.commentCount} />,
               <span key="preview" className={`line-clamp-2 italic ${modePanelListBodyClassName}`}>
                 {entry.commentPreview ?? '—'}
               </span>,

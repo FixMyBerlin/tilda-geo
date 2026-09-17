@@ -21,6 +21,7 @@ import { ModeCollectionSelect } from '../ModeCollectionSelect'
 import { ModePanel } from '../ModePanel'
 import { modePanelPrimaryButtonClassName } from '../modePanel.const'
 import { useModeDetailSelection } from '../useModeDetailSelection'
+import { EditNoteResolvedAtForm } from './detail/EditNoteResolvedAtForm'
 import { NotesDetailInternal } from './detail/NotesDetailInternal'
 import {
   NotesDetailOsm,
@@ -172,7 +173,9 @@ export const PageModeNotes = () => {
         ) : undefined
       }
       actions={
-        showInternalAuthCallout || panelDetail ? undefined : (
+        !isComposing && isInternalNoteSelected && selectedInternalNote ? (
+          <EditNoteResolvedAtForm key={selectedInternalNote.id} note={selectedInternalNote} />
+        ) : showInternalAuthCallout || panelDetail ? undefined : (
           <>
             <button
               type="button"

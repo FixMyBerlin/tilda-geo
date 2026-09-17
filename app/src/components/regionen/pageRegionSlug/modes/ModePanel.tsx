@@ -26,7 +26,7 @@ type ModePanelDetail = {
   title: string
   /** Second line under the detail title (e.g. OSM note created date). */
   subtitle?: ReactNode
-  /** Status flag at the end of the title row (e.g. OSM open/closed pill). */
+  /** Status flag on the right of the title row (e.g. OSM open/closed pill). */
   titleBadge?: ReactNode
   onBack: () => void
   children: ReactNode
@@ -124,9 +124,9 @@ export const ModePanel = ({
             >
               <ArrowLeftIcon className="size-5" aria-hidden />
             </button>
-            <div className={twJoin(modePanelHeaderBarClassName, 'grow justify-between')}>
-              <div className="flex min-w-0 flex-col justify-center gap-0 leading-tight">
-                <div className="flex min-w-0 items-center gap-1.5">
+            <div className={twJoin(modePanelHeaderBarClassName, 'min-w-0 grow')}>
+              <div className="flex w-full min-w-0 items-center justify-between gap-2">
+                <div className="flex min-w-0 flex-1 flex-col justify-center gap-0 leading-tight">
                   <Tooltip text={detail.title} className="max-w-full min-w-0">
                     <h1
                       className={twJoin(
@@ -137,17 +137,21 @@ export const ModePanel = ({
                       {detail.title}
                     </h1>
                   </Tooltip>
-                  {detail.titleBadge}
+                  {detail.subtitle ? (
+                    <div
+                      className={twJoin('min-w-0 text-xs leading-3', accent.invertedMutedClassName)}
+                    >
+                      {detail.subtitle}
+                    </div>
+                  ) : null}
                 </div>
-                {detail.subtitle ? (
-                  <div
-                    className={twJoin('min-w-0 text-xs leading-3', accent.invertedMutedClassName)}
-                  >
-                    {detail.subtitle}
+                {(detail.titleBadge || actions) && (
+                  <div className="flex shrink-0 items-center gap-2">
+                    {detail.titleBadge}
+                    {actions}
                   </div>
-                ) : null}
+                )}
               </div>
-              {actions && <div className="flex shrink-0 items-center gap-2">{actions}</div>}
             </div>
           </>
         ) : collection && collectionAlwaysOpen ? (

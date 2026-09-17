@@ -14,14 +14,14 @@ import { useListHoverMarkerPosition } from './useListHoverMarkerPosition'
 /**
  * List-hover ring from the row's `[lng, lat]` only (the map feature does not need to be loaded).
  * Off-screen: clamped to the viewport edge. In-view notes use a MapLibre disc under the icon
- * instead; other modes keep this HTML ring on the point.
+ * instead; other modes keep this HTML ring on the point. In-view notes use `noteHighlightCirclePaint`.
  */
 export const MapListHoverMarker = () => {
   const position = useListHoverMarkerPosition()
   const hoveredListItem = useHoveredListItem()
   const { mode } = useCurrentMode()
   if (!position || !hoveredListItem) return null
-  // In-view notes use a MapLibre disc under the icon (`noteHoverCirclePaint`). The HTML ring sits
+  // In-view notes use a MapLibre disc under the icon (`noteHighlightCirclePaint`). The HTML ring sits
   // on top of the sprite and does not stay concentric with it.
   if (mode === 'notes' && !position.atEdge) return null
 

@@ -2,6 +2,7 @@ import { CheckBadgeIcon } from '@heroicons/react/24/solid'
 import { useQuery } from '@tanstack/react-query'
 import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { Link } from '@/components/shared/links/Link'
+import { inheritLinkStyles } from '@/components/shared/links/styles'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 import { getOsmUrl } from '@/components/shared/utils/getOsmUrl'
 import { regionMemberOsmNamesQueryOptions } from '@/server/regions/regionQueryOptions'
@@ -45,7 +46,7 @@ export const OsmUserLink = ({
   return (
     <span className={membershipBadge ? 'inline-flex items-center gap-1' : undefined}>
       {showDisplayName && displayName ? <span>{displayName} </span> : null}
-      <Link blank href={getOsmUrl(`/user/${osmName}`)}>
+      <Link blank href={getOsmUrl(`/user/${osmName}`)} classNameOverwrite={inheritLinkStyles}>
         {osmName}
       </Link>
       {membershipBadge}

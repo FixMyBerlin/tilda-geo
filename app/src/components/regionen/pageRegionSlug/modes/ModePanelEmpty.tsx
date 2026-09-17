@@ -12,7 +12,7 @@ type Props = {
 export const ModePanelEmpty = ({ label, description }: Props) => (
   <div className="flex min-h-full flex-col items-center px-4 py-4 text-center" role="status">
     <div className="grow" aria-hidden />
-    <ListBulletIcon className="size-10 shrink-0 text-gray-300" aria-hidden />
+    <ListBulletIcon className="size-10 shrink-0 text-white" aria-hidden />
     {description ? (
       <p className={`mt-3 max-w-prose ${modePanelMutedClassName}`}>{description}</p>
     ) : (

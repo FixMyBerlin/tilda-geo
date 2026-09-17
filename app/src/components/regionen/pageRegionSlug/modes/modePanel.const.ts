@@ -78,6 +78,14 @@ export const modePanelFilterControlClassName =
 
 export const modePanelListItemBorderClassName = 'border-b border-gray-200'
 
+/** Hairline on the tinted Hinweise panel; gray-200 disappears on the sky wash. */
+export const modePanelTintHairlineBottomClassName = 'border-b border-white/80'
+
+export const modePanelTintHairlineTopClassName = 'border-t border-white/80'
+
+/** Left rail on note comment bodies; gray-200 disappears on the sky wash. */
+export const modePanelTintContentRailClassName = 'border-l-4 border-white/80 pl-3'
+
 export const modePanelListItemActiveClassName = 'bg-yellow-50'
 
 export const modePanelListItemHoverClassName = 'hover:bg-gray-50'

@@ -1,6 +1,9 @@
 import { useQuery } from '@tanstack/react-query'
 import { ObjectDump } from '@/components/admin/ObjectDump'
-import { modePanelMutedClassName } from '@/components/regionen/pageRegionSlug/modes/modePanel.const'
+import {
+  modePanelMutedClassName,
+  modePanelTintHairlineTopClassName,
+} from '@/components/regionen/pageRegionSlug/modes/modePanel.const'
 import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { Spinner } from '@/components/shared/Spinner/Spinner'
 import { isDev } from '@/components/shared/utils/isEnv'
@@ -42,12 +45,12 @@ export const NotesDetailInternal = ({ noteId }: Props) => {
         <ul>
           {noteAndComments.noteComments?.map((comment) => {
             return (
-              <li key={comment.id} className="mt-5 border-t border-t-gray-200 pt-5">
+              <li key={comment.id} className={`mt-5 ${modePanelTintHairlineTopClassName} pt-5`}>
                 <InternalNoteComment comment={comment} />
               </li>
             )
           })}
-          <li className="mt-5 border-t border-t-gray-200 pt-5">
+          <li className={`mt-5 ${modePanelTintHairlineTopClassName} pt-5`}>
             <NewNoteCommentForm noteId={noteAndComments.id} />
           </li>
         </ul>

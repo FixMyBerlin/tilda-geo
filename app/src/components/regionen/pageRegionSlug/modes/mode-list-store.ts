@@ -18,6 +18,8 @@ type ModeListStore = {
   actions: {
     hoverListItem: (item: HoveredListItem) => void
     unhoverListItem: (id: string) => void
+    /** Drop list→map hover (e.g. after a map click so a stale disc does not linger). */
+    clearHoveredListItem: () => void
     notifyMapViewChanged: () => void
   }
 }
@@ -32,6 +34,7 @@ const useModeListStore = create<ModeListStore>()((set) => ({
     // mouseenter of the next item)
     unhoverListItem: (id) =>
       set((state) => (state.hoveredListItem?.id === id ? { hoveredListItem: null } : state)),
+    clearHoveredListItem: () => set({ hoveredListItem: null }),
     notifyMapViewChanged: () =>
       set((state) => (state.hoveredListItem ? { mapViewEpoch: state.mapViewEpoch + 1 } : state)),
   },

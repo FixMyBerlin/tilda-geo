@@ -94,7 +94,7 @@ export const RegionMap = () => {
   const [cursorStyle, setCursorStyle] = useState('grab')
   const { data: regionDatasets } = useRegionDatasetsQuery()
   const currentMode = useCurrentMode()
-  const { notifyMapViewChanged } = useModeListActions()
+  const { notifyMapViewChanged, clearHoveredListItem } = useModeListActions()
 
   const { mainMap } = useMap()
 
@@ -140,6 +140,7 @@ export const RegionMap = () => {
     })
     replaceInspectorFeatures(nextInspectorFeatures)
     setFeaturesParam(nextUrlFeatures.length > 0 ? nextUrlFeatures : null)
+    clearHoveredListItem()
   }
 
   const updateCursor = (features: MapGeoJSONFeature[] | undefined) => {

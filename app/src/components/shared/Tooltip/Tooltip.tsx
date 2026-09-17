@@ -93,7 +93,7 @@ export const Tooltip = ({
               }
               exit={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, ...enterOffset }}
               transition={reducedMotion ? { duration: 0 } : UI_SPRING}
-              className="z-50 w-max max-w-82 rounded bg-gray-900/90 p-2 text-xs text-white shadow-md select-none"
+              className="z-50 w-max max-w-82 rounded bg-gray-900/90 p-2 text-xs whitespace-pre-line text-white shadow-md select-none"
               {...getFloatingProps({ ref: refs.setFloating, style: floatingStyles })}
             >
               {text}

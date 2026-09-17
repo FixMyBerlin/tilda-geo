@@ -1,9 +1,12 @@
-import { PencilSquareIcon } from '@heroicons/react/20/solid'
+import { PencilSquareIcon } from '@heroicons/react/24/outline'
 import { useId, useState } from 'react'
 import { z } from 'zod'
+import {
+  mapControlIconClassName,
+  mobileMapIconButtonClassName,
+} from '@/components/regionen/pageRegionSlug/mobile/mobileControlButton.const'
 import { MarkdownEditorField } from '@/components/shared/form/fields/MarkdownEditorField'
 import { Form } from '@/components/shared/form/Form'
-import { notesButtonStyle } from '@/components/shared/links/styles'
 import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
 import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
 import { ModeFormSubmit } from './ModeFormSubmit'
@@ -37,9 +40,9 @@ export const ModeCommentEditButton = ({ authorId, body, mode, onSave }: Props) =
           captureModalOpenOrigin(event.currentTarget)
           setOpen(true)
         }}
-        className={notesButtonStyle}
+        className={mobileMapIconButtonClassName}
       >
-        <PencilSquareIcon className="size-5" />
+        <PencilSquareIcon className={mapControlIconClassName} />
       </button>
 
       <ModalDialog

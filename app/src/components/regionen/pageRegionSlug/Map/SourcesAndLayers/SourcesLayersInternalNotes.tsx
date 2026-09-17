@@ -3,9 +3,8 @@ import { Layer, Source } from 'react-map-gl/maplibre'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useHoveredListItem } from '@/components/regionen/pageRegionSlug/modes/mode-list-store'
 import {
-  noteHoverCirclePaint,
-  noteHoverFilter,
-  noteSelectRingPaint,
+  noteHighlightCirclePaint,
+  noteHighlightFilter,
 } from '@/components/regionen/pageRegionSlug/modes/notes/noteSelectRingPaint'
 import { parseNotesListHoverId } from '@/components/regionen/pageRegionSlug/modes/notes/notesListHoverId'
 import { notesModeToServerFilter } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
@@ -39,6 +38,8 @@ export const SourcesLayersInternalNotes = () => {
     .map((feature) => Number(feature.id))
   const hoveredNoteId = parseNotesListHoverId(hoveredListItem?.id, internalNotesSourceId)
 
+  const highlightIds = [...selectedFeatureIds, ...(hoveredNoteId == null ? [] : [hoveredNoteId])]
+
   return (
     <>
       <Source
@@ -48,25 +49,13 @@ export const SourcesLayersInternalNotes = () => {
         data={result.featureCollection}
         // attribution="" Internal data / copyrighted
       />
-      {/* Hover disc under the icon (list hover). Always mounted so it stays below the symbol. */}
       <Layer
-        id={`${internalNotesLayerId}-hover`}
-        key={`${internalNotesLayerId}-hover`}
+        id={`${internalNotesLayerId}-highlight`}
+        key={`${internalNotesLayerId}-highlight`}
         source={internalNotesSourceId}
         type="circle"
-        paint={noteHoverCirclePaint}
-        filter={noteHoverFilter(hoveredNoteId)}
-      />
-      {/* Selection ring under the icon. Always mounted so it stays below the symbol. */}
-      <Layer
-        id={`${internalNotesLayerId}-selected`}
-        key={`${internalNotesLayerId}-selected`}
-        source={internalNotesSourceId}
-        type="circle"
-        paint={noteSelectRingPaint}
-        filter={
-          selectedFeatureIds.length > 0 ? ['in', 'id', ...selectedFeatureIds] : ['literal', false]
-        }
+        paint={noteHighlightCirclePaint}
+        filter={noteHighlightFilter(highlightIds)}
       />
       <Layer
         id={internalNotesLayerId}

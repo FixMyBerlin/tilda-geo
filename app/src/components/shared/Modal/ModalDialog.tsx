@@ -138,10 +138,7 @@ export const ModalDialog = ({
               >
                 <DialogPanel
                   data-testid={panelTestId}
-                  className={twJoin(
-                    'relative w-full transform overflow-hidden rounded-lg px-4 pt-3 pb-4 text-left shadow-xl sm:px-6 sm:pt-4 sm:pb-6',
-                    accent ? accent.tintClassName : 'bg-white',
-                  )}
+                  className="relative w-full transform overflow-hidden rounded-lg bg-white px-4 pt-3 pb-4 text-left shadow-xl sm:px-6 sm:pt-4 sm:pb-6"
                 >
                   <div className="flex items-center gap-3">
                     <div
@@ -165,10 +162,7 @@ export const ModalDialog = ({
 
                     <button
                       type="button"
-                      className={twJoin(
-                        'inline-flex size-8 shrink-0 items-center justify-center rounded-md text-gray-500 transition-colors hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500',
-                        accent ? 'hover:bg-white/60' : 'hover:bg-gray-100',
-                      )}
+                      className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-gray-500 transition-colors hover:bg-gray-100 hover:text-gray-900 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500"
                       onClick={() => setOpen(false)}
                       ref={closeButtonRef}
                     >

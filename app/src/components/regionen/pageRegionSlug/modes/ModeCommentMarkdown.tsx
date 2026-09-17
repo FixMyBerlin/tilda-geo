@@ -1,10 +1,12 @@
 import { twJoin, twMerge } from 'tailwind-merge'
+import { inheritLinkStyles } from '@/components/shared/links/styles'
 import { Markdown } from '@/components/shared/text/Markdown'
+import { modePanelTintContentRailClassName } from './modePanel.const'
 
 type Props = {
   markdown?: string | null
   className?: string
-  /** Internal notes: left rule + yellow link hover. Omit for QA / Prüflisten so those stay unbordered. */
+  /** Hinweise: left rail; links match surrounding text. Omit for QA / Prüflisten so those stay unbordered. */
   variant?: 'default' | 'notes'
 }
 
@@ -13,7 +15,7 @@ const commentMarkdownClasses = twJoin(
 )
 
 const notesVariantClasses = twJoin(
-  'border-l-4 border-gray-200 pl-3 prose-a:underline prose-a:hover:text-yellow-700 prose-a:hover:decoration-yellow-700',
+  `${modePanelTintContentRailClassName} prose-a:text-inherit prose-a:underline prose-a:decoration-current prose-a:underline-offset-4 prose-a:hover:text-gray-950 prose-ol:list-inside prose-ol:ps-0 prose-ul:my-1 prose-ul:list-inside prose-ul:ps-0 prose-li:ps-0 prose-li:marker:text-white/80`,
 )
 
 export const ModeCommentMarkdown = ({ markdown, className, variant = 'default' }: Props) => (
@@ -24,5 +26,6 @@ export const ModeCommentMarkdown = ({ markdown, className, variant = 'default' }
       variant === 'notes' ? notesVariantClasses : undefined,
       className,
     )}
+    linkClassNameOverwrite={inheritLinkStyles}
   />
 )

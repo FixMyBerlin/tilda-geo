@@ -45,62 +45,62 @@ export const EditNoteResolvedAtForm = ({ note }: Props) => {
     })
   }
 
+  const statusLabel = formResolved ? 'erledigt' : 'offen'
+
   return (
     <NativeForm>
       <Field
         as="div"
-        className="mt-3 flex items-center gap-1.5 text-sm"
-        title={note.resolvedAt?.toLocaleString()}
+        className="flex items-center gap-1.5 text-sm"
+        title={error?.message ?? note.resolvedAt?.toLocaleString() ?? undefined}
       >
-        <span>Status:</span>{' '}
-        <Switch
-          checked={formResolved}
-          onChange={handleSubmit}
-          className={twJoin(
-            formResolved ? 'bg-yellow-600' : 'bg-gray-200',
-            'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-yellow-600 focus:ring-offset-2 focus:outline-none',
-          )}
-        >
-          <span className="sr-only">Erledigt</span>
-          <span
+        <Label className="w-16 shrink-0 text-right">{statusLabel}</Label>
+        <span className="relative inline-flex shrink-0">
+          <Switch
+            checked={formResolved}
+            onChange={handleSubmit}
             className={twJoin(
-              formResolved ? 'translate-x-5' : 'translate-x-0',
-              'pointer-events-none relative inline-block size-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
+              formResolved ? 'bg-yellow-600' : 'bg-gray-200',
+              'relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:ring-2 focus:ring-white focus:ring-offset-0 focus:outline-none',
             )}
           >
             <span
               className={twJoin(
-                formResolved
-                  ? 'opacity-0 duration-100 ease-out'
-                  : 'opacity-100 duration-200 ease-in',
-                'absolute inset-0 flex h-full w-full items-center justify-center transition-opacity',
+                formResolved ? 'translate-x-5' : 'translate-x-0',
+                'pointer-events-none relative inline-block size-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out',
               )}
-              aria-hidden="true"
             >
-              <SvgNotesQuestionmark className="size-5 text-sky-700" />
+              <span
+                className={twJoin(
+                  formResolved
+                    ? 'opacity-0 duration-100 ease-out'
+                    : 'opacity-100 duration-200 ease-in',
+                  'absolute inset-0 flex h-full w-full items-center justify-center transition-opacity',
+                )}
+                aria-hidden="true"
+              >
+                <SvgNotesQuestionmark className="size-5 text-sky-700" />
+              </span>
+              <span
+                className={twJoin(
+                  formResolved
+                    ? 'opacity-100 duration-200 ease-in'
+                    : 'opacity-0 duration-100 ease-out',
+                  'absolute inset-0 flex h-full w-full items-center justify-center transition-opacity',
+                )}
+                aria-hidden="true"
+              >
+                <SvgNotesCheckmark className="size-5 text-sky-700" />
+              </span>
             </span>
-            <span
-              className={twJoin(
-                formResolved
-                  ? 'opacity-100 duration-200 ease-in'
-                  : 'opacity-0 duration-100 ease-out',
-                'absolute inset-0 flex h-full w-full items-center justify-center transition-opacity',
-              )}
-              aria-hidden="true"
-            >
-              <SvgNotesCheckmark className="size-5 text-sky-700" />
+          </Switch>
+          {isLoading ? (
+            <span className="pointer-events-none absolute top-1/2 -right-5 -translate-y-1/2">
+              <SmallSpinner />
             </span>
-          </span>
-        </Switch>
-        <Label as="span">
-          <span className="sr-only">Dieser Hinweis ist </span>
-          {formResolved ? 'erledigt' : 'offen'}
-          <span className="sr-only">.</span>
-        </Label>
-        {isLoading && <SmallSpinner />}
+          ) : null}
+        </span>
       </Field>
-
-      {error ? <p className="text-red-500">{error.message}</p> : null}
     </NativeForm>
   )
 }

@@ -1,9 +1,12 @@
-import { PencilSquareIcon } from '@heroicons/react/20/solid'
-import { TrashIcon } from '@heroicons/react/24/outline'
+import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useId, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
 import { z } from 'zod'
+import {
+  mapControlIconClassName,
+  mobileMapIconButtonClassName,
+} from '@/components/regionen/pageRegionSlug/mobile/mobileControlButton.const'
 import { useInternalNotesQueryKey } from '@/components/regionen/pageRegionSlug/modes/notes/useInternalNotesQueryKey'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { MarkdownEditorField } from '@/components/shared/form/fields/MarkdownEditorField'
@@ -70,13 +73,14 @@ export const EditNoteCommentForm = ({ comment }: Props) => {
     <>
       <button
         type="button"
+        title="Antwort bearbeiten"
         onClick={(e) => {
           captureModalOpenOrigin(e.currentTarget)
           setOpen(true)
         }}
-        className={notesButtonStyle}
+        className={mobileMapIconButtonClassName}
       >
-        <PencilSquareIcon className="size-6" />
+        <PencilSquareIcon className={mapControlIconClassName} />
       </button>
 
       <ModalDialog

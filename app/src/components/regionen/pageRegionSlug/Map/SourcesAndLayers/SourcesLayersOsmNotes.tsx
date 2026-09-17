@@ -2,9 +2,8 @@ import { Layer, Source } from 'react-map-gl/maplibre'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useHoveredListItem } from '@/components/regionen/pageRegionSlug/modes/mode-list-store'
 import {
-  noteHoverCirclePaint,
-  noteHoverFilter,
-  noteSelectRingPaint,
+  noteHighlightCirclePaint,
+  noteHighlightFilter,
 } from '@/components/regionen/pageRegionSlug/modes/notes/noteSelectRingPaint'
 import { parseNotesListHoverId } from '@/components/regionen/pageRegionSlug/modes/notes/notesListHoverId'
 import { notesModeToServerFilter } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
@@ -34,6 +33,8 @@ export const SourcesLayersOsmNotes = () => {
     .map((feature) => Number(feature.id))
   const hoveredNoteId = parseNotesListHoverId(hoveredListItem?.id, osmNotesSourceId)
 
+  const highlightIds = [...selectedFeatureIds, ...(hoveredNoteId == null ? [] : [hoveredNoteId])]
+
   return (
     <>
       <Source
@@ -55,25 +56,14 @@ export const SourcesLayersOsmNotes = () => {
         }}
         filter={['get', 'tilda']}
       />
-      {/* Hover disc under the icon (list hover). No stroke — a ring is not concentric with the sprite. */}
+      {/* Hover and selection: same disc under the icon. */}
       <Layer
-        id={`${osmNotesLayerId}-hover`}
-        key={`${osmNotesLayerId}-hover`}
+        id={`${osmNotesLayerId}-highlight`}
+        key={`${osmNotesLayerId}-highlight`}
         source={osmNotesSourceId}
         type="circle"
-        paint={noteHoverCirclePaint}
-        filter={noteHoverFilter(hoveredNoteId)}
-      />
-      {/* Selection ring under the icon (same as LayerHighlight for symbols). */}
-      <Layer
-        id={`${osmNotesLayerId}-selected`}
-        key={`${osmNotesLayerId}-selected`}
-        source={osmNotesSourceId}
-        type="circle"
-        paint={noteSelectRingPaint}
-        filter={
-          selectedFeatureIds.length > 0 ? ['in', 'id', ...selectedFeatureIds] : ['literal', false]
-        }
+        paint={noteHighlightCirclePaint}
+        filter={noteHighlightFilter(highlightIds)}
       />
       <Layer
         id={osmNotesLayerId}

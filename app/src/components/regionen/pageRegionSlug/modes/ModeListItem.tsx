@@ -1,5 +1,5 @@
 import { type ReactNode, useEffect, useRef } from 'react'
-import { twJoin } from 'tailwind-merge'
+import { twMerge } from 'tailwind-merge'
 import { useModeListActions } from './mode-list-store'
 import {
   modePanelListItemActiveClassName,
@@ -18,6 +18,10 @@ type Props = {
   children: ReactNode
   /** Controls below the row button so they are not nested inside it. */
   actions?: ReactNode
+  /** Extra classes on the `<li>` (e.g. comment-style separators). */
+  className?: string
+  /** Extra classes on the row button (padding). Merged with the default padding. */
+  buttonClassName?: string
 }
 
 /**
@@ -33,6 +37,8 @@ export const ModeListItem = ({
   onClick,
   children,
   actions,
+  className,
+  buttonClassName,
 }: Props) => {
   const { hoverListItem, unhoverListItem } = useModeListActions()
   const ref = useRef<HTMLLIElement>(null)
@@ -49,10 +55,11 @@ export const ModeListItem = ({
   return (
     <li
       ref={ref}
-      className={twJoin(
+      className={twMerge(
         'list-none',
         modePanelListItemBorderClassName,
         active ? modePanelListItemActiveClassName : '',
+        className,
       )}
       onMouseEnter={() => hoverListItem({ id, coordinates })}
       onMouseLeave={() => unhoverListItem(id)}
@@ -62,9 +69,10 @@ export const ModeListItem = ({
         onClick={onClick}
         onFocus={() => hoverListItem({ id, coordinates })}
         onBlur={() => unhoverListItem(id)}
-        className={twJoin(
+        className={twMerge(
           'block w-full cursor-pointer px-4 py-3 text-left text-sm select-none',
           active ? '' : modePanelListItemHoverClassName,
+          buttonClassName,
         )}
         aria-current={active ? 'true' : undefined}
       >

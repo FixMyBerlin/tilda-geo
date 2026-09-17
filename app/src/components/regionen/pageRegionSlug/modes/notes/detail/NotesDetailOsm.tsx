@@ -2,6 +2,12 @@ import dompurify from 'dompurify'
 import { twJoin } from 'tailwind-merge'
 import { ObjectDump } from '@/components/admin/ObjectDump'
 import { ModeCommentMarkdown } from '@/components/regionen/pageRegionSlug/modes/ModeCommentMarkdown'
+import {
+  modePanelTintContentRailClassName,
+  modePanelTintHairlineBottomClassName,
+} from '@/components/regionen/pageRegionSlug/modes/modePanel.const'
+import { NotesCommentByline } from '@/components/regionen/pageRegionSlug/modes/notes/detail/NotesCommentByline'
+import { NotesOpenClosedBadge } from '@/components/regionen/pageRegionSlug/modes/notes/notesStatusBadge'
 import { useOsmNotesQuery } from '@/components/regionen/pageRegionSlug/modes/notes/useOsmNotesQuery'
 import { SvgNotesCheckmark } from '@/components/regionen/pageRegionSlug/SidebarInspector/icons/SvgNotesCheckmark'
 import { SvgNotesQuestionmark } from '@/components/regionen/pageRegionSlug/SidebarInspector/icons/SvgNotesQuestionmark'
@@ -13,7 +19,7 @@ import { getOsmUrl } from '@/components/shared/utils/getOsmUrl'
 import { isDev } from '@/components/shared/utils/isEnv'
 
 const osmCommentBodyClassName = twJoin(
-  'mt-2 mb-0 min-w-0 border-white leading-snug wrap-anywhere prose-p:my-1 prose-p:leading-snug prose-a:wrap-anywhere prose-a:underline prose-a:hover:text-yellow-700 prose-a:hover:decoration-yellow-700 prose-blockquote:my-1.5 prose-blockquote:border-sky-700/30 prose-blockquote:text-gray-700 prose-ol:leading-snug prose-ul:leading-snug',
+  'mb-0 min-w-0 leading-snug wrap-anywhere prose-p:my-1 prose-p:leading-snug prose-a:wrap-anywhere prose-a:text-inherit prose-a:underline prose-a:decoration-current prose-a:underline-offset-4 prose-a:hover:text-gray-950 prose-blockquote:my-1.5 prose-blockquote:border-sky-700/30 prose-blockquote:text-gray-700 prose-ol:list-inside prose-ol:ps-0 prose-ol:leading-snug prose-ul:list-inside prose-ul:ps-0 prose-ul:leading-snug prose-li:ps-0 prose-li:marker:text-white/80',
 )
 
 export const NotesDetailOsmStatusBadge = ({ noteId }: { noteId: number }) => {
@@ -21,20 +27,7 @@ export const NotesDetailOsmStatusBadge = ({ noteId }: { noteId: number }) => {
   const thread = osmNotesFeatures?.features.find((f) => f.properties.id === noteId)?.properties
   if (!thread) return null
 
-  const isClosed = thread.status === 'closed'
-  return (
-    <span
-      className="inline-flex shrink-0 items-center gap-1 rounded-full bg-white py-0.5 pr-2 pl-0.5 text-xs font-medium text-gray-900"
-      title={isClosed ? 'geschlossen' : 'offen'}
-    >
-      {isClosed ? (
-        <SvgNotesCheckmark className="size-4 text-teal-700" />
-      ) : (
-        <SvgNotesQuestionmark className="size-4 text-teal-700" />
-      )}
-      {isClosed ? 'geschlossen' : 'offen'}
-    </span>
-  )
+  return <NotesOpenClosedBadge status={thread.status} />
 }
 
 export const NotesDetailOsmHeaderMeta = ({ noteId }: { noteId: number }) => {
@@ -70,16 +63,8 @@ export const NotesDetailOsm = ({ noteId }: Props) => {
         return (
           <section
             key={`${noteId}-${index}-${comment.date.toISOString()}`}
-            className="border-b border-b-gray-200 px-3 pt-3.5 pb-4"
+            className={`${modePanelTintHairlineBottomClassName} px-3 pt-3.5 pb-4`}
           >
-            <div className="min-w-0 text-sm leading-5 text-black">
-              <strong>
-                <OsmUserLink osmName={comment.user} />
-              </strong>{' '}
-              kommentierte am{' '}
-              <TimeWithRelativeTooltip date={comment.date} timeClassName="text-inherit" />:
-            </div>
-
             {comment.text ? (
               <ModeCommentMarkdown
                 key={`${noteId}-${index}-md`}
@@ -91,7 +76,11 @@ export const NotesDetailOsm = ({ noteId }: Props) => {
               <div
                 // oxlint-disable-next-line react/no-danger -- OSM HTML; markdown text missing
                 dangerouslySetInnerHTML={{ __html: dompurify.sanitize(comment.html) }}
-                className={twJoin(proseClasses, osmCommentBodyClassName, 'border-l-4 pl-3')}
+                className={twJoin(
+                  proseClasses,
+                  osmCommentBodyClassName,
+                  modePanelTintContentRailClassName,
+                )}
               />
             )}
             {!firstComment && comment.action === 'opened' && (
@@ -106,6 +95,10 @@ export const NotesDetailOsm = ({ noteId }: Props) => {
                 Der Hinweis wurde geschlossen.
               </p>
             )}
+            <NotesCommentByline
+              author={<OsmUserLink osmName={comment.user} />}
+              date={<TimeWithRelativeTooltip date={comment.date} timeClassName="text-inherit" />}
+            />
           </section>
         )
       })}

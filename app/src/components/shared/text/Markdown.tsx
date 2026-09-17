@@ -28,6 +28,8 @@ type Props = {
    * Use for inspector labels/values that may contain `` `code` `` but sit inside existing text.
    */
   inline?: boolean
+  /** Replaces default yellow link styles (e.g. mode sidebar inherit links). */
+  linkClassNameOverwrite?: string
 }
 
 type HeadingMdProps = ComponentPropsWithoutRef<'h1'> & ExtraProps
@@ -99,22 +101,30 @@ const createDocumentHeading =
 
 type AnchorMdProps = ComponentPropsWithoutRef<'a'> & ExtraProps
 
-const MdA = ({ node: _node, href, children, ...anchorProps }: AnchorMdProps) => {
-  if (!href) return null
-  const isExternal = href.startsWith('http')
-  if (isExternal) {
+const createMdA =
+  (linkClassNameOverwrite?: string) =>
+  ({ node: _node, href, children, ...anchorProps }: AnchorMdProps) => {
+    if (!href) return null
+    const isExternal = href.startsWith('http')
+    if (isExternal) {
+      return (
+        <Link blank href={href} classNameOverwrite={linkClassNameOverwrite} {...anchorProps}>
+          {children}
+        </Link>
+      )
+    }
     return (
-      <Link blank href={href} {...anchorProps}>
+      <Link
+        classNameOverwrite={linkClassNameOverwrite}
+        {...anchorProps}
+        to={href as LinkOptions<Router>['to']}
+      >
         {children}
       </Link>
     )
   }
-  return (
-    <Link {...anchorProps} to={href as LinkOptions<Router>['to']}>
-      {children}
-    </Link>
-  )
-}
+
+const MdA = createMdA()
 
 type HrMdProps = ComponentPropsWithoutRef<'hr'> & ExtraProps
 
@@ -174,13 +184,18 @@ export const Markdown = ({
   headingLevelOffset = 0,
   headingIdPrefix,
   inline = false,
+  linkClassNameOverwrite,
 }: Props) => {
   const components = useMemo(() => {
-    if (inline) return inlineMarkdownComponents
-    if (headingStyle !== 'document') return compactMarkdownComponents
+    const a = linkClassNameOverwrite ? createMdA(linkClassNameOverwrite) : MdA
+    if (inline) return { ...inlineMarkdownComponents, a }
+    if (headingStyle !== 'document') return { ...compactMarkdownComponents, a }
     const idRegistry: HeadingIdRegistry = new Map()
-    return createDocumentMarkdownComponents(headingLevelOffset, idRegistry, headingIdPrefix)
-  }, [inline, headingStyle, headingLevelOffset, headingIdPrefix])
+    return {
+      ...createDocumentMarkdownComponents(headingLevelOffset, idRegistry, headingIdPrefix),
+      a,
+    }
+  }, [inline, headingStyle, headingLevelOffset, headingIdPrefix, linkClassNameOverwrite])
 
   if (!markdown) return null
 

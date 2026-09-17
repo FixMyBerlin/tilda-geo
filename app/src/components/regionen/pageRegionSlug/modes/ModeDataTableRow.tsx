@@ -1,5 +1,5 @@
 import { type KeyboardEvent, type ReactNode, useEffect, useRef } from 'react'
-import { twJoin } from 'tailwind-merge'
+import { twMerge } from 'tailwind-merge'
 import { useModeListActions } from './mode-list-store'
 import {
   modePanelListItemActiveClassName,
@@ -13,6 +13,7 @@ type Props = {
   onClick: () => void
   cells: ReactNode[]
   actions?: ReactNode
+  className?: string
 }
 
 /** Multi-column table row. One cell per column at wide breakpoints. */
@@ -23,6 +24,7 @@ export const ModeDataTableCellsRow = ({
   onClick,
   cells,
   actions,
+  className,
 }: Props) => {
   const { hoverListItem, unhoverListItem } = useModeListActions()
   const ref = useRef<HTMLTableRowElement>(null)
@@ -40,10 +42,11 @@ export const ModeDataTableCellsRow = ({
     <>
       <tr
         ref={ref}
-        className={twJoin(
+        className={twMerge(
           'group/row border-b border-gray-100 @[36rem]:table-row',
           active ? modePanelListItemActiveClassName : modePanelListItemHoverClassName,
           'cursor-pointer select-none',
+          className,
         )}
         onClick={onClick}
         onMouseEnter={() => hoverListItem({ id, coordinates })}
