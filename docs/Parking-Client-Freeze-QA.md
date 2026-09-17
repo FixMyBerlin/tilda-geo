@@ -12,7 +12,7 @@ When we freeze parking data for delivery, we always:
    ```
    Use `--mode snapshot` so the previous dump stays under `snapshots/`. First-ever publish of a table may use `--mode override`.
 6. **Import** on local, staging, and production via `/admin/data-schema` → Import (or MCP `data_schema_import`). This replaces empty placeholders from processing with the real baseline.
-7. **(Decide)** Point [`9_qa_parkings_euvm_voronoi.sql`](../processing/topics/parking/9_qa_parkings_euvm_voronoi.sql) at the new `data.*` table and deploy, so nightly QA fills the stable public maps `qa_parkings_euvm` / `qa_parkings_euvm_priority`. `QaConfig` on `parkraum-berlin-euvm` keeps pointing at those public tables. Behaviour: [QA Documentation](QA-Documentation.md).
+7. **(Decide)** Point [`9_qa_parkings_euvm_voronoi.sql`](../processing/topics/parking/9_qa_parkings_euvm_voronoi.sql) at the new `data.*` table and deploy, so nightly QA fills the stable public maps `qa_parkings_euvm` / `qa_parkings_euvm_priority`. `QaConfig` on `parkraum-berlin-euvm` keeps pointing at those public tables. Behaviour: [Region modes, Qualitätssicherung](Modes-Concept-Summary.md#qualitätssicherung).
 
 ## Agent prompt (step 4)
 
