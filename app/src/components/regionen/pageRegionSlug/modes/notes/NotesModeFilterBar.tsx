@@ -14,6 +14,8 @@ type Props = {
   notesMode: NotesModeParam
   setNotesModeParam: (next: NotesModeParam) => void
   showReactionFilter: boolean
+  /** TILDA notes can filter by map view; OSM notes are already the bbox. */
+  showExtentFilter: boolean
   authorOptions: { value: string; label: string }[]
 }
 
@@ -21,10 +23,10 @@ export const NotesModeFilterBar = ({
   notesMode,
   setNotesModeParam,
   showReactionFilter,
+  showExtentFilter,
   authorOptions,
 }: Props) => {
   const search = notesMode.search ?? ''
-  const extent = notesMode.extent ?? 'view'
   const updateFilter = (patch: Partial<NotesModeParam>) =>
     setNotesModeParam({ ...notesMode, ...patch })
 
@@ -33,8 +35,8 @@ export const NotesModeFilterBar = ({
       search={search}
       onSearchChange={(query) => updateFilter({ search: query || undefined })}
       searchPlaceholder="Hinweise durchsuchen…"
-      extent={extent}
-      onExtentChange={(next) => setNotesModeParam({ ...notesMode, extent: next })}
+      extent={showExtentFilter ? (notesMode.extent ?? 'view') : undefined}
+      onExtentChange={showExtentFilter ? (next) => updateFilter({ extent: next }) : undefined}
     >
       <ModeFilterSelect
         label="Status"

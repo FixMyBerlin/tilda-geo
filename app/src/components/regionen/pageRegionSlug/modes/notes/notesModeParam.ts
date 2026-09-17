@@ -2,9 +2,11 @@ import { z } from 'zod'
 
 /**
  * Single JSON param for the notes mode (`notes`). `key` is `'osm'` or a TILDA folder id;
- * omitted while a region has one notes kind. `extent` is omitted when `'view'` (the default).
- * `new` is the compose pin (`zoom/lat/lng`, same encoding as `map=`). `review.new` is boolean
- * `true`; `notes.new` is a map-param string — same session name, different types.
+ * omitted while a region has one notes kind. `extent` is omitted when `'view'` (the default)
+ * and used for TILDA notes; OSM notes are always the map bbox, so the Ausschnitt control is
+ * hidden there. `new` is the compose pin (`zoom/lat/lng`, same encoding as `map=`).
+ * `review.new` is boolean `true`; `notes.new` is a map-param string — same session name,
+ * different types.
  */
 // Per-field `.catch` keeps stale bookmarks usable: `optionalSearchJson` drops the whole object
 // as soon as one field fails.

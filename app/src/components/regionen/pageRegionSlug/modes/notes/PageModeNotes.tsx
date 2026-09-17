@@ -72,8 +72,6 @@ export const PageModeNotes = () => {
     capabilities,
   } = useNotesModeListData()
 
-  const extent = notesMode.extent ?? 'view'
-
   const selectedNoteId = selected ? Number(selected.id) : undefined
   const isInternalNoteSelected =
     selected?.sourceId === internalNotesSourceId &&
@@ -160,7 +158,7 @@ export const PageModeNotes = () => {
 
   return (
     <ModePanel
-      title="Hinweise"
+      title={showingOsm ? 'OSM-Hinweise' : 'Hinweise'}
       detail={panelDetail}
       collection={
         collectionOption ? (
@@ -196,6 +194,7 @@ export const PageModeNotes = () => {
             notesMode={notesMode}
             setNotesModeParam={setNotesModeParam}
             showReactionFilter={capabilities.showReactionFilter}
+            showExtentFilter={capabilities.showExtentFilter}
             authorOptions={authorOptions}
           />
         )
@@ -214,7 +213,7 @@ export const PageModeNotes = () => {
           isInternalLoading={isInternalLoading}
           isInternalError={isInternalError}
           isOsmError={isOsmError}
-          extent={extent}
+          extent={capabilities.showExtentFilter ? (notesMode.extent ?? 'view') : undefined}
         />
       )}
     </ModePanel>

@@ -46,7 +46,9 @@ test.describe('Smoke – region mode pages (unauthenticated)', () => {
     // beforeLoad normalization may add search params but must keep the mode sub-path
     expect(new URL(page.url()).pathname).toBe(TEST_REGION_NOTES_MODE_URL)
 
-    await expect(page.getByRole('heading', { name: 'Hinweise' })).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByRole('heading', { name: 'OSM-Hinweise' })).toBeVisible({
+      timeout: 30_000,
+    })
     await expect(page.getByRole('button', { name: 'Neuer Hinweis' })).toBeVisible()
     await waitForMapLoad(page)
     await verifyMapRendered(page)
@@ -57,7 +59,9 @@ test.describe('Smoke – region mode pages (unauthenticated)', () => {
   test('legacy osmNotes=true on the map redirects into Hinweise', async ({ page }) => {
     await page.goto(`${TEST_REGION_URL}?osmNotes=true`)
     await page.waitForURL((url) => new URL(url).pathname === TEST_REGION_NOTES_MODE_URL)
-    await expect(page.getByRole('heading', { name: 'Hinweise' })).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByRole('heading', { name: 'OSM-Hinweise' })).toBeVisible({
+      timeout: 30_000,
+    })
     expect(new URL(page.url()).searchParams.has('osmNotes')).toBe(false)
 
     await expectNoConsoleErrors(page)
@@ -87,7 +91,9 @@ test.describe('Smoke – region mode pages (unauthenticated)', () => {
       .getByRole('link', { name: 'Hinweise' })
       .click()
     await page.waitForURL((url) => new URL(url).pathname === TEST_REGION_NOTES_MODE_URL)
-    await expect(page.getByRole('heading', { name: 'Hinweise' })).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByRole('heading', { name: 'OSM-Hinweise' })).toBeVisible({
+      timeout: 30_000,
+    })
 
     // Map view and category config survive the mode switch (URL is the source of truth)
     const urlAfter = new URL(page.url())

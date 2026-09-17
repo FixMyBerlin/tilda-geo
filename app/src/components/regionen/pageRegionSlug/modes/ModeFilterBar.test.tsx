@@ -3,6 +3,7 @@ import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { ModeFilterBar } from './ModeFilterBar'
 import { ModeFilterSelect, modeFilterIcons } from './ModeFilterSelect'
+import { NotesModeFilterBar } from './notes/NotesModeFilterBar'
 import {
   NOTES_COMMENTED_FILTER_OPTIONS,
   NOTES_REACTION_FILTER_OPTIONS,
@@ -169,5 +170,22 @@ describe('ModeFilterBar', () => {
   test('extent is optional so callers without onExtentChange omit Ausschnitt', () => {
     render(<ModeFilterBar search="" onSearchChange={vi.fn()} />)
     expect(screen.queryByRole('button', { name: /Ausschnitt/ })).toBeNull()
+  })
+
+  test('TILDA Hinweise show Ausschnitt; OSM Hinweise do not', () => {
+    const shared = {
+      notesMode: {},
+      setNotesModeParam: vi.fn(),
+      authorOptions: [{ value: '', label: 'Alle' }],
+    }
+    const { rerender } = render(
+      <NotesModeFilterBar {...shared} showReactionFilter showExtentFilter />,
+    )
+    expect(screen.getByRole('button', { name: 'Ausschnitt: Nur Karte' })).toBeTruthy()
+    expect(screen.getByRole('button', { name: 'Reaktion: Alle' })).toBeTruthy()
+
+    rerender(<NotesModeFilterBar {...shared} showReactionFilter={false} showExtentFilter={false} />)
+    expect(screen.queryByRole('button', { name: /Ausschnitt/ })).toBeNull()
+    expect(screen.queryByRole('button', { name: /Reaktion/ })).toBeNull()
   })
 })

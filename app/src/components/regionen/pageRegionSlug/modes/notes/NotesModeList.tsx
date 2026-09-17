@@ -20,6 +20,7 @@ import { notesListItemId } from './notesListHoverId'
 import type { NotesModeListEntry } from './notesModeListEntry'
 import type { NotesSelection } from './notesSelection'
 import { NotesCommentsPill, NotesOpenClosedIcon } from './notesStatusBadge'
+import { OsmNotesLimitNotice } from './OsmNotesLimitNotice'
 
 const NOTES_TABLE_COLUMNS = [
   { id: 'title', label: 'Titel', className: 'w-[28%]' },
@@ -38,12 +39,14 @@ type Props = {
   isInternalLoading: boolean
   isInternalError: boolean
   isOsmError: boolean
-  extent: ModeListExtent
+  /** TILDA notes only; OSM is always the current map bbox. */
+  extent?: ModeListExtent
 }
 
 /**
- * Notes mode list rows (OSM + internal). Extent filtering runs here; status/author filters are
- * applied by the parent query. Clicking a row selects it in `f` without moving the map.
+ * Notes mode list rows (OSM + internal). OSM notes are the current map bbox (API cap 100).
+ * Internal notes are the region collection and can be limited to the map view. Status/author
+ * filters run in the parent query. Clicking a row selects it in `f` without moving the map.
  */
 export const NotesModeList = ({
   entries,
@@ -55,7 +58,7 @@ export const NotesModeList = ({
   extent,
 }: Props) => {
   const { featuresParam, setFeaturesParam } = useFeaturesParam()
-  const passesExtent = useMapExtentFilter(extent)
+  const passesExtent = useMapExtentFilter(showingOsm ? 'all' : (extent ?? 'view'))
   const visibleEntries = entries.filter((entry) => passesExtent(entry.coordinates))
 
   const activeIds = new Set(
@@ -73,7 +76,7 @@ export const NotesModeList = ({
   }
 
   const emptyNotes =
-    entries.length > 0 && visibleEntries.length === 0 ? (
+    !showingOsm && entries.length > 0 && visibleEntries.length === 0 ? (
       <ModePanelEmpty
         label="Keine Hinweise für diese Filter."
         description={modeListFilterEmptyMessage({
@@ -109,16 +112,18 @@ export const NotesModeList = ({
                       status={entry.status}
                       className="mt-0.5 size-5 shrink-0 text-teal-700"
                     />
-                    <span className={modePanelListTitleClassName}>{entry.title}</span>
-                    {!showingOsm && <ComposerDraftDot draftId={noteCommentDraftId(entry.id)} />}
+                    <span className="flex min-w-0 items-baseline gap-1.5">
+                      <span className={modePanelListTitleClassName}>{entry.title}</span>
+                      {entry.subtitle ? (
+                        <span className={`min-w-0 truncate ${modePanelListMetaClassName}`}>
+                          {entry.subtitle}
+                        </span>
+                      ) : null}
+                      {!showingOsm && <ComposerDraftDot draftId={noteCommentDraftId(entry.id)} />}
+                    </span>
                   </div>
                   <NotesCommentsPill count={entry.commentCount} />
                 </div>
-                {entry.subtitle && (
-                  <div className={`mt-0.5 pl-6.5 ${modePanelListMetaClassName}`}>
-                    {entry.subtitle}
-                  </div>
-                )}
                 {entry.commentPreview && (
                   <div className={`mt-1 line-clamp-2 pl-6.5 italic ${modePanelListBodyClassName}`}>
                     {entry.commentPreview}
@@ -160,6 +165,13 @@ export const NotesModeList = ({
     </ModeDataTable>
   )
 
+  const osmList = (
+    <>
+      <OsmNotesLimitNotice />
+      {entries.length === 0 ? emptyNotes : notesTable}
+    </>
+  )
+
   switch (selectionKind) {
     case 'none':
       return emptyNotes
@@ -187,6 +199,6 @@ export const NotesModeList = ({
           </p>
         )
       }
-      return visibleEntries.length === 0 ? emptyNotes : notesTable
+      return osmList
   }
 }

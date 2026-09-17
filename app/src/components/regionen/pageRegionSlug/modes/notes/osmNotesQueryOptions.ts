@@ -10,13 +10,21 @@ import {
 
 export const osmNotesQueryKey = (bbox: string | undefined) => ['osmNotes', bbox] as const
 
+/** OSM bbox notes default (`notes default_query_limit`). Ordered by `updated_at` desc. */
+export const OSM_NOTES_BBOX_LIMIT = 100
+
+export const osmNotesBboxPath = (bbox: string) =>
+  `/notes.json?bbox=${bbox}&limit=${OSM_NOTES_BBOX_LIMIT}`
+
+export const osmNotesHitBboxLimit = (count: number) => count >= OSM_NOTES_BBOX_LIMIT
+
 const TILDA_NOTE_SEARCH_TERMS = ['#tilda', '#radverkehrsatlas']
 
 export const osmNotesQueryOptions = ({ bbox }: { bbox: string | undefined }) => {
   return queryOptions({
     queryKey: osmNotesQueryKey(bbox),
     queryFn: async () => {
-      const apiUrl = getOsmApiUrl(`/notes.json?bbox=${bbox}`)
+      const apiUrl = getOsmApiUrl(osmNotesBboxPath(bbox ?? ''))
       const response = await fetch(apiUrl, { headers: { Accept: 'application/json' } })
       if (!response.ok) {
         throw new Error('Network response was not ok')

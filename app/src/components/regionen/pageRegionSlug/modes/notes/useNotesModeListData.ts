@@ -81,6 +81,7 @@ export const useNotesModeListData = () => {
     capabilities: {
       showDownload: !showingOsm,
       showReactionFilter: !showingOsm,
+      showExtentFilter: !showingOsm,
       draftKind,
       collectionOptions,
     },
