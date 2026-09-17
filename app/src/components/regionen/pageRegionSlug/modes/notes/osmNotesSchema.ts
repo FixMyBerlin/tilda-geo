@@ -40,6 +40,10 @@ const osmApiNoteSchema = z.object({
 
 export type OsmApiNotesThreadType = z.infer<typeof osmApiNoteSchema>
 
+/** OSM stores the original note as `comments[0]`. TILDA counts only later replies. */
+export const osmNoteReplyCount = (comments: { length: number } | undefined) =>
+  Math.max(0, (comments?.length ?? 0) - 1)
+
 const osmNoteSchema = osmApiNoteSchema.extend({ tilda: z.boolean() })
 
 const sharedFeaturePointSchema = z.object({

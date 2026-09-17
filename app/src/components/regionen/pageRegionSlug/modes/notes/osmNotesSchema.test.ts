@@ -1,6 +1,15 @@
 /** @vitest-environment node */
 import { describe, expect, test } from 'vitest'
-import { osmApiFeatureCollectionSchema, parseOsmApiDate } from './osmNotesSchema'
+import { osmApiFeatureCollectionSchema, osmNoteReplyCount, parseOsmApiDate } from './osmNotesSchema'
+
+describe('osmNoteReplyCount', () => {
+  test('treats the original OSM note as zero comments', () => {
+    expect(osmNoteReplyCount(undefined)).toBe(0)
+    expect(osmNoteReplyCount([])).toBe(0)
+    expect(osmNoteReplyCount([{}])).toBe(0)
+    expect(osmNoteReplyCount([{}, {}])).toBe(1)
+  })
+})
 
 describe('parseOsmApiDate', () => {
   test('parses OSM API UTC timestamps as UTC', () => {

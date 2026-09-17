@@ -1,7 +1,10 @@
 import type { FeatureCollection } from 'geojson'
 import { internalNotesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersInternalNotes'
 import { osmNotesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersOsmNotes'
-import type { OsmFeaturePointType } from '@/components/regionen/pageRegionSlug/modes/notes/osmNotesSchema'
+import {
+  osmNoteReplyCount,
+  type OsmFeaturePointType,
+} from '@/components/regionen/pageRegionSlug/modes/notes/osmNotesSchema'
 
 /** Normalized note row shown in the notes mode list, for both internal and OSM notes. */
 export type NotesModeListEntry = {
@@ -59,10 +62,10 @@ export const osmNotesToListEntries = (
         sourceId: osmNotesSourceId,
         coordinates: [lng, lat],
         status: props.status,
-        title: `OSM-Hinweis #${props.id}`,
+        title: `Hinweis #${props.id}`,
         subtitle: firstComment?.user || undefined,
         commentPreview: firstComment?.text ? truncate(firstComment.text) : undefined,
-        commentCount: props.comments.length,
+        commentCount: osmNoteReplyCount(props.comments),
       } satisfies NotesModeListEntry,
     ]
   })

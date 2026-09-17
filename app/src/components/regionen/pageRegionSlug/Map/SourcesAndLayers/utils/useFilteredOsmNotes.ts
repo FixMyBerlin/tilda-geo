@@ -1,5 +1,6 @@
 import { featureCollection } from '@turf/turf'
 import type { z } from 'zod'
+import { osmNoteReplyCount } from '@/components/regionen/pageRegionSlug/modes/notes/osmNotesSchema'
 import { useOsmNotesQuery } from '@/components/regionen/pageRegionSlug/modes/notes/useOsmNotesQuery'
 import type { zodInternalNotesFilterParam } from '@/shared/regionen/regionSearchZod'
 
@@ -41,16 +42,11 @@ export const useFilteredOsmNotes = (filter?: NotesFilter | null) => {
       if (filter.user === note.properties.comments.at(0)?.user) return true
       return false
     })
-    // Filter by `commented` on note.noteComments
+    // Filter by `commented` — OSM `comments[0]` is the original note, not a reply.
     filteredOsmNotes = filteredOsmNotes.filter((note) => {
       if (typeof filter.commented !== 'boolean') return true
-      const fullNote = osmNotesFeatureCollection.features.find(
-        (fNote) => fNote.id === note.properties.id,
-      )?.properties
-      if (fullNote?.comments?.length && filter.commented === fullNote.comments.length > 1) {
-        return true
-      }
-      return false
+      const hasReplies = osmNoteReplyCount(note.properties.comments) > 0
+      return filter.commented === hasReplies
     })
   }
   return featureCollection(filteredOsmNotes)
