@@ -6,7 +6,7 @@ const clamp = (value: number, min: number, max: number) => Math.min(Math.max(val
 export type EdgeSide = 'left' | 'right' | 'top' | 'bottom'
 
 /** Base size used to derive the off-screen edge disc (`LIST_HOVER_EDGE_RING_PX`). */
-export const LIST_HOVER_RING_PX = 22
+const LIST_HOVER_RING_PX = 22
 /** Off-screen disc: 3× `LIST_HOVER_RING_PX` so it reads at the map edge. */
 export const LIST_HOVER_EDGE_RING_PX = LIST_HOVER_RING_PX * 3
 /** Fraction of the edge-ring diameter that hangs outside the map and is clipped. */

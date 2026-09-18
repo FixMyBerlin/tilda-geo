@@ -24,9 +24,16 @@ import { UI_SPRING } from '@/components/shared/motion/spring.const'
 
 type ModalIcon = 'info' | 'error' | 'copyright' | 'download' | 'edit' | 'docs' | 'reviewList'
 
+/** Escape hatch for callers with their own Heroicon (e.g. `ConfirmDialog`) instead of a preset key. */
+export type ModalCustomIcon = {
+  Icon: typeof PencilIcon
+  bgClass: string
+  iconClass: string
+}
+
 type Props = {
   title: string
-  icon: ModalIcon
+  icon: ModalIcon | ModalCustomIcon
   /** Tint header icon with a region mode accent (notes / qa / reviewLists). */
   mode?: ModeAccentMode
   buttonCloseName?: string
@@ -98,7 +105,7 @@ export const ModalDialog = ({
     },
   } satisfies Record<ModalIcon, { bgClass: string; iconClass: string; Icon: typeof PencilIcon }>
 
-  const { bgClass, iconClass, Icon } = iconComponent[icon]
+  const { bgClass, iconClass, Icon } = typeof icon === 'string' ? iconComponent[icon] : icon
   const accent = mode ? modeIdentity[mode].accent : undefined
 
   // Motion + `Dialog static` (same split as MobileBottomSheet): Headless UI keeps the

@@ -40,9 +40,7 @@ const auditLogFilterFields = {
   to: optionalAuditLogDateBound('to'),
 } as const
 
-export const auditLogListSchema = z
-  .object(auditLogFilterFields)
-  .extend(offsetSearchFields({ maxTake: 200 }))
+export const auditLogListSchema = z.object(auditLogFilterFields).extend(offsetSearchFields())
 
 /** Parsed audit-log query filters (dates expanded at the schema boundary). */
 export type AuditLogListFilters = Partial<z.output<typeof auditLogListSchema>>

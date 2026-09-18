@@ -1,27 +1,27 @@
 /** @vitest-environment jsdom */
-import { fireEvent, render, screen } from '@testing-library/react'
+import { render, screen } from '@testing-library/react'
 import { describe, expect, test } from 'vitest'
 import { ObjectDump } from './ObjectDump'
 
 describe('ObjectDump', () => {
-  test('renders a floating overlay button, not an in-flow JSON Dump summary', () => {
-    const { container } = render(
-      <div className="relative">
-        <p>visible content</p>
-        <ObjectDump title="note" data={{ id: 1 }} />
-      </div>,
-    )
+  test('renders a collapsed disclosure labelled with the title', () => {
+    const { container } = render(<ObjectDump title="Region" data={{ id: 1 }} />)
 
-    expect(container.querySelector('details')).toBeNull()
-    expect(screen.queryByText(/JSON Dump note/)).toBeNull()
-    expect(screen.getByRole('button', { name: 'JSON Dump note' })).toBeTruthy()
+    const details = container.querySelector('details')
+    expect(details).not.toBeNull()
+    expect(details?.open).toBe(false)
+    expect(screen.getByText('Region').closest('summary')).not.toBeNull()
   })
 
-  test('opens the JSON dump in a popover', async () => {
-    render(<ObjectDump title="note" data={{ id: 1 }} />)
+  test('contains the pretty-printed JSON', () => {
+    const { container } = render(<ObjectDump title="Region" data={{ id: 1 }} />)
 
-    fireEvent.click(screen.getByRole('button', { name: 'JSON Dump note' }))
+    expect(container.querySelector('pre')?.textContent).toBe('{\n  "id": 1\n}')
+  })
 
-    expect(await screen.findByText(/"id": 1/)).toBeTruthy()
+  test('renders null for missing data', () => {
+    const { container } = render(<ObjectDump data={undefined} />)
+
+    expect(container.querySelector('pre')?.textContent).toBe('null')
   })
 })

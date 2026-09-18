@@ -6,9 +6,6 @@ import { paginate } from '@/server/utils/paginate.server'
 
 type GetUsersInput = Pick<Prisma.UserFindManyArgs, 'where' | 'orderBy' | 'skip' | 'take'>
 
-const DEFAULT_TAKE = 50
-const MAX_TAKE = 200
-
 export type UserWithMemberships = Awaited<ReturnType<typeof getUsersAndMemberships>>['rows'][number]
 
 export async function getUsersAndMemberships(input: GetUsersInput = {}, headers: Headers) {
@@ -18,8 +15,7 @@ export async function getUsersAndMemberships(input: GetUsersInput = {}, headers:
   const result = await paginate({
     skip: input.skip,
     take: input.take,
-    defaultTake: DEFAULT_TAKE,
-    maxTake: MAX_TAKE,
+    fallbackToLastPage: true,
     count: () => db.user.count({ where }),
     query: ({ skip, take }) =>
       db.user.findMany({

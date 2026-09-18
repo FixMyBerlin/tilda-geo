@@ -4,9 +4,7 @@ import { getAdminRegionEditLoaderFn } from '@/server/admin/admin.functions'
 
 export const Route = createFileRoute('/admin/regions/$regionSlug/edit')({
   ssr: true,
-  loader: async ({ params }) => {
-    return await getAdminRegionEditLoaderFn({ data: { regionSlug: params.regionSlug } })
-  },
+  loader: ({ params }) => getAdminRegionEditLoaderFn({ data: { regionSlug: params.regionSlug } }),
   head: ({ loaderData }) => {
     if (!loaderData) return { meta: [] }
     return {

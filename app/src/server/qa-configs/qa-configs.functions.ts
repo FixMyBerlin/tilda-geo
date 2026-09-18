@@ -66,13 +66,13 @@ export const createQaEvaluationFn = createServerFn({ method: 'POST' })
   .handler(async ({ data }) => createQaEvaluation(data, getRequestHeaders()))
 
 export const createQaConfigFn = createServerFn({ method: 'POST' })
-  .validator((data: z.infer<typeof CreateQaConfigFormSchema>) =>
+  .validator((data: z.input<typeof CreateQaConfigFormSchema>) =>
     CreateQaConfigFormSchema.parse(data),
   )
   .handler(async ({ data }) => createQaConfigWithData(data, getRequestHeaders()))
 
 export const updateQaConfigFn = createServerFn({ method: 'POST' })
-  .validator((data: z.infer<typeof UpdateQaConfigFormSchema>) =>
+  .validator((data: z.input<typeof UpdateQaConfigFormSchema>) =>
     UpdateQaConfigFormSchema.parse(data),
   )
   .handler(async ({ data }) => updateQaConfigWithData(data, getRequestHeaders()))

@@ -1,5 +1,5 @@
-import { AdminEditActionLink } from '@/components/admin/adminPageTitle'
-import { adminTableClasses } from '@/components/admin/AdminTable'
+import { AdminTable, adminTableClasses } from '@/components/admin/AdminTable'
+import { AdminTableActions, AdminTableEditLink } from '@/components/admin/AdminTableActions'
 import { buildMapDatasetCategoriesListSearch } from './mapDatasetCategoriesListSearch'
 
 type CategoryRow = {
@@ -11,6 +11,14 @@ type CategoryRow = {
   title: string
   subtitle: string | null
 }
+
+const header = [
+  'Sortierung',
+  'Kategorie',
+  'Titel',
+  'Untertitel',
+  { id: 'actions', label: 'Aktionen', srOnly: true, align: 'right' as const },
+]
 
 export const MapDatasetCategoriesTable = ({
   categories,
@@ -31,61 +39,46 @@ export const MapDatasetCategoriesTable = ({
   }
 
   return (
-    <div className="mt-6">
-      <table className={adminTableClasses.table}>
-        <thead>
-          <tr className={adminTableClasses.headRow}>
-            {['Sortierung', 'Kategorie', 'Titel', 'Untertitel', ''].map((cell) => (
-              <th key={cell} scope="col" className={adminTableClasses.th}>
-                {cell}
+    <AdminTable header={header}>
+      {sections.map((item) => {
+        if (item.kind === 'group') {
+          return (
+            <tr key={`g:${item.groupKey}`} className={adminTableClasses.groupRow}>
+              <th
+                colSpan={header.length}
+                scope="colgroup"
+                className={adminTableClasses.groupHeader}
+              >
+                {item.groupKey}
               </th>
-            ))}
+            </tr>
+          )
+        }
+        const row = item.row
+        const subtitlePreview =
+          row.subtitle && row.subtitle.length > 80 ? `${row.subtitle.slice(0, 80)}…` : row.subtitle
+        return (
+          <tr key={row.id}>
+            <td className={adminTableClasses.td}>{row.sortOrder}</td>
+            <td className={adminTableClasses.td}>
+              <code className="text-xs text-gray-700">{row.categoryKey}</code>
+            </td>
+            <td className={adminTableClasses.td}>{row.title}</td>
+            <td className={adminTableClasses.td} title={row.subtitle ?? undefined}>
+              <span className="line-clamp-2 max-w-md text-gray-600">{subtitlePreview || '—'}</span>
+            </td>
+            <td className={adminTableClasses.td}>
+              <AdminTableActions>
+                <AdminTableEditLink
+                  to="/admin/map-dataset-categories/$categoryKey"
+                  params={{ categoryKey: row.key }}
+                  search={buildMapDatasetCategoriesListSearch(listGroupKey)}
+                />
+              </AdminTableActions>
+            </td>
           </tr>
-        </thead>
-        <tbody className={adminTableClasses.body}>
-          {sections.map((item) => {
-            if (item.kind === 'group') {
-              return (
-                <tr key={`g:${item.groupKey}`} className="bg-gray-100/90">
-                  <th
-                    colSpan={5}
-                    scope="colgroup"
-                    className="px-3 py-2 text-left text-xs font-semibold tracking-wide text-gray-600 uppercase"
-                  >
-                    {item.groupKey}
-                  </th>
-                </tr>
-              )
-            }
-            const row = item.row
-            const subtitlePreview =
-              row.subtitle && row.subtitle.length > 80
-                ? `${row.subtitle.slice(0, 80)}…`
-                : row.subtitle
-            return (
-              <tr key={row.id}>
-                <td className={adminTableClasses.td}>{row.sortOrder}</td>
-                <td className={adminTableClasses.td}>
-                  <code className="text-xs text-gray-700">{row.categoryKey}</code>
-                </td>
-                <td className={adminTableClasses.td}>{row.title}</td>
-                <td className={adminTableClasses.td} title={row.subtitle ?? undefined}>
-                  <span className="line-clamp-2 max-w-md text-gray-600">
-                    {subtitlePreview || '—'}
-                  </span>
-                </td>
-                <td className={adminTableClasses.td}>
-                  <AdminEditActionLink
-                    to="/admin/map-dataset-categories/$categoryKey"
-                    params={{ categoryKey: row.key }}
-                    search={buildMapDatasetCategoriesListSearch(listGroupKey)}
-                  />
-                </td>
-              </tr>
-            )
-          })}
-        </tbody>
-      </table>
-    </div>
+        )
+      })}
+    </AdminTable>
   )
 }

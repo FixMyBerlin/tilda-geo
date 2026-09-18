@@ -2,7 +2,7 @@ import { z } from 'zod'
 import type { QaEvaluationStatus, QaEvaluatorType, QaSystemStatus } from '@/prisma/generated/client'
 import { requireAdmin } from '@/server/auth/session.server'
 import db from '@/server/db.server'
-import { clampSkipTake } from '@/shared/pagination/clampSkipTake'
+import { clampSkipTake, lastPageSkip } from '@/shared/pagination/clampSkipTake'
 import type { PaginatedList } from '@/shared/pagination/types'
 import { getQaTableName } from '../utils/getQaTableName'
 
@@ -69,7 +69,10 @@ function isMissingMapTableError(error: unknown) {
   return /relation .+ does not exist|42P01/i.test(error.message)
 }
 
-/** Orphans first by human work (user evals, then comments), then recency; then skip/take. */
+/**
+ * Orphans first by human work (user evals, then comments), then recency, then `areaId`; then
+ * skip/take. A `skip` past the end returns the last page (like `paginate({ fallbackToLastPage })`).
+ */
 export function selectQaOrphanedEvaluationPage(
   latestEvaluations: OrphanLatestEvaluation[],
   mapIdSet: Set<string>,
@@ -106,13 +109,18 @@ export function selectQaOrphanedEvaluationPage(
       if (b.commentCount !== a.commentCount) {
         return b.commentCount - a.commentCount
       }
-      return b.createdAt.getTime() - a.createdAt.getTime()
+      if (b.createdAt.getTime() !== a.createdAt.getTime()) {
+        return b.createdAt.getTime() - a.createdAt.getTime()
+      }
+      return a.areaId.localeCompare(b.areaId)
     })
 
+  const pageSkip = skip > 0 && skip >= orphans.length ? lastPageSkip(orphans.length, take) : skip
+
   return {
-    rows: orphans.slice(skip, skip + take),
+    rows: orphans.slice(pageSkip, pageSkip + take),
     total: orphans.length,
-    skip,
+    skip: pageSkip,
     take,
   } satisfies QaOrphanedEvaluationsResult
 }

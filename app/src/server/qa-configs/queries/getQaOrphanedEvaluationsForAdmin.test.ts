@@ -94,6 +94,19 @@ describe('selectQaOrphanedEvaluationPage', () => {
     expect(result.skip).toBe(1)
     expect(result.take).toBe(2)
   })
+
+  test('breaks ties by areaId and falls back to the last page past the end', () => {
+    const createdAt = new Date('2024-01-01T00:00:00Z')
+    const evaluations = ['c', 'a', 'b'].map((areaId) => latest({ areaId, createdAt }))
+    const noCounts = new Map<string, ReturnType<typeof counts>>()
+
+    const all = selectQaOrphanedEvaluationPage(evaluations, new Set(), noCounts, 0, 50)
+    expect(all.rows.map((row) => row.areaId)).toEqual(['a', 'b', 'c'])
+
+    const pastEnd = selectQaOrphanedEvaluationPage(evaluations, new Set(), noCounts, 500, 2)
+    expect(pastEnd.rows.map((row) => row.areaId)).toEqual(['c'])
+    expect(pastEnd.skip).toBe(2)
+  })
 })
 
 describe('countNonBlankCommentBodies', () => {

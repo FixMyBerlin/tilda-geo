@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { fractionToPercent, percentToFraction } from '@/shared/qaThresholdPercent'
 
 const QaConfigSchema = z.object({
   id: z.number().optional(),
@@ -29,8 +30,31 @@ const trustedOsmUsernamesFromTextarea = z.string().transform((value) => [
 // `date` input string (e.g. "2025-06-30") -> Date; a date-only ISO string parses as 00:00 UTC
 const referenceFrozenAtFromDateInput = z.iso.date().transform((value) => new Date(value))
 
-// Schema for creating QA configs
-export const CreateQaConfigFormSchema = QaConfigSchema.omit({
+// The admin form shows/edits `goodThreshold`/`needsReviewThreshold` as a percent (e.g. 10 for
+// 10 %) — easier to reason about than the raw 0–1 ratio. `QaConfig` keeps storing the fraction;
+// this is the only place the percent <-> fraction conversion happens (see qaThresholdCalculations.ts,
+// reused by the list table and the form's "Probe-Rechnung" preview).
+const percentThresholdFromInput = z.coerce
+  .number()
+  .min(0, 'Wert darf nicht kleiner als 0 % sein.')
+  .max(100, 'Wert darf nicht größer als 100 % sein.')
+  .transform(percentToFraction)
+
+/** „Gut bis“ darf nicht über „Überprüfung bis“ liegen — sonst gäbe es Werte, die keinem Status zugeordnet werden können. */
+function requireGoodThresholdNotAboveNeedsReview(
+  data: { goodThreshold: number; needsReviewThreshold: number },
+  ctx: z.RefinementCtx,
+) {
+  if (data.goodThreshold > data.needsReviewThreshold) {
+    ctx.addIssue({
+      code: 'custom',
+      path: ['needsReviewThreshold'],
+      message: `„Überprüfung bis“ (${fractionToPercent(data.needsReviewThreshold)} %) muss mindestens so hoch sein wie „Gut bis“ (${fractionToPercent(data.goodThreshold)} %).`,
+    })
+  }
+}
+
+const CreateQaConfigObjectSchema = QaConfigSchema.omit({
   id: true,
   isActive: true,
   regionId: true,
@@ -41,9 +65,9 @@ export const CreateQaConfigFormSchema = QaConfigSchema.omit({
 }).extend({
   isActive: trueOrFalse,
   regionId: z.coerce.number().int().positive('Region ID must be a valid positive integer'),
-  goodThreshold: z.coerce.number(),
-  needsReviewThreshold: z.coerce.number(),
-  absoluteDifferenceThreshold: z.coerce.number(),
+  goodThreshold: percentThresholdFromInput,
+  needsReviewThreshold: percentThresholdFromInput,
+  absoluteDifferenceThreshold: z.coerce.number().int().min(0),
   mapAttribution: z
     .string()
     .optional()
@@ -52,10 +76,19 @@ export const CreateQaConfigFormSchema = QaConfigSchema.omit({
   referenceFrozenAt: referenceFrozenAtFromDateInput,
 })
 
-// Schema for updating QA configs (includes id)
-export const UpdateQaConfigFormSchema = CreateQaConfigFormSchema.extend({
+// Schema for creating QA configs
+export const CreateQaConfigFormSchema = CreateQaConfigObjectSchema.superRefine(
+  requireGoodThresholdNotAboveNeedsReview,
+)
+
+const UpdateQaConfigObjectSchema = CreateQaConfigObjectSchema.extend({
   id: z.coerce.number().int().positive('ID must be a valid positive integer'),
 })
+
+// Schema for updating QA configs (includes id)
+export const UpdateQaConfigFormSchema = UpdateQaConfigObjectSchema.superRefine(
+  requireGoodThresholdNotAboveNeedsReview,
+)
 
 export const GetQaConfigSchema = z.object({
   id: z.number(),

@@ -1,135 +1,147 @@
-import { getRouteApi } from '@tanstack/react-router'
-import { twJoin, twMerge } from 'tailwind-merge'
-import { adminBulletedListClassName } from '@/components/admin/adminListClasses'
-import { AdminPageTitleEdit, AdminPageTitleEditLabel } from '@/components/admin/adminPageTitle'
-import { adminTableClasses } from '@/components/admin/AdminTable'
-import { AuditHistoryPanel } from '@/components/admin/audit-log/AuditHistoryPanel'
-import { Breadcrumb } from '@/components/admin/Breadcrumb'
-import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
+import {
+  ArrowDownTrayIcon,
+  CheckBadgeIcon,
+  ClipboardDocumentListIcon,
+  ClockIcon,
+  CloudArrowUpIcon,
+  MapIcon,
+  UsersIcon,
+} from '@heroicons/react/20/solid'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { getRouteApi, useNavigate } from '@tanstack/react-router'
+import { AdminDeleteButton } from '@/components/admin/AdminDeleteButton'
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
+import { AdminTechnicalDetails } from '@/components/admin/AdminTechnicalDetails'
+import { AdminAsideLink } from '@/components/admin/aside/AdminAsideActions'
+import { toAdminAsideSections } from '@/components/admin/aside/adminAsideSection'
 import { buildUploadsListSearch } from '@/components/admin/map-dataset-uploads/pageMapDatasetUploads/mapDatasetUploadsListSearch'
-import { RegionStatusPill } from '@/components/regionen/regionMeta/RegionStatusPill'
-import { Link } from '@/components/shared/links/Link'
-import { linkStyles } from '@/components/shared/links/styles'
-import { Quote } from '@/components/shared/text/Quotes'
-import { hasContactEmail } from '@/components/shared/utils/osmPlaceholderEmail'
+import { toastSuccess } from '@/components/shared/toast/toastSuccess'
+import { adminNavCountsQueryOptions } from '@/server/admin/adminNavQueryOptions'
+import { regionenIndexQueryKey } from '@/server/regions/regionenIndexQueryOptions'
+import { deleteRegionFn } from '@/server/regions/regions.functions'
 import { RegionFormEdit } from './pageRegions/RegionFormEdit'
-import { RemoveMembershipButton } from './pageRegions/RemoveMembershipButton'
 
 const routeApi = getRouteApi('/admin/regions/$regionSlug/edit')
 
+/** Sections after the 12 form field groups (`RegionForm`). */
+const pageSectionLabels = {
+  technical: 'Technische Details',
+} satisfies Record<string, string>
+
 export function PageRegionEdit() {
-  const { region, users, formConfig, formValues, contracts, auditHistory } =
-    routeApi.useLoaderData()
+  const { region, formConfig, formValues, contracts, linkCounts } = routeApi.useLoaderData()
+  const regionSearch = { regionSlug: region.slug }
+  const navigate = useNavigate()
+  const queryClient = useQueryClient()
+
+  const deleteRegion = useMutation({
+    mutationFn: async () => {
+      const result = await deleteRegionFn({ data: { slug: region.slug } })
+      if (!result.success) throw new Error(result.message)
+    },
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: regionenIndexQueryKey }),
+        queryClient.invalidateQueries({ queryKey: adminNavCountsQueryOptions().queryKey }),
+      ])
+      toastSuccess('Gelöscht.')
+      await navigate({ to: '/admin/regions' })
+    },
+  })
 
   return (
     <>
-      <HeaderWrapper>
-        <Breadcrumb
-          pages={[
-            { href: '/admin/regions', name: 'Regionen' },
-            {
-              href: `/admin/regions/${region.slug}/edit`,
-              name: <AdminPageTitleEditLabel name={region.name} variant="breadcrumb" />,
-            },
-          ]}
-        />
-      </HeaderWrapper>
-
-      <AdminPageTitleEdit name={region.name} />
-
-      <p className="mt-4 flex flex-wrap gap-x-4 gap-y-1 text-sm text-gray-700">
-        <Link to="/regionen/$regionSlug" params={{ regionSlug: region.slug }}>
-          Öffnen…
-        </Link>
-        <Link
-          to="/admin/map-dataset-uploads"
-          search={buildUploadsListSearch({ regionSlug: region.slug })}
-        >
-          Uploads dieser Region
-        </Link>
-      </p>
-
-      <div className="my-10">
-        <h2 className="mb-4 text-xl font-semibold">
-          Benutzer von <Quote>{region.name}</Quote>
-        </h2>
-        {users.length === 0 ? (
-          <p className="text-gray-500">Keine Benutzer gefunden</p>
-        ) : (
-          <table className={twMerge(adminTableClasses.table, 'w-full min-w-full')}>
-            <thead>
-              <tr className={adminTableClasses.headRow}>
-                <th scope="col" className={adminTableClasses.thLeft}>
-                  Benutzer
-                </th>
-                <th scope="col" className={adminTableClasses.thLeft}>
-                  Aktionen
-                </th>
-                <th scope="col" className={adminTableClasses.thLeft}>
-                  Alle Regionen
-                </th>
-              </tr>
-            </thead>
-            <tbody className={adminTableClasses.body}>
-              {users.map((user) => {
-                const membershipInRegion = user.memberships.find(
-                  (m) => m.region.slug === region.slug,
-                )
-
-                return (
-                  <tr key={user.id}>
-                    <td className={twMerge(adminTableClasses.td, 'py-3 align-top')}>
-                      <strong>OSM: {user.osmName}</strong> ({user.osmId})
-                      <br />
-                      {user.firstName || user.lastName
-                        ? `${user.firstName || ''} ${user.lastName || ''}`.trim()
-                        : '–'}
-                      <br />
-                      {hasContactEmail(user.email) ? user.email : '–'}
-                    </td>
-                    <td className={twMerge(adminTableClasses.td, 'py-3 align-top')}>
-                      {membershipInRegion ? (
-                        <RemoveMembershipButton membershipId={membershipInRegion.id} />
-                      ) : (
-                        '–'
-                      )}
-                    </td>
-                    <td className={twMerge(adminTableClasses.td, 'py-3 align-top')}>
-                      <details>
-                        <summary className={twJoin(linkStyles, 'cursor-pointer whitespace-nowrap')}>
-                          Alle Regionen ({user.memberships.length})
-                        </summary>
-                        <ul className={twMerge(adminBulletedListClassName, 'mt-2')}>
-                          {user.memberships.map((membership) => (
-                            <li key={membership.id}>
-                              <div className="flex items-center gap-2">
-                                <span>{membership.region.slug}</span>
-                                <RegionStatusPill
-                                  status={membership.region.status}
-                                  className="text-xs"
-                                />
-                              </div>
-                            </li>
-                          ))}
-                        </ul>
-                      </details>
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        )}
-      </div>
+      <AdminPageHeader title={region.name} parent={{ label: 'Regionen', to: '/admin/regions' }} />
 
       <RegionFormEdit
         formConfig={formConfig}
         formValues={formValues}
         contracts={contracts}
         regionId={region.id}
+        pageExtras={{
+          sections: toAdminAsideSections(pageSectionLabels),
+          content: (
+            <AdminTechnicalDetails
+              id="technical"
+              items={[
+                { label: 'ID', value: region.id },
+                { label: 'Slug', value: <code>{region.slug}</code> },
+              ]}
+              dumps={[
+                { title: 'Region', data: region },
+                { title: 'Gespeicherte Konfiguration', data: formConfig },
+              ]}
+            />
+          ),
+          secondaryActions: (
+            <>
+              <AdminAsideLink
+                icon={MapIcon}
+                blank
+                to="/regionen/$regionSlug"
+                params={{ regionSlug: region.slug }}
+              >
+                Karte öffnen
+              </AdminAsideLink>
+              <AdminAsideLink
+                icon={UsersIcon}
+                to="/admin/memberships"
+                search={regionSearch}
+                count={linkCounts.memberships}
+              >
+                Mitglieder
+              </AdminAsideLink>
+              <AdminAsideLink
+                icon={CloudArrowUpIcon}
+                to="/admin/map-dataset-uploads"
+                search={buildUploadsListSearch(regionSearch)}
+                count={linkCounts.uploads}
+              >
+                Uploads
+              </AdminAsideLink>
+              <AdminAsideLink
+                icon={CheckBadgeIcon}
+                to="/admin/qa-configs"
+                search={regionSearch}
+                count={linkCounts.qaConfigs}
+              >
+                QA-Konfigurationen
+              </AdminAsideLink>
+              <AdminAsideLink
+                icon={ClipboardDocumentListIcon}
+                to="/admin/review-lists"
+                search={regionSearch}
+                count={linkCounts.reviewLists}
+              >
+                Prüflisten
+              </AdminAsideLink>
+              <AdminAsideLink
+                icon={ClockIcon}
+                to="/admin/audit-log"
+                search={regionSearch}
+                count={linkCounts.auditLog}
+              >
+                Änderungsverlauf
+              </AdminAsideLink>
+              <AdminAsideLink
+                icon={ArrowDownTrayIcon}
+                href={`/api/regions/${region.slug}/uploads-csv`}
+                download
+              >
+                Uploads als CSV
+              </AdminAsideLink>
+            </>
+          ),
+          destructiveAction: (
+            <AdminDeleteButton
+              label="Region löschen"
+              title={`Region „${region.name}“ löschen?`}
+              description={`Die Region »${region.slug}« wird unwiderruflich gelöscht.`}
+              onDelete={() => deleteRegion.mutateAsync()}
+            />
+          ),
+        }}
       />
-
-      <AuditHistoryPanel rows={auditHistory} model="Region" recordId={String(region.id)} />
     </>
   )
 }

@@ -1,3 +1,4 @@
+import type { AdminFormPageExtras } from '@/components/admin/aside/AdminFormLayout'
 import type { TRegionContract } from '@/server/region-contracts/regionContractMapper.server'
 import type { RegionFormInput, RegionWriteInput } from '@/server/regions/regionWriteSchema'
 import { regionConfigToFormDefaults, RegionForm } from './RegionForm'
@@ -8,9 +9,10 @@ type Props = {
   formValues?: RegionFormInput
   contracts: TRegionContract[]
   regionId: number
+  pageExtras: AdminFormPageExtras
 }
 
-export function RegionFormEdit({ formConfig, formValues, contracts, regionId }: Props) {
+export function RegionFormEdit({ formConfig, formValues, contracts, regionId, pageExtras }: Props) {
   const initialValues = formValues ?? regionConfigToFormDefaults(formConfig)
   // Remount when mask defaults change — TanStack Form only reads defaultValues on mount, so after
   // save+invalidate (or reopen) a stale empty mask field would otherwise stick and clear the mask
@@ -30,6 +32,7 @@ export function RegionFormEdit({ formConfig, formValues, contracts, regionId }: 
       contracts={contracts}
       regionId={regionId}
       regionSlug={formConfig.slug}
+      pageExtras={pageExtras}
     />
   )
 }

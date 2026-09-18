@@ -5,9 +5,6 @@ import { paginate } from '@/server/utils/paginate.server'
 
 type GetUploadInput = Pick<Prisma.MapDatasetUploadFindManyArgs, 'where' | 'skip' | 'take'>
 
-const DEFAULT_TAKE = 50
-const MAX_TAKE = 200
-
 export type TUpload = Awaited<ReturnType<typeof getUploads>>['rows'][number]
 
 export async function getUploads(input: GetUploadInput = {}, headers: Headers) {
@@ -18,14 +15,14 @@ export async function getUploads(input: GetUploadInput = {}, headers: Headers) {
   return paginate({
     skip,
     take,
-    defaultTake: DEFAULT_TAKE,
-    maxTake: MAX_TAKE,
+    fallbackToLastPage: true,
     count: () => db.mapDatasetUpload.count({ where }),
     query: ({ skip, take }) =>
       db.mapDatasetUpload.findMany({
         skip,
         take,
         where,
+        orderBy: [{ slug: 'asc' }, { id: 'asc' }],
         include: {
           regions: {
             select: {

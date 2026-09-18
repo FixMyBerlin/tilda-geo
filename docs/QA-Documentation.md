@@ -61,6 +61,8 @@ When there is **no user decision** (`userStatus === null`), the system uses an *
 2. Otherwise, if the percent-based status is not GOOD **and** the trusted-editor check ([§3.3](#33-trusted-osm-editors-automatic-ok)) passes: effective status = **TRUSTED_EDITOR_CHANGE**.
 3. Otherwise: effective status = the percent-based status (GOOD / NEEDS_REVIEW / PROBLEMATIC from `goodThreshold` / `needsReviewThreshold`).
 
+`QaConfig.goodThreshold`/`needsReviewThreshold` are stored as a 0–1 fraction (e.g. `0.1` for 10 %). The admin form shows and edits them as a percent — the conversion happens once, at the form/schema boundary (`qaThresholdPreview.ts`, used by `schemas.ts`); nothing else in the system deals in percent.
+
 **When \|absoluteDifference\| ≤ threshold** (effective = GOOD):
 
 | Previous System Status | Effective New Status | Action                                                         |

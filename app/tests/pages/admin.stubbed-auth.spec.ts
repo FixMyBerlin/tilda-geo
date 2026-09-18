@@ -127,6 +127,99 @@ test.describe('Admin Pages (stubbed login)', () => {
       await cleanupStubbedSessionData('ADMIN', 'admin-memberships-new-userid')
     })
   })
+
+  test.describe('memberships pagination', () => {
+    test('pages via links, keeps history and resets the page on search', async ({
+      page,
+    }, testInfo) => {
+      const baseURL = testInfo.project.use.baseURL
+      if (typeof baseURL !== 'string') {
+        throw new Error('Playwright baseURL must be a string for stubbed login tests')
+      }
+
+      await createStubbedAdminSession(page, baseURL, {
+        identityKey: 'admin-memberships-pagination',
+      })
+      const serverErrors = collectServerErrors(page, baseURL)
+
+      // Small page size so the seeded users span several pages.
+      await page.goto('/admin/memberships?pageSize=1')
+      const pagination = page.getByRole('navigation', { name: 'Seitennummerierung' })
+      await expect(pagination).toBeVisible()
+      await expect(pagination.getByRole('link', { name: 'Seite 1' })).toHaveAttribute(
+        'aria-current',
+        'page',
+      )
+
+      await pagination.getByRole('link', { name: 'Weiter' }).click()
+      await expect(page).toHaveURL(/[?&]page=2(&|$)/)
+      await expect(page).toHaveURL(/[?&]pageSize=1(&|$)/)
+      await expect(pagination.getByRole('link', { name: 'Seite 2' })).toHaveAttribute(
+        'aria-current',
+        'page',
+      )
+
+      await pagination.getByRole('link', { name: 'Weiter' }).click()
+      await expect(page).toHaveURL(/[?&]page=3(&|$)/)
+
+      await page.goBack()
+      await expect(page).toHaveURL(/[?&]page=2(&|$)/)
+      await expect(pagination.getByRole('link', { name: 'Seite 2' })).toHaveAttribute(
+        'aria-current',
+        'page',
+      )
+      // Let the back navigation's loader settle before the debounced search navigation starts.
+      await page.waitForLoadState('networkidle')
+
+      await page.getByRole('searchbox', { name: 'Nutzer durchsuchen' }).fill('playwright')
+      await expect(page).toHaveURL(/[?&]q=playwright(&|$)/)
+      await expect(page).not.toHaveURL(/[?&]page=/)
+
+      // Invalid values fall back to the defaults, which are stripped from the URL.
+      await page.goto('/admin/memberships?page=abc&pageSize=9999')
+      await expect(page).toHaveURL(/\/admin\/memberships$/)
+
+      await expectNoServerErrors(page, serverErrors)
+    })
+
+    test.afterEach(async () => {
+      await cleanupStubbedSessionData('ADMIN', 'admin-memberships-pagination')
+    })
+  })
+
+  test.describe('memberships region filter', () => {
+    test('shows the region from the URL and clears it', async ({ page }, testInfo) => {
+      const baseURL = testInfo.project.use.baseURL
+      if (typeof baseURL !== 'string') {
+        throw new Error('Playwright baseURL must be a string for stubbed login tests')
+      }
+
+      await createStubbedAdminSession(page, baseURL, {
+        identityKey: 'admin-memberships-region-filter',
+      })
+      const serverErrors = collectServerErrors(page, baseURL)
+
+      await page.goto('/admin/memberships?regionSlug=radinfra')
+      // `exact: true`: the sidebar's own region switcher ("Region öffnen…") is now on every admin
+      // page, so a substring match on "Region" would resolve to both comboboxes.
+      const regionFilter = page.getByRole('combobox', { name: 'Region', exact: true })
+      await expect(regionFilter).toHaveValue('radinfra.de')
+      await expect(page.getByRole('link', { name: 'Neue Mitgliedschaft' })).toHaveAttribute(
+        'href',
+        /[?&]regionSlug=radinfra(&|$)/,
+      )
+
+      await page.getByRole('button', { name: 'Regionsfilter aufheben' }).click()
+      await expect(page).not.toHaveURL(/regionSlug=/)
+      await expect(regionFilter).toHaveValue('')
+
+      await expectNoServerErrors(page, serverErrors)
+    })
+
+    test.afterEach(async () => {
+      await cleanupStubbedSessionData('ADMIN', 'admin-memberships-region-filter')
+    })
+  })
 })
 
 test.describe('Admin access (non-admin and unauthenticated)', () => {

@@ -1,17 +1,13 @@
 import { z } from 'zod'
 
-/**
- * Standard form state returned by Server Actions using useActionState.
- * Used consistently across all form mutations.
- * Discriminated union with `success` as the discriminator for type narrowing.
+/*
+ * Standard form state returned by the helpers below, used consistently across form mutations:
+ * `{ success, message, errors }`, discriminated by `success` for type narrowing.
  * `errors` is always present (empty object `{}` on success) for simpler component code.
  */
-export type FormState =
-  | { success: true; message: string; errors: Record<string, never> }
-  | { success: false; message: string; errors: Record<string, string[]> }
 
 /**
- * Returns a FormState for validation errors.
+ * Returns the form state for validation errors.
  * Use when catching ZodError from form validation.
  */
 export function validationErrorState(error: z.ZodError) {
@@ -23,7 +19,7 @@ export function validationErrorState(error: z.ZodError) {
 }
 
 /**
- * Returns a FormState for general errors.
+ * Returns the form state for general errors.
  * Use for non-validation errors (database errors, etc.).
  */
 export function errorState(error: unknown, defaultMessage: string) {
@@ -35,7 +31,7 @@ export function errorState(error: unknown, defaultMessage: string) {
 }
 
 /**
- * Returns a FormState for successful mutations.
+ * Returns the form state for successful mutations.
  */
 export function successState(): {
   success: true

@@ -1,14 +1,16 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
-import { toast } from 'sonner'
-import { AdminConsoleDumpButton } from '@/components/admin/AdminConsoleDumpButton'
-import { AdminEditActionLink } from '@/components/admin/adminPageTitle'
 import { AdminTable, adminTableClasses } from '@/components/admin/AdminTable'
-import { AdminTrashIconButton } from '@/components/admin/AdminTrashIconButton'
+import {
+  AdminTableActions,
+  AdminTableDeleteButton,
+  AdminTableEditLink,
+  AdminTableExternalLink,
+} from '@/components/admin/AdminTableActions'
 import { RegionPromotedPill } from '@/components/regionen/regionMeta/RegionPromotedPill'
 import { RegionStatusPill } from '@/components/regionen/regionMeta/RegionStatusPill'
-import { Link } from '@/components/shared/links/Link'
-import { toastError } from '@/components/shared/toast/toastError'
+import { toastSuccess } from '@/components/shared/toast/toastSuccess'
+import { adminNavCountsQueryOptions } from '@/server/admin/adminNavQueryOptions'
 import {
   groupRegionsByContract,
   SINGLETON_CONTRACT_PARAM,
@@ -23,21 +25,30 @@ type Props = {
   showContractGroups?: boolean
 }
 
+const header = [
+  'Region',
+  'Auftrag',
+  'Status',
+  'Gelistet',
+  { id: 'actions', label: 'Aktionen', srOnly: true, align: 'right' as const },
+]
+
 export const RegionsTable = ({ regions, showContractGroups = false }: Props) => {
   const router = useRouter()
   const queryClient = useQueryClient()
-  const { mutate: deleteRegionMutation } = useMutation({
-    mutationFn: (input: { slug: string }) => deleteRegionFn({ data: input }),
-    onSuccess: async (result) => {
-      if (!result.success) {
-        toast.error(result.message)
-        return
-      }
-      await queryClient.invalidateQueries({ queryKey: regionenIndexQueryKey })
-      await router.invalidate()
+
+  const deleteRegion = useMutation({
+    mutationFn: async (slug: string) => {
+      const result = await deleteRegionFn({ data: { slug } })
+      if (!result.success) throw new Error(result.message)
     },
-    onError: (error) => {
-      toastError(error, 'Fehler beim Löschen der Region')
+    onSuccess: async () => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: regionenIndexQueryKey }),
+        queryClient.invalidateQueries({ queryKey: adminNavCountsQueryOptions().queryKey }),
+      ])
+      await router.invalidate()
+      toastSuccess('Gelöscht.')
     },
   })
 
@@ -62,25 +73,15 @@ export const RegionsTable = ({ regions, showContractGroups = false }: Props) => 
   }
 
   return (
-    <AdminTable
-      header={[
-        'Name',
-        'Status',
-        'Gelistet',
-        'Region',
-        { id: 'regions-debug', label: '' },
-        { id: 'regions-delete', label: '' },
-        { id: 'regions-edit', label: '' },
-      ]}
-    >
+    <AdminTable header={header}>
       {sections.map((item) => {
         if (item.kind === 'group') {
           return (
-            <tr key={`group:${item.key}`} className="bg-gray-100/90">
+            <tr key={`group:${item.key}`} className={adminTableClasses.groupRow}>
               <th
-                colSpan={7}
+                colSpan={header.length}
                 scope="colgroup"
-                className="px-3 py-2 text-left text-xs font-semibold tracking-wide text-gray-600 uppercase"
+                className={adminTableClasses.groupHeader}
               >
                 {item.name}
               </th>
@@ -95,34 +96,31 @@ export const RegionsTable = ({ regions, showContractGroups = false }: Props) => 
               {region.name}
             </th>
             <td className={adminTableClasses.td}>
+              {region.contract ? region.contract.name : <span className="text-gray-400">—</span>}
+            </td>
+            <td className={adminTableClasses.td}>
               <RegionStatusPill status={region.status} />
             </td>
             <td className={adminTableClasses.td}>
               <RegionPromotedPill promoted={region.promoted} />
             </td>
             <td className={adminTableClasses.td}>
-              <Link to="/regionen/$regionSlug" params={{ regionSlug: region.slug }}>
-                Öffnen…
-              </Link>
-            </td>
-            <td className={adminTableClasses.td}>
-              <AdminConsoleDumpButton data={region} name={region.slug} />
-            </td>
-            <td className={adminTableClasses.td}>
-              <AdminTrashIconButton
-                ariaLabel={`Region ${region.slug} löschen`}
-                onClick={() => {
-                  if (window.confirm(`»${region.slug}« wirklich unwiderruflich löschen?`)) {
-                    deleteRegionMutation({ slug: region.slug })
-                  }
-                }}
-              />
-            </td>
-            <td className={adminTableClasses.td}>
-              <AdminEditActionLink
-                to="/admin/regions/$regionSlug/edit"
-                params={{ regionSlug: region.slug }}
-              />
+              <AdminTableActions>
+                <AdminTableEditLink
+                  to="/admin/regions/$regionSlug/edit"
+                  params={{ regionSlug: region.slug }}
+                />
+                <AdminTableExternalLink
+                  to="/regionen/$regionSlug"
+                  params={{ regionSlug: region.slug }}
+                />
+                <AdminTableDeleteButton
+                  label={`Region ${region.slug} löschen`}
+                  title={`Region „${region.name}“ löschen?`}
+                  description={`Die Region »${region.slug}« wird unwiderruflich gelöscht.`}
+                  onDelete={() => deleteRegion.mutateAsync(region.slug)}
+                />
+              </AdminTableActions>
             </td>
           </tr>
         )

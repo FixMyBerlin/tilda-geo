@@ -1,7 +1,5 @@
 import { getRouteApi } from '@tanstack/react-router'
-import { AdminPageTitleNew, AdminPageTitleNewLabel } from '@/components/admin/adminPageTitle'
-import { Breadcrumb } from '@/components/admin/Breadcrumb'
-import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
 import { MembershipForm } from './pageMemberships/MembershipForm'
 
 const routeApi = getRouteApi('/admin/memberships/new')
@@ -14,19 +12,10 @@ export function PageMembershipsNew() {
 
   return (
     <>
-      <HeaderWrapper>
-        <Breadcrumb
-          pages={[
-            { href: '/admin/memberships', name: 'Nutzer:innen & Mitgliedschaften' },
-            {
-              href: '/admin/memberships/new',
-              name: <AdminPageTitleNewLabel label="Neue Mitgliedschaft" variant="breadcrumb" />,
-            },
-          ]}
-        />
-      </HeaderWrapper>
-
-      <AdminPageTitleNew label="Neue Mitgliedschaft" />
+      <AdminPageHeader
+        title="Neue Mitgliedschaft"
+        parent={{ label: 'Nutzer & Rechte', to: '/admin/memberships' }}
+      />
 
       <MembershipForm
         regions={regions}
@@ -35,7 +24,6 @@ export function PageMembershipsNew() {
           userId: userId || undefined,
           regionId: regionId ? String(regionId) : undefined,
         }}
-        submitLabel="Erstellen"
       />
     </>
   )

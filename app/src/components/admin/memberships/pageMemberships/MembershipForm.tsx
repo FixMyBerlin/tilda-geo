@@ -1,6 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 import type { z } from 'zod'
+import { AdminFormLayout } from '@/components/admin/aside/AdminFormLayout'
+import { AdminFormSection } from '@/components/admin/aside/AdminFormSection'
 import { RadioGroup } from '@/components/shared/form/fields/RadioGroup'
 import { Select } from '@/components/shared/form/fields/Select'
 import { Form } from '@/components/shared/form/Form'
@@ -20,10 +22,13 @@ type Props = {
     userId?: string
     regionId?: string
   }
-  submitLabel?: string
 }
 
 type MembershipFormValues = z.input<typeof MembershipSchema>
+
+const sectionLabels = {
+  membership: 'Mitgliedschaft',
+} satisfies Record<string, string>
 
 function MembershipFormFields({
   form,
@@ -69,23 +74,19 @@ function MembershipFormFields({
       <RadioGroup
         form={form}
         name="regionId"
-        label="Region, auf dem User Rechte erhalten soll"
+        label="Region, auf der der User Rechte erhalten soll"
         items={regionOptions}
       />
     </>
   )
 }
 
-export function MembershipForm({
-  regions,
-  users,
-  initialValues,
-  submitLabel = 'Speichern',
-}: Props) {
+export function MembershipForm({ regions, users, initialValues }: Props) {
   const [selectedUserId, setSelectedUserId] = useState(initialValues?.userId ?? '')
 
   return (
     <Form
+      actionBarPlacement="none"
       showFormErrors={false}
       defaultValues={{
         userId: initialValues?.userId ?? '',
@@ -99,19 +100,30 @@ export function MembershipForm({
             regionId: values.regionId,
           },
         })
-        if (result.success) return { success: true, redirect: '/admin/memberships' }
+        if (result.success) {
+          return { success: true, message: 'Angelegt.', redirect: '/admin/memberships' }
+        }
         return result
       }}
-      submitLabel={submitLabel}
     >
-      {(form) => (
-        <MembershipFormFields
+      {(form, { submitError }) => (
+        <AdminFormLayout
+          fieldLabels={sectionLabels}
           form={form}
-          userId={selectedUserId}
-          onUserIdChange={setSelectedUserId}
-          regions={regions}
-          users={users}
-        />
+          submitLabel="Erstellen"
+          cancel={{ to: '/admin/memberships' }}
+          submitError={submitError}
+        >
+          <AdminFormSection id="membership" title={sectionLabels.membership}>
+            <MembershipFormFields
+              form={form}
+              userId={selectedUserId}
+              onUserIdChange={setSelectedUserId}
+              regions={regions}
+              users={users}
+            />
+          </AdminFormSection>
+        </AdminFormLayout>
       )}
     </Form>
   )

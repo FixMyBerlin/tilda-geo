@@ -29,6 +29,8 @@ test.describe('Admin region contracts CRUD', () => {
 
     await page.goto('/admin/region-contracts')
     await expect(page).toHaveURL(/\/admin\/region-contracts/)
+    // Under load the link click can beat hydration; a full reload of /new then wipes the filled fields.
+    await page.waitForLoadState('networkidle')
     await expect(page.getByRole('link', { name: 'Neuer Auftrag' })).toBeVisible()
 
     await page.getByRole('link', { name: 'Neuer Auftrag' }).click()
@@ -36,7 +38,10 @@ test.describe('Admin region contracts CRUD', () => {
 
     await page.getByLabel('Slug').fill(CONTRACT_SLUG)
     await page.getByLabel('Name').fill(CONTRACT_NAME)
-    await page.getByRole('button', { name: 'Auftrag anlegen' }).click()
+    // The submit/cancel/delete actions render twice (desktop aside + mobile bar); the aside
+    // region is the one visible at the default desktop viewport, so scope to it.
+    const asideActions = page.getByRole('complementary', { name: 'Abschnitte und Aktionen' })
+    await asideActions.getByRole('button', { name: 'Erstellen' }).click()
 
     await expect(page).toHaveURL(/\/admin\/region-contracts$/)
     const createdRow = page.getByRole('row', { name: new RegExp(CONTRACT_NAME) })
@@ -44,17 +49,15 @@ test.describe('Admin region contracts CRUD', () => {
 
     await createdRow.getByRole('link', { name: 'Bearbeiten' }).click()
     await expect(page).toHaveURL(new RegExp(`/admin/region-contracts/${CONTRACT_SLUG}/edit`))
+    await page.waitForLoadState('networkidle')
 
     await page.getByLabel('Name').fill(UPDATED_NAME)
-    await page.getByRole('button', { name: 'Auftrag aktualisieren' }).click()
+    await asideActions.getByRole('button', { name: 'Speichern' }).click()
+    await expect(page.getByRole('heading', { name: UPDATED_NAME })).toBeVisible()
 
-    await expect(page).toHaveURL(/\/admin\/region-contracts$/)
-    const updatedRow = page.getByRole('row', { name: new RegExp(UPDATED_NAME) })
-    await expect(updatedRow).toBeVisible()
-
-    await updatedRow.getByRole('link', { name: 'Bearbeiten' }).click()
+    // Aside deletes confirm via the native `window.confirm` dialog.
     page.once('dialog', (dialog) => dialog.accept())
-    await page.getByRole('button', { name: `Auftrag ${UPDATED_NAME} löschen` }).click()
+    await asideActions.getByRole('button', { name: 'Auftrag löschen' }).click()
 
     await expect(page).toHaveURL(/\/admin\/region-contracts$/)
     await expect(page.getByRole('row', { name: new RegExp(UPDATED_NAME) })).toHaveCount(0)

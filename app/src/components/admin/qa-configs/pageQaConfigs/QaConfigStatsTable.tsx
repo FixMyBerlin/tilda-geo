@@ -1,5 +1,5 @@
-import { twMerge } from 'tailwind-merge'
-import { adminTableClasses } from '@/components/admin/AdminTable'
+import { twJoin } from 'tailwind-merge'
+import { AdminTable, adminTableClasses } from '@/components/admin/AdminTable'
 import {
   evaluatorTypeConfig,
   systemStatusConfig,
@@ -7,224 +7,66 @@ import {
 } from '@/components/regionen/pageRegionSlug/modes/qa/detail/qaConfigs'
 import type { QaConfigStats } from '@/server/qa-configs/queries/getQaConfigStatsForAdmin.server'
 
-export function QaConfigStatsTable({ stats }: { stats: QaConfigStats | undefined }) {
-  if (!stats) return null
+const header = ['Bewertet von', 'Status', { id: 'count', label: 'Anzahl', align: 'right' as const }]
+
+const countClassName = twJoin(adminTableClasses.td, 'text-right tabular-nums')
+
+export function QaConfigStatsTable({ stats }: { stats: QaConfigStats }) {
+  const rows = [
+    ...(['GOOD', 'NEEDS_REVIEW', 'PROBLEMATIC', 'TRUSTED_EDITOR_CHANGE'] as const).map(
+      (status) => ({
+        evaluator: evaluatorTypeConfig.SYSTEM.label,
+        status,
+        label: systemStatusConfig[status].label,
+        hexColor: systemStatusConfig[status].hexColor,
+        count: stats.evaluationStats.SYSTEM[status],
+      }),
+    ),
+    ...(
+      [
+        'OK_STRUCTURAL_CHANGE',
+        'OK_REFERENCE_ERROR',
+        'NOT_OK_DATA_ERROR',
+        'NOT_OK_PROCESSING_ERROR',
+        'OK_QA_TOOLING_ERROR',
+      ] as const
+    ).map((status) => ({
+      evaluator: evaluatorTypeConfig.USER.label,
+      status,
+      label: userStatusConfig[status].label,
+      hexColor: userStatusConfig[status].hexColor,
+      count: stats.evaluationStats.USER[status],
+    })),
+  ]
 
   return (
-    <div className="mt-6">
-      <h4 className="mb-3 text-sm font-semibold text-gray-900">Statistiken</h4>
-      <div className="overflow-x-auto">
-        <table className={twMerge(adminTableClasses.table, 'min-w-full')}>
-          <thead className="bg-gray-50">
-            <tr>
-              <th className="px-4 py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                EvaluatorType
-              </th>
-              <th className="px-4 py-2 text-left text-xs font-medium tracking-wider text-gray-500 uppercase">
-                EvaluationType
-              </th>
-              <th className="px-4 py-2 text-right text-xs font-medium tracking-wider text-gray-500 uppercase">
-                Anzahl
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-200 bg-white">
-            {/* System evaluations */}
-            <tr>
-              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">
-                {evaluatorTypeConfig.SYSTEM.label}
-              </td>
-              <td className="px-4 py-2 text-sm text-gray-900">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="h-3 w-3 rounded-full"
-                    style={{ backgroundColor: systemStatusConfig.GOOD.hexColor }}
-                  />
-                  <span>
-                    {systemStatusConfig.GOOD.label} <code className="text-xs">GOOD</code>
-                  </span>
-                </div>
-              </td>
-              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
-                {stats.evaluationStats.SYSTEM.GOOD}
-              </td>
-            </tr>
-            <tr>
-              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">
-                {evaluatorTypeConfig.SYSTEM.label}
-              </td>
-              <td className="px-4 py-2 text-sm text-gray-900">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="h-3 w-3 rounded-full"
-                    style={{ backgroundColor: systemStatusConfig.NEEDS_REVIEW.hexColor }}
-                  />
-                  <span>
-                    {systemStatusConfig.NEEDS_REVIEW.label}{' '}
-                    <code className="text-xs">NEEDS_REVIEW</code>
-                  </span>
-                </div>
-              </td>
-              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
-                {stats.evaluationStats.SYSTEM.NEEDS_REVIEW}
-              </td>
-            </tr>
-            <tr>
-              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">
-                {evaluatorTypeConfig.SYSTEM.label}
-              </td>
-              <td className="px-4 py-2 text-sm text-gray-900">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="h-3 w-3 rounded-full"
-                    style={{ backgroundColor: systemStatusConfig.PROBLEMATIC.hexColor }}
-                  />
-                  <span>
-                    {systemStatusConfig.PROBLEMATIC.label}{' '}
-                    <code className="text-xs">PROBLEMATIC</code>
-                  </span>
-                </div>
-              </td>
-              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
-                {stats.evaluationStats.SYSTEM.PROBLEMATIC}
-              </td>
-            </tr>
-            <tr>
-              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">
-                {evaluatorTypeConfig.SYSTEM.label}
-              </td>
-              <td className="px-4 py-2 text-sm text-gray-900">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="h-3 w-3 rounded-full"
-                    style={{ backgroundColor: systemStatusConfig.TRUSTED_EDITOR_CHANGE.hexColor }}
-                  />
-                  <span>
-                    {systemStatusConfig.TRUSTED_EDITOR_CHANGE.label}{' '}
-                    <code className="text-xs">TRUSTED_EDITOR_CHANGE</code>
-                  </span>
-                </div>
-              </td>
-              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
-                {stats.evaluationStats.SYSTEM.TRUSTED_EDITOR_CHANGE}
-              </td>
-            </tr>
-            {/* User evaluations */}
-            <tr>
-              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">
-                {evaluatorTypeConfig.USER.label}
-              </td>
-              <td className="px-4 py-2 text-sm text-gray-900">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="h-3 w-3 rounded-full"
-                    style={{
-                      backgroundColor: userStatusConfig.OK_STRUCTURAL_CHANGE.hexColor,
-                    }}
-                  />
-                  <span>
-                    {userStatusConfig.OK_STRUCTURAL_CHANGE.label}{' '}
-                    <code className="text-xs">OK_STRUCTURAL_CHANGE</code>
-                  </span>
-                </div>
-              </td>
-              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
-                {stats.evaluationStats.USER.OK_STRUCTURAL_CHANGE}
-              </td>
-            </tr>
-            <tr>
-              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">
-                {evaluatorTypeConfig.USER.label}
-              </td>
-              <td className="px-4 py-2 text-sm text-gray-900">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="h-3 w-3 rounded-full"
-                    style={{ backgroundColor: userStatusConfig.OK_REFERENCE_ERROR.hexColor }}
-                  />
-                  <span>
-                    {userStatusConfig.OK_REFERENCE_ERROR.label}{' '}
-                    <code className="text-xs">OK_REFERENCE_ERROR</code>
-                  </span>
-                </div>
-              </td>
-              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
-                {stats.evaluationStats.USER.OK_REFERENCE_ERROR}
-              </td>
-            </tr>
-            <tr>
-              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">
-                {evaluatorTypeConfig.USER.label}
-              </td>
-              <td className="px-4 py-2 text-sm text-gray-900">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="h-3 w-3 rounded-full"
-                    style={{ backgroundColor: userStatusConfig.NOT_OK_DATA_ERROR.hexColor }}
-                  />
-                  <span>
-                    {userStatusConfig.NOT_OK_DATA_ERROR.label}{' '}
-                    <code className="text-xs">NOT_OK_DATA_ERROR</code>
-                  </span>
-                </div>
-              </td>
-              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
-                {stats.evaluationStats.USER.NOT_OK_DATA_ERROR}
-              </td>
-            </tr>
-            <tr>
-              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">
-                {evaluatorTypeConfig.USER.label}
-              </td>
-              <td className="px-4 py-2 text-sm text-gray-900">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="h-3 w-3 rounded-full"
-                    style={{
-                      backgroundColor: userStatusConfig.NOT_OK_PROCESSING_ERROR.hexColor,
-                    }}
-                  />
-                  <span>
-                    {userStatusConfig.NOT_OK_PROCESSING_ERROR.label}{' '}
-                    <code className="text-xs">NOT_OK_PROCESSING_ERROR</code>
-                  </span>
-                </div>
-              </td>
-              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
-                {stats.evaluationStats.USER.NOT_OK_PROCESSING_ERROR}
-              </td>
-            </tr>
-            <tr>
-              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">
-                {evaluatorTypeConfig.USER.label}
-              </td>
-              <td className="px-4 py-2 text-sm text-gray-900">
-                <div className="flex items-center gap-2">
-                  <div
-                    className="h-3 w-3 rounded-full"
-                    style={{ backgroundColor: userStatusConfig.OK_QA_TOOLING_ERROR.hexColor }}
-                  />
-                  <span>
-                    {userStatusConfig.OK_QA_TOOLING_ERROR.label}{' '}
-                    <code className="text-xs">OK_QA_TOOLING_ERROR</code>
-                  </span>
-                </div>
-              </td>
-              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
-                {stats.evaluationStats.USER.OK_QA_TOOLING_ERROR}
-              </td>
-            </tr>
-            {/* Total row */}
-            <tr className="bg-gray-50 font-semibold">
-              <td className="px-4 py-2 text-sm whitespace-nowrap text-gray-900">Total</td>
-              <td className="px-4 py-2 text-sm text-gray-900"></td>
-              <td className="px-4 py-2 text-right text-sm whitespace-nowrap text-gray-900">
-                {stats.totalAreas}
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+    <AdminTable header={header}>
+      {rows.map((row) => (
+        <tr key={`${row.evaluator}:${row.status}`}>
+          <td className={twJoin(adminTableClasses.td, 'whitespace-nowrap')}>{row.evaluator}</td>
+          <td className={adminTableClasses.td}>
+            <div className="flex items-center gap-2">
+              <span
+                aria-hidden="true"
+                className="size-3 shrink-0 rounded-full"
+                style={{ backgroundColor: row.hexColor }}
+              />
+              <span>
+                {row.label} <code className="text-xs text-gray-500">{row.status}</code>
+              </span>
+            </div>
+          </td>
+          <td className={countClassName}>{row.count.toLocaleString('de-DE')}</td>
+        </tr>
+      ))}
+      <tr className="bg-gray-50">
+        <th scope="row" colSpan={2} className={adminTableClasses.thRow}>
+          Bereiche gesamt
+        </th>
+        <td className={twJoin(countClassName, 'font-semibold text-gray-900')}>
+          {stats.totalAreas.toLocaleString('de-DE')}
+        </td>
+      </tr>
+    </AdminTable>
   )
 }

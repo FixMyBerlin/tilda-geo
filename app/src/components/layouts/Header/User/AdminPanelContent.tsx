@@ -1,5 +1,9 @@
 import { useHydrated, useLocation } from '@tanstack/react-router'
 import type { ReactNode } from 'react'
+import {
+  type AdminRegionNavLink,
+  buildAdminRegionNavigation,
+} from '@/components/admin/navigation/adminRegionNavigation'
 import { useMapDebugActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapDebugState'
 import { parseMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import {
@@ -17,7 +21,6 @@ import { linkStyles } from '@/components/shared/links/styles'
 import { Quote } from '@/components/shared/text/Quotes'
 import { envKey } from '@/components/shared/utils/isEnv'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
-import { type RegionAdminLink, regionAdminLinks } from './adminPanelLinks'
 import { AdminRegionSwitch } from './AdminRegionSwitch'
 import { getAdminInfoEnvUrl } from './utils/getAdminInfoEnvUrl'
 
@@ -48,10 +51,10 @@ const AdminMenuLink = ({ item }: { item: AdminMenuLinkItem }) => (
   </li>
 )
 
-const RegionAdminLinkItem = ({ entry }: { entry: RegionAdminLink }) => (
+const RegionAdminLinkItem = ({ entry }: { entry: AdminRegionNavLink }) => (
   <li>
-    <Link to={entry.to} params={entry.params} search={entry.search}>
-      {entry.label}
+    <Link to={entry.to} params={entry.params} search={entry.search} blank={entry.external}>
+      {entry.name}
     </Link>
   </li>
 )
@@ -123,7 +126,7 @@ const MapEnvironmentSection = () => {
 
 const RegionAdminSection = () => {
   const region = useAdminPanelRegionContext()
-  const regionLinks = region ? regionAdminLinks(region.slug, region) : []
+  const regionLinks = region ? buildAdminRegionNavigation(region) : []
 
   return (
     <section className={adminMenuSectionClassName}>
@@ -138,10 +141,10 @@ const RegionAdminSection = () => {
       </h3>
       <ul className="space-y-1 text-sm leading-5">
         <li>
-          <Link to="/admin">Admin Bereich</Link>
+          <Link to="/admin">Admin-Bereich</Link>
         </li>
         {regionLinks.map((entry) => (
-          <RegionAdminLinkItem key={entry.label} entry={entry} />
+          <RegionAdminLinkItem key={entry.key} entry={entry} />
         ))}
       </ul>
     </section>

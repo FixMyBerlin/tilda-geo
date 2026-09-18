@@ -1,102 +1,58 @@
-import { ChevronRightIcon } from '@heroicons/react/20/solid'
-import { twMerge } from 'tailwind-merge'
-import { Breadcrumb } from '@/components/admin/Breadcrumb'
-import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
-import { Disclosure } from '@/components/regionen/pageRegionSlug/SidebarInspector/Disclosure/Disclosure'
+import { useSuspenseQuery } from '@tanstack/react-query'
+import { twJoin } from 'tailwind-merge'
+import { adminCardClassName } from '@/components/admin/adminClasses'
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
+import { adminNavLeaves } from '@/components/admin/navigation/adminNavigation'
 import { Link } from '@/components/shared/links/Link'
-import { isProd } from '@/components/shared/utils/isEnv'
-import {
-  DEV_ERROR_PREVIEW_DEFAULT_REGION_SLUG,
-  devRegionErrorPreviewHref,
-} from '@/dev/errorPreviews'
-import type { InternalPath } from '@/router'
+import { adminNavCountsQueryOptions } from '@/server/admin/adminNavQueryOptions'
 
-const rowLinkClassName = twMerge(
-  'flex w-full items-center justify-between gap-x-6 px-4 py-4 no-underline transition-colors sm:px-6',
-  'hover:bg-pink-50',
+const cardLinkClassName = twJoin(
+  adminCardClassName,
+  'group flex h-full items-start gap-x-4 p-5 no-underline transition-shadow',
+  'hover:shadow-md hover:ring-gray-900/10 focus-visible:ring-2 focus-visible:ring-yellow-500 focus-visible:outline-none',
 )
 
-const items = [
-  { to: '/admin/regions', label: 'Regionen' },
-  { to: '/admin/region-contracts', label: 'Regionen-Aufträge' },
-  { to: '/admin/qa-configs', label: 'QA Konfigurationen' },
-  { to: '/admin/review-lists', label: 'Prüflisten' },
-  { to: '/admin/memberships', label: 'Nutzer:innen & Mitgliedschaften' },
-  { to: '/admin/map-dataset-uploads', label: 'Statische Daten (Uploads)' },
-  { to: '/admin/map-dataset-categories', label: 'Statische Daten: Kategorien' },
-  { to: '/admin/audit-log', label: 'Änderungsverlauf (Audit-Log)' },
-  { to: '/admin/api-tokens', label: 'API-Tokens (MCP)' },
-  { to: '/admin/processing', label: 'Processing' },
-  { to: '/admin/data-schema', label: 'Data-Schema' },
-] satisfies { to: InternalPath; label: string }[]
-
-const errorPreviewItems = [
-  { to: '/preview/default-error', label: 'Standard Route-Fehler (DefaultError)' },
-  { to: '/preview/not-found', label: 'Nicht gefunden (NotFound)' },
-  { to: '/preview/root-fallback', label: 'Root ErrorBoundary-Fallback' },
-  { to: '/preview/region-error', label: 'Region-Fehler (Komponente)' },
-  { to: '/preview/default-pending', label: 'Standard Pending' },
-  { to: '/preview/region-pending', label: 'Region-Karte Pending (Skeleton)' },
-] satisfies { to: InternalPath; label: string }[]
-
 export function PageIndex() {
+  const { data: counts } = useSuspenseQuery(adminNavCountsQueryOptions())
+
   return (
     <>
-      <HeaderWrapper>
-        <Breadcrumb pages={[]} />
-      </HeaderWrapper>
+      <AdminPageHeader title="Übersicht" />
 
-      <ul
-        className={twMerge(
-          'divide-y divide-gray-900/10 overflow-hidden',
-          'rounded-xl bg-white/90 shadow-sm ring-1 ring-gray-900/5',
-        )}
-      >
-        {items.map((item) => (
-          <li key={item.to}>
-            <Link to={item.to} classNameOverwrite={rowLinkClassName}>
-              <span className="text-sm/6 font-semibold text-gray-900">{item.label}</span>
-              <ChevronRightIcon aria-hidden className="size-5 shrink-0 text-gray-400" />
-            </Link>
-          </li>
-        ))}
-      </ul>
+      <ul role="list" className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+        {adminNavLeaves().map((leaf) => {
+          const Icon = leaf.icon
+          const count = leaf.countKey ? counts[leaf.countKey] : undefined
 
-      {!isProd ? (
-        <>
-          <hr className={twMerge('my-10 border-0 border-t border-gray-900/10')} />
-          <Disclosure title="Fehler-UI (nur Dev / Staging)" defaultOpen={false}>
-            <div className="p-3">
-              <ul
-                className={twMerge(
-                  'divide-y divide-gray-900/10 overflow-hidden',
-                  'rounded-xl bg-white/90 shadow-sm ring-1 ring-gray-900/5',
-                )}
-              >
-                {errorPreviewItems.map((item) => (
-                  <li key={item.to}>
-                    <Link to={item.to} classNameOverwrite={rowLinkClassName}>
-                      <span className="text-sm/6 font-semibold text-gray-900">{item.label}</span>
-                      <ChevronRightIcon aria-hidden className="size-5 shrink-0 text-gray-400" />
-                    </Link>
-                  </li>
-                ))}
-                <li>
-                  <Link
-                    href={devRegionErrorPreviewHref(DEV_ERROR_PREVIEW_DEFAULT_REGION_SLUG)}
-                    classNameOverwrite={rowLinkClassName}
-                  >
-                    <span className="text-sm/6 font-semibold text-gray-900">
-                      {`Region-Fehler (Route, ${DEV_ERROR_PREVIEW_DEFAULT_REGION_SLUG}?__regionError=1)`}
+          return (
+            <li key={leaf.to}>
+              <Link to={leaf.to} classNameOverwrite={cardLinkClassName}>
+                <span className="flex size-10 shrink-0 items-center justify-center rounded-md bg-gray-800">
+                  <Icon aria-hidden="true" className="size-6 text-white" />
+                </span>
+                <span className="min-w-0 flex-1">
+                  {leaf.groupName ? (
+                    <span className="block text-xs/5 font-medium text-gray-500">
+                      {leaf.groupName}
                     </span>
-                    <ChevronRightIcon aria-hidden className="size-5 shrink-0 text-gray-400" />
-                  </Link>
-                </li>
-              </ul>
-            </div>
-          </Disclosure>
-        </>
-      ) : null}
+                  ) : null}
+                  <span className="block text-base/6 font-semibold text-gray-900 group-hover:text-yellow-700">
+                    {leaf.name}
+                  </span>
+                  {leaf.description ? (
+                    <span className="mt-1 block text-sm/5 text-gray-600">{leaf.description}</span>
+                  ) : null}
+                </span>
+                {count === undefined ? null : (
+                  <span className="shrink-0 text-2xl font-semibold text-gray-900 tabular-nums">
+                    {count.toLocaleString('de-DE')}
+                  </span>
+                )}
+              </Link>
+            </li>
+          )
+        })}
+      </ul>
     </>
   )
 }

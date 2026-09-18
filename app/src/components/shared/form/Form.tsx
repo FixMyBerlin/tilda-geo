@@ -10,6 +10,7 @@ import { FormActionBar } from '@/components/shared/form/FormActionBar'
 import { uniqueFormattedFormErrors } from '@/components/shared/form/formatError'
 import type { FormApi } from '@/components/shared/form/types'
 import { buttonStyles } from '@/components/shared/links/styles'
+import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { toastSuccess } from '@/components/shared/toast/toastSuccess'
 import { isProd } from '@/components/shared/utils/isEnv'
 import type { Router } from '@/router'
@@ -53,18 +54,28 @@ function applyFieldErrors(
 }
 
 /** Use schema input shape for field values (differs from `z.infer` when the schema uses `.transform()`). */
-type ActionBarPlacement = 'bottom' | 'both'
+type ActionBarPlacement = 'bottom' | 'both' | 'none'
+
+type FormRenderState = {
+  /** Message of the last rejected submit (`SubmitResult.message`), `null` otherwise. */
+  submitError: string | null
+}
 
 type FormProps<TValues extends Record<string, unknown>> = {
+  /**
+   * `'none'` renders no action bar and no inline submit error; put your own submit button in
+   * `children` and show `submitError` there (e.g. `AdminFormAsideActions`).
+   */
   actionBarPlacement?: ActionBarPlacement
   actionBarRight?: ReactNode
   defaultValues: TValues
   schema: z.ZodTypeAny
   onSubmit: (values: TValues) => undefined | Promise<SubmitResult<TValues> | undefined>
-  children: (form: FormApi<TValues>) => ReactNode
+  children: (form: FormApi<TValues>, state: FormRenderState) => ReactNode
   /** Associates an external submit button via the HTML `form` attribute. */
   id?: string
   className?: string
+  /** Renders the standard `FormActionBar` submit button. Omit for a custom submit button in `children`. */
   submitLabel?: string
   submitClassName?: string
   showFormErrors?: boolean
@@ -132,41 +143,43 @@ export function Form<TValues extends Record<string, unknown>>({
     },
   })
 
-  const actionBar = submitLabel ? (
-    <FormActionBar
-      left={
-        <form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting, s.errors] as const}>
-          {([canSubmit, isSubmitting, errors]) => {
-            const lines = showFormErrors ? uniqueFormattedFormErrors(errors) : []
-            return (
-              <div className="flex min-w-0 flex-wrap items-center gap-3">
-                <button
-                  type="submit"
-                  disabled={!canSubmit || isSubmitting}
-                  className={submitClassName ?? buttonStyles}
-                  title={
-                    !canSubmit && lines.length > 0
-                      ? `Formular unvollständig: ${lines.join(' · ')}`
-                      : undefined
-                  }
-                >
-                  {isSubmitting ? '…' : submitLabel}
-                </button>
-                {lines.length > 0 ? (
-                  <div className="min-w-0 text-sm text-red-800" role="alert">
-                    {lines.map((msg) => (
-                      <p key={msg}>{msg}</p>
-                    ))}
-                  </div>
-                ) : null}
-              </div>
-            )
-          }}
-        </form.Subscribe>
-      }
-      right={actionBarRight}
-    />
-  ) : null
+  const actionBar =
+    actionBarPlacement !== 'none' && submitLabel ? (
+      <FormActionBar
+        left={
+          <form.Subscribe selector={(s) => [s.canSubmit, s.isSubmitting, s.errors] as const}>
+            {([canSubmit, isSubmitting, errors]) => {
+              const lines = showFormErrors ? uniqueFormattedFormErrors(errors) : []
+              return (
+                <div className="flex min-w-0 flex-wrap items-center gap-3">
+                  <button
+                    type="submit"
+                    disabled={!canSubmit || isSubmitting}
+                    className={submitClassName ?? buttonStyles}
+                    title={
+                      !canSubmit && lines.length > 0
+                        ? `Formular unvollständig: ${lines.join(' · ')}`
+                        : undefined
+                    }
+                  >
+                    {isSubmitting ? <SmallSpinner /> : null}
+                    {submitLabel}
+                  </button>
+                  {lines.length > 0 ? (
+                    <div className="min-w-0 text-sm text-red-800" role="alert">
+                      {lines.map((msg) => (
+                        <p key={msg}>{msg}</p>
+                      ))}
+                    </div>
+                  ) : null}
+                </div>
+              )
+            }}
+          </form.Subscribe>
+        }
+        right={actionBarRight}
+      />
+    ) : null
 
   return (
     <form
@@ -181,9 +194,9 @@ export function Form<TValues extends Record<string, unknown>>({
     >
       {actionBarPlacement === 'both' ? actionBar : null}
 
-      {children(form as FormApi<TValues>)}
+      {children(form as FormApi<TValues>, { submitError })}
 
-      {submitError ? (
+      {submitError && actionBarPlacement !== 'none' ? (
         <div className="text-sm text-red-600" role="alert">
           {submitError}
         </div>

@@ -1,51 +1,32 @@
 import { getRouteApi } from '@tanstack/react-router'
-import { AdminEditActionLink } from '@/components/admin/adminPageTitle'
-import { AdminTable, adminTableClasses } from '@/components/admin/AdminTable'
-import { Breadcrumb } from '@/components/admin/Breadcrumb'
-import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
+import { AdminEmptyState } from '@/components/admin/AdminEmptyState'
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
+import { AdminRegionFilter } from '@/components/admin/AdminRegionFilter'
+import { ReviewListsTable } from './pageReviewLists/ReviewListsTable'
 
 const routeApi = getRouteApi('/admin/review-lists/')
 
 export function PageReviewLists() {
   const { lists } = routeApi.useLoaderData()
+  const { regionSlug } = routeApi.useSearch()
 
   return (
     <>
-      <HeaderWrapper>
-        <Breadcrumb pages={[{ href: '/admin/review-lists', name: 'Prüflisten' }]} />
-      </HeaderWrapper>
+      <AdminPageHeader
+        title="Prüflisten"
+        intro="Neue Prüflisten werden in der Region im Modus Prüflisten angelegt. Das können Mitglieder und Admins tun."
+      />
 
-      <p className="mb-6 text-sm text-gray-500">
-        Neue Prüflisten werden in der Region im Modus Prüflisten angelegt. Das können Mitglieder und
-        Admins tun.
-      </p>
+      <div className="mb-6">
+        <AdminRegionFilter />
+      </div>
 
       {lists.length === 0 ? (
-        <p className="text-sm text-gray-500">Noch keine Prüflisten angelegt.</p>
+        <AdminEmptyState>
+          {regionSlug ? 'Keine Prüflisten für diese Region.' : 'Noch keine Prüflisten vorhanden.'}
+        </AdminEmptyState>
       ) : (
-        <AdminTable header={['Name', 'Regionen', 'Einträge', { id: 'edit', label: '' }]}>
-          {lists.map((list) => (
-            <tr key={list.id}>
-              <th scope="row" className={adminTableClasses.thRow}>
-                {list.name}
-              </th>
-              <td className={adminTableClasses.td}>
-                {list.regionSlugs.length === 0 ? (
-                  <span className="text-gray-400">—</span>
-                ) : (
-                  list.regionSlugs.join(', ')
-                )}
-              </td>
-              <td className={adminTableClasses.td}>{list.entryCount}</td>
-              <td className={adminTableClasses.td}>
-                <AdminEditActionLink
-                  to="/admin/review-lists/$id/edit"
-                  params={{ id: String(list.id) }}
-                />
-              </td>
-            </tr>
-          ))}
-        </AdminTable>
+        <ReviewListsTable lists={lists} />
       )}
     </>
   )

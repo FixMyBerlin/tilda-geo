@@ -1,6 +1,6 @@
 import { getRouteApi } from '@tanstack/react-router'
-import { Breadcrumb } from '@/components/admin/Breadcrumb'
-import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
+import { AdminEmptyState } from '@/components/admin/AdminEmptyState'
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
 import { FilterRow } from '@/components/shared/FilterRow/FilterRow'
 import { Link } from '@/components/shared/links/Link'
 import { buildMapDatasetCategoryFilterItems } from './buildMapDatasetCategoryFilterItems'
@@ -23,30 +23,29 @@ export function PageMapDatasetCategories() {
       : groupKey
         ? []
         : categories
+
   return (
     <>
-      <HeaderWrapper>
-        <Breadcrumb
-          pages={[{ href: '/admin/map-dataset-categories', name: 'Statische Daten: Kategorien' }]}
-        />
-      </HeaderWrapper>
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">Statische Daten: Kategorien</h1>
-        <Link
-          to="/admin/map-dataset-categories/new"
-          search={buildMapDatasetCategoriesListSearch(groupKey)}
-          classNameOverwrite="inline-flex shrink-0 rounded-lg bg-gray-900 px-4 py-2 text-sm font-semibold text-white no-underline hover:bg-gray-800"
-        >
-          Neue Kategorie
-        </Link>
-      </div>
+      <AdminPageHeader
+        title="Statische Daten: Kategorien"
+        action={
+          <Link
+            to="/admin/map-dataset-categories/new"
+            search={buildMapDatasetCategoriesListSearch(groupKey)}
+            button
+          >
+            Neue Kategorie
+          </Link>
+        }
+      />
+
       {categories.length === 0 ? (
-        <p className="mt-6 text-gray-600">
+        <AdminEmptyState>
           Noch keine Kategorien. Lege die erste über „Neue Kategorie“ an.
-        </p>
+        </AdminEmptyState>
       ) : (
         <>
-          <div className="mt-6">
+          <div className="mb-6">
             <FilterRow
               items={filterItems}
               activeId={activeId}
@@ -56,9 +55,7 @@ export function PageMapDatasetCategories() {
             />
           </div>
           {filtered.length === 0 ? (
-            <p className="mt-6 text-gray-600">
-              Keine Kategorien in der Gruppe „{groupKey}“. Wähle „Alle“ oder eine andere Gruppe.
-            </p>
+            <AdminEmptyState>Keine Kategorien in der Gruppe „{groupKey}“.</AdminEmptyState>
           ) : (
             <MapDatasetCategoriesTable categories={filtered} listGroupKey={groupKey} />
           )}

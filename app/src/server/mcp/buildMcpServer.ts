@@ -185,7 +185,7 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
       inputSchema: {
         table: dataSchemaIdentifierSchema.optional(),
         status: z.enum(['PENDING', 'RUNNING', 'SUCCESS', 'FAILED']).optional(),
-        ...offsetSearchFields({ maxTake: 200 }),
+        ...offsetSearchFields(),
       },
     },
     (args) => run(() => listDataSchemaImports(args)),
@@ -221,7 +221,7 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
         'Each item has status, durations, OSM date, topic completed/skipped counts, and the slowest topics. ' +
         'Paginate with take/skip (default 50, max 200). Use processing_runs_get for per-topic timings.',
       inputSchema: {
-        ...offsetSearchFields({ maxTake: 200 }),
+        ...offsetSearchFields(),
       },
     },
     (args) =>
@@ -262,7 +262,7 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
         'dates); paginate with take/skip. Useful for inspecting or planning a rollback.',
       inputSchema: {
         ...auditLogFilterWireFields,
-        ...offsetSearchFields({ maxTake: 200 }),
+        ...offsetSearchFields(),
       },
     },
     (args) => run(() => listAuditLog(auditLogListSchema.parse(args))),

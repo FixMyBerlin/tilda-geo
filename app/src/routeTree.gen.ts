@@ -80,6 +80,7 @@ import { Route as ApiAdminAuditLogRouteImport } from './routes/api/admin/audit-l
 import { Route as AdminRegionsNewRouteImport } from './routes/admin/regions/new'
 import { Route as AdminRegionContractsNewRouteImport } from './routes/admin/region-contracts/new'
 import { Route as AdminQaConfigsNewRouteImport } from './routes/admin/qa-configs/new'
+import { Route as AdminProcessingHooksRouteImport } from './routes/admin/processing/hooks'
 import { Route as AdminProcessingMetaIdRouteImport } from './routes/admin/processing/$metaId'
 import { Route as AdminMembershipsNewRouteImport } from './routes/admin/memberships/new'
 import { Route as AdminMapDatasetUploadsSlugRouteImport } from './routes/admin/map-dataset-uploads/$slug'
@@ -473,6 +474,11 @@ const AdminQaConfigsNewRoute = AdminQaConfigsNewRouteImport.update({
   path: '/new',
   getParentRoute: () => AdminQaConfigsRoute,
 } as any)
+const AdminProcessingHooksRoute = AdminProcessingHooksRouteImport.update({
+  id: '/hooks',
+  path: '/hooks',
+  getParentRoute: () => AdminProcessingRoute,
+} as any)
 const AdminProcessingMetaIdRoute = AdminProcessingMetaIdRouteImport.update({
   id: '/$metaId',
   path: '/$metaId',
@@ -676,6 +682,7 @@ export interface FileRoutesByFullPath {
   '/admin/map-dataset-uploads/$slug': typeof AdminMapDatasetUploadsSlugRoute
   '/admin/memberships/new': typeof AdminMembershipsNewRoute
   '/admin/processing/$metaId': typeof AdminProcessingMetaIdRoute
+  '/admin/processing/hooks': typeof AdminProcessingHooksRoute
   '/admin/qa-configs/new': typeof AdminQaConfigsNewRoute
   '/admin/region-contracts/new': typeof AdminRegionContractsNewRoute
   '/admin/regions/new': typeof AdminRegionsNewRoute
@@ -764,6 +771,7 @@ export interface FileRoutesByTo {
   '/admin/map-dataset-uploads/$slug': typeof AdminMapDatasetUploadsSlugRoute
   '/admin/memberships/new': typeof AdminMembershipsNewRoute
   '/admin/processing/$metaId': typeof AdminProcessingMetaIdRoute
+  '/admin/processing/hooks': typeof AdminProcessingHooksRoute
   '/admin/qa-configs/new': typeof AdminQaConfigsNewRoute
   '/admin/region-contracts/new': typeof AdminRegionContractsNewRoute
   '/admin/regions/new': typeof AdminRegionsNewRoute
@@ -865,6 +873,7 @@ export interface FileRoutesById {
   '/admin/map-dataset-uploads/$slug': typeof AdminMapDatasetUploadsSlugRoute
   '/admin/memberships/new': typeof AdminMembershipsNewRoute
   '/admin/processing/$metaId': typeof AdminProcessingMetaIdRoute
+  '/admin/processing/hooks': typeof AdminProcessingHooksRoute
   '/admin/qa-configs/new': typeof AdminQaConfigsNewRoute
   '/admin/region-contracts/new': typeof AdminRegionContractsNewRoute
   '/admin/regions/new': typeof AdminRegionsNewRoute
@@ -966,6 +975,7 @@ export interface FileRouteTypes {
     | '/admin/map-dataset-uploads/$slug'
     | '/admin/memberships/new'
     | '/admin/processing/$metaId'
+    | '/admin/processing/hooks'
     | '/admin/qa-configs/new'
     | '/admin/region-contracts/new'
     | '/admin/regions/new'
@@ -1054,6 +1064,7 @@ export interface FileRouteTypes {
     | '/admin/map-dataset-uploads/$slug'
     | '/admin/memberships/new'
     | '/admin/processing/$metaId'
+    | '/admin/processing/hooks'
     | '/admin/qa-configs/new'
     | '/admin/region-contracts/new'
     | '/admin/regions/new'
@@ -1154,6 +1165,7 @@ export interface FileRouteTypes {
     | '/admin/map-dataset-uploads/$slug'
     | '/admin/memberships/new'
     | '/admin/processing/$metaId'
+    | '/admin/processing/hooks'
     | '/admin/qa-configs/new'
     | '/admin/region-contracts/new'
     | '/admin/regions/new'
@@ -1748,6 +1760,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminQaConfigsNewRouteImport
       parentRoute: typeof AdminQaConfigsRoute
     }
+    '/admin/processing/hooks': {
+      id: '/admin/processing/hooks'
+      path: '/hooks'
+      fullPath: '/admin/processing/hooks'
+      preLoaderRoute: typeof AdminProcessingHooksRouteImport
+      parentRoute: typeof AdminProcessingRoute
+    }
     '/admin/processing/$metaId': {
       id: '/admin/processing/$metaId'
       path: '/$metaId'
@@ -2012,11 +2031,13 @@ const AdminMembershipsRouteWithChildren =
 
 interface AdminProcessingRouteChildren {
   AdminProcessingMetaIdRoute: typeof AdminProcessingMetaIdRoute
+  AdminProcessingHooksRoute: typeof AdminProcessingHooksRoute
   AdminProcessingIndexRoute: typeof AdminProcessingIndexRoute
 }
 
 const AdminProcessingRouteChildren: AdminProcessingRouteChildren = {
   AdminProcessingMetaIdRoute: AdminProcessingMetaIdRoute,
+  AdminProcessingHooksRoute: AdminProcessingHooksRoute,
   AdminProcessingIndexRoute: AdminProcessingIndexRoute,
 }
 
