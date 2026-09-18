@@ -1,8 +1,10 @@
+import { useMap } from 'react-map-gl/maplibre'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { mergeModeUrlFeature } from '@/components/regionen/pageRegionSlug/Map/utils/partitionClickedFeatures'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { noteCommentDraftId } from '../composerDrafts/composerDraftIds'
 import { ComposerDraftDot } from '../composerDrafts/DraftIndicatorDot'
+import { flyMapToIfOffscreen } from '../flyMapToIfOffscreen'
 import { ModeDataTable } from '../ModeDataTable'
 import { ModeDataTableCellsRow } from '../ModeDataTableRow'
 import { modeListFilterEmptyMessage } from '../modeListFilterEmptyMessage'
@@ -15,11 +17,12 @@ import {
   modePanelTintHairlineBottomClassName,
 } from '../modePanel.const'
 import { ModePanelEmpty } from '../ModePanelEmpty'
+import { ModeCommentsPill } from '../ModePanelPill'
 import { useMapExtentFilter, type ModeListExtent } from '../useMapExtentFilter'
 import { notesListItemId } from './notesListHoverId'
 import type { NotesModeListEntry } from './notesModeListEntry'
 import type { NotesSelection } from './notesSelection'
-import { NotesCommentsPill, NotesOpenClosedIcon } from './notesStatusBadge'
+import { NotesOpenClosedIcon } from './notesStatusBadge'
 import { OsmNotesLimitNotice } from './OsmNotesLimitNotice'
 
 const NOTES_TABLE_COLUMNS = [
@@ -46,7 +49,7 @@ type Props = {
 /**
  * Notes mode list rows (OSM + internal). OSM notes are the current map bbox (API cap 100).
  * Internal notes are the region collection and can be limited to the map view. Status/author
- * filters run in the parent query. Clicking a row selects it in `f` without moving the map.
+ * filters run in the parent query. Clicking a row selects it in `f` and pans if it is off-screen.
  */
 export const NotesModeList = ({
   entries,
@@ -57,6 +60,7 @@ export const NotesModeList = ({
   isOsmError,
   extent,
 }: Props) => {
+  const { mainMap } = useMap()
   const { featuresParam, setFeaturesParam } = useFeaturesParam()
   const passesExtent = useMapExtentFilter(showingOsm ? 'all' : (extent ?? 'view'))
   const visibleEntries = entries.filter((entry) => passesExtent(entry.coordinates))
@@ -73,6 +77,7 @@ export const NotesModeList = ({
         coordinates: entry.coordinates,
       }),
     )
+    flyMapToIfOffscreen(mainMap, entry.coordinates)
   }
 
   const emptyNotes =
@@ -122,7 +127,7 @@ export const NotesModeList = ({
                       {!showingOsm && <ComposerDraftDot draftId={noteCommentDraftId(entry.id)} />}
                     </span>
                   </div>
-                  <NotesCommentsPill count={entry.commentCount} />
+                  <ModeCommentsPill count={entry.commentCount} />
                 </div>
                 {entry.commentPreview && (
                   <div className={`mt-1 line-clamp-2 pl-6.5 italic ${modePanelListBodyClassName}`}>
@@ -154,7 +159,7 @@ export const NotesModeList = ({
               <span key="author" className={`line-clamp-1 ${modePanelListMetaClassName}`}>
                 {entry.subtitle ?? '—'}
               </span>,
-              <NotesCommentsPill key="count" count={entry.commentCount} />,
+              <ModeCommentsPill key="count" count={entry.commentCount} />,
               <span key="preview" className={`line-clamp-2 italic ${modePanelListBodyClassName}`}>
                 {entry.commentPreview ?? '—'}
               </span>,

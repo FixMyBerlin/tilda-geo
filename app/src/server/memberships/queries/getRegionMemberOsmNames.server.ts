@@ -7,7 +7,7 @@ const Schema = z.object({
   regionSlug: z.string(),
 })
 
-/** OSM display names of users with a Membership in this region (not TILDA logins without membership). */
+/** Region members (OSM name + TILDA names). Empty for guests; not TILDA logins without membership. */
 export async function getRegionMemberOsmNames(input: { regionSlug: string }, headers: Headers) {
   const { regionSlug } = Schema.parse(input)
   const session = await getAppSession(headers)
@@ -19,8 +19,12 @@ export async function getRegionMemberOsmNames(input: { regionSlug: string }, hea
       osmName: { not: null },
       memberships: { some: { region: { slug: regionSlug } } },
     },
-    select: { osmName: true },
+    select: { osmName: true, firstName: true, lastName: true },
   })
 
-  return users.flatMap((user) => (user.osmName ? [user.osmName] : []))
+  return users.flatMap((user) =>
+    user.osmName
+      ? [{ osmName: user.osmName, firstName: user.firstName, lastName: user.lastName }]
+      : [],
+  )
 }

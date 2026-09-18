@@ -6,6 +6,7 @@ import { formatFormError } from '@/components/shared/form/formatError'
 import type { FormApi } from '@/components/shared/form/types'
 import { ComposerDraftAutosave } from '../../composerDrafts/ComposerDraftAutosave'
 import { ModeFormSubmit } from '../../ModeFormSubmit'
+import { ModePanelPill } from '../../ModePanelPill'
 import { userStatusOptions } from './qaConfigs'
 
 const schema = z.object({
@@ -67,12 +68,9 @@ const QaUserStatusField = ({ form, isLoading }: { form: FormApi<Values>; isLoadi
                         disabled={isLoading}
                       />
                       <div className="min-w-0">
-                        <div
-                          className="inline-flex items-center rounded-full px-2 py-1 text-xs font-medium text-white"
-                          style={{ backgroundColor: option.hexColor }}
-                        >
+                        <ModePanelPill backgroundColor={option.hexColor}>
                           {option.label}
-                        </div>
+                        </ModePanelPill>
                         <div className="mt-1 leading-tight text-gray-500">{option.description}</div>
                       </div>
                     </label>

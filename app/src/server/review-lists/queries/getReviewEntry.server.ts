@@ -27,15 +27,15 @@ export async function getReviewEntry(input: z.infer<typeof Schema>, headers: Hea
       properties: true,
       createdAt: true,
       updatedAt: true,
-      createdBy: { select: { id: true, osmName: true } },
-      updatedBy: { select: { id: true, osmName: true } },
+      createdBy: { select: { id: true, osmName: true, firstName: true, lastName: true } },
+      updatedBy: { select: { id: true, osmName: true, firstName: true, lastName: true } },
       comments: {
         select: {
           id: true,
           body: true,
           createdAt: true,
           updatedAt: true,
-          author: { select: { id: true, osmName: true } },
+          author: { select: { id: true, osmName: true, firstName: true, lastName: true } },
         },
         orderBy: { createdAt: 'asc' },
       },

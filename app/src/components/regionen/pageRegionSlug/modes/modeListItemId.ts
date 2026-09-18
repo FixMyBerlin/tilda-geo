@@ -9,6 +9,25 @@ export const qaListItemId = (areaId: string | number) => `qa-${areaId}`
 
 export const reviewListItemId = (id: number) => `review-${id}`
 
+/** Numeric review-entry id from a hovered list-row id. */
+export const parseReviewListHoverId = (hoveredListItemId: string | undefined) => {
+  if (!hoveredListItemId?.startsWith('review-')) return null
+  const id = Number(hoveredListItemId.slice('review-'.length))
+  return Number.isFinite(id) ? id : null
+}
+
+/** Selection plus list-hover and map-hover ids for review-entry highlight layers. */
+export const reviewHighlightIds = (
+  selectedIds: number[],
+  hoveredListItemId: string | undefined,
+  hoveredMapItemId: string | null | undefined,
+) => {
+  const hoverIds = [hoveredListItemId, hoveredMapItemId ?? undefined]
+    .map((id) => parseReviewListHoverId(id))
+    .filter((id): id is number => id != null)
+  return [...selectedIds, ...hoverIds]
+}
+
 /**
  * Mode sources set `<Source promoteId="id" />`, which copies `properties.id` onto
  * `feature.id` (`number | string | undefined`). Use that field, never `properties.id`.

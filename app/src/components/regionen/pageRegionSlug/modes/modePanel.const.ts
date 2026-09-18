@@ -30,11 +30,11 @@ export const modeColumnElevationClassName =
 export const modeMobileDockElevationClassName =
   'shadow-[0_-4px_6px_-1px_rgb(0_0_0/0.1),0_-2px_4px_-2px_rgb(0_0_0/0.1)]'
 
-export const modePanelCollectionClassName = 'border-t border-white/60 px-4 py-2'
+export const modePanelCollectionClassName = 'border-t border-white/80 px-4 py-2'
 
-export const modePanelSectionClassName = 'border-b border-gray-200 px-4 py-2'
+export const modePanelSectionClassName = 'border-b border-white/80 px-4 py-2'
 
-export const modePanelFooterClassName = 'border-t border-gray-200 px-4 py-2 text-xs text-gray-500'
+export const modePanelFooterClassName = 'border-t border-white/80 px-4 py-2 text-xs text-gray-500'
 
 export const modePanelTitleClassName = 'text-sm font-semibold text-gray-900'
 
@@ -76,14 +76,14 @@ export const modePanelSmallButtonClassName =
 export const modePanelFilterControlClassName =
   'inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-brand focus:outline-none'
 
-export const modePanelListItemBorderClassName = 'border-b border-gray-200'
+export const modePanelListItemBorderClassName = 'border-b border-white/80'
 
-/** Hairline on the tinted Hinweise panel; gray-200 disappears on the sky wash. */
+/** Hairline on tinted mode panels; gray-200 disappears on the wash. */
 export const modePanelTintHairlineBottomClassName = 'border-b border-white/80'
 
 export const modePanelTintHairlineTopClassName = 'border-t border-white/80'
 
-/** Left rail on note comment bodies; gray-200 disappears on the sky wash. */
+/** Left rail on note comment bodies; gray-200 disappears on the wash. */
 export const modePanelTintContentRailClassName = 'border-l-4 border-white/80 pl-3'
 
 export const modePanelListItemActiveClassName = 'bg-yellow-50'
@@ -100,6 +100,3 @@ export const modePanelListMetaClassName = 'text-xs text-gray-500'
 export const modePanelListBodyClassName = 'text-xs text-gray-600'
 
 export const modePanelListHintClassName = 'text-[11px] text-gray-400'
-
-export const modePanelBadgeClassName =
-  'shrink-0 rounded bg-gray-100 px-1.5 py-0.5 text-xs text-gray-600'

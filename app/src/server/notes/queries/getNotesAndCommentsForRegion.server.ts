@@ -4,6 +4,7 @@ import { getAppSession } from '@/server/auth/session.server'
 import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
 import { zodInternalNotesFilterParam } from '@/shared/regionen/regionSearchZod'
+import { formatUserDisplayName } from '@/shared/userDisplayName'
 
 const Schema = z.object({
   regionSlug: z.string(),
@@ -56,7 +57,7 @@ export async function getNotesAndCommentsForRegion(
       regionId: note.regionId,
       subject: note.subject,
       authorId: note.author.id,
-      authorName: note.author.osmName ?? '',
+      authorName: formatUserDisplayName(note.author) ?? '',
       hasComments: note.noteComments.length > 0,
       commentCount: note.noteComments.length,
       // Newest comment first (orderBy desc) — used as a compact preview line in the list.

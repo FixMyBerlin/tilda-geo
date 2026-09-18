@@ -9,6 +9,7 @@ import type { QaEvaluationForArea } from '@/server/qa-configs/queries/getQaEvalu
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import { ModeCommentEditButton } from '../../ModeCommentEditButton'
 import { ModeCommentMarkdown } from '../../ModeCommentMarkdown'
+import { ModePanelPill } from '../../ModePanelPill'
 import { wasUpdated } from '../../notes/detail/utils/wasUpdated'
 import { systemStatusConfig, userStatusConfig } from './qaConfigs'
 import { QaDecisionData as QaDecisionDataComponent } from './QaDecisionData'
@@ -45,12 +46,7 @@ export const QaEvaluationCard = ({ evaluation, variant = 'history' }: Props) => 
   const isSystem = evaluation.evaluatorType === 'SYSTEM'
 
   const statusPill = statusConfig ? (
-    <div
-      className="w-fit rounded-full px-2 py-1 text-xs font-medium text-white"
-      style={{ backgroundColor: statusConfig.hexColor }}
-    >
-      {statusConfig.label}
-    </div>
+    <ModePanelPill backgroundColor={statusConfig.hexColor}>{statusConfig.label}</ModePanelPill>
   ) : null
 
   return (

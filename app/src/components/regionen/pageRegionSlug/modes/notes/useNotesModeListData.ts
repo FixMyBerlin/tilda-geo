@@ -4,7 +4,10 @@ import { useFilteredOsmNotes } from '@/components/regionen/pageRegionSlug/Map/So
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { authClient } from '@/components/shared/auth/auth-client'
 import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
-import { internalNotesQueryOptions } from '@/server/regions/regionQueryOptions'
+import {
+  internalNotesQueryOptions,
+  regionMemberOsmNamesQueryOptions,
+} from '@/server/regions/regionQueryOptions'
 import { useHasNewNoteComposerDraft } from '../composerDrafts/useHasComposerDraft'
 import { notesAuthorFilterOptions, uniqueOsmNoteAuthorNames } from './notesModeFilters'
 import { internalNotesToListEntries, osmNotesToListEntries } from './notesModeListEntry'
@@ -47,9 +50,13 @@ export const useNotesModeListData = () => {
   })
   const { isError: isOsmError } = useOsmNotesQuery()
   const osmCollection = useFilteredOsmNotes(serverFilter)
+  const { data: regionMembers } = useQuery({
+    ...regionMemberOsmNamesQueryOptions(region.slug),
+    enabled: showingOsm && hasPermissions,
+  })
 
   const entries = showingOsm
-    ? osmNotesToListEntries(osmCollection.features)
+    ? osmNotesToListEntries(osmCollection.features, regionMembers)
     : internalNotesToListEntries(internalData?.featureCollection)
 
   const authors = internalData?.authors ?? []

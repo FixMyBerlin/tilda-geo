@@ -1,4 +1,3 @@
-import { ChatBubbleLeftIcon } from '@heroicons/react/20/solid'
 import { useQuery } from '@tanstack/react-query'
 import { useMap } from 'react-map-gl/maplibre'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
@@ -9,13 +8,14 @@ import {
   systemStatusConfig,
   userStatusConfig,
 } from '@/components/regionen/pageRegionSlug/modes/qa/detail/qaConfigs'
-import { formatRelativeTime } from '@/components/shared/date/relativeTime'
+import { TimeWithRelativeTooltip } from '@/components/shared/date/TimeWithRelativeTooltip'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { frenchQuote } from '@/components/shared/text/Quotes'
 import { getQaAreaListFn } from '@/server/qa-configs/qa-configs.functions'
 import type { QaAreaListItem } from '@/server/qa-configs/queries/getQaAreaList.server'
 import { qaEvalDraftId } from '../composerDrafts/composerDraftIds'
 import { ComposerDraftDot } from '../composerDrafts/DraftIndicatorDot'
+import { flyMapToIfOffscreen } from '../flyMapToIfOffscreen'
 import { modeListFilterEmptyMessage } from '../modeListFilterEmptyMessage'
 import { ModeListItem } from '../ModeListItem'
 import { qaListItemId } from '../modeListItemId'
@@ -26,6 +26,7 @@ import {
   modePanelMutedClassName,
 } from '../modePanel.const'
 import { ModePanelEmpty } from '../ModePanelEmpty'
+import { ModeCommentsPill, ModePanelPill } from '../ModePanelPill'
 import type { ModeListExtent } from '../useMapExtentFilter'
 import { useMapViewportBbox } from '../useMapViewportBbox'
 import { QA_STATUS_SELECT_ALL, type QaStatusKey } from './qaConfigStyles'
@@ -49,7 +50,7 @@ type Props = {
 
 /**
  * QA mode area rows. Filters (status, users, search, map extent) run on the server.
- * Clicking an area selects it in `f` (mode panel detail) and flies the map to its bbox.
+ * Clicking an area selects it in `f` (mode panel detail) and pans if it is off-screen.
  */
 export const QaModeAreaList = ({
   configSlug,
@@ -164,43 +165,22 @@ export const QaModeAreaList = ({
                     coordinates: area.bbox,
                   }),
                 )
-                if (!mainMap) return
-                const [minLng, minLat, maxLng, maxLat] = area.bbox
-                mainMap.fitBounds(
-                  [
-                    [minLng, minLat],
-                    [maxLng, maxLat],
-                  ],
-                  { padding: 50, duration: 1000 },
-                )
+                flyMapToIfOffscreen(mainMap, area.bbox)
               }}
             >
               <div className="relative flex items-start justify-between gap-2">
                 <span className={modePanelListTitleClassName}>Bereich #{area.areaId}</span>
                 <span className="flex shrink-0 items-center gap-2">
-                  {area.commentCount > 0 ? (
-                    <span
-                      className={`inline-flex items-center gap-0.5 ${modePanelListHintClassName}`}
-                      aria-label={`${area.commentCount} Kommentar${area.commentCount === 1 ? '' : 'e'}`}
-                      title={`${area.commentCount} Kommentar${area.commentCount === 1 ? '' : 'e'}`}
-                    >
-                      <ChatBubbleLeftIcon className="size-3.5" aria-hidden="true" />
-                      {area.commentCount}
-                    </span>
-                  ) : null}
-                  <span className={modePanelListHintClassName}>
-                    {formatRelativeTime(new Date(area.createdAt))}
-                  </span>
+                  <ModeCommentsPill count={area.commentCount} />
+                  <TimeWithRelativeTooltip
+                    date={area.createdAt}
+                    timeClassName={modePanelListHintClassName}
+                  />
                 </span>
                 <ComposerDraftDot draftId={qaEvalDraftId(regionSlug, configSlug, area.areaId)} />
               </div>
               <div className="mt-1 flex min-w-0 items-center gap-2">
-                <span
-                  className="shrink-0 rounded px-1.5 py-0.5 text-xs font-medium text-white"
-                  style={{ backgroundColor: config.hexColor }}
-                >
-                  {config.label}
-                </span>
+                <ModePanelPill backgroundColor={config.hexColor}>{config.label}</ModePanelPill>
                 <span className={`truncate ${modePanelListMetaClassName}`}>
                   {evaluatorLabel(area)}
                 </span>

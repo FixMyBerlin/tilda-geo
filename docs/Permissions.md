@@ -111,7 +111,7 @@ Tests: `availableModes.test.ts`, `app/tests/smoke/region-modes.spec.ts` (guests 
 
 - **Read:** fetched in the browser from the public OSM API. Visible wherever the Hinweise page opens.
 - **Create:** any signed-in user, posted to openstreetmap.org under their own OSM account (`createOsmNote.server.ts`). Not tied to a region or membership, because the note lands in public OSM data anyway. The compose UI only exists where OSM notes can be read (Hinweise mode, and the inspector link when the region has OSM notes), so this is an accepted gap.
-- **Member badge** on an OSM username: only if that OSM account has a `Membership` for this region. A TILDA login without membership is not enough. The list of member OSM names is member/admin-only (`getRegionMemberOsmNames`). Guests never see the badge.
+- **Member badge** on an OSM username: only if that OSM account has a `Membership` for this region. A TILDA login without membership is not enough. The list of region members (OSM name + TILDA names) is member/admin-only (`getRegionMemberOsmNames`). Guests never see the badge.
 
 ### Hinweise: internal notes
 

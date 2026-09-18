@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { getAppSession } from '@/server/auth/session.server'
 import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
+import { formatUserDisplayName } from '@/shared/userDisplayName'
 import { reviewEntryGeometrySchema } from '../geojson'
 
 const Schema = z.object({
@@ -39,7 +40,7 @@ export async function getReviewEntriesForList(input: z.infer<typeof Schema>, hea
           status: true,
           source: true,
           importId: true,
-          createdBy: { select: { id: true, osmName: true } },
+          createdBy: { select: { id: true, osmName: true, firstName: true, lastName: true } },
           _count: { select: { comments: true } },
         },
         orderBy: { id: 'asc' },
@@ -55,7 +56,8 @@ export async function getReviewEntriesForList(input: z.infer<typeof Schema>, hea
         source: entry.source,
         importId: entry.importId,
         geometryType: entry.geometryType,
-        authorName: entry.createdBy?.osmName ?? null,
+        authorName: formatUserDisplayName(entry.createdBy) ?? null,
+        authorOsmName: entry.createdBy?.osmName ?? null,
         commentCount: entry._count.comments,
         // Display attributes from upload/drawing (kept under a namespace to avoid clobbering ours).
         // Writes store `normalizeProperties` → Record<string, string>; Prisma types the column as Json.

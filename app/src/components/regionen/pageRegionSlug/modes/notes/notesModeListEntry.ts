@@ -5,6 +5,7 @@ import {
   osmNoteReplyCount,
   type OsmFeaturePointType,
 } from '@/components/regionen/pageRegionSlug/modes/notes/osmNotesSchema'
+import { displayNameForOsmUser, type RegionMemberDisplay } from '@/shared/userDisplayName'
 
 /** Normalized note row shown in the notes mode list, for both internal and OSM notes. */
 export type NotesModeListEntry = {
@@ -49,6 +50,7 @@ export const osmNotesToListEntries = (
   features:
     | { geometry: OsmFeaturePointType['geometry']; properties: OsmFeaturePointType['properties'] }[]
     | undefined,
+  members?: RegionMemberDisplay[],
 ) => {
   if (!features) return []
   return features.flatMap((feature) => {
@@ -63,7 +65,7 @@ export const osmNotesToListEntries = (
         coordinates: [lng, lat],
         status: props.status,
         title: `Hinweis #${props.id}`,
-        subtitle: firstComment?.user || undefined,
+        subtitle: displayNameForOsmUser(firstComment?.user, members),
         commentPreview: firstComment?.text ? truncate(firstComment.text) : undefined,
         commentCount: osmNoteReplyCount(props.comments),
       } satisfies NotesModeListEntry,

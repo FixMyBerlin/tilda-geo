@@ -42,7 +42,7 @@ export const ModeListItem = ({
   className,
   buttonClassName,
 }: Props) => {
-  const { hoverListItem, unhoverListItem } = useModeListActions()
+  const { hoverListItem, unhoverListItem, clearHoveredListItem } = useModeListActions()
   const hoveredFromMap = useIsHoveredMapListItem(id)
   const ref = useRef<HTMLLIElement>(null)
 
@@ -69,7 +69,10 @@ export const ModeListItem = ({
     >
       <button
         type="button"
-        onClick={onClick}
+        onClick={() => {
+          clearHoveredListItem()
+          onClick()
+        }}
         onFocus={() => hoverListItem({ id, coordinates })}
         onBlur={() => unhoverListItem(id)}
         className={twMerge(

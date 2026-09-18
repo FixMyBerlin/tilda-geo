@@ -2,7 +2,17 @@ import { useQuery } from '@tanstack/react-query'
 import type { ExpressionSpecification } from 'maplibre-gl'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
-import { modeIdentity } from '@/components/regionen/pageRegionSlug/modes/modeIdentity'
+import {
+  useHoveredListItem,
+  useHoveredMapItemId,
+} from '@/components/regionen/pageRegionSlug/modes/mode-list-store'
+import { reviewHighlightIds } from '@/components/regionen/pageRegionSlug/modes/modeListItemId'
+import { noteHighlightFilter } from '@/components/regionen/pageRegionSlug/modes/notes/noteSelectRingPaint'
+import {
+  reviewHighlightAreaLinePaint,
+  reviewHighlightCirclePaint,
+  reviewHighlightLinePaint,
+} from '@/components/regionen/pageRegionSlug/modes/reviewLists/reviewHighlightPaint'
 import { useReviewListsModeValue } from '@/components/regionen/pageRegionSlug/modes/reviewLists/useReviewListsModeParam'
 import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
@@ -37,6 +47,8 @@ export const SourcesLayersReviewEntries = () => {
   const regionSlug = useRegionSlug()
   const { key, new: isComposing, move: isMoveArmed } = useReviewListsModeValue()
   const { featuresParam } = useFeaturesParam()
+  const hoveredListItem = useHoveredListItem()
+  const hoveredMapItemId = useHoveredMapItemId()
 
   const { data: lists } = useQuery({
     ...reviewListsQueryOptions(regionSlug),
@@ -56,7 +68,9 @@ export const SourcesLayersReviewEntries = () => {
     .map((feature) => Number(feature.id))
   const editingId =
     !isComposing && isMoveArmed && selectedIds.length === 1 ? selectedIds[0] : undefined
-  const haloIds = selectedIds.filter((id) => id !== editingId)
+  const haloIds = reviewHighlightIds(selectedIds, hoveredListItem?.id, hoveredMapItemId).filter(
+    (id) => id !== editingId,
+  )
 
   const notEditing = (filter: ExpressionSpecification) =>
     editingId === undefined
@@ -71,63 +85,45 @@ export const SourcesLayersReviewEntries = () => {
         data={data.featureCollection}
         promoteId="id"
       />
-      {/* Selection halo; status colors stay on the base layers. */}
-      {haloIds.length > 0 ? (
-        <>
-          <Layer
-            id={`${reviewEntriesLayerId}-halo-fill`}
-            key={`${reviewEntriesLayerId}-halo-fill`}
-            source={reviewEntriesSourceId}
-            type="fill"
-            filter={[
-              'all',
-              ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
-              ['in', ['get', 'id'], ['literal', haloIds]],
-            ]}
-            paint={{ 'fill-color': modeIdentity.reviewLists.accent.hex, 'fill-opacity': 0.12 }}
-          />
-          <Layer
-            id={`${reviewEntriesLayerId}-halo-line`}
-            key={`${reviewEntriesLayerId}-halo-line`}
-            source={reviewEntriesSourceId}
-            type="line"
-            layout={{ 'line-cap': 'round', 'line-join': 'round' }}
-            filter={[
-              'all',
-              [
-                'in',
-                ['geometry-type'],
-                ['literal', ['LineString', 'MultiLineString', 'Polygon', 'MultiPolygon']],
-              ],
-              ['in', ['get', 'id'], ['literal', haloIds]],
-            ]}
-            paint={{
-              'line-color': modeIdentity.reviewLists.accent.hex,
-              'line-width': 8,
-              'line-opacity': 0.45,
-            }}
-          />
-          <Layer
-            id={`${reviewEntriesLayerId}-halo`}
-            key={`${reviewEntriesLayerId}-halo`}
-            source={reviewEntriesSourceId}
-            type="circle"
-            filter={[
-              'all',
-              ['in', ['geometry-type'], ['literal', ['Point', 'MultiPoint']]],
-              ['in', ['get', 'id'], ['literal', haloIds]],
-            ]}
-            paint={{
-              'circle-radius': 11,
-              'circle-color': modeIdentity.reviewLists.accent.hex,
-              'circle-opacity': 0.28,
-              'circle-stroke-color': modeIdentity.reviewLists.accent.hex,
-              'circle-stroke-width': 2.5,
-              'circle-stroke-opacity': 0.9,
-            }}
-          />
-        </>
-      ) : null}
+      {/* Selection and hover use the same shadow under status colors. */}
+      <Layer
+        id={`${reviewEntriesLayerId}-halo-area`}
+        key={`${reviewEntriesLayerId}-halo-area`}
+        source={reviewEntriesSourceId}
+        type="line"
+        layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+        filter={[
+          'all',
+          ['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]],
+          noteHighlightFilter(haloIds),
+        ]}
+        paint={reviewHighlightAreaLinePaint}
+      />
+      <Layer
+        id={`${reviewEntriesLayerId}-halo-line`}
+        key={`${reviewEntriesLayerId}-halo-line`}
+        source={reviewEntriesSourceId}
+        type="line"
+        layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+        filter={[
+          'all',
+          ['in', ['geometry-type'], ['literal', ['LineString', 'MultiLineString']]],
+          noteHighlightFilter(haloIds),
+        ]}
+        paint={reviewHighlightLinePaint}
+      />
+      <Layer
+        id={`${reviewEntriesLayerId}-halo`}
+        key={`${reviewEntriesLayerId}-halo`}
+        source={reviewEntriesSourceId}
+        type="circle"
+        filter={[
+          'all',
+          ['in', ['geometry-type'], ['literal', ['Point', 'MultiPoint']]],
+          noteHighlightFilter(haloIds),
+        ]}
+        paint={reviewHighlightCirclePaint}
+      />
       <Layer
         id={`${reviewEntriesLayerId}-fill`}
         key={`${reviewEntriesLayerId}-fill`}

@@ -1,4 +1,5 @@
 import { ArrowUpTrayIcon, PlusIcon } from '@heroicons/react/24/outline'
+import { bbox } from '@turf/turf'
 import type { Geometry } from 'geojson'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
@@ -8,19 +9,20 @@ import { mergeModeUrlFeature } from '@/components/regionen/pageRegionSlug/Map/ut
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { reviewCommentDraftId } from '../composerDrafts/composerDraftIds'
 import { ComposerDraftDot } from '../composerDrafts/DraftIndicatorDot'
+import { flyMapToIfOffscreen } from '../flyMapToIfOffscreen'
 import { ModeDataTable } from '../ModeDataTable'
 import { ModeDataTableCellsRow } from '../ModeDataTableRow'
 import { modeListFilterEmptyMessage } from '../modeListFilterEmptyMessage'
 import { ModeListItem } from '../ModeListItem'
 import { reviewListItemId } from '../modeListItemId'
 import {
-  modePanelBadgeClassName,
   modePanelHeaderIconButtonClassName,
   modePanelListMetaClassName,
   modePanelListTitleClassName,
   modePanelMutedClassName,
 } from '../modePanel.const'
 import { ModePanelEmpty } from '../ModePanelEmpty'
+import { ModeCommentsPill, ModePanelPill } from '../ModePanelPill'
 import { useMapExtentFilter } from '../useMapExtentFilter'
 import { formatReviewEntryDataSummary } from './reviewEntryDataSummary'
 import { STATUS_LABEL, type ReviewStatus } from './reviewListsModeFilters'
@@ -39,29 +41,24 @@ const firstPosition = (geometry: Geometry) => {
 const REVIEW_TABLE_COLUMNS = [
   { id: 'id', label: '#', className: 'w-[8%]' },
   { id: 'status', label: 'Status', className: 'w-[10%]' },
-  { id: 'geometry', label: 'Geometrie', className: 'w-[12%]' },
-  { id: 'source', label: 'Quelle', className: 'w-[10%]' },
-  { id: 'author', label: 'Autor:in', className: 'w-[14%]' },
+  { id: 'source', label: 'Quelle', className: 'w-[12%]' },
+  { id: 'author', label: 'Autor:in', className: 'w-[16%]' },
   { id: 'comments', label: 'Kommentare', className: 'w-[10%]' },
-  { id: 'data', label: 'Daten', className: 'w-[36%]' },
+  { id: 'data', label: 'Daten', className: 'w-[44%]' },
 ] as const
 
 const ReviewStatusBadge = ({ status }: { status: ReviewStatus }) => {
   switch (status) {
     case 'PROBLEM':
       return (
-        <span className="inline-block rounded bg-red-100 px-1.5 py-0.5 text-xs text-red-800">
-          {STATUS_LABEL.PROBLEM}
-        </span>
+        <ModePanelPill className="bg-red-100 text-red-800">{STATUS_LABEL.PROBLEM}</ModePanelPill>
       )
     case 'OK':
       return (
-        <span className="inline-block rounded bg-green-100 px-1.5 py-0.5 text-xs text-green-800">
-          {STATUS_LABEL.OK}
-        </span>
+        <ModePanelPill className="bg-green-100 text-green-800">{STATUS_LABEL.OK}</ModePanelPill>
       )
     case 'OPEN':
-      return <span className={modePanelBadgeClassName}>{STATUS_LABEL.OPEN}</span>
+      return <ModePanelPill>{STATUS_LABEL.OPEN}</ModePanelPill>
   }
 }
 
@@ -73,6 +70,7 @@ type ReviewListEntryFeature = {
     source: string
     geometryType: string
     authorName?: string | null
+    authorOsmName?: string | null
     commentCount: number
     data?: Record<string, string>
   }
@@ -88,7 +86,7 @@ type Props = {
 
 /**
  * Review-list entry rows. Status/search/extent filters run here. Clicking a row selects it in `f`
- * and flies the map to the first coordinate.
+ * and pans if it is off-screen (zoom unchanged).
  */
 export const ReviewListsModeList = ({
   features,
@@ -120,7 +118,8 @@ export const ReviewListsModeList = ({
       if (reviewListsMode.status && props.status !== reviewListsMode.status) return false
       if (reviewListsMode.source && props.source !== reviewListsMode.source) return false
       if (search) {
-        const haystack = `${props.id} ${JSON.stringify(props.data ?? {})}`.toLowerCase()
+        const haystack =
+          `${props.id} ${props.authorName ?? ''} ${props.authorOsmName ?? ''} ${JSON.stringify(props.data ?? {})}`.toLowerCase()
         if (!haystack.includes(search.toLowerCase())) return false
       }
       return true
@@ -134,7 +133,7 @@ export const ReviewListsModeList = ({
     (featuresParam ?? []).map((feature) => `${feature.sourceId}-${feature.id}`),
   )
 
-  const selectEntry = (id: number, coordinates: [number, number]) => {
+  const selectEntry = (id: number, coordinates: [number, number], geometry: Geometry) => {
     setFeaturesParam(
       mergeModeUrlFeature(featuresParam, {
         id,
@@ -146,10 +145,8 @@ export const ReviewListsModeList = ({
       ...reviewListsMode,
       move: undefined,
     })
-    mainMap?.flyTo({
-      center: coordinates,
-      zoom: Math.max(mainMap.getZoom(), 15),
-    })
+    const [minLng, minLat, maxLng, maxLat] = bbox(geometry)
+    flyMapToIfOffscreen(mainMap, [minLng, minLat, maxLng, maxLat])
   }
 
   if (selectedListId === undefined) {
@@ -220,16 +217,29 @@ export const ReviewListsModeList = ({
                 id={reviewListItemId(id)}
                 coordinates={coordinates}
                 active={active}
-                onClick={() => selectEntry(id, coordinates)}
+                onClick={() => selectEntry(id, coordinates, feature.geometry)}
               >
-                <div className="relative flex items-start justify-between gap-2">
-                  <span className={modePanelListTitleClassName}>Prüfeintrag #{id}</span>
-                  <ReviewStatusBadge status={props.status} />
-                  <ComposerDraftDot draftId={reviewCommentDraftId(id)} />
+                <div className="relative flex items-center justify-between gap-2">
+                  <span className="flex min-w-0 items-baseline gap-1.5">
+                    <span
+                      className={twJoin('shrink-0 whitespace-nowrap', modePanelListTitleClassName)}
+                    >
+                      Prüfeintrag #{id}
+                    </span>
+                    {props.authorName ? (
+                      <span className={twJoin('min-w-0 truncate', modePanelListMetaClassName)}>
+                        {props.authorName}
+                      </span>
+                    ) : null}
+                    <ComposerDraftDot draftId={reviewCommentDraftId(id)} />
+                  </span>
+                  <span className="flex shrink-0 items-center gap-1.5">
+                    <ReviewStatusBadge status={props.status} />
+                    <ModeCommentsPill count={props.commentCount} />
+                  </span>
                 </div>
                 <div className={twJoin('mt-0.5', modePanelListMetaClassName)}>
-                  {props.geometryType} · {props.source === 'MANUAL' ? 'manuell' : 'Upload'}
-                  {props.commentCount > 0 ? ` · ${props.commentCount} Kommentar(e)` : ''}
+                  {props.source === 'MANUAL' ? 'manuell' : 'Upload'}
                 </div>
               </ModeListItem>
             )
@@ -248,25 +258,20 @@ export const ReviewListsModeList = ({
             id={reviewListItemId(id)}
             coordinates={coordinates}
             active={active}
-            onClick={() => selectEntry(id, coordinates)}
+            onClick={() => selectEntry(id, coordinates, feature.geometry)}
             cells={[
               <span key="id" className={twJoin('relative', modePanelListTitleClassName)}>
                 #{id}
                 <ComposerDraftDot draftId={reviewCommentDraftId(id)} />
               </span>,
               <ReviewStatusBadge key="status" status={props.status} />,
-              <span key="geometry" className={modePanelListMetaClassName}>
-                {props.geometryType}
-              </span>,
               <span key="source" className={modePanelListMetaClassName}>
                 {props.source === 'MANUAL' ? 'manuell' : 'Upload'}
               </span>,
               <span key="author" className={twJoin('line-clamp-1', modePanelListMetaClassName)}>
                 {props.authorName ?? '—'}
               </span>,
-              <span key="comments" className={modePanelListMetaClassName}>
-                {props.commentCount > 0 ? props.commentCount : '—'}
-              </span>,
+              <ModeCommentsPill key="comments" count={props.commentCount} />,
               <span key="data" className={twJoin('line-clamp-2', modePanelListMetaClassName)}>
                 {dataSummary || '—'}
               </span>,

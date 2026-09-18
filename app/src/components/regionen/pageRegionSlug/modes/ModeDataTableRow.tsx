@@ -27,7 +27,7 @@ export const ModeDataTableCellsRow = ({
   actions,
   className,
 }: Props) => {
-  const { hoverListItem, unhoverListItem } = useModeListActions()
+  const { hoverListItem, unhoverListItem, clearHoveredListItem } = useModeListActions()
   const hoveredFromMap = useIsHoveredMapListItem(id)
   const ref = useRef<HTMLTableRowElement>(null)
 
@@ -45,7 +45,7 @@ export const ModeDataTableCellsRow = ({
       <tr
         ref={ref}
         className={twMerge(
-          'group/row border-b border-gray-100 @[36rem]:table-row',
+          'group/row border-b border-white/80 @[36rem]:table-row',
           active
             ? modePanelListItemActiveClassName
             : hoveredFromMap
@@ -54,7 +54,10 @@ export const ModeDataTableCellsRow = ({
           'cursor-pointer select-none',
           className,
         )}
-        onClick={onClick}
+        onClick={() => {
+          clearHoveredListItem()
+          onClick()
+        }}
         onMouseEnter={() => hoverListItem({ id, coordinates })}
         onMouseLeave={() => unhoverListItem(id)}
         onFocus={() => hoverListItem({ id, coordinates })}
@@ -62,6 +65,7 @@ export const ModeDataTableCellsRow = ({
         onKeyDown={(event: KeyboardEvent<HTMLTableRowElement>) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault()
+            clearHoveredListItem()
             onClick()
           }
         }}
@@ -75,7 +79,7 @@ export const ModeDataTableCellsRow = ({
         ))}
       </tr>
       {actions ? (
-        <tr className="border-b border-gray-100 bg-gray-50/80">
+        <tr className="border-b border-white/80 bg-gray-50/80">
           <td colSpan={cells.length} className="px-3 py-2">
             {actions}
           </td>

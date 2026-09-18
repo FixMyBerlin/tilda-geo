@@ -1,25 +1,22 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { twMerge } from 'tailwind-merge'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
-import { formatRelativeTime } from '@/components/shared/date/relativeTime'
 import { TimeWithRelativeTooltip } from '@/components/shared/date/TimeWithRelativeTooltip'
 import { buttonStyles, buttonStylesOnYellow } from '@/components/shared/links/styles'
 import { ReviewEntryStatus } from '@/prisma/generated/enums'
 import {
   createReviewEntryCommentFn,
   getReviewEntryFn,
-  updateReviewEntryCommentFn,
   updateReviewEntryFn,
 } from '@/server/review-lists/review-lists.functions'
+import { formatUserDisplayName } from '@/shared/userDisplayName'
 import { reviewCommentDraftId } from '../../composerDrafts/composerDraftIds'
 import { ModeCommentComposer } from '../../ModeCommentComposer'
-import { ModeCommentEditButton } from '../../ModeCommentEditButton'
-import { ModeCommentMarkdown } from '../../ModeCommentMarkdown'
-import { modePanelMutedClassName } from '../../modePanel.const'
-import { wasUpdated } from '../../notes/detail/utils/wasUpdated'
+import { modePanelMutedClassName, modePanelTintHairlineTopClassName } from '../../modePanel.const'
 import { REVIEW_ENTRY_MOVE_COLOR, REVIEW_ENTRY_MOVE_COLOR_LABEL } from '../reviewEntryMapColors'
 import { STATUS_LABEL } from '../reviewListsModeFilters'
 import { useReviewListsModeValue } from '../useReviewListsModeParam'
+import { ReviewEntryComment } from './ReviewEntryComment'
 
 type Props = { entryId: number }
 
@@ -61,21 +58,29 @@ export const ReviewEntryDetail = ({ entryId }: Props) => {
   }
   if (!entry) return null
 
+  const createdByName = formatUserDisplayName(entry.createdBy)
+  const updatedByName = formatUserDisplayName(entry.updatedBy)
+  const wasUpdated = new Date(entry.updatedAt).getTime() !== new Date(entry.createdAt).getTime()
+
   return (
-    <div className="space-y-3 px-4 py-4">
-      <div className="text-xs text-gray-500">
-        {entry.source === 'MANUAL' ? 'Manuell erstellt' : 'Aus Upload'}
-        {entry.createdBy?.osmName ? ` · ${entry.createdBy.osmName}` : ''}
-      </div>
-      {new Date(entry.updatedAt).getTime() !== new Date(entry.createdAt).getTime() ? (
-        <div className="text-xs text-gray-500">
-          Geändert <TimeWithRelativeTooltip date={entry.updatedAt} />
-          {entry.updatedBy?.osmName ? ` von ${entry.updatedBy.osmName}` : ''}
+    <div>
+      <div className="space-y-3 px-4 pt-4 pb-4">
+        <div className="min-w-0 text-xs text-gray-500">
+          <p className="truncate">
+            {entry.source === 'MANUAL' ? 'Manuell erstellt' : 'Importiert'}{' '}
+            <TimeWithRelativeTooltip date={entry.createdAt} timeClassName="text-inherit" />
+            {createdByName ? ` von ${createdByName}` : null}
+          </p>
+          {wasUpdated ? (
+            <p className="truncate">
+              Zuletzt aktualisiert{' '}
+              <TimeWithRelativeTooltip date={entry.updatedAt} timeClassName="text-inherit" />
+              {updatedByName ? ` von ${updatedByName}` : null}
+            </p>
+          ) : null}
         </div>
-      ) : null}
-      <p className="text-xs text-gray-500">
         {isMoveArmed ? (
-          <>
+          <p className="text-xs text-gray-500">
             Geometrie-Bearbeitung ist aktiv (
             <span className="inline-flex items-center gap-1 font-medium text-gray-700">
               <span
@@ -87,93 +92,85 @@ export const ReviewEntryDetail = ({ entryId }: Props) => {
             </span>
             ). Das Element auf der Karte ziehen oder über die Werkzeugleiste Teile hinzufügen und
             löschen.
-          </>
-        ) : (
-          <>
-            Mit dem Stift-Button oben die Geometrie-Bearbeitung starten (
-            <span className="inline-flex items-center gap-1 font-medium text-gray-700">
-              <span
-                className="inline-block size-2.5 rounded-full"
-                style={{ backgroundColor: REVIEW_ENTRY_MOVE_COLOR }}
-                aria-hidden
-              />
-              {REVIEW_ENTRY_MOVE_COLOR_LABEL}
-            </span>
-            ). Danach das Element auf der Karte ziehen.
-          </>
-        )}
-      </p>
+          </p>
+        ) : null}
 
-      {/* Status */}
-      <div className="isolate inline-flex rounded-md shadow-sm" role="group" aria-label="Status">
-        {Object.values(ReviewEntryStatus).map((status) => (
-          <button
-            key={status}
-            type="button"
-            disabled={setStatus.isPending}
-            onClick={() => setStatus.mutate(status)}
-            className={twMerge(
-              entry.status === status ? buttonStylesOnYellow : buttonStyles,
-              '-ml-px rounded-none shadow-none first:ml-0 first:rounded-l-md last:rounded-r-md focus:z-10',
-            )}
-            aria-pressed={entry.status === status}
-          >
-            {STATUS_LABEL[status]}
-          </button>
-        ))}
+        <div className="isolate inline-flex rounded-md shadow-sm" role="group" aria-label="Status">
+          {Object.values(ReviewEntryStatus).map((status) => (
+            <button
+              key={status}
+              type="button"
+              disabled={setStatus.isPending}
+              onClick={() => setStatus.mutate(status)}
+              className={twMerge(
+                entry.status === status ? buttonStylesOnYellow : buttonStyles,
+                '-ml-px rounded-none shadow-none first:ml-0 first:rounded-l-md last:rounded-r-md focus:z-10',
+              )}
+              aria-pressed={entry.status === status}
+            >
+              {STATUS_LABEL[status]}
+            </button>
+          ))}
+        </div>
+
+        {entry.properties &&
+          typeof entry.properties === 'object' &&
+          Object.keys(entry.properties).length > 0 && (
+            <div>
+              <h3 className="mb-1.5 text-xs font-medium text-gray-900">Attribute des Eintrags</h3>
+              <dl className="divide-y divide-gray-950/10 overflow-hidden rounded-md border border-gray-950/10 text-xs">
+                {Object.entries(entry.properties as Record<string, unknown>).map(([key, value]) => {
+                  const display = String(value)
+                  return (
+                    <div
+                      key={key}
+                      className="grid grid-cols-[minmax(0,8.5rem)_minmax(0,1fr)] items-baseline gap-x-2 px-2.5 py-1.5"
+                    >
+                      <dt className="truncate font-medium text-gray-500" title={key}>
+                        {key}
+                      </dt>
+                      <dd className="truncate text-gray-900" title={display}>
+                        {display}
+                      </dd>
+                    </div>
+                  )
+                })}
+              </dl>
+            </div>
+          )}
       </div>
 
-      {/* Display attributes from upload/drawing */}
-      {entry.properties &&
-        typeof entry.properties === 'object' &&
-        Object.keys(entry.properties).length > 0 && (
-          <dl className="grid grid-cols-[auto_1fr] gap-x-2 gap-y-0.5 text-xs text-gray-600">
-            {Object.entries(entry.properties as Record<string, unknown>).map(([key, value]) => (
-              <div key={key} className="contents">
-                <dt className="font-medium text-gray-500">{key}</dt>
-                <dd className="truncate">{String(value)}</dd>
-              </div>
-            ))}
-          </dl>
-        )}
-
-      {/* Comments */}
-      <div className="space-y-2 border-t border-gray-100 pt-2">
-        <h3 className="text-xs font-semibold text-gray-600 uppercase">Kommentare</h3>
-        {entry.comments.length === 0 && <p className="text-xs text-gray-400">Noch keine.</p>}
-        {entry.comments.map((c) => (
-          <div key={c.id} className="rounded bg-gray-50 px-2 py-1 text-xs">
-            <div className="flex items-center justify-between gap-2 text-gray-500">
-              <span>
-                {c.author?.osmName ?? 'Unbekannt'} · {formatRelativeTime(new Date(c.createdAt))}
-                {wasUpdated(c) ? (
-                  <>, aktualisiert {formatRelativeTime(new Date(c.updatedAt))}</>
-                ) : null}
-              </span>
-              <ModeCommentEditButton
-                authorId={c.author.id}
-                body={c.body}
-                mode="reviewLists"
-                onSave={async (body) => {
-                  await updateReviewEntryCommentFn({
-                    data: { regionSlug, commentId: c.id, body },
-                  })
-                  await invalidate()
-                }}
-              />
-            </div>
-            <ModeCommentMarkdown markdown={c.body} />
-          </div>
-        ))}
-        <ModeCommentComposer
-          draftId={reviewCommentDraftId(entryId)}
-          label="Kommentar (Markdown)"
-          submitLabel="Kommentieren"
-          placeholder="Kommentar hinzufügen…"
-          onSubmit={async (body) => {
-            await addComment.mutateAsync(body)
-          }}
-        />
+      <div className={modePanelTintHairlineTopClassName}>
+        <ul className="px-4 pt-4 pb-5">
+          {entry.comments.map((comment, index) => (
+            <li
+              key={comment.id}
+              className={index === 0 ? undefined : `mt-5 ${modePanelTintHairlineTopClassName} pt-5`}
+            >
+              <ReviewEntryComment comment={comment} regionSlug={regionSlug} onSaved={invalidate} />
+            </li>
+          ))}
+          <li
+            className={
+              entry.comments.length === 0
+                ? undefined
+                : `mt-5 ${modePanelTintHairlineTopClassName} pt-5`
+            }
+          >
+            {entry.comments.length === 0 ? (
+              <p className="mb-3 text-xs text-gray-400">Noch keine Kommentare.</p>
+            ) : null}
+            <ModeCommentComposer
+              draftId={reviewCommentDraftId(entryId)}
+              label="Kommentar (Markdown)"
+              submitLabel="Kommentieren"
+              placeholder="Kommentar hinzufügen…"
+              onSubmit={async (body) => {
+                await addComment.mutateAsync(body)
+              }}
+            />
+          </li>
+        </ul>
       </div>
     </div>
   )

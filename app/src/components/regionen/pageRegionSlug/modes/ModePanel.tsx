@@ -109,7 +109,7 @@ export const ModePanel = ({
       ) : null}
       <header
         className={twJoin(
-          isDetail ? 'flex items-stretch border-b border-gray-200' : 'border-b border-gray-200',
+          isDetail ? 'flex items-stretch border-b border-white/80' : 'border-b border-white/80',
           accent.className,
           accent.invertedFgClassName,
         )}

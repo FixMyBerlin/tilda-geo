@@ -1,12 +1,12 @@
 import dompurify from 'dompurify'
 import { twJoin } from 'tailwind-merge'
 import { ObjectDump } from '@/components/admin/ObjectDump'
+import { ModeComment } from '@/components/regionen/pageRegionSlug/modes/ModeComment'
 import { ModeCommentMarkdown } from '@/components/regionen/pageRegionSlug/modes/ModeCommentMarkdown'
 import {
   modePanelTintContentRailClassName,
   modePanelTintHairlineBottomClassName,
 } from '@/components/regionen/pageRegionSlug/modes/modePanel.const'
-import { NotesCommentByline } from '@/components/regionen/pageRegionSlug/modes/notes/detail/NotesCommentByline'
 import { NotesOpenClosedBadge } from '@/components/regionen/pageRegionSlug/modes/notes/notesStatusBadge'
 import { useOsmNotesQuery } from '@/components/regionen/pageRegionSlug/modes/notes/useOsmNotesQuery'
 import { SvgNotesCheckmark } from '@/components/regionen/pageRegionSlug/SidebarInspector/icons/SvgNotesCheckmark'
@@ -65,40 +65,43 @@ export const NotesDetailOsm = ({ noteId }: Props) => {
             key={`${noteId}-${index}-${comment.date.toISOString()}`}
             className={`${modePanelTintHairlineBottomClassName} px-3 pt-3.5 pb-4`}
           >
-            {comment.text ? (
-              <ModeCommentMarkdown
-                key={`${noteId}-${index}-md`}
-                variant="notes"
-                markdown={comment.text}
-                className={osmCommentBodyClassName}
-              />
-            ) : (
-              <div
-                // oxlint-disable-next-line react/no-danger -- OSM HTML; markdown text missing
-                dangerouslySetInnerHTML={{ __html: dompurify.sanitize(comment.html) }}
-                className={twJoin(
-                  proseClasses,
-                  osmCommentBodyClassName,
-                  modePanelTintContentRailClassName,
-                )}
-              />
-            )}
-            {!firstComment && comment.action === 'opened' && (
-              <p className="mt-2 flex items-center gap-1 text-sm italic">
-                <SvgNotesQuestionmark className="size-4 shrink-0 text-teal-700" />
-                Der Hinweis wurde erneut geöffnet.
-              </p>
-            )}
-            {comment.action === 'closed' && (
-              <p className="mt-2 flex items-center gap-1 text-sm italic">
-                <SvgNotesCheckmark className="size-4 shrink-0 text-teal-700" />
-                Der Hinweis wurde geschlossen.
-              </p>
-            )}
-            <NotesCommentByline
+            <ModeComment
+              body={
+                comment.text ? (
+                  <ModeCommentMarkdown
+                    key={`${noteId}-${index}-md`}
+                    variant="notes"
+                    markdown={comment.text}
+                    className={osmCommentBodyClassName}
+                  />
+                ) : (
+                  <div
+                    // oxlint-disable-next-line react/no-danger -- OSM HTML; markdown text missing
+                    dangerouslySetInnerHTML={{ __html: dompurify.sanitize(comment.html) }}
+                    className={twJoin(
+                      proseClasses,
+                      osmCommentBodyClassName,
+                      modePanelTintContentRailClassName,
+                    )}
+                  />
+                )
+              }
               author={<OsmUserLink osmName={comment.user} />}
               date={<TimeWithRelativeTooltip date={comment.date} timeClassName="text-inherit" />}
-            />
+            >
+              {!firstComment && comment.action === 'opened' && (
+                <p className="mt-2 flex items-center gap-1 text-sm italic">
+                  <SvgNotesQuestionmark className="size-4 shrink-0 text-teal-700" />
+                  Der Hinweis wurde erneut geöffnet.
+                </p>
+              )}
+              {comment.action === 'closed' && (
+                <p className="mt-2 flex items-center gap-1 text-sm italic">
+                  <SvgNotesCheckmark className="size-4 shrink-0 text-teal-700" />
+                  Der Hinweis wurde geschlossen.
+                </p>
+              )}
+            </ModeComment>
           </section>
         )
       })}

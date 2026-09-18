@@ -3,7 +3,9 @@ import { additionalSourceKeys } from '@/components/regionen/pageRegionSlug/hooks
 import {
   listItemIdFromMapFeature,
   listItemIdFromMapFeatures,
+  parseReviewListHoverId,
   qaListItemId,
+  reviewHighlightIds,
   reviewListItemId,
 } from './modeListItemId'
 import { notesListItemId } from './notes/notesListHoverId'
@@ -52,5 +54,29 @@ describe('listItemIdFromMapFeatures()', () => {
   test('returns null when nothing maps to a list row', () => {
     expect(listItemIdFromMapFeatures(undefined)).toBeNull()
     expect(listItemIdFromMapFeatures([{ source: 'atlas_bikelanes', id: 1 }])).toBeNull()
+  })
+})
+
+describe('parseReviewListHoverId()', () => {
+  test('reads the numeric id', () => {
+    expect(parseReviewListHoverId(reviewListItemId(3))).toBe(3)
+  })
+
+  test('ignores missing or other-mode ids', () => {
+    expect(parseReviewListHoverId(undefined)).toBeNull()
+    expect(parseReviewListHoverId('qa-1')).toBeNull()
+    expect(parseReviewListHoverId('review-x')).toBeNull()
+  })
+})
+
+describe('reviewHighlightIds()', () => {
+  test('unions selection with list hover and map hover', () => {
+    expect(reviewHighlightIds([1, 2], reviewListItemId(3), reviewListItemId(4))).toEqual([
+      1, 2, 3, 4,
+    ])
+  })
+
+  test('ignores hover ids from another mode', () => {
+    expect(reviewHighlightIds([1], qaListItemId(9), null)).toEqual([1])
   })
 })

@@ -25,7 +25,7 @@ export const OsmUserLink = ({
 }: Props) => {
   const hasPermission = useHasPermissions()
   const regionSlug = useRegionSlug()
-  const { data: memberOsmNames } = useQuery({
+  const { data: members } = useQuery({
     ...regionMemberOsmNamesQueryOptions(regionSlug),
     enabled: hasPermission && showMembership,
   })
@@ -33,8 +33,8 @@ export const OsmUserLink = ({
 
   if (!osmName) return <>Eine anonyme Nutzer:in</>
 
-  const isRegionMember = memberOsmNames?.some(
-    (memberName) => memberName.toLowerCase() === osmName.toLowerCase(),
+  const isRegionMember = members?.some(
+    (member) => member.osmName.toLowerCase() === osmName.toLowerCase(),
   )
   const membershipBadge =
     hasPermission && showMembership && isRegionMember ? (

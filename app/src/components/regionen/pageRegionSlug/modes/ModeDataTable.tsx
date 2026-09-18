@@ -19,7 +19,7 @@ export const ModeDataTable = ({ columns, list, children }: Props) => (
     <div className="@[36rem]:hidden">{list}</div>
     <table className="hidden w-full table-fixed @[36rem]:table">
       <thead>
-        <tr className="border-b border-gray-200 bg-gray-50 text-left text-xs font-medium text-gray-600">
+        <tr className="border-b border-white/80 bg-gray-50 text-left text-xs font-medium text-gray-600">
           {columns.map((column) => (
             <th
               key={column.id}

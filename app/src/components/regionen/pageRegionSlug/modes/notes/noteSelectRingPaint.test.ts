@@ -11,6 +11,6 @@ describe('noteHighlightFilter()', () => {
   })
 
   test('dedupes and uses in for several ids', () => {
-    expect(noteHighlightFilter([1, 1, 2])).toEqual(['in', 'id', 1, 2])
+    expect(noteHighlightFilter([1, 1, 2])).toEqual(['in', ['get', 'id'], ['literal', [1, 2]]])
   })
 })

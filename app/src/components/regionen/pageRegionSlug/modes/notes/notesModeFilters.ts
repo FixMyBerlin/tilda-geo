@@ -1,3 +1,5 @@
+import { formatUserDisplayName } from '@/shared/userDisplayName'
+
 export const NOTES_STATUS_FILTER_OPTIONS = [
   { value: 'all', label: 'Alle' },
   { value: 'open', label: 'Offen' },
@@ -22,6 +24,7 @@ type InternalAuthor = {
   id: string
   osmName?: string | null
   firstName?: string | null
+  lastName?: string | null
   currentUser?: boolean
 }
 
@@ -53,7 +56,7 @@ export const notesAuthorFilterOptions = ({
     if (author.id === myValue) continue
     options.push({
       value: author.id,
-      label: author.osmName || author.firstName || author.id,
+      label: formatUserDisplayName(author) || author.id,
     })
   }
   return options
