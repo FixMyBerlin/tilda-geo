@@ -31,8 +31,8 @@ import {
 } from '@/components/shared/utils/playwright'
 import { MAP_STYLE_URL } from '@/server/api/map-style/mapStyleUrl.const'
 import { SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
-import { MapListHoverMarker } from '../modes/MapListHoverMarker'
 import { useModeListActions } from '../modes/mode-list-store'
+import { ModeListHoverEdgeMarker } from '../modes/ModeListHoverEdgeMarker'
 import { listItemIdFromMapFeatures } from '../modes/modeListItemId'
 import { NotesNewRelatedGeometry } from '../modes/notes/new/NotesNewRelatedGeometry'
 import { useNotesComposeActive } from '../modes/notes/useNotesComposeActive'
@@ -327,7 +327,7 @@ export const RegionMap = () => {
       {/* Last in tree + moveLayer: stay above remounted highlights. Do not use this layer as beforeId. */}
       <TerrainProfileHoverMarkerLayer />
       <SourcesLayersReviewEntries />
-      <MapListHoverMarker />
+      <ModeListHoverEdgeMarker />
       <AttributionControl compact={true} position="bottom-left" />
       <Map3dTouchRotation />
       <Calculator />

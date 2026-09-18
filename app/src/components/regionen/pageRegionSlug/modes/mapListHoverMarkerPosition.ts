@@ -5,9 +5,9 @@ const clamp = (value: number, min: number, max: number) => Math.min(Math.max(val
 
 export type EdgeSide = 'left' | 'right' | 'top' | 'bottom'
 
-/** In-view list-hover ring, aligned with the selected-point halo. */
+/** Base size used to derive the off-screen edge disc (`LIST_HOVER_EDGE_RING_PX`). */
 export const LIST_HOVER_RING_PX = 22
-/** Off-screen ring: 3× the in-view marker so it reads at the map edge. */
+/** Off-screen disc: 3× `LIST_HOVER_RING_PX` so it reads at the map edge. */
 export const LIST_HOVER_EDGE_RING_PX = LIST_HOVER_RING_PX * 3
 /** Fraction of the edge-ring diameter that hangs outside the map and is clipped. */
 const LIST_HOVER_EDGE_CUTOFF = 0.4
@@ -29,10 +29,10 @@ export type ListHoverMarkerPosition = Point & {
 }
 
 /**
- * Projected pixel position for a hovered mode-list item (see <MapListHoverMarker>).
+ * Projected pixel position for a hovered mode-list item (see <ModeListHoverEdgeMarker>).
  * Uses the list row's coordinates — the map feature does not need to be loaded.
- * In view: the ring sits on the projected point. Off-screen: clamped to the container
- * edge (`atEdge: true`), `margin` px inset so the large edge ring is ~40% clipped.
+ * In view: unclamped projection and `atEdge: false`. Off-screen: clamped to the
+ * container edge (`atEdge: true`), `margin` px inset so the large edge disc is ~40% clipped.
  */
 export const listHoverMarkerPosition = (
   projected: Point,

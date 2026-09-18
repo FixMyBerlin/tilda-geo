@@ -5,8 +5,9 @@ import { useHoveredListItem, useHoveredMapViewEpoch } from './mode-list-store'
 
 /**
  * Projects the hovered list row's `[lng, lat]` onto the current map viewport.
- * Does not look up map features. In-view: Marker sits on the list point. Off-screen:
- * clamp to the container edge and unproject so the Marker stays on-canvas.
+ * Does not look up map features. In-view: original lng/lat and `atEdge: false`
+ * (`ModePanel` hides the off-screen footer). Off-screen: clamp to the container
+ * edge and unproject so `<ModeListHoverEdgeMarker>` stays on-canvas.
  */
 export const useListHoverMarkerPosition = () => {
   const { mainMap } = useMap()

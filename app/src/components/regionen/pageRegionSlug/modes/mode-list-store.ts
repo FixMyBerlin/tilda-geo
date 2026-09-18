@@ -2,10 +2,10 @@ import { create } from 'zustand'
 
 /**
  * Shared hover state for the mode list and map. Two channels, so they cannot echo each other:
- * - List → map: `{ id, coordinates }` for `MapListHoverMarker` / highlight paint. Off-screen items
+ * - List → map: `{ id, coordinates }` for `ModeListHoverEdgeMarker` / highlight paint. Off-screen items
  *   get an edge ring; in-view notes, QA, and Prüflisten paint the same highlight as selection.
  * - Map → list: mode-prefixed row id only. Rows apply the hover background; this never carries
- *   coordinates, so it cannot light the centroid ring.
+ *   coordinates, so it cannot light the edge disc.
  * Map clicks use existing selection params. The list reacts to those.
  */
 type HoveredListItem = {
@@ -16,7 +16,7 @@ type HoveredListItem = {
 type ModeListStore = {
   hoveredListItem: HoveredListItem | null
   hoveredMapItemId: string | null
-  /** Bumped from <Map onMove/onResize> so the list-hover marker can re-project without map.on(). */
+  /** Bumped from <Map onMove/onResize> so the list-hover edge disc can re-project without map.on(). */
   mapViewEpoch: number
   actions: {
     hoverListItem: (item: HoveredListItem) => void

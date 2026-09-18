@@ -1,34 +1,25 @@
 import { motion } from 'motion/react'
 import { Marker } from 'react-map-gl/maplibre'
 import { UI_SPRING } from '@/components/shared/motion/spring.const'
-import {
-  edgeJumpOffset,
-  LIST_HOVER_EDGE_RING_PX,
-  LIST_HOVER_RING_PX,
-} from './mapListHoverMarkerPosition'
+import { edgeJumpOffset, LIST_HOVER_EDGE_RING_PX } from './mapListHoverMarkerPosition'
 import { useHoveredListItem } from './mode-list-store'
 import { modeIdentity } from './modeIdentity'
 import { useCurrentMode } from './useCurrentMode'
 import { useListHoverMarkerPosition } from './useListHoverMarkerPosition'
 
 /**
- * List-hover ring from the row's `[lng, lat]` only (the map feature does not need to be loaded).
- * Off-screen: clamped to the viewport edge. In-view notes, QA, and Prüflisten use MapLibre
- * highlight paint instead.
+ * Off-screen list-hover disc: clamped to the map viewport edge from the row's `[lng, lat]`.
+ * In-view notes, QA, and Prüflisten use MapLibre highlight paint instead.
  */
-export const MapListHoverMarker = () => {
+export const ModeListHoverEdgeMarker = () => {
   const position = useListHoverMarkerPosition()
   const hoveredListItem = useHoveredListItem()
   const { mode } = useCurrentMode()
-  if (!position || !hoveredListItem) return null
-  // In-view notes/QA/Prüflisten use MapLibre highlight paint. The HTML ring sits on top of the
-  // feature and does not stay concentric with it (and is a point even for lines/areas).
-  if ((mode === 'notes' || mode === 'qa' || mode === 'reviewLists') && !position.atEdge) return null
+  if (!position || !hoveredListItem || !position.atEdge) return null
 
   const { accent } = modeIdentity[mode]
   const rgba = (alpha: number) => `rgba(${accent.rgb.join(',')}, ${alpha})`
-  const size = position.atEdge ? LIST_HOVER_EDGE_RING_PX : LIST_HOVER_RING_PX
-  const jump = position.atEdge ? edgeJumpOffset(position.edges) : { x: 0, y: 0 }
+  const jump = edgeJumpOffset(position.edges)
 
   return (
     <Marker
@@ -39,13 +30,13 @@ export const MapListHoverMarker = () => {
       aria-hidden
     >
       <motion.div
-        key={`${hoveredListItem.id}-${position.atEdge ? 'edge' : 'in'}`}
-        data-list-hover-marker=""
-        initial={position.atEdge ? { scale: 0.55, x: 0, y: 0 } : false}
+        key={hoveredListItem.id}
+        data-list-hover-edge-marker=""
+        initial={{ scale: 0.55, x: 0, y: 0 }}
         animate={{
           scale: 1,
-          x: position.atEdge ? [0, jump.x, 0] : 0,
-          y: position.atEdge ? [0, jump.y, 0] : 0,
+          x: [0, jump.x, 0],
+          y: [0, jump.y, 0],
         }}
         transition={{
           scale: UI_SPRING,
@@ -54,10 +45,10 @@ export const MapListHoverMarker = () => {
         }}
         className="rounded-full border-[3px]"
         style={{
-          width: size,
-          height: size,
+          width: LIST_HOVER_EDGE_RING_PX,
+          height: LIST_HOVER_EDGE_RING_PX,
           borderColor: accent.hex,
-          backgroundColor: rgba(position.atEdge ? 0.55 : 0.35),
+          backgroundColor: rgba(0.55),
           boxShadow: `0 0 0 3px rgba(255,255,255,0.9), 0 0 16px ${rgba(0.7)}`,
         }}
       />
