@@ -37,7 +37,7 @@ const HOVER_COLOR = '#ff9933'
 type Props = LayerProps & {
   /** Override pointer-hover color. Default orange; QA passes the mode accent. */
   hoverColor?: string
-  /** When false, skip feature-state selected paint (QA uses a dedicated `${qaLayerId}-selected` layer). */
+  /** When false, skip feature-state selected paint (QA uses filtered highlight layers). */
   includeSelected?: boolean
 }
 
@@ -48,8 +48,8 @@ export const LayerHighlight = ({
 }: Props) => {
   const mapLoaded = useMapLoaded()
   const { mode } = useCurrentMode()
-  // Selected uses the mode accent (QA purple, notes blue, …). Default hover stays orange so
-  // pointer interest stays distinct from “this feature is open in the panel”.
+  // Selected uses the mode accent. Default hover stays orange so pointer interest stays
+  // distinct from “this feature is open in the panel”.
   const selectedColor = modeIdentity[mode].accent.hex
   const opacity = createMatchExpression({
     valueNone: 0,

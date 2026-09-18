@@ -3,7 +3,9 @@ import { additionalSourceKeys } from '@/components/regionen/pageRegionSlug/hooks
 import {
   listItemIdFromMapFeature,
   listItemIdFromMapFeatures,
+  parseQaListHoverId,
   parseReviewListHoverId,
+  qaHighlightIds,
   qaListItemId,
   reviewHighlightIds,
   reviewListItemId,
@@ -54,6 +56,35 @@ describe('listItemIdFromMapFeatures()', () => {
   test('returns null when nothing maps to a list row', () => {
     expect(listItemIdFromMapFeatures(undefined)).toBeNull()
     expect(listItemIdFromMapFeatures([{ source: 'atlas_bikelanes', id: 1 }])).toBeNull()
+  })
+})
+
+describe('parseQaListHoverId()', () => {
+  test('reads string and numeric area ids', () => {
+    expect(parseQaListHoverId(qaListItemId('area-1'))).toBe('area-1')
+    expect(parseQaListHoverId(qaListItemId(12))).toBe('12')
+  })
+
+  test('ignores missing or other-mode ids', () => {
+    expect(parseQaListHoverId(undefined)).toBeNull()
+    expect(parseQaListHoverId('qa-')).toBeNull()
+    expect(parseQaListHoverId(reviewListItemId(3))).toBeNull()
+  })
+})
+
+describe('qaHighlightIds()', () => {
+  test('unions selection with list hover and map hover', () => {
+    expect(qaHighlightIds(['1', '2'], qaListItemId(3), qaListItemId('area-1'))).toEqual([
+      '1',
+      '2',
+      '3',
+      'area-1',
+    ])
+  })
+
+  test('ignores hover ids from another mode and dedupes', () => {
+    expect(qaHighlightIds(['1'], reviewListItemId(9), null)).toEqual(['1'])
+    expect(qaHighlightIds(['1'], qaListItemId(1), qaListItemId(1))).toEqual(['1'])
   })
 })
 

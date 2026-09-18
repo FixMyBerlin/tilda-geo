@@ -13,17 +13,17 @@ import { useListHoverMarkerPosition } from './useListHoverMarkerPosition'
 
 /**
  * List-hover ring from the row's `[lng, lat]` only (the map feature does not need to be loaded).
- * Off-screen: clamped to the viewport edge. In-view notes and Prüflisten use MapLibre highlight
- * paint instead; other modes keep this HTML ring on the point.
+ * Off-screen: clamped to the viewport edge. In-view notes, QA, and Prüflisten use MapLibre
+ * highlight paint instead.
  */
 export const MapListHoverMarker = () => {
   const position = useListHoverMarkerPosition()
   const hoveredListItem = useHoveredListItem()
   const { mode } = useCurrentMode()
   if (!position || !hoveredListItem) return null
-  // In-view notes/Prüflisten use MapLibre highlight paint. The HTML ring sits on top of the
+  // In-view notes/QA/Prüflisten use MapLibre highlight paint. The HTML ring sits on top of the
   // feature and does not stay concentric with it (and is a point even for lines/areas).
-  if ((mode === 'notes' || mode === 'reviewLists') && !position.atEdge) return null
+  if ((mode === 'notes' || mode === 'qa' || mode === 'reviewLists') && !position.atEdge) return null
 
   const { accent } = modeIdentity[mode]
   const rgba = (alpha: number) => `rgba(${accent.rgb.join(',')}, ${alpha})`

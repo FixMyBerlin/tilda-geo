@@ -2,8 +2,8 @@ import { create } from 'zustand'
 
 /**
  * Shared hover state for the mode list and map. Two channels, so they cannot echo each other:
- * - List → map: `{ id, coordinates }` for `MapListHoverMarker` / highlight discs. Off-screen items
- *   get an edge ring; in-view notes paint a disc under the icon.
+ * - List → map: `{ id, coordinates }` for `MapListHoverMarker` / highlight paint. Off-screen items
+ *   get an edge ring; in-view notes, QA, and Prüflisten paint the same highlight as selection.
  * - Map → list: mode-prefixed row id only. Rows apply the hover background; this never carries
  *   coordinates, so it cannot light the centroid ring.
  * Map clicks use existing selection params. The list reacts to those.

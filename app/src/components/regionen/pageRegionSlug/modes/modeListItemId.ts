@@ -9,6 +9,25 @@ export const qaListItemId = (areaId: string | number) => `qa-${areaId}`
 
 export const reviewListItemId = (id: number) => `review-${id}`
 
+/** Area id from a hovered QA list-row id (string; map `promoteId` may be number or string). */
+export const parseQaListHoverId = (hoveredListItemId: string | undefined) => {
+  if (!hoveredListItemId?.startsWith('qa-')) return null
+  const id = hoveredListItemId.slice('qa-'.length)
+  return id.length > 0 ? id : null
+}
+
+/** Selection plus list-hover and map-hover ids for the QA inner-ring highlight. */
+export const qaHighlightIds = (
+  selectedIds: string[],
+  hoveredListItemId: string | undefined,
+  hoveredMapItemId: string | null | undefined,
+) => {
+  const hoverIds = [hoveredListItemId, hoveredMapItemId ?? undefined]
+    .map((id) => parseQaListHoverId(id))
+    .filter((id): id is string => id != null)
+  return [...new Set([...selectedIds, ...hoverIds])]
+}
+
 /** Numeric review-entry id from a hovered list-row id. */
 export const parseReviewListHoverId = (hoveredListItemId: string | undefined) => {
   if (!hoveredListItemId?.startsWith('review-')) return null
