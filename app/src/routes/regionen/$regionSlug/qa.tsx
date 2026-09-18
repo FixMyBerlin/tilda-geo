@@ -6,11 +6,11 @@ import {
   compactQaParam,
   QA_DEFAULT_STATUS_KEY,
 } from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
-import { getSafeSignInCallbackURL } from '@/components/shared/hooks/useSignInUrl'
 import {
   qaDataForMapQueryOptions,
   regionQaConfigsQueryOptions,
 } from '@/server/regions/regionQueryOptions'
+import { getSafeSignInCallbackURL } from '@/shared/auth/safeSignInCallbackURL'
 import { getQaParamFromSearch } from '@/shared/regionen/regionSearchSchemas'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 

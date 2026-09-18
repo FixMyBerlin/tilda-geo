@@ -1,11 +1,11 @@
-import { type KeyboardEvent, type ReactNode, useEffect, useRef } from 'react'
+import type { KeyboardEvent, ReactNode } from 'react'
 import { twMerge } from 'tailwind-merge'
-import { useIsHoveredMapListItem, useModeListActions } from './mode-list-store'
 import {
   modePanelListItemActiveClassName,
   modePanelListItemHoverClassName,
   modePanelListItemHoveredClassName,
 } from './modePanel.const'
+import { useModeListRow } from './useModeListRow'
 
 type Props = {
   id: string
@@ -27,17 +27,11 @@ export const ModeDataTableCellsRow = ({
   actions,
   className,
 }: Props) => {
-  const { hoverListItem, unhoverListItem, clearHoveredListItem } = useModeListActions()
-  const hoveredFromMap = useIsHoveredMapListItem(id)
-  const ref = useRef<HTMLTableRowElement>(null)
-
-  useEffect(
-    function scrollActiveTableRowIntoView() {
-      if (active) {
-        ref.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-      }
-    },
-    [active],
+  const { ref, hoveredFromMap, onActivate, hoverHandlers } = useModeListRow<HTMLTableRowElement>(
+    id,
+    coordinates,
+    active,
+    onClick,
   )
 
   return (
@@ -54,19 +48,15 @@ export const ModeDataTableCellsRow = ({
           'cursor-pointer select-none',
           className,
         )}
-        onClick={() => {
-          clearHoveredListItem()
-          onClick()
-        }}
-        onMouseEnter={() => hoverListItem({ id, coordinates })}
-        onMouseLeave={() => unhoverListItem(id)}
-        onFocus={() => hoverListItem({ id, coordinates })}
-        onBlur={() => unhoverListItem(id)}
+        onClick={onActivate}
+        onMouseEnter={hoverHandlers.onMouseEnter}
+        onMouseLeave={hoverHandlers.onMouseLeave}
+        onFocus={hoverHandlers.onFocus}
+        onBlur={hoverHandlers.onBlur}
         onKeyDown={(event: KeyboardEvent<HTMLTableRowElement>) => {
           if (event.key === 'Enter' || event.key === ' ') {
             event.preventDefault()
-            clearHoveredListItem()
-            onClick()
+            onActivate()
           }
         }}
         tabIndex={0}

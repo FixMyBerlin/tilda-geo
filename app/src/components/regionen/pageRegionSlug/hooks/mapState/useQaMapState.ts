@@ -1,5 +1,5 @@
 import type { MapSourceDataEvent } from 'maplibre-gl'
-import { useCallback, useEffect } from 'react'
+import { useEffect, useEffectEvent } from 'react'
 import type { MapGeoJSONFeature } from 'react-map-gl/maplibre'
 import { useMap } from 'react-map-gl/maplibre'
 import {
@@ -28,17 +28,16 @@ export const useQaMapState = () => {
     qaMapPayloadAppliesDefault({ search: qaParamData.search, userIds: qaParamData.users })
   const statusFilter = qaStatusForMapFilter(qaParamData.status)
 
-  const updateFeatureStates = useCallback(
-    function updateFeatureStates() {
-      if (!mainMap || !shouldUpdateFeatureStates) return
+  const syncQaFeatureStates = useEffectEvent(function syncQaFeatureStates() {
+    if (!mainMap || !shouldUpdateFeatureStates) return
 
-      // Timing guard: queryRenderedFeatures is unsafe until the QA layer exists.
-      const qaLayer = mainMap.getMap().getLayer(qaLayerId)
-      if (!qaLayer) {
-        if (!isProd) console.log('[DEV][useQaMapState]', 'QA layer does not exist yet')
-        return
-      }
+    startFeatureStateSync()
 
+    // Timing guard: queryRenderedFeatures is unsafe until the QA layer exists.
+    const qaLayer = mainMap.getMap().getLayer(qaLayerId)
+    if (!qaLayer) {
+      if (!isProd) console.log('[DEV][useQaMapState]', 'QA layer does not exist yet')
+    } else {
       const mapQaFeatures: MapGeoJSONFeature[] = mainMap.queryRenderedFeatures({
         layers: [qaLayerId],
       })
@@ -63,27 +62,17 @@ export const useQaMapState = () => {
       })
 
       if (!isProd) console.timeEnd('[DEV][useQaMapState] setFeatureState')
-    },
-    [applyDefault, mainMap, qaDataByAreaId, shouldUpdateFeatureStates, statusFilter],
-  )
+    }
 
-  // Stable so the effect can list it as a dependency without oxlint exhaustive-deps suppression.
-  const syncQaFeatureStates = useCallback(
-    function syncQaFeatureStates() {
-      if (!shouldUpdateFeatureStates) return
-      startFeatureStateSync()
-      updateFeatureStates()
-      finishFeatureStateSync()
-    },
-    [finishFeatureStateSync, shouldUpdateFeatureStates, startFeatureStateSync, updateFeatureStates],
-  )
+    finishFeatureStateSync()
+  })
 
   // Payload/filter changes, not style. Tile availability is a second trigger via map.on('sourcedata').
   useEffect(
     function syncFeatureStatesAfterQaDataChanges() {
       syncQaFeatureStates()
     },
-    [syncQaFeatureStates],
+    [applyDefault, qaDataByAreaId, statusFilter, shouldUpdateFeatureStates, mainMap, mapLoaded],
   )
 
   useEffect(
@@ -102,6 +91,6 @@ export const useQaMapState = () => {
         map.off('sourcedata', handleQaSourceData)
       }
     },
-    [mainMap, syncQaFeatureStates],
+    [mainMap],
   )
 }

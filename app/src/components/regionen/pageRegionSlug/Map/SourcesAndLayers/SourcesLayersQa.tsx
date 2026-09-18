@@ -1,17 +1,16 @@
 import { useQuery } from '@tanstack/react-query'
 import type { ExpressionSpecification } from 'maplibre-gl'
-import { Fragment, useEffect } from 'react'
-import { Layer, Source, useMap } from 'react-map-gl/maplibre'
+import { Fragment } from 'react'
+import { Layer, Source } from 'react-map-gl/maplibre'
 import { useQaMapState } from '@/components/regionen/pageRegionSlug/hooks/mapState/useQaMapState'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useQaParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useQaParam'
-import { safeSetFeatureState } from '@/components/regionen/pageRegionSlug/Map/utils/safeSetFeatureState'
 import {
   useHoveredListItem,
-  useHoveredMapViewEpoch,
+  useHoveredMapItemId,
 } from '@/components/regionen/pageRegionSlug/modes/mode-list-store'
 import { modeIdentity } from '@/components/regionen/pageRegionSlug/modes/modeIdentity'
-import { parseQaListHoverId } from '@/components/regionen/pageRegionSlug/modes/modeListItemId'
+import { qaHighlightIds } from '@/components/regionen/pageRegionSlug/modes/modeListItemId'
 import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
@@ -31,15 +30,20 @@ export const qaMinZoom = 12
 
 const qaAccent = modeIdentity.qa.accent.hex
 
-const hideHoveredOrSelected = [
-  'any',
-  ['boolean', ['feature-state', 'hover'], false],
-  ['boolean', ['feature-state', 'selected'], false],
-] as ExpressionSpecification
+/** Base fill/outline hide under pointer hover (feature-state) and under list-hover/selection ids. */
+const hideHoveredOrSelected = (highlightIdStrings: string[]) => {
+  const conditions: ExpressionSpecification[] = [
+    ['boolean', ['feature-state', 'hover'], false],
+    ['boolean', ['feature-state', 'selected'], false],
+  ]
+  if (highlightIdStrings.length > 0) {
+    conditions.push(['in', ['to-string', ['id']], ['literal', highlightIdStrings]])
+  }
+  return ['any', ...conditions] as ExpressionSpecification
+}
 
 export const SourcesLayersQa = () => {
   useQaMapState()
-  const { mainMap } = useMap()
   const hasPermissions = useHasPermissions()
   const { qaParamData } = useQaParam()
   const regionSlug = useRegionSlug()
@@ -51,7 +55,7 @@ export const SourcesLayersQa = () => {
   })
 
   const hoveredListItem = useHoveredListItem()
-  const mapViewEpoch = useHoveredMapViewEpoch()
+  const hoveredMapItemId = useHoveredMapItemId()
 
   const activeQaConfig = qaConfigs?.find((config) => config.slug === qaParamData.key)
   const vectorSourceName = activeQaConfig?.mapTable.replace('public.', '')
@@ -59,32 +63,17 @@ export const SourcesLayersQa = () => {
   const selectedIdStrings = featuresParam
     .filter((feature) => feature.sourceId === qaSourceId)
     .map((feature) => String(feature.id))
-  const selectedFilter = (
-    selectedIdStrings.length > 0
-      ? ['in', ['to-string', ['id']], ['literal', selectedIdStrings]]
-      : false
-  ) as ExpressionSpecification | false
-
-  useEffect(
-    function syncQaListHoverFeatureState() {
-      if (!mainMap?.getMap().getLayer(qaLayerId)) return
-      const areaId = parseQaListHoverId(hoveredListItem?.id)
-      if (areaId == null) return
-
-      const matches = mainMap
-        .queryRenderedFeatures({ layers: [qaLayerId] })
-        .filter((feature) => String(feature.id) === areaId)
-      for (const feature of matches) {
-        safeSetFeatureState(mainMap, feature, { hover: true })
-      }
-      return function clearQaListHoverFeatureState() {
-        for (const feature of matches) {
-          safeSetFeatureState(mainMap, feature, { hover: false })
-        }
-      }
-    },
-    [hoveredListItem?.id, mainMap, mapViewEpoch],
+  const highlightIdStrings = qaHighlightIds(
+    selectedIdStrings,
+    hoveredListItem?.id,
+    hoveredMapItemId,
   )
+  const highlightFilter = [
+    'in',
+    ['to-string', ['id']],
+    ['literal', highlightIdStrings],
+  ] as ExpressionSpecification
+  const hideBaseFill = hideHoveredOrSelected(highlightIdStrings)
 
   if (!hasPermissions) {
     return null
@@ -127,7 +116,7 @@ export const SourcesLayersQa = () => {
           type="fill"
           paint={{
             'fill-color': qaMapStatusColorExpression(QA_MAP_UNSTYLED_FILL),
-            'fill-opacity': ['case', hideHoveredOrSelected, 0, 0.7],
+            'fill-opacity': ['case', hideBaseFill, 0, 0.7],
             'fill-outline-color': qaMapStatusColorExpression(QA_MAP_UNSTYLED_OUTLINE),
           }}
         />
@@ -139,21 +128,17 @@ export const SourcesLayersQa = () => {
           paint={{
             'line-color': qaMapStatusColorExpression(QA_MAP_UNSTYLED_OUTLINE),
             'line-width': 3,
-            'line-opacity': ['case', hideHoveredOrSelected, 0, 1],
+            'line-opacity': ['case', hideBaseFill, 0, 1],
           }}
         />
-        {selectedIdStrings.length > 0 ? (
+        {highlightIdStrings.length > 0 ? (
           <>
             <Layer
               id={`${qaLayerId}-highlight`}
               source={qaSourceId}
               source-layer={vectorSourceName}
               type="line"
-              filter={
-                selectedFilter === false
-                  ? (['literal', false] as ExpressionSpecification)
-                  : selectedFilter
-              }
+              filter={highlightFilter}
               layout={{ 'line-cap': 'round', 'line-join': 'round' }}
               paint={{
                 'line-color': qaAccent,
@@ -167,11 +152,7 @@ export const SourcesLayersQa = () => {
               source={qaSourceId}
               source-layer={vectorSourceName}
               type="line"
-              filter={
-                selectedFilter === false
-                  ? (['literal', false] as ExpressionSpecification)
-                  : selectedFilter
-              }
+              filter={highlightFilter}
               layout={{ 'line-cap': 'round', 'line-join': 'round' }}
               paint={{
                 'line-color': qaAccent,

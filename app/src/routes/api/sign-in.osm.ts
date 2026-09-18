@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { optionalSearchString } from '@/lib/searchParamsSchema'
 import { applyAuthResponseCookies } from '@/server/auth/applyAuthResponseCookies.server'
 import { auth } from '@/server/auth/auth.server'
+import { getSafeSignInCallbackURL } from '@/shared/auth/safeSignInCallbackURL'
 
 const searchSchema = z.object({
   callbackURL: optionalSearchString(),
@@ -36,7 +37,7 @@ function toSafeCallbackURL(rawCallbackURL: string | null, requestUrl: string) {
     const search = normalized.search
       ? `?${new URLSearchParams(normalized.search.slice(1)).toString()}`
       : ''
-    return `${normalized.pathname}${search}${normalized.hash}`
+    return getSafeSignInCallbackURL(`${normalized.pathname}${search}`)
   } catch {
     return fallback
   }

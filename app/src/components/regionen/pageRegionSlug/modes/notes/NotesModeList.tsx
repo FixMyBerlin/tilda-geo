@@ -6,7 +6,7 @@ import { noteCommentDraftId } from '../composerDrafts/composerDraftIds'
 import { ComposerDraftDot } from '../composerDrafts/DraftIndicatorDot'
 import { flyMapToIfOffscreen } from '../flyMapToIfOffscreen'
 import { ModeDataTable } from '../ModeDataTable'
-import { ModeDataTableCellsRow } from '../ModeDataTableRow'
+import { ModeDataTableCellsRow } from '../ModeDataTableCellsRow'
 import { modeListFilterEmptyMessage } from '../modeListFilterEmptyMessage'
 import { ModeListItem } from '../ModeListItem'
 import {

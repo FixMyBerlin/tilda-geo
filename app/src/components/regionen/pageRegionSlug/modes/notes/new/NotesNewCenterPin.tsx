@@ -20,12 +20,12 @@ const NotesNewCenterPinSession = () => {
   const [showHint, setShowHint] = useState(true)
 
   useEffect(
-    function dismissHintOnFirstMapMove() {
+    function dismissHintOnFirstMapDrag() {
       if (!mainMap || !showHint) return
-      const onMove = () => setShowHint(false)
-      mainMap.on('move', onMove)
-      return function removeMoveListener() {
-        mainMap.off('move', onMove)
+      const onDragStart = () => setShowHint(false)
+      mainMap.on('dragstart', onDragStart)
+      return function removeDragStartListener() {
+        mainMap.off('dragstart', onDragStart)
       }
     },
     [mainMap, showHint],

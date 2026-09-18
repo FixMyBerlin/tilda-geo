@@ -3,8 +3,8 @@ import { isMemberOnlyMode } from '@/components/regionen/pageRegionSlug/modes/ava
 import { modeScopedSearchMiddleware } from '@/components/regionen/pageRegionSlug/modes/modeScopedSearchMiddleware'
 import { notesModeToServerFilter } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
 import { PageModeNotes } from '@/components/regionen/pageRegionSlug/modes/notes/PageModeNotes'
-import { getSafeSignInCallbackURL } from '@/components/shared/hooks/useSignInUrl'
 import { internalNotesQueryOptions } from '@/server/regions/regionQueryOptions'
+import { getSafeSignInCallbackURL } from '@/shared/auth/safeSignInCallbackURL'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 
 /**

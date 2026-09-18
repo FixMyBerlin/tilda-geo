@@ -295,10 +295,15 @@ export class ReviewMapDrawingControl {
   private reinitAfterStyleChange() {
     if (!this.draw || !this.isInitialized || !this.map) return
     const mode = this.enabled ? this.draw.getMode() : (this.pendingMode ?? REVIEW_DRAW_MODE.point)
-    // Style was replaced so TerraDraw layers are gone. Recreate without stop().
+    const previous = this.draw
     this.draw = this.createDrawInstance(this.map)
     this.draw.start()
     this.attachListeners()
+    try {
+      previous.stop()
+    } catch {
+      // Style layers may already be gone.
+    }
     if (this.enabled) {
       this.draw.setMode(mode)
       return

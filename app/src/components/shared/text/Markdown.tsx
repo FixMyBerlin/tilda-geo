@@ -104,8 +104,8 @@ type AnchorMdProps = ComponentPropsWithoutRef<'a'> & ExtraProps
 const createMdA =
   (linkClassNameOverwrite?: string) =>
   ({ node: _node, href, children, ...anchorProps }: AnchorMdProps) => {
-    if (!href) return null
-    const isExternal = href.startsWith('http')
+    if (!href) return children
+    const isExternal = href.startsWith('https://') || href.startsWith('http://')
     if (isExternal) {
       return (
         <Link blank href={href} classNameOverwrite={linkClassNameOverwrite} {...anchorProps}>
@@ -113,15 +113,18 @@ const createMdA =
         </Link>
       )
     }
-    return (
-      <Link
-        classNameOverwrite={linkClassNameOverwrite}
-        {...anchorProps}
-        to={href as LinkOptions<Router>['to']}
-      >
-        {children}
-      </Link>
-    )
+    if (href.startsWith('/') && !href.startsWith('//')) {
+      return (
+        <Link
+          classNameOverwrite={linkClassNameOverwrite}
+          {...anchorProps}
+          to={href as LinkOptions<Router>['to']}
+        >
+          {children}
+        </Link>
+      )
+    }
+    return children
   }
 
 const MdA = createMdA()

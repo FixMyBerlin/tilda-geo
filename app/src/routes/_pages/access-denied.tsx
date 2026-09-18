@@ -1,8 +1,8 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 import { PageAccessDenied } from '@/components/pages/accessDenied/PageAccessDenied'
-import { getSafeSignInCallbackURL } from '@/components/shared/hooks/useSignInUrl'
 import { optionalSearchString } from '@/lib/searchParamsSchema'
+import { getSafeSignInCallbackURL } from '@/shared/auth/safeSignInCallbackURL'
 
 const accessDeniedSearchSchema = z.object({
   from: optionalSearchString().transform((from) =>

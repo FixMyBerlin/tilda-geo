@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest'
-import { getSafeSignInCallbackURL } from './useSignInUrl'
+import { getSafeSignInCallbackURL } from '@/shared/auth/safeSignInCallbackURL'
 
 describe('getSafeSignInCallbackURL', () => {
   test('keeps relative path and search', () => {
@@ -16,6 +16,7 @@ describe('getSafeSignInCallbackURL', () => {
 
   test('rejects protocol-relative, api, and oauth error paths', () => {
     expect(getSafeSignInCallbackURL('//evil.example/regionen/foo')).toBe('/')
+    expect(getSafeSignInCallbackURL('/api/foo')).toBe('/')
     expect(getSafeSignInCallbackURL('/api/sign-in')).toBe('/')
     expect(getSafeSignInCallbackURL('/api/auth/callback')).toBe('/')
     expect(getSafeSignInCallbackURL('/oautherror?error=x')).toBe('/')

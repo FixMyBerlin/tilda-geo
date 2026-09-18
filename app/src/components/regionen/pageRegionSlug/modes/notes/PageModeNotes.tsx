@@ -1,6 +1,5 @@
 import { PlusIcon } from '@heroicons/react/24/outline'
 import { useQuery } from '@tanstack/react-query'
-import { useEffect } from 'react'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useOsmNotesActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/userMapNotes'
 import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
@@ -50,15 +49,6 @@ export const PageModeNotes = () => {
   const { updateSearch } = useRegionSearchNavigation()
   useFlyMainMapToComposePin()
 
-  useEffect(
-    function clearOsmNewNoteFeatureOnUnmount() {
-      return function clearOsmNewNoteFeature() {
-        setOsmNewNoteFeature(undefined)
-      }
-    },
-    [setOsmNewNoteFeature],
-  )
-
   const {
     kind,
     showingOsm,
@@ -88,6 +78,8 @@ export const PageModeNotes = () => {
   const openNewNote = () => {
     if (!mapParam) return
     clearInspectorFeatures()
+    // A plain compose has no related map object; the inspector sets one before navigating here.
+    setOsmNewNoteFeature(undefined)
     updateSearch(
       {
         [searchParamsRegistry.notes]: compactNotesModeParam({

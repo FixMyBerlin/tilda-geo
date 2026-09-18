@@ -3,7 +3,6 @@ import { LayoutRegionSlug } from '@/components/regionen/LayoutRegionSlug'
 import { deriveAvailableModes } from '@/components/regionen/pageRegionSlug/modes/availableModes'
 import RegionError from '@/components/regionen/pageRegionSlug/RegionError'
 import RegionPagePending from '@/components/regionen/pageRegionSlug/RegionPagePending'
-import { getSafeSignInCallbackURL } from '@/components/shared/hooks/useSignInUrl'
 import { isProd } from '@/components/shared/utils/isEnv'
 import { productName } from '@/data/tildaProductNames.const'
 import { DEV_REGION_ERROR_QUERY_KEY } from '@/dev/errorPreviews'
@@ -17,6 +16,7 @@ import {
   regionUploadsSystemLayerQueryOptions,
   regionUploadsUserQueryOptions,
 } from '@/server/uploads/uploadsQueryOptions'
+import { getSafeSignInCallbackURL } from '@/shared/auth/safeSignInCallbackURL'
 import { regionSearchSchema } from '@/shared/regionen/regionSearchSchemas'
 
 /**

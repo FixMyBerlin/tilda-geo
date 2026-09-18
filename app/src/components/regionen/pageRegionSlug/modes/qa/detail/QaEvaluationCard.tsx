@@ -118,6 +118,8 @@ export const QaEvaluationCard = ({ evaluation, variant = 'history' }: Props) => 
                 data: { regionSlug, evaluationId: evaluation.id, body },
               })
               await queryClient.invalidateQueries({ queryKey: ['qaEvaluations'] })
+              // Area rows show a comment count.
+              await queryClient.invalidateQueries({ queryKey: ['qa-configs', 'getQaAreaList'] })
             }}
           />
         </div>

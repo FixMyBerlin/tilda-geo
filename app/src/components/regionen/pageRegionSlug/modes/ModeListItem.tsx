@@ -1,12 +1,12 @@
-import { type ReactNode, useEffect, useRef } from 'react'
+import type { ReactNode } from 'react'
 import { twMerge } from 'tailwind-merge'
-import { useIsHoveredMapListItem, useModeListActions } from './mode-list-store'
 import {
   modePanelListItemActiveClassName,
   modePanelListItemBorderClassName,
   modePanelListItemHoverClassName,
   modePanelListItemHoveredClassName,
 } from './modePanel.const'
+import { useModeListRow } from './useModeListRow'
 
 type Props = {
   /** Prefixed by mode so ids never collide, e.g. `note-123`. */
@@ -42,17 +42,11 @@ export const ModeListItem = ({
   className,
   buttonClassName,
 }: Props) => {
-  const { hoverListItem, unhoverListItem, clearHoveredListItem } = useModeListActions()
-  const hoveredFromMap = useIsHoveredMapListItem(id)
-  const ref = useRef<HTMLLIElement>(null)
-
-  useEffect(
-    function scrollActiveListItemIntoView() {
-      if (active) {
-        ref.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' })
-      }
-    },
-    [active],
+  const { ref, hoveredFromMap, onActivate, hoverHandlers } = useModeListRow<HTMLLIElement>(
+    id,
+    coordinates,
+    active,
+    onClick,
   )
 
   return (
@@ -64,17 +58,14 @@ export const ModeListItem = ({
         active ? modePanelListItemActiveClassName : '',
         className,
       )}
-      onMouseEnter={() => hoverListItem({ id, coordinates })}
-      onMouseLeave={() => unhoverListItem(id)}
+      onMouseEnter={hoverHandlers.onMouseEnter}
+      onMouseLeave={hoverHandlers.onMouseLeave}
     >
       <button
         type="button"
-        onClick={() => {
-          clearHoveredListItem()
-          onClick()
-        }}
-        onFocus={() => hoverListItem({ id, coordinates })}
-        onBlur={() => unhoverListItem(id)}
+        onClick={onActivate}
+        onFocus={hoverHandlers.onFocus}
+        onBlur={hoverHandlers.onBlur}
         className={twMerge(
           'block w-full cursor-pointer px-4 py-3 text-left text-sm select-none',
           active

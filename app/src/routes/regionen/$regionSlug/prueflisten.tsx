@@ -2,11 +2,11 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import { isMemberOnlyMode } from '@/components/regionen/pageRegionSlug/modes/availableModes'
 import { modeScopedSearchMiddleware } from '@/components/regionen/pageRegionSlug/modes/modeScopedSearchMiddleware'
 import { PageModeReviewLists } from '@/components/regionen/pageRegionSlug/modes/reviewLists/PageModeReviewLists'
-import { getSafeSignInCallbackURL } from '@/components/shared/hooks/useSignInUrl'
 import {
   reviewEntriesQueryOptions,
   reviewListsQueryOptions,
 } from '@/server/regions/regionQueryOptions'
+import { getSafeSignInCallbackURL } from '@/shared/auth/safeSignInCallbackURL'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 
 /**

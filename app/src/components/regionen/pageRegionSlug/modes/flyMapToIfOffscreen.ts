@@ -2,9 +2,6 @@ import type { LngLatBounds } from 'maplibre-gl'
 import type { MapRef } from 'react-map-gl/maplibre'
 import { MODE_MAP_CAMERA_EDGE_INSET_PX } from './modeMapCameraPadding'
 
-export const isPointOffscreen = (bounds: LngLatBounds, coordinates: [number, number]) =>
-  !bounds.contains(coordinates)
-
 /** True when the box does not overlap the map view at all. */
 export const isBboxOffscreen = (bounds: LngLatBounds, bbox: [number, number, number, number]) => {
   const [minLng, minLat, maxLng, maxLat] = bbox
@@ -25,7 +22,7 @@ const asBbox = (target: [number, number] | [number, number, number, number]) =>
   ]
 
 /**
- * When the point or bbox is fully outside the current view, fly so it fits.
+ * When the point or bbox is fully outside the current view, fit so it is on-screen.
  * Never zooms in; zooms out only if the bbox is larger than the current view.
  */
 export const flyMapToIfOffscreen = (
@@ -38,18 +35,14 @@ export const flyMapToIfOffscreen = (
   if (!isBboxOffscreen(bounds, bbox)) return
 
   const [minLng, minLat, maxLng, maxLat] = bbox
-  const currentZoom = map.getZoom()
-  const camera = map.cameraForBounds(
+  map.fitBounds(
     [
       [minLng, minLat],
       [maxLng, maxLat],
     ],
-    { padding: MODE_MAP_CAMERA_EDGE_INSET_PX },
+    {
+      padding: MODE_MAP_CAMERA_EDGE_INSET_PX,
+      maxZoom: map.getZoom(),
+    },
   )
-  if (!camera?.center) {
-    map.flyTo({ center: [(minLng + maxLng) / 2, (minLat + maxLat) / 2] })
-    return
-  }
-  const zoom = typeof camera.zoom === 'number' ? Math.min(currentZoom, camera.zoom) : currentZoom
-  map.flyTo({ center: camera.center, zoom })
 }

@@ -200,6 +200,8 @@ const QaDetailSession = ({
       clearDraft()
       onDraftSessionConsumed()
       queryClient.invalidateQueries({ queryKey: evaluationsQueryKey })
+      // Area list, user dropdown, and map payload all derive from evaluations.
+      queryClient.invalidateQueries({ queryKey: ['qa-configs'] })
     },
     onError: (error, _variables, context) => {
       if (mapDataQueryKey) {
