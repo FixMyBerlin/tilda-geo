@@ -30,6 +30,7 @@ export type SourcesRasterIdsTILDA =
   | 'brandenburg-dop20'
   | 'brandenburg-aktualitaet'
   | 'nrw-ortho'
+  | 'bayern-dop20'
 
 // https://console.mapbox.com/account/access-tokens/
 // https://console.mapbox.com/account/access-tokens/cmpe4fbj800im2pr3p8jz5qvj
@@ -383,5 +384,17 @@ export const sourcesBackgroundsRasterTilda: MapDataBackgroundSource<SourcesRaste
     minzoom: 0,
     tileSize: 512,
     attributionHtml: 'NRW Orthophoto (RGB) dl-de/zero-2-0',
+  },
+  {
+    // https://geoservices.bayern.de/od/wms/dop/v1/dop20?SERVICE=WMS&REQUEST=GetCapabilities
+    id: 'bayern-dop20',
+    name: 'Bayern Luftbilder (DOP20)',
+    tilesUrl:
+      'https://geoservices.bayern.de/od/wms/dop/v1/dop20?LAYERS=by_dop20c&STYLES=&FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
+    maxzoom: 21,
+    minzoom: 0,
+    tileSize: 512,
+    attributionHtml:
+      '<a target="_blank" href="https://geoservices.bayern.de">Bayerische Vermessungsverwaltung / DOP20</a>, CC BY 4.0',
   },
 ]

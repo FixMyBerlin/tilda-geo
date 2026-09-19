@@ -26,6 +26,8 @@ export type TopicConfigEntry = {
 const bboxBerlin: TopicConfigBbox = [13.08283, 52.33446, 13.762245, 52.6783]
 const bboxBiBi: TopicConfigBbox = [9.0671, 48.9229, 9.1753, 48.9838]
 const bboxLoerrach: TopicConfigBbox = [7.63351, 47.5919, 7.72901, 47.67736]
+const bboxFriedberg: TopicConfigBbox = [8.611736, 50.267728, 8.897381, 50.417597]
+const bboxMuenchen: TopicConfigBbox = [11.25, 47.991071, 11.821289, 48.304436]
 
 const config = [
   { id: 'roads_bikelanes', bboxes: null, schedule: 'nightly' },
@@ -41,7 +43,11 @@ const config = [
   // (dissolved into public._settlement_areas by landcover.sql) and `_buildings`. Also runnable on
   // demand with PROCESS_ONLY_TOPICS=landcover.
   { id: 'landcover', bboxes: null, schedule: 'weekend' },
-  { id: 'parking', bboxes: [bboxBerlin, bboxBiBi, bboxLoerrach], schedule: 'nightly' },
+  {
+    id: 'parking',
+    bboxes: [bboxBerlin, bboxBiBi, bboxLoerrach, bboxFriedberg, bboxMuenchen],
+    schedule: 'nightly',
+  },
 ] as const satisfies readonly TopicConfigEntry[]
 
 export type Topic = (typeof config)[number]['id']

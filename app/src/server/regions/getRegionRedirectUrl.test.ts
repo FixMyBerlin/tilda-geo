@@ -573,7 +573,7 @@ describe('getRegionRedirectUrl()', () => {
       const resultUrl = getUrl(redirectUrl)
 
       expect(resultUrl.searchParams.get('v')).toBe('3')
-      expect(resultUrl.searchParams.get('config')).toBe('166cmie.ivb7ah.2r53k')
+      expect(resultUrl.searchParams.get('config')).toBe('1qswwvv.282dgp.5ia75')
     })
 
     test('MIGRATION: Preserve already-short config when version is missing', async () => {
@@ -664,6 +664,44 @@ describe('getRegionRedirectUrl()', () => {
         (s) => s.id === 'parkingTildaCutouts',
       )!
       expect(parkingTildaCutouts.styles.find((s) => s.id === 'default')?.active).toBe(true)
+    })
+
+    describe('Planning mode params do not trigger redirects', () => {
+      // Start from a URL that is already canonical (no config/map normalization to redirect on),
+      // so the only thing under test is the planning params.
+      async function canonicalBase() {
+        const seed = 'http://127.0.0.1:5173/regionen/berlin?map=13.5/52.4918/13.4261'
+        const normalized = await redirectOnly(seed, 'berlin')
+        return normalized ?? seed
+      }
+
+      test('planningScore is preserved, not stripped as an unused param', async () => {
+        // Switching the display mode (Bedarf/Bebauung/Kombination) must not drop the param.
+        const url = `${await canonicalBase()}&planning=true&planningScore=bebauung`
+        const redirectUrl = await redirectOnly(url, 'berlin')
+        // No redirect at all is the ideal outcome; if one happens it must keep the param.
+        if (redirectUrl) {
+          expect(getUrl(redirectUrl).searchParams.get('planningScore')).toBe('bebauung')
+        }
+      })
+
+      test('planningHexagons is preserved, not stripped as an unused param', async () => {
+        // Toggling the hexagon layer off must not drop the param.
+        const url = `${await canonicalBase()}&planning=true&planningHexagons=false`
+        const redirectUrl = await redirectOnly(url, 'berlin')
+        if (redirectUrl) {
+          expect(getUrl(redirectUrl).searchParams.get('planningHexagons')).toBe('false')
+        }
+      })
+
+      test('no canonical-reorder redirect while a planning param is present', async () => {
+        // Showing a saved result (planningRun), switching display mode, or toggling the
+        // hexagon layer must not rewrite the URL, otherwise beforeLoad throws a 301 →
+        // full-page pending flash.
+        const url = `${await canonicalBase()}&planning=true&planningArea=2&planningVariant=3&planningRun=5&planningScore=bedarf&planningHexagons=false`
+        const redirectUrl = await redirectOnly(url, 'berlin')
+        expect(redirectUrl).toBe(null)
+      })
     })
 
     test('CONFIG TEMPLATE (tier 2): a stored checksum resolves via getRegionConfigTemplate, not reset', async () => {
