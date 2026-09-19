@@ -153,6 +153,7 @@ export type TRegion = {
   /** TILDA (Atlas) notes. Independent of `notesOsm`; both may be on. */
   notesInternal: boolean
   showSearch?: boolean
+  spaceFinderEnabled: boolean
   mask: { osmRelationIds: number[]; bufferKm: number } | null
   map: { lat: number; lng: number; zoom: number }
   logoWhiteBackgroundRequired: boolean

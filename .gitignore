@@ -18,3 +18,11 @@
 
 /node_modules
 processing/node_modules
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# uv venvs (planning-worker)
+.venv/

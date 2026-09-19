@@ -62,6 +62,7 @@ const baseRegionConfig = {
   notesOsm: true,
   notesInternal: false,
   showSearch: false,
+  spaceFinderEnabled: true,
   logoWhiteBackgroundRequired: false,
   headerLogoId: null,
   bbox: null,

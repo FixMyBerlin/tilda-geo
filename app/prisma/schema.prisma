@@ -33,26 +33,30 @@ model User {
   lastName  String? // User's last name (editable via UserForm)
 
   // App-managed fields
-  role            UserRoleEnum   @default(USER) // User role (USER/ADMIN) - set on user creation, managed by admins
-  accessedRegions Json?          @default("[]") // Region access tracking (JSON array) - managed by app logic
+  role                     UserRoleEnum         @default(USER) // User role (USER/ADMIN) - set on user creation, managed by admins
+  accessedRegions          Json?                @default("[]") // Region access tracking (JSON array) - managed by app logic
   //
-  sessions        Session[]
-  accounts        Account[]
-  verifications   Verification[]
-  memberships   Membership[]
-  notes         Note[]
-  noteComments  NoteComment[]
-  qaEvaluations   QaEvaluation[]
-  adminApiTokens  AdminApiToken[]
-  dataSchemaImportsCreated DataSchemaImport[] @relation("DataSchemaImportCreatedBy")
-  dataSchemaImportsUpdated DataSchemaImport[] @relation("DataSchemaImportUpdatedBy")
-  reviewEntryComments ReviewEntryComment[]
-  reviewListsCreated ReviewList[] @relation("ReviewListCreatedBy")
-  reviewListsUpdated ReviewList[] @relation("ReviewListUpdatedBy")
-  reviewEntriesCreated ReviewEntry[] @relation("ReviewEntryCreatedBy")
-  reviewEntriesUpdated ReviewEntry[] @relation("ReviewEntryUpdatedBy")
-  noteFoldersCreated NoteFolder[] @relation("NoteFolderCreatedBy")
-  noteFoldersUpdated NoteFolder[] @relation("NoteFolderUpdatedBy")
+  sessions                 Session[]
+  accounts                 Account[]
+  verifications            Verification[]
+  memberships              Membership[]
+  notes                    Note[]
+  noteComments             NoteComment[]
+  qaEvaluations            QaEvaluation[]
+  adminApiTokens           AdminApiToken[]
+  dataSchemaImportsCreated DataSchemaImport[]   @relation("DataSchemaImportCreatedBy")
+  dataSchemaImportsUpdated DataSchemaImport[]   @relation("DataSchemaImportUpdatedBy")
+  reviewEntryComments      ReviewEntryComment[]
+  reviewListsCreated       ReviewList[]         @relation("ReviewListCreatedBy")
+  reviewListsUpdated       ReviewList[]         @relation("ReviewListUpdatedBy")
+  reviewEntriesCreated     ReviewEntry[]        @relation("ReviewEntryCreatedBy")
+  reviewEntriesUpdated     ReviewEntry[]        @relation("ReviewEntryUpdatedBy")
+  noteFoldersCreated       NoteFolder[]         @relation("NoteFolderCreatedBy")
+  noteFoldersUpdated       NoteFolder[]         @relation("NoteFolderUpdatedBy")
+  //
+  // Planning module: areas/variants this user created (any region member may still edit them).
+  planningAreas            PlanningArea[]
+  planningVariants         PlanningVariant[]
 
   @@map("User")
   @@schema("prisma")
@@ -167,13 +171,16 @@ model Region {
   promoted  Boolean      @default(false)
   status    RegionStatus @default(PUBLIC)
 
-  name       String        @default("")
-  fullName   String        @default("")
-  product    RegionProduct @default(radverkehr)
+  name          String        @default("")
+  fullName      String        @default("")
+  product       RegionProduct @default(radverkehr)
   // Independent flags on purpose (product may allow both later); today RegionWriteSchema rejects both being true.
-  notesOsm      Boolean @default(true)
-  notesInternal Boolean @default(false)
-  showSearch Boolean       @default(false)
+  notesOsm      Boolean       @default(true)
+  notesInternal Boolean       @default(false)
+  showSearch    Boolean       @default(false)
+
+  /// Flächenfinder (Planungsmodus). Default an; Regionen können ihn im Admin abschalten.
+  spaceFinderEnabled Boolean @default(true)
 
   mapLat  Float @default(0)
   mapLng  Float @default(0)
@@ -185,8 +192,8 @@ model Region {
   headerLogoId Int?
   headerLogo   RegionUpload? @relation("RegionHeaderLogo", fields: [headerLogoId], references: [id], onDelete: SetNull)
 
-  maskOsmRelationIds Int[]  @default([])
-  maskBufferKm       Float  @default(10)
+  maskOsmRelationIds Int[] @default([])
+  maskBufferKm       Float @default(10)
 
   /// GeoJSON 2D bbox: [minLng, minLat, maxLng, maxLat]
   bbox Json?
@@ -197,12 +204,12 @@ model Region {
   contractId Int?
   contract   RegionContract? @relation(fields: [contractId], references: [id], onDelete: SetNull)
 
-  welcomeEnabled       Boolean @default(false)
-  welcomeTitle         String  @default("")
+  welcomeEnabled       Boolean       @default(false)
+  welcomeTitle         String        @default("")
   welcomeSubtitle      String?
   welcomeBodyMarkdown  String?
   /// [{ title, bodyMarkdown, sortOrder }] — validated by regionWelcomeSectionsSchema (max 8)
-  welcomeSections      Json    @default("[]")
+  welcomeSections      Json          @default("[]")
   welcomeImageUploadId Int?
   welcomeImageUpload   RegionUpload? @relation("RegionWelcomeImage", fields: [welcomeImageUploadId], references: [id], onDelete: SetNull)
   welcomeImageAltText  String?
@@ -218,6 +225,7 @@ model Region {
   qaConfigs         QaConfig[]
   reviewLists       ReviewList[]
   noteFolders       NoteFolder[]
+  planningAreas     PlanningArea[]
 
   @@index([contractId])
   @@index([headerLogoId])
@@ -245,8 +253,8 @@ model RegionUpload {
   /// Better Auth user id of the admin who uploaded it (audit; not an FK to keep User untouched).
   createdById String?
 
-  headerLogoForRegions     Region[] @relation("RegionHeaderLogo")
-  welcomeImageForRegions   Region[] @relation("RegionWelcomeImage")
+  headerLogoForRegions   Region[] @relation("RegionHeaderLogo")
+  welcomeImageForRegions Region[] @relation("RegionWelcomeImage")
 
   @@index([regionId])
   @@map("RegionUpload")
@@ -266,10 +274,10 @@ model RegionCategoryAssignment {
 }
 
 model RegionBackgroundAssignment {
-  id         Int    @id @default(autoincrement())
-  regionId   Int
-  sourceId   String
-  region     Region @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  id       Int    @id @default(autoincrement())
+  regionId Int
+  sourceId String
+  region   Region @relation(fields: [regionId], references: [id], onDelete: Cascade)
 
   @@unique([regionId, sourceId])
   @@map("RegionBackgroundAssignment")
@@ -277,10 +285,10 @@ model RegionBackgroundAssignment {
 }
 
 model RegionExportAssignment {
-  id        Int    @id @default(autoincrement())
-  regionId  Int
-  exportId  String
-  region    Region @relation(fields: [regionId], references: [id], onDelete: Cascade)
+  id       Int    @id @default(autoincrement())
+  regionId Int
+  exportId String
+  region   Region @relation(fields: [regionId], references: [id], onDelete: Cascade)
 
   @@unique([regionId, exportId])
   @@map("RegionExportAssignment")
@@ -364,26 +372,26 @@ model Membership {
 /// Map-dataset file artifact (PMTiles/GeoJSON shown on the map), one row per static-dataset folder.
 /// Distinct from RegionUpload (region logos).
 model MapDatasetUpload {
-  id                Int                       @id @default(autoincrement())
-  createdAt         DateTime                  @default(now())
-  createdBy         MapDatasetUploadCreatedBy @default(SCRIPT)
-  updatedAt         DateTime                  @updatedAt
+  id                   Int                       @id @default(autoincrement())
+  createdAt            DateTime                  @default(now())
+  createdBy            MapDatasetUploadCreatedBy @default(SCRIPT)
+  updatedAt            DateTime                  @updatedAt
   //
-  slug              String                    @unique
-  configs           Json
-  public            Boolean                   @default(false)
-  hideDownloadLink  Boolean                   @default(false)
-  mapRenderFormat   MapRenderFormatEnum
-  mapRenderUrl      String
-  githubUrl         String
+  slug                 String                    @unique
+  configs              Json
+  public               Boolean                   @default(false)
+  hideDownloadLink     Boolean                   @default(false)
+  mapRenderFormat      MapRenderFormatEnum
+  mapRenderUrl         String
+  githubUrl            String
   // One of them is missing when `dataSourceType: 'external'` (because external sources are "either or")
-  pmtilesUrl        String?
-  geojsonUrl        String?
+  pmtilesUrl           String?
+  geojsonUrl           String?
   //
-  externalSourceUrl String?
-  cacheTtlSeconds   Int?                      @default(86400)
+  externalSourceUrl    String?
+  cacheTtlSeconds      Int?                      @default(86400)
   //
-  systemLayer       Boolean                   @default(false)
+  systemLayer          Boolean                   @default(false)
   //
   // File-level metadata (one value per dataset file, not per layer-config "Ansicht").
   // Admin/CSV read these columns (and `layerConfigs` rows); map region datasets still expand `configs` JSON.
@@ -393,8 +401,8 @@ model MapDatasetUpload {
   licence              String? // licence enum values as in StaticDatasets/types.ts
   licenceOsmCompatible String? // 'licence' | 'waiver' | 'no'
   //
-  regions           Region[]                  @relation("RegionToMapDatasetUpload")
-  layerConfigs      MapDatasetLayerConfig[]
+  regions              Region[]                  @relation("RegionToMapDatasetUpload")
+  layerConfigs         MapDatasetLayerConfig[]
 
   @@map("MapDatasetUpload")
   @@schema("prisma")
@@ -434,10 +442,10 @@ model MapDatasetCategory {
   updatedAt DateTime @updatedAt
 
   /// Same string as MapDatasetUpload.configs[].categoryKey (e.g. bb/Netzkonzeption). Globally unique.
-  key         String @unique @db.VarChar(191)
+  key String @unique @db.VarChar(191)
 
   /// First path segment (before first `/`), e.g. bb from bb/Netzkonzeption.
-  groupKey    String @db.VarChar(191)
+  groupKey String @db.VarChar(191)
 
   /// Rest after first `/`, e.g. Netzkonzeption.
   categoryKey String @db.VarChar(191)
@@ -499,19 +507,19 @@ model Note {
 // shared across several region views of the same customer (like ReviewList.regions). A note lives
 // in exactly one folder; its regions are the folder's regions.
 model NoteFolder {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int      @id @default(autoincrement())
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
   //
-  name      String
+  name        String
   //
   createdById String?
-  createdBy   User?   @relation("NoteFolderCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy   User?    @relation("NoteFolderCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   updatedById String?
-  updatedBy   User?   @relation("NoteFolderUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedBy   User?    @relation("NoteFolderUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
   //
-  regions Region[]
-  notes   Note[]
+  regions     Region[]
+  notes       Note[]
 
   @@map("NoteFolder")
   @@schema("prisma")
@@ -539,31 +547,31 @@ model NoteComment {
 // Entries are deliberately a separate table from Notes (Prisma has no polymorphic associations);
 // they are functionally analogous but not shared code.
 model ReviewList {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id          Int           @id @default(autoincrement())
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
   //
-  name      String
+  name        String
   //
   createdById String?
-  createdBy   User?   @relation("ReviewListCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy   User?         @relation("ReviewListCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   updatedById String?
-  updatedBy   User?   @relation("ReviewListUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  updatedBy   User?         @relation("ReviewListUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
   //
-  regions   Region[]
-  entries   ReviewEntry[]
+  regions     Region[]
+  entries     ReviewEntry[]
 
   @@map("ReviewList")
   @@schema("prisma")
 }
 
 model ReviewEntry {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           Int                     @id @default(autoincrement())
+  createdAt    DateTime                @default(now())
+  updatedAt    DateTime                @updatedAt
   //
-  list      ReviewList @relation(fields: [listId], references: [id], onDelete: Cascade)
-  listId    Int
+  list         ReviewList              @relation(fields: [listId], references: [id], onDelete: Cascade)
+  listId       Int
   //
   // GeoJSON geometry + free-form display properties (from upload or drawing).
   geometry     Json
@@ -572,21 +580,21 @@ model ReviewEntry {
   //
   // Import identity (not the SQL id). A dedicated column so matching survives user edits
   // to `properties` and can use @@index([listId, importId]) instead of a JSON scan.
-  importId String?
+  importId     String?
   //
   // Provenance: uploaded (from a GeoJSON file) vs. manually drawn in the app.
-  source     ReviewEntrySource @default(UPLOAD)
-  sourceMeta Json? // e.g. { filename } for uploads, { date } for manual entries
+  source       ReviewEntrySource       @default(UPLOAD)
+  sourceMeta   Json? // e.g. { filename } for uploads, { date } for manual entries
   // Author of a manually drawn entry is createdBy; uploaded entries carry the importer as createdBy.
-  createdById String?
-  createdBy   User?   @relation("ReviewEntryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
-  updatedById String?
-  updatedBy   User?   @relation("ReviewEntryUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  createdById  String?
+  createdBy    User?                   @relation("ReviewEntryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById  String?
+  updatedBy    User?                   @relation("ReviewEntryUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
   //
   // Evaluation status set by members in the Prüflisten panel; OPEN → OK | PROBLEM.
-  status   ReviewEntryStatus @default(OPEN)
+  status       ReviewEntryStatus       @default(OPEN)
   //
-  comments ReviewEntryComment[]
+  comments     ReviewEntryComment[]
 
   // Serves both list scans and import matching (listId is a prefix of this composite).
   @@index([listId, importId])
@@ -595,17 +603,17 @@ model ReviewEntry {
 }
 
 model ReviewEntryComment {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id        Int         @id @default(autoincrement())
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
   //
-  author  User        @relation(fields: [userId], references: [id])
-  userId  String
+  author    User        @relation(fields: [userId], references: [id])
+  userId    String
   //
-  entry   ReviewEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
-  entryId Int
+  entry     ReviewEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  entryId   Int
   //
-  body    String
+  body      String
 
   @@index([entryId])
   @@map("ReviewEntryComment")
@@ -732,6 +740,154 @@ enum QaEvaluationStatus {
 enum QaEvaluatorType {
   SYSTEM
   USER
+
+  @@schema("prisma")
+}
+
+// ── Planning module (Flächenfinder) ──────────────────────────────────────────
+// Planungsgebiet (selten geändert: Geometrie, eigene Daten) + Variante
+// (häufig: Gewichte, Schwellen, Use-Case). Ein Lauf merged beides in
+// factorConfigSnapshot; PostGIS-Ergebnisse hängen an PlanningRun.id.
+//
+// Permissions: any region member may edit/run any area/variant of that region;
+// the creator is tracked for attribution only. Variants duplicate via `parentId`.
+
+model PlanningArea {
+  id                 Int               @id @default(autoincrement())
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+  //
+  title              String
+  //
+  region             Region            @relation(fields: [regionId], references: [id])
+  regionId           Int
+  //
+  creator            User              @relation(fields: [creatorId], references: [id])
+  creatorId          String
+  //
+  // GeoJSON geometry (EPSG:4326) and optional user-upload obstacles.
+  studyArea          Json
+  userGeojson        Json?
+  userGeojsonMode    String?
+  // Shared by all variants of this area; merged into worker snapshots as use_case / area_size_m2.
+  useCase            String            @default("fahrradbox")
+  areaSizeM2         Float?
+  // Bumped when geometry/obstacles/use-case/size change — marks existing COMPLETE runs stale.
+  inputUpdatedAt     DateTime          @default(now())
+  //
+  // Zensus-Kennzahlen des Planungsgebiets, einmal je Gebiet aus `data.census_population_point`
+  // ermittelt (siehe server/planning/censusSaettigung.server.ts). Sie füllen den Faktor-Parameter
+  // `bewohnerbedarf_saettigung_ew` vor; alle Varianten des Gebiets starten damit auf demselben
+  // Wert. `censusComputedAt` unterscheidet „noch nie gerechnet" von „gerechnet, nichts gefunden"
+  // (dann bleiben beide Werte NULL und der Worker-Default greift).
+  censusSaettigungEw Float?
+  censusEwPerHa      Float?
+  censusComputedAt   DateTime?
+  //
+  variants           PlanningVariant[]
+
+  @@index([regionId])
+  @@map("PlanningArea")
+  @@schema("prisma")
+}
+
+model PlanningVariant {
+  id           Int               @id @default(autoincrement())
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
+  //
+  title        String
+  description  String?
+  //
+  area         PlanningArea      @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  areaId       Int
+  //
+  creator      User              @relation(fields: [creatorId], references: [id])
+  creatorId    String
+  //
+  // Lineage: duplicate creates a child variant seeded from the parent's config.
+  parent       PlanningVariant?  @relation("Lineage", fields: [parentId], references: [id], onDelete: SetNull)
+  parentId     Int?
+  children     PlanningVariant[] @relation("Lineage")
+  //
+  // Editable UseCaseConfig ohne Geometrie: weights and thresholds only (use-case/size live on PlanningArea).
+  factorConfig Json
+  //
+  // Pointer to the latest successful run used for display. Plain Int (logical FK
+  // to PlanningRun.id) to avoid a relation cycle.
+  currentRunId Int?
+  //
+  runs         PlanningRun[]
+  jobs         PlanningJob[]
+
+  @@index([areaId])
+  @@map("PlanningVariant")
+  @@schema("prisma")
+}
+
+model PlanningRun {
+  id                   Int               @id @default(autoincrement())
+  createdAt            DateTime          @default(now())
+  //
+  variant              PlanningVariant   @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variantId            Int
+  //
+  // Frozen merge of area geometry + use-case/size + variant assumptions (reproducibility).
+  factorConfigSnapshot Json
+  //
+  // true when the parent area's geometry, obstacles, use-case, or size changed after this run completed.
+  stale                Boolean           @default(false)
+  status               PlanningRunStatus @default(PENDING)
+  hexCount             Int?
+  vegCount             Int?
+  cirAttribution       String?
+  //
+  job                  PlanningJob?
+
+  @@index([variantId])
+  @@map("PlanningRun")
+  @@schema("prisma")
+}
+
+model PlanningJob {
+  id            Int               @id @default(autoincrement())
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+  //
+  variant       PlanningVariant   @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variantId     Int
+  //
+  status        PlanningJobStatus @default(QUEUED)
+  startedAt     DateTime?
+  finishedAt    DateTime?
+  errorMessage  String?
+  // Fortschritt 0–100 + Kurzlabel, vom planning-worker während der Berechnung gesetzt.
+  progress      Int?
+  progressLabel String?
+  //
+  // Set when DONE — links to the immutable run used for tile display.
+  resultRun     PlanningRun?      @relation(fields: [resultRunId], references: [id])
+  resultRunId   Int?              @unique
+
+  @@index([status])
+  @@index([variantId])
+  @@map("PlanningJob")
+  @@schema("prisma")
+}
+
+enum PlanningRunStatus {
+  PENDING
+  COMPLETE
+  EMPTY
+
+  @@schema("prisma")
+}
+
+enum PlanningJobStatus {
+  QUEUED
+  RUNNING
+  DONE
+  FAILED
 
   @@schema("prisma")
 }
