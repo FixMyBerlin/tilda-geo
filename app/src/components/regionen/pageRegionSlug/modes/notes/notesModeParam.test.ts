@@ -15,10 +15,21 @@ describe('notesMode search param', () => {
       completed: false,
       extent: 'all',
     })
-    expect(compactNotesModeParam({ key: 'osm', search: 'foo' })).toEqual({
+    expect(compactNotesModeParam({ key: 3, search: 'foo' })).toEqual({
+      key: 3,
+      search: 'foo',
+    })
+  })
+
+  test('numeric and osm keys round-trip; other strings are dropped', () => {
+    expect(zodNotesModeParam.parse({ key: 3 })).toEqual({ key: 3 })
+    expect(compactNotesModeParam({ key: 3 })).toEqual({ key: 3 })
+    expect(zodNotesModeParam.parse({ key: 'osm', search: 'foo' })).toEqual({
       key: 'osm',
       search: 'foo',
     })
+    expect(compactNotesModeParam({ key: 'osm' })).toEqual({ key: 'osm' })
+    expect(zodNotesModeParam.parse({ key: 'folder', search: 'foo' })).toEqual({ search: 'foo' })
   })
 
   test('compactNotesModeParam keeps a compose pin on new', () => {

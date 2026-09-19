@@ -11,21 +11,21 @@ import {
 import { notesHighlightIds } from '@/components/regionen/pageRegionSlug/modes/notes/notesListHoverId'
 import { notesModeToServerFilter } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
 import { useNotesModeValue } from '@/components/regionen/pageRegionSlug/modes/notes/useNotesModeParam'
+import { useNotesSelection } from '@/components/regionen/pageRegionSlug/modes/notes/useNotesSelection'
 import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
-import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { useFilteredOsmNotes } from './utils/useFilteredOsmNotes'
 
 export const osmNotesLayerId = 'osm-notes-layer'
 export const osmNotesSourceId = 'osm-notes-source'
 
 export const SourcesLayersOsmNotes = () => {
-  const region = useRegion()
   const { featuresParam } = useFeaturesParam()
   const currentMode = useCurrentMode()
   const notesModeValue = useNotesModeValue()
+  const notesSelection = useNotesSelection()
   const hoveredListItem = useHoveredListItem()
   const hoveredMapItemId = useHoveredMapItemId()
-  const showLayers = currentMode.isNotes && region.notesOsm
+  const showLayers = currentMode.isNotes && notesSelection.kind === 'osm'
   const filteredFeatures = useFilteredOsmNotes(
     showLayers ? notesModeToServerFilter(notesModeValue) : undefined,
   )

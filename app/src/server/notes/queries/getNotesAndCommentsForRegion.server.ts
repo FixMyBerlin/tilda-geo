@@ -8,6 +8,7 @@ import { formatUserDisplayName } from '@/shared/userDisplayName'
 
 const Schema = z.object({
   regionSlug: z.string(),
+  folderId: z.number(),
   filter: zodInternalNotesFilterParam.nullish(),
 })
 
@@ -15,7 +16,7 @@ export async function getNotesAndCommentsForRegion(
   input: z.infer<typeof Schema>,
   headers: Headers,
 ) {
-  const { regionSlug, filter } = Schema.parse(input)
+  const { regionSlug, folderId, filter } = Schema.parse(input)
 
   // Internal notes are member/admin-only, also on PUBLIC regions (region status is not note access).
   const session = await getAppSession(headers)
@@ -25,13 +26,13 @@ export async function getNotesAndCommentsForRegion(
   }
 
   const notes = await db.note.findMany({
-    where: { region: { slug: regionSlug } },
+    where: { folderId, folder: { regions: { some: { slug: regionSlug } } } },
     select: {
       id: true,
       resolvedAt: true,
       longitude: true,
       latitude: true,
-      regionId: true,
+      folderId: true,
       subject: true,
       body: true,
       author: { select: { id: true, osmName: true, firstName: true, lastName: true } },
@@ -54,7 +55,7 @@ export async function getNotesAndCommentsForRegion(
     const properties = {
       id: note.id,
       status: note.resolvedAt ? 'closed' : 'open',
-      regionId: note.regionId,
+      folderId: note.folderId,
       subject: note.subject,
       authorId: note.author.id,
       authorName: formatUserDisplayName(note.author) ?? '',

@@ -10,8 +10,8 @@ type ModeCollectionManagerOptions<TCreated> = {
 }
 
 /**
- * Create/rename/delete plus cache invalidation for Prüflisten selectors.
- * `ReviewListSelect` owns the name modal and extra actions.
+ * Create/rename/delete plus cache invalidation for the Prüflisten and Hinweise-Ordner
+ * collection selectors. `ReviewListSelect`/`NoteFolderSelect` own the name modal and extra actions.
  */
 export const useModeCollectionManager = <TCreated>({
   createFn,

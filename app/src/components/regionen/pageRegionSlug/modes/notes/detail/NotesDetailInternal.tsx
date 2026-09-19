@@ -1,12 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { ObjectDump } from '@/components/admin/ObjectDump'
 import {
   modePanelMutedClassName,
   modePanelTintHairlineTopClassName,
 } from '@/components/regionen/pageRegionSlug/modes/modePanel.const'
+import { AdminLogDataButton } from '@/components/shared/debug/AdminLogDataButton'
 import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { Spinner } from '@/components/shared/Spinner/Spinner'
-import { isDev } from '@/components/shared/utils/isEnv'
 import { getNoteAndCommentsFn } from '@/server/notes/notes.functions'
 import { InternalNote } from './InternalNote'
 import { InternalNoteComment } from './InternalNoteComment'
@@ -56,7 +55,9 @@ export const NotesDetailInternal = ({ noteId }: Props) => {
         </ul>
       </section>
 
-      {isDev && <ObjectDump data={noteAndComments} />}
+      <div className="px-3 pb-3">
+        <AdminLogDataButton data={noteAndComments} />
+      </div>
     </div>
   )
 }

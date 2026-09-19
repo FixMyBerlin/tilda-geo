@@ -37,6 +37,7 @@ import { Route as AdminRegionsRouteImport } from './routes/admin/regions'
 import { Route as AdminRegionContractsRouteImport } from './routes/admin/region-contracts'
 import { Route as AdminQaConfigsRouteImport } from './routes/admin/qa-configs'
 import { Route as AdminProcessingRouteImport } from './routes/admin/processing'
+import { Route as AdminNoteFoldersRouteImport } from './routes/admin/note-folders'
 import { Route as AdminMembershipsRouteImport } from './routes/admin/memberships'
 import { Route as AdminMapDatasetUploadsRouteImport } from './routes/admin/map-dataset-uploads'
 import { Route as AdminMapDatasetCategoriesRouteImport } from './routes/admin/map-dataset-categories'
@@ -54,6 +55,7 @@ import { Route as AdminRegionsIndexRouteImport } from './routes/admin/regions/in
 import { Route as AdminRegionContractsIndexRouteImport } from './routes/admin/region-contracts/index'
 import { Route as AdminQaConfigsIndexRouteImport } from './routes/admin/qa-configs/index'
 import { Route as AdminProcessingIndexRouteImport } from './routes/admin/processing/index'
+import { Route as AdminNoteFoldersIndexRouteImport } from './routes/admin/note-folders/index'
 import { Route as AdminMembershipsIndexRouteImport } from './routes/admin/memberships/index'
 import { Route as AdminMapDatasetUploadsIndexRouteImport } from './routes/admin/map-dataset-uploads/index'
 import { Route as AdminMapDatasetCategoriesIndexRouteImport } from './routes/admin/map-dataset-categories/index'
@@ -107,6 +109,7 @@ import { Route as AdminReviewListsIdEditRouteImport } from './routes/admin/revie
 import { Route as AdminRegionsRegionSlugEditRouteImport } from './routes/admin/regions/$regionSlug.edit'
 import { Route as AdminRegionContractsSlugEditRouteImport } from './routes/admin/region-contracts/$slug.edit'
 import { Route as AdminQaConfigsIdEditRouteImport } from './routes/admin/qa-configs/$id.edit'
+import { Route as AdminNoteFoldersIdEditRouteImport } from './routes/admin/note-folders/$id.edit'
 import { Route as ApiAdminQaConfigsIdExportCsvRouteImport } from './routes/api/admin.qa-configs.$id.export-csv'
 
 const RegionenRoute = RegionenRouteImport.update({
@@ -249,6 +252,11 @@ const AdminProcessingRoute = AdminProcessingRouteImport.update({
   path: '/processing',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminNoteFoldersRoute = AdminNoteFoldersRouteImport.update({
+  id: '/note-folders',
+  path: '/note-folders',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminMembershipsRoute = AdminMembershipsRouteImport.update({
   id: '/memberships',
   path: '/memberships',
@@ -335,6 +343,11 @@ const AdminProcessingIndexRoute = AdminProcessingIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminProcessingRoute,
+} as any)
+const AdminNoteFoldersIndexRoute = AdminNoteFoldersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminNoteFoldersRoute,
 } as any)
 const AdminMembershipsIndexRoute = AdminMembershipsIndexRouteImport.update({
   id: '/',
@@ -628,6 +641,11 @@ const AdminQaConfigsIdEditRoute = AdminQaConfigsIdEditRouteImport.update({
   path: '/$id/edit',
   getParentRoute: () => AdminQaConfigsRoute,
 } as any)
+const AdminNoteFoldersIdEditRoute = AdminNoteFoldersIdEditRouteImport.update({
+  id: '/$id/edit',
+  path: '/$id/edit',
+  getParentRoute: () => AdminNoteFoldersRoute,
+} as any)
 const ApiAdminQaConfigsIdExportCsvRoute =
   ApiAdminQaConfigsIdExportCsvRouteImport.update({
     id: '/api/admin/qa-configs/$id/export-csv',
@@ -652,6 +670,7 @@ export interface FileRoutesByFullPath {
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesRouteWithChildren
   '/admin/map-dataset-uploads': typeof AdminMapDatasetUploadsRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRouteWithChildren
+  '/admin/note-folders': typeof AdminNoteFoldersRouteWithChildren
   '/admin/processing': typeof AdminProcessingRouteWithChildren
   '/admin/qa-configs': typeof AdminQaConfigsRouteWithChildren
   '/admin/region-contracts': typeof AdminRegionContractsRouteWithChildren
@@ -709,12 +728,14 @@ export interface FileRoutesByFullPath {
   '/admin/map-dataset-categories/': typeof AdminMapDatasetCategoriesIndexRoute
   '/admin/map-dataset-uploads/': typeof AdminMapDatasetUploadsIndexRoute
   '/admin/memberships/': typeof AdminMembershipsIndexRoute
+  '/admin/note-folders/': typeof AdminNoteFoldersIndexRoute
   '/admin/processing/': typeof AdminProcessingIndexRoute
   '/admin/qa-configs/': typeof AdminQaConfigsIndexRoute
   '/admin/region-contracts/': typeof AdminRegionContractsIndexRoute
   '/admin/regions/': typeof AdminRegionsIndexRoute
   '/admin/review-lists/': typeof AdminReviewListsIndexRoute
   '/regionen/$regionSlug/': typeof RegionenRegionSlugIndexRoute
+  '/admin/note-folders/$id/edit': typeof AdminNoteFoldersIdEditRoute
   '/admin/qa-configs/$id/edit': typeof AdminQaConfigsIdEditRoute
   '/admin/region-contracts/$slug/edit': typeof AdminRegionContractsSlugEditRoute
   '/admin/regions/$regionSlug/edit': typeof AdminRegionsRegionSlugEditRoute
@@ -798,12 +819,14 @@ export interface FileRoutesByTo {
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesIndexRoute
   '/admin/map-dataset-uploads': typeof AdminMapDatasetUploadsIndexRoute
   '/admin/memberships': typeof AdminMembershipsIndexRoute
+  '/admin/note-folders': typeof AdminNoteFoldersIndexRoute
   '/admin/processing': typeof AdminProcessingIndexRoute
   '/admin/qa-configs': typeof AdminQaConfigsIndexRoute
   '/admin/region-contracts': typeof AdminRegionContractsIndexRoute
   '/admin/regions': typeof AdminRegionsIndexRoute
   '/admin/review-lists': typeof AdminReviewListsIndexRoute
   '/regionen/$regionSlug': typeof RegionenRegionSlugIndexRoute
+  '/admin/note-folders/$id/edit': typeof AdminNoteFoldersIdEditRoute
   '/admin/qa-configs/$id/edit': typeof AdminQaConfigsIdEditRoute
   '/admin/region-contracts/$slug/edit': typeof AdminRegionContractsSlugEditRoute
   '/admin/regions/$regionSlug/edit': typeof AdminRegionsRegionSlugEditRoute
@@ -843,6 +866,7 @@ export interface FileRoutesById {
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesRouteWithChildren
   '/admin/map-dataset-uploads': typeof AdminMapDatasetUploadsRouteWithChildren
   '/admin/memberships': typeof AdminMembershipsRouteWithChildren
+  '/admin/note-folders': typeof AdminNoteFoldersRouteWithChildren
   '/admin/processing': typeof AdminProcessingRouteWithChildren
   '/admin/qa-configs': typeof AdminQaConfigsRouteWithChildren
   '/admin/region-contracts': typeof AdminRegionContractsRouteWithChildren
@@ -900,12 +924,14 @@ export interface FileRoutesById {
   '/admin/map-dataset-categories/': typeof AdminMapDatasetCategoriesIndexRoute
   '/admin/map-dataset-uploads/': typeof AdminMapDatasetUploadsIndexRoute
   '/admin/memberships/': typeof AdminMembershipsIndexRoute
+  '/admin/note-folders/': typeof AdminNoteFoldersIndexRoute
   '/admin/processing/': typeof AdminProcessingIndexRoute
   '/admin/qa-configs/': typeof AdminQaConfigsIndexRoute
   '/admin/region-contracts/': typeof AdminRegionContractsIndexRoute
   '/admin/regions/': typeof AdminRegionsIndexRoute
   '/admin/review-lists/': typeof AdminReviewListsIndexRoute
   '/regionen/$regionSlug/': typeof RegionenRegionSlugIndexRoute
+  '/admin/note-folders/$id/edit': typeof AdminNoteFoldersIdEditRoute
   '/admin/qa-configs/$id/edit': typeof AdminQaConfigsIdEditRoute
   '/admin/region-contracts/$slug/edit': typeof AdminRegionContractsSlugEditRoute
   '/admin/regions/$regionSlug/edit': typeof AdminRegionsRegionSlugEditRoute
@@ -945,6 +971,7 @@ export interface FileRouteTypes {
     | '/admin/map-dataset-categories'
     | '/admin/map-dataset-uploads'
     | '/admin/memberships'
+    | '/admin/note-folders'
     | '/admin/processing'
     | '/admin/qa-configs'
     | '/admin/region-contracts'
@@ -1002,12 +1029,14 @@ export interface FileRouteTypes {
     | '/admin/map-dataset-categories/'
     | '/admin/map-dataset-uploads/'
     | '/admin/memberships/'
+    | '/admin/note-folders/'
     | '/admin/processing/'
     | '/admin/qa-configs/'
     | '/admin/region-contracts/'
     | '/admin/regions/'
     | '/admin/review-lists/'
     | '/regionen/$regionSlug/'
+    | '/admin/note-folders/$id/edit'
     | '/admin/qa-configs/$id/edit'
     | '/admin/region-contracts/$slug/edit'
     | '/admin/regions/$regionSlug/edit'
@@ -1091,12 +1120,14 @@ export interface FileRouteTypes {
     | '/admin/map-dataset-categories'
     | '/admin/map-dataset-uploads'
     | '/admin/memberships'
+    | '/admin/note-folders'
     | '/admin/processing'
     | '/admin/qa-configs'
     | '/admin/region-contracts'
     | '/admin/regions'
     | '/admin/review-lists'
     | '/regionen/$regionSlug'
+    | '/admin/note-folders/$id/edit'
     | '/admin/qa-configs/$id/edit'
     | '/admin/region-contracts/$slug/edit'
     | '/admin/regions/$regionSlug/edit'
@@ -1135,6 +1166,7 @@ export interface FileRouteTypes {
     | '/admin/map-dataset-categories'
     | '/admin/map-dataset-uploads'
     | '/admin/memberships'
+    | '/admin/note-folders'
     | '/admin/processing'
     | '/admin/qa-configs'
     | '/admin/region-contracts'
@@ -1192,12 +1224,14 @@ export interface FileRouteTypes {
     | '/admin/map-dataset-categories/'
     | '/admin/map-dataset-uploads/'
     | '/admin/memberships/'
+    | '/admin/note-folders/'
     | '/admin/processing/'
     | '/admin/qa-configs/'
     | '/admin/region-contracts/'
     | '/admin/regions/'
     | '/admin/review-lists/'
     | '/regionen/$regionSlug/'
+    | '/admin/note-folders/$id/edit'
     | '/admin/qa-configs/$id/edit'
     | '/admin/region-contracts/$slug/edit'
     | '/admin/regions/$regionSlug/edit'
@@ -1459,6 +1493,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminProcessingRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/note-folders': {
+      id: '/admin/note-folders'
+      path: '/note-folders'
+      fullPath: '/admin/note-folders'
+      preLoaderRoute: typeof AdminNoteFoldersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/memberships': {
       id: '/admin/memberships'
       path: '/memberships'
@@ -1577,6 +1618,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/processing/'
       preLoaderRoute: typeof AdminProcessingIndexRouteImport
       parentRoute: typeof AdminProcessingRoute
+    }
+    '/admin/note-folders/': {
+      id: '/admin/note-folders/'
+      path: '/'
+      fullPath: '/admin/note-folders/'
+      preLoaderRoute: typeof AdminNoteFoldersIndexRouteImport
+      parentRoute: typeof AdminNoteFoldersRoute
     }
     '/admin/memberships/': {
       id: '/admin/memberships/'
@@ -1949,6 +1997,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminQaConfigsIdEditRouteImport
       parentRoute: typeof AdminQaConfigsRoute
     }
+    '/admin/note-folders/$id/edit': {
+      id: '/admin/note-folders/$id/edit'
+      path: '/$id/edit'
+      fullPath: '/admin/note-folders/$id/edit'
+      preLoaderRoute: typeof AdminNoteFoldersIdEditRouteImport
+      parentRoute: typeof AdminNoteFoldersRoute
+    }
     '/api/admin/qa-configs/$id/export-csv': {
       id: '/api/admin/qa-configs/$id/export-csv'
       path: '/api/admin/qa-configs/$id/export-csv'
@@ -2028,6 +2083,19 @@ const AdminMembershipsRouteChildren: AdminMembershipsRouteChildren = {
 
 const AdminMembershipsRouteWithChildren =
   AdminMembershipsRoute._addFileChildren(AdminMembershipsRouteChildren)
+
+interface AdminNoteFoldersRouteChildren {
+  AdminNoteFoldersIndexRoute: typeof AdminNoteFoldersIndexRoute
+  AdminNoteFoldersIdEditRoute: typeof AdminNoteFoldersIdEditRoute
+}
+
+const AdminNoteFoldersRouteChildren: AdminNoteFoldersRouteChildren = {
+  AdminNoteFoldersIndexRoute: AdminNoteFoldersIndexRoute,
+  AdminNoteFoldersIdEditRoute: AdminNoteFoldersIdEditRoute,
+}
+
+const AdminNoteFoldersRouteWithChildren =
+  AdminNoteFoldersRoute._addFileChildren(AdminNoteFoldersRouteChildren)
 
 interface AdminProcessingRouteChildren {
   AdminProcessingMetaIdRoute: typeof AdminProcessingMetaIdRoute
@@ -2112,6 +2180,7 @@ interface AdminRouteChildren {
   AdminMapDatasetCategoriesRoute: typeof AdminMapDatasetCategoriesRouteWithChildren
   AdminMapDatasetUploadsRoute: typeof AdminMapDatasetUploadsRouteWithChildren
   AdminMembershipsRoute: typeof AdminMembershipsRouteWithChildren
+  AdminNoteFoldersRoute: typeof AdminNoteFoldersRouteWithChildren
   AdminProcessingRoute: typeof AdminProcessingRouteWithChildren
   AdminQaConfigsRoute: typeof AdminQaConfigsRouteWithChildren
   AdminRegionContractsRoute: typeof AdminRegionContractsRouteWithChildren
@@ -2127,6 +2196,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminMapDatasetCategoriesRoute: AdminMapDatasetCategoriesRouteWithChildren,
   AdminMapDatasetUploadsRoute: AdminMapDatasetUploadsRouteWithChildren,
   AdminMembershipsRoute: AdminMembershipsRouteWithChildren,
+  AdminNoteFoldersRoute: AdminNoteFoldersRouteWithChildren,
   AdminProcessingRoute: AdminProcessingRouteWithChildren,
   AdminQaConfigsRoute: AdminQaConfigsRouteWithChildren,
   AdminRegionContractsRoute: AdminRegionContractsRouteWithChildren,

@@ -196,10 +196,6 @@ export const RegionWriteSchema = z
   .refine((data) => hasUniqueIds(data.exports), {
     message: 'Doppelte Export-IDs sind nicht erlaubt',
   })
-  .refine((data) => !(data.notesOsm && data.notesInternal), {
-    message: 'OSM-Hinweise und interne Hinweise können nicht gleichzeitig aktiv sein',
-    path: ['notesInternal'],
-  })
 
 export type RegionWriteInput = z.infer<typeof RegionWriteSchema>
 
@@ -371,7 +367,8 @@ export const RegionFormRawSchema = z
     promoted: trueOrFalse,
     status: RegionStatusSchema,
     product: RegionProductSchema,
-    notes: z.enum(['osmNotes', 'internalNotes', 'disabled']),
+    notesOsm: trueOrFalse,
+    notesInternal: trueOrFalse,
     showSearch: trueOrFalse,
     mapLat: enDecimalFormField,
     mapLng: enDecimalFormField,
@@ -513,8 +510,8 @@ export const RegionFormSchema = RegionFormRawSchema.transform((form): RegionWrit
     promoted: form.promoted,
     status: form.status,
     product: form.product,
-    notesOsm: form.notes === 'osmNotes',
-    notesInternal: form.notes === 'internalNotes',
+    notesOsm: form.notesOsm,
+    notesInternal: form.notesInternal,
     showSearch: form.showSearch,
     mapLat: Number(form.mapLat),
     mapLng: Number(form.mapLng),
@@ -569,11 +566,8 @@ export function regionConfigToFormValues(config: RegionWriteInput) {
     promoted: toTrueFalseString(config.promoted),
     status: config.status,
     product: config.product,
-    notes: config.notesInternal
-      ? ('internalNotes' as const)
-      : config.notesOsm
-        ? ('osmNotes' as const)
-        : ('disabled' as const),
+    notesOsm: toTrueFalseString(config.notesOsm),
+    notesInternal: toTrueFalseString(config.notesInternal),
     showSearch: toTrueFalseString(config.showSearch),
     mapLat: String(config.mapLat),
     mapLng: String(config.mapLng),

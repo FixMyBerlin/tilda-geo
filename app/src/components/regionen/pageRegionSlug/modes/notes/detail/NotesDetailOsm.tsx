@@ -1,6 +1,5 @@
 import dompurify from 'dompurify'
 import { twJoin } from 'tailwind-merge'
-import { ObjectDump } from '@/components/admin/ObjectDump'
 import { ModeComment } from '@/components/regionen/pageRegionSlug/modes/ModeComment'
 import { ModeCommentMarkdown } from '@/components/regionen/pageRegionSlug/modes/ModeCommentMarkdown'
 import {
@@ -13,10 +12,10 @@ import { SvgNotesCheckmark } from '@/components/regionen/pageRegionSlug/SidebarI
 import { SvgNotesQuestionmark } from '@/components/regionen/pageRegionSlug/SidebarInspector/icons/SvgNotesQuestionmark'
 import { OsmUserLink } from '@/components/regionen/pageRegionSlug/SidebarInspector/OsmUserLink'
 import { TimeWithRelativeTooltip } from '@/components/shared/date/TimeWithRelativeTooltip'
+import { AdminLogDataButton } from '@/components/shared/debug/AdminLogDataButton'
 import { Link } from '@/components/shared/links/Link'
 import { proseClasses } from '@/components/shared/text/prose'
 import { getOsmUrl } from '@/components/shared/utils/getOsmUrl'
-import { isDev } from '@/components/shared/utils/isEnv'
 
 const osmCommentBodyClassName = twJoin(
   'mb-0 min-w-0 leading-snug wrap-anywhere prose-p:my-1 prose-p:leading-snug prose-a:wrap-anywhere prose-a:text-inherit prose-a:underline prose-a:decoration-current prose-a:underline-offset-4 prose-a:hover:text-gray-950 prose-blockquote:my-1.5 prose-blockquote:border-sky-700/30 prose-blockquote:text-gray-700 prose-ol:list-inside prose-ol:ps-0 prose-ol:leading-snug prose-ul:list-inside prose-ul:ps-0 prose-ul:leading-snug prose-li:ps-0 prose-li:marker:text-white/80',
@@ -113,7 +112,9 @@ export const NotesDetailOsm = ({ noteId }: Props) => {
         </p>
       </div>
 
-      {isDev && <ObjectDump data={thread} />}
+      <div className="px-3 pb-3">
+        <AdminLogDataButton data={thread} />
+      </div>
     </div>
   )
 }

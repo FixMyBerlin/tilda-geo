@@ -2,8 +2,12 @@ import { createFileRoute, redirect } from '@tanstack/react-router'
 import { isMemberOnlyMode } from '@/components/regionen/pageRegionSlug/modes/availableModes'
 import { modeScopedSearchMiddleware } from '@/components/regionen/pageRegionSlug/modes/modeScopedSearchMiddleware'
 import { notesModeToServerFilter } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
+import { resolveSelectedNoteFolderId } from '@/components/regionen/pageRegionSlug/modes/notes/notesSelection'
 import { PageModeNotes } from '@/components/regionen/pageRegionSlug/modes/notes/PageModeNotes'
-import { internalNotesQueryOptions } from '@/server/regions/regionQueryOptions'
+import {
+  internalNotesQueryOptions,
+  noteFoldersQueryOptions,
+} from '@/server/regions/regionQueryOptions'
 import { getSafeSignInCallbackURL } from '@/shared/auth/safeSignInCallbackURL'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 
@@ -19,6 +23,7 @@ export const Route = createFileRoute('/regionen/$regionSlug/hinweise')({
     const notesMode = search[searchParamsRegistry.notes]
     // Free-text `search` is omitted so typing does not re-run the loader; the panel query follows URL state.
     return {
+      key: notesMode?.key,
       completed: notesMode?.completed,
       commented: notesMode?.commented,
       notReacted: notesMode?.notReacted,
@@ -48,10 +53,16 @@ export const Route = createFileRoute('/regionen/$regionSlug/hinweise')({
     }
 
     const { queryClient } = context
-    if (parent.loaderData.region.notesInternal) {
-      await queryClient.ensureQueryData(
-        internalNotesQueryOptions(params.regionSlug, notesModeToServerFilter(deps)),
+    if (parent.loaderData.region.notesInternal && parent.loaderData.hasPermissions) {
+      const { folders } = await queryClient.ensureQueryData(
+        noteFoldersQueryOptions(params.regionSlug),
       )
+      const folderId = resolveSelectedNoteFolderId(deps.key, folders)
+      if (folderId !== undefined) {
+        await queryClient.ensureQueryData(
+          internalNotesQueryOptions(params.regionSlug, folderId, notesModeToServerFilter(deps)),
+        )
+      }
     }
   },
   component: PageModeNotes,

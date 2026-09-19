@@ -12,6 +12,7 @@ describe('buildAdminRegionNavigation', () => {
       'uploads',
       'qaConfigs',
       'reviewLists',
+      'noteFolders',
       'auditLog',
       'uploadsCsv',
     ])
@@ -26,6 +27,7 @@ describe('buildAdminRegionNavigation', () => {
       ['uploads', '/admin/map-dataset-uploads'],
       ['qaConfigs', '/admin/qa-configs'],
       ['reviewLists', '/admin/review-lists'],
+      ['noteFolders', '/admin/note-folders'],
       ['auditLog', '/admin/audit-log'],
     ] as const) {
       expect(links.find((link) => link.key === key)).toMatchObject({

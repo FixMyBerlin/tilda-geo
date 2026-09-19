@@ -18,7 +18,10 @@ export async function deleteNote(input: z.infer<typeof Schema>, headers: Headers
 
   // Only author may delete own note
   const { userId: dbUserId } = await db.note.findFirstOrThrow({
-    where: { id: parsed.noteId },
+    where: {
+      id: parsed.noteId,
+      folder: { regions: { some: { slug: parsed.regionSlug } } },
+    },
     select: { userId: true },
   })
 

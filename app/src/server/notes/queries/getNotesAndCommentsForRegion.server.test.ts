@@ -7,7 +7,11 @@ const { noteFindMany, getAppSession, canAccessMemberModeForRegion } = vi.hoisted
   canAccessMemberModeForRegion: vi.fn(),
 }))
 
-vi.mock('@/server/db.server', () => ({ default: { note: { findMany: noteFindMany } } }))
+vi.mock('@/server/db.server', () => ({
+  default: {
+    note: { findMany: noteFindMany },
+  },
+}))
 vi.mock('@/server/auth/session.server', () => ({ getAppSession }))
 vi.mock('@/server/authorization/canAccessMemberModeForRegion.server', () => ({
   canAccessMemberModeForRegion,
@@ -28,15 +32,22 @@ describe('getNotesAndCommentsForRegion', () => {
   test('non-member (e.g. on a PUBLIC region) gets no notes and no DB read', async () => {
     canAccessMemberModeForRegion.mockResolvedValue({ isAuthorized: false, regionId: 11 })
 
-    const result = await getNotesAndCommentsForRegion({ regionSlug: 'woldegk' }, headers)
+    const result = await getNotesAndCommentsForRegion(
+      { regionSlug: 'woldegk', folderId: 1 },
+      headers,
+    )
     expect(result.featureCollection.features).toEqual([])
     expect(noteFindMany).not.toHaveBeenCalled()
   })
 
-  test('member reads the region notes', async () => {
+  test('member reads notes of a folder linked to the region', async () => {
     canAccessMemberModeForRegion.mockResolvedValue({ isAuthorized: true, regionId: 11 })
 
-    await getNotesAndCommentsForRegion({ regionSlug: 'woldegk' }, headers)
-    expect(noteFindMany).toHaveBeenCalledOnce()
+    await getNotesAndCommentsForRegion({ regionSlug: 'woldegk', folderId: 1 }, headers)
+    expect(noteFindMany).toHaveBeenCalledWith(
+      expect.objectContaining({
+        where: { folderId: 1, folder: { regions: { some: { slug: 'woldegk' } } } },
+      }),
+    )
   })
 })

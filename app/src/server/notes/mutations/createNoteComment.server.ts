@@ -6,6 +6,7 @@ import {
 import { requireAuth } from '@/server/auth/session.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
+import { assertNoteInRegion } from '../queries/assertFolderInRegion.server'
 import { CreateNoteCommentSchema } from '../schemas'
 
 const Schema = CreateNoteCommentSchema.extend({
@@ -19,6 +20,7 @@ export async function createNoteComment(input: z.infer<typeof Schema>, headers: 
   const parsed = Schema.parse(input)
 
   await authorizeRegionMemberByRegionSlug(session, parsed.regionSlug)
+  await assertNoteInRegion(parsed.noteId, parsed.regionSlug)
 
   const result = await runWithAuditContextAsync(
     memberFormAuditContext(headers, session.userId),

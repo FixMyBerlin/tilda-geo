@@ -51,6 +51,8 @@ model User {
   reviewListsUpdated ReviewList[] @relation("ReviewListUpdatedBy")
   reviewEntriesCreated ReviewEntry[] @relation("ReviewEntryCreatedBy")
   reviewEntriesUpdated ReviewEntry[] @relation("ReviewEntryUpdatedBy")
+  noteFoldersCreated NoteFolder[] @relation("NoteFolderCreatedBy")
+  noteFoldersUpdated NoteFolder[] @relation("NoteFolderUpdatedBy")
 
   @@map("User")
   @@schema("prisma")
@@ -213,9 +215,9 @@ model Region {
   memberships       Membership[]
   mapDatasetUploads MapDatasetUpload[] @relation("RegionToMapDatasetUpload")
   regionUploads     RegionUpload[]     @relation("RegionUploadLibrary")
-  noteRecords       Note[]
   qaConfigs         QaConfig[]
   reviewLists       ReviewList[]
+  noteFolders       NoteFolder[]
 
   @@index([contractId])
   @@index([headerLogoId])
@@ -475,8 +477,8 @@ model Note {
   author       User          @relation(fields: [userId], references: [id])
   userId       String
   //
-  region       Region        @relation(fields: [regionId], references: [id])
-  regionId     Int
+  folder       NoteFolder    @relation(fields: [folderId], references: [id], onDelete: Restrict)
+  folderId     Int
   //
   subject      String
   body         String?
@@ -488,7 +490,30 @@ model Note {
   //
   noteComments NoteComment[]
 
+  @@index([folderId])
   @@map("Note")
+  @@schema("prisma")
+}
+
+// Folders ("Ordner") for internal TILDA notes. Many-to-many with regions so one folder can be
+// shared across several region views of the same customer (like ReviewList.regions). A note lives
+// in exactly one folder; its regions are the folder's regions.
+model NoteFolder {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  //
+  name      String
+  //
+  createdById String?
+  createdBy   User?   @relation("NoteFolderCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String?
+  updatedBy   User?   @relation("NoteFolderUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  //
+  regions Region[]
+  notes   Note[]
+
+  @@map("NoteFolder")
   @@schema("prisma")
 }
 

@@ -24,6 +24,7 @@ import { sanitizeHtml } from '@/components/shared/utils/sanitizeHtml'
 import type { DeleteNoteInputType, UpdateNoteInputType } from '@/server/notes/notes.functions'
 import { deleteNoteFn, updateNoteFn } from '@/server/notes/notes.functions'
 import type { NoteAndComments } from '@/server/notes/queries/getNoteAndComments.server'
+import { noteFoldersQueryKey } from '@/server/regions/regionQueryOptions'
 import { ModeFormSubmit } from '../../ModeFormSubmit'
 import { useIsAuthor } from './utils/useIsAuthor'
 
@@ -61,6 +62,8 @@ export const EditNoteForm = ({ note }: Props) => {
     mutationFn: (input: DeleteNoteInputType) => deleteNoteFn({ data: input }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeyMap })
+      // The deleted note's folder count (select/manage menu) changes too.
+      queryClient.invalidateQueries({ queryKey: noteFoldersQueryKey })
       setOpen(false)
       clearModeDetail()
     },

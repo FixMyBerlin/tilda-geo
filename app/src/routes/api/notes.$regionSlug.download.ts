@@ -13,9 +13,12 @@ import db from '@/server/db.server'
 const notesDownloadSearchSchema = z.object({
   format: z.enum(['raw', 'points', 'csv', 'geojson']).default('geojson'),
   apiKey: optionalSearchString(),
+  folderId: z.coerce.number().optional(),
 })
 
-type NoteWithComments = Prisma.NoteGetPayload<{ include: { noteComments: true } }>
+type NoteWithComments = Prisma.NoteGetPayload<{
+  include: { noteComments: true; folder: { select: { id: true; name: true } } }
+}>
 
 type NoteOrCommentRow = {
   type: 'note' | 'comment'
@@ -25,6 +28,8 @@ type NoteOrCommentRow = {
   subject: string | null
   body: string | null
   author: string
+  folderId: number
+  folderName: string
   latitude: number
   longitude: number
   createdAt: Date
@@ -42,6 +47,8 @@ function buildPoints(notes: NoteWithComments[], userNameById: Record<string, str
       subject: note.subject,
       body: note.body,
       author: userNameById[note.userId] ?? 'n/a',
+      folderId: note.folder.id,
+      folderName: note.folder.name,
       latitude: note.latitude,
       longitude: note.longitude,
       createdAt: note.createdAt,
@@ -56,6 +63,8 @@ function buildPoints(notes: NoteWithComments[], userNameById: Record<string, str
         subject: null,
         author: userNameById[comment.userId] ?? 'n/a',
         body: comment.body,
+        folderId: note.folder.id,
+        folderName: note.folder.name,
         createdAt: comment.createdAt,
         lastUpdateAt: comment.updatedAt,
         latitude: note.latitude,
@@ -83,18 +92,12 @@ export const Route = createFileRoute('/api/notes/$regionSlug/download')({
             info: z.flattenError(searchResult.error),
           })
         }
-        const { format, apiKey } = searchResult.data
+        const { format, apiKey, folderId } = searchResult.data
 
         const region = await db.region.findFirst({ where: { slug: regionSlug } })
         if (!region) {
           return notFoundJson({ headers: corsHeaders })
         }
-
-        const notes = await db.note.findMany({
-          where: { regionId: region.id },
-          orderBy: { createdAt: 'asc' },
-          include: { noteComments: true },
-        })
 
         if (!compareApiKeyTimingSafe(apiKey)) {
           const authResponse = await guardRegionMembership({
@@ -106,6 +109,28 @@ export const Route = createFileRoute('/api/notes/$regionSlug/download')({
             return authResponse
           }
         }
+
+        if (folderId !== undefined) {
+          const folder = await db.noteFolder.findFirst({
+            where: { id: folderId, regions: { some: { id: region.id } } },
+            select: { id: true },
+          })
+          if (!folder) {
+            return badRequestJson({
+              headers: corsHeaders,
+              info: { folderId: 'Ordner gehört nicht zu dieser Region' },
+            })
+          }
+        }
+
+        const notes = await db.note.findMany({
+          where: {
+            folder: { regions: { some: { id: region.id } } },
+            ...(folderId !== undefined ? { folderId } : {}),
+          },
+          orderBy: { createdAt: 'asc' },
+          include: { noteComments: true, folder: { select: { id: true, name: true } } },
+        })
 
         const users = await db.user.findMany()
         const userNameById = Object.fromEntries(users.map((u) => [u.id, u.osmName ?? 'n/a']))

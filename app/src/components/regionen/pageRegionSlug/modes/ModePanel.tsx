@@ -42,12 +42,16 @@ const ModePanelListHeading = ({ title, subtitle, mutedClassName }: ModePanelList
   const tooltip = subtitle ? `${title} — ${subtitle}` : title
   return (
     <Tooltip text={tooltip} className="max-w-full min-w-0">
-      <div className="flex min-w-0 items-baseline gap-2">
-        <h1 className={twJoin(modePanelTitleClassName, 'min-w-0 truncate text-inherit')}>
+      <div className="flex min-w-0 flex-col justify-center gap-0 leading-tight">
+        <h1
+          className={twJoin(modePanelTitleClassName, 'min-w-0 truncate leading-tight text-inherit')}
+        >
           {title}
         </h1>
         {subtitle ? (
-          <div className={twJoin('min-w-0 truncate text-xs', mutedClassName)}>{subtitle}</div>
+          <div className={twJoin('min-w-0 truncate text-xs leading-4', mutedClassName)}>
+            {subtitle}
+          </div>
         ) : null}
       </div>
     </Tooltip>
@@ -139,7 +143,7 @@ export const ModePanel = ({
                   </Tooltip>
                   {detail.subtitle ? (
                     <div
-                      className={twJoin('min-w-0 text-xs leading-3', accent.invertedMutedClassName)}
+                      className={twJoin('min-w-0 text-xs leading-4', accent.invertedMutedClassName)}
                     >
                       {detail.subtitle}
                     </div>

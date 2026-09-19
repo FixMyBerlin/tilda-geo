@@ -93,6 +93,12 @@ export const adminNavigation: AdminNavItem[] = [
         description: 'Prüflisten für den Prüfmodus der Regionen.',
       },
       {
+        name: 'Hinweis-Ordner',
+        to: '/admin/note-folders',
+        countKey: 'noteFolders',
+        description: 'Ordner für den Hinweise-Modus der Regionen.',
+      },
+      {
         name: 'QA-Konfigurationen',
         to: '/admin/qa-configs',
         countKey: 'qaConfigsActive',

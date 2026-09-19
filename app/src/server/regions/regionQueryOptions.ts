@@ -6,7 +6,10 @@ import {
   STALE_TIME_NOTES_MS,
 } from '@/config/queryStaleTimes'
 import { getRegionMemberOsmNamesFn } from '@/server/memberships/memberships.functions'
-import { getNotesAndCommentsForRegionFn } from '@/server/notes/notes.functions'
+import {
+  getNoteFoldersForRegionFn,
+  getNotesAndCommentsForRegionFn,
+} from '@/server/notes/notes.functions'
 import {
   getQaConfigsForRegionFn,
   getQaDataForMapFn,
@@ -31,15 +34,27 @@ export const internalNotesQueryKey = ['notes', 'getNotesAndCommentsForRegion'] a
 
 export const internalNotesQueryOptions = (
   regionSlug: string,
+  folderId: number | undefined,
   filter: InternalNotesFilter | null | undefined,
 ) => {
   return queryOptions({
-    queryKey: [...internalNotesQueryKey, { regionSlug, filter }] as const,
+    queryKey: [...internalNotesQueryKey, { regionSlug, folderId, filter }] as const,
     queryFn: () => {
       return getNotesAndCommentsForRegionFn({
-        data: { regionSlug, filter: filter ?? undefined },
+        data: { regionSlug, folderId: folderId!, filter: filter ?? undefined },
       })
     },
+    staleTime: STALE_TIME_NOTES_MS,
+    enabled: folderId !== undefined,
+  })
+}
+
+export const noteFoldersQueryKey = ['notes', 'getNoteFoldersForRegion'] as const
+
+export const noteFoldersQueryOptions = (regionSlug: string) => {
+  return queryOptions({
+    queryKey: [...noteFoldersQueryKey, { regionSlug }] as const,
+    queryFn: () => getNoteFoldersForRegionFn({ data: { regionSlug } }),
     staleTime: STALE_TIME_NOTES_MS,
   })
 }

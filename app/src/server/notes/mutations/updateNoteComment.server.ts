@@ -18,7 +18,10 @@ export async function updateNoteComment(input: z.infer<typeof Schema>, headers: 
 
   // Only author may update own note comment
   const { userId: dbUserId } = await db.noteComment.findFirstOrThrow({
-    where: { id: parsed.commentId },
+    where: {
+      id: parsed.commentId,
+      note: { folder: { regions: { some: { slug: parsed.regionSlug } } } },
+    },
     select: { userId: true },
   })
 

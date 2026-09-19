@@ -4,6 +4,7 @@ import {
   ClipboardDocumentListIcon,
   ClockIcon,
   CloudArrowUpIcon,
+  FolderIcon,
   MapIcon,
   UsersIcon,
 } from '@heroicons/react/20/solid'
@@ -114,6 +115,14 @@ export function PageRegionEdit() {
                 count={linkCounts.reviewLists}
               >
                 Prüflisten
+              </AdminAsideLink>
+              <AdminAsideLink
+                icon={FolderIcon}
+                to="/admin/note-folders"
+                search={regionSearch}
+                count={linkCounts.noteFolders}
+              >
+                Hinweis-Ordner
               </AdminAsideLink>
               <AdminAsideLink
                 icon={ClockIcon}

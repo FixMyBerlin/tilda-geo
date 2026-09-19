@@ -12,6 +12,7 @@ type AdminRegionNavLinkKey =
   | 'uploads'
   | 'qaConfigs'
   | 'reviewLists'
+  | 'noteFolders'
   | 'auditLog'
   | 'contract'
   | 'uploadsCsv'
@@ -68,6 +69,12 @@ export function buildAdminRegionNavigation(region: AdminRegionNavRegion) {
       key: 'reviewLists',
       name: 'Prüflisten',
       to: '/admin/review-lists',
+      search: { regionSlug },
+    },
+    {
+      key: 'noteFolders',
+      name: 'Hinweis-Ordner',
+      to: '/admin/note-folders',
       search: { regionSlug },
     },
     {

@@ -1,11 +1,31 @@
-import type { Prisma } from '@/prisma/generated/client'
 import db from '../../src/server/db.server'
 
-const seedInternalNotes = async () => {
-  // Dev seed uses an explicit slug list; extend when adding internal-notes fixtures.
-  const regionsWithInternalNotes = [{ slug: 'dev-status-public', map: { lat: 52.5, lng: 13.4 } }]
+type RegionNotesSeed = {
+  slug: string
+  /** OSM notes come from the OSM API at this map center when `notesOsm` is on. */
+  map: { lat: number; lng: number }
+  folders: string[]
+}
 
-  // Get users for seeding (use first two users found)
+/**
+ * One region per notes-mode combo (flags live on the region in `regionSeedCatalog`):
+ * - only OSM — `dev-status-private` (`notesOsm`, no folders)
+ * - only TILDA, 1 folder — `dev-status-public`
+ * - nothing — `dev-downloads-disabled` (both flags off, no folders)
+ * - OSM + TILDA, 3 folders — `dev-status-promoted`
+ */
+const regionNotesSeeds = [
+  { slug: 'dev-status-private', map: { lat: 52.5, lng: 13.4 }, folders: [] },
+  { slug: 'dev-status-public', map: { lat: 52.5, lng: 13.4 }, folders: ['Allgemein'] },
+  { slug: 'dev-downloads-disabled', map: { lat: 52.5, lng: 13.4 }, folders: [] },
+  {
+    slug: 'dev-status-promoted',
+    map: { lat: 52.5, lng: 13.4 },
+    folders: ['Allgemein', 'Planung', 'Begehung'],
+  },
+] satisfies RegionNotesSeed[]
+
+const seedInternalNotes = async () => {
   const users = await db.user.findMany({
     take: 2,
     orderBy: { createdAt: 'asc' },
@@ -23,53 +43,66 @@ const seedInternalNotes = async () => {
     return
   }
 
-  const seedInternalNoteComments: Array<Prisma.NoteCommentUncheckedCreateInput> = [
-    {
-      userId: user1.id,
-      noteId: 999, // replaced below
-      body: 'Ich stimme zu. **Fettdruck**.',
-    },
-    {
-      userId: user2.id,
-      noteId: 999, // replaced below
-      updatedAt: new Date(),
-      body: 'Ich habe das erledigt.',
-    },
-  ]
-
-  for (const region of regionsWithInternalNotes) {
-    const regionForId = await db.region.findFirstOrThrow({ where: { slug: region.slug } })
-    const noteInput: Prisma.NoteUncheckedCreateInput = {
-      userId: user2.id,
-      regionId: regionForId.id,
-      subject: 'X nicht Y',
-      body: `
+  const openNoteBody = `
 An dieser Stelle ist nicht X sondern Y zu finden.
 
 **Fettdruck**
 
 * Liste
 * Liste
-      `,
-      latitude: region.map.lat,
-      longitude: region.map.lng,
-    }
-    const note = await db.note.create({ data: noteInput })
-    for (const comment of seedInternalNoteComments) {
-      await db.noteComment.create({ data: { ...comment, noteId: note.id } })
-    }
+      `
 
-    const seedResolvedInternalNotes: Prisma.NoteUncheckedCreateInput = {
-      userId: user1.id,
-      regionId: regionForId.id,
-      subject: 'Prüfen ob Z richtig ist',
-      body: `Dieser Hinweis ist bereits erledigt worden und außerdem bearbeitet.`,
-      resolvedAt: new Date(),
-      updatedAt: new Date(),
-      latitude: region.map.lat + 0.2,
-      longitude: region.map.lng + 0.2,
+  for (const regionSeed of regionNotesSeeds) {
+    const region = await db.region.findFirstOrThrow({ where: { slug: regionSeed.slug } })
+
+    for (const [folderIndex, folderName] of regionSeed.folders.entries()) {
+      const folder = await db.noteFolder.create({
+        data: { name: folderName, regions: { connect: { id: region.id } } },
+      })
+
+      const lat = regionSeed.map.lat + folderIndex * 0.08
+      const lng = regionSeed.map.lng + folderIndex * 0.08
+
+      const openNote = await db.note.create({
+        data: {
+          userId: user2.id,
+          folderId: folder.id,
+          subject: `${folderName}: X nicht Y`,
+          body: openNoteBody,
+          latitude: lat,
+          longitude: lng,
+        },
+      })
+
+      await db.noteComment.create({
+        data: {
+          userId: user1.id,
+          noteId: openNote.id,
+          body: 'Ich stimme zu. **Fettdruck**.',
+        },
+      })
+      await db.noteComment.create({
+        data: {
+          userId: user2.id,
+          noteId: openNote.id,
+          updatedAt: new Date(),
+          body: 'Ich habe das erledigt.',
+        },
+      })
+
+      await db.note.create({
+        data: {
+          userId: user1.id,
+          folderId: folder.id,
+          subject: `${folderName}: Prüfen ob Z richtig ist`,
+          body: `Dieser Hinweis ist bereits erledigt worden und außerdem bearbeitet.`,
+          resolvedAt: new Date(),
+          updatedAt: new Date(),
+          latitude: lat + 0.02,
+          longitude: lng + 0.02,
+        },
+      })
     }
-    await db.note.create({ data: seedResolvedInternalNotes })
   }
 }
 

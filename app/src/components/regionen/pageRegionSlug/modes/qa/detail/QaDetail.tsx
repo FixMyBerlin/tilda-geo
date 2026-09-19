@@ -2,7 +2,6 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useOptimistic, useState } from 'react'
 import { IntlProvider } from 'react-intl'
 import { useMap } from 'react-map-gl/maplibre'
-import { ObjectDump } from '@/components/admin/ObjectDump'
 import {
   qaMapDataQueryOptions,
   restoreQaMapDataRow,
@@ -14,10 +13,10 @@ import { safeSetFeatureState } from '@/components/regionen/pageRegionSlug/Map/ut
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { translations } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/translations.const'
 import { TimeWithRelativeTooltip } from '@/components/shared/date/TimeWithRelativeTooltip'
+import { AdminLogDataButton } from '@/components/shared/debug/AdminLogDataButton'
 import { buttonStylesOnYellow } from '@/components/shared/links/styles'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { toastError } from '@/components/shared/toast/toastError'
-import { isDev } from '@/components/shared/utils/isEnv'
 import {
   getQaDecisionDataForAreaFn,
   getQaEvaluationsForAreaFn,
@@ -308,7 +307,7 @@ const QaDetailSession = ({
             <QaEvaluationHistory evaluations={evaluations} />
           </div>
         )}
-        {isDev && <ObjectDump title="QaDetail" data={{ areaId, decisionData, evaluations }} />}
+        <AdminLogDataButton data={{ areaId, decisionData, evaluations }} />
       </div>
     </IntlProvider>
   )

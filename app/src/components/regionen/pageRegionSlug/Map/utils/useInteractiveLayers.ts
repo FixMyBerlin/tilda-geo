@@ -5,6 +5,7 @@ import { useDataParam } from '@/components/regionen/pageRegionSlug/hooks/useQuer
 import { useQaParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useQaParam'
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
+import { useNotesSelection } from '@/components/regionen/pageRegionSlug/modes/notes/useNotesSelection'
 import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { createLayerKeyAtlasGeo } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
@@ -93,6 +94,7 @@ export const useInteractiveLayers = () => {
   const { dataParam: selectedDatasetIds } = useDataParam()
   const { data: regionDatasets } = useRegionDatasetsQuery()
   const currentMode = useCurrentMode()
+  const notesSelection = useNotesSelection()
 
   // Debug mode: return ALL layers from config
   if (debugLayerStyles && categoriesConfig) {
@@ -106,10 +108,10 @@ export const useInteractiveLayers = () => {
     categories: activeCategoriesConfig,
   })
 
-  if (region.notesOsm && currentMode.isNotes) {
+  if (notesSelection.kind === 'osm' && currentMode.isNotes) {
     activeCategoryLayerIds.push(osmNotesLayerId)
   }
-  if (region.notesInternal && hasPermissions && currentMode.isNotes) {
+  if (notesSelection.kind === 'internal' && currentMode.isNotes) {
     activeCategoryLayerIds.push(internalNotesLayerId)
   }
   if (hasPermissions && qaParamData.key && currentMode.isQa) {

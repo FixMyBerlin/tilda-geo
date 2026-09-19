@@ -117,16 +117,20 @@ Tests: `availableModes.test.ts`, `app/tests/smoke/region-modes.spec.ts` (guests 
 
 Internal notes are always member-only, including on PUBLIC regions.
 
-| Action                        | Who                                                         | Code                                                                                   |
-| ----------------------------- | ----------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| List / read                   | Member, admin                                               | `getNotesAndCommentsForRegion`, `getNoteAndComments`, `api/notes.$regionSlug.download` |
-| Create note, comment          | Member, admin                                               | `createNote`, `createNoteComment`                                                      |
-| Resolve / reopen              | Any member, admin                                           | `updateNoteResolvedAt`                                                                 |
-| Edit / delete note or comment | **Author only** (must also be member). Admins get no bypass | `updateNote`, `deleteNote`, `updateNoteComment`, `deleteNoteComment`                   |
+| Action                                     | Who                                                                                                                    | Code                                                                                   |
+| ------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| List / read                                | Member, admin                                                                                                          | `getNotesAndCommentsForRegion`, `getNoteAndComments`, `api/notes.$regionSlug.download` |
+| Create note, comment                       | Member, admin                                                                                                          | `createNote`, `createNoteComment`                                                      |
+| Resolve / reopen                           | Any member, admin                                                                                                      | `updateNoteResolvedAt`                                                                 |
+| Edit / delete note or comment              | **Author only** (must also be member). Admins get no bypass                                                            | `updateNote`, `deleteNote`, `updateNoteComment`, `deleteNoteComment`                   |
+| Create / rename folder                     | Member, admin                                                                                                          | `createNoteFolder`, `updateNoteFolder`                                                 |
+| Delete folder                              | Member, admin: only empty folders linked to this region only. Admin (`/admin/note-folders`): empty folders, no cascade | `deleteNoteFolder`, `deleteNoteFolderForAdmin`                                         |
+| Move note to another folder                | Member, admin                                                                                                          | `moveNoteToFolder`                                                                     |
+| Change which regions a folder is linked to | Admin only                                                                                                             | `updateNoteFolderForAdmin`                                                             |
 
-Folders do not exist yet. When they do, linking a folder to other regions is planned as admin-only.
+Folders (`NoteFolder`) are assigned to regions in `/admin/note-folders` (admin-only). OSM as a virtual folder in the Hinweise dropdown is not a `NoteFolder` row. Member writes bind the note/comment/folder to the acting region (`assertNoteInRegion` / `assertFolderInRegion`, or the same constraint in the lookup `where`).
 
-Tests: `getNotesAndCommentsForRegion.server.test.ts` (non-member gets nothing). `notesAuthorOnly.server.test.ts` (edit/delete of notes and comments: author only, another member and admin rejected).
+Tests: `getNotesAndCommentsForRegion.server.test.ts` (non-member gets nothing). `notesAuthorOnly.server.test.ts` (edit/delete of notes and comments: author only, another member and admin rejected; lookups scoped to the acting region). `notesMutationsRegion.server.test.ts` (resolve/comment reject notes outside the acting region). `deleteNoteFolder.server.test.ts` (non-empty and shared folders blocked). `moveNoteToFolder.server.test.ts` (target folder must belong to the region).
 
 ### Qualitätssicherung
 

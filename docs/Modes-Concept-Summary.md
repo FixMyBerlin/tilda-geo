@@ -17,24 +17,26 @@ Switching modes keeps map position and layer configuration. Each mode stores its
 
 ## Shared panel
 
-The right `ModePanel` has a heading, a collection selector (QA config or Prüfliste; read-only for Hinweise), a filter bar (search, chips or status, current map view vs all), and a list of compact previews. On desktop the panel sits on the map edge and is resizable.
+The right `ModePanel` has a heading, a collection selector (QA config, Prüfliste, or — for internal Hinweise — Ordner; read-only only for OSM Hinweise), a filter bar (search, chips or status, current map view vs all), and a list of compact previews. On desktop the panel sits on the map edge and is resizable.
 
 The inspector still shows the selected feature. Hovering a list row draws a mode-accent ring on the map (clamped to the viewport when the geometry is off-screen). Clicking the map or a row writes `f`, scrolls the row into view, and opens details. Hover does not select.
 
-| Feature                     | Default map                                                                            | Dedicated mode                              |
-| --------------------------- | -------------------------------------------------------------------------------------- | ------------------------------------------- |
-| Hinweise                    | Inspector "new note" tools navigate into the mode. No note markers on the default map. | Yes. One list for the region's notes kind.  |
-| Qualitätssicherung          | No                                                                                     | Yes only                                    |
-| Prüflisten                  | No                                                                                     | Yes only                                    |
-| Calculator (parking totals) | Yes. Drawing and totals on the map. "Summieren: …" stays in the category UI.           | No. Not a region mode. No `/rechner` route. |
+| Feature                     | Default map                                                                            | Dedicated mode                                           |
+| --------------------------- | -------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| Hinweise                    | Inspector "new note" tools navigate into the mode. No note markers on the default map. | Yes. OSM and/or TILDA folders; one collection at a time. |
+| Qualitätssicherung          | No                                                                                     | Yes only                                                 |
+| Prüflisten                  | No                                                                                     | Yes only                                                 |
+| Calculator (parking totals) | Yes. Drawing and totals on the map. "Summieren: …" stays in the category UI.           | No. Not a region mode. No `/rechner` route.              |
 
 ## Hinweise
 
-Lists the region's notes. Today that is OSM **or** TILDA internal notes, not both. Search, extent, and chips live in `notes`. Pins render only in this mode. From the default-map inspector, "new note" still jumps here (`notes.new` compose pin).
+Lists the region's notes. OSM and TILDA internal notes are independent region flags. When both are off, Hinweise is hidden from the primary menu. When one is on, the collection dropdown shows only that source. When both are on, OSM appears as one (public) row in the same dropdown as the TILDA folders; `notes.key` is `'osm'` or a folder id, and the list/map never mix the two. Search, extent, and chips live in `notes`. Pins render only in this mode. From the default-map inspector, "new note" still jumps here (`notes.new` compose pin).
 
-OSM notes are public. Internal notes are member-only. The Hinweise route is member-only when the region has only internal notes.
+OSM notes are public. Internal notes are member-only. The Hinweise route is member-only when the region has only internal notes (OSM also on keeps the page open for guests, who only see OSM).
 
-Folders are not in the product yet. When they are, OSM and internal notes may both be enabled on a region, but the list and map show one collection at a time: OSM **or** one internal folder.
+Internal notes are grouped into **Ordner** (`NoteFolder`), the same collection pattern as Prüflisten: many-to-many with regions (a folder can be shared across several region views of the same customer, e.g. one customer with several region cut-outs), one URL `key` selects the active folder, and the panel header has the create / rename / delete menu. A note lives in exactly one folder; the folder's regions are the note's regions — there is no separate `Note.regionId`. Every region that had internal notes enabled when the folders migration ran starts with one folder named "Allgemein"; regions created after that start empty and must create a first folder before "Neuer Hinweis" is available. Deleting a folder is blocked while it has notes, and a shared folder can only be unlinked in `/admin/note-folders`. Moving a note to another folder happens in the note detail view; the URL follows the note to its new folder. The map layer, list, and download always scope to the active folder only.
+
+Admin: `/admin/note-folders` assigns folders to regions, mirroring `/admin/review-lists`.
 
 ## Qualitätssicherung
 

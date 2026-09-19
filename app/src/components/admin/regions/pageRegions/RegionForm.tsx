@@ -14,8 +14,10 @@ import {
 } from '@/components/regionen/regionMeta/regionFormRadioItems'
 import { EN_DECIMAL_HELP } from '@/components/shared/form/enDecimalInput'
 import { CheckboxGroup } from '@/components/shared/form/fields/CheckboxGroup'
+import { ChoiceCheckbox } from '@/components/shared/form/fields/ChoiceCheckbox'
 import { RadioGroup } from '@/components/shared/form/fields/RadioGroup'
 import { Select } from '@/components/shared/form/fields/Select'
+import { choiceOptionListClassName } from '@/components/shared/form/fields/sharedStyles'
 import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form, type SubmitResult } from '@/components/shared/form/Form'
 import { Link } from '@/components/shared/links/Link'
@@ -30,12 +32,6 @@ import {
   regionConfigToFormValues,
   type RegionFormInput,
 } from '@/server/regions/regionWriteSchema'
-
-const notesItems = [
-  { value: 'osmNotes', label: 'OSM-Hinweise' },
-  { value: 'internalNotes', label: 'Interne Notizen' },
-  { value: 'disabled', label: 'Deaktiviert' },
-] as const
 
 const yesNoItems = [
   { value: 'true', label: 'Ja' },
@@ -65,7 +61,8 @@ export const regionFormEmptyDefaults = {
   promoted: 'false' as const,
   status: RegionStatus.PUBLIC,
   product: RegionProduct.radverkehr,
-  notes: 'osmNotes' as const,
+  notesOsm: 'true' as const,
+  notesInternal: 'false' as const,
   showSearch: 'false' as const,
   mapLat: '52.5',
   mapLng: '13.4',
@@ -417,13 +414,30 @@ export function RegionForm(props: Props) {
           </AdminFormSection>
 
           <AdminFormSection id="notes" title={sectionLabels.notes}>
-            <RadioGroup
-              inline
-              form={form}
-              name="notes"
-              label="Hinweise auf der Karte"
-              items={[...notesItems]}
-            />
+            <div className={choiceOptionListClassName}>
+              {(
+                [
+                  ['notesOsm', 'OSM-Hinweise anzeigen'],
+                  ['notesInternal', 'Interne TILDA Hinweise anzeigen'],
+                ] as const
+              ).map(([name, label]) => (
+                <form.Field key={name} name={name}>
+                  {(field) => (
+                    <ChoiceCheckbox
+                      id={name}
+                      name={field.name}
+                      checked={field.state.value === 'true'}
+                      ariaLabel={label}
+                      label={label}
+                      onBlur={field.handleBlur}
+                      onChange={(checked) =>
+                        field.handleChange((_prev) => (checked ? 'true' : 'false') as typeof _prev)
+                      }
+                    />
+                  )}
+                </form.Field>
+              ))}
+            </div>
           </AdminFormSection>
         </AdminFormLayout>
       )}

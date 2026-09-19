@@ -16,6 +16,10 @@ export const qaConfigsInRegionWhere = (regionSlug: string) =>
 export const reviewListsInRegionWhere = (regionSlug: string) =>
   ({ regions: { some: { slug: regionSlug } } }) satisfies Prisma.ReviewListWhereInput
 
+/** Note folders linked to the region (`/admin/note-folders`). */
+export const noteFoldersInRegionWhere = (regionSlug: string) =>
+  ({ regions: { some: { slug: regionSlug } } }) satisfies Prisma.NoteFolderWhereInput
+
 /** Child rows of Region that MCP/admin region writes replace via deleteMany + createMany. */
 const REGION_ASSIGNMENT_AUDIT_MODELS = [
   'RegionCategoryAssignment',

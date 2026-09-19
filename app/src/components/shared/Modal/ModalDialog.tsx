@@ -4,6 +4,7 @@ import {
   BookOpenIcon,
   ClipboardDocumentCheckIcon,
   ExclamationTriangleIcon,
+  FolderIcon,
   InformationCircleIcon,
   PencilIcon,
   XMarkIcon,
@@ -22,7 +23,15 @@ import {
 } from '@/components/shared/motion/modalOpenOrigin'
 import { UI_SPRING } from '@/components/shared/motion/spring.const'
 
-type ModalIcon = 'info' | 'error' | 'copyright' | 'download' | 'edit' | 'docs' | 'reviewList'
+type ModalIcon =
+  | 'info'
+  | 'error'
+  | 'copyright'
+  | 'download'
+  | 'edit'
+  | 'docs'
+  | 'reviewList'
+  | 'noteFolder'
 
 /** Escape hatch for callers with their own Heroicon (e.g. `ConfirmDialog`) instead of a preset key. */
 export type ModalCustomIcon = {
@@ -102,6 +111,11 @@ export const ModalDialog = ({
       bgClass: 'bg-teal-100',
       iconClass: 'text-teal-600',
       Icon: ClipboardDocumentCheckIcon,
+    },
+    noteFolder: {
+      bgClass: 'bg-teal-100',
+      iconClass: 'text-teal-600',
+      Icon: FolderIcon,
     },
   } satisfies Record<ModalIcon, { bgClass: string; iconClass: string; Icon: typeof PencilIcon }>
 

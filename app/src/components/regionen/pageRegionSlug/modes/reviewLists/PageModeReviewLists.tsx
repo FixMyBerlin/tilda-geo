@@ -13,6 +13,7 @@ import { ModeFilterBar } from '../ModeFilterBar'
 import { ModeFilterSelect, modeFilterIcons } from '../ModeFilterSelect'
 import { ModePanel } from '../ModePanel'
 import { modePanelHeaderIconButtonClassName } from '../modePanel.const'
+import { sharedWithRegionsSubtitle } from '../sharedWithRegions'
 import { useModeDetailSelection } from '../useModeDetailSelection'
 import { ReviewEntryDetail } from './detail/ReviewEntryDetail'
 import { ReviewEntryDetailActions } from './detail/ReviewEntryDetailActions'
@@ -99,12 +100,18 @@ export const PageModeReviewLists = () => {
   return (
     <ModePanel
       title={selectedList ? `Liste ${frenchQuote(selectedList.name)}` : 'Prüflisten'}
+      subtitle={
+        !panelDetail
+          ? sharedWithRegionsSubtitle('Liste', selectedList?.regions, region.slug)
+          : undefined
+      }
       detail={panelDetail}
       collectionAlwaysOpen={lists.length === 0}
       collection={
         <ReviewListSelect
           lists={lists}
           selectedListId={selectedListId}
+          currentRegionSlug={region.slug}
           onSelect={onSelectList}
           commands={reviewListCommands}
         />

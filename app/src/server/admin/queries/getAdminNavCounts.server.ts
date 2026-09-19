@@ -6,15 +6,16 @@ export type AdminNavCounts = Awaited<ReturnType<typeof getAdminNavCounts>>
 export async function getAdminNavCounts(headers: Headers) {
   await requireAdmin(headers)
 
-  const [regions, regionContracts, reviewLists, users, uploads, qaConfigsActive] =
+  const [regions, regionContracts, reviewLists, noteFolders, users, uploads, qaConfigsActive] =
     await Promise.all([
       db.region.count(),
       db.regionContract.count(),
       db.reviewList.count(),
+      db.noteFolder.count(),
       db.user.count(),
       db.mapDatasetUpload.count(),
       db.qaConfig.count({ where: { isActive: true } }),
     ])
 
-  return { regions, regionContracts, reviewLists, users, uploads, qaConfigsActive }
+  return { regions, regionContracts, reviewLists, noteFolders, users, uploads, qaConfigsActive }
 }

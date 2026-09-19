@@ -6,6 +6,7 @@ import {
 import { requireAuth } from '@/server/auth/session.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
+import { assertNoteInRegion } from '../queries/assertFolderInRegion.server'
 
 const Schema = z.object({
   noteId: z.number(),
@@ -18,6 +19,7 @@ export async function updateNoteResolvedAt(input: z.infer<typeof Schema>, header
   const parsed = Schema.parse(input)
 
   await authorizeRegionMemberByRegionSlug(session, parsed.regionSlug)
+  await assertNoteInRegion(parsed.noteId, parsed.regionSlug)
 
   const result = await runWithAuditContextAsync(
     memberFormAuditContext(headers, session.userId),

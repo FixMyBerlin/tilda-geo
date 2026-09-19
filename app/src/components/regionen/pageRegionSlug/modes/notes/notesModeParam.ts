@@ -1,17 +1,25 @@
 import { z } from 'zod'
 
+/** Virtual collection for OSM notes in the Hinweise folder dropdown (`notes.key`). */
+export const notesOsmCollectionKey = 'osm' as const
+
+export type NotesCollectionKey = number | typeof notesOsmCollectionKey
+
 /**
- * Single JSON param for the notes mode (`notes`). `key` is `'osm'` or a TILDA folder id;
- * omitted while a region has one notes kind. `extent` is omitted when `'view'` (the default)
- * and used for TILDA notes; OSM notes are always the map bbox, so the Ausschnitt control is
- * hidden there. `new` is the compose pin (`zoom/lat/lng`, same encoding as `map=`).
- * `review.new` is boolean `true`; `notes.new` is a map-param string — same session name,
- * different types.
+ * Single JSON param for the notes mode (`notes`). `key` is `'osm'` or a TILDA folder id.
+ * Omitted when it is the default: OSM-only regions, or the first folder when TILDA notes
+ * are on. `extent` is omitted when `'view'` (the default) and used for TILDA notes; OSM
+ * notes are always the map bbox, so the Ausschnitt control is hidden there. `new` is the
+ * compose pin (`zoom/lat/lng`, same encoding as `map=`). `review.new` is boolean `true`;
+ * `notes.new` is a map-param string — same session name, different types.
  */
 // Per-field `.catch` keeps stale bookmarks usable: `optionalSearchJson` drops the whole object
 // as soon as one field fails.
 export const zodNotesModeParam = z.object({
-  key: z.string().optional().catch(undefined),
+  key: z
+    .union([z.number(), z.literal(notesOsmCollectionKey)])
+    .optional()
+    .catch(undefined),
   search: z.string().optional().catch(undefined),
   extent: z.enum(['view', 'all']).optional().catch(undefined),
   completed: z.boolean().optional().catch(undefined),
@@ -25,7 +33,7 @@ export type NotesModeParam = z.infer<typeof zodNotesModeParam>
 
 export const compactNotesModeParam = (param: NotesModeParam) => {
   const next: NotesModeParam = {}
-  if (param.key) next.key = param.key
+  if (param.key !== undefined) next.key = param.key
   if (param.search) next.search = param.search
   if (param.extent && param.extent !== 'view') next.extent = param.extent
   if (param.completed !== undefined) next.completed = param.completed

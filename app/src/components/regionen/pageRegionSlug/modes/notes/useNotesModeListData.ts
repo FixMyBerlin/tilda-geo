@@ -12,14 +12,15 @@ import { useHasNewNoteComposerDraft } from '../composerDrafts/useHasComposerDraf
 import { notesAuthorFilterOptions, uniqueOsmNoteAuthorNames } from './notesModeFilters'
 import { internalNotesToListEntries, osmNotesToListEntries } from './notesModeListEntry'
 import { notesModeToServerFilter } from './notesModeParam'
-import { resolveNotesSelection } from './notesSelection'
+import { useNoteFolders } from './useNoteFolders'
 import { useNotesModeParam } from './useNotesModeParam'
+import { useNotesSelection } from './useNotesSelection'
 import { useOsmNotesQuery } from './useOsmNotesQuery'
 
 /**
- * Dual-dataset notes list (OSM vs one internal collection). Next step is XOR via `notes.key`
- * (`osm` vs folder id) once both region flags can be on — OSM is a virtual folder, never shown
- * together with an internal folder.
+ * Dual-dataset notes list. OSM and TILDA are XOR via `notes.key` (`osm` vs folder id).
+ * When both region flags are on, OSM is a virtual folder and never shown together with
+ * an internal folder.
  */
 export const useNotesModeListData = () => {
   const region = useRegion()
@@ -29,24 +30,26 @@ export const useNotesModeListData = () => {
   const { isComposing } = useNotesComposePin()
 
   const hasInternalNotes = region.notesInternal
-  const hasOsmNotes = region.notesOsm
-  const lacksInternalAccess = hasInternalNotes && !hasPermissions
-  const selection = resolveNotesSelection({
-    hasInternalNotes: hasInternalNotes && hasPermissions,
-    hasOsmNotes,
-  })
+  const lacksInternalAccess = hasInternalNotes && !hasPermissions && !region.notesOsm
+  const selection = useNotesSelection()
   const showingOsm = selection.kind === 'osm'
   const draftKind = showingOsm ? 'osm' : 'internal'
   const hasNewNoteDraft = useHasNewNoteComposerDraft(region.slug, draftKind)
   const serverFilter = notesModeToServerFilter(notesMode)
+
+  const { selectedFolderId } = useNoteFolders()
 
   const {
     data: internalData,
     isLoading: isInternalLoading,
     isError: isInternalError,
   } = useQuery({
-    ...internalNotesQueryOptions(region.slug, serverFilter),
-    enabled: selection.kind === 'internal' && hasPermissions && !isComposing,
+    ...internalNotesQueryOptions(region.slug, selectedFolderId, serverFilter),
+    enabled:
+      selection.kind === 'internal' &&
+      hasPermissions &&
+      !isComposing &&
+      selectedFolderId !== undefined,
   })
   const { isError: isOsmError } = useOsmNotesQuery()
   const osmCollection = useFilteredOsmNotes(serverFilter)
@@ -69,12 +72,6 @@ export const useNotesModeListData = () => {
     osmAuthorNames,
     myValue: myAuthorValue,
   })
-  const collectionOptions = showingOsm
-    ? [{ value: 'osm', label: 'OpenStreetMap-Hinweise (öffentlich)', private: false }]
-    : selection.kind === 'internal'
-      ? [{ value: 'internal', label: 'TILDA-Hinweise', private: true }]
-      : []
-
   return {
     kind: selection.kind,
     showingOsm,
@@ -86,11 +83,9 @@ export const useNotesModeListData = () => {
     hasNewNoteDraft,
     showInternalAuthCallout: lacksInternalAccess,
     capabilities: {
-      showDownload: !showingOsm,
       showReactionFilter: !showingOsm,
       showExtentFilter: !showingOsm,
       draftKind,
-      collectionOptions,
     },
   }
 }

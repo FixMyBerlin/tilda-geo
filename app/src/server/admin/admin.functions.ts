@@ -8,6 +8,8 @@ import { auditLogListSchema } from '@/server/audit/auditLogFilters.schema'
 import { getAuditHistoryForRecord, listAuditLog } from '@/server/audit/queries/listAuditLog.server'
 import { requireAdmin } from '@/server/auth/session.server'
 import db from '@/server/db.server'
+import { getNoteFolder } from '@/server/notes/queries/getNoteFolder.server'
+import { getNoteFoldersForAdmin } from '@/server/notes/queries/getNoteFoldersForAdmin.server'
 import { getQaConfig } from '@/server/qa-configs/queries/getQaConfig.server'
 import { getQaConfigsForAdmin } from '@/server/qa-configs/queries/getQaConfigsForAdmin.server'
 import { getQaConfigStatsForAdmin } from '@/server/qa-configs/queries/getQaConfigStatsForAdmin.server'
@@ -159,6 +161,32 @@ export const getAdminReviewListEditLoaderFn = createServerFn({ method: 'GET' })
       getAuditHistoryForRecord(headers, 'ReviewList', String(data.id)),
     ])
     return { list, regions, auditHistory }
+  })
+
+export const getAdminNoteFoldersLoaderFn = createServerFn({ method: 'GET' })
+  .validator((data: z.input<typeof AdminRegionFilterInput>) =>
+    AdminRegionFilterInput.parse(data ?? {}),
+  )
+  .handler(async ({ data }) => {
+    const folders = await getNoteFoldersForAdmin(data, getRequestHeaders())
+    return { folders }
+  })
+
+const AdminNoteFolderEditInput = z.object({ id: z.number() })
+
+export const getAdminNoteFolderEditLoaderFn = createServerFn({ method: 'GET' })
+  .validator((data: z.infer<typeof AdminNoteFolderEditInput>) =>
+    AdminNoteFolderEditInput.parse(data),
+  )
+  .handler(async ({ data }) => {
+    const headers = getRequestHeaders()
+    await requireAdmin(headers)
+    const [folder, regions, auditHistory] = await Promise.all([
+      getNoteFolder({ id: data.id }, headers),
+      getRegions(),
+      getAuditHistoryForRecord(headers, 'NoteFolder', String(data.id)),
+    ])
+    return { folder, regions, auditHistory }
   })
 
 const AdminMembershipsLoaderInput = createPageSearchSchema().extend({

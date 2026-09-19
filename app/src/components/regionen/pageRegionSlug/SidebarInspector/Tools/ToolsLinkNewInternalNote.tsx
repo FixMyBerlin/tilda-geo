@@ -57,6 +57,7 @@ export const ToolsLinkNewInternalNote = ({ properties, geometry, osmIdConfig }: 
               zodNotesModeParam.safeParse(prev[searchParamsRegistry.notes]).data ?? {}
             next[searchParamsRegistry.notes] = compactNotesModeParam({
               ...prevNotes,
+              key: prevNotes.key === 'osm' ? undefined : prevNotes.key,
               new: serializeMapParam({ zoom: 18, lng, lat }),
             })
             delete next[searchParamsRegistry.f]

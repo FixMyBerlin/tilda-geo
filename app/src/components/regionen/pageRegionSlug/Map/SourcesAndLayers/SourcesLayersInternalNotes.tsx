@@ -11,8 +11,9 @@ import {
 } from '@/components/regionen/pageRegionSlug/modes/notes/noteSelectRingPaint'
 import { notesHighlightIds } from '@/components/regionen/pageRegionSlug/modes/notes/notesListHoverId'
 import { notesModeToServerFilter } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
-import { useAllowInternalNotes } from '@/components/regionen/pageRegionSlug/modes/notes/useAllowInternalNotes'
+import { useNoteFolders } from '@/components/regionen/pageRegionSlug/modes/notes/useNoteFolders'
 import { useNotesModeValue } from '@/components/regionen/pageRegionSlug/modes/notes/useNotesModeParam'
+import { useNotesSelection } from '@/components/regionen/pageRegionSlug/modes/notes/useNotesSelection'
 import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { internalNotesQueryOptions } from '@/server/regions/regionQueryOptions'
@@ -22,16 +23,22 @@ export const internalNotesSourceId = 'internal-notes-source'
 
 export const SourcesLayersInternalNotes = () => {
   const region = useRegion()
-  const allowInternalNotes = useAllowInternalNotes()
   const { featuresParam } = useFeaturesParam()
   const currentMode = useCurrentMode()
   const notesModeValue = useNotesModeValue()
+  const notesSelection = useNotesSelection()
   const hoveredListItem = useHoveredListItem()
   const hoveredMapItemId = useHoveredMapItemId()
-  const showLayers = currentMode.isNotes && region.notesInternal && allowInternalNotes
+  const showLayers = currentMode.isNotes && notesSelection.kind === 'internal'
+  // Map markers always follow the active folder, same query as the panel list.
+  const { selectedFolderId } = useNoteFolders()
   const { data: result } = useQuery({
-    ...internalNotesQueryOptions(region.slug, notesModeToServerFilter(notesModeValue)),
-    enabled: showLayers,
+    ...internalNotesQueryOptions(
+      region.slug,
+      selectedFolderId,
+      notesModeToServerFilter(notesModeValue),
+    ),
+    enabled: showLayers && selectedFolderId !== undefined,
   })
 
   if (result === undefined) return null

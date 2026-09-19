@@ -5,7 +5,7 @@ import type { ReviewListForRegion } from '@/server/review-lists/queries/getRevie
 import { mapOverlayMenuClassName } from '../../mapOverlayChrome.const'
 import { ModeCollectionSelect } from '../ModeCollectionSelect'
 import { modePanelHeaderIconButtonClassName } from '../modePanel.const'
-import { formatLinkedRegionsHint } from './linkedRegionsHint'
+import { sharedWithRegionsSubtitle } from '../sharedWithRegions'
 import { ReviewListGeojsonUploadModal } from './ReviewListGeojsonUploadModal'
 import { ReviewListNameModal } from './ReviewListNameModal'
 import type { ReviewListCommands } from './useReviewListCommands'
@@ -13,6 +13,7 @@ import type { ReviewListCommands } from './useReviewListCommands'
 type SelectProps = {
   lists: ReviewListForRegion[]
   selectedListId: number | undefined
+  currentRegionSlug: string
   onSelect: (listId: number) => void
 }
 
@@ -28,9 +29,10 @@ const menuHeadingClassName = 'px-3 pt-2 pb-1 text-xs font-semibold tracking-wide
 export const ReviewListSelect = ({
   lists,
   selectedListId,
+  currentRegionSlug,
   onSelect,
   commands: { uploadError, create, rename, selectedList, nameModal, openNameModal, closeNameModal },
-}: Pick<SelectProps, 'lists' | 'selectedListId' | 'onSelect'> & {
+}: Pick<SelectProps, 'lists' | 'selectedListId' | 'currentRegionSlug' | 'onSelect'> & {
   commands: ReviewListCommands
 }) => {
   return (
@@ -44,7 +46,7 @@ export const ReviewListSelect = ({
             label: list.name,
             description: String(list.entryCount),
             private: true,
-            regionHint: formatLinkedRegionsHint(list.regions.map((region) => region.name)),
+            regionHint: sharedWithRegionsSubtitle('Liste', list.regions, currentRegionSlug),
           }))}
           onChange={(next) => onSelect(Number(next))}
         />

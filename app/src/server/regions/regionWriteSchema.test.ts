@@ -175,13 +175,13 @@ describe('RegionWriteSchema', () => {
     })
   })
 
-  test('rejects OSM and internal notes both enabled', () => {
+  test('allows OSM and internal notes both enabled', () => {
     const result = RegionWriteSchema.safeParse({
       ...validBase,
       notesOsm: true,
       notesInternal: true,
     })
-    expect(result.success).toBe(false)
+    expect(result.success).toBe(true)
   })
 })
 
@@ -192,7 +192,8 @@ const regionFormBase = {
   promoted: 'false' as const,
   status: 'PUBLIC' as const,
   product: 'radverkehr' as const,
-  notes: 'osmNotes' as const,
+  notesOsm: 'true' as const,
+  notesInternal: 'false' as const,
   showSearch: 'false' as const,
   mapLat: '52.5',
   mapLng: '13.4',
@@ -432,6 +433,20 @@ describe('RegionFormSchema', () => {
       'boundaries,boundaryLabels',
       'barrierAreas,barrierLines',
     ])
+  })
+
+  test('round-trips both notes flags independently', () => {
+    const formValues = regionConfigToFormValues({
+      ...validBase,
+      notesOsm: true,
+      notesInternal: true,
+    })
+    expect(formValues.notesOsm).toBe('true')
+    expect(formValues.notesInternal).toBe('true')
+    expect(RegionFormSchema.parse(formValues)).toMatchObject({
+      notesOsm: true,
+      notesInternal: true,
+    })
   })
 
   test('round-trips mask OSM relation IDs into the form string field', () => {

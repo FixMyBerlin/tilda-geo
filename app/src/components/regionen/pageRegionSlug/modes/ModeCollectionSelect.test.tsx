@@ -29,7 +29,7 @@ describe('ModeCollectionSelect', () => {
   })
 
   test('shows an info icon with the shared-region hint next to the lock', () => {
-    const hint = 'Diese Liste ist mit den Regionen »Alpha« und »Beta« verknüpft.'
+    const hint = 'Liste geteilt mit: »Alpha«, »Beta«'
     render(
       <ModeCollectionSelect
         aria-label="Prüfliste"
@@ -101,21 +101,45 @@ describe('ModeCollectionSelect', () => {
     expect(screen.getByTitle(INACTIVE_COLLECTION_TITLE)).toBeTruthy()
   })
 
-  test('Hinweise TILDA is private and read-only does not change the value', () => {
+  test('mixed Hinweise: OSM is public, folders are private, and onChange receives osm', () => {
     const onChange = vi.fn()
     render(
       <ModeCollectionSelect
-        aria-label="Hinweise-Sammlung"
-        value="internal"
-        options={[{ value: 'internal', label: 'TILDA-Hinweise', private: true }]}
-        readOnly
+        aria-label="Ordner"
+        value="9"
+        options={[
+          { value: 'osm', label: 'OpenStreetMap-Hinweise (öffentlich)', private: false },
+          { value: '9', label: 'Allgemein', description: '3', private: true },
+        ]}
         onChange={onChange}
       />,
     )
 
-    expect(screen.getByRole('option', { name: 'TILDA-Hinweise' })).toBeTruthy()
-    expect(screen.getByTitle(PRIVATE_DATASET_TITLE)).toBeTruthy()
-    fireEvent.click(screen.getByRole('option', { name: 'TILDA-Hinweise' }))
-    expect(onChange).not.toHaveBeenCalled()
+    expect(screen.queryByTitle(PRIVATE_DATASET_TITLE)).toBeTruthy()
+    expect(screen.getAllByTitle(PRIVATE_DATASET_TITLE)).toHaveLength(1)
+    fireEvent.click(screen.getByRole('option', { name: 'OpenStreetMap-Hinweise (öffentlich)' }))
+    expect(onChange).toHaveBeenCalledWith('osm')
+  })
+
+  test('internal folders (Hinweise-Ordner) are private and call onChange', () => {
+    const onChange = vi.fn()
+    render(
+      <ModeCollectionSelect
+        aria-label="Ordner"
+        value="9"
+        options={[
+          { value: '9', label: 'Allgemein', description: '3', private: true },
+          { value: '2', label: 'Kreuzungen', description: '1', private: true },
+        ]}
+        onChange={onChange}
+      />,
+    )
+
+    expect(screen.getByRole('option', { name: /Allgemein/ }).getAttribute('aria-selected')).toBe(
+      'true',
+    )
+    expect(screen.getAllByTitle(PRIVATE_DATASET_TITLE)).toHaveLength(2)
+    fireEvent.click(screen.getByRole('option', { name: /Kreuzungen/ }))
+    expect(onChange).toHaveBeenCalledWith('2')
   })
 })

@@ -33,8 +33,6 @@ const NOTES_TABLE_COLUMNS = [
   { id: 'preview', label: 'Vorschau', className: 'w-[36%]' },
 ] as const
 
-const notesListItemButtonClassName = 'px-3 pt-3.5 pb-4'
-
 type Props = {
   entries: NotesModeListEntry[]
   showingOsm: boolean
@@ -109,13 +107,13 @@ export const NotesModeList = ({
                 active={active}
                 onClick={() => selectEntry(entry)}
                 className={modePanelTintHairlineBottomClassName}
-                buttonClassName={notesListItemButtonClassName}
+                buttonClassName="px-3"
               >
-                <div className="flex items-start justify-between gap-2">
-                  <div className="relative flex min-w-0 items-start gap-1.5">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="relative flex min-w-0 items-center gap-1.5">
                     <NotesOpenClosedIcon
                       status={entry.status}
-                      className="mt-0.5 size-5 shrink-0 text-teal-700"
+                      className="size-5 shrink-0 text-teal-700"
                     />
                     <span className="flex min-w-0 items-baseline gap-1.5">
                       <span className={modePanelListTitleClassName}>{entry.title}</span>
@@ -130,7 +128,9 @@ export const NotesModeList = ({
                   <ModeCommentsPill count={entry.commentCount} />
                 </div>
                 {entry.commentPreview && (
-                  <div className={`mt-1 line-clamp-2 pl-6.5 italic ${modePanelListBodyClassName}`}>
+                  <div
+                    className={`mt-0.5 line-clamp-2 pl-6.5 italic ${modePanelListBodyClassName}`}
+                  >
                     {entry.commentPreview}
                   </div>
                 )}

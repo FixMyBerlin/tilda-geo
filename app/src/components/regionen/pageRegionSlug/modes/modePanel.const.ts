@@ -14,7 +14,7 @@ import {
  * inspector (`z-20`) → map.
  */
 export const modePanelClassName =
-  'relative flex h-full w-full shrink-0 flex-col overflow-y-hidden text-gray-900'
+  '@container/mode-panel relative flex h-full w-full shrink-0 flex-col overflow-y-hidden text-gray-900'
 
 /**
  * Mode column casts onto the map/inspector to the left — same strength as button `shadow-md`,

@@ -19,6 +19,12 @@ describe('deriveAvailableModes()', () => {
     expect(
       deriveAvailableModes({ region: region({ notesInternal: true }), qaConfigsCount: 0 }).notes,
     ).toBe(true)
+    expect(
+      deriveAvailableModes({
+        region: region({ notesOsm: true, notesInternal: true }),
+        qaConfigsCount: 0,
+      }).notes,
+    ).toBe(true)
   })
 
   test('qa mode requires at least one QA config', () => {

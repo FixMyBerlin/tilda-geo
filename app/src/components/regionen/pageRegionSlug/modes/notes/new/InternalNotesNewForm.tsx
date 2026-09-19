@@ -19,6 +19,7 @@ import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { sanitizeHtml } from '@/components/shared/utils/sanitizeHtml'
 import type { CreateNoteInputType } from '@/server/notes/notes.functions'
 import { createNoteFn } from '@/server/notes/notes.functions'
+import { noteFoldersQueryKey } from '@/server/regions/regionQueryOptions'
 import { ComposerDraftAutosave } from '../../composerDrafts/ComposerDraftAutosave'
 import { internalNewNoteDraftId } from '../../composerDrafts/composerDraftIds'
 import { toComposerDraftStringValues } from '../../composerDrafts/composerDraftStorage'
@@ -29,6 +30,7 @@ import {
 import { ModeFormSubmit } from '../../ModeFormSubmit'
 import { modePanelMutedClassName } from '../../modePanel.const'
 import { useInternalNotesQueryKey } from '../useInternalNotesQueryKey'
+import { useNoteFolders } from '../useNoteFolders'
 
 const InternalNoteSchema = z.object({
   subject: z.string().min(1, 'Betreff fehlt.'),
@@ -71,6 +73,8 @@ export const InternalNotesNewForm = () => {
   const draftId = internalNewNoteDraftId(regionSlug)
   const { isReady, draftValues, saveDraft, clearDraft } = useComposerDraft(draftId)
 
+  const { selectedFolderId } = useNoteFolders()
+
   const {
     mutateAsync: createNoteMutation,
     isPending,
@@ -80,6 +84,8 @@ export const InternalNotesNewForm = () => {
     onSuccess: () => {
       clearDraft()
       queryClient.invalidateQueries({ queryKey })
+      // Note counts shown in the folder select/manage menu change too.
+      queryClient.invalidateQueries({ queryKey: noteFoldersQueryKey })
       clearComposeParams()
       setOsmNewNoteFeature(undefined)
     },
@@ -98,6 +104,14 @@ export const InternalNotesNewForm = () => {
     return (
       <section className="px-4 py-3">
         <SmallSpinner />
+      </section>
+    )
+  }
+
+  if (selectedFolderId === undefined) {
+    return (
+      <section className="px-4 py-3">
+        <p className={modePanelMutedClassName}>Lege zuerst einen Ordner an.</p>
       </section>
     )
   }
@@ -126,6 +140,7 @@ export const InternalNotesNewForm = () => {
           try {
             await createNoteMutation({
               regionSlug,
+              folderId: selectedFolderId,
               subject: sanitizeHtml(values.subject),
               latitude: center.lat,
               longitude: center.lng,

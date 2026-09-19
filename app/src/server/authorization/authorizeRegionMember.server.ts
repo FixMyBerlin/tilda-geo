@@ -29,6 +29,7 @@ export async function authorizeRegionMemberByRegionSlug(session: AppSession, slu
   await authorizeRegionMemberByRegionId(session, regionId)
 }
 
+/** A note's regions are its folder's regions (`Note.regionId` was removed); membership in any of them is enough. */
 export async function authorizeRegionMemberByNoteId(session: AppSession, noteId: number) {
   if (!session.userId || !session.role) {
     throw new AuthorizationError(apiJsonMessages.notAuthenticated)
@@ -36,9 +37,16 @@ export async function authorizeRegionMemberByNoteId(session: AppSession, noteId:
   if (session.role === UserRoleEnum.ADMIN) {
     return
   }
-  const { regionId } = await db.note.findFirstOrThrow({
+  const note = await db.note.findFirstOrThrow({
     where: { id: noteId },
-    select: { regionId: true },
+    select: { folder: { select: { regions: { select: { id: true } } } } },
   })
-  await authorizeRegionMemberByRegionId(session, regionId)
+  const regionIds = note.folder.regions.map((region) => region.id)
+  const membership = await db.membership.findFirst({
+    where: { userId: session.userId, regionId: { in: regionIds } },
+    select: { id: true },
+  })
+  if (!membership) {
+    throw new AuthorizationError('Region membership or admin required')
+  }
 }

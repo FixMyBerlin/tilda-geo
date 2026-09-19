@@ -17,6 +17,7 @@ export const AUDITED_MODELS = [
   'MapDatasetCategory',
   'Note',
   'NoteComment',
+  'NoteFolder',
   'ReviewList',
   'ReviewEntry',
   'ReviewEntryComment',

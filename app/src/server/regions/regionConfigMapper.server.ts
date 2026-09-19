@@ -165,9 +165,9 @@ export type TRegion = {
   name: string
   fullName: string
   product: RegionProduct
-  /** OSM notes. Mutually exclusive with `notesInternal`. */
+  /** OSM notes. Independent of `notesInternal`; both may be on (OSM is then a virtual folder). */
   notesOsm: boolean
-  /** TILDA (Atlas) notes. Mutually exclusive with `notesOsm`. */
+  /** TILDA (Atlas) notes. Independent of `notesOsm`; both may be on. */
   notesInternal: boolean
   showSearch?: boolean
   mask: { osmRelationIds: number[]; bufferKm: number } | null

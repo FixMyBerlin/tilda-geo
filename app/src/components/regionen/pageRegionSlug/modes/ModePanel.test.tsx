@@ -76,7 +76,11 @@ describe('ModePanel', () => {
     expect(
       screen.getByRole('heading', { name: 'Prüflisten' }).closest('[data-tooltip]'),
     ).toHaveAttribute('data-tooltip', 'Prüflisten — Liste geteilt mit: berlin')
-    expect(screen.getByText('Liste geteilt mit: berlin')).toBeTruthy()
+    const subtitle = screen.getByText('Liste geteilt mit: berlin')
+    expect(subtitle).toBeTruthy()
+    expect(screen.getByRole('heading', { name: 'Prüflisten' }).parentElement).toContainElement(
+      subtitle,
+    )
     expect(screen.getByText('Export')).toBeTruthy()
     fireEvent.click(screen.getByRole('heading', { name: 'Prüflisten' }))
     expect(screen.getByText('Collection')).toBeTruthy()
