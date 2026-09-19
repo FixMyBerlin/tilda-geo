@@ -17,13 +17,20 @@ const UpdateOsmNoteInput = z
   .object({
     noteId: z.number().int().positive(),
     action: z.enum(['comment', 'close', 'reopen']),
-    text: z.string().optional(),
+    // Blank text becomes `undefined`, so close/reopen without a comment send no `text` field.
+    text: z
+      .string()
+      .trim()
+      .optional()
+      .transform((text) => text || undefined),
   })
-  .refine((data) => data.action !== 'comment' || Boolean(data.text?.trim()), {
+  .refine((data) => data.action !== 'comment' || data.text, {
     message: 'Bitte Kommentar eingeben.',
     path: ['text'],
   })
 
+export type UpdateOsmNoteData = z.output<typeof UpdateOsmNoteInput>
+
 export const updateOsmNoteFn = createServerFn({ method: 'POST' })
-  .validator((data: z.infer<typeof UpdateOsmNoteInput>) => UpdateOsmNoteInput.parse(data))
+  .validator((data: z.input<typeof UpdateOsmNoteInput>) => UpdateOsmNoteInput.parse(data))
   .handler(async ({ data }) => updateOsmNote(data))

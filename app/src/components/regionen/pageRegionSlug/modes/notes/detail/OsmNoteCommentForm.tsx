@@ -20,7 +20,7 @@ type Props = { thread: OsmApiNotesThreadType }
 type CommentValues = { comment: string }
 
 // Only used by the submit button (open notes); close/reopen read the textarea directly.
-const CommentSchema = z.object({ comment: z.string().min(1, 'Bitte Kommentar eingeben.') })
+const CommentSchema = z.object({ comment: z.string().trim().min(1, 'Bitte Kommentar eingeben.') })
 
 /**
  * Comment / close / reopen for a single OSM note, via OSM API v0.6 and the same OAuth
@@ -36,24 +36,24 @@ export const OsmNoteCommentForm = ({ thread }: Props) => {
   // (also changes the `key` on the outer `Form`, so `useComposerDraft` remounts too).
   const [sessionKey, setSessionKey] = useState(0)
   const { isReady, draftValues, saveDraft, clearDraft } = useComposerDraft(draftId)
-  const { mutateAsync, isPending, error, variables } = useMutation({
+  const updateOsmNote = useMutation({
     mutationFn: (input: { action: 'comment' | 'close' | 'reopen'; text?: string }) =>
       updateOsmNoteFn({ data: { noteId: thread.id, ...input } }),
-    onSuccess: (updated) => {
+    onSuccess: async (updated) => {
       const feature = toOsmFeaturePoint(updated)
       queryClient.setQueryData<OsmFeatureCollectionType>(queryKey, (old) =>
         old
           ? { ...old, features: old.features.map((f) => (f.id === feature.id ? feature : f)) }
           : old,
       )
-      queryClient.invalidateQueries({ queryKey })
+      await queryClient.invalidateQueries({ queryKey })
     },
   })
 
   // Optimistic while a close/reopen is in flight; otherwise the (query cache) thread status.
   const isClosed =
-    isPending && variables?.action !== 'comment'
-      ? variables?.action === 'close'
+    updateOsmNote.isPending && updateOsmNote.variables.action !== 'comment'
+      ? updateOsmNote.variables.action === 'close'
       : thread.status === 'closed'
 
   const resetAfterSuccess = () => {
@@ -78,7 +78,7 @@ export const OsmNoteCommentForm = ({ thread }: Props) => {
         schema={CommentSchema}
         onSubmit={async (values) => {
           try {
-            await mutateAsync({ action: 'comment', text: values.comment })
+            await updateOsmNote.mutateAsync({ action: 'comment', text: values.comment })
             resetAfterSuccess()
             return { success: true, resetValues: { comment: '' } }
           } catch (e) {
@@ -103,27 +103,21 @@ export const OsmNoteCommentForm = ({ thread }: Props) => {
                 checked={isClosed}
                 checkedLabel="geschlossen"
                 uncheckedLabel="offen"
-                pending={isPending}
-                onChange={async (nextClosed) => {
-                  // Read the current textarea value at toggle time (outside the submit flow).
-                  const text = form.state.values.comment?.trim()
-                  try {
-                    await mutateAsync({
-                      action: nextClosed ? 'close' : 'reopen',
-                      text: text || undefined,
-                    })
-                    resetAfterSuccess()
-                  } catch {
-                    // Shown via the mutation `error` below; the switch falls back to thread.status.
-                  }
-                }}
+                pending={updateOsmNote.isPending}
+                onChange={(nextClosed) =>
+                  // Sends the current textarea value along (outside the submit flow).
+                  updateOsmNote.mutate(
+                    { action: nextClosed ? 'close' : 'reopen', text: form.state.values.comment },
+                    { onSuccess: resetAfterSuccess },
+                  )
+                }
               />
               {!isClosed && (
                 <form.Subscribe selector={(s) => s.isSubmitting}>
                   {(isSubmitting) => (
                     <ModeFormSubmit
                       label="Kommentar veröffentlichen"
-                      pending={isSubmitting || isPending}
+                      pending={isSubmitting || updateOsmNote.isPending}
                     />
                   )}
                 </form.Subscribe>
@@ -132,7 +126,10 @@ export const OsmNoteCommentForm = ({ thread }: Props) => {
             <p className={modePanelMutedClassName}>
               Wird öffentlich auf openstreetmap.org gespeichert.
             </p>
-            {error && <p className="text-red-500">{error.message}</p>}
+            {/* Submit errors show in the Form's own alert; only surface close/reopen errors here. */}
+            {updateOsmNote.error && updateOsmNote.variables?.action !== 'comment' && (
+              <p className="text-red-500">{updateOsmNote.error.message}</p>
+            )}
           </>
         )}
       </Form>
