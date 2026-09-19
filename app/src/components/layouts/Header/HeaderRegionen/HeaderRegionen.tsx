@@ -1,5 +1,6 @@
 import { MotionConfig } from 'motion/react'
 import { useId } from 'react'
+import { PlanningModeToggle } from '@/components/regionen/pageRegionSlug/Planning/PlanningModeToggle'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { RegionPanelToggle } from '@/components/regionen/pageRegionSlug/welcome/RegionPanelToggle'
 import { RegionWelcomeDesktopPanel } from '@/components/regionen/pageRegionSlug/welcome/RegionWelcomeDesktopPanel'
@@ -24,6 +25,7 @@ export const HeaderRegionen = () => {
         <NavigationDesktop
           logo={<HeaderRegionenLogo />}
           primaryNavigation={primaryNavigation}
+          extra={region?.spaceFinderEnabled ? <PlanningModeToggle /> : undefined}
           trailing={
             // Always shown: the panel is also the region secondary-links surface (not welcome-only).
             <RegionPanelToggle

@@ -21,6 +21,9 @@ import { MobileLayerButton } from './mobile/MobileLayerButton'
 import { MobileMapHeader } from './mobile/MobileMapHeader'
 import { NotesNewCenterPin } from './modes/notes/new/NotesNewCenterPin'
 import { OsmNotes } from './modes/notes/OsmNotes'
+import { PlanningCandidateSelectionReset } from './Planning/candidates/PlanningCandidateToggle'
+import { PlanningPanel } from './Planning/PlanningPanel'
+import { useRegion } from './regionUtils/useRegion'
 import { SidebarInspector } from './SidebarInspector/SidebarInspector'
 import { SidebarLayerControls } from './SidebarLayerControls/SidebarLayerControls'
 import { DesktopOnly } from './utils/Breakpoint'
@@ -28,6 +31,7 @@ import { DesktopOnly } from './utils/Breakpoint'
 export const MapInterface = () => {
   const isDesktop = useBreakpoint('sm')
   const { is3dActive } = useBg3dParam()
+  const { spaceFinderEnabled } = useRegion()
 
   useEffect(function registerPmtilesProtocolOnMount() {
     const protocol = new Protocol()
@@ -73,7 +77,11 @@ export const MapInterface = () => {
         </div>
       )}
       <OsmNotes />
+      {/* Planning (Flächenfinder) floating panel; becomes a region mode (see flaechenfinder_as_mode.plan.md). */}
+      {spaceFinderEnabled && <PlanningPanel />}
+      {spaceFinderEnabled && <PlanningCandidateSelectionReset />}
       <SidebarLayerControls />
+      {/* Also renders the planning candidate list while that tool is active. */}
       <SidebarInspector />
       <div className={mapOverlayBottomRightControlsClassName}>
         {isDesktop ? (

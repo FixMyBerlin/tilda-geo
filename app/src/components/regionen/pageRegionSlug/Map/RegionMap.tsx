@@ -14,6 +14,8 @@ import {
   useMapCalculatorDrawActive,
   useMapInspectorFeatures,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
+import { usePlanningBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningBoundaryState'
+import { usePlanningCandidatesState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningCandidatesState'
 import { useBg3dParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBg3dParam'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
@@ -40,6 +42,7 @@ import { useNotesComposeActive } from '../modes/notes/useNotesComposeActive'
 import { ReviewMapDrawing } from '../modes/reviewLists/drawing/ReviewMapDrawing'
 import { useReviewDrawActive } from '../modes/reviewLists/useReviewDrawActive'
 import { useCurrentMode } from '../modes/useCurrentMode'
+import { PlanningMapDrawing } from '../Planning/drawing/PlanningMapDrawing'
 import { useRegion } from '../regionUtils/useRegion'
 import { Calculator } from './Calculator/Calculator'
 import { Map3dTouchRotation } from './Map3dTouchRotation'
@@ -51,6 +54,10 @@ import { SourcesLayersInternalNotes } from './SourcesAndLayers/SourcesLayersInte
 import { SourcesLayersMap3dBuildings } from './SourcesAndLayers/SourcesLayersMap3dBuildings'
 import { SourcesLayersMap3dDem } from './SourcesAndLayers/SourcesLayersMap3dDem'
 import { SourcesLayersOsmNotes } from './SourcesAndLayers/SourcesLayersOsmNotes'
+import {
+  planningHexagonsSourceLayer,
+  SourcesLayersPlanning,
+} from './SourcesAndLayers/SourcesLayersPlanning'
 import { SourcesLayersQa } from './SourcesAndLayers/SourcesLayersQa'
 import { SourcesLayersReviewEntries } from './SourcesAndLayers/SourcesLayersReviewEntries'
 import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersStaticDatasets'
@@ -110,10 +117,29 @@ export const RegionMap = () => {
   const calculatorDrawActive = useMapCalculatorDrawActive()
   const notesComposeActive = useNotesComposeActive()
   const reviewDrawActive = useReviewDrawActive()
+  const planningPolygonDrawing = usePlanningBoundaryState((s) => s.polygonDrawInProgress)
+  const candidateSelectActive = usePlanningCandidatesState((s) => s.selectActive)
+  const toggleCandidate = usePlanningCandidatesState((s) => s.toggleCandidate)
 
   const handleClick = ({ features, ...event }: MapLayerMouseEvent) => {
     if (reviewDrawActive) return
     if (containMaskFeature(features)) {
+      return
+    }
+
+    // Kandidaten-Auswahlwerkzeug des Planungsmoduls (PlanningCandidateToggle): solange
+    // es aktiv ist, sammelt ein Klick auf ein Ergebnis-Hexagon Kandidaten, statt den
+    // Inspector zu öffnen – auch ein Klick ins Leere lässt die Auswahl unangetastet.
+    if (candidateSelectActive) {
+      const hexagon = features?.find((f) => f.sourceLayer === planningHexagonsSourceLayer)
+      const h3Id = hexagon?.properties?.h3_id
+      if (hexagon && h3Id) {
+        toggleCandidate({
+          h3Id: String(h3Id),
+          geometry: hexagon.geometry,
+          properties: { ...hexagon.properties },
+        })
+      }
       return
     }
     if (!isProd) {
@@ -268,13 +294,13 @@ export const RegionMap = () => {
     updateMapBounds(mainMap?.getBounds() || null)
   }
 
-  // While the calculator draw tool or notes compose is active, no layers are interactive:
-  // clicking/hovering the data does nothing and the inspector can't open
-  // (queryRenderedFeatures returns none). This replaces a special-case guard in the click
-  // handler with the map's own interactivity mechanism.
+  // While a draw tool (calculator, Prüflisten, planning study-area polygon in its point-placing
+  // phase) or notes compose is active, no layers are interactive: clicking/hovering the data does
+  // nothing and the inspector can't open (queryRenderedFeatures returns none). This replaces a
+  // special-case guard in the click handler with the map's own interactivity mechanism.
   const computedInteractiveLayerIds = useInteractiveLayers()
   const interactiveLayerIds =
-    calculatorDrawActive || notesComposeActive || reviewDrawActive
+    calculatorDrawActive || notesComposeActive || reviewDrawActive || planningPolygonDrawing
       ? NO_INTERACTIVE_LAYERS
       : computedInteractiveLayerIds
 
@@ -350,6 +376,8 @@ export const RegionMap = () => {
       <SourcesLayersQa />
       <SearchResultLayers />
       <NotesNewRelatedGeometry />
+      <SourcesLayersPlanning />
+      <PlanningMapDrawing />
       {/* Last in tree + moveLayer: stay above remounted highlights. Do not use this layer as beforeId. */}
       <TerrainProfileHoverMarkerLayer />
       <SourcesLayersReviewEntries />

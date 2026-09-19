@@ -23,10 +23,13 @@ import { zodReviewListsModeParam } from '@/components/regionen/pageRegionSlug/mo
 import {
   optionalSearchJson,
   optionalSearchBoolean,
+  optionalSearchNumber,
   optionalSearchString,
   searchBoolean,
+  searchNumber,
   searchStringArray,
 } from '@/lib/searchParamsSchema'
+import { PLANNING_SCORE_MODES } from '@/shared/regionen/planningScoreMode.const'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 
 const parseDrawParam = (query: string | undefined): DrawArea[] => {
@@ -60,6 +63,11 @@ const backgroundSearchParam = () =>
     .transform((s) => s ?? defaultBackgroundParam)
     .pipe(z.enum(validBackgroundParams).catch(defaultBackgroundParam))
 
+const planningScoreSearchParam = () =>
+  optionalSearchString()
+    .transform((s) => s ?? 'kombination')
+    .pipe(z.enum(PLANNING_SCORE_MODES).catch('kombination'))
+
 export const regionDialogParamSchema = z.enum(['welcome', 'download', 'docs'])
 
 export type RegionDialogParam = z.infer<typeof regionDialogParamSchema>
@@ -85,6 +93,16 @@ export const regionSearchSchema = z.object({
   // per-child validateSearch schemas.
   [searchParamsRegistry.notes]: optionalSearchJson(zodNotesModeParam),
   [searchParamsRegistry.review]: optionalSearchJson(zodReviewListsModeParam),
+  [searchParamsRegistry.planning]: searchBoolean(false),
+  [searchParamsRegistry.planningArea]: optionalSearchNumber(),
+  [searchParamsRegistry.planningVariant]: optionalSearchNumber(),
+  [searchParamsRegistry.planningScenario]: optionalSearchNumber(),
+  [searchParamsRegistry.planningRun]: optionalSearchNumber(),
+  [searchParamsRegistry.planningScore]: planningScoreSearchParam(),
+  [searchParamsRegistry.planningHexagons]: searchBoolean(true),
+  [searchParamsRegistry.planningHexagonsOpacity]: searchNumber(100),
+  [searchParamsRegistry.planningMinArea]: searchNumber(0),
+  [searchParamsRegistry.planningAreaFilter]: searchBoolean(false),
 })
 
 export type RegionSearch = z.infer<typeof regionSearchSchema>

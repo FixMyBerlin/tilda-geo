@@ -9,14 +9,17 @@ import {
   useMapLoaded,
   useMapSidebarSize,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
+import { usePlanningCandidatesState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningCandidatesState'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useSelectedFeatures } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useSelectedFeatures'
 import { isModeOwnedSource } from '@/components/regionen/pageRegionSlug/modes/modeScopedSelection'
+import { CloseButton } from '@/components/shared/CloseButton/CloseButton'
 import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { FadeSlideIn } from '@/components/shared/motion/FadeSlideIn'
 import { mapOverlayMaxHeightClassName, mapOverlaySheetClassName } from '../mapOverlayChrome.const'
 import { MobileBottomSheet } from '../mobile/MobileBottomSheet'
 import { PanelResizeHandle } from '../PanelResizeHandle'
+import { PlanningCandidateList } from '../Planning/candidates/PlanningCandidateList'
 import { Inspector } from './Inspector'
 import { InspectorHeader } from './InspectorHeader'
 import { inspectorRenderableFeatures } from './useInspectorRenderableFeatures'
@@ -40,7 +43,14 @@ export const SidebarInspector = () => {
     selectedFeatures.map((feature) => feature.mapFeature),
   )
 
-  const renderFeatures = !!features.length
+  // Kandidaten-Auswahlwerkzeug des Planungsmoduls: solange es aktiv ist, zeigt dieselbe
+  // Sidebar statt der Einzel-Feature-Ansicht die Übersicht der ausgewählten Hexagone
+  // (PlanningCandidateList) – gleiche Panel-Chrome, gleiche ziehbare Breite.
+  const candidateSelectActive = usePlanningCandidatesState((s) => s.selectActive)
+  const setCandidateSelectActive = usePlanningCandidatesState((s) => s.setSelectActive)
+  const candidateCount = usePlanningCandidatesState((s) => s.candidates.length)
+
+  const renderFeatures = !!features.length || candidateSelectActive
 
   const { ref: desktopPanelRef, onResizeHandlePointerDown } = useResizableInspectorWidth({
     enabled: isDesktop,
@@ -53,6 +63,10 @@ export const SidebarInspector = () => {
     const modeUrlFeatures = featuresParam.filter((feature) => isModeOwnedSource(feature.sourceId))
     setFeaturesParam(modeUrlFeatures.length > 0 ? modeUrlFeatures : null)
     clearInspectorFeatures()
+    // Schließt die Sidebar auch dann, wenn sie gerade die Kandidatenliste zeigt.
+    // Die Auswahl selbst bleibt erhalten, verschwindet aber von der Karte (die
+    // gelbe Markierung hängt an selectActive, siehe CandidateHighlightLayer).
+    setCandidateSelectActive(false)
   }
 
   useEffect(
@@ -90,10 +104,14 @@ export const SidebarInspector = () => {
       <MobileBottomSheet
         open={renderFeatures}
         onClose={handleClose}
-        title={`${features.length} ${features.length === 1 ? 'Element' : 'Elemente'}`}
+        title={
+          candidateSelectActive
+            ? `${candidateCount} ${candidateCount === 1 ? 'Kandidat' : 'Kandidaten'}`
+            : `${features.length} ${features.length === 1 ? 'Element' : 'Elemente'}`
+        }
       >
         <div className="px-4 pb-4">
-          <Inspector features={features} />
+          {candidateSelectActive ? <PlanningCandidateList /> : <Inspector features={features} />}
         </div>
       </MobileBottomSheet>
     )
@@ -127,8 +145,20 @@ export const SidebarInspector = () => {
             )}
           >
             <FadeSlideIn x={24} className="relative min-h-0 flex-1 overflow-y-auto p-2">
-              <InspectorHeader count={features.length} handleClose={handleClose} />
-              <Inspector features={features} />
+              {candidateSelectActive ? (
+                <>
+                  <h2 className="mb-3 text-base font-medium text-gray-900">
+                    {candidateCount} {candidateCount === 1 ? 'Kandidat' : 'Kandidaten'}:
+                  </h2>
+                  <CloseButton onClick={handleClose} positionClasses="top-3 right-3" />
+                  <PlanningCandidateList />
+                </>
+              ) : (
+                <>
+                  <InspectorHeader count={features.length} handleClose={handleClose} />
+                  <Inspector features={features} />
+                </>
+              )}
             </FadeSlideIn>
           </div>
         </>

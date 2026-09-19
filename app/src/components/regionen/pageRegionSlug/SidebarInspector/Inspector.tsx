@@ -1,8 +1,10 @@
 import type { StoreFeaturesInspector } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
+import { planningHexagonsSourceId } from '../Map/SourcesAndLayers/SourcesLayersPlanning'
 import { SelectedFeatureTerrainProfilePanel } from '../terrainProfile/ui/SelectedFeatureTerrainProfilePanel'
 import { createInspectorFeatureKey } from '../utils/sourceKeyUtils/createInspectorFeatureKey'
 import { parseSourceKeyStaticDatasets } from '../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
+import { InspectorFeaturePlanningHexagon } from './InspectorFeaturePlanningHexagon'
 import { InspectorFeatureStaticDataset } from './InspectorFeatureStaticDataset'
 import { InspectorFeatureTilda } from './InspectorFeatureTilda'
 import { InspectorHints } from './InspectorHints'
@@ -29,13 +31,16 @@ export const Inspector = ({ features }: Props) => {
         if (!sourceKey) return null
 
         const key = createInspectorFeatureKey(inspectObject)
-        const content = regionDatasets.some(
-          (d) => d.id === parseSourceKeyStaticDatasets(sourceKey).sourceId,
-        ) ? (
-          <InspectorFeatureStaticDataset sourceKey={sourceKey} feature={inspectObject} />
-        ) : (
-          <InspectorFeatureTilda sourceKey={sourceKey} feature={inspectObject} />
-        )
+        const content =
+          inspectObject.source === planningHexagonsSourceId ? (
+            <InspectorFeaturePlanningHexagon feature={inspectObject} />
+          ) : regionDatasets.some(
+              (d) => d.id === parseSourceKeyStaticDatasets(sourceKey).sourceId,
+            ) ? (
+            <InspectorFeatureStaticDataset sourceKey={sourceKey} feature={inspectObject} />
+          ) : (
+            <InspectorFeatureTilda sourceKey={sourceKey} feature={inspectObject} />
+          )
 
         return <div key={key}>{content}</div>
       })}

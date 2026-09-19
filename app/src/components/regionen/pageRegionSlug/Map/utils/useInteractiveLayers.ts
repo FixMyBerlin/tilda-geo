@@ -2,6 +2,7 @@ import { useMapDebugDebugLayerStyles } from '@/components/regionen/pageRegionSlu
 import type { MapDataCategoryConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
 import { useCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/useCategoriesConfig'
 import { useDataParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useDataParam'
+import { usePlanningRunParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/usePlanningParams'
 import { useQaParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useQaParam'
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
@@ -17,6 +18,7 @@ import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { reviewEntriesInteractiveLayerIds } from '../SourcesAndLayers/reviewEntriesLayers.const'
 import { internalNotesLayerId } from '../SourcesAndLayers/SourcesLayersInternalNotes'
 import { osmNotesLayerId } from '../SourcesAndLayers/SourcesLayersOsmNotes'
+import { planningHexagonsLayerId } from '../SourcesAndLayers/SourcesLayersPlanning'
 import { qaLayerId } from '../SourcesAndLayers/SourcesLayersQa'
 import { MASK_INTERACTIVE_LAYER_IDS } from './maskLayerUtils'
 
@@ -95,6 +97,7 @@ export const useInteractiveLayers = () => {
   const { data: regionDatasets } = useRegionDatasetsQuery()
   const currentMode = useCurrentMode()
   const notesSelection = useNotesSelection()
+  const [planningRun] = usePlanningRunParam()
 
   // Debug mode: return ALL layers from config
   if (debugLayerStyles && categoriesConfig) {
@@ -125,6 +128,10 @@ export const useInteractiveLayers = () => {
   // via the normal dataset filtering. We need to manually add them so they're interactive.
   if (region.mask) {
     activeCategoryLayerIds.push(...MASK_INTERACTIVE_LAYER_IDS)
+  }
+
+  if (planningRun != null) {
+    activeCategoryLayerIds.push(planningHexagonsLayerId)
   }
 
   // active layer from datasets
