@@ -7,6 +7,7 @@ import { MotionCollapse } from '@/components/shared/motion/MotionCollapse'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 import { modeIdentity } from './modeIdentity'
 import {
+  modePanelActionFooterClassName,
   modePanelBackButtonClassName,
   modePanelClassName,
   modePanelCollectionClassName,
@@ -66,6 +67,12 @@ type Props = {
   filter?: ReactNode
   actions?: ReactNode
   detail?: ModePanelDetail
+  /**
+   * Sticky primary-action bar below the scroll area (e.g. Flächenfinder »Berechnen«). Only
+   * Flächenfinder uses this today; other modes simply omit it. The caller decides when it applies
+   * (e.g. not while a detail view is open).
+   */
+  footer?: ReactNode
   children: ReactNode
 }
 
@@ -83,6 +90,7 @@ export const ModePanel = ({
   filter,
   actions,
   detail,
+  footer,
   children,
 }: Props) => {
   const { mode } = useCurrentMode()
@@ -212,6 +220,7 @@ export const ModePanel = ({
           Außerhalb des Kartenausschnitts
         </footer>
       ) : null}
+      {footer ? <div className={modePanelActionFooterClassName}>{footer}</div> : null}
     </section>
   )
 }

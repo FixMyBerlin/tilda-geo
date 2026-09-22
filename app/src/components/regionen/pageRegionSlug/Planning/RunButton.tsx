@@ -14,10 +14,14 @@ export const RunButton = ({
   variantId,
   regionSlug,
   latestJob,
+  showJobStatus = true,
 }: {
   variantId: number
   regionSlug: string
   latestJob?: LatestJob | null
+  /** Set false when the caller shows `JobStatusBadge` itself elsewhere (Flächenfinder: the
+   * sticky footer only holds the button; progress/outdated status lives in its own section). */
+  showJobStatus?: boolean
 }) => {
   const queryClient = useQueryClient()
 
@@ -55,7 +59,9 @@ export const RunButton = ({
           {label}
         </button>
       )}
-      {latestJob != null && <JobStatusBadge jobId={latestJob.id} variantId={variantId} />}
+      {showJobStatus && latestJob != null && (
+        <JobStatusBadge jobId={latestJob.id} variantId={variantId} />
+      )}
     </div>
   )
 }

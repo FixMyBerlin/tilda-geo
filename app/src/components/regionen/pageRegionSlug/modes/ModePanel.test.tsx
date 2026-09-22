@@ -179,4 +179,29 @@ describe('ModePanel', () => {
     )
     expect(screen.queryByText('Außerhalb des Kartenausschnitts')).toBeNull()
   })
+
+  test('renders the sticky action footer when given one, alongside the outside-viewport hint', () => {
+    useCurrentMode.mockReturnValue(currentModeFlags('reviewLists'))
+    useListHoverMarkerPosition.mockReturnValue(atEdgePosition)
+    render(
+      <ModePanel title="Flächenfinder" footer={<button type="button">Berechnen</button>}>
+        <p>Body</p>
+      </ModePanel>,
+    )
+
+    expect(screen.getByText('Berechnen')).toBeTruthy()
+    expect(screen.getByText('Außerhalb des Kartenausschnitts')).toBeTruthy()
+  })
+
+  test('omits the action footer when none is given', () => {
+    useCurrentMode.mockReturnValue(currentModeFlags('reviewLists'))
+    useListHoverMarkerPosition.mockReturnValue(null)
+    render(
+      <ModePanel title="Prüflisten">
+        <p>Body</p>
+      </ModePanel>,
+    )
+
+    expect(screen.queryByText('Berechnen')).toBeNull()
+  })
 })
