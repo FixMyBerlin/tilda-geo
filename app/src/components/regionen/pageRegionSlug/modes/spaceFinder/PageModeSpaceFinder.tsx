@@ -87,7 +87,7 @@ export const PageModeSpaceFinder = () => {
       if (first?.variantId === spaceFinderMode.key) return
       onSelect(first?.variantId)
     },
-    [areas, options, spaceFinderMode, onSelect],
+    [areas, options, spaceFinderMode],
   )
 
   const commands = useSpaceFinderCommands({ regionSlug, areas, selectedOption, onSelect })
