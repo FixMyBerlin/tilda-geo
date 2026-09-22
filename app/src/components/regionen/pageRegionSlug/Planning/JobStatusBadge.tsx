@@ -1,11 +1,9 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 import {
   planningJobQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
-import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
-import { usePlanningRunParam } from '../hooks/useQueryState/usePlanningParams'
 import { deriveScoringStep, PlanningSteps } from './PlanningSteps'
 import { Spinner } from './Spinner'
 
@@ -26,12 +24,6 @@ const COLORS: Record<string, string> = {
 /** Polls a job until DONE/FAILED. On DONE, shows the run on the map + refreshes variant. */
 export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId: number }) => {
   const queryClient = useQueryClient()
-  const [, setRun] = usePlanningRunParam()
-  const setPanelCollapsed = usePlanningBoundaryState((s) => s.setPanelCollapsed)
-  const autoCollapsedJobId = usePlanningBoundaryState((s) => s.autoCollapsedJobId)
-  const setAutoCollapsedJobId = usePlanningBoundaryState((s) => s.setAutoCollapsedJobId)
-
-  const sawInFlight = useRef(false)
 
   const { data } = useQuery({
     ...planningJobQueryOptions(jobId),
@@ -42,30 +34,12 @@ export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId:
   })
 
   useEffect(() => {
-    if (data?.status === 'QUEUED' || data?.status === 'RUNNING') {
-      sawInFlight.current = true
-    }
     if (data?.status !== 'DONE' || data.resultRunId == null) return
-    setRun(data.resultRunId)
+    // No explicit "show this run" write: the shown run is always `variant.currentRunId` (D7), which
+    // the worker already set server-side — this invalidation just refetches it.
     queryClient.invalidateQueries(planningVariantQueryOptions(variantId))
     queryClient.invalidateQueries({ queryKey: ['planning', 'areas'] })
-    // Only collapse when this job actually finished in this session — not when
-    // selecting a variant whose latest job is already DONE.
-    if (sawInFlight.current && autoCollapsedJobId !== jobId) {
-      setPanelCollapsed(true)
-      setAutoCollapsedJobId(jobId)
-    }
-  }, [
-    data?.status,
-    data?.resultRunId,
-    jobId,
-    variantId,
-    setRun,
-    queryClient,
-    setPanelCollapsed,
-    autoCollapsedJobId,
-    setAutoCollapsedJobId,
-  ])
+  }, [data?.status, data?.resultRunId, variantId, queryClient])
 
   // Der "Neu berechnen"-Button in RunButton zeigt den fertigen Zustand schon an.
   if (!data || data.status === 'DONE') return null

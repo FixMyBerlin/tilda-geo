@@ -2,17 +2,13 @@ import { useEffect } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { usePlanningBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningBoundaryState'
 import { usePlanningCandidatesState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningCandidatesState'
+import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
+import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
+import { getTilesUrl } from '@/components/shared/utils/getTilesUrl'
 import {
   PLANNING_SCORE_PROPERTY,
   type PlanningScoreMode,
-  usePlanningAreaFilterParam,
-  usePlanningHexagonsOpacityParam,
-  usePlanningHexagonsVisibleParam,
-  usePlanningMinAreaParam,
-  usePlanningRunParam,
-  usePlanningScoreParam,
-} from '@/components/regionen/pageRegionSlug/hooks/useQueryState/usePlanningParams'
-import { getTilesUrl } from '@/components/shared/utils/getTilesUrl'
+} from '@/shared/regionen/planningScoreMode.const'
 import { getLayerHighlightId } from '../utils/layerHighlight'
 import { LayerHighlight } from './LayerHighlight'
 
@@ -56,8 +52,8 @@ const HEXAGON_LABEL_MIN_ZOOM = 18
 // run_id-keyed tile URL is cached effectively forever (separate nginx
 // `planning_cache` zone, see configs/nginx.conf).
 //
-// When `planningRun` is absent (the normal viewer), this renders nothing — so the
-// existing viewer is untouched.
+// When the active variant has no run yet (`runId` from `useSpaceFinderSelection`), this renders
+// nothing — this component only mounts inside the Flächenfinder mode anyway (`RegionMap`).
 
 // Score → Farbintensitäts-Rampe (0 = ausgeschlossen/transparent … 100 = kräftigste Farbe).
 // Hexagone mit Wert 0 bekommen keine Füllfarbe, nur der Rand (fill-outline-color)
@@ -109,7 +105,7 @@ const scoreColor = (property: string, mode: PlanningScoreMode): any => {
 const MAX_FILL_OPACITY = 0.7
 
 // Verhältnis abgedunkelt : voll sichtbar aus den ursprünglichen Festwerten (0.1/0.7),
-// jetzt relativ zur per Regler eingestellten Deckkraft (usePlanningHexagonsOpacityParam)
+// jetzt relativ zur per Regler eingestellten Deckkraft (`ff.opacity`, ScoreModeSwitcher)
 // angewendet, damit das Abdunkeln bei jeder Transparenz-Einstellung sichtbar bleibt.
 const DIMMED_RATIO = 0.1 / 0.7
 
@@ -337,12 +333,12 @@ const CandidateHighlightLayer = () => {
 }
 
 export const SourcesLayersPlanning = () => {
-  const [runId] = usePlanningRunParam()
-  const [scoreMode] = usePlanningScoreParam()
-  const [hexagonsVisible] = usePlanningHexagonsVisibleParam()
-  const [hexagonsOpacityPct] = usePlanningHexagonsOpacityParam()
-  const [minArea] = usePlanningMinAreaParam()
-  const [areaFilterOn] = usePlanningAreaFilterParam()
+  const { runId } = useSpaceFinderSelection()
+  const { spaceFinderMode } = useSpaceFinderModeParam()
+  const scoreMode = spaceFinderMode.score ?? 'kombination'
+  const hexagonsOpacityPct = spaceFinderMode.opacity ?? 100
+  const minArea = spaceFinderMode.minArea ?? 0
+  const areaFilterOn = minArea > 0
   const vegetationOn = usePlanningBoundaryState((s) => s.vegetationVisible)
   const vegetationAttribution = usePlanningBoundaryState((s) => s.vegetationAttribution)
   const carriagewaysOn = usePlanningBoundaryState((s) => s.carriagewaysVisible)
@@ -386,7 +382,7 @@ export const SourcesLayersPlanning = () => {
       {/* Siehe Kommentar bei planningOverlayCeilingLayerId. */}
       <Layer id={planningOverlayCeilingLayerId} type="background" layout={{ visibility: 'none' }} />
 
-      {hexagonsVisible && hexagonsOpacityPct > 0 && (
+      {hexagonsOpacityPct > 0 && (
         <>
           <Source
             id={planningHexagonsSourceId}

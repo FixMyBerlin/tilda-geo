@@ -130,7 +130,7 @@ export const RegionMap = () => {
     // Kandidaten-Auswahlwerkzeug des Planungsmoduls (PlanningCandidateToggle): solange
     // es aktiv ist, sammelt ein Klick auf ein Ergebnis-Hexagon Kandidaten, statt den
     // Inspector zu öffnen – auch ein Klick ins Leere lässt die Auswahl unangetastet.
-    if (candidateSelectActive) {
+    if (currentMode.isSpaceFinder && candidateSelectActive) {
       const hexagon = features?.find((f) => f.sourceLayer === planningHexagonsSourceLayer)
       const h3Id = hexagon?.properties?.h3_id
       if (hexagon && h3Id) {
@@ -300,7 +300,10 @@ export const RegionMap = () => {
   // special-case guard in the click handler with the map's own interactivity mechanism.
   const computedInteractiveLayerIds = useInteractiveLayers()
   const interactiveLayerIds =
-    calculatorDrawActive || notesComposeActive || reviewDrawActive || planningPolygonDrawing
+    calculatorDrawActive ||
+    notesComposeActive ||
+    reviewDrawActive ||
+    (currentMode.isSpaceFinder && planningPolygonDrawing)
       ? NO_INTERACTIVE_LAYERS
       : computedInteractiveLayerIds
 
@@ -376,8 +379,12 @@ export const RegionMap = () => {
       <SourcesLayersQa />
       <SearchResultLayers />
       <NotesNewRelatedGeometry />
-      <SourcesLayersPlanning />
-      <PlanningMapDrawing />
+      {currentMode.isSpaceFinder && (
+        <>
+          <SourcesLayersPlanning />
+          <PlanningMapDrawing />
+        </>
+      )}
       {/* Last in tree + moveLayer: stay above remounted highlights. Do not use this layer as beforeId. */}
       <TerrainProfileHoverMarkerLayer />
       <SourcesLayersReviewEntries />

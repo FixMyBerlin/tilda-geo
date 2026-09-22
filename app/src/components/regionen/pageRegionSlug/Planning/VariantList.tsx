@@ -13,11 +13,8 @@ import {
   planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
-import {
-  usePlanningAreaParam,
-  usePlanningVariantParam,
-  useSetPlanningSelection,
-} from '../hooks/useQueryState/usePlanningParams'
+import { useSpaceFinderModeParam } from '../modes/spaceFinder/useSpaceFinderModeParam'
+import { useSpaceFinderSelection } from '../modes/spaceFinder/useSpaceFinderSelection'
 import { DEFAULT_FACTOR_TEMPLATE } from './planningDefaults'
 import { Spinner } from './Spinner'
 
@@ -195,18 +192,13 @@ const VariantMenu = ({
 
 /** A/B variant switcher for the active planungsgebiet. */
 export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
-  const [activeArea] = usePlanningAreaParam()
-  const [activeVariant] = usePlanningVariantParam()
-  const setPlanningSelection = useSetPlanningSelection()
+  const { areaId: activeArea, variantId: activeVariant } = useSpaceFinderSelection()
+  const { spaceFinderMode, setSpaceFinderModeParam } = useSpaceFinderModeParam()
   const [renamingId, setRenamingId] = useState<number | null>(null)
   const queryClient = useQueryClient()
 
-  const selectVariant = (variantId: number | null, runId: number | null) => {
-    setPlanningSelection({
-      area: activeArea ?? null,
-      variant: variantId,
-      run: runId,
-    })
+  const selectVariant = (variantId: number | null) => {
+    setSpaceFinderModeParam({ ...spaceFinderMode, key: variantId ?? undefined })
   }
 
   const { data: areas } = useQuery({
@@ -227,7 +219,7 @@ export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
     mutationFn: (variantId: number) => duplicatePlanningVariantFn({ data: { variantId } }),
     onSuccess: (created) => {
       queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
-      selectVariant(created.id, null)
+      selectVariant(created.id)
     },
   })
 
@@ -242,7 +234,7 @@ export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
     onSuccess: (created) => {
       queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
       queryClient.invalidateQueries(planningVariantQueryOptions(created.id))
-      selectVariant(created.id, null)
+      selectVariant(created.id)
     },
   })
 
@@ -282,7 +274,7 @@ export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
                 ) : (
                   <button
                     type="button"
-                    onClick={() => selectVariant(variant.id, variant.currentRunId ?? null)}
+                    onClick={() => selectVariant(variant.id)}
                     className={`flex min-w-0 flex-1 items-center gap-2 rounded px-2 py-1 text-left text-sm hover:bg-gray-100 ${
                       activeVariant === variant.id ? 'bg-blue-50 font-medium' : ''
                     }`}
@@ -310,10 +302,10 @@ export const VariantList = ({ regionSlug }: { regionSlug: string }) => {
                   variant={variant}
                   regionSlug={regionSlug}
                   onRename={() => setRenamingId(variant.id)}
-                  onDuplicated={(id) => selectVariant(id, null)}
+                  onDuplicated={(id) => selectVariant(id)}
                   onDeleted={() => {
                     if (activeVariant === variant.id) {
-                      selectVariant(null, null)
+                      selectVariant(null)
                     }
                   }}
                 />

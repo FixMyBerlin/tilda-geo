@@ -2,11 +2,11 @@ import { useMapDebugDebugLayerStyles } from '@/components/regionen/pageRegionSlu
 import type { MapDataCategoryConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
 import { useCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/useCategoriesConfig'
 import { useDataParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useDataParam'
-import { usePlanningRunParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/usePlanningParams'
 import { useQaParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useQaParam'
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
 import { useNotesSelection } from '@/components/regionen/pageRegionSlug/modes/notes/useNotesSelection'
+import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
 import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { createLayerKeyAtlasGeo } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
@@ -97,7 +97,7 @@ export const useInteractiveLayers = () => {
   const { data: regionDatasets } = useRegionDatasetsQuery()
   const currentMode = useCurrentMode()
   const notesSelection = useNotesSelection()
-  const [planningRun] = usePlanningRunParam()
+  const { runId: planningRun } = useSpaceFinderSelection()
 
   // Debug mode: return ALL layers from config
   if (debugLayerStyles && categoriesConfig) {
@@ -130,7 +130,7 @@ export const useInteractiveLayers = () => {
     activeCategoryLayerIds.push(...MASK_INTERACTIVE_LAYER_IDS)
   }
 
-  if (planningRun != null) {
+  if (currentMode.isSpaceFinder && planningRun != null) {
     activeCategoryLayerIds.push(planningHexagonsLayerId)
   }
 

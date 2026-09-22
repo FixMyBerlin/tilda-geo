@@ -4,32 +4,38 @@ import { twJoin } from 'tailwind-merge'
 import { useMapActions } from '../../hooks/mapState/useMapState'
 import { usePlanningCandidatesState } from '../../hooks/mapState/usePlanningCandidatesState'
 import { useFeaturesParam } from '../../hooks/useQueryState/useFeaturesParam/useFeaturesParam'
-import {
-  usePlanningModeParam,
-  usePlanningRunParam,
-} from '../../hooks/useQueryState/usePlanningParams'
+import { useSpaceFinderSelection } from '../../modes/spaceFinder/useSpaceFinderSelection'
 
 /**
- * Setzt Werkzeug und Auswahl zurück, sobald der Planungsmodus verlassen wird oder kein
- * Lauf mehr angezeigt wird – die Kandidaten gehören zu genau diesem Ergebnis.
+ * Setzt Werkzeug und Auswahl zurück, sobald kein Lauf mehr angezeigt wird – die Kandidaten
+ * gehören zu genau diesem Ergebnis. Auch beim Verlassen des Modus (Unmount, siehe Cleanup unten):
+ * die Kandidaten sind nicht persistiert (D6).
  *
- * Bewusst getrennt vom Knopf: der lebt im Planungspanel und ist dort nur bei einem
+ * Bewusst getrennt vom Knopf: der lebt im Flächenfinder-Panel und ist dort nur bei einem
  * fertigen Lauf gemountet; das Zurücksetzen muss aber gerade dann laufen, wenn dieser
- * Zustand endet. Diese Komponente rendert nichts und hängt im MapInterface.
+ * Zustand endet. Diese Komponente rendert nichts und hängt in `PageModeSpaceFinder`.
  */
 export const PlanningCandidateSelectionReset = () => {
-  const [planningMode] = usePlanningModeParam()
-  const [runId] = usePlanningRunParam()
+  const { runId } = useSpaceFinderSelection()
   const setSelectActive = usePlanningCandidatesState((s) => s.setSelectActive)
   const clearCandidates = usePlanningCandidatesState((s) => s.clearCandidates)
 
   useEffect(
     function resetCandidateSelectionOutsidePlanningResult() {
-      if (planningMode && runId != null) return
+      if (runId != null) return
       setSelectActive(false)
       clearCandidates()
     },
-    [planningMode, runId, setSelectActive, clearCandidates],
+    [runId, setSelectActive, clearCandidates],
+  )
+
+  // Leaving the mode unmounts this component — clear the selection then too.
+  useEffect(
+    () => () => {
+      setSelectActive(false)
+      clearCandidates()
+    },
+    [setSelectActive, clearCandidates],
   )
 
   return null
@@ -45,14 +51,13 @@ export const PlanningCandidateSelectionReset = () => {
  * umrandet), damit er sich vom blauen „Neu berechnen“ abhebt.
  */
 export const PlanningCandidateToggle = () => {
-  const [planningMode] = usePlanningModeParam()
-  const [runId] = usePlanningRunParam()
+  const { runId } = useSpaceFinderSelection()
   const selectActive = usePlanningCandidatesState((s) => s.selectActive)
   const setSelectActive = usePlanningCandidatesState((s) => s.setSelectActive)
   const { clearInspectorFeatures } = useMapActions()
   const { setFeaturesParam } = useFeaturesParam()
 
-  if (!planningMode || runId == null) return null
+  if (runId == null) return null
 
   const handleClick = () => {
     const next = !selectActive

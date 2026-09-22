@@ -14,15 +14,5 @@ export const searchParamsRegistry = {
   welcomeSkipDialog: '__skipDialog',
   notes: 'notes', // JSON: key (folder id or `osm`), search, extent, chips, new (compose pin) (`notesModeParam.ts`)
   review: 'review', // JSON: key, search, extent, status, source, new, move (`reviewListsModeParam.ts`)
-  planning: 'planning',
-  planningArea: 'planningArea',
-  planningVariant: 'planningVariant',
-  /** @deprecated Use planningVariant — kept for one release of URL compat. */
-  planningScenario: 'planningScenario',
-  planningRun: 'planningRun',
-  planningScore: 'planningScore', // which probability colors the hexagons (bedarf/bebauung/kombination)
-  planningHexagons: 'planningHexagons', // whether the hexagon result layer is visible
-  planningHexagonsOpacity: 'planningHexagonsOpacity', // opacity (0-100%) of the hexagon result layer; 0 = same as planningHexagons=false
-  planningMinArea: 'planningMinArea', // gesuchte Mindestfläche (m²), Client-Filter auf cluster_area_m2
-  planningAreaFilter: 'planningAreaFilter', // ob der Zielgrößen-Filter aktiv ist
+  ff: 'ff', // Flächenfinder mode JSON: key (variant id), score, opacity, minArea, new, edit (`spaceFinderModeParam.ts`)
 } as const

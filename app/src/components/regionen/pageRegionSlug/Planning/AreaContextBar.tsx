@@ -4,11 +4,8 @@ import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { planningAreasQueryOptions } from '@/server/planning/planningQueryOptions'
 import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
-import {
-  usePlanningAreaParam,
-  usePlanningVariantParam,
-  useSetPlanningSelection,
-} from '../hooks/useQueryState/usePlanningParams'
+import { useSpaceFinderModeParam } from '../modes/spaceFinder/useSpaceFinderModeParam'
+import { useSpaceFinderSelection } from '../modes/spaceFinder/useSpaceFinderSelection'
 import { AreaEditor } from './AreaEditor'
 import { AreaWizard } from './AreaWizard'
 
@@ -26,21 +23,15 @@ export const AreaContextBar = ({
   onShowCreate: (show: boolean) => void
   onPendingCreatedAreaId: (areaId: number | null) => void
 }) => {
-  const [activeArea] = usePlanningAreaParam()
-  const [activeVariant] = usePlanningVariantParam()
-  const setPlanningSelection = useSetPlanningSelection()
+  const { areaId: activeArea } = useSpaceFinderSelection()
+  const { spaceFinderMode, setSpaceFinderModeParam } = useSpaceFinderModeParam()
   const setBoundaryHighlightGeom = usePlanningBoundaryState((s) => s.setBoundaryHighlightGeom)
   const setLastFittedBoundaryKey = usePlanningBoundaryState((s) => s.setLastFittedBoundaryKey)
   const [editing, setEditing] = useState(false)
 
   const startCreate = () => {
-    // Keep area/variant in the URL so Cancel remounts the previous variant.
-    // Only hide run overlays and the old outline while the wizard owns the map.
-    setPlanningSelection({
-      area: activeArea ?? null,
-      variant: activeVariant ?? null,
-      run: null,
-    })
+    // Hide run overlays and the old outline while the wizard owns the map. The current
+    // variant stays selected in the URL so Cancel remounts it.
     setBoundaryHighlightGeom(null)
     onShowCreate(true)
   }
@@ -48,36 +39,27 @@ export const AreaContextBar = ({
   const { data: areas } = useQuery(planningAreasQueryOptions(regionSlug))
   const current = areas?.find((a) => a.id === activeArea)
 
-  // Auto-select first area when entering planning without URL state, or when the
-  // URL still points at a deleted (orphaned) planungsgebiet.
+  // Auto-select the first Gebiet/Variante when entering the mode without a selection, or when
+  // the URL still points at a deleted (orphaned) variant. Because the area is always derived from
+  // the variant (D7), selecting a Gebiet with zero variants is only transient here: this effect
+  // picks the first available Gebiet+Variante again — a proper "empty Gebiet" state is phase 3.
   useEffect(
-    function selectFirstAreaWhenOrphaned() {
+    function selectFirstVariantWhenOrphaned() {
       if (pendingCreatedAreaId != null) return
       if (!areas?.length) return
-      const activeStillExists = activeArea != null && areas.some((a) => a.id === activeArea)
-      if (activeStillExists) return
-      // Legacy shared links may only have planningVariant — let PlanningPanel resolve the area.
-      if (activeArea == null && activeVariant != null) return
+      const activeVariantStillExists =
+        spaceFinderMode.key != null &&
+        areas.some((a) => a.variants.some((v) => v.id === spaceFinderMode.key))
+      if (activeVariantStillExists) return
       const first = areas[0]!
       const firstVariant = first.variants[0]
-      setPlanningSelection({
-        area: first.id,
-        variant: firstVariant?.id ?? null,
-        run: firstVariant?.currentRunId ?? null,
-      })
+      setSpaceFinderModeParam({ ...spaceFinderMode, key: firstVariant?.id })
     },
-    [areas, activeArea, activeVariant, pendingCreatedAreaId, setPlanningSelection],
+    [areas, spaceFinderMode, pendingCreatedAreaId, setSpaceFinderModeParam],
   )
 
-  const selectArea = (
-    areaId: number,
-    firstVariant?: { id: number; currentRunId: number | null },
-  ) => {
-    setPlanningSelection({
-      area: areaId,
-      variant: firstVariant?.id ?? null,
-      run: firstVariant?.currentRunId ?? null,
-    })
+  const selectArea = (firstVariant?: { id: number; currentRunId: number | null }) => {
+    setSpaceFinderModeParam({ ...spaceFinderMode, key: firstVariant?.id })
     onShowCreate(false)
     onPendingCreatedAreaId(null)
     setEditing(false)
@@ -89,7 +71,7 @@ export const AreaContextBar = ({
         regionSlug={regionSlug}
         onCreated={(areaId, variantId) => {
           setLastFittedBoundaryKey(null)
-          setPlanningSelection({ area: areaId, variant: variantId, run: null })
+          setSpaceFinderModeParam({ ...spaceFinderMode, key: variantId })
           onShowCreate(false)
           onPendingCreatedAreaId(areaId)
         }}
@@ -133,7 +115,7 @@ export const AreaContextBar = ({
         value={activeArea ?? undefined}
         onChange={(areaId) => {
           const area = areas?.find((a) => a.id === areaId)
-          selectArea(areaId, area?.variants[0])
+          selectArea(area?.variants[0])
         }}
       >
         <ListboxButton className="flex w-full items-center gap-1 rounded border border-gray-200 px-2 py-1 text-left hover:bg-gray-50">

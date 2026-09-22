@@ -42,23 +42,6 @@ export const optionalSearchBoolean = () =>
     })
     .optional()
 
-const numberWire = z.union([z.number(), z.coerce.number(), emptyish])
-
-/** Numeric flag from URL search; absent/empty/invalid falls back to `fallback`. */
-export const searchNumber = (fallback: number) =>
-  numberWire
-    .transform((v) => (v === undefined || v === null || v === '' || Number.isNaN(v) ? fallback : v))
-    .catch(fallback)
-
-/** Optional numeric flag; absent/empty/invalid stays undefined. */
-export const optionalSearchNumber = () =>
-  numberWire
-    .transform((v) =>
-      v === undefined || v === null || v === '' || Number.isNaN(v) ? undefined : v,
-    )
-    .optional()
-    .catch(undefined)
-
 /** String list from comma-separated wire, legacy JSON array string, or native array. */
 export const searchStringArray = () =>
   z

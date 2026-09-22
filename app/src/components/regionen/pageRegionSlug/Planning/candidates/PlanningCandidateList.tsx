@@ -5,7 +5,7 @@ import {
   type PlanningCandidate,
   usePlanningCandidatesState,
 } from '../../hooks/mapState/usePlanningCandidatesState'
-import { usePlanningVariantParam } from '../../hooks/useQueryState/usePlanningParams'
+import { useSpaceFinderModeParam } from '../../modes/spaceFinder/useSpaceFinderModeParam'
 import { candidateExportFileName, downloadCandidatesGeojson } from './planningCandidateExport'
 
 const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
@@ -79,7 +79,8 @@ const CandidateRow = ({
  * sich wie gewohnt in der Breite ziehen lässt.
  */
 export const PlanningCandidateList = () => {
-  const [variantId] = usePlanningVariantParam()
+  const { spaceFinderMode } = useSpaceFinderModeParam()
+  const variantId = spaceFinderMode.key ?? null
   const candidates = usePlanningCandidatesState((s) => s.candidates)
   const removeCandidate = usePlanningCandidatesState((s) => s.removeCandidate)
   const clearCandidates = usePlanningCandidatesState((s) => s.clearCandidates)

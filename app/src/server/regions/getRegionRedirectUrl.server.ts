@@ -46,6 +46,10 @@ const isLegacyNotesOverlayBookmark = (params: URLSearchParams) =>
   isTruthySearchFlag(params.get('internalNotes')) ||
   params.has('atlasNote')
 
+/** Legacy Flächenfinder entry: `?planning=true` on the region root (D7). */
+const isLegacyPlanningBookmark = (params: URLSearchParams) =>
+  isTruthySearchFlag(params.get('planning'))
+
 /** Returns URL to redirect to, or null if no redirect. */
 function sortedSearchParamEntries(searchParams: URLSearchParams) {
   return [...searchParams.entries()].sort(([a], [b]) => a.localeCompare(b))
@@ -171,8 +175,9 @@ function migrateConfigCategoryIds(urlConfig: ReturnType<typeof parseConfig>) {
  * (not beforeLoad — search-param navigations must not re-run this), so it also runs for mode child
  * routes (`/regionen/berlin/hinweise`, …). Pathname is mode identity; root rewrites are only for
  * unmigrated overlay bookmarks (legacy `osmNotes`/`notes`/`internalNotes` flags, pre-migration
- * `atlasNote`, or a legacy `qa=` string), not for live `qa`/`notes` JSON or compose (`notes.new`).
- * Region-rename rewrites only the slug segment; existing mode paths are not nested.
+ * `atlasNote`, a legacy `qa=` string, or legacy `planning=true`), not for live `qa`/`notes`/`ff`
+ * JSON or compose (`notes.new`). Region-rename rewrites only the slug segment; existing mode paths
+ * are not nested.
  *
  * Routes that trigger this:
  * - `/regionen/berlin` → normalizes search params (map, config, etc.)
@@ -207,6 +212,7 @@ export async function getRegionRedirectUrl(locationHref: string, regionSlug: str
   const preMigrationParams = new URL(migratedUrl).searchParams
   const hadLegacyQaBookmark = isLegacyQaBookmark(preMigrationParams.get('qa'))
   const hadLegacyNotesOverlay = isLegacyNotesOverlayBookmark(preMigrationParams)
+  const hadLegacyPlanningBookmark = isLegacyPlanningBookmark(preMigrationParams)
 
   // URL param migrations need the region's current category list to rebuild defaults.
   migratedUrl = migrateUrl(migratedUrl, { categories: region.categories })
@@ -224,6 +230,8 @@ export async function getRegionRedirectUrl(locationHref: string, regionSlug: str
       u.pathname = `${regionRootPath}/qa`
     } else if (hadLegacyNotesOverlay && regionEnablesNotes) {
       u.pathname = `${regionRootPath}/hinweise`
+    } else if (hadLegacyPlanningBookmark && region.spaceFinderEnabled) {
+      u.pathname = `${regionRootPath}/flaechenfinder`
     }
   }
 

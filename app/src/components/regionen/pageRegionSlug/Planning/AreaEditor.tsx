@@ -10,7 +10,7 @@ import {
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
 import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
-import { useSetPlanningSelection } from '../hooks/useQueryState/usePlanningParams'
+import { useSpaceFinderModeParam } from '../modes/spaceFinder/useSpaceFinderModeParam'
 import { AreaFormFields, useEffectiveStudyArea, useStudyAreaKm2 } from './AreaFormFields'
 import type { PlanningUseCase } from './planningDefaults'
 import type { UserGeojsonMode } from './UserObstaclesField'
@@ -34,7 +34,7 @@ const AreaEditorForm = ({
 }) => {
   const queryClient = useQueryClient()
   const setBoundaryHighlightGeom = usePlanningBoundaryState((s) => s.setBoundaryHighlightGeom)
-  const setPlanningSelection = useSetPlanningSelection()
+  const { spaceFinderMode, setSpaceFinderModeParam } = useSpaceFinderModeParam()
 
   const [title, setTitle] = useState(area.title)
   const [boundaryId, setBoundaryId] = useState<string | null>(null)
@@ -104,16 +104,8 @@ const AreaEditorForm = ({
       queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
 
       const next = remaining[0]
-      if (next) {
-        const firstVariant = next.variants[0]
-        setPlanningSelection({
-          area: next.id,
-          variant: firstVariant?.id ?? null,
-          run: firstVariant?.currentRunId ?? null,
-        })
-      } else {
-        setPlanningSelection({ area: null, variant: null, run: null })
-      }
+      const nextVariant = next?.variants[0]
+      setSpaceFinderModeParam({ ...spaceFinderMode, key: nextVariant?.id })
       onDeleted?.()
       onClose()
     },

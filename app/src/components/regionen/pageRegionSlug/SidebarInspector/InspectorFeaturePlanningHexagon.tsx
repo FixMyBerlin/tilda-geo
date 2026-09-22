@@ -1,11 +1,7 @@
-import { useQuery } from '@tanstack/react-query'
 import { twJoin } from 'tailwind-merge'
 import type { StoreFeaturesInspector } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
-import {
-  usePlanningAreaFilterParam,
-  usePlanningRunParam,
-  usePlanningVariantParam,
-} from '@/components/regionen/pageRegionSlug/hooks/useQueryState/usePlanningParams'
+import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
+import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
 import { WEIGHT_GROUPS } from '@/components/regionen/pageRegionSlug/Planning/planningDefaults'
 import {
   planningGroupBarStyle,
@@ -18,7 +14,6 @@ import {
   weightToPoints,
 } from '@/components/regionen/pageRegionSlug/Planning/weightScale'
 import type { VariantFactorConfig } from '@/server/planning/mergeFactorConfig'
-import { planningVariantQueryOptions } from '@/server/planning/planningQueryOptions'
 import { Disclosure } from './Disclosure/Disclosure'
 
 type Props = {
@@ -182,13 +177,9 @@ const modifierFillClassName = (
       : 'bg-gray-300'
 
 export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
-  const [areaFilterOn] = usePlanningAreaFilterParam()
-  const [variantId] = usePlanningVariantParam()
-  const [runId] = usePlanningRunParam()
-  const { data: variant } = useQuery({
-    ...planningVariantQueryOptions(variantId!),
-    enabled: variantId != null,
-  })
+  const { spaceFinderMode } = useSpaceFinderModeParam()
+  const areaFilterOn = (spaceFinderMode.minArea ?? 0) > 0
+  const { runId, variant } = useSpaceFinderSelection()
 
   // Gewichte des Laufs, der die hier angezeigten Werte tatsächlich erzeugt hat — NICHT die
   // (womöglich seither ohne Neuberechnung veränderten) aktuellen Variantengewichte. Sonst würden

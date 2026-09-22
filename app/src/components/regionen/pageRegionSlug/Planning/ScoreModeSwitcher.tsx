@@ -1,11 +1,7 @@
 import { EyeSlashIcon } from '@heroicons/react/24/outline'
 import { twJoin } from 'tailwind-merge'
-import {
-  type PlanningScoreMode,
-  usePlanningHexagonsOpacityParam,
-  usePlanningHexagonsVisibleParam,
-  usePlanningScoreParam,
-} from '../hooks/useQueryState/usePlanningParams'
+import type { PlanningScoreMode } from '@/shared/regionen/planningScoreMode.const'
+import { useSpaceFinderModeParam } from '../modes/spaceFinder/useSpaceFinderModeParam'
 import { planningGroupButtonClass, planningRadioButtonClass } from './planningPanelStyles'
 
 // Tab-like switcher for the three display modes (Issue #3415): the demand
@@ -27,25 +23,15 @@ const DEFAULT_OPACITY = 100
 // `compact`: nur die Modus-Buttons (für die eingeklappte Panel-Breadcrumb-Zeile) —
 // ohne "Anzeige"-Überschrift und ohne Transparenz-Regler.
 export const ScoreModeSwitcher = ({ compact = false }: { compact?: boolean }) => {
-  const [mode, setMode] = usePlanningScoreParam()
-  const [visible, setVisible] = usePlanningHexagonsVisibleParam()
-  const [opacity, setOpacity] = usePlanningHexagonsOpacityParam()
+  const { spaceFinderMode, setSpaceFinderModeParam } = useSpaceFinderModeParam()
+  const mode = spaceFinderMode.score ?? 'kombination'
+  const opacity = spaceFinderMode.opacity ?? 100
+  // 0% Deckkraft bedeutet ausgeblendet (D7 — ersetzt das frühere separate Sichtbarkeits-Flag).
+  const visible = opacity > 0
 
-  // Regler und "ausgeblendet"-Button bleiben synchron: 0% Deckkraft bedeutet
-  // dasselbe wie visible=false, damit beide Bedienwege zum selben Zustand führen.
-  const show = () => {
-    setVisible(true)
-    if (opacity === 0) setOpacity(DEFAULT_OPACITY)
-  }
-  const hide = () => {
-    setVisible(false)
-    setOpacity(0)
-  }
-  const handleOpacityChange = (next: number) => {
-    setOpacity(next)
-    if (next === 0) setVisible(false)
-    else if (!visible) setVisible(true)
-  }
+  const setOpacity = (value: number) =>
+    setSpaceFinderModeParam({ ...spaceFinderMode, opacity: value === 100 ? undefined : value })
+  const hide = () => setOpacity(0)
 
   return (
     <div className={twJoin('flex flex-col gap-1', !compact && 'mt-1')}>
@@ -56,8 +42,13 @@ export const ScoreModeSwitcher = ({ compact = false }: { compact?: boolean }) =>
             key={value}
             type="button"
             onClick={() => {
-              setMode(value)
-              show()
+              // One write: setting mode and un-hiding must land in the same navigation, otherwise
+              // the second call's stale closure would clobber the first (see `updateSearch`).
+              setSpaceFinderModeParam({
+                ...spaceFinderMode,
+                score: value === 'kombination' ? undefined : value,
+                opacity: opacity === 0 ? DEFAULT_OPACITY : spaceFinderMode.opacity,
+              })
             }}
             className={twJoin('flex-1', planningGroupButtonClass(visible && mode === value, value))}
           >
@@ -85,7 +76,7 @@ export const ScoreModeSwitcher = ({ compact = false }: { compact?: boolean }) =>
             step={10}
             value={visible ? opacity : 0}
             aria-label="Transparenz der Hexagone in Prozent — bei 0 % werden sie ausgeblendet"
-            onChange={(e) => handleOpacityChange(Number(e.target.value))}
+            onChange={(e) => setOpacity(Number(e.target.value))}
             className="w-full accent-green-700"
           />
           <span className="w-9 shrink-0 text-right text-xs text-gray-500 tabular-nums">

@@ -43,6 +43,7 @@ const { regionFixtures } = vi.hoisted(() => ({
       ],
       notesOsm: true,
       notesInternal: true,
+      spaceFinderEnabled: true,
     },
     'bb-pg': {
       map: { lat: 52.3968, lng: 13.0342, zoom: 11 },
@@ -76,6 +77,7 @@ const { regionFixtures } = vi.hoisted(() => ({
       categories: string[]
       notesOsm?: boolean
       notesInternal?: boolean
+      spaceFinderEnabled?: boolean
     }
   >,
 }))
@@ -257,7 +259,7 @@ describe('getRegionRedirectUrl()', () => {
       expect(JSON.parse(resultUrl.searchParams.get('qa')!)).toEqual({
         key: 'euvm-parkraum-2026',
       })
-      expect(resultUrl.searchParams.get('v')).toBe('3')
+      expect(resultUrl.searchParams.get('v')).toBe('4')
       expect(resultUrl.searchParams.get('map')).toBe('13/52.4675/13.4419')
       expect(await redirectOnly(redirectUrl!, 'parkraum-berlin-euvm')).toBe(null)
     })
@@ -372,7 +374,7 @@ describe('getRegionRedirectUrl()', () => {
       expect(params.has('atlasNote')).toBe(false)
       expect(params.has('atlasNotesFilter')).toBe(false)
       expect(params.has('osmNotesFilter')).toBe(false)
-      expect(params.get('v')).toBe('3')
+      expect(params.get('v')).toBe('4')
     })
 
     test('a v3 URL with notes JSON is stable (no redirect loop)', async () => {
@@ -382,6 +384,52 @@ describe('getRegionRedirectUrl()', () => {
       expect(first).toBeTruthy()
       expect(getUrl(first).pathname).toBe('/regionen/berlin/hinweise')
       expect(await redirectOnly(first!, 'berlin')).toBe(null)
+    })
+  })
+
+  describe('v4: Flächenfinder root bookmark becomes a mode route (D7)', () => {
+    test('?planning=true&planningVariant=3 on the root → /flaechenfinder with ff JSON', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin?planning=true&planningVariant=3'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      expect(redirectUrl).toBeTruthy()
+      const resultUrl = getUrl(redirectUrl)
+      expect(resultUrl.pathname).toBe('/regionen/berlin/flaechenfinder')
+      expect(JSON.parse(resultUrl.searchParams.get('ff')!)).toEqual({ key: 3 })
+      expect(resultUrl.searchParams.has('planning')).toBe(false)
+      expect(resultUrl.searchParams.has('planningVariant')).toBe(false)
+      expect(await redirectOnly(redirectUrl!, 'berlin')).toBe(null)
+    })
+
+    test('legacy planningScenario is folded into ff.key the same way', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin?planning=true&planningScenario=7'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      expect(redirectUrl).toBeTruthy()
+      const resultUrl = getUrl(redirectUrl)
+      expect(resultUrl.pathname).toBe('/regionen/berlin/flaechenfinder')
+      expect(JSON.parse(resultUrl.searchParams.get('ff')!)).toEqual({ key: 7 })
+    })
+
+    test('?planning=true on a region without spaceFinderEnabled stays on the root', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/parkraum?planning=true&planningVariant=3'
+      const redirectUrl = await redirectOnly(url, 'parkraum')
+      const resultUrl = redirectUrl ? getUrl(redirectUrl) : new URL(url)
+      expect(resultUrl.pathname).toBe('/regionen/parkraum')
+    })
+
+    test('?planning=false on the root does not redirect', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin?planning=false'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      const resultUrl = redirectUrl ? getUrl(redirectUrl) : new URL(url)
+      expect(resultUrl.pathname).toBe('/regionen/berlin')
+      expect(resultUrl.searchParams.has('planning')).toBe(false)
+    })
+
+    test('?planningVariant=3 on /flaechenfinder stays, params folded into ff', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/berlin/flaechenfinder?planningVariant=3'
+      const redirectUrl = await redirectOnly(url, 'berlin')
+      const resultUrl = redirectUrl ? getUrl(redirectUrl) : new URL(url)
+      expect(resultUrl.pathname).toBe('/regionen/berlin/flaechenfinder')
+      expect(JSON.parse(resultUrl.searchParams.get('ff')!)).toEqual({ key: 3 })
     })
   })
 
@@ -572,7 +620,7 @@ describe('getRegionRedirectUrl()', () => {
       expect(redirectUrl).toBeTruthy()
       const resultUrl = getUrl(redirectUrl)
 
-      expect(resultUrl.searchParams.get('v')).toBe('3')
+      expect(resultUrl.searchParams.get('v')).toBe('4')
       expect(resultUrl.searchParams.get('config')).toBe('1qswwvv.282dgp.5ia75')
     })
 
@@ -583,7 +631,7 @@ describe('getRegionRedirectUrl()', () => {
       expect(redirectUrl).toBeTruthy()
       const resultUrl = getUrl(redirectUrl)
 
-      expect(resultUrl.searchParams.get('v')).toBe('3')
+      expect(resultUrl.searchParams.get('v')).toBe('4')
 
       const parkingTildaCategory = parseCategoryFromResponse(redirectUrl, '', 'parkingTilda')
       expect(parkingTildaCategory.active).toBe(true)
@@ -664,44 +712,6 @@ describe('getRegionRedirectUrl()', () => {
         (s) => s.id === 'parkingTildaCutouts',
       )!
       expect(parkingTildaCutouts.styles.find((s) => s.id === 'default')?.active).toBe(true)
-    })
-
-    describe('Planning mode params do not trigger redirects', () => {
-      // Start from a URL that is already canonical (no config/map normalization to redirect on),
-      // so the only thing under test is the planning params.
-      async function canonicalBase() {
-        const seed = 'http://127.0.0.1:5173/regionen/berlin?map=13.5/52.4918/13.4261'
-        const normalized = await redirectOnly(seed, 'berlin')
-        return normalized ?? seed
-      }
-
-      test('planningScore is preserved, not stripped as an unused param', async () => {
-        // Switching the display mode (Bedarf/Bebauung/Kombination) must not drop the param.
-        const url = `${await canonicalBase()}&planning=true&planningScore=bebauung`
-        const redirectUrl = await redirectOnly(url, 'berlin')
-        // No redirect at all is the ideal outcome; if one happens it must keep the param.
-        if (redirectUrl) {
-          expect(getUrl(redirectUrl).searchParams.get('planningScore')).toBe('bebauung')
-        }
-      })
-
-      test('planningHexagons is preserved, not stripped as an unused param', async () => {
-        // Toggling the hexagon layer off must not drop the param.
-        const url = `${await canonicalBase()}&planning=true&planningHexagons=false`
-        const redirectUrl = await redirectOnly(url, 'berlin')
-        if (redirectUrl) {
-          expect(getUrl(redirectUrl).searchParams.get('planningHexagons')).toBe('false')
-        }
-      })
-
-      test('no canonical-reorder redirect while a planning param is present', async () => {
-        // Showing a saved result (planningRun), switching display mode, or toggling the
-        // hexagon layer must not rewrite the URL, otherwise beforeLoad throws a 301 →
-        // full-page pending flash.
-        const url = `${await canonicalBase()}&planning=true&planningArea=2&planningVariant=3&planningRun=5&planningScore=bedarf&planningHexagons=false`
-        const redirectUrl = await redirectOnly(url, 'berlin')
-        expect(redirectUrl).toBe(null)
-      })
     })
 
     test('CONFIG TEMPLATE (tier 2): a stored checksum resolves via getRegionConfigTemplate, not reset', async () => {

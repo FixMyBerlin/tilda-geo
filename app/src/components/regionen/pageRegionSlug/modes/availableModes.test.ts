@@ -2,12 +2,15 @@ import { describe, expect, test } from 'vitest'
 import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { deriveAvailableModes, isMemberOnlyMode } from './availableModes'
 
-const region = (overrides: Partial<Pick<TRegion, 'notesOsm' | 'notesInternal'>>) => {
+const region = (
+  overrides: Partial<Pick<TRegion, 'notesOsm' | 'notesInternal' | 'spaceFinderEnabled'>>,
+) => {
   return {
     notesOsm: false,
     notesInternal: false,
+    spaceFinderEnabled: false,
     ...overrides,
-  } satisfies Pick<TRegion, 'notesOsm' | 'notesInternal'>
+  } satisfies Pick<TRegion, 'notesOsm' | 'notesInternal' | 'spaceFinderEnabled'>
 }
 
 describe('deriveAvailableModes()', () => {
@@ -43,12 +46,33 @@ describe('deriveAvailableModes()', () => {
       deriveAvailableModes({ region: region({}), qaConfigsCount: 0, canManage: true }).reviewLists,
     ).toBe(true)
   })
+
+  test('spaceFinder mode requires spaceFinderEnabled AND manage rights (D8)', () => {
+    expect(
+      deriveAvailableModes({ region: region({}), qaConfigsCount: 0, canManage: true }).spaceFinder,
+    ).toBe(false)
+    expect(
+      deriveAvailableModes({
+        region: region({ spaceFinderEnabled: true }),
+        qaConfigsCount: 0,
+        canManage: false,
+      }).spaceFinder,
+    ).toBe(false)
+    expect(
+      deriveAvailableModes({
+        region: region({ spaceFinderEnabled: true }),
+        qaConfigsCount: 0,
+        canManage: true,
+      }).spaceFinder,
+    ).toBe(true)
+  })
 })
 
 describe('isMemberOnlyMode()', () => {
-  test('QA and Prüflisten are always member-only', () => {
+  test('QA, Prüflisten and Flächenfinder are always member-only', () => {
     expect(isMemberOnlyMode('qa', region({}))).toBe(true)
     expect(isMemberOnlyMode('reviewLists', region({}))).toBe(true)
+    expect(isMemberOnlyMode('spaceFinder', region({}))).toBe(true)
   })
 
   test('Hinweise is member-only only when the region has internal notes and no OSM notes', () => {

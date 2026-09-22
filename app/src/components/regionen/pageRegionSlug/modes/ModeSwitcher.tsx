@@ -94,7 +94,13 @@ const ModeSwitcherNav = () => {
         observer.disconnect()
       }
     },
-    [highlightedMode, availableModes.notes, availableModes.qa, availableModes.reviewLists],
+    [
+      highlightedMode,
+      availableModes.notes,
+      availableModes.qa,
+      availableModes.reviewLists,
+      availableModes.spaceFinder,
+    ],
   )
 
   if (modes.length <= 1) return null
