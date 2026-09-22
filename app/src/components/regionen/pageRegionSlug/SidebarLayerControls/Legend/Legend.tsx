@@ -1,11 +1,10 @@
-import { ChevronRightIcon } from '@heroicons/react/20/solid'
-import { twJoin } from 'tailwind-merge'
 import type { StyleId, SubcategoryId } from '@/components/regionen/pageRegionSlug/mapData/typeId'
 import type {
   FileMapDataSubcategoryHiddenStyle,
   FileMapDataSubcategoryStyle,
   FileMapDataSubcategoryStyleLegend,
 } from '@/components/regionen/pageRegionSlug/mapData/types'
+import { DisclosureChevron } from '@/components/shared/DisclosureChevron/DisclosureChevron'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 import {
   createSubcatStyleKey,
@@ -102,12 +101,10 @@ const LegendDetailToggle = ({
     className="group flex cursor-pointer items-center gap-0.5 text-left text-xs leading-tight text-gray-500 hover:text-gray-800"
     aria-expanded={expanded}
   >
-    <ChevronRightIcon
-      aria-hidden
-      className={twJoin(
-        'size-3.5 shrink-0 text-gray-400 transition-transform group-hover:text-gray-700',
-        expanded && 'rotate-90',
-      )}
+    <DisclosureChevron
+      open={expanded}
+      side="leading"
+      className="size-3.5 text-gray-400 group-hover:text-gray-700"
     />
     <span>{expanded ? 'Kompakte Legende' : 'Detaillierte Legende'}</span>
   </button>

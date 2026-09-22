@@ -1,8 +1,8 @@
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
-import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { ZodError } from 'zod'
+import { DisclosureChevron } from '@/components/shared/DisclosureChevron/DisclosureChevron'
 import { FileUploadDropzone } from '@/components/shared/form/fields/FileUploadDropzone'
 import { buttonStylesOnYellow } from '@/components/shared/links/styles'
 import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
@@ -78,13 +78,7 @@ const ImportBucketDisclosure = ({
         <>
           <DisclosureButton className="flex w-full cursor-pointer items-center justify-between gap-2 px-3 py-2 text-left text-sm font-semibold text-gray-900 hover:bg-gray-50">
             <span>{title}</span>
-            <ChevronRightIcon
-              className={twJoin(
-                'size-4 shrink-0 text-gray-500 transition-transform',
-                open && 'rotate-90',
-              )}
-              aria-hidden
-            />
+            <DisclosureChevron open={open} side="trailing" className="size-4 text-gray-500" />
           </DisclosureButton>
           <DisclosurePanel className="max-h-48 space-y-2 overflow-y-auto border-t border-gray-200 px-3 py-2">
             {description ? <p className="text-sm text-gray-600">{description}</p> : null}

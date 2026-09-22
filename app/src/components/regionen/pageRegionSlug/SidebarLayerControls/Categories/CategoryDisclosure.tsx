@@ -1,11 +1,11 @@
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
-import { ChevronDownIcon, ChevronLeftIcon } from '@heroicons/react/20/solid'
 import { produce } from 'immer'
 import { Fragment } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import type { MapDataCategoryConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
 import { useCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/useCategoriesConfig'
+import { DisclosureChevron } from '@/components/shared/DisclosureChevron/DisclosureChevron'
 import { MotionCollapse } from '@/components/shared/motion/MotionCollapse'
 import { SubcategoryCheckbox } from '../Subcategories/SubcategoryCheckbox'
 import { SubcategoryDropdown } from '../Subcategories/SubcategoryDropdown'
@@ -62,11 +62,7 @@ export const CategoryDisclosure = ({ categoryConfig: currCategoryConfig, active 
             </CategoryHeadlineToggle>
             {/* Larger tap target + chevron on mobile (the flyout has room); compact on desktop. */}
             <DisclosureButton className="flex flex-none cursor-pointer items-center justify-center border-l border-gray-200 px-4 text-yellow-500 hover:bg-yellow-50 sm:px-1">
-              {open ? (
-                <ChevronDownIcon className="size-9 sm:size-7" />
-              ) : (
-                <ChevronLeftIcon className="size-9 sm:size-7" />
-              )}
+              <DisclosureChevron open={open} side="trailing" className="size-9 sm:size-7" />
             </DisclosureButton>
           </header>
 

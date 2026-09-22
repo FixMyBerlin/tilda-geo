@@ -1,7 +1,7 @@
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
-import { ChevronDownIcon, ChevronLeftIcon } from '@heroicons/react/20/solid'
 import { twJoin } from 'tailwind-merge'
 import { useDataParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useDataParam'
+import { DisclosureChevron } from '@/components/shared/DisclosureChevron/DisclosureChevron'
 import { MotionCollapse } from '@/components/shared/motion/MotionCollapse'
 import type { RegionDataset } from '@/server/uploads/queries/getUploadsForRegion.server'
 import { createSourceKeyStaticDatasets } from '../../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
@@ -83,11 +83,7 @@ export const SelectDatasets = ({
               )}
             </div>
             <div className="flex min-h-10 flex-none items-center justify-center px-1 text-yellow-500">
-              {open ? (
-                <ChevronDownIcon className="h-7 w-7" />
-              ) : (
-                <ChevronLeftIcon className="h-7 w-7" />
-              )}
+              <DisclosureChevron open={open} side="trailing" className="size-7" />
             </div>
           </DisclosureButton>
 

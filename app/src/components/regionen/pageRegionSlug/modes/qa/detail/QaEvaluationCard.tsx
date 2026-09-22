@@ -1,8 +1,7 @@
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
-import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { useQueryClient } from '@tanstack/react-query'
-import { twJoin } from 'tailwind-merge'
 import { TimeWithRelativeTooltip } from '@/components/shared/date/TimeWithRelativeTooltip'
+import { DisclosureChevron } from '@/components/shared/DisclosureChevron/DisclosureChevron'
 import { MotionCollapse } from '@/components/shared/motion/MotionCollapse'
 import { updateQaEvaluationBodyFn } from '@/server/qa-configs/qa-configs.functions'
 import type { QaEvaluationForArea } from '@/server/qa-configs/queries/getQaEvaluationsForArea.server'
@@ -76,13 +75,7 @@ export const QaEvaluationCard = ({ evaluation, variant = 'history' }: Props) => 
               <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
                 {statusPill}
                 <DisclosureButton className="ml-auto inline-flex cursor-pointer items-center gap-0.5 text-gray-600 hover:text-gray-800 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand">
-                  <ChevronRightIcon
-                    className={twJoin(
-                      'size-4 shrink-0 transition-transform',
-                      open && 'rotate-90 transform',
-                    )}
-                    aria-hidden="true"
-                  />
+                  <DisclosureChevron open={open} side="leading" className="size-4" />
                   Bewertungsgrundlage
                 </DisclosureButton>
               </div>

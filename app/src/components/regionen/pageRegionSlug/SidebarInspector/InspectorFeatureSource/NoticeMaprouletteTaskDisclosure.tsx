@@ -1,5 +1,5 @@
-import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { twJoin } from 'tailwind-merge'
+import { DisclosureChevron } from '@/components/shared/DisclosureChevron/DisclosureChevron'
 import type { TodoId } from '@/data/processingTypes/todoId.generated.const'
 import { campaigns } from '@/data/radinfra-de/campaigns'
 import type { NoticeMaproulette } from './NoticeMaproulette'
@@ -37,11 +37,10 @@ export const NoticeMaprouletteTaskDisclosure = ({
           open ? 'rounded-b-none border-b border-b-white/70' : '',
         )}
       >
-        <ChevronRightIcon
-          className={twJoin(
-            'mt-px mr-1.5 size-5 shrink-0 text-gray-900 transition-transform',
-            open ? 'rotate-90 transform' : '',
-          )}
+        <DisclosureChevron
+          open={open}
+          side="leading"
+          className="mt-px mr-1.5 size-5 text-gray-900"
         />
         <span className="not-prose min-w-0 leading-tight">{title}</span>
       </summary>

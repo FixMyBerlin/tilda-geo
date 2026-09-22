@@ -3,13 +3,14 @@ import {
   DisclosurePanel,
   Disclosure as HeadlessUiDisclosure,
 } from '@headlessui/react'
-import { ChevronRightIcon, LockClosedIcon } from '@heroicons/react/20/solid'
+import { LockClosedIcon } from '@heroicons/react/20/solid'
 import type React from 'react'
 import { twJoin } from 'tailwind-merge'
 import {
   type ModeAccentMode,
   modeIdentity,
 } from '@/components/regionen/pageRegionSlug/modes/modeIdentity'
+import { DisclosureChevron } from '@/components/shared/DisclosureChevron/DisclosureChevron'
 import { MotionCollapse } from '@/components/shared/motion/MotionCollapse'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 
@@ -54,11 +55,12 @@ export const Disclosure = ({
               open ? 'rounded-b-none border-b border-b-gray-200' : '',
             )}
           >
-            <ChevronRightIcon
+            <DisclosureChevron
+              open={open}
+              side="leading"
               className={twJoin(
-                'mr-1 -ml-0.5 size-5 shrink-0 transition-transform',
+                'mr-1 -ml-0.5 size-5',
                 mode ? 'text-white group-hover:text-gray-900' : 'text-gray-900',
-                open ? 'rotate-90 transform' : '',
               )}
             />
             <h3 className="not-prose w-full leading-tight">

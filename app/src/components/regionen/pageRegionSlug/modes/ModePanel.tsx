@@ -1,5 +1,6 @@
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
-import { ArrowLeftIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
+import { ChevronLeftIcon } from '@heroicons/react/20/solid'
+import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import type { ReactNode } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
@@ -192,10 +193,10 @@ export const ModePanel = ({
                         mutedClassName={accent.invertedMutedClassName}
                       />
                     </div>
-                    <ChevronDownIcon
+                    <ChevronLeftIcon
                       className={twJoin(
                         'size-5 shrink-0 transition-transform',
-                        open ? 'rotate-180' : '',
+                        open ? 'rotate-90 transform' : '',
                       )}
                       aria-hidden
                     />
