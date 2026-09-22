@@ -146,6 +146,10 @@ export default defineConfig({
     forwardApiRequestsPastViteAssetMiddleware(),
     nitro({
       preset: 'bun',
+      // Rolldown 1.2.9 still emits a broken SSR graph: `ssr.mjs` exports `ssr_exports` without
+      // declaring it, and the router chunks call `createSsrRpc` before that binding is initialized.
+      // One server bundle avoids both. https://github.com/TanStack/router/issues/8031
+      inlineDynamicImports: true,
       plugins: [
         'src/server/instrumentation/nitro-env-validation.plugin.server.ts',
         'src/server/instrumentation/nitro-legacy-cookie-sweep.plugin.server.ts',
