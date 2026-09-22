@@ -249,14 +249,14 @@ async function main() {
   const localKeys = new Set(localObjects.map(objectKey))
 
   // ── 3. Choose the environment to audit (staging first is recommended) ─────────────────────────
-  const source = (await p.select({
+  const source = await p.select({
     message: 'Audit which environment?',
     options: [
-      { value: 'staging', label: 'staging', hint: 'do this one first' },
-      { value: 'production', label: 'production' },
+      { value: 'staging' as const, label: 'staging', hint: 'do this one first' },
+      { value: 'production' as const, label: 'production' },
     ],
-    initialValue: 'staging',
-  })) as AllowedSource | symbol
+    initialValue: 'staging' as const,
+  })
   if (p.isCancel(source)) {
     p.cancel('Aborted.')
     await local.end().catch(() => {})
@@ -306,7 +306,7 @@ async function main() {
     )
 
     // ── 8. Multi-select what to drop ────────────────────────────────────────────────────────────
-    const selectedKeys = (await p.multiselect({
+    const selectedKeys = await p.multiselect({
       message: `Select objects to DROP from ${source}.public (space to toggle, enter to confirm)`,
       options: candidates.map((o) => ({
         value: objectKey(o),
@@ -314,7 +314,7 @@ async function main() {
         hint: o.kind,
       })),
       required: false,
-    })) as string[] | symbol
+    })
     if (p.isCancel(selectedKeys) || selectedKeys.length === 0) {
       p.outro('Nothing selected — no changes made.')
       return
