@@ -2,6 +2,7 @@ import { runGeoBootstrap } from '../scripts/geo-bootstrap/run'
 import { seedLocalAccess } from '../scripts/seed-local/seedLocalAccess'
 import seedInternalNotes from './seeds/atlasNotes'
 import seedMemberships from './seeds/memberships'
+import seedPlanning from './seeds/planning'
 import seedUploads from './seeds/pmtiles'
 import seedProcessingMeta from './seeds/processingMeta'
 import seedQaConfigs from './seeds/qaConfigs'
@@ -19,6 +20,7 @@ const seed = async () => {
   await seedUsers()
   await seedLocalAccess()
   await seedMemberships()
+  await seedPlanning()
   await seedUploads()
   await seedInternalNotes()
   await seedQaConfigs()
