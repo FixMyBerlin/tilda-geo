@@ -5,11 +5,13 @@ import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { FadeSlideIn } from '@/components/shared/motion/FadeSlideIn'
 import { UI_SPRING } from '@/components/shared/motion/spring.const'
 import { mapOverlayHairlineClassName } from '../mapOverlayChrome.const'
+import { PanelResizeHandle } from '../PanelResizeHandle'
 import { useModePanelWidth, useModePanelWidthDragging } from './mode-panel-width-store'
 import { modeIdentity } from './modeIdentity'
 import { ModeMobileDock } from './ModeMobileDock'
 import { modeColumnElevationClassName } from './modePanel.const'
 import { useOptimisticMode } from './useCurrentMode'
+import { useResizableModePanelWidth } from './useResizableModePanelWidth'
 
 /**
  * Animated right column for mode routes on desktop. Outer shell springs width 0 ↔ stored
@@ -34,6 +36,9 @@ export const ModeColumnShell = () => {
   const isDragging = useModePanelWidthDragging()
   const reduceMotion = useReducedMotion()
   const instant = reduceMotion || isDragging
+  const { panelRef, onResizeHandlePointerDown } = useResizableModePanelWidth({
+    enabled: isDesktop,
+  })
 
   if (!isDesktop) {
     return isModeRoute ? <ModeMobileDock /> : null
@@ -51,11 +56,15 @@ export const ModeColumnShell = () => {
             modeColumnElevationClassName,
           )}
           initial={{ width: 0, overflow: 'hidden' }}
-          animate={{ width: panelWidth, overflow: isDragging ? 'hidden' : 'visible' }}
+          animate={{ width: panelWidth, overflow: 'visible' }}
           exit={{ width: 0, overflow: 'hidden' }}
           transition={instant ? { duration: 0 } : UI_SPRING}
         >
-          <div className="h-full overflow-hidden" style={{ width: panelWidth }}>
+          <PanelResizeHandle
+            label="Modus-Panelbreite ändern"
+            onPointerDown={onResizeHandlePointerDown}
+          />
+          <div ref={panelRef} className="h-full overflow-hidden" style={{ width: panelWidth }}>
             <FadeSlideIn x={24} className="h-full w-full">
               <Outlet />
             </FadeSlideIn>

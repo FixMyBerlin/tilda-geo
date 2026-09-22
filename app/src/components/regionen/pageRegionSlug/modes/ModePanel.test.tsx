@@ -28,21 +28,6 @@ vi.mock('./useListHoverMarkerPosition', () => ({
   useListHoverMarkerPosition,
 }))
 
-vi.mock('@/components/shared/hooks/viewport/useBreakpoint', () => ({
-  useBreakpoint: () => true,
-}))
-
-vi.mock('./useResizableModePanelWidth', () => ({
-  useResizableModePanelWidth: () => ({
-    panelRef: { current: null },
-    onResizeHandlePointerDown: () => {},
-  }),
-}))
-
-vi.mock('../PanelResizeHandle', () => ({
-  PanelResizeHandle: () => null,
-}))
-
 vi.mock('@/components/shared/Tooltip/Tooltip', () => ({
   Tooltip: ({ text, children }: { text: string; children: React.ReactNode }) => (
     <div data-tooltip={text}>{children}</div>

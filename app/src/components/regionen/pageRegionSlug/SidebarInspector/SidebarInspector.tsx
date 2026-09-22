@@ -104,10 +104,9 @@ export const SidebarInspector = () => {
     <div
       ref={desktopPanelRef}
       className={twJoin(
-        'absolute z-20 flex w-(--inspector-width) max-w-[800px] flex-col overflow-hidden transition-opacity duration-150',
+        'absolute z-20 flex w-(--inspector-width) max-w-[800px] flex-col overflow-visible transition-opacity duration-150',
         'top-(--map-overlay-inset) right-(--map-overlay-inset)',
         mapOverlayMaxHeightClassName,
-        mapOverlaySheetClassName,
         !renderFeatures && 'pointer-events-none opacity-0',
       )}
     >
@@ -119,11 +118,19 @@ export const SidebarInspector = () => {
           />
           {/* Enter-only transform/opacity animation on the content only: the outer panel
               div must stay a plain, always-mounted div — its ResizeObserver and the
-              --inspector-width layout effect depend on it (see useResizableInspectorWidth). */}
-          <FadeSlideIn x={24} className="relative min-h-0 overflow-y-auto p-2">
-            <InspectorHeader count={features.length} handleClose={handleClose} />
-            <Inspector features={features} />
-          </FadeSlideIn>
+              --inspector-width layout effect depend on it (see useResizableInspectorWidth).
+              Sheet chrome is the inner clip so the resize pill can sit on the left edge. */}
+          <div
+            className={twJoin(
+              'flex min-h-0 flex-1 flex-col overflow-hidden',
+              mapOverlaySheetClassName,
+            )}
+          >
+            <FadeSlideIn x={24} className="relative min-h-0 flex-1 overflow-y-auto p-2">
+              <InspectorHeader count={features.length} handleClose={handleClose} />
+              <Inspector features={features} />
+            </FadeSlideIn>
+          </div>
         </>
       ) : null}
     </div>

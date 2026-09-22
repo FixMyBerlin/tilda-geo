@@ -24,7 +24,7 @@ type HookApi = ReturnType<typeof useResizableModePanelWidth>
 
 const mountHook = () => {
   const hook = renderHook(() => useResizableModePanelWidth({ enabled: true }))
-  const panel = document.createElement('section')
+  const panel = document.createElement('div')
   document.body.appendChild(panel)
   hook.result.current.panelRef.current = panel
   return hook

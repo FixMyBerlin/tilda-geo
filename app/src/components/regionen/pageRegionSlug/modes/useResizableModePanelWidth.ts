@@ -18,7 +18,7 @@ type UseResizableModePanelWidthOptions = {
 // Desktop mode panel: width lives in the zustand store. Inactive (mobile) keeps the overlay
 // from shoving viewport-fixed map chrome.
 export function useResizableModePanelWidth({ enabled }: UseResizableModePanelWidthOptions) {
-  const panelRef = useRef<HTMLElement>(null)
+  const panelRef = useRef<HTMLDivElement>(null)
   const { resize, startDrag, endDrag } = useModePanelWidthActions()
   const mode = useOptimisticMode()
   const { foldForLayout } = useLayerControlsActions()

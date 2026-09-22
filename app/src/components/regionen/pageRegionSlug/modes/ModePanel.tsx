@@ -1,12 +1,10 @@
 import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
-import { ChevronLeftIcon } from '@heroicons/react/20/solid'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import type { ReactNode } from 'react'
 import { twJoin } from 'tailwind-merge'
-import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
+import { DisclosureChevron } from '@/components/shared/DisclosureChevron/DisclosureChevron'
 import { MotionCollapse } from '@/components/shared/motion/MotionCollapse'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
-import { PanelResizeHandle } from '../PanelResizeHandle'
 import { modeIdentity } from './modeIdentity'
 import {
   modePanelBackButtonClassName,
@@ -21,7 +19,6 @@ import {
 } from './modePanel.const'
 import { useCurrentMode } from './useCurrentMode'
 import { useListHoverMarkerPosition } from './useListHoverMarkerPosition'
-import { useResizableModePanelWidth } from './useResizableModePanelWidth'
 
 type ModePanelDetail = {
   title: string
@@ -92,26 +89,15 @@ export const ModePanel = ({
   const identity = modeIdentity[mode]
   const { accent } = identity
   const Icon = identity.icon
-  const isDesktop = useBreakpoint('sm')
-  const { panelRef, onResizeHandlePointerDown } = useResizableModePanelWidth({
-    enabled: isDesktop,
-  })
   const isDetail = detail !== undefined
   const hoverMarkerPosition = useListHoverMarkerPosition()
   const showOutsideFooter = !isDetail && hoverMarkerPosition?.atEdge === true
 
   return (
     <section
-      ref={panelRef}
       aria-label={identity.label}
       className={twJoin(modePanelClassName, accent.tintClassName)}
     >
-      {isDesktop ? (
-        <PanelResizeHandle
-          label="Modus-Panelbreite ändern"
-          onPointerDown={onResizeHandlePointerDown}
-        />
-      ) : null}
       <header
         className={twJoin(
           isDetail ? 'flex items-stretch border-b border-white/80' : 'border-b border-white/80',
@@ -193,13 +179,7 @@ export const ModePanel = ({
                         mutedClassName={accent.invertedMutedClassName}
                       />
                     </div>
-                    <ChevronLeftIcon
-                      className={twJoin(
-                        'size-5 shrink-0 transition-transform',
-                        open ? 'rotate-90 transform' : '',
-                      )}
-                      aria-hidden
-                    />
+                    <DisclosureChevron open={open} side="trailing" className="size-5" />
                   </DisclosureButton>
                   {actions && <div className={modePanelListHeaderActionsClassName}>{actions}</div>}
                 </div>
