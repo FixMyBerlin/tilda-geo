@@ -2,8 +2,6 @@ import type { ExpressionSpecification } from 'maplibre-gl'
 import type { LayerProps } from 'react-map-gl/maplibre'
 import { Layer } from 'react-map-gl/maplibre'
 import { useMapLoaded } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
-import { modeIdentity } from '@/components/regionen/pageRegionSlug/modes/modeIdentity'
-import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
 
 const createMatchExpression = ({
   valueNone,
@@ -32,10 +30,13 @@ const createMatchExpression = ({
   ] satisfies ExpressionSpecification
 }
 
+/** Pointer hover on atlas categories and static datasets. Mode layers pass their own accent. */
 const HOVER_COLOR = '#ff9933'
+/** Selected atlas/static features. Unchanged by the active region mode. */
+const SELECTED_COLOR = '#ff0000'
 
 type Props = LayerProps & {
-  /** Override pointer-hover color. Default orange; QA passes the mode accent. */
+  /** Override pointer-hover color. Default orange; mode-owned layers pass their accent. */
   hoverColor?: string
   /** When false, skip feature-state selected paint (QA uses filtered highlight layers). */
   includeSelected?: boolean
@@ -47,10 +48,6 @@ export const LayerHighlight = ({
   ...props
 }: Props) => {
   const mapLoaded = useMapLoaded()
-  const { mode } = useCurrentMode()
-  // Selected uses the mode accent. Default hover stays orange so pointer interest stays
-  // distinct from “this feature is open in the panel”.
-  const selectedColor = modeIdentity[mode].accent.hex
   const opacity = createMatchExpression({
     valueNone: 0,
     valueHover: 0.5,
@@ -60,8 +57,8 @@ export const LayerHighlight = ({
   const color = createMatchExpression({
     valueNone: 'black',
     valueHover: hoverColor,
-    valueSelected: includeSelected ? selectedColor : hoverColor,
-    valueHoverSelected: includeSelected ? selectedColor : hoverColor,
+    valueSelected: includeSelected ? SELECTED_COLOR : hoverColor,
+    valueHoverSelected: includeSelected ? SELECTED_COLOR : hoverColor,
   })
   if (!mapLoaded) return null
 
