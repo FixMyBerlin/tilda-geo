@@ -30,6 +30,14 @@ const sectionLabels = {
   membership: 'Mitgliedschaft',
 } satisfies Record<string, string>
 
+const roleOptions = [
+  { value: 'USER', label: 'Normaler User – Rechte nur auf den zugewiesenen Regionen' },
+  { value: 'ADMIN', label: 'Admin – Zugriff auf alle Regionen und den Admin-Bereich' },
+]
+
+const getUserRole = (users: User[], userId: string) =>
+  users.find((u) => u.id === userId)?.role ?? 'USER'
+
 function MembershipFormFields({
   form,
   userId,
@@ -52,12 +60,15 @@ function MembershipFormFields({
   const regionOptsRaw = getRegionSelectOptions(regions, userData ?? null)
   const regionsLocked = Boolean(userId) && membershipQueryPending
 
-  const regionOptions = regionOptsRaw.map(({ value, label, readonly, outerProps }) => ({
-    value,
-    label,
-    disabled: readonly || regionsLocked,
-    className: outerProps?.className,
-  }))
+  const regionOptions = [
+    { value: '', label: 'Keine Region hinzufügen', disabled: regionsLocked },
+    ...regionOptsRaw.map(({ value, label, readonly, outerProps }) => ({
+      value,
+      label,
+      disabled: readonly || regionsLocked,
+      className: outerProps?.className,
+    })),
+  ]
 
   return (
     <>
@@ -69,8 +80,10 @@ function MembershipFormFields({
         onValueChange={(nextUserId) => {
           onUserIdChange(nextUserId)
           void form.setFieldValue('regionId', '')
+          void form.setFieldValue('role', getUserRole(users, nextUserId))
         }}
       />
+      <RadioGroup form={form} name="role" label="Rolle" items={roleOptions} />
       <RadioGroup
         form={form}
         name="regionId"
@@ -90,6 +103,7 @@ export function MembershipForm({ regions, users, initialValues }: Props) {
       showFormErrors={false}
       defaultValues={{
         userId: initialValues?.userId ?? '',
+        role: getUserRole(users, initialValues?.userId ?? ''),
         regionId: initialValues?.regionId ?? '',
       }}
       schema={MembershipSchema}
@@ -97,11 +111,12 @@ export function MembershipForm({ regions, users, initialValues }: Props) {
         const result = await createMembershipFn({
           data: {
             userId: values.userId,
+            role: values.role,
             regionId: values.regionId,
           },
         })
         if (result.success) {
-          return { success: true, message: 'Angelegt.', redirect: '/admin/memberships' }
+          return { success: true, message: 'Gespeichert.', redirect: '/admin/memberships' }
         }
         return result
       }}
@@ -110,7 +125,7 @@ export function MembershipForm({ regions, users, initialValues }: Props) {
         <AdminFormLayout
           fieldLabels={sectionLabels}
           form={form}
-          submitLabel="Erstellen"
+          submitLabel="Speichern"
           cancel={{ to: '/admin/memberships' }}
           submitError={submitError}
         >
