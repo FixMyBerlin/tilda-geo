@@ -1,5 +1,4 @@
 import { Switch } from '@headlessui/react'
-import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { bbox } from '@turf/turf'
@@ -21,33 +20,18 @@ import {
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
 import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
-import {
-  usePlanningAreaFilterParam,
-  usePlanningAreaParam,
-  usePlanningMinAreaParam,
-  usePlanningModeParam,
-  usePlanningRunParam,
-  usePlanningVariantParam,
-} from '../hooks/useQueryState/usePlanningParams'
+import { useSpaceFinderModeParam } from '../modes/spaceFinder/useSpaceFinderModeParam'
+import { useSpaceFinderSelection } from '../modes/spaceFinder/useSpaceFinderSelection'
 import { AreaContextBar } from './AreaContextBar'
 import { PlanningCandidateToggle } from './candidates/PlanningCandidateToggle'
 import { FactorEditorPanel } from './FactorEditorPanel'
 import { InfoTooltip } from './InfoTooltip'
-import { PLANNING_PANEL_WIDTH, planningNumberInputClass } from './planningPanelStyles'
+import { planningNumberInputClass } from './planningPanelStyles'
 import { RunButton } from './RunButton'
 import { ScoreModeSwitcher } from './ScoreModeSwitcher'
-import { useDraggableMapPanel } from './useDraggableMapPanel'
 import { VariantList } from './VariantList'
 
 const routeApi = getRouteApi('/regionen/$regionSlug')
-
-const DragGripIcon = ({ className }: { className?: string }) => (
-  <svg viewBox="0 0 16 16" fill="currentColor" className={className} aria-hidden="true">
-    {[3, 8, 13].flatMap((cy) =>
-      [3, 8, 13].map((cx) => <circle key={`${cx}-${cy}`} cx={cx} cy={cy} r={1.35} />),
-    )}
-  </svg>
-)
 
 /**
  * Ein/Aus-Schalter für einen der Kontroll-Layer der Karte (Vegetation, Fahrbahnen,
@@ -146,10 +130,12 @@ const UserObstaclesToggle = () => {
 }
 
 /**
- * Zielgrößen-Filter der Flächensuche. Der Wert gehört zur Variante
+ * Zielgrößen-Filter der Flächensuche. Der gespeicherte Wert gehört zur Variante
  * (`factorConfig.min_area_m2`, beim Anlegen des Planungsgebiets aus dessen Flächengröße
  * vorbelegt) und wird beim Verlassen des Felds gespeichert.
- * Der URL-Param hält den in der Karte wirksamen Wert, damit sie schon beim Tippen reagiert.
+ * `ff.minArea` hält den in der Karte wirksamen Wert (0/fehlend = Filter aus, D7), damit sie
+ * schon beim Tippen reagiert; der lokale Zustand hält die Zahl auch sichtbar, während der
+ * Filter per Checkbox ausgeschaltet ist (das leert `ff.minArea`, nicht das Eingabefeld).
  */
 const MinAreaFilterForm = ({
   variantId,
@@ -159,8 +145,10 @@ const MinAreaFilterForm = ({
   savedMinArea: number
 }) => {
   const queryClient = useQueryClient()
-  const [filterOn, setFilterOn] = usePlanningAreaFilterParam()
-  const [minArea, setMinArea] = usePlanningMinAreaParam()
+  const { spaceFinderMode, setSpaceFinderModeParam } = useSpaceFinderModeParam()
+  const urlMinArea = spaceFinderMode.minArea ?? 0
+  const filterOn = urlMinArea > 0
+  const [minArea, setLocalMinArea] = useState(savedMinArea)
   const lastSaved = useRef(savedMinArea)
 
   // Beim Öffnen einer Variante deren gespeicherten Wert einmalig in die Karte übernehmen
@@ -169,8 +157,10 @@ const MinAreaFilterForm = ({
   useEffect(() => {
     if (initialized.current) return
     initialized.current = true
-    if (savedMinArea !== minArea) setMinArea(savedMinArea)
-  }, [savedMinArea, minArea, setMinArea])
+    if (savedMinArea !== urlMinArea) {
+      setSpaceFinderModeParam({ ...spaceFinderMode, minArea: savedMinArea || undefined })
+    }
+  }, [savedMinArea, urlMinArea, spaceFinderMode, setSpaceFinderModeParam])
 
   const mutation = useMutation({
     mutationFn: (value: number) =>
@@ -183,6 +173,18 @@ const MinAreaFilterForm = ({
 
   const save = () => {
     if (minArea !== lastSaved.current) mutation.mutate(minArea)
+  }
+
+  const setFilterOn = (checked: boolean) => {
+    setSpaceFinderModeParam({
+      ...spaceFinderMode,
+      minArea: checked ? minArea || undefined : undefined,
+    })
+  }
+
+  const setMinArea = (value: number) => {
+    setLocalMinArea(value)
+    setSpaceFinderModeParam({ ...spaceFinderMode, minArea: value > 0 ? value : undefined })
   }
 
   return (
@@ -224,21 +226,9 @@ const MinAreaFilter = (props: { variantId: number; savedMinArea: number }) => (
 )
 
 const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlug: string }) => {
-  const [, setRun] = usePlanningRunParam()
   const setVegetationAttribution = usePlanningBoundaryState((s) => s.setVegetationAttribution)
   const setUserObstaclesGeom = usePlanningBoundaryState((s) => s.setUserObstaclesGeom)
   const { data: variant } = useQuery(planningVariantQueryOptions(variantId))
-
-  const currentRunId = variant?.currentRunId ?? null
-  useEffect(
-    function syncRunParamFromVariant() {
-      // Wait until the variant query has loaded so we do not clear a run just written
-      // by useSetPlanningSelection (area/variant switch) while this query is in flight.
-      if (!variant) return
-      setRun(currentRunId)
-    },
-    [variant, currentRunId, setRun],
-  )
 
   useEffect(() => {
     if (!variant) return
@@ -330,15 +320,13 @@ const VariantDetail = ({ variantId, regionSlug }: { variantId: number; regionSlu
   )
 }
 
-/** Planning-mode entry button + interactive panel. */
-export const PlanningPanel = () => {
-  const [planningMode] = usePlanningModeParam()
-  const [activeArea, setActiveArea] = usePlanningAreaParam()
-  const [activeVariant] = usePlanningVariantParam()
-  const panelCollapsed = usePlanningBoundaryState((s) => s.panelCollapsed)
-  const setPanelCollapsed = usePlanningBoundaryState((s) => s.setPanelCollapsed)
-  const { panelRef, dragging, panelStyle, defaultPositionClassName, headerDragProps } =
-    useDraggableMapPanel(planningMode)
+/**
+ * Flächenfinder panel body: rendered inside the mode's `ModePanel` (`PageModeSpaceFinder`), which
+ * owns the panel chrome (header, resizable width, scroll container). The former floating/draggable
+ * panel and its collapse state are gone (D3/D5 — phase 3 does the full panel-body redesign); this
+ * is the first port of the existing sections, unchanged in behavior.
+ */
+export const SpaceFinderPanelBody = () => {
   const { regionSlug } = routeApi.useParams()
   const [showCreate, setShowCreate] = useState(false)
   const [pendingCreatedAreaId, setPendingCreatedAreaId] = useState<number | null>(null)
@@ -346,29 +334,19 @@ export const PlanningPanel = () => {
   const setBoundaryHighlightGeom = usePlanningBoundaryState((s) => s.setBoundaryHighlightGeom)
   const setLastFittedBoundaryKey = usePlanningBoundaryState((s) => s.setLastFittedBoundaryKey)
 
+  // Area id is always derived from the active variant (D7) — there is no separate area URL key.
+  const { variantId: activeVariant, areaId: activeArea, variant } = useSpaceFinderSelection()
+
   const { data: areas } = useQuery(planningAreasQueryOptions(regionSlug))
   const waitingForCreatedArea =
     pendingCreatedAreaId != null &&
     (activeArea !== pendingCreatedAreaId || !areas?.some((a) => a.id === pendingCreatedAreaId))
   const creatingArea = showCreate || waitingForCreatedArea
 
-  const { data: variant } = useQuery({
-    ...planningVariantQueryOptions(activeVariant!),
-    enabled: activeVariant != null,
-  })
-
   const { data: area } = useQuery({
     ...planningAreaQueryOptions(activeArea!),
     enabled: activeArea != null,
   })
-
-  // Resolve area from variant when only legacy planningScenario URL is set.
-  useEffect(
-    function resolveAreaFromLegacyVariantParam() {
-      if (variant?.area?.id != null && activeArea == null) setActiveArea(variant.area.id)
-    },
-    [variant?.area?.id, activeArea, setActiveArea],
-  )
 
   const studyArea =
     (area?.studyArea as GeoJSON.Geometry | undefined) ??
@@ -376,14 +354,10 @@ export const PlanningPanel = () => {
       | GeoJSON.Geometry
       | undefined)
 
-  // Outline lives on the panel (not VariantDetail) so it stays on the map when the
-  // panel is collapsed or while switching variants of the same planungsgebiet.
+  // Outline lives on the panel body (not VariantDetail) so it stays on the map while switching
+  // variants of the same planungsgebiet.
   useEffect(
     function syncStudyAreaOutline() {
-      if (!planningMode) {
-        setBoundaryHighlightGeom(null)
-        return
-      }
       // While creating, AreaFormFields / the wizard own the highlight — do not re-apply
       // the previous area's studyArea. Missing geometry while an area is selected means
       // the query is still in flight; keep the current outline instead of flashing it off.
@@ -407,16 +381,12 @@ export const PlanningPanel = () => {
         }
       }
     },
-    [
-      planningMode,
-      creatingArea,
-      activeArea,
-      studyArea,
-      map,
-      setBoundaryHighlightGeom,
-      setLastFittedBoundaryKey,
-    ],
+    [creatingArea, activeArea, studyArea, map, setBoundaryHighlightGeom, setLastFittedBoundaryKey],
   )
+
+  // Clear the outline when leaving the mode — the component unmounts with the route (there is no
+  // more "planning mode off while the map stays mounted" state to guard against here).
+  useEffect(() => () => setBoundaryHighlightGeom(null), [setBoundaryHighlightGeom])
 
   if (
     pendingCreatedAreaId != null &&
@@ -426,111 +396,22 @@ export const PlanningPanel = () => {
     setPendingCreatedAreaId(null)
   }
 
-  if (!planningMode) return null
-
-  const areaTitle = area?.title ?? variant?.area?.title
-  const variantTitle = variant?.title
-  const collapsedTrail = panelCollapsed && (areaTitle || variantTitle)
-  const hasCompleteRun = variant?.runs[0]?.status === 'COMPLETE'
-
   return (
-    <div
-      ref={panelRef}
-      style={panelStyle}
-      className={twJoin(
-        'pointer-events-auto absolute z-10 flex max-h-[calc(100%-1.25rem)] flex-col overflow-hidden rounded bg-white shadow-lg',
-        defaultPositionClassName,
-        PLANNING_PANEL_WIDTH,
-      )}
-    >
-      <div
-        {...headerDragProps}
-        title="Flächenfinder verschieben"
-        className={twJoin(
-          'group/drag flex shrink-0 cursor-grab touch-none items-center justify-between gap-2 px-3 py-2 select-none',
-          'hover:bg-gray-50',
-          dragging && 'cursor-grabbing bg-gray-50',
-        )}
-      >
-        <div className="flex min-w-0 flex-1 items-center gap-1.5">
-          <DragGripIcon className="size-4 shrink-0 text-gray-400 group-hover/drag:text-gray-600" />
-          <h2 className="font-bold">Flächenfinder</h2>
-        </div>
-        <button
-          type="button"
-          data-drag-ignore
-          onPointerDown={(event) => event.stopPropagation()}
-          onClick={() => setPanelCollapsed(!panelCollapsed)}
-          aria-label={panelCollapsed ? 'Flächenfinder ausklappen' : 'Flächenfinder einklappen'}
-          className="shrink-0 cursor-pointer text-gray-500 hover:text-gray-800"
-        >
-          <ChevronRightIcon
-            className={twJoin('size-4 transition-transform', panelCollapsed ? '' : 'rotate-90')}
-          />
-        </button>
-      </div>
-      {collapsedTrail && (
-        <button
-          type="button"
-          data-drag-ignore
-          onClick={() => setPanelCollapsed(false)}
-          aria-label="Flächenfinder ausklappen"
-          className="shrink-0 cursor-pointer border-t border-gray-200 px-3 py-2 text-left hover:bg-gray-50"
-        >
-          <ol className="flex min-w-0 items-center">
-            {areaTitle && (
-              <li className="min-w-0">
-                <span
-                  className={twJoin(
-                    'block truncate text-sm font-medium',
-                    variantTitle ? 'text-gray-500' : 'text-gray-700',
-                  )}
-                >
-                  {areaTitle}
-                </span>
-              </li>
-            )}
-            {variantTitle && (
-              <li className="flex min-w-0 items-center">
-                {areaTitle && (
-                  <ChevronRightIcon aria-hidden="true" className="size-5 shrink-0 text-gray-400" />
-                )}
-                <span
-                  className={twJoin(
-                    'min-w-0 truncate text-sm font-medium text-gray-700',
-                    areaTitle && 'ml-1',
-                  )}
-                >
-                  {variantTitle}
-                </span>
-              </li>
-            )}
-          </ol>
-        </button>
-      )}
-      {panelCollapsed && hasCompleteRun && (
-        <div className="shrink-0 border-t border-gray-200 px-3 py-2">
-          <ScoreModeSwitcher compact />
-        </div>
-      )}
-      {!panelCollapsed && (
-        <div className="flex min-h-0 flex-col gap-3 overflow-auto px-3 pt-1 pb-3">
-          <AreaContextBar
-            regionSlug={regionSlug}
-            creating={creatingArea}
-            pendingCreatedAreaId={pendingCreatedAreaId}
-            onShowCreate={setShowCreate}
-            onPendingCreatedAreaId={setPendingCreatedAreaId}
-          />
-          {!creatingArea && (
-            <>
-              <VariantList regionSlug={regionSlug} />
-              {activeVariant != null && (
-                <VariantDetail variantId={activeVariant} regionSlug={regionSlug} />
-              )}
-            </>
+    <div className="flex flex-col gap-3">
+      <AreaContextBar
+        regionSlug={regionSlug}
+        creating={creatingArea}
+        pendingCreatedAreaId={pendingCreatedAreaId}
+        onShowCreate={setShowCreate}
+        onPendingCreatedAreaId={setPendingCreatedAreaId}
+      />
+      {!creatingArea && (
+        <>
+          <VariantList regionSlug={regionSlug} />
+          {activeVariant != null && (
+            <VariantDetail variantId={activeVariant} regionSlug={regionSlug} />
           )}
-        </div>
+        </>
       )}
     </div>
   )

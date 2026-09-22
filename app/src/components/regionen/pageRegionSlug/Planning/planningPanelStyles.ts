@@ -1,9 +1,6 @@
 import { twJoin } from 'tailwind-merge'
 import type { PlanningScoreMode } from '@/shared/regionen/planningScoreMode.const'
 
-/** Planungspanel-Breite (etwas über Standard-`w-80`). */
-export const PLANNING_PANEL_WIDTH = 'w-[22rem]'
-
 const planningToggleButtonBase = 'rounded border px-2 py-1.5 text-xs font-medium transition-colors'
 const planningToggleButtonInactive = 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
 
