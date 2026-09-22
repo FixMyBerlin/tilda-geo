@@ -6,13 +6,14 @@ services:
     build:
       context: .
       dockerfile: ./processing.Dockerfile
-    # INFO: Mounting processing as volumen allows us to edit data without constant rebuild
-    # However, that would also overwrite the `node_modules` that where build inside docker
-    # with local data. The second line prevents this overwrite by excepting the `node_modules`
-    # from the mounting.
+    # Bind-mount source for edit-without-rebuild. `processing_node_modules` keeps the image's
+    # `bun install` (the bind would otherwise hide it). Named per compose project so recreates
+    # reuse one volume instead of leaving anonymous hashes behind. The entrypoint runs
+    # `bun install` when bun.lock no longer matches the stamp in the volume — no manual delete.
+    entrypoint: ['bun', '/processing/scripts/ensure-node-modules.ts']
     volumes:
       - ./processing:/processing
-      - /processing/node_modules
+      - processing_node_modules:/processing/node_modules
       # oxfmt config: must not mount under /processing (nested bind breaks Docker Desktop virtiofs)
       - ./app/oxfmt.config.mjs:/mnt/oxfmt.config.mjs:ro
     # INFO: The overwrite of `journald` is needed for mac systems which did not work with `journald`
@@ -66,6 +67,10 @@ services:
     mem_limit: 4g
     mem_reservation: 1g
     cpus: '4'
+
+volumes:
+  # Project-prefixed (`tilda-geo_processing_node_modules`, `wt_*_processing_node_modules`).
+  processing_node_modules:
 
 configs:
   postgres_conf:

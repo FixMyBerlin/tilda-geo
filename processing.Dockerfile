@@ -58,7 +58,7 @@ RUN curl -o /usr/local/bin/oauth_cookie_client.py https://raw.githubusercontent.
     chmod +x /usr/local/bin/oauth_cookie_client.py
 
 # install bun packages
-RUN bun install
+RUN bun install && sha256sum bun.lock | awk '{print $1}' > node_modules/.processing-bun-lock-hash
 
 # Commit SHA for "Processing: Startup" logs (no .git in image; set via CI build-arg).
 ARG GIT_SHA=unknown

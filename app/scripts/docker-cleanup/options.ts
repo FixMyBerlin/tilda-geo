@@ -1,4 +1,10 @@
-import { containerNamesForStoppedDevStacks, listDevStacks } from './devStackContext'
+import {
+  classifyVolumes,
+  containerNamesForStoppedDevStacks,
+  formatVolumeClassification,
+  isSafeCacheVolume,
+  listDevStacks,
+} from './devStackContext'
 import {
   formatBytesAsGB,
   getStoppedContainerNames,
@@ -13,6 +19,7 @@ import type { DfSummary } from './dockerPreview'
 export type CleanupActionId =
   | 'stopped_containers'
   | 'dangling_images'
+  | 'unused_node_modules_volumes'
   | 'unused_volumes'
   | 'build_cache_unused'
   | 'all_unused_images'
@@ -46,6 +53,7 @@ const ACTION_ORDER: CleanupActionId[] = [
   'build_cache_unused',
   'all_unused_images',
   'build_cache_all',
+  'unused_node_modules_volumes',
   'unused_volumes',
   'full_system_prune',
 ]
@@ -75,6 +83,13 @@ export async function getPreviewGB(summary: DfSummary, action: CleanupAction) {
 
 export function isDestructiveAction(id: CleanupActionId) {
   return id === 'unused_volumes' || id === 'full_system_prune'
+}
+
+async function listSafeCacheVolumeNames() {
+  const unused = await getUnusedVolumeNames()
+  return classifyVolumes(unused)
+    .filter(isSafeCacheVolume)
+    .map((volume) => volume.name)
 }
 
 export function formatMultiselectLabel(
@@ -205,11 +220,39 @@ export const CLEANUP_ACTIONS: CleanupAction[] = [
     },
   },
   {
+    id: 'unused_node_modules_volumes',
+    label: 'Unused processing node_modules volumes',
+    destructive: false,
+    description:
+      'Safe cache only. Removes unused `*_processing_node_modules` volumes. Postgres and OSM volumes are not touched. Volumes still attached to a processing container (even a stopped one) stay until that container is removed — select "Stopped containers" in the same run to release them. The next processing start creates a fresh cache.',
+    previewTypes: 'custom',
+    getPreviewNames: async () => {
+      const unused = await getUnusedVolumeNames()
+      return classifyVolumes(unused).filter(isSafeCacheVolume).map(formatVolumeClassification)
+    },
+    run: async () => {
+      const names = await listSafeCacheVolumeNames()
+      if (names.length === 0) {
+        return {
+          stdout: 'No unused processing node_modules volumes.',
+          stderr: '',
+          exitCode: 0,
+        }
+      }
+      const r = await dockerCmd(['volume', 'rm', ...names], { timeoutMs: DOCKER_PRUNE_TIMEOUT_MS })
+      return {
+        stdout: r.stdout,
+        stderr: r.stderr,
+        exitCode: r.timedOut ? -1 : r.exitCode,
+      }
+    },
+  },
+  {
     id: 'unused_volumes',
-    label: 'Unused volumes',
+    label: 'Unused volumes (all, including databases)',
     destructive: true,
     description:
-      'Warning: can delete data. Removes volumes not used by any container (e.g. old DB volumes). Only choose if you are sure no important data is in those volumes.',
+      'Warning: can delete data. Removes every volume not used by any container, including old Postgres and OSM volumes. Prefer "Unused processing node_modules volumes" when you only want the processing dependency cache.',
     previewTypes: ['Local Volumes'],
     getPreviewNames: getUnusedVolumeNames,
     run: async () => {
