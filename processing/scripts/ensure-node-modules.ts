@@ -18,5 +18,10 @@ if (current !== hash) {
 }
 
 const [command, ...args] = Bun.argv.slice(2)
-if (!command) process.exit(0)
+if (!command) {
+  console.error(
+    'ensure-node-modules: no command to run. Expected command: bun run /processing/index.ts',
+  )
+  process.exit(1)
+}
 await $`${command} ${args}`.cwd('/processing')

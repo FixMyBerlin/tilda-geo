@@ -11,6 +11,8 @@ services:
     # reuse one volume instead of leaving anonymous hashes behind. The entrypoint runs
     # `bun install` when bun.lock no longer matches the stamp in the volume — no manual delete.
     entrypoint: ['bun', '/processing/scripts/ensure-node-modules.ts']
+    # Same command as processing.Dockerfile CMD. The entrypoint runs it after the node_modules check.
+    command: ['bun', 'run', '/processing/index.ts']
     volumes:
       - ./processing:/processing
       - processing_node_modules:/processing/node_modules
