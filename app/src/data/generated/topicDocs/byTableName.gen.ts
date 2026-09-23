@@ -863,7 +863,7 @@ const data = {
           },
           {
             value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
+            label: 'Straßenquerung (Radweg)',
           },
           {
             value: 'cycleway',
@@ -871,11 +871,19 @@ const data = {
           },
           {
             value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
           },
           {
             value: 'footway_sidewalk',
             label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
           },
           {
             value: 'footway',
@@ -2695,7 +2703,7 @@ const data = {
           },
           {
             value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
+            label: 'Straßenquerung (Radweg)',
           },
           {
             value: 'cycleway',
@@ -2703,11 +2711,19 @@ const data = {
           },
           {
             value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
           },
           {
             value: 'footway_sidewalk',
             label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
           },
           {
             value: 'footway',
@@ -3223,7 +3239,7 @@ const data = {
           },
           {
             value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
+            label: 'Straßenquerung (Radweg)',
           },
           {
             value: 'cycleway',
@@ -3231,11 +3247,19 @@ const data = {
           },
           {
             value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
           },
           {
             value: 'footway_sidewalk',
             label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
           },
           {
             value: 'footway',
@@ -5964,7 +5988,7 @@ const data = {
           },
           {
             value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
+            label: 'Straßenquerung (Radweg)',
           },
           {
             value: 'cycleway',
@@ -5972,11 +5996,19 @@ const data = {
           },
           {
             value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
           },
           {
             value: 'footway_sidewalk',
             label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
           },
           {
             value: 'footway',
@@ -7439,7 +7471,7 @@ const data = {
           },
           {
             value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
+            label: 'Straßenquerung (Radweg)',
           },
           {
             value: 'cycleway',
@@ -7447,11 +7479,19 @@ const data = {
           },
           {
             value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
           },
           {
             value: 'footway_sidewalk',
             label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
           },
           {
             value: 'footway',
@@ -8648,7 +8688,7 @@ const data = {
           },
           {
             value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
+            label: 'Straßenquerung (Radweg)',
           },
           {
             value: 'cycleway',
@@ -8656,11 +8696,19 @@ const data = {
           },
           {
             value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
           },
           {
             value: 'footway_sidewalk',
             label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
           },
           {
             value: 'footway',
@@ -9624,7 +9672,7 @@ const data = {
           },
           {
             value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
+            label: 'Straßenquerung (Radweg)',
           },
           {
             value: 'cycleway',
@@ -9632,11 +9680,19 @@ const data = {
           },
           {
             value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
           },
           {
             value: 'footway_sidewalk',
             label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
           },
           {
             value: 'footway',
@@ -11576,7 +11632,7 @@ const data = {
           },
           {
             value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
+            label: 'Straßenquerung (Radweg)',
           },
           {
             value: 'cycleway',
@@ -11584,11 +11640,19 @@ const data = {
           },
           {
             value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
           },
           {
             value: 'footway_sidewalk',
             label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
           },
           {
             value: 'footway',
@@ -12876,7 +12940,7 @@ const data = {
           },
           {
             value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
+            label: 'Straßenquerung (Radweg)',
           },
           {
             value: 'cycleway',
@@ -12884,11 +12948,19 @@ const data = {
           },
           {
             value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
           },
           {
             value: 'footway_sidewalk',
             label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
           },
           {
             value: 'footway',
