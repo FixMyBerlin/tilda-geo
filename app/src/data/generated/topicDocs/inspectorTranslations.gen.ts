@@ -468,6 +468,8 @@ const data = {
   'atlas_bikelanes--traffic_sign=none': 'Unbeschildert',
   'atlas_bikelanes--tunnel--key': 'Tunnel',
   'atlas_bikelanes--tunnel=yes': 'Ja',
+  'atlas_bikelanes--tunnel=yes--description':
+    'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`. Arkaden (`covered=arcade`) sind keine Durchgänge und stehen hier nicht.',
   'atlas_bikelanes--width_effective--key': 'Effektive Breite',
   'atlas_bikelanes--width_source--key': 'Quelle Breite',
   'atlas_bikelanes--width_source=ALKIS': 'Aus ALKIS Daten ausgemessen',
@@ -1454,6 +1456,8 @@ const data = {
   'atlas_roads--traffic_sign=none': 'Unbeschildert',
   'atlas_roads--tunnel--key': 'Tunnel',
   'atlas_roads--tunnel=yes': 'Ja',
+  'atlas_roads--tunnel=yes--description':
+    'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`. Arkaden (`covered=arcade`) sind keine Durchgänge und stehen hier nicht.',
   'atlas_roads--width_effective--key': 'Effektive Breite',
   'atlas_roads--width_source--key': 'Quelle Breite',
   'atlas_roads--width_source=ALKIS': 'Aus ALKIS Daten ausgemessen',
@@ -1904,6 +1908,8 @@ const data = {
   'tilda_highwayAreas--traffic_sign=none': 'Unbeschildert',
   'tilda_highwayAreas--tunnel--key': 'Tunnel',
   'tilda_highwayAreas--tunnel=yes': 'Ja',
+  'tilda_highwayAreas--tunnel=yes--description':
+    'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`. Arkaden (`covered=arcade`) sind keine Durchgänge und stehen hier nicht.',
   'tilda_highwayAreas--width_source--key': 'Quelle Breite',
   'tilda_highwayAreas--width_source=ALKIS': 'Aus ALKIS Daten ausgemessen',
   'tilda_highwayAreas--width_source=ARCore': 'Mit dem Handy-Metermaß von StreetComplete gemessen',

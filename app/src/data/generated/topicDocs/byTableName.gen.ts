@@ -1271,6 +1271,8 @@ const data = {
           {
             value: 'yes',
             label: 'Ja',
+            description:
+              'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`. Arkaden (`covered=arcade`) sind keine Durchgänge und stehen hier nicht.',
           },
         ],
       },
@@ -3604,6 +3606,8 @@ const data = {
           {
             value: 'yes',
             label: 'Ja',
+            description:
+              'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`. Arkaden (`covered=arcade`) sind keine Durchgänge und stehen hier nicht.',
           },
         ],
       },
@@ -11973,6 +11977,8 @@ const data = {
           {
             value: 'yes',
             label: 'Ja',
+            description:
+              'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`. Arkaden (`covered=arcade`) sind keine Durchgänge und stehen hier nicht.',
           },
         ],
       },

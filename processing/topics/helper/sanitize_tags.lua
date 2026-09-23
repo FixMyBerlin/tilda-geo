@@ -28,6 +28,7 @@ end
 ---@field oneway_road fun(tags: OsmTags): string|nil
 ---@field oneway_bicycle fun(value: string|nil): string|nil
 ---@field boolean_yes fun(value: string|nil): string|nil
+---@field tunnel fun(value: string|nil): string|nil
 ---@field access fun(value: string|nil): string|nil
 ---@field traffic_sign fun(value: string|nil): string|nil
 ---@field surface fun(tags: OsmTags): string|nil
@@ -56,6 +57,14 @@ local SANITIZE_TAGS = {
     return sanitize_for_logging(value, { 'yes', 'no' })
   end,
   boolean_yes = function (value)
+    return sanitize_for_logging(value, { 'yes' }, { 'no' })
+  end,
+  -- OSM `tunnel=building_passage` is a passage through a building, not a road tunnel,
+  -- but it is still a tunnel for map styling and filtering.
+  tunnel = function (value)
+    if value == 'building_passage' then
+      return 'yes'
+    end
     return sanitize_for_logging(value, { 'yes' }, { 'no' })
   end,
   access = function (value)

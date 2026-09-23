@@ -32,6 +32,9 @@ const data = {
         implicit_yes:
           'Keine explizite OSM-Angabe (`oneway` / `oneway:bicycle`). Aus der Führungsform abgeleitet (z. B. Schutzstreifen), nicht aus einem oneway-Tag gelesen.',
       },
+      tunnel: {
+        yes: 'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`. Arkaden (`covered=arcade`) sind keine Durchgänge und stehen hier nicht.',
+      },
       traffic_sign: {
         never:
           'Wird aktuell intern für `category=cyclewayOnHighwayBetweenLanes` verwendet um klarzustellen, dass hier nie ein Verkehrszeichen zu erwarten ist.',
@@ -108,7 +111,11 @@ const data = {
       mapillary_traffic_sign:
         'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
     },
-    values: {},
+    values: {
+      tunnel: {
+        yes: 'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`. Arkaden (`covered=arcade`) sind keine Durchgänge und stehen hier nicht.',
+      },
+    },
   },
   atlas_roadsPathClasses: {
     keys: {
@@ -150,7 +157,11 @@ const data = {
       mapillary_traffic_sign:
         'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
     },
-    values: {},
+    values: {
+      tunnel: {
+        yes: 'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`. Arkaden (`covered=arcade`) sind keine Durchgänge und stehen hier nicht.',
+      },
+    },
   },
   tilda_parkings: {
     keys: {

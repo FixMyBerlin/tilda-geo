@@ -93,7 +93,7 @@ local function bikelanes(object_tags, object_geom)
           width_effective = parse_length(transformed_tags['width:effective']),
           oneway = derive_oneway(transformed_tags, category),
           bridge = SANITIZE_TAGS.boolean_yes(object_tags.bridge),
-          tunnel = SANITIZE_TAGS.boolean_yes(object_tags.tunnel),
+          tunnel = SANITIZE_TAGS.tunnel(object_tags.tunnel),
           surface_color = SANITIZE_ROAD_TAGS.surface_color(transformed_tags),
           separation_left = SANITIZE_ROAD_TAGS.separation(transformed_tags, 'left'),
           separation_right = SANITIZE_ROAD_TAGS.separation(transformed_tags, 'right'),
