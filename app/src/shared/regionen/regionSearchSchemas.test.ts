@@ -175,6 +175,23 @@ describe('regionSearchSchema', () => {
     expect(routerSearch.stringify(cleared)).not.toContain('data=')
   })
 
+  test('accepts a legacy bookmark whose notes flag JSON-parses to a boolean', () => {
+    const raw =
+      '?map=13/52.4675/13.4419&data=[]&bg=default&bg3d=false&osmNotes=false&notes=false&qa=euvm-parkraum-2026--all&config=1qldklk.4ptan8.20&v=2'
+    const parsed = routerSearch.parse(raw)
+    expect(parsed).toMatchObject({ notes: false, osmNotes: false, bg3d: false })
+
+    const search = regionSearchSchema.parse(parsed)
+    expect(search.notes).toBeUndefined()
+    expect(search.v).toBe('2')
+
+    // The loader migrates `location.href`, which is this stringify of the parsed search.
+    const href = routerSearch.stringify(parsed)
+    expect(href).toContain('notes=false')
+    expect(href).toContain('qa=euvm-parkraum-2026--all')
+    expect(href).toContain('osmNotes=false')
+  })
+
   test('parses flat notes JSON', () => {
     const parsed = parseRegionSearch({
       notes: { search: 'kreuzung', completed: false, extent: 'view' },

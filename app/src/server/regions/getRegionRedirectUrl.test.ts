@@ -244,6 +244,24 @@ describe('getRegionRedirectUrl()', () => {
       expect(resultUrl.searchParams.has('osmNotes')).toBe(false)
     })
 
+    test('production parkraum bookmark with notes=false migrates onto /qa', async () => {
+      const url =
+        'http://127.0.0.1:5173/regionen/parkraum-berlin-euvm?map=13/52.4675/13.4419&data=[]&bg=default&bg3d=false&osmNotes=false&notes=false&qa=euvm-parkraum-2026--all&config=1qldklk.4ptan8.20&v=2'
+      const redirectUrl = await redirectOnly(url, 'parkraum-berlin-euvm')
+      expect(redirectUrl).toBeTruthy()
+      const resultUrl = getUrl(redirectUrl)
+      expect(resultUrl.pathname).toBe('/regionen/parkraum-berlin-euvm/qa')
+      expect(resultUrl.searchParams.has('notes')).toBe(false)
+      expect(resultUrl.searchParams.has('osmNotes')).toBe(false)
+      expect(resultUrl.searchParams.has('internalNotes')).toBe(false)
+      expect(JSON.parse(resultUrl.searchParams.get('qa')!)).toEqual({
+        key: 'euvm-parkraum-2026',
+      })
+      expect(resultUrl.searchParams.get('v')).toBe('3')
+      expect(resultUrl.searchParams.get('map')).toBe('13/52.4675/13.4419')
+      expect(await redirectOnly(redirectUrl!, 'parkraum-berlin-euvm')).toBe(null)
+    })
+
     test('?qa=euvm-parkraum-2025--all on the root → /qa with the same key', async () => {
       const url = 'http://127.0.0.1:5173/regionen/berlin?qa=euvm-parkraum-2025--all'
       const redirectUrl = await redirectOnly(url, 'berlin')

@@ -61,10 +61,15 @@ export const searchStringArray = () =>
     })
     .catch([])
 
-/** JSON object from wire string or router-parsed object. */
+/**
+ * JSON object from a wire string or a router-parsed value.
+ * `parseSearch` JSON-parses each query value, so a legacy flag such as `notes=false`
+ * arrives as a boolean. Drop non-objects so `validateSearch` does not fail the region
+ * route before the loader migrates the raw URL.
+ */
 export const optionalSearchJson = <T extends z.ZodType>(schema: T) =>
   z
-    .union([schema, z.string(), z.record(z.string(), z.unknown()), emptyish])
+    .unknown()
     .transform((raw): z.infer<T> | undefined => {
       if (raw === undefined || raw === null || raw === '') return undefined
       if (typeof raw === 'object' && !Array.isArray(raw)) {
