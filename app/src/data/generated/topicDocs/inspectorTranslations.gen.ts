@@ -213,6 +213,8 @@ const data = {
   'atlas_bikelanes--category=sharedMotorVehicleLane': 'Gemeinsamer Fahrstreifen',
   'atlas_bikelanes--covered--key': 'Überdacht',
   'atlas_bikelanes--covered=covered': 'Überdacht',
+  'atlas_bikelanes--covered=covered--description':
+    'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
   'atlas_bikelanes--covered=indoor': 'In einem Gebäude',
   'atlas_bikelanes--covered=partial': 'Teilweise überdacht',
   'atlas_bikelanes--description--key': 'Hinweis aus OSM',
@@ -469,7 +471,7 @@ const data = {
   'atlas_bikelanes--tunnel--key': 'Tunnel',
   'atlas_bikelanes--tunnel=yes': 'Ja',
   'atlas_bikelanes--tunnel=yes--description':
-    'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`. Arkaden (`covered=arcade`) sind keine Durchgänge und stehen hier nicht.',
+    'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',
   'atlas_bikelanes--width_effective--key': 'Effektive Breite',
   'atlas_bikelanes--width_source--key': 'Quelle Breite',
   'atlas_bikelanes--width_source=ALKIS': 'Aus ALKIS Daten ausgemessen',
@@ -663,6 +665,8 @@ const data = {
     'Potentiell geeignet aufgrund Verkehrszeichen 277.1',
   'atlas_bikeSuitability--covered--key': 'Überdacht',
   'atlas_bikeSuitability--covered=covered': 'Überdacht',
+  'atlas_bikeSuitability--covered=covered--description':
+    'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
   'atlas_bikeSuitability--covered=indoor': 'In einem Gebäude',
   'atlas_bikeSuitability--covered=partial': 'Teilweise überdacht',
   'atlas_bikeSuitability--description--key': 'Hinweis aus OSM',
@@ -1275,6 +1279,8 @@ const data = {
   'atlas_roads--bridge=yes': 'Ja',
   'atlas_roads--covered--key': 'Überdacht',
   'atlas_roads--covered=covered': 'Überdacht',
+  'atlas_roads--covered=covered--description':
+    'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
   'atlas_roads--covered=indoor': 'In einem Gebäude',
   'atlas_roads--covered=partial': 'Teilweise überdacht',
   'atlas_roads--description--key': 'Hinweis aus OSM',
@@ -1457,7 +1463,7 @@ const data = {
   'atlas_roads--tunnel--key': 'Tunnel',
   'atlas_roads--tunnel=yes': 'Ja',
   'atlas_roads--tunnel=yes--description':
-    'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`. Arkaden (`covered=arcade`) sind keine Durchgänge und stehen hier nicht.',
+    'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',
   'atlas_roads--width_effective--key': 'Effektive Breite',
   'atlas_roads--width_source--key': 'Quelle Breite',
   'atlas_roads--width_source=ALKIS': 'Aus ALKIS Daten ausgemessen',
@@ -1615,6 +1621,8 @@ const data = {
   'atlas_roadsPathClasses--bikelane_self=sharedMotorVehicleLane': 'Gemeinsamer Fahrstreifen',
   'atlas_roadsPathClasses--covered--key': 'Überdacht',
   'atlas_roadsPathClasses--covered=covered': 'Überdacht',
+  'atlas_roadsPathClasses--covered=covered--description':
+    'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
   'atlas_roadsPathClasses--covered=indoor': 'In einem Gebäude',
   'atlas_roadsPathClasses--covered=partial': 'Teilweise überdacht',
   'atlas_roadsPathClasses--description--key': 'Hinweis aus OSM',
@@ -1779,6 +1787,8 @@ const data = {
   'tilda_highwayAreas--bridge=yes': 'Ja',
   'tilda_highwayAreas--covered--key': 'Überdacht',
   'tilda_highwayAreas--covered=covered': 'Überdacht',
+  'tilda_highwayAreas--covered=covered--description':
+    'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
   'tilda_highwayAreas--covered=indoor': 'In einem Gebäude',
   'tilda_highwayAreas--covered=partial': 'Teilweise überdacht',
   'tilda_highwayAreas--description--key': 'Hinweis aus OSM',
@@ -1909,7 +1919,7 @@ const data = {
   'tilda_highwayAreas--tunnel--key': 'Tunnel',
   'tilda_highwayAreas--tunnel=yes': 'Ja',
   'tilda_highwayAreas--tunnel=yes--description':
-    'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`. Arkaden (`covered=arcade`) sind keine Durchgänge und stehen hier nicht.',
+    'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',
   'tilda_highwayAreas--width_source--key': 'Quelle Breite',
   'tilda_highwayAreas--width_source=ALKIS': 'Aus ALKIS Daten ausgemessen',
   'tilda_highwayAreas--width_source=ARCore': 'Mit dem Handy-Metermaß von StreetComplete gemessen',

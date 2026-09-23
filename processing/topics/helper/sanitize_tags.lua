@@ -165,7 +165,8 @@ local SANITIZE_TAGS = {
     return sanitize_for_logging(value, { 'yes', 'partial' }, { 'no' })
   end,
   covered_or_indoor = function(tags)
-    if tags.covered == 'yes' then
+    -- Arcades are open on one side; we still treat them as covered.
+    if tags.covered == 'yes' or tags.covered == 'arcade' then
       return 'covered'
     elseif tags.covered == 'partial' then
       return 'partial'

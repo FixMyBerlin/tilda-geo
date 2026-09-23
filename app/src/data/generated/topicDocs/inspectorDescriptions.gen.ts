@@ -33,7 +33,11 @@ const data = {
           'Keine explizite OSM-Angabe (`oneway` / `oneway:bicycle`). Aus der Führungsform abgeleitet (z. B. Schutzstreifen), nicht aus einem oneway-Tag gelesen.',
       },
       tunnel: {
-        yes: 'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`. Arkaden (`covered=arcade`) sind keine Durchgänge und stehen hier nicht.',
+        yes: 'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',
+      },
+      covered: {
+        covered:
+          'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
       },
       traffic_sign: {
         never:
@@ -70,7 +74,12 @@ const data = {
       mapillary_traffic_sign:
         'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
     },
-    values: {},
+    values: {
+      covered: {
+        covered:
+          'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
+      },
+    },
   },
   atlas_landuse: {
     keys: {
@@ -113,7 +122,11 @@ const data = {
     },
     values: {
       tunnel: {
-        yes: 'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`. Arkaden (`covered=arcade`) sind keine Durchgänge und stehen hier nicht.',
+        yes: 'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',
+      },
+      covered: {
+        covered:
+          'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
       },
     },
   },
@@ -132,7 +145,12 @@ const data = {
       mapillary_traffic_sign:
         'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
     },
-    values: {},
+    values: {
+      covered: {
+        covered:
+          'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
+      },
+    },
   },
   atlas_trafficSigns: {
     keys: {
@@ -158,8 +176,12 @@ const data = {
         'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
     },
     values: {
+      covered: {
+        covered:
+          'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
+      },
       tunnel: {
-        yes: 'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`. Arkaden (`covered=arcade`) sind keine Durchgänge und stehen hier nicht.',
+        yes: 'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',
       },
     },
   },

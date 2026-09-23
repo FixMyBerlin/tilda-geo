@@ -1272,7 +1272,7 @@ const data = {
             value: 'yes',
             label: 'Ja',
             description:
-              'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`. Arkaden (`covered=arcade`) sind keine Durchgänge und stehen hier nicht.',
+              'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',
           },
         ],
       },
@@ -1698,6 +1698,8 @@ const data = {
           {
             value: 'covered',
             label: 'Überdacht',
+            description:
+              'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
           },
           {
             value: 'partial',
@@ -2966,6 +2968,8 @@ const data = {
           {
             value: 'covered',
             label: 'Überdacht',
+            description:
+              'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
           },
           {
             value: 'partial',
@@ -3535,6 +3539,8 @@ const data = {
           {
             value: 'covered',
             label: 'Überdacht',
+            description:
+              'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
           },
           {
             value: 'partial',
@@ -3607,7 +3613,7 @@ const data = {
             value: 'yes',
             label: 'Ja',
             description:
-              'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`. Arkaden (`covered=arcade`) sind keine Durchgänge und stehen hier nicht.',
+              'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',
           },
         ],
       },
@@ -11978,7 +11984,7 @@ const data = {
             value: 'yes',
             label: 'Ja',
             description:
-              'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`. Arkaden (`covered=arcade`) sind keine Durchgänge und stehen hier nicht.',
+              'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',
           },
         ],
       },
@@ -12104,6 +12110,8 @@ const data = {
           {
             value: 'covered',
             label: 'Überdacht',
+            description:
+              'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
           },
           {
             value: 'partial',
@@ -13241,6 +13249,8 @@ const data = {
           {
             value: 'covered',
             label: 'Überdacht',
+            description:
+              'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
           },
           {
             value: 'partial',
