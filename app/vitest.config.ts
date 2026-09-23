@@ -25,6 +25,8 @@ export default defineConfig({
     include: ['**/*.test.ts', '**/*.test.tsx'], // Exclude .spec.ts which are Playwright tests
     maxWorkers: 1,
     fileParallelism: false,
+    // Node 26 enables web storage by default and warns without a path.
+    execArgv: ['--localstorage-file=:memory:'],
     server: {
       deps: {
         // Zod 4's re-export graph breaks when Vitest loads it as a native external under Bun.
