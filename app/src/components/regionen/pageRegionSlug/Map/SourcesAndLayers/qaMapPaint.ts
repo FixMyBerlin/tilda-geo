@@ -10,6 +10,9 @@ import {
 export const QA_MAP_UNSTYLED_FILL = 'gray'
 export const QA_MAP_UNSTYLED_OUTLINE = '#333333'
 
+/** Light wash. Status stays readable from the outline; the basemap has to show through. */
+export const QA_MAP_FILL_OPACITY = 0.35
+
 export const qaMapStatusColorExpression = (unstyledColor: string) =>
   [
     'case',

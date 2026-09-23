@@ -3,6 +3,7 @@ import type { ExpressionSpecification } from 'maplibre-gl'
 import { Fragment } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { useQaMapState } from '@/components/regionen/pageRegionSlug/hooks/mapState/useQaMapState'
+import { useBackgroundParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBackgroundParam'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useQaParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useQaParam'
 import {
@@ -19,6 +20,7 @@ import { regionQaConfigsQueryOptions } from '@/server/regions/regionQueryOptions
 import { getLayerHighlightId } from '../utils/layerHighlight'
 import { LayerHighlight } from './LayerHighlight'
 import {
+  QA_MAP_FILL_OPACITY,
   QA_MAP_UNSTYLED_FILL,
   QA_MAP_UNSTYLED_OUTLINE,
   qaMapStatusColorExpression,
@@ -46,6 +48,7 @@ export const SourcesLayersQa = () => {
   useQaMapState()
   const hasPermissions = useHasPermissions()
   const { qaParamData } = useQaParam()
+  const { backgroundParam } = useBackgroundParam()
   const regionSlug = useRegionSlug()
   const currentMode = useCurrentMode()
   const { featuresParam } = useFeaturesParam()
@@ -114,9 +117,10 @@ export const SourcesLayersQa = () => {
           source={qaSourceId}
           source-layer={vectorSourceName}
           type="fill"
+          beforeId={backgroundParam === 'default' ? 'atlas-app-beforeid-below-road' : undefined}
           paint={{
             'fill-color': qaMapStatusColorExpression(QA_MAP_UNSTYLED_FILL),
-            'fill-opacity': ['case', hideBaseFill, 0, 0.7],
+            'fill-opacity': ['case', hideBaseFill, 0, QA_MAP_FILL_OPACITY],
             'fill-outline-color': qaMapStatusColorExpression(QA_MAP_UNSTYLED_OUTLINE),
           }}
         />
