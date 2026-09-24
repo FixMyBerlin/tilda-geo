@@ -2,11 +2,13 @@
 --
 -- Entry point for all SQL based processing.
 --
--- NOTE: We intentionally no longer move bikelane geometries sideways off the road
--- centerline. The derived bikelane geometry now stays on the centerline and the
--- sideways offset is applied purely visually in the map style via `line-offset`,
--- derived from the `offset` attribute (meters, signed by side). See the topic-doc
--- chapter `versetzte-geometrien` and processing/CHANGELOG.md for details.
+-- NOTE: Derived bikelane geometries stay on the road centerline. The sideways
+-- offset is applied visually in the map style via `line-offset`, from the
+-- `offset` attribute (meters, `+` left / `-` right). Left-side lines run
+-- against the OSM way; right-side lines run with it.
+-- See topic-doc chapter `versetzte-geometrien` and processing/CHANGELOG.md.
+\i '/processing/topics/roads_bikelanes/2_orient_bikelanes.sql'
+\i '/processing/topics/roads_bikelanes/2_orient_routing.sql'
 \i '/processing/topics/roads_bikelanes/3_cleanup_todos_lines.sql'
 
 DO $$ BEGIN RAISE NOTICE 'FINISH topics/roads_bikelanes/roads_bikelanes.sql at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

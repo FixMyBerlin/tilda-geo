@@ -50,9 +50,11 @@ describe('bikelaneVisualLineOffset', () => {
     expect(expression[3]).toBe(0)
     expect(expression[4]).toEqual([
       'case',
-      ['in', '/left', ['to-string', ['coalesce', ['get', 'id'], '']]],
-      -0.75,
-      ['in', '/right', ['to-string', ['coalesce', ['get', 'id'], '']]],
+      [
+        'any',
+        ['in', '/left', ['to-string', ['coalesce', ['get', 'id'], '']]],
+        ['in', '/right', ['to-string', ['coalesce', ['get', 'id'], '']]],
+      ],
       0.75,
       0,
     ])
