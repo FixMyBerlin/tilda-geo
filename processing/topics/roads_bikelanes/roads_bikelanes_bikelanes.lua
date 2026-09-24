@@ -4,6 +4,7 @@ local extract_public_tags = require('topics.helper.extract_public_tags')
 local default_id = require('topics.helper.default_id')
 local roads_bikelanes_tables = require('topics.roads_bikelanes.roads_bikelanes_tables')
 local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
+local orient_line_direction_tags = require('topics.roads_bikelanes.bikelanes.helper.orient_line_direction_tags')
 
 local bikelanes_table = roads_bikelanes_tables.bikelanes_table
 local bikelanes_presence_table = roads_bikelanes_tables.bikelanes_presence_table
@@ -45,9 +46,12 @@ local function roads_bikelanes_bikelanes(context)
       }
       local meta = object_meta
 
+      local tags = merge_table(extract_public_tags(cycleway), result_tags)
+      orient_line_direction_tags(tags, cycleway._side)
+
       bikelanes_table:insert({
         id = cycleway._id,
-        tags = merge_table(extract_public_tags(cycleway), result_tags),
+        tags = tags,
         meta = meta,
         geom = object_geom,
         minzoom = bikelane_generalization(object_tags, result_tags)
