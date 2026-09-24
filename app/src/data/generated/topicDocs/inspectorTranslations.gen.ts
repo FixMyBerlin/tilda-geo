@@ -3305,7 +3305,7 @@ const data = {
   'tilda_parkings--surface=wood': 'Holz',
   'tilda_parkings--surface=woodchips': 'Hackschnitzel',
   'tilda_parkings--tag_sources--key': 'Tag-Quellen',
-  'tilda_parkings--title': 'Straßenparken',
+  'tilda_parkings--title': 'Straßenparken Kanten',
   'tilda_parkings--traffic_sign--key': 'Verkehrszeichen',
   'tilda_parkings--way_ids--key': 'OSM-Way-IDs',
   'tilda_parkings--way_reversed--key': 'Way-Richtung',
