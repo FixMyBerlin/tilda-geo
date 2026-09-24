@@ -7,6 +7,10 @@ import {
   tableKeyConditionCategory,
 } from './compositTableRows/TagsTableRowCompositConditionCategory'
 import {
+  TagsTableRowCompositEraWidth,
+  tableKeyEraWidth,
+} from './compositTableRows/TagsTableRowCompositEraWidth'
+import {
   TagsTableRowCompositMapillary,
   tableKeyMapillary,
 } from './compositTableRows/TagsTableRowCompositMapillary'
@@ -108,6 +112,16 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
               case tableKeyHighway: {
                 return (
                   <TagsTableRowCompositParentHighway
+                    key={cleanedKey}
+                    sourceId={sourceId}
+                    tagKey={cleanedKey}
+                    properties={properties}
+                  />
+                )
+              }
+              case tableKeyEraWidth: {
+                return (
+                  <TagsTableRowCompositEraWidth
                     key={cleanedKey}
                     sourceId={sourceId}
                     tagKey={cleanedKey}

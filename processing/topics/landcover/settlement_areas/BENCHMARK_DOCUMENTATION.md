@@ -30,8 +30,13 @@ On full Germany (`germany-latest.osm.pbf`), with `public._settlement_areas` alre
 
 - **Dissolve:** grid-partitioned parallel `ST_Union` + GEOS-robust valid-only output fixed the
   original OOM/crash. ~12 min total on Germany — fine for a `weekend` (≈ weekly) topic.
-- **Per-way method:** use **`ST_Intersects`**. The %-coverage variant is not worth its cost
-  (and risks OOM); a way touching a settlement area at all is a good enough innerorts signal.
+- **Per-way method:** measure the %-coverage, but **staged**. Method B was measured unstaged — an
+  `ST_Intersection` for all 15.9M ways — and that is what exhausted memory. What we run instead:
+  the index-only tests decide first (touches nothing → außerorts; fully covered by one area →
+  innerorts), and only the ways that cross a settlement boundary get an `ST_Intersection`.
+  `ST_Intersects` alone (the first version of this) called every way innerorts that merely clipped
+  the edge of a settlement area, which is wrong for exactly the through-roads the distinction
+  matters for. See `roads_bikelanes/pseudo_tags_settlement_area/sql/run_settlement_area_estimation.sql`.
 - **Export the minority class:** outside is smaller than inside **by way count**, so the CSV holds
   only the outside ways (`assumed_no`) and the Lua infers inside (`assumed_yes`) as the default —
   see `roads_bikelanes/pseudo_tags_settlement_area/`. Production numbers on the actual export way set:
