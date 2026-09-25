@@ -142,6 +142,9 @@ attributes:
     label: Primäre Parkbeschränkung
     description: Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.
     valuesRef: parkings.condition_category
+    valuesAdd:
+      - value: default
+        label: Keine Zuordnung
   - key: staggered
     label: Parkweise
     description: Besondere Merkmale zur Parkweise, insbesondere bei alternierendem/versetztem Parken auf Fahrbahnen, die zu schmal sind um auf beiden Seiten gleichzeitig zu parken, keine Markierungen und Beschilderungen aufweisen, die das Parken regeln und auf denen gewöhnlich wechselseitig abschnittsweise auf der einen oder anderen Straßenseite geparkt wird oder geparkt werden kann.
@@ -177,13 +180,13 @@ attributes:
   - key: geom_sources
     purpose: qa
     format: sanitized_strings
-    label: (Intern) OSM-IDs der Geometiren
-    description: Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendeten wurden.
+    label: (Intern) OSM-IDs der Geometrien
+    description: Interne Hilfswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendet wurden.
   - key: tag_sources
     purpose: qa
     format: sanitized_strings
     label: Tag-Quellen
-    description: Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.
+    description: Interne Hilfswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.
   - key: road
     label: Straßentyp
     description: Art der Straße, an dem der Parkraum liegt.

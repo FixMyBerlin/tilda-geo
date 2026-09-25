@@ -1261,7 +1261,7 @@ const data = {
         type: 'meter',
         label: 'Länge',
         description:
-          'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',
+          'Ein berechneter Wert für das OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genauigkeit für Deutschland.',
         values: [],
       },
       {
@@ -2935,7 +2935,7 @@ const data = {
         type: 'meter',
         label: 'Länge',
         description:
-          'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',
+          'Ein berechneter Wert für das OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genauigkeit für Deutschland.',
         values: [],
       },
       {
@@ -4506,6 +4506,10 @@ const data = {
             value: 'vehicle_restriction',
             label: 'Beschränkung auf Fahrzeugklassen',
           },
+          {
+            value: 'default',
+            label: 'Keine Zuordnung',
+          },
         ],
       },
       {
@@ -5259,6 +5263,10 @@ const data = {
             value: 'vehicle_restriction',
             label: 'Beschränkung auf Fahrzeugklassen',
           },
+          {
+            value: 'default',
+            label: 'Keine Zuordnung',
+          },
         ],
       },
       {
@@ -5992,6 +6000,10 @@ const data = {
             value: 'vehicle_restriction',
             label: 'Beschränkung auf Fahrzeugklassen',
           },
+          {
+            value: 'default',
+            label: 'Keine Zuordnung',
+          },
         ],
       },
       {
@@ -6019,7 +6031,7 @@ const data = {
         type: 'meter',
         label: 'Länge',
         description:
-          'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',
+          'Ein berechneter Wert für das OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genauigkeit für Deutschland.',
         values: [],
       },
       {
@@ -6064,10 +6076,10 @@ const data = {
       {
         key: 'geom_sources',
         type: 'sanitized_strings',
-        label: '(Intern) OSM-IDs der Geometiren',
+        label: '(Intern) OSM-IDs der Geometrien',
         purpose: 'qa',
         description:
-          'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendeten wurden.',
+          'Interne Hilfswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendet wurden.',
         values: [],
       },
       {
@@ -6076,7 +6088,7 @@ const data = {
         label: 'Tag-Quellen',
         purpose: 'qa',
         description:
-          'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.',
+          'Interne Hilfswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.',
         values: [],
       },
       {
@@ -7854,6 +7866,10 @@ const data = {
             value: 'vehicle_restriction',
             label: 'Beschränkung auf Fahrzeugklassen',
           },
+          {
+            value: 'default',
+            label: 'Keine Zuordnung',
+          },
         ],
       },
       {
@@ -7951,6 +7967,10 @@ const data = {
           {
             value: 'vehicle_restriction',
             label: 'Beschränkung auf Fahrzeugklassen',
+          },
+          {
+            value: 'default',
+            label: 'Keine Zuordnung',
           },
         ],
       },
@@ -8748,10 +8768,10 @@ const data = {
       {
         key: 'geom_sources',
         type: 'sanitized_strings',
-        label: '(Intern) OSM-IDs der Geometiren',
+        label: '(Intern) OSM-IDs der Geometrien',
         purpose: 'qa',
         description:
-          'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendeten wurden.',
+          'Interne Hilfswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendet wurden.',
         values: [],
       },
       {
@@ -8760,7 +8780,7 @@ const data = {
         label: 'Tag-Quellen',
         purpose: 'qa',
         description:
-          'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.',
+          'Interne Hilfswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.',
         values: [],
       },
       {
@@ -9679,7 +9699,7 @@ const data = {
         type: 'meter',
         label: 'Länge',
         description:
-          'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',
+          'Ein berechneter Wert für das OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genauigkeit für Deutschland.',
         values: [],
       },
       {
@@ -9724,10 +9744,10 @@ const data = {
       {
         key: 'geom_sources',
         type: 'sanitized_strings',
-        label: '(Intern) OSM-IDs der Geometiren',
+        label: '(Intern) OSM-IDs der Geometrien',
         purpose: 'qa',
         description:
-          'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendeten wurden.',
+          'Interne Hilfswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendet wurden.',
         values: [],
       },
       {
@@ -9736,7 +9756,7 @@ const data = {
         label: 'Tag-Quellen',
         purpose: 'qa',
         description:
-          'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.',
+          'Interne Hilfswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.',
         values: [],
       },
       {
@@ -11933,7 +11953,7 @@ const data = {
         type: 'meter',
         label: 'Länge',
         description:
-          'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',
+          'Ein berechneter Wert für das OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genauigkeit für Deutschland.',
         values: [],
       },
       {
@@ -13120,7 +13140,7 @@ const data = {
         type: 'meter',
         label: 'Länge',
         description:
-          'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',
+          'Ein berechneter Wert für das OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genauigkeit für Deutschland.',
         values: [],
       },
       {
@@ -14841,7 +14861,7 @@ const data = {
         type: 'meter',
         label: 'Länge',
         description:
-          'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',
+          'Ein berechneter Wert für das OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genauigkeit für Deutschland.',
         values: [],
       },
       {

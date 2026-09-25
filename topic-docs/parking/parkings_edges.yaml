@@ -57,11 +57,17 @@ attributes:
     label: Parkbeschränkung links
     description: Dominantes Beschränkungs-Token der gewinnenden Operator-Gruppe auf der linken Straßenseite. Nur zur Darstellung.
     valuesRef: parkings.condition_category
+    valuesAdd:
+      - value: default
+        label: Keine Zuordnung
   - key: condition_category_right
     purpose: rendering
     label: Parkbeschränkung rechts
     description: Dominantes Beschränkungs-Token der gewinnenden Operator-Gruppe auf der rechten Straßenseite. Nur zur Darstellung.
     valuesRef: parkings.condition_category
+    valuesAdd:
+      - value: default
+        label: Keine Zuordnung
   - key: parking_left
     label: Parkposition links
     description: Dominanter `parking`-Wert der gewinnenden Operator-Gruppe auf der linken Straßenseite. `missing` bedeutet hier, dass auf dieser Seite keine Stellplätze der gewinnenden Gruppe liegen, nicht dass OSM-Daten fehlen.

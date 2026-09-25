@@ -157,6 +157,12 @@ function classify_parking_conditions(tags, default_category)
     end
   end
 
+  -- Common OSM mistake `maxstay=1 hour @ (Mo-Fr 08:00-18:00)`: read it like maxstay:conditional,
+  -- so we emit `time_limited (1 hour) (Mo-Fr …)` instead of nesting the raw value in brackets.
+  if not maxstay_conditional and maxstay and string.find(maxstay, '@') then
+    maxstay_conditional = parse_conditional_value(maxstay)
+  end
+
   -- vehicle access keys
   local vehicle_class_list = {
     'motorcar', -- we understand this synonym to 'passenger_car', see https://wiki.openstreetmap.org/wiki/Key:motorcar#Controversy

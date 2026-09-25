@@ -113,4 +113,10 @@ describe('classify_parking_conditions', function()
     assert.are.equal(result.condition_category, 'assumed_free;vehicle_restriction (except hgv)')
     assert.is_nil(string.match(result.condition_category, 'vehicle_restriction %(no '))
   end)
+
+  it('reads maxstay with @ (missing :conditional) like maxstay:conditional', function()
+    local tags = { maxstay = '1 hour @ (Mo-Fr 08:00-18:00, Sa 08:00-14:00)' }
+    local result = classify_parking_conditions(tags, 'assumed_free')
+    assert.are.equal(result.condition_category, 'time_limited (1 hour) (Mo-Fr 08:00-18:00, Sa 08:00-14:00)')
+  end)
 end)

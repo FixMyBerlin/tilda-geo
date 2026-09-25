@@ -2153,7 +2153,7 @@ const data = {
   'tilda_parkings_no--direction--key': 'Einparkrichtung',
   'tilda_parkings_no--direction=back_in': 'Rückwärts einparken',
   'tilda_parkings_no--direction=head_in': 'Vorwärts einparken',
-  'tilda_parkings_no--geom_sources--key': '(Intern) OSM-IDs der Geometiren',
+  'tilda_parkings_no--geom_sources--key': '(Intern) OSM-IDs der Geometrien',
   'tilda_parkings_no--informal--key': 'Duldung',
   'tilda_parkings_no--informal=yes':
     'Parken im rechtlichen Graubereich oder etabliertes, geduldetes Falschparken.',
@@ -2352,6 +2352,7 @@ const data = {
     'Nur für Carsharing-Fahrzeuge',
   'tilda_parkings_off_street_quantized--condition_category_primary=charging':
     'Laden von Elektrofahrzeugen',
+  'tilda_parkings_off_street_quantized--condition_category_primary=default': 'Keine Zuordnung',
   'tilda_parkings_off_street_quantized--condition_category_primary=disabled':
     'Behindertenparkplatz',
   'tilda_parkings_off_street_quantized--condition_category_primary=disabled_private':
@@ -2563,6 +2564,7 @@ const data = {
   'tilda_parkings_off_street--condition_category_primary=car_sharing':
     'Nur für Carsharing-Fahrzeuge',
   'tilda_parkings_off_street--condition_category_primary=charging': 'Laden von Elektrofahrzeugen',
+  'tilda_parkings_off_street--condition_category_primary=default': 'Keine Zuordnung',
   'tilda_parkings_off_street--condition_category_primary=disabled': 'Behindertenparkplatz',
   'tilda_parkings_off_street--condition_category_primary=disabled_private':
     'Personenbezogener Behindertenparkplatz',
@@ -2748,7 +2750,7 @@ const data = {
   'tilda_parkings_quantized--direction--key': 'Einparkrichtung',
   'tilda_parkings_quantized--direction=back_in': 'Rückwärts einparken',
   'tilda_parkings_quantized--direction=head_in': 'Vorwärts einparken',
-  'tilda_parkings_quantized--geom_sources--key': '(Intern) OSM-IDs der Geometiren',
+  'tilda_parkings_quantized--geom_sources--key': '(Intern) OSM-IDs der Geometrien',
   'tilda_parkings_quantized--informal--key': 'Duldung',
   'tilda_parkings_quantized--informal=yes':
     'Parken im rechtlichen Graubereich oder etabliertes, geduldetes Falschparken.',
@@ -2968,6 +2970,7 @@ const data = {
   'tilda_parkings--condition_category_left=bus_lane': 'Bussonderfahrstreifen',
   'tilda_parkings--condition_category_left=car_sharing': 'Nur für Carsharing-Fahrzeuge',
   'tilda_parkings--condition_category_left=charging': 'Laden von Elektrofahrzeugen',
+  'tilda_parkings--condition_category_left=default': 'Keine Zuordnung',
   'tilda_parkings--condition_category_left=disabled': 'Behindertenparkplatz',
   'tilda_parkings--condition_category_left=disabled_private':
     'Personenbezogener Behindertenparkplatz',
@@ -2993,6 +2996,7 @@ const data = {
   'tilda_parkings--condition_category_primary=bus_lane': 'Bussonderfahrstreifen',
   'tilda_parkings--condition_category_primary=car_sharing': 'Nur für Carsharing-Fahrzeuge',
   'tilda_parkings--condition_category_primary=charging': 'Laden von Elektrofahrzeugen',
+  'tilda_parkings--condition_category_primary=default': 'Keine Zuordnung',
   'tilda_parkings--condition_category_primary=disabled': 'Behindertenparkplatz',
   'tilda_parkings--condition_category_primary=disabled_private':
     'Personenbezogener Behindertenparkplatz',
@@ -3019,6 +3023,7 @@ const data = {
   'tilda_parkings--condition_category_right=bus_lane': 'Bussonderfahrstreifen',
   'tilda_parkings--condition_category_right=car_sharing': 'Nur für Carsharing-Fahrzeuge',
   'tilda_parkings--condition_category_right=charging': 'Laden von Elektrofahrzeugen',
+  'tilda_parkings--condition_category_right=default': 'Keine Zuordnung',
   'tilda_parkings--condition_category_right=disabled': 'Behindertenparkplatz',
   'tilda_parkings--condition_category_right=disabled_private':
     'Personenbezogener Behindertenparkplatz',
@@ -3067,7 +3072,7 @@ const data = {
   'tilda_parkings--direction=back_in': 'Rückwärts einparken',
   'tilda_parkings--direction=head_in': 'Vorwärts einparken',
   'tilda_parkings--end_node--key': 'Endknoten',
-  'tilda_parkings--geom_sources--key': '(Intern) OSM-IDs der Geometiren',
+  'tilda_parkings--geom_sources--key': '(Intern) OSM-IDs der Geometrien',
   'tilda_parkings--highway--key': 'OSM-Straßentyp',
   'tilda_parkings--highway=construction': 'Straße ist in Bau',
   'tilda_parkings--highway=cycleway': 'Radweg',

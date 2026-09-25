@@ -1789,6 +1789,7 @@ const data = {
           time_limited: 'Höchstparkdauer',
           unspecified: 'Unbestimmt',
           vehicle_restriction: 'Beschränkung auf Fahrzeugklassen',
+          default: 'Keine Zuordnung',
         },
       },
       access: {
@@ -2087,6 +2088,7 @@ const data = {
           time_limited: 'Höchstparkdauer',
           unspecified: 'Unbestimmt',
           vehicle_restriction: 'Beschränkung auf Fahrzeugklassen',
+          default: 'Keine Zuordnung',
         },
       },
       access: {
@@ -2358,6 +2360,7 @@ const data = {
           time_limited: 'Höchstparkdauer',
           unspecified: 'Unbestimmt',
           vehicle_restriction: 'Beschränkung auf Fahrzeugklassen',
+          default: 'Keine Zuordnung',
         },
       },
       staggered: {
@@ -2394,7 +2397,7 @@ const data = {
           separate_parking_points: 'Separate erfasste Punktdaten',
         },
       },
-      geom_sources: '(Intern) OSM-IDs der Geometiren',
+      geom_sources: '(Intern) OSM-IDs der Geometrien',
       tag_sources: 'Tag-Quellen',
       road: {
         name: 'Straßentyp',
@@ -2961,6 +2964,7 @@ const data = {
           time_limited: 'Höchstparkdauer',
           unspecified: 'Unbestimmt',
           vehicle_restriction: 'Beschränkung auf Fahrzeugklassen',
+          default: 'Keine Zuordnung',
         },
       },
       condition_category_right: {
@@ -2990,6 +2994,7 @@ const data = {
           time_limited: 'Höchstparkdauer',
           unspecified: 'Unbestimmt',
           vehicle_restriction: 'Beschränkung auf Fahrzeugklassen',
+          default: 'Keine Zuordnung',
         },
       },
       parking_left: {
@@ -3244,7 +3249,7 @@ const data = {
           separate_parking_points: 'Separate erfasste Punktdaten',
         },
       },
-      geom_sources: '(Intern) OSM-IDs der Geometiren',
+      geom_sources: '(Intern) OSM-IDs der Geometrien',
       tag_sources: 'Tag-Quellen',
       road: {
         name: 'Straßentyp',
@@ -3634,7 +3639,7 @@ const data = {
           separate_parking_points: 'Separate erfasste Punktdaten',
         },
       },
-      geom_sources: '(Intern) OSM-IDs der Geometiren',
+      geom_sources: '(Intern) OSM-IDs der Geometrien',
       tag_sources: 'Tag-Quellen',
       road: {
         name: 'Straßentyp',

@@ -149,6 +149,68 @@ describe('formatParkingConditionCategorySegment (Lua examples)', () => {
   })
 })
 
+describe('formatParkingConditionCategorySegment (real-data detail tokens)', () => {
+  const fmt = (segment: string) =>
+    formatParkingConditionCategorySegment(
+      segment,
+      resolveParkingConditionCategoryBase,
+      resolveParkingConditionDetailToken,
+    )
+
+  test('vehicle_restriction (except disabled)', () => {
+    expect(fmt('vehicle_restriction (except disabled)')).toBe(
+      `${tCat('vehicle_restriction')} (${tTok('except')} ${tTok('disabled')})`,
+    )
+  })
+
+  test('vehicle_restriction (only motorcar, disabled)', () => {
+    expect(fmt('vehicle_restriction (only motorcar, disabled)')).toBe(
+      `${tCat('vehicle_restriction')} (${tTok('only')} ${tTok('motorcar')}, ${tTok('disabled')})`,
+    )
+  })
+
+  test('vehicle_restriction (except car_sharing) — underscore token', () => {
+    expect(fmt('vehicle_restriction (except car_sharing)')).toBe(
+      `${tCat('vehicle_restriction')} (${tTok('except')} ${tTok('car_sharing')})`,
+    )
+  })
+
+  test('access_restriction (residents) and (private)', () => {
+    expect(fmt('access_restriction (residents)')).toBe(
+      `${tCat('access_restriction')} (${tTok('residents')})`,
+    )
+    expect(fmt('access_restriction (private)')).toBe(
+      `${tCat('access_restriction')} (${tTok('private')})`,
+    )
+  })
+
+  test('mixed (except Mo-Sa 00:00-09:00, Su, residents)', () => {
+    expect(fmt('mixed (except Mo-Sa 00:00-09:00, Su, residents)')).toBe(
+      `${tCat('mixed')} (${tTok('except')} Montag-Samstag 00:00-09:00, Sonntag, ${tTok('residents')})`,
+    )
+  })
+
+  test('no_parking (…; none @ residents) — "none @ X" reads as "except X"', () => {
+    expect(fmt('no_parking (Mo-Fr 08:00-18:00, none @ residents)')).toBe(
+      `${tCat('no_parking')} (Montag-Freitag 08:00-18:00, ${tTok('except')} ${tTok('residents')})`,
+    )
+  })
+
+  test('loading (except taxi)', () => {
+    expect(fmt('loading (except taxi)')).toBe(
+      `${tCat('loading')} (${tTok('except')} ${tTok('taxi')})`,
+    )
+  })
+
+  test('lowercase OSM weekdays: mo-Fr, mo-sa', () => {
+    expect(fmt('no_parking (mo-Fr 08:00-18:00)')).toBe(
+      `${tCat('no_parking')} (Montag-Freitag 08:00-18:00)`,
+    )
+    expect(fmt('paid (mo-sa 06:00-22:00)')).toBe(`${tCat('paid')} (Montag-Samstag 06:00-22:00)`)
+    expect(fmt('paid (sa 06:00-22:00)')).toBe(`${tCat('paid')} (Samstag 06:00-22:00)`)
+  })
+})
+
 describe('formatParkingConditionCategorySegment (edge cases)', () => {
   test('plain paid', () => {
     expect(

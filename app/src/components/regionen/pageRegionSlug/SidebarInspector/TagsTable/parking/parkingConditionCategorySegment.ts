@@ -121,15 +121,20 @@ function escapeRegExp(s: string) {
   return s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
-/** Weekday / holiday abbreviations as emitted by opening_hours-style strings in Lua. */
+/** `mo` / `MO` → `Mo`; OSM data contains lowercase weekdays such as `mo-Fr` or `mo-sa`. */
+function weekdayLabel(abbr: string) {
+  return WEEKDAY_LABEL[`${abbr.charAt(0).toUpperCase()}${abbr.charAt(1).toLowerCase()}`]
+}
+
+/** Weekday / holiday abbreviations as emitted by opening_hours-style strings in Lua (weekdays match case-insensitively). */
 function translateParkingConditionCategoryWeekdays(detail: string) {
   let out = detail.replace(/PH off/g, 'Feiertag ausgenommen')
 
   out = out.replace(
-    /\b(Mo|Tu|We|Th|Fr|Sa|Su)-(Mo|Tu|We|Th|Fr|Sa|Su)\b/g,
+    /\b(Mo|Tu|We|Th|Fr|Sa|Su)-(Mo|Tu|We|Th|Fr|Sa|Su)\b/gi,
     (_, a: string, b: string) => {
-      const la = WEEKDAY_LABEL[a]
-      const lb = WEEKDAY_LABEL[b]
+      const la = weekdayLabel(a)
+      const lb = weekdayLabel(b)
       if (!la || !lb) {
         return `${a}-${b}`
       }
@@ -140,11 +145,13 @@ function translateParkingConditionCategoryWeekdays(detail: string) {
   out = out.replace(/\bPH\b/g, 'Feiertag')
   out = out.replace(/\bSH\b/g, 'Ferien')
 
-  for (const abbr of ['Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa', 'Su'] as const) {
-    const label = WEEKDAY_LABEL[abbr]
-    const re = new RegExp(`(^|[^A-Za-z0-9_])${abbr}(?![A-Za-z0-9_])`, 'g')
-    out = out.replace(re, `$1${label}`)
-  }
+  out = out.replace(
+    /(^|[^A-Za-z0-9_])(Mo|Tu|We|Th|Fr|Sa|Su)(?![A-Za-z0-9_])/gi,
+    (match, prefix: string, abbr: string) => {
+      const label = weekdayLabel(abbr)
+      return label ? `${prefix}${label}` : match
+    },
+  )
 
   return out
 }
@@ -189,6 +196,7 @@ function translateParkingConditionCategoryMonths(detail: string) {
 const PARKING_CONDITION_DETAIL_TOKEN_IDS_LONGEST_FIRST = [
   'passenger_car',
   'load-unload',
+  'car_sharing',
   'agricultural',
   'discouraged',
   'destination',
@@ -199,11 +207,14 @@ const PARKING_CONDITION_DETAIL_TOKEN_IDS_LONGEST_FIRST = [
   'emergency',
   'employees',
   'customers',
+  'residents',
   'axleload',
   'delivery',
+  'disabled',
   'motorcar',
   'military',
   'forestry',
+  'private',
   'minutes',
   'minute',
   'hazmat',
@@ -231,6 +242,8 @@ const PARKING_CONDITION_DETAIL_TOKEN_IDS_LONGEST_FIRST = [
   'week',
   'days',
   'day',
+  'taxi',
+  'none',
   'bus',
   'snow',
   'wet',
@@ -244,7 +257,9 @@ function translateParkingConditionCategoryDetailTokens(
   detail: string,
   resolveToken: (tokenId: string) => string | undefined,
 ) {
-  let out = detail
+  // OSM `restriction:conditional=…; none @ residents` reaches the detail string verbatim: "none @ X" means "except X".
+  const exceptLabel = resolveToken('except')
+  let out = exceptLabel ? detail.replace(/\bnone @ /g, `${exceptLabel} `) : detail
   for (const tokenId of PARKING_CONDITION_DETAIL_TOKEN_IDS_LONGEST_FIRST) {
     const repl = resolveToken(tokenId)
     if (!repl) {
