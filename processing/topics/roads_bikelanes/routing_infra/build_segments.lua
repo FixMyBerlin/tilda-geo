@@ -15,6 +15,14 @@ local road_highway_classes = SET.join_sets({
   HIGHWAYS.minor_road_classes,
 })
 
+-- Self infra that is a lane inside the carriageway (Mittellage). It uses the centerline id
+-- like Fahrradstraße, but the road stays drivable, so the carriageway edges are kept.
+-- `needsClarification` only matches motor roads via the unclear Mittellage condition.
+local lane_within_carriageway_categories = SET.set({
+  'cyclewayOnHighwayBetweenLanes',
+  'needsClarification',
+})
+
 ---@param segments table[]
 ---@param opts { segment_id: string, side: SideKey, geom: table, category: string, road: string, parent_id: string, edge_oneway: string, tags: OsmTags }
 local function insert_carriageway_edge(segments, opts)
@@ -158,13 +166,18 @@ local function build_segments(context)
         category = cycleway.category,
       })
     end
-    if cycleway._infrastructureExists and cycleway._id == object_default_id then
+    if cycleway._infrastructureExists
+      and cycleway._id == object_default_id
+      and not lane_within_carriageway_categories[cycleway.category]
+    then
       virtual_uses_centerline_id = true
     end
   end
 
   if road_highway_classes[object_tags.highway] and not virtual_uses_centerline_id then
-    local default_category = self_cycleway and self_cycleway.category or 'mixedTrafficMotor'
+    -- A self infra category (Mittellage) is its own bikelanes edge, not the carriageway's.
+    local self_non_infra_category = self_cycleway and not self_cycleway._infrastructureExists and self_cycleway.category
+    local default_category = self_non_infra_category or 'mixedTrafficMotor'
     local road_value = context.shared_result_tags.road or road_classification_road_value(object_tags)
     emit_carriageway_edges(
       segments,

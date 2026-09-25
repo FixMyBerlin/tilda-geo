@@ -28,11 +28,11 @@ Check: after processing, `routing` rows with `tags->>'source_table' = 'roadsPath
 
 ### Edge types (`source_table`)
 
-| `source_table`     | When                                                                                                              |
-| ------------------ | ----------------------------------------------------------------------------------------------------------------- |
-| `bikelanes`        | Any cycleway object with `infrastructureExists` and a category (left/right from OSM side tags, or self)           |
-| `roads`            | Motor-road classes, unless self infra uses the centerline id; mixed-traffic directed edges (`mixedTrafficMotor*`) |
-| `roadsPathClasses` | Path-like highway without bikelane infra (self category id when present, else `mixedTrafficFoot`)                 |
+| `source_table`     | When                                                                                                                                                                                                                                 |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `bikelanes`        | Any cycleway object with `infrastructureExists` and a category (left/right from OSM side tags, or self)                                                                                                                              |
+| `roads`            | Motor-road classes, unless self infra uses the centerline id (Fahrradstraße, Fußgängerzone, …); mixed-traffic directed edges (`mixedTrafficMotor*`). A Mittellage lane (`cyclewayOnHighwayBetweenLanes`) keeps the carriageway edges |
+| `roadsPathClasses` | Path-like highway without bikelane infra (self category id when present, else `mixedTrafficFoot`)                                                                                                                                    |
 
 ### Exclusions
 

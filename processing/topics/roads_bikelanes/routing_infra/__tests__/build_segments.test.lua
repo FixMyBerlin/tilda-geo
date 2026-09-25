@@ -76,6 +76,53 @@ describe('build_segments carriageway edges', function()
     assert.are.equal(segments[1].tags.oneway, 'yes')
   end)
 
+  it('keeps carriageway edges next to a Mittellage bike lane on the centerline', function()
+    local segments = carriageway_segments({
+      highway = 'primary',
+      _id = 12,
+      _type = 'way',
+    }, {
+      {
+        _id = 'way/12',
+        _side = 'self',
+        _infrastructureExists = true,
+        category = 'cyclewayOnHighwayBetweenLanes',
+      },
+    })
+
+    local by_table = {}
+    for _, segment in ipairs(segments) do
+      by_table[segment.source_table] = by_table[segment.source_table] or {}
+      table.insert(by_table[segment.source_table], segment)
+    end
+    assert.are.equal(#by_table.bikelanes, 1)
+    assert.are.equal(by_table.bikelanes[1].category, 'cyclewayOnHighwayBetweenLanes')
+    assert.are.equal(#by_table.roads, 2)
+    for _, segment in ipairs(by_table.roads) do
+      assert.are.equal(segment.category, 'mixedTrafficMotor')
+    end
+  end)
+
+  it('Fahrradstraße on the centerline replaces the carriageway edges', function()
+    local segments = carriageway_segments({
+      highway = 'residential',
+      bicycle_road = 'yes',
+      _id = 13,
+      _type = 'way',
+    }, {
+      {
+        _id = 'way/13',
+        _side = 'self',
+        _infrastructureExists = true,
+        category = 'bicycleRoad',
+      },
+    })
+
+    assert.are.equal(#segments, 1)
+    assert.are.equal(segments[1].source_table, 'bikelanes')
+    assert.are.equal(segments[1].category, 'bicycleRoad')
+  end)
+
   it('carriageway join keys point at roads.id, not the directed edge id', function()
     local segments = carriageway_segments({
       highway = 'residential',
