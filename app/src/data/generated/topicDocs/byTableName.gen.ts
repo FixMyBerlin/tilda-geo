@@ -14584,7 +14584,7 @@ const data = {
         type: 'string',
         label: 'Straßentyp der angrenzenden Straße',
         description:
-          'Gleicher Wert wie `bikelanes.adjoining_road`. Auf `side=self` die begleitende (parallele) bzw. bei Querungen die gequerte Kfz-Straße; auf `side=left`/`right` leer (`road` trägt dort die Elternstraße).',
+          'Kfz-Straße neben der Radinfrastruktur. Auf `side=self` gleicher Wert wie `bikelanes.adjoining_road` (begleitende bzw. bei Querungen die gequerte Straße). Auf `side=left`/`right` die Elternstraße, auf der der Streifen liegt (`bikelanes.parent_road`).',
         chapterRefs: ['adjoining-road'],
         values: [
           {
@@ -14718,7 +14718,7 @@ const data = {
         type: 'kilometer_per_hour',
         label: 'Höchstgeschwindigkeit der angrenzenden Straße',
         description:
-          'TILDA-Höchstgeschwindigkeit (gleiche Ableitung wie roads.maxspeed: Tags, Zonen, Straßenklasse) der angrenzenden Straße; Maximum über die zugeordneten Straßensegmente der dominanten Klasse.',
+          'Höchstgeschwindigkeit der Kfz-Straße aus `adjoining_road`. Auf `side=left`/`right` die der Elternstraße (`bikelanes.parent_maxspeed`).',
         values: [],
       },
       {

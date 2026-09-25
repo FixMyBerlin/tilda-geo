@@ -3,7 +3,7 @@ local adjoining_context = require('topics.roads_bikelanes.pseudo_tags_sidepath.a
 local HIGHWAYS = require('topics.helper.highway_classes')
 
 --- Option 1 motor-road context for factor_motor_traffic.
----@param segment { source_table: string, tags: OsmTags }
+---@param segment { source_table: string, side: SideKey|nil, tags: OsmTags }
 ---@param context RoadsBikelanesWayContext
 ---@return MotorRoadContext
 local function resolve_motor_road_context(segment, context)
@@ -12,11 +12,13 @@ local function resolve_motor_road_context(segment, context)
   local result = {}
 
   if segment.source_table == 'bikelanes' then
-    -- Published adjoining follows bikelanes literally (empty on left/right; CSV/:of on self).
-    -- Do not copy this way's own `road` class — that is already `tags.road`.
+    -- Self rows follow bikelanes (CSV/:of). Left/right lanes lie on the parent road, so the
+    -- motor traffic beside them is that road: use its class and speed, which bikelanes keeps as
+    -- `parent_road` / `parent_maxspeed`. A router then reads one key on every bike edge.
     result.sidepath = 'yes'
-    result.adjoining_road = tags.adjoining_road
-    result.adjoining_maxspeed = tags.adjoining_maxspeed
+    local is_lane = segment.side == 'left' or segment.side == 'right'
+    result.adjoining_road = tags.adjoining_road or (is_lane and tags.parent_road or nil)
+    result.adjoining_maxspeed = tags.adjoining_maxspeed or (is_lane and tags.parent_maxspeed or nil)
     return result
   end
 

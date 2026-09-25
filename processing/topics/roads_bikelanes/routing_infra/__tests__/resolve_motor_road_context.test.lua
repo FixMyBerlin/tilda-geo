@@ -78,10 +78,11 @@ describe('resolve_motor_road_context (sidepath branch)', function()
     assert.are.equal(result.adjoining_maxspeed, 50)
   end)
 
-  it('leaves adjoining empty on bikelanes edges when bikelanes has none (left/right)', function()
+  it('uses the parent road as adjoining context on left/right lanes', function()
     local segment = {
       source_table = 'bikelanes',
-      tags = { highway = 'cycleway', parent_road = 'residential' },
+      side = 'right',
+      tags = { highway = 'cycleway', parent_road = 'residential_priority_road', parent_maxspeed = 30 },
     }
     local context = {
       object_tags = { highway = 'residential', priority_road = 'designated' },
@@ -89,6 +90,21 @@ describe('resolve_motor_road_context (sidepath branch)', function()
     }
     local result = resolve_motor_road_context(segment, context)
     assert.are.equal(result.sidepath, 'yes')
+    assert.are.equal(result.adjoining_road, 'residential_priority_road')
+    assert.are.equal(result.adjoining_maxspeed, 30)
+  end)
+
+  it('leaves adjoining empty on self bikelanes edges when bikelanes has none', function()
+    local segment = {
+      source_table = 'bikelanes',
+      side = 'self',
+      tags = { highway = 'cycleway', parent_road = 'residential', parent_maxspeed = 30 },
+    }
+    local context = {
+      object_tags = { highway = 'cycleway' },
+      shared_result_tags = { road = 'cycleway' },
+    }
+    local result = resolve_motor_road_context(segment, context)
     assert.is_nil(result.adjoining_road)
     assert.is_nil(result.adjoining_maxspeed)
   end)
