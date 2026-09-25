@@ -58,9 +58,9 @@ describe('build_segments carriageway edges', function()
     for _, segment in ipairs(segments) do
       categories[segment.category] = true
     end
-    assert.is_true(categories['bicycleRoad'])
+    assert.is_true(categories['mixedTrafficMotor'])
     assert.is_true(categories['mixedTrafficMotorContraflow'])
-    assert.is_nil(categories['mixedTrafficMotor'])
+    assert.is_nil(categories['bicycleRoad'])
   end)
 
   it('Case 1 all-modes oneway uses yes for factor oneway', function()

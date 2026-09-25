@@ -49,8 +49,7 @@ end
 ---@param object_geom table
 ---@param object_default_id string
 ---@param road_value string
----@param default_category string
-local function emit_carriageway_edges(segments, object_tags, object_geom, object_default_id, road_value, default_category)
+local function emit_carriageway_edges(segments, object_tags, object_geom, object_default_id, road_value)
   local factor_oneway = derive_oneway(object_tags, { implicitOneWay = false })
   local raw_oneway = object_tags.oneway
   local is_car_not_bike = factor_oneway == 'car_not_bike'
@@ -81,23 +80,23 @@ local function emit_carriageway_edges(segments, object_tags, object_geom, object
     local motor_backward = raw_oneway == '-1'
     local with_flow_side = motor_backward and 'left' or 'right'
     local contra_side = motor_backward and 'right' or 'left'
-    emit(with_flow_side, not motor_backward, default_category)
+    emit(with_flow_side, not motor_backward, 'mixedTrafficMotor')
     emit(contra_side, motor_backward, 'mixedTrafficMotorContraflow')
     return
   end
 
   if raw_oneway == '-1' then
-    emit('left', false, default_category)
+    emit('left', false, 'mixedTrafficMotor')
     return
   end
 
   if factor_oneway == 'yes' or raw_oneway == 'yes' then
-    emit('right', true, default_category)
+    emit('right', true, 'mixedTrafficMotor')
     return
   end
 
-  emit('right', true, default_category)
-  emit('left', false, default_category)
+  emit('right', true, 'mixedTrafficMotor')
+  emit('left', false, 'mixedTrafficMotor')
 end
 
 ---@param segments table[]
@@ -185,17 +184,13 @@ local function build_segments(context)
   end
 
   if road_highway_classes[object_tags.highway] and not virtual_uses_centerline_id then
-    -- A self infra category (Mittellage) is its own bikelanes edge, not the carriageway's.
-    local self_non_infra_category = self_cycleway and not self_cycleway._infrastructureExists and self_cycleway.category
-    local default_category = self_non_infra_category or 'mixedTrafficMotor'
     local road_value = context.shared_result_tags.road or road_classification_road_value(object_tags)
     emit_carriageway_edges(
       segments,
       object_tags,
       object_geom,
       object_default_id,
-      road_value,
-      default_category
+      road_value
     )
   elseif HIGHWAYS.path_classes[object_tags.highway] and not has_virtual_infra and not virtual_uses_centerline_id then
     -- Path edges always join roadsPathClasses; skip when that table would omit the way.
