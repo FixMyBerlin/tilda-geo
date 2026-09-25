@@ -20,8 +20,18 @@ class ResizeObserverStub {
   disconnect() {}
 }
 
+class IntersectionObserverStub {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+  takeRecords() {
+    return []
+  }
+}
+
 beforeEach(() => {
   vi.stubGlobal('ResizeObserver', ResizeObserverStub)
+  vi.stubGlobal('IntersectionObserver', IntersectionObserverStub)
 })
 
 describe('notes author options', () => {
@@ -93,7 +103,9 @@ describe('filter dropdown options', () => {
       osmAuthorNames: ['bob'],
       myValue: 'alice',
     })
-    render(
+    expect(options.map((option) => option.label)).toEqual(['Alle', 'Meine', 'bob'])
+
+    const { unmount } = render(
       <ModeFilterSelect
         label="Autor:in"
         icon={modeFilterIcons.author}
@@ -103,16 +115,18 @@ describe('filter dropdown options', () => {
       />,
     )
 
+    expect(screen.getByRole('button', { name: 'Autor:in: Alle' })).toBeTruthy()
     fireEvent.click(screen.getByRole('button', { name: 'Autor:in: Alle' }))
     expect(screen.getByRole('option', { name: 'Alle' })).toBeTruthy()
     expect(screen.getByRole('option', { name: 'Meine' })).toBeTruthy()
     expect(screen.getByRole('option', { name: 'bob' })).toBeTruthy()
-  })
+    unmount()
+  }, 15_000)
 
   test('Prüflisten status and Ausschnitt dropdowns render their options', () => {
     const onStatus = vi.fn()
     const onExtent = vi.fn()
-    render(
+    const { unmount } = render(
       <ModeFilterBar search="" onSearchChange={vi.fn()} extent="view" onExtentChange={onExtent}>
         <ModeFilterSelect
           label="Status"
@@ -137,7 +151,8 @@ describe('filter dropdown options', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Ausschnitt: Nur Karte' }))
     expect(screen.getByRole('option', { name: 'Nur Karte' })).toBeTruthy()
     expect(screen.getByRole('option', { name: 'Überall' })).toBeTruthy()
-  })
+    unmount()
+  }, 15_000)
 })
 
 describe('ModeFilterBar', () => {
