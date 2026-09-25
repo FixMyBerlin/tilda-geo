@@ -2134,6 +2134,9 @@ const data = {
   'tilda_parkings_no--condition_category=disabled_private':
     'Personenbezogener Behindertenparkplatz',
   'tilda_parkings_no--condition_category=free': 'Keine Parkbeschränkungen',
+  'tilda_parkings_no--condition_category=invalid': 'Ungültige Angabe in OSM',
+  'tilda_parkings_no--condition_category=invalid--description':
+    'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
   'tilda_parkings_no--condition_category=loading': 'Ladezone',
   'tilda_parkings_no--condition_category=maxweight': 'Gewichtsbegrenzung',
   'tilda_parkings_no--condition_category=mixed': 'Nur mit Parkschein oder Bewohnerparkausweis',
@@ -2359,6 +2362,10 @@ const data = {
     'Personenbezogener Behindertenparkplatz',
   'tilda_parkings_off_street_quantized--condition_category_primary=free':
     'Keine Parkbeschränkungen',
+  'tilda_parkings_off_street_quantized--condition_category_primary=invalid':
+    'Ungültige Angabe in OSM',
+  'tilda_parkings_off_street_quantized--condition_category_primary=invalid--description':
+    'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
   'tilda_parkings_off_street_quantized--condition_category_primary=loading': 'Ladezone',
   'tilda_parkings_off_street_quantized--condition_category_primary=maxweight': 'Gewichtsbegrenzung',
   'tilda_parkings_off_street_quantized--condition_category_primary=mixed':
@@ -2393,6 +2400,9 @@ const data = {
   'tilda_parkings_off_street_quantized--condition_category=disabled_private':
     'Personenbezogener Behindertenparkplatz',
   'tilda_parkings_off_street_quantized--condition_category=free': 'Keine Parkbeschränkungen',
+  'tilda_parkings_off_street_quantized--condition_category=invalid': 'Ungültige Angabe in OSM',
+  'tilda_parkings_off_street_quantized--condition_category=invalid--description':
+    'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
   'tilda_parkings_off_street_quantized--condition_category=loading': 'Ladezone',
   'tilda_parkings_off_street_quantized--condition_category=maxweight': 'Gewichtsbegrenzung',
   'tilda_parkings_off_street_quantized--condition_category=mixed':
@@ -2569,6 +2579,9 @@ const data = {
   'tilda_parkings_off_street--condition_category_primary=disabled_private':
     'Personenbezogener Behindertenparkplatz',
   'tilda_parkings_off_street--condition_category_primary=free': 'Keine Parkbeschränkungen',
+  'tilda_parkings_off_street--condition_category_primary=invalid': 'Ungültige Angabe in OSM',
+  'tilda_parkings_off_street--condition_category_primary=invalid--description':
+    'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
   'tilda_parkings_off_street--condition_category_primary=loading': 'Ladezone',
   'tilda_parkings_off_street--condition_category_primary=maxweight': 'Gewichtsbegrenzung',
   'tilda_parkings_off_street--condition_category_primary=mixed':
@@ -2596,6 +2609,9 @@ const data = {
   'tilda_parkings_off_street--condition_category=disabled_private':
     'Personenbezogener Behindertenparkplatz',
   'tilda_parkings_off_street--condition_category=free': 'Keine Parkbeschränkungen',
+  'tilda_parkings_off_street--condition_category=invalid': 'Ungültige Angabe in OSM',
+  'tilda_parkings_off_street--condition_category=invalid--description':
+    'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
   'tilda_parkings_off_street--condition_category=loading': 'Ladezone',
   'tilda_parkings_off_street--condition_category=maxweight': 'Gewichtsbegrenzung',
   'tilda_parkings_off_street--condition_category=mixed':
@@ -2729,6 +2745,9 @@ const data = {
   'tilda_parkings_quantized--condition_category=disabled_private':
     'Personenbezogener Behindertenparkplatz',
   'tilda_parkings_quantized--condition_category=free': 'Keine Parkbeschränkungen',
+  'tilda_parkings_quantized--condition_category=invalid': 'Ungültige Angabe in OSM',
+  'tilda_parkings_quantized--condition_category=invalid--description':
+    'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
   'tilda_parkings_quantized--condition_category=loading': 'Ladezone',
   'tilda_parkings_quantized--condition_category=maxweight': 'Gewichtsbegrenzung',
   'tilda_parkings_quantized--condition_category=mixed':
@@ -2975,6 +2994,9 @@ const data = {
   'tilda_parkings--condition_category_left=disabled_private':
     'Personenbezogener Behindertenparkplatz',
   'tilda_parkings--condition_category_left=free': 'Keine Parkbeschränkungen',
+  'tilda_parkings--condition_category_left=invalid': 'Ungültige Angabe in OSM',
+  'tilda_parkings--condition_category_left=invalid--description':
+    'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
   'tilda_parkings--condition_category_left=loading': 'Ladezone',
   'tilda_parkings--condition_category_left=maxweight': 'Gewichtsbegrenzung',
   'tilda_parkings--condition_category_left=mixed': 'Nur mit Parkschein oder Bewohnerparkausweis',
@@ -3001,6 +3023,9 @@ const data = {
   'tilda_parkings--condition_category_primary=disabled_private':
     'Personenbezogener Behindertenparkplatz',
   'tilda_parkings--condition_category_primary=free': 'Keine Parkbeschränkungen',
+  'tilda_parkings--condition_category_primary=invalid': 'Ungültige Angabe in OSM',
+  'tilda_parkings--condition_category_primary=invalid--description':
+    'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
   'tilda_parkings--condition_category_primary=loading': 'Ladezone',
   'tilda_parkings--condition_category_primary=maxweight': 'Gewichtsbegrenzung',
   'tilda_parkings--condition_category_primary=mixed': 'Nur mit Parkschein oder Bewohnerparkausweis',
@@ -3028,6 +3053,9 @@ const data = {
   'tilda_parkings--condition_category_right=disabled_private':
     'Personenbezogener Behindertenparkplatz',
   'tilda_parkings--condition_category_right=free': 'Keine Parkbeschränkungen',
+  'tilda_parkings--condition_category_right=invalid': 'Ungültige Angabe in OSM',
+  'tilda_parkings--condition_category_right=invalid--description':
+    'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
   'tilda_parkings--condition_category_right=loading': 'Ladezone',
   'tilda_parkings--condition_category_right=maxweight': 'Gewichtsbegrenzung',
   'tilda_parkings--condition_category_right=mixed': 'Nur mit Parkschein oder Bewohnerparkausweis',
@@ -3052,6 +3080,9 @@ const data = {
   'tilda_parkings--condition_category=disabled': 'Behindertenparkplatz',
   'tilda_parkings--condition_category=disabled_private': 'Personenbezogener Behindertenparkplatz',
   'tilda_parkings--condition_category=free': 'Keine Parkbeschränkungen',
+  'tilda_parkings--condition_category=invalid': 'Ungültige Angabe in OSM',
+  'tilda_parkings--condition_category=invalid--description':
+    'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
   'tilda_parkings--condition_category=loading': 'Ladezone',
   'tilda_parkings--condition_category=maxweight': 'Gewichtsbegrenzung',
   'tilda_parkings--condition_category=mixed': 'Nur mit Parkschein oder Bewohnerparkausweis',

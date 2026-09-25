@@ -48,6 +48,7 @@ const PARKING_CONDITION_CATEGORY_BASE_KEYS_LONGEST_FIRST = [
   'bus_lane',
   'charging',
   'disabled',
+  'invalid',
   'private',
   'loading',
   'mixed',

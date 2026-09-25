@@ -172,10 +172,11 @@ end
 function classify_parking_conditions(tags, default_category)
   local function t(k) return tags[k] end
 
-  -- Strict: a malformed conditional value leaves the category unknown; callers log `invalid_conditional_tags` to `parking_errors`.
+  -- Strict: a malformed conditional value makes the category `invalid` (we can not tell the real restriction);
+  -- callers log `invalid_conditional_tags` to `parking_errors`.
   local invalid_conditional_tags = collect_invalid_conditional_tags(tags)
   if invalid_conditional_tags then
-    return { invalid_conditional_tags = invalid_conditional_tags }
+    return { condition_category = 'invalid', invalid_conditional_tags = invalid_conditional_tags }
   end
 
   -- Initialize categories

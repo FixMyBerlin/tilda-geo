@@ -91,7 +91,7 @@ describe('`result_tags`', function()
       local results = transform_parkings(input_object)
 
       local left, replaced_tags = result_tags(results.left)
-      assert.is_nil(left.tags.condition_category)
+      assert.are.equal('invalid', left.tags.condition_category)
       assert.are.same({
         ['parking:both:restriction:conditional'] = input_object.tags['parking:both:restriction:conditional'],
       }, replaced_tags)

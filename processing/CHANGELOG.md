@@ -4,11 +4,14 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-09
 
-### `parkings`, `off_street_parking_areas`, `parking_errors`
+### `parkings`, `off_street_parking_areas`, `parkings_edges`, `parking_errors`
 
-- `condition_category` is strict about OSM conditional syntax: when a `*:conditional` value the classifier reads has unbalanced or nested brackets, an `@` inside the condition, or a part without `value @ condition`, `condition_category` stays empty (`condition_category_primary=default`). The raw tag is logged to `parking_errors` (`SANITIZED_VALUE`) with its original key, e.g. `parking:both:restriction:conditional`. The same applies to `maxstay` values that contain `@`.
-- `maxstay=1 hour @ (Mo-Fr …)` without `:conditional` is read like `maxstay:conditional` → `time_limited (1 hour) (Mo-Fr …)`.
+- New `condition_category=invalid`: a `*:conditional` value the classifier reads has broken syntax (unbalanced or nested brackets, `@` inside the condition, a part without `value @ condition`; also `maxstay` values with a broken `@`). We can not tell the real restriction, so we do not guess (dropping e.g. `no_stopping @ …` would read as free parking). `condition_category_primary` / `condition_category_left|right` carry `invalid` too (last in the priority list); map styles have no own colour and use the fallback on purpose.
+- The broken tags are logged to `parking_errors` (`SANITIZED_VALUE`) with their original key, e.g. `parking:both:restriction:conditional`, so they can be fixed in OSM. Real examples: `no_stopping @ (Mo-Sa 07:00-19:00; PH off)...)`, `no_parking @ (Mo-Fr 09:00-20:00; Sa 09:00-18:00; none @ residents`.
+- `maxstay=1 hour @ (Mo-Fr …)` without `:conditional` is read like `maxstay:conditional` → `time_limited (1 hour) (Mo-Fr …)` instead of nested brackets.
 - Street parkings from `parking:left|right|both:*` now log rejected sanitizer values to `parking_errors` too (previously dropped silently).
+- Docs: `condition_category_primary` and `condition_category_left|right` document `default` ("Keine Zuordnung": category not in the style priority list, e.g. `no_standing`). `capacity_source=area` (off-street) was already documented via `valuesAdd`.
+- Note: condition detail strings are mostly passed through from OSM verbatim (only fee inversion and time subtraction rebuild them), so casing like `mo-Fr` can appear. The inspector translates weekdays case-insensitively.
 
 ### `bikelanes`, `routing`
 

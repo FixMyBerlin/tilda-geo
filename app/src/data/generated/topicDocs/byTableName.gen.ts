@@ -4357,6 +4357,12 @@ const data = {
             label: 'Keine Parkbeschränkungen',
           },
           {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
+          },
+          {
             value: 'loading',
             label: 'Ladezone',
           },
@@ -4453,6 +4459,12 @@ const data = {
           {
             value: 'free',
             label: 'Keine Parkbeschränkungen',
+          },
+          {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
           },
           {
             value: 'loading',
@@ -5114,6 +5126,12 @@ const data = {
             label: 'Keine Parkbeschränkungen',
           },
           {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
+          },
+          {
             value: 'loading',
             label: 'Ladezone',
           },
@@ -5210,6 +5228,12 @@ const data = {
           {
             value: 'free',
             label: 'Keine Parkbeschränkungen',
+          },
+          {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
           },
           {
             value: 'loading',
@@ -5851,6 +5875,12 @@ const data = {
             label: 'Keine Parkbeschränkungen',
           },
           {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
+          },
+          {
             value: 'loading',
             label: 'Ladezone',
           },
@@ -5947,6 +5977,12 @@ const data = {
           {
             value: 'free',
             label: 'Keine Parkbeschränkungen',
+          },
+          {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
           },
           {
             value: 'loading',
@@ -7815,6 +7851,12 @@ const data = {
             label: 'Keine Parkbeschränkungen',
           },
           {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
+          },
+          {
             value: 'loading',
             label: 'Ladezone',
           },
@@ -7915,6 +7957,12 @@ const data = {
           {
             value: 'free',
             label: 'Keine Parkbeschränkungen',
+          },
+          {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
           },
           {
             value: 'loading',
@@ -8563,6 +8611,12 @@ const data = {
           {
             value: 'free',
             label: 'Keine Parkbeschränkungen',
+          },
+          {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
           },
           {
             value: 'loading',
@@ -9619,6 +9673,12 @@ const data = {
           {
             value: 'free',
             label: 'Keine Parkbeschränkungen',
+          },
+          {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
           },
           {
             value: 'loading',

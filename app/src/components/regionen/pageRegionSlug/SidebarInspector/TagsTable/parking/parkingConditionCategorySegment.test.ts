@@ -222,6 +222,16 @@ describe('formatParkingConditionCategorySegment (edge cases)', () => {
     ).toBe(tCat('paid'))
   })
 
+  test('plain invalid (malformed OSM conditional tags)', () => {
+    expect(
+      formatParkingConditionCategorySegment(
+        'invalid',
+        resolveParkingConditionCategoryBase,
+        resolveParkingConditionDetailToken,
+      ),
+    ).toBe(tCat('invalid'))
+  })
+
   test('plain free', () => {
     expect(
       formatParkingConditionCategorySegment(

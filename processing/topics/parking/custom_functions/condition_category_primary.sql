@@ -10,6 +10,7 @@
 --
 -- Lua `classify_parking_conditions` can emit extra bases (e.g. `no_standing`); those are
 -- not in this list and fall through to `'default'`.
+-- `invalid` (malformed OSM conditional tags) has no own colour in the styles; it uses the style fallback on purpose.
 -- First ARRAY match wins; NULL/empty/no match → 'default'.
 -- USED IN: `7_finalize_parkings.sql`, `7a_off_street_condition_category_primary.sql`, `11_create_edges.sql`
 DROP FUNCTION IF EXISTS tilda_condition_category_primary (text);
@@ -42,7 +43,8 @@ CREATE OR REPLACE FUNCTION tilda_condition_category_priority () RETURNS TABLE (c
         'time_limited',
         'unspecified',
         'free',
-        'assumed_free'
+        'assumed_free',
+        'invalid'
       ]::text[]
     )
     WITH ORDINALITY AS t (category, pri);

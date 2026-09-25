@@ -111,6 +111,9 @@ attributes:
         label: Personenbezogener Behindertenparkplatz
       - value: free
         label: Keine Parkbeschränkungen
+      - value: invalid
+        label: Ungültige Angabe in OSM
+        description: Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.
       - value: loading
         label: Ladezone
       - value: maxweight

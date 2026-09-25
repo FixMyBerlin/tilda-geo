@@ -119,13 +119,13 @@ describe('classify_parking_conditions', function()
     local result = classify_parking_conditions(tags, 'assumed_free')
     assert.are.equal(result.condition_category, 'time_limited (1 hour) (Mo-Fr 08:00-18:00, Sa 08:00-14:00)')
   end)
-  it('leaves condition_category empty and reports malformed conditional values (strict)', function()
+  it('sets condition_category=invalid and reports malformed conditional values (strict)', function()
     local tags = {
       fee = 'yes',
       ['restriction:conditional'] = 'no_stopping @ (Mo-Sa 07:00-19:00; PH off)...)',
     }
     local result = classify_parking_conditions(tags, 'assumed_free')
-    assert.is_nil(result.condition_category)
+    assert.are.equal('invalid', result.condition_category)
     assert.are.same({ ['restriction:conditional'] = tags['restriction:conditional'] }, result.invalid_conditional_tags)
   end)
 
@@ -135,7 +135,7 @@ describe('classify_parking_conditions', function()
       maxstay = '1 hour @ ((Mo-Fr 08:00-18:00))',
     }
     local result = classify_parking_conditions(tags, 'assumed_free')
-    assert.is_nil(result.condition_category)
+    assert.are.equal('invalid', result.condition_category)
     assert.are.same({
       ['disabled:conditional'] = tags['disabled:conditional'],
       maxstay = tags.maxstay,
