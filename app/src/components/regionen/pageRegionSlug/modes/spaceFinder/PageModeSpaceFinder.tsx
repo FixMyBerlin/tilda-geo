@@ -2,7 +2,7 @@ import { PlusIcon } from '@heroicons/react/24/outline'
 import { useSuspenseQuery } from '@tanstack/react-query'
 import { getRouteApi } from '@tanstack/react-router'
 import { bbox } from '@turf/turf'
-import { useEffect } from 'react'
+import { useEffect, useEffectEvent } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
 import { RunButton } from '@/components/regionen/pageRegionSlug/Planning/RunButton'
@@ -75,6 +75,11 @@ export const PageModeSpaceFinder = () => {
   const onSelect = (variantId: number | undefined) =>
     setSpaceFinderModeParam({ ...spaceFinderMode, key: variantId })
 
+  // `onSelect` is a new function every render. As an effect event it always sees the latest
+  // `spaceFinderMode` without being an effect dependency (otherwise `oxlint --fix` in the pre-push
+  // hook keeps adding it to the deps array and editors keep removing it again).
+  const selectVariant = useEffectEvent((variantId: number | undefined) => onSelect(variantId))
+
   // Auto-select the first Gebiet/Variante (oldest first, D4) when entering the mode without a
   // selection, or when the URL still points at a deleted (orphaned) variant. Skipped while the
   // create wizard owns the selection (`ff.new`).
@@ -85,9 +90,9 @@ export const PageModeSpaceFinder = () => {
       if (stillExists) return
       const first = options[0]
       if (first?.variantId === spaceFinderMode.key) return
-      onSelect(first?.variantId)
+      selectVariant(first?.variantId)
     },
-    [areas, options, spaceFinderMode, onSelect],
+    [areas, options, spaceFinderMode],
   )
 
   const commands = useSpaceFinderCommands({ regionSlug, areas, selectedOption, onSelect })
