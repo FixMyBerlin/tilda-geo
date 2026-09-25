@@ -192,7 +192,6 @@ const data = {
   'atlas_bikelanes--category=cycleway_adjoining': 'Radweg (straßenbegleitend)',
   'atlas_bikelanes--category=cycleway_adjoiningOrIsolated':
     'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
-  'atlas_bikelanes--category=cycleway_crossing': 'Straßenquerung (Radverkehr)',
   'atlas_bikelanes--category=cycleway_isolated': 'Radweg, selbstständig geführt',
   'atlas_bikelanes--category=cyclewayLink': 'Radweg-Verbindungsstück',
   'atlas_bikelanes--category=cyclewayOnHighway_advisory': 'Schutzstreifen',
@@ -220,10 +219,8 @@ const data = {
     'Gehweg mit Radfahrer frei (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
   'atlas_bikelanes--category=footwayBicycleYes_isolated':
     'Gehweg mit Radfahrer frei, selbstständig geführt',
-  'atlas_bikelanes--category=livingStreet': 'Verkehrsberuhigter Bereich (Spielstraße)',
   'atlas_bikelanes--category=needsClarification': 'Führungsform unklar',
   'atlas_bikelanes--category=pedestrianAreaBicycleYes': 'Fußgängerzone, Fahrrad frei',
-  'atlas_bikelanes--category=separate_geometry': 'RVA als separate Geometrie erfasst',
   'atlas_bikelanes--category=sharedBusLaneBikeWithBus': 'Radfahrstreifen mit Freigabe Busverkehr',
   'atlas_bikelanes--category=sharedBusLaneBusWithBike': 'Bussonderfahrstreifen mit Fahrrad frei',
   'atlas_bikelanes--category=sharedMotorVehicleLane': 'Anteilig genutzter Fahrstreifen (Sharrows)',
@@ -515,7 +512,6 @@ const data = {
   'atlas_bikelanesPresence--bikelane_left=cycleway_adjoining': 'Radweg (straßenbegleitend)',
   'atlas_bikelanesPresence--bikelane_left=cycleway_adjoiningOrIsolated':
     'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
-  'atlas_bikelanesPresence--bikelane_left=cycleway_crossing': 'Straßenquerung (Radverkehr)',
   'atlas_bikelanesPresence--bikelane_left=cycleway_isolated': 'Radweg, selbstständig geführt',
   'atlas_bikelanesPresence--bikelane_left=cyclewayLink': 'Radweg-Verbindungsstück',
   'atlas_bikelanesPresence--bikelane_left=cyclewayOnHighway_advisory': 'Schutzstreifen',
@@ -545,7 +541,6 @@ const data = {
     'Gehweg mit Radfahrer frei (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
   'atlas_bikelanesPresence--bikelane_left=footwayBicycleYes_isolated':
     'Gehweg mit Radfahrer frei, selbstständig geführt',
-  'atlas_bikelanesPresence--bikelane_left=livingStreet': 'Verkehrsberuhigter Bereich (Spielstraße)',
   'atlas_bikelanesPresence--bikelane_left=missing': 'Unvollständig',
   'atlas_bikelanesPresence--bikelane_left=needsClarification': 'Führungsform unklar',
   'atlas_bikelanesPresence--bikelane_left=not_expected': 'Keine Infrastruktur erwartet',
@@ -566,7 +561,6 @@ const data = {
   'atlas_bikelanesPresence--bikelane_right=cycleway_adjoining': 'Radweg (straßenbegleitend)',
   'atlas_bikelanesPresence--bikelane_right=cycleway_adjoiningOrIsolated':
     'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
-  'atlas_bikelanesPresence--bikelane_right=cycleway_crossing': 'Straßenquerung (Radverkehr)',
   'atlas_bikelanesPresence--bikelane_right=cycleway_isolated': 'Radweg, selbstständig geführt',
   'atlas_bikelanesPresence--bikelane_right=cyclewayLink': 'Radweg-Verbindungsstück',
   'atlas_bikelanesPresence--bikelane_right=cyclewayOnHighway_advisory': 'Schutzstreifen',
@@ -596,8 +590,6 @@ const data = {
     'Gehweg mit Radfahrer frei (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
   'atlas_bikelanesPresence--bikelane_right=footwayBicycleYes_isolated':
     'Gehweg mit Radfahrer frei, selbstständig geführt',
-  'atlas_bikelanesPresence--bikelane_right=livingStreet':
-    'Verkehrsberuhigter Bereich (Spielstraße)',
   'atlas_bikelanesPresence--bikelane_right=missing': 'Unvollständig',
   'atlas_bikelanesPresence--bikelane_right=needsClarification': 'Führungsform unklar',
   'atlas_bikelanesPresence--bikelane_right=not_expected': 'Keine Infrastruktur erwartet',
@@ -618,7 +610,6 @@ const data = {
   'atlas_bikelanesPresence--bikelane_self=cycleway_adjoining': 'Radweg (straßenbegleitend)',
   'atlas_bikelanesPresence--bikelane_self=cycleway_adjoiningOrIsolated':
     'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
-  'atlas_bikelanesPresence--bikelane_self=cycleway_crossing': 'Straßenquerung (Radverkehr)',
   'atlas_bikelanesPresence--bikelane_self=cycleway_isolated': 'Radweg, selbstständig geführt',
   'atlas_bikelanesPresence--bikelane_self=cyclewayLink': 'Radweg-Verbindungsstück',
   'atlas_bikelanesPresence--bikelane_self=cyclewayOnHighway_advisory': 'Schutzstreifen',
@@ -648,7 +639,6 @@ const data = {
     'Gehweg mit Radfahrer frei (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
   'atlas_bikelanesPresence--bikelane_self=footwayBicycleYes_isolated':
     'Gehweg mit Radfahrer frei, selbstständig geführt',
-  'atlas_bikelanesPresence--bikelane_self=livingStreet': 'Verkehrsberuhigter Bereich (Spielstraße)',
   'atlas_bikelanesPresence--bikelane_self=missing': 'Unvollständig',
   'atlas_bikelanesPresence--bikelane_self=needsClarification': 'Führungsform unklar',
   'atlas_bikelanesPresence--bikelane_self=not_expected': 'Keine Infrastruktur erwartet',
@@ -1173,7 +1163,6 @@ const data = {
   'atlas_roads--bikelane_left=cycleway_adjoining': 'Radweg (straßenbegleitend)',
   'atlas_roads--bikelane_left=cycleway_adjoiningOrIsolated':
     'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
-  'atlas_roads--bikelane_left=cycleway_crossing': 'Straßenquerung (Radverkehr)',
   'atlas_roads--bikelane_left=cycleway_isolated': 'Radweg, selbstständig geführt',
   'atlas_roads--bikelane_left=cyclewayLink': 'Radweg-Verbindungsstück',
   'atlas_roads--bikelane_left=cyclewayOnHighway_advisory': 'Schutzstreifen',
@@ -1202,7 +1191,6 @@ const data = {
     'Gehweg mit Radfahrer frei (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
   'atlas_roads--bikelane_left=footwayBicycleYes_isolated':
     'Gehweg mit Radfahrer frei, selbstständig geführt',
-  'atlas_roads--bikelane_left=livingStreet': 'Verkehrsberuhigter Bereich (Spielstraße)',
   'atlas_roads--bikelane_left=missing': 'Unvollständig',
   'atlas_roads--bikelane_left=needsClarification': 'Führungsform unklar',
   'atlas_roads--bikelane_left=not_expected': 'Keine Infrastruktur erwartet',
@@ -1220,7 +1208,6 @@ const data = {
   'atlas_roads--bikelane_right=cycleway_adjoining': 'Radweg (straßenbegleitend)',
   'atlas_roads--bikelane_right=cycleway_adjoiningOrIsolated':
     'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
-  'atlas_roads--bikelane_right=cycleway_crossing': 'Straßenquerung (Radverkehr)',
   'atlas_roads--bikelane_right=cycleway_isolated': 'Radweg, selbstständig geführt',
   'atlas_roads--bikelane_right=cyclewayLink': 'Radweg-Verbindungsstück',
   'atlas_roads--bikelane_right=cyclewayOnHighway_advisory': 'Schutzstreifen',
@@ -1249,7 +1236,6 @@ const data = {
     'Gehweg mit Radfahrer frei (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
   'atlas_roads--bikelane_right=footwayBicycleYes_isolated':
     'Gehweg mit Radfahrer frei, selbstständig geführt',
-  'atlas_roads--bikelane_right=livingStreet': 'Verkehrsberuhigter Bereich (Spielstraße)',
   'atlas_roads--bikelane_right=missing': 'Unvollständig',
   'atlas_roads--bikelane_right=needsClarification': 'Führungsform unklar',
   'atlas_roads--bikelane_right=not_expected': 'Keine Infrastruktur erwartet',
@@ -1268,7 +1254,6 @@ const data = {
   'atlas_roads--bikelane_self=cycleway_adjoining': 'Radweg (straßenbegleitend)',
   'atlas_roads--bikelane_self=cycleway_adjoiningOrIsolated':
     'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
-  'atlas_roads--bikelane_self=cycleway_crossing': 'Straßenquerung (Radverkehr)',
   'atlas_roads--bikelane_self=cycleway_isolated': 'Radweg, selbstständig geführt',
   'atlas_roads--bikelane_self=cyclewayLink': 'Radweg-Verbindungsstück',
   'atlas_roads--bikelane_self=cyclewayOnHighway_advisory': 'Schutzstreifen',
@@ -1297,7 +1282,6 @@ const data = {
     'Gehweg mit Radfahrer frei (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
   'atlas_roads--bikelane_self=footwayBicycleYes_isolated':
     'Gehweg mit Radfahrer frei, selbstständig geführt',
-  'atlas_roads--bikelane_self=livingStreet': 'Verkehrsberuhigter Bereich (Spielstraße)',
   'atlas_roads--bikelane_self=missing': 'Unvollständig',
   'atlas_roads--bikelane_self=needsClarification': 'Führungsform unklar',
   'atlas_roads--bikelane_self=not_expected': 'Keine Infrastruktur erwartet',
@@ -1549,7 +1533,6 @@ const data = {
   'atlas_roadsPathClasses--bikelane_left=cycleway_adjoining': 'Radweg (straßenbegleitend)',
   'atlas_roadsPathClasses--bikelane_left=cycleway_adjoiningOrIsolated':
     'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
-  'atlas_roadsPathClasses--bikelane_left=cycleway_crossing': 'Straßenquerung (Radverkehr)',
   'atlas_roadsPathClasses--bikelane_left=cycleway_isolated': 'Radweg, selbstständig geführt',
   'atlas_roadsPathClasses--bikelane_left=cyclewayLink': 'Radweg-Verbindungsstück',
   'atlas_roadsPathClasses--bikelane_left=cyclewayOnHighway_advisory': 'Schutzstreifen',
@@ -1579,7 +1562,6 @@ const data = {
     'Gehweg mit Radfahrer frei (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
   'atlas_roadsPathClasses--bikelane_left=footwayBicycleYes_isolated':
     'Gehweg mit Radfahrer frei, selbstständig geführt',
-  'atlas_roadsPathClasses--bikelane_left=livingStreet': 'Verkehrsberuhigter Bereich (Spielstraße)',
   'atlas_roadsPathClasses--bikelane_left=missing': 'Unvollständig',
   'atlas_roadsPathClasses--bikelane_left=needsClarification': 'Führungsform unklar',
   'atlas_roadsPathClasses--bikelane_left=not_expected': 'Keine Infrastruktur erwartet',
@@ -1591,7 +1573,7 @@ const data = {
     'Bussonderfahrstreifen mit Fahrrad frei',
   'atlas_roadsPathClasses--bikelane_left=sharedMotorVehicleLane':
     'Anteilig genutzter Fahrstreifen (Sharrows)',
-  'atlas_roadsPathClasses--bikelane_right--key': 'Radinfrastruktur links',
+  'atlas_roadsPathClasses--bikelane_right--key': 'Radinfrastruktur rechts',
   'atlas_roadsPathClasses--bikelane_right=assumed_no': 'Vermutlich vollständig',
   'atlas_roadsPathClasses--bikelane_right=bicycleRoad': 'Fahrradstraße',
   'atlas_roadsPathClasses--bikelane_right=bicycleRoad_vehicleDestination':
@@ -1600,7 +1582,6 @@ const data = {
   'atlas_roadsPathClasses--bikelane_right=cycleway_adjoining': 'Radweg (straßenbegleitend)',
   'atlas_roadsPathClasses--bikelane_right=cycleway_adjoiningOrIsolated':
     'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
-  'atlas_roadsPathClasses--bikelane_right=cycleway_crossing': 'Straßenquerung (Radverkehr)',
   'atlas_roadsPathClasses--bikelane_right=cycleway_isolated': 'Radweg, selbstständig geführt',
   'atlas_roadsPathClasses--bikelane_right=cyclewayLink': 'Radweg-Verbindungsstück',
   'atlas_roadsPathClasses--bikelane_right=cyclewayOnHighway_advisory': 'Schutzstreifen',
@@ -1630,7 +1611,6 @@ const data = {
     'Gehweg mit Radfahrer frei (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
   'atlas_roadsPathClasses--bikelane_right=footwayBicycleYes_isolated':
     'Gehweg mit Radfahrer frei, selbstständig geführt',
-  'atlas_roadsPathClasses--bikelane_right=livingStreet': 'Verkehrsberuhigter Bereich (Spielstraße)',
   'atlas_roadsPathClasses--bikelane_right=missing': 'Unvollständig',
   'atlas_roadsPathClasses--bikelane_right=needsClarification': 'Führungsform unklar',
   'atlas_roadsPathClasses--bikelane_right=not_expected': 'Keine Infrastruktur erwartet',
@@ -1642,7 +1622,7 @@ const data = {
     'Bussonderfahrstreifen mit Fahrrad frei',
   'atlas_roadsPathClasses--bikelane_right=sharedMotorVehicleLane':
     'Anteilig genutzter Fahrstreifen (Sharrows)',
-  'atlas_roadsPathClasses--bikelane_self--key': 'Radinfrastruktur links',
+  'atlas_roadsPathClasses--bikelane_self--key': 'Radinfrastruktur mittig',
   'atlas_roadsPathClasses--bikelane_self=assumed_no': 'Vermutlich vollständig',
   'atlas_roadsPathClasses--bikelane_self=bicycleRoad': 'Fahrradstraße',
   'atlas_roadsPathClasses--bikelane_self=bicycleRoad_vehicleDestination':
@@ -1651,7 +1631,6 @@ const data = {
   'atlas_roadsPathClasses--bikelane_self=cycleway_adjoining': 'Radweg (straßenbegleitend)',
   'atlas_roadsPathClasses--bikelane_self=cycleway_adjoiningOrIsolated':
     'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
-  'atlas_roadsPathClasses--bikelane_self=cycleway_crossing': 'Straßenquerung (Radverkehr)',
   'atlas_roadsPathClasses--bikelane_self=cycleway_isolated': 'Radweg, selbstständig geführt',
   'atlas_roadsPathClasses--bikelane_self=cyclewayLink': 'Radweg-Verbindungsstück',
   'atlas_roadsPathClasses--bikelane_self=cyclewayOnHighway_advisory': 'Schutzstreifen',
@@ -1681,7 +1660,6 @@ const data = {
     'Gehweg mit Radfahrer frei (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
   'atlas_roadsPathClasses--bikelane_self=footwayBicycleYes_isolated':
     'Gehweg mit Radfahrer frei, selbstständig geführt',
-  'atlas_roadsPathClasses--bikelane_self=livingStreet': 'Verkehrsberuhigter Bereich (Spielstraße)',
   'atlas_roadsPathClasses--bikelane_self=missing': 'Unvollständig',
   'atlas_roadsPathClasses--bikelane_self=needsClarification': 'Führungsform unklar',
   'atlas_roadsPathClasses--bikelane_self=not_expected': 'Keine Infrastruktur erwartet',

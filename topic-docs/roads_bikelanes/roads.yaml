@@ -224,40 +224,13 @@ attributes:
         label: In einem Gebäude
   - key: bikelane_left
     label: Radinfrastruktur links
-    valuesRef: bikelanes.category
-    valuesAdd:
-      - value: data_no
-        label: Vollständig (explizit keine)
-      - value: not_expected
-        label: Keine Infrastruktur erwartet
-      - value: assumed_no
-        label: Vermutlich vollständig
-      - value: missing
-        label: Unvollständig
+    ref: bikelanesPresence.bikelane_left
   - key: bikelane_self
     label: Radinfrastruktur mittig
-    valuesRef: bikelanes.category
-    valuesAdd:
-      - value: data_no
-        label: Vollständig (explizit keine)
-      - value: not_expected
-        label: Keine Infrastruktur erwartet
-      - value: assumed_no
-        label: Vermutlich vollständig
-      - value: missing
-        label: Unvollständig
+    ref: bikelanesPresence.bikelane_self
   - key: bikelane_right
     label: Radinfrastruktur rechts
-    valuesRef: bikelanes.category
-    valuesAdd:
-      - value: data_no
-        label: Vollständig (explizit keine)
-      - value: not_expected
-        label: Keine Infrastruktur erwartet
-      - value: assumed_no
-        label: Vermutlich vollständig
-      - value: missing
-        label: Unvollständig
+    ref: bikelanesPresence.bikelane_right
   - key: maxspeed
     label: Höchstgeschwindigkeit
     format: kilometer_per_hour

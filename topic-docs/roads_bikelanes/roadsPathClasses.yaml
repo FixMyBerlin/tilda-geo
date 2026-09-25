@@ -55,10 +55,13 @@ attributes:
   - key: surface_color
     ref: roads.surface_color
   - key: bikelane_left
+    label: Radinfrastruktur links
     ref: bikelanesPresence.bikelane_left
   - key: bikelane_self
+    label: Radinfrastruktur mittig
     ref: bikelanesPresence.bikelane_self
   - key: bikelane_right
+    label: Radinfrastruktur rechts
     ref: bikelanesPresence.bikelane_right
   - key: todos
     ref: todos_lines.todos

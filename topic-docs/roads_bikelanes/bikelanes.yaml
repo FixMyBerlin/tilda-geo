@@ -17,8 +17,6 @@ attributes:
         label: Radweg (straßenbegleitend)
       - value: cycleway_adjoiningOrIsolated
         label: Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)
-      - value: cycleway_crossing
-        label: Straßenquerung (Radverkehr)
       - value: cycleway_isolated
         label: Radweg, selbstständig geführt
       - value: cyclewayLink
@@ -51,12 +49,8 @@ attributes:
         label: Gehweg mit Radfahrer frei (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)
       - value: footwayBicycleYes_isolated
         label: Gehweg mit Radfahrer frei, selbstständig geführt
-      - value: livingStreet
-        label: Verkehrsberuhigter Bereich (Spielstraße)
       - value: pedestrianAreaBicycleYes
         label: Fußgängerzone, Fahrrad frei
-      - value: separate_geometry
-        label: RVA als separate Geometrie erfasst
       - value: sharedBusLaneBikeWithBus
         label: Radfahrstreifen mit Freigabe Busverkehr
       - value: sharedBusLaneBusWithBike

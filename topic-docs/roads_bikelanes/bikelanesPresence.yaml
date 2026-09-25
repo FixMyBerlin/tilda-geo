@@ -10,6 +10,8 @@ attributes:
         label: Vollständig (explizit keine)
       - value: not_expected
         label: Keine Infrastruktur erwartet
+      - value: separate_geometry
+        label: RVA als separate Geometrie erfasst
       - value: assumed_no
         label: Vermutlich vollständig
       - value: missing

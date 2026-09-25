@@ -748,10 +748,6 @@ const data = {
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
           },
           {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
-          {
             value: 'cycleway_isolated',
             label: 'Radweg, selbstständig geführt',
           },
@@ -819,16 +815,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -2238,10 +2226,6 @@ const data = {
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
           },
           {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
-          {
             value: 'cycleway_isolated',
             label: 'Radweg, selbstständig geführt',
           },
@@ -2309,16 +2293,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -2343,6 +2319,10 @@ const data = {
           {
             value: 'not_expected',
             label: 'Keine Infrastruktur erwartet',
+          },
+          {
+            value: 'separate_geometry',
+            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'assumed_no',
@@ -2380,10 +2360,6 @@ const data = {
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
           },
           {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
-          {
             value: 'cycleway_isolated',
             label: 'Radweg, selbstständig geführt',
           },
@@ -2451,16 +2427,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -2485,6 +2453,10 @@ const data = {
           {
             value: 'not_expected',
             label: 'Keine Infrastruktur erwartet',
+          },
+          {
+            value: 'separate_geometry',
+            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'assumed_no',
@@ -2522,10 +2494,6 @@ const data = {
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
           },
           {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
-          {
             value: 'cycleway_isolated',
             label: 'Radweg, selbstständig geführt',
           },
@@ -2593,16 +2561,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -2627,6 +2587,10 @@ const data = {
           {
             value: 'not_expected',
             label: 'Keine Infrastruktur erwartet',
+          },
+          {
+            value: 'separate_geometry',
+            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'assumed_no',
@@ -12242,10 +12206,6 @@ const data = {
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
           },
           {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
-          {
             value: 'cycleway_isolated',
             label: 'Radweg, selbstständig geführt',
           },
@@ -12313,16 +12273,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -12347,6 +12299,10 @@ const data = {
           {
             value: 'not_expected',
             label: 'Keine Infrastruktur erwartet',
+          },
+          {
+            value: 'separate_geometry',
+            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'assumed_no',
@@ -12384,10 +12340,6 @@ const data = {
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
           },
           {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
-          {
             value: 'cycleway_isolated',
             label: 'Radweg, selbstständig geführt',
           },
@@ -12455,16 +12407,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -12489,6 +12433,10 @@ const data = {
           {
             value: 'not_expected',
             label: 'Keine Infrastruktur erwartet',
+          },
+          {
+            value: 'separate_geometry',
+            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'assumed_no',
@@ -12526,10 +12474,6 @@ const data = {
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
           },
           {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
-          {
             value: 'cycleway_isolated',
             label: 'Radweg, selbstständig geführt',
           },
@@ -12597,16 +12541,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -12631,6 +12567,10 @@ const data = {
           {
             value: 'not_expected',
             label: 'Keine Infrastruktur erwartet',
+          },
+          {
+            value: 'separate_geometry',
+            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'assumed_no',
@@ -13677,10 +13617,6 @@ const data = {
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
           },
           {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
-          {
             value: 'cycleway_isolated',
             label: 'Radweg, selbstständig geführt',
           },
@@ -13748,16 +13684,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -13782,6 +13710,10 @@ const data = {
           {
             value: 'not_expected',
             label: 'Keine Infrastruktur erwartet',
+          },
+          {
+            value: 'separate_geometry',
+            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'assumed_no',
@@ -13796,7 +13728,7 @@ const data = {
       {
         key: 'bikelane_self',
         type: 'string',
-        label: 'Radinfrastruktur links',
+        label: 'Radinfrastruktur mittig',
         values: [
           {
             value: 'bicycleRoad',
@@ -13817,10 +13749,6 @@ const data = {
           {
             value: 'cycleway_adjoiningOrIsolated',
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
-          },
-          {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
           },
           {
             value: 'cycleway_isolated',
@@ -13890,16 +13818,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -13924,6 +13844,10 @@ const data = {
           {
             value: 'not_expected',
             label: 'Keine Infrastruktur erwartet',
+          },
+          {
+            value: 'separate_geometry',
+            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'assumed_no',
@@ -13938,7 +13862,7 @@ const data = {
       {
         key: 'bikelane_right',
         type: 'string',
-        label: 'Radinfrastruktur links',
+        label: 'Radinfrastruktur rechts',
         values: [
           {
             value: 'bicycleRoad',
@@ -13959,10 +13883,6 @@ const data = {
           {
             value: 'cycleway_adjoiningOrIsolated',
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
-          },
-          {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
           },
           {
             value: 'cycleway_isolated',
@@ -14032,16 +13952,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -14066,6 +13978,10 @@ const data = {
           {
             value: 'not_expected',
             label: 'Keine Infrastruktur erwartet',
+          },
+          {
+            value: 'separate_geometry',
+            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'assumed_no',
@@ -14293,10 +14209,6 @@ const data = {
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
           },
           {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
-          {
             value: 'cycleway_isolated',
             label: 'Radweg, selbstständig geführt',
           },
@@ -14364,16 +14276,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
