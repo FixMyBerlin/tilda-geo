@@ -20,7 +20,10 @@ export type RegionForDatasetDerivation = {
 const exportTableSet = new Set<SourceExportApiIdentifier>(exportApiIdentifier)
 const exportTitleByTableName = new Map(exportConfigs.map((config) => [config.id, config.title]))
 
-const isExportTableName = (tableId: TableId): tableId is SourceExportApiIdentifier =>
+// Export tables without map tiles (e.g. `routing`) are never reached from a map source.
+const isExportTableName = (
+  tableId: TableId,
+): tableId is Extract<SourceExportApiIdentifier, TableId> =>
   exportTableSet.has(tableId as SourceExportApiIdentifier)
 
 const getTableNamesForSourceId = (

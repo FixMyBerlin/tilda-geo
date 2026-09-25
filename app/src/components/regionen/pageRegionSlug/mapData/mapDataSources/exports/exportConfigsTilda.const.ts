@@ -42,6 +42,14 @@ export const exportConfigsTilda: MapDataExportConfig[] = [
     licence: 'ODbL',
   },
   {
+    id: 'routing',
+    title: 'Routing-Netz (experimentell)',
+    desc: 'Gerichtete Kanten für Fahrbahn, Radinfrastruktur und Wege. Experimentell, Attribute und Kantenregeln können sich noch ändern.',
+    attributionHtml:
+      '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
+    licence: 'ODbL',
+  },
+  {
     id: 'publicTransport',
     title: 'ÖPNV-Haltepunkte und Fähranleger',
     desc: 'Punktdaten von Haltestellen',
