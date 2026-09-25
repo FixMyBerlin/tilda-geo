@@ -77,4 +77,24 @@ describe('`result_tags`', function()
       assert.are.equal(right.tags.parking, 'no')
     end)
   end)
+  describe('replaced tags', function()
+    it('reports malformed conditionals with the original parking:* key', function()
+      local input_object = {
+        tags = {
+          highway = 'residential',
+          ['parking:both'] = 'lane',
+          ['parking:both:restriction:conditional'] = 'no_parking @ (Mo-Fr 09:00-20:00; Sa 09:00-18:00; none @ residents',
+        },
+        id = 1,
+        type = 'way',
+      }
+      local results = transform_parkings(input_object)
+
+      local left, replaced_tags = result_tags(results.left)
+      assert.is_nil(left.tags.condition_category)
+      assert.are.same({
+        ['parking:both:restriction:conditional'] = input_object.tags['parking:both:restriction:conditional'],
+      }, replaced_tags)
+    end)
+  end)
 end)

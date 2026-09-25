@@ -4,6 +4,12 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-09
 
+### `parkings`, `off_street_parking_areas`, `parking_errors`
+
+- `condition_category` is strict about OSM conditional syntax: when a `*:conditional` value the classifier reads has unbalanced or nested brackets, an `@` inside the condition, or a part without `value @ condition`, `condition_category` stays empty (`condition_category_primary=default`). The raw tag is logged to `parking_errors` (`SANITIZED_VALUE`) with its original key, e.g. `parking:both:restriction:conditional`. The same applies to `maxstay` values that contain `@`.
+- `maxstay=1 hour @ (Mo-Fr …)` without `:conditional` is read like `maxstay:conditional` → `time_limited (1 hour) (Mo-Fr …)`.
+- Street parkings from `parking:left|right|both:*` now log rejected sanitizer values to `parking_errors` too (previously dropped silently).
+
 ### `bikelanes`, `routing`
 
 - Rename `parent_highway` → `parent_road`. Value is the TILDA `roads.road` class of the parent centerline (same classifier as `road`), not the raw OSM `highway`.

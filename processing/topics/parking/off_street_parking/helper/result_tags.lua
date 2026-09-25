@@ -78,6 +78,9 @@ local function result_tags_off_street_parking(result, area)
   local result_meta = metadata(result.object)
 
   local cleaned_tags, replaced_tags = CLEANER.separate_tags(result_tags, result.object.tags)
+  for key, value in pairs(conditional_categories_result.invalid_conditional_tags or {}) do
+    replaced_tags[key] = value
+  end
 
   return {
     id = id,

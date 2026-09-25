@@ -1,11 +1,65 @@
 local log = require('topics.helper.log')
 
 local invert_time_condition = require('topics.parking.helper.invert_time_condition')
+local is_valid_conditional_value = require('topics.parking.helper.is_valid_conditional_value')
 local parse_conditional_value = require('topics.parking.helper.parse_conditional_value')
 local sort_condition_class = require('topics.parking.helper.sort_condition_class')
 local subtract_time_ranges = require('topics.parking.helper.subtract_time_ranges')
 
 local SEPARATOR = ';'
+
+-- vehicle access keys
+local vehicle_class_list = {
+  'motorcar', -- we understand this synonym to 'passenger_car', see https://wiki.openstreetmap.org/wiki/Key:motorcar#Controversy
+  'passenger_car', -- proposed explicit tagging for 'passenger cars only'
+  'disabled',
+  'car_sharing',
+  'motorcycle',
+  'goods',
+  'hgv',
+  'bus',
+  'tourist_bus',
+  'coach',
+  'psv',
+  'taxi',
+  'motorhome',
+  'emergency',
+  -- some access values that we can treat like vehicle types
+  'delivery',
+  'agricultural',
+  'forestry',
+}
+
+-- Every `*:conditional` key read below; their values are syntax-checked before we classify.
+local CONDITIONAL_KEYS = {}
+for _, key in ipairs({ 'fee', 'motor_vehicle', 'access', 'maxstay', 'restriction', 'reason', 'restriction:reason', 'maxweight', 'maxweightrating' }) do
+  table.insert(CONDITIONAL_KEYS, key .. ':conditional')
+end
+for _, vehicle_class in ipairs(vehicle_class_list) do
+  table.insert(CONDITIONAL_KEYS, vehicle_class .. ':conditional')
+  table.insert(CONDITIONAL_KEYS, 'restriction:' .. vehicle_class .. ':conditional')
+end
+
+-- Collect conditional values we can not interpret (see `is_valid_conditional_value`).
+---@param tags table
+---@return table<string, string>|nil
+local function collect_invalid_conditional_tags(tags)
+  local invalid = {}
+  local has_invalid = false
+  for _, key in ipairs(CONDITIONAL_KEYS) do
+    local value = tags[key]
+    if value and value ~= 'yes' and not is_valid_conditional_value(value) then
+      invalid[key] = value
+      has_invalid = true
+    end
+  end
+  -- `maxstay=1 hour @ (…)` is read like `maxstay:conditional` below
+  if tags.maxstay and string.find(tags.maxstay, '@') and not is_valid_conditional_value(tags.maxstay) then
+    invalid.maxstay = tags.maxstay
+    has_invalid = true
+  end
+  return has_invalid and invalid or nil
+end
 
 ---@alias conditional_entry {value: string, condition: string}
 
@@ -114,9 +168,15 @@ end
 -- Uses only `tags` (e.g. unnested parking:left/right from the way, or full tags on a parking area). Highway-only tags must not be merged in here for road-derived parkings.
 ---@param tags OsmTags<string, string|nil> Parking-scoped OSM tags (unnested `parking:*` side tags or element tags)
 ---@param default_category 'assumed_free'|'assumed_private' Default category to use when no condition is found
----@return {condition_category?: string}
+---@return {condition_category?: string, invalid_conditional_tags?: table<string, string>}
 function classify_parking_conditions(tags, default_category)
   local function t(k) return tags[k] end
+
+  -- Strict: a malformed conditional value leaves the category unknown; callers log `invalid_conditional_tags` to `parking_errors`.
+  local invalid_conditional_tags = collect_invalid_conditional_tags(tags)
+  if invalid_conditional_tags then
+    return { invalid_conditional_tags = invalid_conditional_tags }
+  end
 
   -- Initialize categories
   ---@type string[]
@@ -163,27 +223,6 @@ function classify_parking_conditions(tags, default_category)
     maxstay_conditional = parse_conditional_value(maxstay)
   end
 
-  -- vehicle access keys
-  local vehicle_class_list = {
-    'motorcar', -- we understand this synonym to 'passenger_car', see https://wiki.openstreetmap.org/wiki/Key:motorcar#Controversy
-    'passenger_car', -- proposed explicit tagging for 'passenger cars only'
-    'disabled',
-    'car_sharing',
-    'motorcycle',
-    'goods',
-    'hgv',
-    'bus',
-    'tourist_bus',
-    'coach',
-    'psv',
-    'taxi',
-    'motorhome',
-    'emergency',
-    -- some access values that we can treat like vehicle types
-    'delivery',
-    'agricultural',
-    'forestry',
-  }
   -- vehicle keys that define their own restriction class
   local access_restriction_class_list = {'disabled', 'taxi', 'car_sharing'}
 

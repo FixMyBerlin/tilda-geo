@@ -10,6 +10,7 @@ local SANITIZE_PARKING_TAGS = require('topics.parking.helper.sanitize_parking_ta
 local CLEANER = require('topics.helper.sanitize_cleaner')
 local classify_parking_conditions = require('topics.parking.helper.classify_parking_conditions')
 local operator_type = require('topics.parking.helper.operator_type_for_road_parking')
+local nested_parking_key = require('topics.parking.parkings.helper.nested_parking_key')
 local SURFACE_TAGS = require('topics.parking.helper.surface_tags')
 
 -- EXAMPLE
@@ -98,7 +99,15 @@ local function result_tags_parkings(object)
     surface_source = surface_tags_result.source,
   }
 
-  local cleaned_tags, replaced_tags = CLEANER.separate_tags(result_tags, object.tags)
+  local cleaned_tags, unnested_replaced_tags = CLEANER.separate_tags(result_tags, object.tags)
+  for key, value in pairs(conditional_categories_result.invalid_conditional_tags or {}) do
+    unnested_replaced_tags[key] = value
+  end
+  -- Log with the original OSM keys (`parking:left:orientation`), not the unnested ones
+  local replaced_tags = {}
+  for key, value in pairs(unnested_replaced_tags) do
+    replaced_tags[nested_parking_key(object._parent_tags, object.tags.side, key, value)] = value
+  end
 
   return {
     id = id,

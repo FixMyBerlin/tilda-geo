@@ -71,6 +71,9 @@ local function result_tags_separate_parking(category, object, area)
   }
 
   local cleaned_tags, replaced_tags = CLEANER.separate_tags(result_tags, object.tags)
+  for key, value in pairs(conditional_categories_result.invalid_conditional_tags or {}) do
+    replaced_tags[key] = value
+  end
 
   return {
     id = id,
