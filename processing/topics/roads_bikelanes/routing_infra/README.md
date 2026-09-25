@@ -1,12 +1,13 @@
 # Routing (`routing`)
 
-Score-free directed road+bike edges for routing. Processing writes to `routing` (`roads_bikelanes_tables.lua`).
+Score-free road+bike edges for routing. Processing writes to `routing` (`roads_bikelanes_tables.lua`).
 
 ## Mental model
 
-- One OSM way → **0..N rows** (directed travel edges).
-- Carriageway edges use **travel-oriented geometry** (line direction matches legal cycling direction).
-- Virtual bikelanes stay on the centerline. Left side (`offset` > 0) runs against the OSM way, same as `bikelanes`. Right side runs with the OSM way.
+- One OSM way → **0..N rows**, but **one row per source object** (carriageway, each left/right lane, the path). No row is split by travel direction.
+- Direction: **`oneway=yes|no`** (may a cyclist ride against the line?) plus geometry direction. With `yes` the line points in the legal direction (OSM `oneway=-1` → reversed).
+- **`oneway_motor=yes`**: cars are one-way, bikes ride both ways (carriageway, Fahrradstraße). The line points along the car direction, so riding against it is contraflow. Routers can use this for a separate reverse cost.
+- Left/right lanes stay on the centerline. Left side (`offset` > 0) runs against the OSM way, same as `bikelanes`. Right side runs with the OSM way.
 - Segments are distinguished by **`segment_id`**, **`side`**, and **`prefix`**.
 - Join keys (in `tags`, like every rendering table; `parent_id` and `source_id` have expression indexes): **`parent_id`**, **`source_table`**, **`source_id`**. `source_table` is the edge type. Carriageway edges join `roads` on `way/{id}`; bikelane edges join `bikelanes` on the same id as `bikelanes.id`; path edges always join `roadsPathClasses` (category is the non-infra self cycleway id when present, else `mixedTrafficFoot`).
 
@@ -16,7 +17,7 @@ Score-free directed road+bike edges for routing. Processing writes to `routing` 
 
 | `source_table`     | Edge                                          | Must exist in that table          |
 | ------------------ | --------------------------------------------- | --------------------------------- |
-| `roads`            | Carriageway (`mixedTrafficMotor*`)            | `roads.id = source_id`            |
+| `roads`            | Carriageway (`mixedTrafficMotor`)             | `roads.id = source_id`            |
 | `bikelanes`        | Bikelane infra (left/right/self)              | `bikelanes.id = source_id`        |
 | `roadsPathClasses` | Path (self category id or `mixedTrafficFoot`) | `roadsPathClasses.id = source_id` |
 
@@ -28,11 +29,11 @@ Check: after processing, `routing` rows with `tags->>'source_table' = 'roadsPath
 
 ### Edge types (`source_table`)
 
-| `source_table`     | When                                                                                                                                                                                                                                 |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `bikelanes`        | Any cycleway object with `infrastructureExists` and a category (left/right from OSM side tags, or self)                                                                                                                              |
-| `roads`            | Motor-road classes, unless self infra uses the centerline id (Fahrradstraße, Fußgängerzone, …); mixed-traffic directed edges (`mixedTrafficMotor*`). A Mittellage lane (`cyclewayOnHighwayBetweenLanes`) keeps the carriageway edges |
-| `roadsPathClasses` | Path-like highway without bikelane infra (self category id when present, else `mixedTrafficFoot`)                                                                                                                                    |
+| `source_table`     | When                                                                                                                                                                                                                                                                                                          |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `bikelanes`        | Any cycleway object with `infrastructureExists` and a category (left/right from OSM side tags, or self)                                                                                                                                                                                                       |
+| `roads`            | Motor-road classes, unless self infra uses the centerline id (Fahrradstraße, Fußgängerzone, …); one mixed-traffic edge (`mixedTrafficMotor`). A Mittellage lane (`cyclewayOnHighwayBetweenLanes`) keeps the carriageway edge; the lane row gets id `way/N/cycleway/self` (unique next to carriageway `way/N`) |
+| `roadsPathClasses` | Path-like highway without bikelane infra (self category id when present, else `mixedTrafficFoot`)                                                                                                                                                                                                             |
 
 ### Exclusions
 

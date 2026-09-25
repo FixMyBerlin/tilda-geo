@@ -1,5 +1,5 @@
--- Enumerates directed travel edges per `source_table` (`roads`, `bikelanes`, `roadsPathClasses`).
--- Edge ids, oneway cases, mixedTraffic*: README.md (§ Directed edges).
+-- Enumerates routing edges per `source_table` (`roads`, `bikelanes`, `roadsPathClasses`).
+-- One edge per source object; direction via `oneway` / `oneway_motor` + geometry (README.md).
 local merge_table = require('topics.helper.merge_table')
 local default_id = require('topics.helper.default_id')
 local road_classification_road_value = require('topics.roads_bikelanes.roads.road_classification_road_value')
@@ -35,80 +35,43 @@ local lane_within_carriageway_categories = SET.set({
   'needsClarification',
 })
 
----@param segments table[]
----@param opts { segment_id: string, side: SideKey, geom: table, category: string, road: string, parent_id: string, edge_oneway: string, tags: OsmTags }
-local function insert_carriageway_edge(segments, opts)
-  table.insert(segments, {
-    segment_id = opts.segment_id,
-    side = opts.side,
-    parent_id = opts.parent_id,
-    source_table = 'roads',
-    source_id = opts.parent_id,
-    geom = opts.geom,
-    category = opts.category,
-    road = opts.road,
-    edge_oneway = opts.edge_oneway,
-    tags = merge_table({
-      road = opts.road,
-      parent_id = opts.parent_id,
-      _side = opts.side,
-    }, opts.tags),
-  })
-end
-
+-- One carriageway edge per OSM way (`id` = `source_id` = `roads.id`), like path and bikelane edges.
+-- `oneway=yes`: geometry points in the legal direction. `oneway=no` with `oneway_motor=yes`: cars
+-- are one-way, bikes both ways; geometry points along the car direction, so riding against the
+-- line is riding against car traffic (contraflow).
 ---@param segments table[]
 ---@param object_tags OsmTags
 ---@param object_geom table
 ---@param object_default_id string
 ---@param road_value string
-local function emit_carriageway_edges(segments, object_tags, object_geom, object_default_id, road_value)
-  local factor_oneway = derive_oneway(object_tags, { implicitOneWay = false })
-  local raw_oneway = object_tags.oneway
-  local is_car_not_bike = factor_oneway == 'car_not_bike'
-  local base_tags = merge_table({ road = road_value }, object_tags)
-  base_tags.oneway = factor_oneway
-
-  local function edge_geom(forward)
-    if forward then
-      return object_geom
-    end
-    return reverse_linestring(object_geom)
+local function emit_carriageway_edge(segments, object_tags, object_geom, object_default_id, road_value)
+  local derived_oneway = derive_oneway(object_tags, { implicitOneWay = false })
+  local geom = object_geom
+  if object_tags.oneway == '-1' then
+    geom = reverse_linestring(object_geom)
+  end
+  local edge_oneway = routing_oneway[derived_oneway]
+  if object_tags.oneway == '-1' and derived_oneway ~= 'car_not_bike' then
+    -- derive_oneway has no `-1` case (falls to assumed_no).
+    edge_oneway = 'yes'
   end
 
-  local function emit(side, forward, category)
-    insert_carriageway_edge(segments, {
-      segment_id = object_default_id .. '/' .. side,
-      side = side,
-      geom = edge_geom(forward),
-      category = category,
-      road = road_value,
-      parent_id = object_default_id,
-      edge_oneway = 'yes',
-      tags = base_tags,
-    })
-  end
+  local tags = merge_table({ road = road_value, parent_id = object_default_id, _side = 'self' }, object_tags)
+  tags.oneway = edge_oneway
 
-  if is_car_not_bike then
-    local motor_backward = raw_oneway == '-1'
-    local with_flow_side = motor_backward and 'left' or 'right'
-    local contra_side = motor_backward and 'right' or 'left'
-    emit(with_flow_side, not motor_backward, 'mixedTrafficMotor')
-    emit(contra_side, motor_backward, 'mixedTrafficMotorContraflow')
-    return
-  end
-
-  if raw_oneway == '-1' then
-    emit('left', false, 'mixedTrafficMotor')
-    return
-  end
-
-  if factor_oneway == 'yes' or raw_oneway == 'yes' then
-    emit('right', true, 'mixedTrafficMotor')
-    return
-  end
-
-  emit('right', true, 'mixedTrafficMotor')
-  emit('left', false, 'mixedTrafficMotor')
+  table.insert(segments, {
+    segment_id = object_default_id,
+    side = 'self',
+    parent_id = object_default_id,
+    source_table = 'roads',
+    source_id = object_default_id,
+    geom = geom,
+    category = 'mixedTrafficMotor',
+    road = road_value,
+    edge_oneway = edge_oneway,
+    oneway_motor = derived_oneway == 'car_not_bike' and 'yes' or nil,
+    tags = tags,
+  })
 end
 
 ---@param segments table[]
@@ -170,19 +133,37 @@ local function build_segments(context)
       local side = cycleway._side or 'self'
       local geom = nil
       local edge_oneway = routing_oneway[cycleway.oneway]
-      if side == 'self' and object_tags.oneway == '-1' and cycleway.oneway ~= 'car_not_bike' then
-        -- Same as path edges: derive_oneway has no `-1` case, so orient the edge here.
+      local oneway_motor = nil
+      if side == 'self' and object_tags.oneway == '-1' then
+        -- Same as carriageway/path edges: point along the (motor) direction of `oneway=-1`.
+        -- derive_oneway has no `-1` case, so a bike-too oneway becomes `yes` here.
         geom = reverse_linestring(object_geom)
-        edge_oneway = 'yes'
+        if cycleway.oneway ~= 'car_not_bike' then
+          edge_oneway = 'yes'
+        end
+      end
+      if side == 'self' and cycleway.oneway == 'car_not_bike' then
+        -- E.g. Fahrradstraße with two-way cycling: same contraflow flag as carriageway edges.
+        oneway_motor = 'yes'
+      end
+      -- A Mittellage lane shares the centerline id with the carriageway edge (`roads`).
+      -- Keep the row id unique; `source_id` still joins `bikelanes`.
+      local segment_id = cycleway._id
+      if side == 'self'
+        and road_highway_classes[object_tags.highway]
+        and lane_within_carriageway_categories[cycleway.category]
+      then
+        segment_id = cycleway._id .. '/cycleway/self'
       end
       table.insert(segments, {
-        segment_id = cycleway._id,
+        segment_id = segment_id,
         side = side,
         parent_id = object_default_id,
         source_table = 'bikelanes',
         source_id = cycleway._id,
         geom = geom,
         edge_oneway = edge_oneway,
+        oneway_motor = oneway_motor,
         tags = merge_table({ parent_id = object_default_id }, cycleway),
         category = cycleway.category,
       })
@@ -197,13 +178,7 @@ local function build_segments(context)
 
   if road_highway_classes[object_tags.highway] and not virtual_uses_centerline_id then
     local road_value = context.shared_result_tags.road or road_classification_road_value(object_tags)
-    emit_carriageway_edges(
-      segments,
-      object_tags,
-      object_geom,
-      object_default_id,
-      road_value
-    )
+    emit_carriageway_edge(segments, object_tags, object_geom, object_default_id, road_value)
   elseif HIGHWAYS.path_classes[object_tags.highway] and not has_virtual_infra and not virtual_uses_centerline_id then
     -- Path edges always join roadsPathClasses; skip when that table would omit the way.
     if not excluded_from_roads_tables(object_tags) then

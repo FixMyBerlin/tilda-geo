@@ -43,6 +43,7 @@ local function build_public_tags(segment, motor_context, context)
     prefix = segment.tags.prefix,
     side = side,
     oneway = segment.edge_oneway or segment.tags.oneway,
+    oneway_motor = segment.oneway_motor,
     parent_id = segment.parent_id,
     source_table = segment.source_table,
     source_id = segment.source_id,

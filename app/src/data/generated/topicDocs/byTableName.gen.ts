@@ -14178,7 +14178,7 @@ const data = {
     sourceIds: [],
     title: 'Routing',
     summary:
-      'Score-free directed road+bike edges for routing, derived from roads_bikelanes infrastructure.',
+      'Score-free road+bike edges for routing (one row per carriageway, bike lane or path), derived from roads_bikelanes infrastructure.',
     groups: [],
     attributes: [
       {
@@ -14300,12 +14300,6 @@ const data = {
             label: 'Mischverkehr mit Kfz-Verkehr',
             description:
               'Verarbeitung zugewiesen (keine OSM-Kategorie). Fahrbahn-Kante ohne bauliche Radinfrastruktur.',
-          },
-          {
-            value: 'mixedTrafficMotorContraflow',
-            label: 'Mischverkehr mit Kfz-Verkehr in Gegenrichtung',
-            description:
-              'Verarbeitung zugewiesen. Gegenrichtung auf der Fahrbahn, wenn nur der Kfz-Verkehr einbahnig ist.',
           },
           {
             value: 'mixedTrafficFoot',
@@ -14752,7 +14746,7 @@ const data = {
         label: 'Linien-Offset',
         purpose: 'rendering',
         description:
-          'Wie `bikelanes.offset`: Geometrie bleibt auf der Mittellinie; der Wert ist nur für die Kartendarstellung (`line-offset`). Fehlt auf der Mittellinie (`self`). Sonst halbe Straßenbreite (`road_width`: OSM `width`/`est_width`, sonst Highway-Default), positiv = links, negativ = rechts. Bei Radinfrastruktur-Kanten (`source_table=bikelanes`) läuft die linke Linie gegen die OSM-Way-Richtung, die rechte mit ihr, analog zu `bikelanes`. Fahrbahn-Kanten laufen in Fahrtrichtung. Transformierte Bikelanes übernehmen den bereits berechneten Wert.',
+          'Wie `bikelanes.offset`: Geometrie bleibt auf der Mittellinie; der Wert ist nur für die Kartendarstellung (`line-offset`). Fehlt auf der Mittellinie (`self`). Sonst halbe Straßenbreite (`road_width`: OSM `width`/`est_width`, sonst Highway-Default), positiv = links, negativ = rechts. Bei Radinfrastruktur-Kanten (`source_table=bikelanes`) läuft die linke Linie gegen die OSM-Way-Richtung, die rechte mit ihr, analog zu `bikelanes`. Fahrbahn-Kanten haben keinen Versatz. Transformierte Bikelanes übernehmen den bereits berechneten Wert.',
         chapterRefs: ['versetzte-geometrien'],
         values: [],
       },
@@ -14778,6 +14772,19 @@ const data = {
           {
             value: 'no',
             label: 'In beide Richtungen',
+          },
+        ],
+      },
+      {
+        key: 'oneway_motor',
+        type: 'string',
+        label: 'Einbahnstraße nur für Kfz',
+        description:
+          '`yes`, wenn nur der Kfz-Verkehr einbahnig ist und Radverkehr in beide Richtungen fahren darf (Fahrbahn, Fahrradstraße). Die Geometrie zeigt in Kfz-Fahrtrichtung; entgegen der Linie fahren heißt entgegen dem Kfz-Verkehr fahren. Sonst leer.',
+        values: [
+          {
+            value: 'yes',
+            label: 'Kfz einbahnig, Rad in beide Richtungen',
           },
         ],
       },
@@ -14820,7 +14827,7 @@ const data = {
         label: 'Quell-ID',
         purpose: 'processing',
         description:
-          '`id` in `source_table`. Bei Carriageway `way/N` (nicht die gerichtete Kante `way/N/left` oder `way/N/right`). Join-Schlüssel (indiziert).',
+          '`id` in `source_table`; entspricht der Objekt-`id`. Ausnahme: Radfahrstreifen in Mittellage haben die Objekt-`id` `way/N/cycleway/self` (neben der Fahrbahn `way/N`), `source_id` bleibt `way/N`. Join-Schlüssel (indiziert).',
         values: [],
       },
       {

@@ -21,59 +21,52 @@ describe('build_segments carriageway edges', function()
     })
   end
 
-  it('Case 3 bidirectional edges keep parent-derived factor oneway, not yes', function()
-    local segments = carriageway_segments({
-      highway = 'residential',
-      _id = 42,
-      _type = 'way',
-    })
+  it('two-way road is one edge with oneway=no', function()
+    local segments = carriageway_segments({ highway = 'residential', _id = 42, _type = 'way' })
 
-    assert.are.equal(#segments, 2)
-    for _, segment in ipairs(segments) do
-      assert.are.equal(segment.source_table, 'roads')
-      assert.are.equal(segment.edge_oneway, 'yes')
-      assert.are.equal(segment.tags.oneway, 'assumed_no')
-      assert.are.not_equal(segment.tags.oneway, 'yes')
-    end
+    assert.are.equal(#segments, 1)
+    assert.are.equal(segments[1].source_table, 'roads')
+    assert.are.equal(segments[1].side, 'self')
+    assert.are.equal(segments[1].category, 'mixedTrafficMotor')
+    assert.are.equal(segments[1].edge_oneway, 'no')
+    assert.is_nil(segments[1].oneway_motor)
   end)
 
-  it('Case 2 contraflow edge is always mixedTrafficMotorContraflow', function()
-    local segments = carriageway_segments({
-      highway = 'residential',
-      bicycle_road = 'yes',
-      oneway = 'yes',
-      ['oneway:bicycle'] = 'no',
-      _id = 7,
-      _type = 'way',
-    }, {
-      {
-        _side = 'self',
-        _infrastructureExists = false,
-        category = 'bicycleRoad',
-      },
-    })
-
-    assert.are.equal(#segments, 2)
-    local categories = {}
-    for _, segment in ipairs(segments) do
-      categories[segment.category] = true
-    end
-    assert.is_true(categories['mixedTrafficMotor'])
-    assert.is_true(categories['mixedTrafficMotorContraflow'])
-    assert.is_nil(categories['bicycleRoad'])
-  end)
-
-  it('Case 1 all-modes oneway uses yes for factor oneway', function()
-    local segments = carriageway_segments({
-      highway = 'residential',
-      oneway = 'yes',
-      _id = 9,
-      _type = 'way',
-    })
+  it('all-modes oneway is one edge with oneway=yes', function()
+    local segments = carriageway_segments({ highway = 'residential', oneway = 'yes', _id = 9, _type = 'way' })
 
     assert.are.equal(#segments, 1)
     assert.are.equal(segments[1].edge_oneway, 'yes')
-    assert.are.equal(segments[1].tags.oneway, 'yes')
+    assert.is_nil(segments[1].oneway_motor)
+  end)
+
+  it('contraflow road is one edge along the car direction with oneway_motor=yes', function()
+    local reversed_geom = {}
+    local way_geom = {}
+    function way_geom:reverse()
+      return reversed_geom
+    end
+
+    local segments = build_segments({
+      object_tags = { highway = 'residential', oneway = '-1', ['oneway:bicycle'] = 'no', _id = 7, _type = 'way' },
+      object_geom = way_geom,
+      cycleways = {},
+      shared_result_tags = { road = 'residential' },
+    })
+
+    assert.are.equal(#segments, 1)
+    assert.are.equal(segments[1].category, 'mixedTrafficMotor')
+    assert.are.equal(segments[1].edge_oneway, 'no')
+    assert.are.equal(segments[1].oneway_motor, 'yes')
+    assert.are.equal(segments[1].geom, reversed_geom)
+  end)
+
+  it('carriageway id is the roads id', function()
+    local segments = carriageway_segments({ highway = 'residential', _id = 42, _type = 'way' })
+
+    assert.are.equal(segments[1].segment_id, 'way/42')
+    assert.are.equal(segments[1].parent_id, 'way/42')
+    assert.are.equal(segments[1].source_id, 'way/42')
   end)
 
   it('keeps carriageway edges next to a Mittellage bike lane on the centerline', function()
@@ -97,10 +90,12 @@ describe('build_segments carriageway edges', function()
     end
     assert.are.equal(#by_table.bikelanes, 1)
     assert.are.equal(by_table.bikelanes[1].category, 'cyclewayOnHighwayBetweenLanes')
-    assert.are.equal(#by_table.roads, 2)
-    for _, segment in ipairs(by_table.roads) do
-      assert.are.equal(segment.category, 'mixedTrafficMotor')
-    end
+    -- Unique row id next to the carriageway `way/12`; still joins bikelanes `way/12`.
+    assert.are.equal(by_table.bikelanes[1].segment_id, 'way/12/cycleway/self')
+    assert.are.equal(by_table.bikelanes[1].source_id, 'way/12')
+    assert.are.equal(#by_table.roads, 1)
+    assert.are.equal(by_table.roads[1].segment_id, 'way/12')
+    assert.are.equal(by_table.roads[1].category, 'mixedTrafficMotor')
   end)
 
   it('Fahrradstraße on the centerline replaces the carriageway edges', function()
@@ -121,22 +116,6 @@ describe('build_segments carriageway edges', function()
     assert.are.equal(#segments, 1)
     assert.are.equal(segments[1].source_table, 'bikelanes')
     assert.are.equal(segments[1].category, 'bicycleRoad')
-  end)
-
-  it('carriageway join keys point at roads.id, not the directed edge id', function()
-    local segments = carriageway_segments({
-      highway = 'residential',
-      _id = 42,
-      _type = 'way',
-    })
-
-    assert.are.equal(#segments, 2)
-    for _, segment in ipairs(segments) do
-      assert.are.equal(segment.parent_id, 'way/42')
-      assert.are.equal(segment.source_table, 'roads')
-      assert.are.equal(segment.source_id, 'way/42')
-      assert.are.not_equal(segment.segment_id, 'way/42')
-    end
   end)
 end)
 
@@ -343,6 +322,7 @@ describe('build_segments join keys', function()
     assert.are.equal(oneway_by_id['way/25/cycleway/right'], 'no')
     assert.are.equal(#fahrradstrasse, 1)
     assert.are.equal(fahrradstrasse[1].edge_oneway, 'no')
+    assert.are.equal(fahrradstrasse[1].oneway_motor, 'yes')
   end)
 
   it('self bikelane oneway=-1 is yes with reversed geometry', function()

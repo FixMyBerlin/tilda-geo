@@ -5262,7 +5262,6 @@ const data = {
           sharedMotorVehicleLane: 'Anteilig genutzter Fahrstreifen (Sharrows)',
           needsClarification: 'Führungsform unklar',
           mixedTrafficMotor: 'Mischverkehr mit Kfz-Verkehr',
-          mixedTrafficMotorContraflow: 'Mischverkehr mit Kfz-Verkehr in Gegenrichtung',
           mixedTrafficFoot: 'Mischverkehr mit Fußverkehr',
         },
       },
@@ -5412,6 +5411,14 @@ const data = {
         format: {
           yes: 'Einbahnig (in Linienrichtung)',
           no: 'In beide Richtungen',
+        },
+      },
+      oneway_motor: {
+        name: 'Einbahnstraße nur für Kfz',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          yes: 'Kfz einbahnig, Rad in beide Richtungen',
         },
       },
       parent_id: 'Parent-Way',
