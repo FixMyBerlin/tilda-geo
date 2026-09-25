@@ -1,64 +1,74 @@
-import { Menu, MenuButton, MenuHeading, MenuItem, MenuItems, MenuSection } from '@headlessui/react'
+import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { EllipsisHorizontalIcon, PlusIcon } from '@heroicons/react/24/outline'
 import { twJoin } from 'tailwind-merge'
 import { frenchQuote } from '@/components/shared/text/Quotes'
-import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 import { mapOverlayMenuClassName } from '../../mapOverlayChrome.const'
-import { modePanelHeaderIconButtonClassName } from '../modePanel.const'
-import type { SpaceFinderCollectionOption } from './spaceFinderCollectionOptions'
+import {
+  modePanelFilterControlClassName,
+  modePanelHeaderIconButtonClassName,
+} from '../modePanel.const'
+import type { SpaceFinderSelectedVariant } from './spaceFinderCollectionOptions'
 import type { SpaceFinderCommands } from './useSpaceFinderCommands'
 
 const menuItemClassName =
   'flex w-full cursor-pointer px-3 py-1.5 text-left text-sm text-gray-700 data-focus:bg-yellow-50 data-disabled:cursor-not-allowed data-disabled:opacity-40'
 
-const menuHeadingClassName = 'px-3 pt-2 pb-1 text-xs font-semibold tracking-wide text-gray-500'
+const menuItemsClassName = twJoin('z-40 min-w-48 py-1 [--anchor-gap:8px]', mapOverlayMenuClassName)
 
-/**
- * Header ➕: »Neue Variante in diesem Gebiet« / »Neues Planungsgebiet« (D4). With no Gebiet yet
- * there is only one meaningful option, so the button opens the wizard directly instead of a menu.
- */
-export const SpaceFinderNewMenu = ({
-  hasArea,
-  onNewVariant,
-  onNewArea,
+/** Square buttons in the Varianten row: same height as the variant pills. */
+const variantRowIconButtonClassName = twJoin(
+  modePanelFilterControlClassName,
+  'size-7 shrink-0 px-0',
+)
+
+/** Header ⋯ for the Planungsgebiet (the collection), like the Ordner menu in Hinweise. */
+export const SpaceFinderAreaManageMenu = ({
+  selected,
+  onEditArea,
+  commands: { openNameModal, deleteArea },
 }: {
-  hasArea: boolean
-  onNewVariant: () => void
-  onNewArea: () => void
+  selected: SpaceFinderSelectedVariant
+  onEditArea: () => void
+  commands: SpaceFinderCommands
 }) => {
-  if (!hasArea) {
-    return (
-      <Tooltip text="Neues Planungsgebiet">
-        <button
-          type="button"
-          onClick={onNewArea}
-          aria-label="Neues Planungsgebiet"
-          className={modePanelHeaderIconButtonClassName}
-        >
-          <PlusIcon className="size-5" aria-hidden />
-        </button>
-      </Tooltip>
-    )
-  }
-
   return (
     <Menu as="div">
-      <MenuButton aria-label="Neu" className={modePanelHeaderIconButtonClassName}>
-        <PlusIcon className="size-5" aria-hidden="true" />
-      </MenuButton>
-      <MenuItems
-        anchor="bottom end"
-        modal={false}
-        className={twJoin('z-40 min-w-56 py-1 [--anchor-gap:8px]', mapOverlayMenuClassName)}
+      <MenuButton
+        aria-label="Planungsgebiet verwalten"
+        className={modePanelHeaderIconButtonClassName}
       >
+        <EllipsisHorizontalIcon className="size-5" aria-hidden="true" />
+      </MenuButton>
+      <MenuItems anchor="bottom end" modal={false} className={menuItemsClassName}>
         <MenuItem>
-          <button type="button" onClick={onNewVariant} className={menuItemClassName}>
-            Neue Variante in diesem Gebiet
+          <button type="button" onClick={onEditArea} className={menuItemClassName}>
+            Gebiet und eigene Daten bearbeiten
           </button>
         </MenuItem>
         <MenuItem>
-          <button type="button" onClick={onNewArea} className={menuItemClassName}>
-            Neues Planungsgebiet
+          <button
+            type="button"
+            onClick={(event) => openNameModal('renameArea', event.currentTarget)}
+            className={menuItemClassName}
+          >
+            Umbenennen
+          </button>
+        </MenuItem>
+        <MenuItem disabled={deleteArea.isPending}>
+          <button
+            type="button"
+            onClick={() => {
+              if (
+                window.confirm(
+                  `Planungsgebiet ${frenchQuote(selected.areaTitle)} und alle seine Varianten unwiderruflich löschen?`,
+                )
+              ) {
+                deleteArea.mutate(selected.areaId)
+              }
+            }}
+            className={twJoin(menuItemClassName, 'text-red-600')}
+          >
+            Löschen
           </button>
         </MenuItem>
       </MenuItems>
@@ -66,97 +76,87 @@ export const SpaceFinderNewMenu = ({
   )
 }
 
-/** Header ⋯: »Variante« block (umbenennen/duplizieren/löschen) + »Gebiet« block (D4). */
-export const SpaceFinderManageMenu = ({
+/**
+ * ➕ in the Varianten row. Duplicating the active variant is the usual way to try out other
+ * weights, so it comes first; a fresh variant starts from the default factors.
+ */
+export const SpaceFinderVariantNewMenu = ({
   selected,
-  onEditArea,
-  commands: { openNameModal, duplicateVariant, deleteVariant, deleteArea },
+  onNewVariant,
+  commands: { duplicateVariant },
 }: {
-  selected: SpaceFinderCollectionOption
-  onEditArea: () => void
+  selected: SpaceFinderSelectedVariant
+  onNewVariant: () => void
   commands: SpaceFinderCommands
 }) => {
   return (
-    <Menu as="div">
-      <MenuButton
-        aria-label="Flächenfinder verwalten"
-        className={modePanelHeaderIconButtonClassName}
-      >
-        <EllipsisHorizontalIcon className="size-5" aria-hidden="true" />
+    <Menu as="div" className="flex">
+      <MenuButton aria-label="Neue Variante" className={variantRowIconButtonClassName}>
+        <PlusIcon className="size-4" aria-hidden="true" />
       </MenuButton>
-      <MenuItems
-        anchor="bottom end"
-        modal={false}
-        className={twJoin('z-40 min-w-48 py-1 [--anchor-gap:8px]', mapOverlayMenuClassName)}
-      >
-        <MenuSection>
-          <MenuHeading className={menuHeadingClassName}>Variante</MenuHeading>
-          <MenuItem>
-            <button
-              type="button"
-              onClick={(event) => openNameModal('renameVariant', event.currentTarget)}
-              className={menuItemClassName}
-            >
-              Umbenennen
-            </button>
-          </MenuItem>
-          <MenuItem disabled={duplicateVariant.isPending}>
-            <button
-              type="button"
-              onClick={() => duplicateVariant.mutate(selected.variantId)}
-              className={menuItemClassName}
-            >
-              {duplicateVariant.isPending ? 'Wird dupliziert…' : 'Duplizieren'}
-            </button>
-          </MenuItem>
-          <MenuItem disabled={deleteVariant.isPending}>
-            <button
-              type="button"
-              onClick={() => {
-                if (window.confirm(`Variante ${frenchQuote(selected.variantTitle)} löschen?`)) {
-                  deleteVariant.mutate(selected.variantId)
-                }
-              }}
-              className={twJoin(menuItemClassName, 'text-red-600')}
-            >
-              Löschen
-            </button>
-          </MenuItem>
-        </MenuSection>
-        <MenuSection>
-          <MenuHeading className={menuHeadingClassName}>Gebiet</MenuHeading>
-          <MenuItem>
-            <button type="button" onClick={onEditArea} className={menuItemClassName}>
-              Bearbeiten
-            </button>
-          </MenuItem>
-          <MenuItem>
-            <button
-              type="button"
-              onClick={(event) => openNameModal('renameArea', event.currentTarget)}
-              className={menuItemClassName}
-            >
-              Umbenennen
-            </button>
-          </MenuItem>
-          <MenuItem disabled={deleteArea.isPending}>
-            <button
-              type="button"
-              onClick={() => {
-                if (
-                  window.confirm(
-                    `Planungsgebiet ${frenchQuote(selected.areaTitle)} und alle seine Varianten unwiderruflich löschen?`,
-                  )
-                ) {
-                  deleteArea.mutate(selected.areaId)
-                }
-              }}
-              className={twJoin(menuItemClassName, 'text-red-600')}
-            >
-              Löschen
-            </button>
-          </MenuItem>
-        </MenuSection>
+      <MenuItems anchor="bottom end" modal={false} className={menuItemsClassName}>
+        <MenuItem disabled={duplicateVariant.isPending}>
+          <button
+            type="button"
+            onClick={() => duplicateVariant.mutate(selected.variantId)}
+            className={menuItemClassName}
+          >
+            {duplicateVariant.isPending
+              ? 'Wird dupliziert…'
+              : `Variante ${frenchQuote(selected.variantTitle)} duplizieren`}
+          </button>
+        </MenuItem>
+        <MenuItem>
+          <button type="button" onClick={onNewVariant} className={menuItemClassName}>
+            Neue Variante mit Standardwerten
+          </button>
+        </MenuItem>
+      </MenuItems>
+    </Menu>
+  )
+}
+
+/** ⋯ in the Varianten row: acts on the active variant. A Gebiet keeps at least one variant. */
+export const SpaceFinderVariantManageMenu = ({
+  selected,
+  commands: { openNameModal, deleteVariant },
+}: {
+  selected: SpaceFinderSelectedVariant
+  commands: SpaceFinderCommands
+}) => {
+  const isLastVariant = selected.variantCount <= 1
+
+  return (
+    <Menu as="div" className="flex">
+      <MenuButton aria-label="Variante verwalten" className={variantRowIconButtonClassName}>
+        <EllipsisHorizontalIcon className="size-4" aria-hidden="true" />
+      </MenuButton>
+      <MenuItems anchor="bottom end" modal={false} className={menuItemsClassName}>
+        <MenuItem>
+          <button
+            type="button"
+            onClick={(event) => openNameModal('renameVariant', event.currentTarget)}
+            className={menuItemClassName}
+          >
+            Umbenennen
+          </button>
+        </MenuItem>
+        <MenuItem disabled={deleteVariant.isPending || isLastVariant}>
+          <button
+            type="button"
+            title={
+              isLastVariant ? 'Ein Planungsgebiet braucht mindestens eine Variante.' : undefined
+            }
+            onClick={() => {
+              if (window.confirm(`Variante ${frenchQuote(selected.variantTitle)} löschen?`)) {
+                deleteVariant.mutate(selected.variantId)
+              }
+            }}
+            className={twJoin(menuItemClassName, 'text-red-600')}
+          >
+            Löschen
+          </button>
+        </MenuItem>
       </MenuItems>
     </Menu>
   )

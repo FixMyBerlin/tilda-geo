@@ -1,39 +1,92 @@
 import { describe, expect, test } from 'vitest'
-import { spaceFinderCollectionOptions } from './spaceFinderCollectionOptions'
+import {
+  firstSpaceFinderVariantId,
+  type PlanningAreasRow,
+  sortedSpaceFinderAreas,
+  spaceFinderSelectedVariant,
+  spaceFinderVariantStatus,
+} from './spaceFinderCollectionOptions'
 
-const area = (overrides: Partial<Parameters<typeof spaceFinderCollectionOptions>[0][number]>) =>
+const area = (overrides: Partial<PlanningAreasRow>) =>
   ({
     id: 1,
     title: 'Gebiet',
     createdAt: new Date('2026-01-01'),
     variants: [],
     ...overrides,
-  }) as Parameters<typeof spaceFinderCollectionOptions>[0][number]
+  }) as PlanningAreasRow
 
-describe('spaceFinderCollectionOptions', () => {
-  test('orders areas oldest first regardless of input order, keeps variant order', () => {
-    const areas = [
-      area({
-        id: 2,
-        title: 'Neu',
-        createdAt: new Date('2026-02-01'),
-        variants: [{ id: 20, title: 'Standard' } as never],
-      }),
-      area({
-        id: 1,
-        title: 'Alt',
-        createdAt: new Date('2026-01-01'),
-        variants: [{ id: 10, title: 'Standard' } as never, { id: 11, title: 'B' } as never],
-      }),
-    ]
+const variant = (id: number, title = 'Variante') =>
+  ({ id, title, currentRunId: null, jobs: [], runs: [] }) as never
 
-    const options = spaceFinderCollectionOptions(areas)
+const areas = [
+  area({ id: 2, title: 'Neu', createdAt: new Date('2026-02-01'), variants: [variant(20)] }),
+  area({
+    id: 1,
+    title: 'Alt',
+    createdAt: new Date('2026-01-01'),
+    variants: [variant(10, 'Standard'), variant(11, 'B')],
+  }),
+]
 
-    expect(options.map((o) => o.variantId)).toEqual([10, 11, 20])
-    expect(options[0]?.label).toBe('Gebiet »Alt«: Variante »Standard«')
+describe('sortedSpaceFinderAreas', () => {
+  test('orders areas oldest first regardless of input order', () => {
+    expect(sortedSpaceFinderAreas(areas).map((a) => a.id)).toEqual([1, 2])
+  })
+})
+
+describe('firstSpaceFinderVariantId', () => {
+  test('picks the first variant of the oldest area', () => {
+    expect(firstSpaceFinderVariantId(areas)).toBe(10)
   })
 
-  test('returns no options for areas without variants', () => {
-    expect(spaceFinderCollectionOptions([area({ variants: [] })])).toEqual([])
+  test('skips areas without variants', () => {
+    expect(firstSpaceFinderVariantId([area({ id: 1, variants: [] }), areas[0]!])).toBe(20)
+  })
+})
+
+describe('spaceFinderSelectedVariant', () => {
+  test('resolves a variant id to its area', () => {
+    expect(spaceFinderSelectedVariant(areas, 11)).toEqual({
+      areaId: 1,
+      areaTitle: 'Alt',
+      variantId: 11,
+      variantTitle: 'B',
+      variantCount: 2,
+    })
+  })
+
+  test('returns undefined for unknown or missing ids', () => {
+    expect(spaceFinderSelectedVariant(areas, 99)).toBeUndefined()
+    expect(spaceFinderSelectedVariant(areas, undefined)).toBeUndefined()
+  })
+})
+
+describe('spaceFinderVariantStatus', () => {
+  const base = { currentRunId: null, jobs: [], runs: [] }
+
+  test('running beats everything else', () => {
+    expect(
+      spaceFinderVariantStatus({
+        ...base,
+        currentRunId: 1,
+        jobs: [{ status: 'RUNNING' }],
+      } as never),
+    ).toBe('running')
+  })
+
+  test('stale complete run', () => {
+    expect(
+      spaceFinderVariantStatus({
+        ...base,
+        currentRunId: 1,
+        runs: [{ status: 'COMPLETE', stale: true }],
+      } as never),
+    ).toBe('stale')
+  })
+
+  test('complete and not calculated', () => {
+    expect(spaceFinderVariantStatus({ ...base, currentRunId: 1 } as never)).toBe('complete')
+    expect(spaceFinderVariantStatus(base as never)).toBe('none')
   })
 })

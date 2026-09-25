@@ -1,7 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
-import type { getPlanningAreasFn } from '@/server/planning/planning.functions'
 import {
   deletePlanningAreaFn,
   deletePlanningVariantFn,
@@ -15,26 +14,25 @@ import {
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
 import {
-  spaceFinderCollectionOptions,
-  type SpaceFinderCollectionOption,
+  firstSpaceFinderVariantId,
+  type PlanningAreasRow,
+  type SpaceFinderSelectedVariant,
 } from './spaceFinderCollectionOptions'
-
-type PlanningAreasRow = Awaited<ReturnType<typeof getPlanningAreasFn>>[number]
 
 type UseSpaceFinderCommandsInput = {
   regionSlug: string
   areas: readonly PlanningAreasRow[]
-  selectedOption: SpaceFinderCollectionOption | undefined
+  selectedOption: SpaceFinderSelectedVariant | undefined
   /** Writes `ff.key`. `undefined` clears the selection (e.g. the last Gebiet was deleted). */
   onSelect: (variantId: number | undefined) => void
 }
 
 /**
- * Variante/Gebiet create/rename/duplicate/delete commands for the header ➕/⋯ menus, mirroring
- * `useReviewListCommands`. Unlike Prüflisten's single collection entity, this manages two levels
- * (D4): the ⋯ menu's »Variante« block acts on `selectedOption`, its »Gebiet« block on
- * `selectedOption.areaId`. Creation (»Neue Variante«/»Neues Planungsgebiet«) is not here — those
- * open a ModePanel detail view (`ff.new`) with their own forms/wizard.
+ * Variante/Gebiet rename/duplicate/delete commands, mirroring `useReviewListCommands`. Unlike
+ * Prüflisten's single collection entity, this manages two levels: the Gebiet ⋯ menu in the panel
+ * header acts on `selectedOption.areaId`, the Varianten ⋯ menu on `selectedOption.variantId`.
+ * Creation (»Neue Variante«/»Neues Planungsgebiet«) is not here — those open a ModePanel detail
+ * view (`ff.new`) with their own forms/wizard.
  */
 export const useSpaceFinderCommands = ({
   regionSlug,
@@ -106,8 +104,7 @@ export const useSpaceFinderCommands = ({
     onSuccess: async (_result, areaId) => {
       await invalidateAreas()
       if (selectedOption?.areaId !== areaId) return
-      const remainingOptions = spaceFinderCollectionOptions(areas.filter((a) => a.id !== areaId))
-      onSelect(remainingOptions[0]?.variantId)
+      onSelect(firstSpaceFinderVariantId(areas.filter((a) => a.id !== areaId)))
     },
   })
 

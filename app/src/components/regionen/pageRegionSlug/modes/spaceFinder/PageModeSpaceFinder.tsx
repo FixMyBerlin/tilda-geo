@@ -8,19 +8,25 @@ import { twJoin } from 'tailwind-merge'
 import { RunButton } from '@/components/regionen/pageRegionSlug/Planning/RunButton'
 import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { frenchQuote } from '@/components/shared/text/Quotes'
+import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 import { planningAreasQueryOptions } from '@/server/planning/planningQueryOptions'
 import { usePlanningBoundaryState } from '../../hooks/mapState/usePlanningBoundaryState'
 import { ModePanel } from '../ModePanel'
-import { modePanelMutedClassName } from '../modePanel.const'
+import { modePanelHeaderIconButtonClassName, modePanelMutedClassName } from '../modePanel.const'
 import { SpaceFinderEditAreaDetail } from './detail/SpaceFinderEditAreaDetail'
 import { SpaceFinderNewAreaDetail } from './detail/SpaceFinderNewAreaDetail'
 import { SpaceFinderNewVariantDetail } from './detail/SpaceFinderNewVariantDetail'
 import { SpaceFinderBody } from './SpaceFinderBody'
 import { SpaceFinderCandidateSelectionReset } from './SpaceFinderCandidatesSection'
-import { spaceFinderCollectionOptions } from './spaceFinderCollectionOptions'
-import { SpaceFinderManageMenu, SpaceFinderNewMenu } from './SpaceFinderMenus'
+import {
+  firstSpaceFinderVariantId,
+  sortedSpaceFinderAreas,
+  spaceFinderSelectedVariant,
+} from './spaceFinderCollectionOptions'
+import { SpaceFinderAreaManageMenu } from './SpaceFinderMenus'
 import { SpaceFinderNameModal } from './SpaceFinderNameModal'
 import { SpaceFinderSelect } from './SpaceFinderSelect'
+import { SpaceFinderVariantTabs } from './SpaceFinderVariantTabs'
 import { useSpaceFinderCommands } from './useSpaceFinderCommands'
 import { useSpaceFinderModeParam } from './useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from './useSpaceFinderSelection'
@@ -51,8 +57,9 @@ const SpaceFinderEmptyState = ({ onCreate }: { onCreate: () => void }) => (
 )
 
 /**
- * Flächenfinder mode page (D4/D5/D6): one flat Gebiet/Variante collection in the header, panel
- * body sections instead of a list (status, Planungsgebiet, Faktoren, Ergebnis, Auswahl), and a
+ * Flächenfinder mode page (D4/D5/D6): the Planungsgebiete are the header collection (like Ordner
+ * in Hinweise), their Varianten a row of pills below the header, then panel body sections
+ * instead of a list (status, Planungsgebiet, Faktoren, Ergebnis, Auswahl), and a
  * sticky footer for the primary »Berechnen«/»Neu berechnen« action. Desktop-first (D10) — on
  * mobile the mode is reachable but read-only.
  */
@@ -65,34 +72,40 @@ export const PageModeSpaceFinder = () => {
 
   // Primed by the route loader (ensureQueryData).
   const { data: areas } = useSuspenseQuery(planningAreasQueryOptions(regionSlug))
-  const options = spaceFinderCollectionOptions(areas)
+  const sortedAreas = sortedSpaceFinderAreas(areas)
 
   const { spaceFinderMode, setSpaceFinderModeParam } = useSpaceFinderModeParam()
   // Area id and shown run are always derived from the active variant (D7).
   const { variantId: activeVariant, areaId: activeArea, variant } = useSpaceFinderSelection()
-  const selectedOption = options.find((option) => option.variantId === activeVariant)
+  const selectedOption = spaceFinderSelectedVariant(areas, activeVariant)
+  const selectedArea = sortedAreas.find((area) => area.id === selectedOption?.areaId)
 
   const onSelect = (variantId: number | undefined) =>
     setSpaceFinderModeParam({ ...spaceFinderMode, key: variantId })
+
+  // Switching the Gebiet opens its first variant; `ff.key` stays a variant id (D7).
+  const onSelectArea = (areaId: number) => {
+    const area = sortedAreas.find((a) => a.id === areaId)
+    onSelect(area?.variants[0]?.id)
+  }
 
   // `onSelect` is a new function every render. As an effect event it always sees the latest
   // `spaceFinderMode` without being an effect dependency (otherwise `oxlint --fix` in the pre-push
   // hook keeps adding it to the deps array and editors keep removing it again).
   const selectVariant = useEffectEvent((variantId: number | undefined) => onSelect(variantId))
 
-  // Auto-select the first Gebiet/Variante (oldest first, D4) when entering the mode without a
+  // Auto-select the first variant of the oldest Gebiet when entering the mode without a
   // selection, or when the URL still points at a deleted (orphaned) variant. Skipped while the
   // create wizard owns the selection (`ff.new`).
   useEffect(
     function selectFirstVariantWhenOrphaned() {
       if (spaceFinderMode.new) return
-      const stillExists = options.some((option) => option.variantId === spaceFinderMode.key)
-      if (stillExists) return
-      const first = options[0]
-      if (first?.variantId === spaceFinderMode.key) return
-      selectVariant(first?.variantId)
+      if (spaceFinderSelectedVariant(areas, spaceFinderMode.key)) return
+      const firstVariantId = firstSpaceFinderVariantId(areas)
+      if (firstVariantId === spaceFinderMode.key) return
+      selectVariant(firstVariantId)
     },
-    [areas, options, spaceFinderMode],
+    [areas, spaceFinderMode],
   )
 
   const commands = useSpaceFinderCommands({ regionSlug, areas, selectedOption, onSelect })
@@ -155,7 +168,7 @@ export const PageModeSpaceFinder = () => {
     isDesktop && spaceFinderMode.new === 'variant' && selectedOption
       ? {
           title: 'Neue Variante',
-          subtitle: `Gebiet ${frenchQuote(selectedOption.areaTitle)}`,
+          subtitle: `Planungsgebiet ${frenchQuote(selectedOption.areaTitle)}`,
           onBack: closeNew,
           children: (
             <SpaceFinderNewVariantDetail
@@ -177,23 +190,41 @@ export const PageModeSpaceFinder = () => {
   const panelDetail = newAreaDetail ?? newVariantDetail ?? editAreaDetail
 
   // Header ➕/⋯ menus: hidden in a detail view and on mobile (D10 — creating/editing needs desktop).
+  const openNewArea = () => setSpaceFinderModeParam({ ...spaceFinderMode, new: 'area' })
+
+  // Header actions belong to the Planungsgebiet (the collection); variant actions live in the
+  // Varianten row. Without any Gebiet, ➕ creates the first one — like Prüflisten with zero lists.
   const showHeaderActions = !panelDetail && isDesktop
-  const actions = showHeaderActions ? (
-    <>
-      <SpaceFinderNewMenu
-        hasArea={options.length > 0}
-        onNewVariant={() => setSpaceFinderModeParam({ ...spaceFinderMode, new: 'variant' })}
-        onNewArea={() => setSpaceFinderModeParam({ ...spaceFinderMode, new: 'area' })}
-      />
-      {selectedOption && (
-        <SpaceFinderManageMenu
-          selected={selectedOption}
-          onEditArea={() => setSpaceFinderModeParam({ ...spaceFinderMode, edit: 'area' })}
-          commands={commands}
-        />
-      )}
-    </>
+  const actions = !showHeaderActions ? undefined : selectedOption ? (
+    <SpaceFinderAreaManageMenu
+      selected={selectedOption}
+      onEditArea={() => setSpaceFinderModeParam({ ...spaceFinderMode, edit: 'area' })}
+      commands={commands}
+    />
+  ) : sortedAreas.length === 0 ? (
+    <Tooltip text="Neues Planungsgebiet">
+      <button
+        type="button"
+        onClick={openNewArea}
+        aria-label="Neues Planungsgebiet"
+        className={modePanelHeaderIconButtonClassName}
+      >
+        <PlusIcon className="size-5" aria-hidden />
+      </button>
+    </Tooltip>
   ) : undefined
+
+  const variantTabs =
+    !panelDetail && selectedOption && selectedArea ? (
+      <SpaceFinderVariantTabs
+        variants={selectedArea.variants}
+        selected={selectedOption}
+        onSelect={onSelect}
+        editable={isDesktop}
+        onNewVariant={() => setSpaceFinderModeParam({ ...spaceFinderMode, new: 'variant' })}
+        commands={commands}
+      />
+    ) : undefined
 
   // Sticky footer: hidden in a detail view and on mobile (D10 — running needs desktop).
   const footer =
@@ -209,33 +240,28 @@ export const PageModeSpaceFinder = () => {
   return (
     <ModePanel
       title={
-        selectedOption ? `Variante ${frenchQuote(selectedOption.variantTitle)}` : 'Flächenfinder'
-      }
-      subtitle={
-        selectedOption && !panelDetail
-          ? `Gebiet ${frenchQuote(selectedOption.areaTitle)}`
-          : undefined
+        selectedOption ? `Planungsgebiet ${frenchQuote(selectedOption.areaTitle)}` : 'Flächenfinder'
       }
       detail={panelDetail}
-      collectionAlwaysOpen={options.length === 0}
+      collectionAlwaysOpen={sortedAreas.length === 0}
       collection={
         <SpaceFinderSelect
-          options={options}
-          selectedVariantId={activeVariant ?? undefined}
-          onSelect={onSelect}
+          areas={sortedAreas}
+          selectedAreaId={selectedOption?.areaId}
+          onSelectArea={onSelectArea}
+          onNewArea={isDesktop ? openNewArea : undefined}
         />
       }
       actions={actions}
+      filter={variantTabs}
       footer={footer}
     >
       <SpaceFinderCandidateSelectionReset />
       {activeVariant != null ? (
         <SpaceFinderBody regionSlug={regionSlug} variantId={activeVariant} editable={isDesktop} />
-      ) : options.length === 0 ? (
+      ) : sortedAreas.length === 0 ? (
         isDesktop ? (
-          <SpaceFinderEmptyState
-            onCreate={() => setSpaceFinderModeParam({ ...spaceFinderMode, new: 'area' })}
-          />
+          <SpaceFinderEmptyState onCreate={openNewArea} />
         ) : (
           <p className={twJoin('px-4 py-3', modePanelMutedClassName)}>
             Noch kein Planungsgebiet in dieser Region.

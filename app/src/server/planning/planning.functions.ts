@@ -680,6 +680,15 @@ export const deletePlanningVariantFn = createServerFn({ method: 'POST' })
   .validator((data: z.infer<typeof VariantIdInput>) => VariantIdInput.parse(data))
   .handler(async ({ data }) => {
     await authorizeByVariant(getRequestHeaders(), data.variantId)
+    // A Planungsgebiet always keeps at least one variant: the mode selects by variant id.
+    const { areaId } = await db.planningVariant.findUniqueOrThrow({
+      where: { id: data.variantId },
+      select: { areaId: true },
+    })
+    const variantCount = await db.planningVariant.count({ where: { areaId } })
+    if (variantCount <= 1) {
+      throw new Error('Ein Planungsgebiet braucht mindestens eine Variante.')
+    }
     await deleteVariantPostgisResults(data.variantId)
     await db.planningVariant.delete({ where: { id: data.variantId } })
   })
