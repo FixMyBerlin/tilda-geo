@@ -316,6 +316,35 @@ describe('build_segments join keys', function()
     assert.are.equal(segments[1].edge_oneway, 'no')
   end)
 
+  it('bikelane edges publish oneway as plain yes/no', function()
+    local segments = build_segments({
+      object_tags = { highway = 'residential', _id = 25, _type = 'way' },
+      object_geom = line_geom,
+      cycleways = {
+        { _id = 'way/25/cycleway/left', _side = 'left', _infrastructureExists = true, category = 'cyclewayOnHighway_advisory', oneway = 'implicit_yes' },
+        { _id = 'way/25/cycleway/right', _side = 'right', _infrastructureExists = true, category = 'cycleway_adjoining', oneway = 'assumed_no' },
+      },
+      shared_result_tags = { road = 'residential' },
+    })
+    local fahrradstrasse = build_segments({
+      object_tags = { highway = 'residential', bicycle_road = 'yes', oneway = 'yes', ['oneway:bicycle'] = 'no', _id = 26, _type = 'way' },
+      object_geom = line_geom,
+      cycleways = {
+        { _id = 'way/26', _side = 'self', _infrastructureExists = true, category = 'bicycleRoad', oneway = 'car_not_bike' },
+      },
+      shared_result_tags = { road = 'bicycle_road' },
+    })
+
+    local oneway_by_id = {}
+    for _, segment in ipairs(segments) do
+      oneway_by_id[segment.segment_id] = segment.edge_oneway
+    end
+    assert.are.equal(oneway_by_id['way/25/cycleway/left'], 'yes')
+    assert.are.equal(oneway_by_id['way/25/cycleway/right'], 'no')
+    assert.are.equal(#fahrradstrasse, 1)
+    assert.are.equal(fahrradstrasse[1].edge_oneway, 'no')
+  end)
+
   it('self bikelane oneway=-1 is yes with reversed geometry', function()
     local reversed_geom = {}
     local way_geom = {}

@@ -14769,8 +14769,17 @@ const data = {
         type: 'string',
         label: 'Einbahnrichtung',
         description:
-          'Aufgelöste Fahrtrichtung des Segments (yes/no/car_not_bike-Kontext als yes/no).',
-        values: [],
+          'Nur `yes` oder `no`: darf entgegen der Linienrichtung gefahren werden? Bei `yes` zeigt die Geometrie in die erlaubte Fahrtrichtung. Aus `bikelanes.oneway` abgeleitet: `implicit_yes` → `yes`; `assumed_no` und `car_not_bike` → `no`.',
+        values: [
+          {
+            value: 'yes',
+            label: 'Einbahnig (in Linienrichtung)',
+          },
+          {
+            value: 'no',
+            label: 'In beide Richtungen',
+          },
+        ],
       },
       {
         key: 'parent_id',

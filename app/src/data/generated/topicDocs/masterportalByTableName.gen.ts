@@ -5405,7 +5405,15 @@ const data = {
         suffix: 'm',
       },
       side: 'Seite',
-      oneway: 'Einbahnrichtung',
+      oneway: {
+        name: 'Einbahnrichtung',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          yes: 'Einbahnig (in Linienrichtung)',
+          no: 'In beide Richtungen',
+        },
+      },
       parent_id: 'Parent-Way',
       source_table: {
         name: 'Quelltabelle',

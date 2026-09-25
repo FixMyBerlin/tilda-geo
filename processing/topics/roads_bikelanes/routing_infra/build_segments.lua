@@ -15,6 +15,18 @@ local road_highway_classes = SET.join_sets({
   HIGHWAYS.minor_road_classes,
 })
 
+-- Routing publishes `oneway` as plain `yes`/`no` on every edge. `bikelanes.oneway` keeps the
+-- detailed value (how we know), a router only needs whether it may ride against the line:
+-- `implicit_yes` (lanes are one-way unless tagged otherwise) → yes;
+-- `assumed_no` (untagged) and `car_not_bike` (only motor traffic is one-way) → no.
+local routing_oneway = {
+  yes = 'yes',
+  implicit_yes = 'yes',
+  no = 'no',
+  assumed_no = 'no',
+  car_not_bike = 'no',
+}
+
 -- Self infra that is a lane inside the carriageway (Mittellage). It uses the centerline id
 -- like Fahrradstraße, but the road stays drivable, so the carriageway edges are kept.
 -- `needsClarification` only matches motor roads via the unclear Mittellage condition.
@@ -157,7 +169,7 @@ local function build_segments(context)
       has_virtual_infra = true
       local side = cycleway._side or 'self'
       local geom = nil
-      local edge_oneway = nil
+      local edge_oneway = routing_oneway[cycleway.oneway]
       if side == 'self' and object_tags.oneway == '-1' and cycleway.oneway ~= 'car_not_bike' then
         -- Same as path edges: derive_oneway has no `-1` case, so orient the edge here.
         geom = reverse_linestring(object_geom)
