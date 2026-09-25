@@ -9,7 +9,7 @@ UPDATE routing
 SET
   geom = ST_Reverse (geom)
 WHERE
-  tags ->> 'segment_kind' = 'virtual_bikelane'
+  tags ->> 'source_table' = 'bikelanes'
   AND (tags ->> 'offset')::numeric > 0;
 
 DO $$ BEGIN RAISE NOTICE 'END orient routing virtual bikelane direction %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

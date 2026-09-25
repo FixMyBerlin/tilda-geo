@@ -14266,18 +14266,11 @@ const data = {
     groups: [],
     attributes: [
       {
-        key: 'segment_kind',
-        type: 'string',
-        label: 'Segmenttyp',
-        description: 'carriageway, virtual_bikelane oder standalone_path.',
-        values: [],
-      },
-      {
         key: 'category',
         type: 'string',
         label: 'Bauliche Führung',
         description:
-          'TILDA-Bikelane-Kategorie (maßgebliche Klassifikation). `mixedTrafficFoot` auf standalone_path, wenn keine Self-Kategorie vorliegt. Standalone-Pfade joinen immer `roadsPathClasses`.',
+          'TILDA-Bikelane-Kategorie (maßgebliche Klassifikation). `mixedTrafficFoot` auf Wege-Kanten (`source_table=roadsPathClasses`), wenn keine Self-Kategorie vorliegt.',
         values: [
           {
             value: 'bicycleRoad',
@@ -14414,7 +14407,7 @@ const data = {
             value: 'mixedTrafficFoot',
             label: 'Mischverkehr mit Fußverkehr',
             description:
-              'Verarbeitung zugewiesen auf standalone_path, wenn keine Self-Bikelane-Kategorie vorliegt. Join immer roadsPathClasses.',
+              'Verarbeitung zugewiesen auf Wege-Kanten (`source_table=roadsPathClasses`), wenn keine Self-Bikelane-Kategorie vorliegt.',
           },
         ],
       },
@@ -14855,7 +14848,7 @@ const data = {
         label: 'Linien-Offset',
         purpose: 'rendering',
         description:
-          'Wie `bikelanes.offset`: Geometrie bleibt auf der Mittellinie; der Wert ist nur für die Kartendarstellung (`line-offset`). Fehlt auf der Mittellinie (`self`). Sonst halbe Straßenbreite (`road_width`: OSM `width`/`est_width`, sonst Highway-Default), positiv = links, negativ = rechts. Bei `virtual_bikelane` läuft die linke Linie gegen die OSM-Way-Richtung, die rechte mit ihr, analog zu `bikelanes`. Fahrbahn-Kanten laufen in Fahrtrichtung. Transformierte Bikelanes übernehmen den bereits berechneten Wert.',
+          'Wie `bikelanes.offset`: Geometrie bleibt auf der Mittellinie; der Wert ist nur für die Kartendarstellung (`line-offset`). Fehlt auf der Mittellinie (`self`). Sonst halbe Straßenbreite (`road_width`: OSM `width`/`est_width`, sonst Highway-Default), positiv = links, negativ = rechts. Bei Radinfrastruktur-Kanten (`source_table=bikelanes`) läuft die linke Linie gegen die OSM-Way-Richtung, die rechte mit ihr, analog zu `bikelanes`. Fahrbahn-Kanten laufen in Fahrtrichtung. Transformierte Bikelanes übernehmen den bereits berechneten Wert.',
         chapterRefs: ['versetzte-geometrien'],
         values: [],
       },
@@ -14881,7 +14874,7 @@ const data = {
         label: 'Parent-Way',
         purpose: 'processing',
         description:
-          'OSM-Parent-Way (`way/N`) für Carriageway- und Infrastruktur-Kanten. Auch als SQL-Spalte für Joins.',
+          'OSM-Parent-Way (`way/N`) für Carriageway- und Infrastruktur-Kanten. Join-Schlüssel (indiziert).',
         values: [],
       },
       {
@@ -14890,7 +14883,7 @@ const data = {
         label: 'Quelltabelle',
         purpose: 'processing',
         description:
-          'TILDA-Tabelle, aus der fachliche Attribute gejoint werden (`bikelanes`, `roads`, `roadsPathClasses`). SQL-Spalte, nicht in `tags`.',
+          'Kantentyp und TILDA-Tabelle, aus der fachliche Attribute gejoint werden (`bikelanes`, `roads`, `roadsPathClasses`). Join-Schlüssel.',
         values: [
           {
             value: 'bikelanes',
@@ -14904,7 +14897,7 @@ const data = {
             value: 'roadsPathClasses',
             label: 'Wege',
             description:
-              'Join-Ziel für standalone_path (Kategorie-ID der Self-Cycleway-Zeile oder mixedTrafficFoot). Jede solche Kante muss in roadsPathClasses existieren (gleicher Skip-Helper wie der Path-Writer).',
+              'Join-Ziel für Wege-Kanten (Kategorie-ID der Self-Cycleway-Zeile oder mixedTrafficFoot). Jede solche Kante muss in roadsPathClasses existieren (gleicher Skip-Helper wie der Path-Writer).',
           },
         ],
       },
@@ -14914,7 +14907,7 @@ const data = {
         label: 'Quell-ID',
         purpose: 'processing',
         description:
-          '`id` in `source_table`. Bei Carriageway `way/N` (nicht die gerichtete Kante `way/N/left` oder `way/N/right`). SQL-Spalte, nicht in `tags`.',
+          '`id` in `source_table`. Bei Carriageway `way/N` (nicht die gerichtete Kante `way/N/left` oder `way/N/right`). Join-Schlüssel (indiziert).',
         values: [],
       },
       {

@@ -43,22 +43,22 @@ describe('inclusion_rules.access_bicycle', function()
   local road = { highway = 'secondary', bicycle = 'use_sidepath', ['cycleway:right'] = 'track' }
 
   it('flags the carriageway edge with the road bicycle access', function()
-    local segment = { segment_kind = 'carriageway', tags = road }
+    local segment = { source_table = 'roads', tags = road }
     assert.are.equal('use_sidepath', access_bicycle(segment, 'right', road))
   end)
 
   it('does not copy the parent road access onto a centerline-derived lane', function()
-    local segment = { segment_kind = 'virtual_bikelane', tags = { category = 'cycleway_adjoining' } }
+    local segment = { source_table = 'bikelanes', tags = { category = 'cycleway_adjoining' } }
     assert.is_nil(access_bicycle(segment, 'right', road))
     assert.is_nil(access_bicycle(segment, 'left', { highway = 'secondary', bicycle = 'no' }))
   end)
 
   it('reads the way itself for self segments', function()
     local path = { highway = 'footway', bicycle = 'dismount' }
-    local segment = { segment_kind = 'standalone_path', tags = { category = 'mixedTrafficFoot' } }
+    local segment = { source_table = 'roadsPathClasses', tags = { category = 'mixedTrafficFoot' } }
     assert.are.equal('dismount', access_bicycle(segment, 'self', path))
     local cycleway = { highway = 'cycleway', bicycle = 'designated' }
-    local virtual_self = { segment_kind = 'virtual_bikelane', tags = { category = 'cycleway_isolated' } }
+    local virtual_self = { source_table = 'bikelanes', tags = { category = 'cycleway_isolated' } }
     assert.are.equal('designated', access_bicycle(virtual_self, 'self', cycleway))
   end)
 end)

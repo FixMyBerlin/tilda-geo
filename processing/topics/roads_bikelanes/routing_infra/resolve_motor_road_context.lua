@@ -3,7 +3,7 @@ local adjoining_context = require('topics.roads_bikelanes.pseudo_tags_sidepath.a
 local HIGHWAYS = require('topics.helper.highway_classes')
 
 --- Option 1 motor-road context for factor_motor_traffic.
----@param segment { segment_kind: string, tags: OsmTags }
+---@param segment { source_table: string, tags: OsmTags }
 ---@param context RoadsBikelanesWayContext
 ---@return MotorRoadContext
 local function resolve_motor_road_context(segment, context)
@@ -11,7 +11,7 @@ local function resolve_motor_road_context(segment, context)
   local object_tags = context.object_tags
   local result = {}
 
-  if segment.segment_kind == 'virtual_bikelane' then
+  if segment.source_table == 'bikelanes' then
     -- Published adjoining follows bikelanes literally (empty on left/right; CSV/:of on self).
     -- Do not copy this way's own `road` class — that is already `tags.road`.
     result.sidepath = 'yes'

@@ -30,21 +30,22 @@ local function offset_for_segment(segment, object_tags, side)
   return sign * road_width(object_tags) / 2
 end
 
----@param segment { segment_kind: string, side: SideKey|nil, tags: OsmTags, edge_oneway: string|nil, category: string|nil, road: string|nil }
+---@param segment { parent_id: string, source_table: string, source_id: string, side: SideKey|nil, tags: OsmTags, edge_oneway: string|nil, category: string|nil, road: string|nil }
 ---@param motor_context MotorRoadContext
 ---@param context RoadsBikelanesWayContext
 local function build_public_tags(segment, motor_context, context)
   local side = segment.side or segment.tags._side or 'self'
   local road = segment.road or segment.tags.road or context.shared_result_tags.road
   local tags = {
-    segment_kind = segment.segment_kind,
     category = segment.category,
     name = context.shared_result_tags.name,
     length = context.shared_result_tags.length,
     prefix = segment.tags.prefix,
     side = side,
     oneway = segment.edge_oneway or segment.tags.oneway,
-    parent_id = segment.tags.parent_id,
+    parent_id = segment.parent_id,
+    source_table = segment.source_table,
+    source_id = segment.source_id,
     road = road,
     parent_road = segment.tags.parent_road,
     access_bicycle = inclusion_rules.access_bicycle(segment, side, context.object_tags),
@@ -90,9 +91,6 @@ local function roads_bikelanes_routing_infra(context)
 
     routing_infra_table:insert({
       id = segment.segment_id,
-      parent_id = segment.parent_id,
-      source_table = segment.source_table,
-      source_id = segment.source_id,
       tags = tags,
       meta = context.object_meta,
       geom = segment.geom or context.object_geom,

@@ -5,13 +5,13 @@ local category_is_sidepath = require('topics.roads_bikelanes.bikelanes.categorie
 
 -- Skip gates for inserting into `roads` / `roadsPathClasses`.
 --
--- `routing` join invariant: every `standalone_path` uses
--- `source_table=roadsPathClasses` (virtual centerline infra joins `bikelanes`).
+-- `routing` join invariant: every path edge
+-- (`source_table=roadsPathClasses`; bikelane infra joins `bikelanes`).
 -- Those edges must exist in `roadsPathClasses` (`source_id` = path `id`). Call
 -- this function from both `roads_bikelanes_roads.lua` (before insert) and
--- `build_segments.lua` (before emitting standalone_path) so inclusion cannot drift.
+-- `build_segments.lua` (before emitting a path edge) so inclusion cannot drift.
 --
--- Do not apply this to `virtual_bikelane`. `category_is_sidepath` is true when
+-- Do not apply this to `source_table=bikelanes` edges. `category_is_sidepath` is true when
 -- `parent_road` is set, which would drop centerline-derived
 -- `footwayBicycleYes*` / `sidewalk:*` virtuals. OSM sidewalk tags are excluded
 -- here on purpose (they never enter the path table).

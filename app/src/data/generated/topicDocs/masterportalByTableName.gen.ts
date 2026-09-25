@@ -5246,7 +5246,6 @@ const data = {
   },
   routing: {
     gfiAttributes: {
-      segment_kind: 'Segmenttyp',
       category: {
         name: 'Bauliche Führung',
         condition: 'contains',

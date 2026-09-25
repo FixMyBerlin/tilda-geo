@@ -1,4 +1,4 @@
--- Enumerates directed travel edges (carriageway, virtual bikelane, standalone path).
+-- Enumerates directed travel edges per `source_table` (`roads`, `bikelanes`, `roadsPathClasses`).
 -- Edge ids, oneway cases, mixedTraffic*: README.md (§ Directed edges).
 local merge_table = require('topics.helper.merge_table')
 local default_id = require('topics.helper.default_id')
@@ -20,7 +20,6 @@ local road_highway_classes = SET.join_sets({
 local function insert_carriageway_edge(segments, opts)
   table.insert(segments, {
     segment_id = opts.segment_id,
-    segment_kind = 'carriageway',
     side = opts.side,
     parent_id = opts.parent_id,
     source_table = 'roads',
@@ -99,7 +98,7 @@ end
 ---@param object_default_id string
 ---@param self_cycleway table|nil
 ---@param road_value string|nil
-local function emit_standalone_path_edge(segments, object_tags, object_geom, object_default_id, self_cycleway, road_value)
+local function emit_path_edge(segments, object_tags, object_geom, object_default_id, self_cycleway, road_value)
   local bikelane_category_id = self_cycleway and self_cycleway.category or nil
   local derived_oneway = (self_cycleway and self_cycleway.oneway)
     or derive_oneway(object_tags, { implicitOneWay = false })
@@ -121,7 +120,6 @@ local function emit_standalone_path_edge(segments, object_tags, object_geom, obj
 
   table.insert(segments, {
     segment_id = object_default_id,
-    segment_kind = 'standalone_path',
     side = 'self',
     parent_id = object_default_id,
     source_table = 'roadsPathClasses',
@@ -152,7 +150,6 @@ local function build_segments(context)
       has_virtual_infra = true
       table.insert(segments, {
         segment_id = cycleway._id,
-        segment_kind = 'virtual_bikelane',
         side = cycleway._side or 'self',
         parent_id = object_default_id,
         source_table = 'bikelanes',
@@ -178,9 +175,9 @@ local function build_segments(context)
       default_category
     )
   elseif HIGHWAYS.path_classes[object_tags.highway] and not has_virtual_infra and not virtual_uses_centerline_id then
-    -- Standalone paths always join roadsPathClasses; skip when that table would omit the way.
+    -- Path edges always join roadsPathClasses; skip when that table would omit the way.
     if not excluded_from_roads_tables(object_tags) then
-      emit_standalone_path_edge(
+      emit_path_edge(
         segments,
         object_tags,
         object_geom,

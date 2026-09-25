@@ -30,7 +30,7 @@ describe('build_segments carriageway edges', function()
 
     assert.are.equal(#segments, 2)
     for _, segment in ipairs(segments) do
-      assert.are.equal(segment.segment_kind, 'carriageway')
+      assert.are.equal(segment.source_table, 'roads')
       assert.are.equal(segment.edge_oneway, 'yes')
       assert.are.equal(segment.tags.oneway, 'assumed_no')
       assert.are.not_equal(segment.tags.oneway, 'yes')
@@ -101,7 +101,7 @@ describe('build_segments join keys', function()
     return self
   end
 
-  it('virtual_bikelane join keys match bikelanes.id', function()
+  it('bikelanes join keys match bikelanes.id', function()
     local segments = build_segments({
       object_tags = { highway = 'residential', _id = 8, _type = 'way' },
       object_geom = line_geom,
@@ -119,7 +119,7 @@ describe('build_segments join keys', function()
 
     local virtual = nil
     for _, segment in ipairs(segments) do
-      if segment.segment_kind == 'virtual_bikelane' then
+      if segment.source_table == 'bikelanes' then
         virtual = segment
       end
     end
@@ -130,7 +130,7 @@ describe('build_segments join keys', function()
     assert.are.equal(virtual.source_id, 'way/8/cycleway/right')
   end)
 
-  it('standalone_path always joins roadsPathClasses', function()
+  it('path edges always join roadsPathClasses', function()
     local segments = build_segments({
       object_tags = { highway = 'cycleway', bicycle = 'designated', _id = 3, _type = 'way' },
       object_geom = line_geom,
@@ -139,14 +139,13 @@ describe('build_segments join keys', function()
     })
 
     assert.are.equal(#segments, 1)
-    assert.are.equal(segments[1].segment_kind, 'standalone_path')
     assert.are.equal(segments[1].source_table, 'roadsPathClasses')
     assert.are.equal(segments[1].source_id, 'way/3')
     assert.are.equal(segments[1].parent_id, 'way/3')
     assert.are.equal(segments[1].category, 'mixedTrafficFoot')
   end)
 
-  it('standalone_path without a bikelane category joins roadsPathClasses as mixedTrafficFoot', function()
+  it('path edges without a bikelane category joins roadsPathClasses as mixedTrafficFoot', function()
     local segments = build_segments({
       object_tags = { highway = 'steps', _id = 11, _type = 'way' },
       object_geom = line_geom,
@@ -155,7 +154,6 @@ describe('build_segments join keys', function()
     })
 
     assert.are.equal(#segments, 1)
-    assert.are.equal(segments[1].segment_kind, 'standalone_path')
     assert.are.equal(segments[1].category, 'mixedTrafficFoot')
     assert.are.equal(segments[1].source_table, 'roadsPathClasses')
     assert.are.equal(segments[1].source_id, 'way/11')
@@ -172,7 +170,7 @@ describe('build_segments join keys', function()
     assert.are.equal(#segments, 0)
   end)
 
-  it('keeps sidewalks that are bike-permitted as virtual_bikelane', function()
+  it('keeps sidewalks that are bike-permitted as bikelanes edges', function()
     local segments = build_segments({
       object_tags = {
         highway = 'footway',
@@ -194,7 +192,6 @@ describe('build_segments join keys', function()
     })
 
     assert.are.equal(#segments, 1)
-    assert.are.equal(segments[1].segment_kind, 'virtual_bikelane')
     assert.are.equal(segments[1].source_table, 'bikelanes')
     assert.are.not_equal(segments[1].category, 'mixedTrafficFoot')
     assert.is_truthy(segments[1].category)
@@ -252,7 +249,7 @@ describe('build_segments join keys', function()
     assert.are.equal(segments[1].source_table, 'roadsPathClasses')
   end)
 
-  it('standalone_path oneway=yes with oneway:bicycle=no is no', function()
+  it('path edge oneway=yes with oneway:bicycle=no is no', function()
     local segments = build_segments({
       object_tags = {
         highway = 'path',
@@ -267,12 +264,12 @@ describe('build_segments join keys', function()
     })
 
     assert.are.equal(#segments, 1)
-    assert.are.equal(segments[1].segment_kind, 'standalone_path')
+    assert.are.equal(segments[1].source_table, 'roadsPathClasses')
     assert.are.equal(segments[1].tags.oneway, 'no')
     assert.are.equal(segments[1].edge_oneway, 'no')
   end)
 
-  it('standalone_path oneway=-1 is yes with reversed geometry', function()
+  it('path edge oneway=-1 is yes with reversed geometry', function()
     local reversed_geom = {}
     local path_geom = {}
     function path_geom:reverse()
@@ -292,7 +289,7 @@ describe('build_segments join keys', function()
     assert.are.equal(segments[1].geom, reversed_geom)
   end)
 
-  it('standalone_path keeps a non-infra self category and joins roadsPathClasses', function()
+  it('path edge keeps a non-infra self category and joins roadsPathClasses', function()
     local segments = build_segments({
       object_tags = { highway = 'path', _id = 23, _type = 'way' },
       object_geom = line_geom,
@@ -307,7 +304,7 @@ describe('build_segments join keys', function()
     })
 
     assert.are.equal(#segments, 1)
-    assert.are.equal(segments[1].segment_kind, 'standalone_path')
+    assert.are.equal(segments[1].source_table, 'roadsPathClasses')
     assert.are.equal(segments[1].category, 'needsClarification')
     assert.are.equal(segments[1].source_table, 'roadsPathClasses')
     assert.are.equal(segments[1].source_id, 'way/23')

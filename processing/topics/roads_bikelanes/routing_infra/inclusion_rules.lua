@@ -38,15 +38,15 @@ local function exclude_segment(tags)
 end
 
 --- Published `access_bicycle` for one routing edge.
---- Lanes derived from the centerline (`virtual_bikelane`, side left/right) do not inherit the
+--- Lanes derived from the centerline (`source_table=bikelanes`, side left/right) do not inherit the
 --- parent road's `bicycle=*`: `bicycle=use_sidepath` / `no` on the carriageway is about the
 --- carriageway, and the lane is exactly where cycling is meant to happen.
----@param segment { segment_kind: string, tags: OsmTags }
+---@param segment { source_table: string, tags: OsmTags }
 ---@param side SideKey
 ---@param object_tags OsmTags the OSM way this segment was built from
 ---@return string|nil
 local function access_bicycle(segment, side, object_tags)
-  local is_lane = segment.segment_kind == 'virtual_bikelane' and side ~= 'self'
+  local is_lane = segment.source_table == 'bikelanes' and side ~= 'self'
   local source = (segment.tags.bicycle or is_lane) and segment.tags or object_tags
   return sanitize_access_tags.sanitized_access(source, 'bicycle')
 end

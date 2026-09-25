@@ -1,15 +1,12 @@
 title: Routing
 summary: Score-free directed road+bike edges for routing, derived from roads_bikelanes infrastructure.
 attributes:
-  - key: segment_kind
-    label: Segmenttyp
-    description: carriageway, virtual_bikelane oder standalone_path.
   - key: category
     label: Bauliche Führung
     description: >-
       TILDA-Bikelane-Kategorie (maßgebliche Klassifikation). `mixedTrafficFoot`
-      auf standalone_path, wenn keine Self-Kategorie vorliegt. Standalone-Pfade
-      joinen immer `roadsPathClasses`.
+      auf Wege-Kanten (`source_table=roadsPathClasses`), wenn keine Self-Kategorie
+      vorliegt.
     valuesRef: bikelanes.category
     valuesAdd:
       - value: mixedTrafficMotor
@@ -20,7 +17,7 @@ attributes:
         description: Verarbeitung zugewiesen. Gegenrichtung auf der Fahrbahn, wenn nur der Kfz-Verkehr einbahnig ist.
       - value: mixedTrafficFoot
         label: Mischverkehr mit Fußverkehr
-        description: Verarbeitung zugewiesen auf standalone_path, wenn keine Self-Bikelane-Kategorie vorliegt. Join immer roadsPathClasses.
+        description: Verarbeitung zugewiesen auf Wege-Kanten (`source_table=roadsPathClasses`), wenn keine Self-Bikelane-Kategorie vorliegt.
   - key: road
     ref: roads.road
   - key: parent_road
@@ -43,7 +40,7 @@ attributes:
   - key: offset
     ref: bikelanes.offset
     description: >-
-      Wie `bikelanes.offset`: Geometrie bleibt auf der Mittellinie; der Wert ist nur für die Kartendarstellung (`line-offset`). Fehlt auf der Mittellinie (`self`). Sonst halbe Straßenbreite (`road_width`: OSM `width`/`est_width`, sonst Highway-Default), positiv = links, negativ = rechts. Bei `virtual_bikelane` läuft die linke Linie gegen die OSM-Way-Richtung, die rechte mit ihr, analog zu `bikelanes`. Fahrbahn-Kanten laufen in Fahrtrichtung. Transformierte Bikelanes übernehmen den bereits berechneten Wert.
+      Wie `bikelanes.offset`: Geometrie bleibt auf der Mittellinie; der Wert ist nur für die Kartendarstellung (`line-offset`). Fehlt auf der Mittellinie (`self`). Sonst halbe Straßenbreite (`road_width`: OSM `width`/`est_width`, sonst Highway-Default), positiv = links, negativ = rechts. Bei Radinfrastruktur-Kanten (`source_table=bikelanes`) läuft die linke Linie gegen die OSM-Way-Richtung, die rechte mit ihr, analog zu `bikelanes`. Fahrbahn-Kanten laufen in Fahrtrichtung. Transformierte Bikelanes übernehmen den bereits berechneten Wert.
   - key: side
     label: Seite
     purpose: processing
@@ -54,11 +51,11 @@ attributes:
   - key: parent_id
     label: Parent-Way
     purpose: processing
-    description: OSM-Parent-Way (`way/N`) für Carriageway- und Infrastruktur-Kanten. Auch als SQL-Spalte für Joins.
+    description: OSM-Parent-Way (`way/N`) für Carriageway- und Infrastruktur-Kanten. Join-Schlüssel (indiziert).
   - key: source_table
     label: Quelltabelle
     purpose: processing
-    description: TILDA-Tabelle, aus der fachliche Attribute gejoint werden (`bikelanes`, `roads`, `roadsPathClasses`). SQL-Spalte, nicht in `tags`.
+    description: Kantentyp und TILDA-Tabelle, aus der fachliche Attribute gejoint werden (`bikelanes`, `roads`, `roadsPathClasses`). Join-Schlüssel.
     values:
       - value: bikelanes
         label: Radinfrastruktur
@@ -67,7 +64,7 @@ attributes:
       - value: roadsPathClasses
         label: Wege
         description: >-
-          Join-Ziel für standalone_path (Kategorie-ID der Self-Cycleway-Zeile
+          Join-Ziel für Wege-Kanten (Kategorie-ID der Self-Cycleway-Zeile
           oder mixedTrafficFoot). Jede solche Kante muss in roadsPathClasses
           existieren (gleicher Skip-Helper wie der Path-Writer).
   - key: source_id
@@ -75,7 +72,7 @@ attributes:
     purpose: processing
     description: >-
       `id` in `source_table`. Bei Carriageway `way/N` (nicht die gerichtete Kante
-      `way/N/left` oder `way/N/right`). SQL-Spalte, nicht in `tags`.
+      `way/N/left` oder `way/N/right`). Join-Schlüssel (indiziert).
   - key: name
     ref: roads.name
   - key: length

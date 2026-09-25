@@ -24,7 +24,7 @@ local function routing_infra_generalization(segment, length)
   if road and MINOR_ROADS[road] then
     return length >= 250 and 10 or 12
   end
-  -- standalone paths / tracks / service, sidepath bikelanes, links, crossings: thin by length.
+  -- paths / tracks / service, sidepath bikelanes, links, crossings: thin by length.
   return length >= 500 and 12 or 13
 end
 

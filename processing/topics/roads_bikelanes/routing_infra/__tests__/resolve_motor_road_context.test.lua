@@ -3,7 +3,7 @@ local resolve_motor_road_context = require('topics.roads_bikelanes.routing_infra
 
 describe('resolve_motor_road_context (sidepath branch)', function()
   it('resolves adjoining road and maxspeed from _sidepath_* pseudo tags', function()
-    local segment = { segment_kind = 'standalone_path', tags = { highway = 'cycleway', footway = 'sidewalk' } }
+    local segment = { source_table = 'roadsPathClasses', tags = { highway = 'cycleway', footway = 'sidewalk' } }
     local context = {
       object_tags = {
         highway = 'cycleway',
@@ -21,7 +21,7 @@ describe('resolve_motor_road_context (sidepath branch)', function()
 
   it('prefers explicit adjoining_road / adjoining_maxspeed tags over pseudo tags', function()
     local segment = {
-      segment_kind = 'standalone_path',
+      source_table = 'roadsPathClasses',
       tags = {
         highway = 'cycleway',
         footway = 'sidewalk',
@@ -45,7 +45,7 @@ describe('resolve_motor_road_context (sidepath branch)', function()
   end)
 
   it('marks a path with no sidepath context as sidepath=no but still copies CSV adjoining', function()
-    local segment = { segment_kind = 'standalone_path', tags = { highway = 'path' } }
+    local segment = { source_table = 'roadsPathClasses', tags = { highway = 'path' } }
     local context = {
       object_tags = {
         highway = 'path',
@@ -59,9 +59,9 @@ describe('resolve_motor_road_context (sidepath branch)', function()
     assert.are.equal(result.adjoining_maxspeed, 30)
   end)
 
-  it('copies adjoining_road from the bikelanes source row on virtual_bikelane', function()
+  it('copies adjoining_road from the bikelanes source row on bikelanes edges', function()
     local segment = {
-      segment_kind = 'virtual_bikelane',
+      source_table = 'bikelanes',
       tags = {
         highway = 'cycleway',
         adjoining_road = 'secondary',
@@ -78,9 +78,9 @@ describe('resolve_motor_road_context (sidepath branch)', function()
     assert.are.equal(result.adjoining_maxspeed, 50)
   end)
 
-  it('leaves adjoining empty on virtual_bikelane when bikelanes has none (left/right)', function()
+  it('leaves adjoining empty on bikelanes edges when bikelanes has none (left/right)', function()
     local segment = {
-      segment_kind = 'virtual_bikelane',
+      source_table = 'bikelanes',
       tags = { highway = 'cycleway', parent_road = 'residential' },
     }
     local context = {
@@ -95,7 +95,7 @@ describe('resolve_motor_road_context (sidepath branch)', function()
 
   it('carriageway exposes own maxspeed, not adjoining_maxspeed', function()
     local segment = {
-      segment_kind = 'carriageway',
+      source_table = 'roads',
       tags = { highway = 'residential', maxspeed = '30' },
     }
     local context = { object_tags = { highway = 'residential', maxspeed = '30' } }

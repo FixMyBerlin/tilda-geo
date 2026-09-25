@@ -84,9 +84,6 @@ local routing_infra_table = osm2pgsql.define_table({
   ids = { type = 'any', id_column = 'osm_id', type_column = 'osm_type' },
   columns = {
     { column = 'id', type = 'text', not_null = true },
-    { column = 'parent_id', type = 'text', not_null = true },
-    { column = 'source_table', type = 'text', not_null = true },
-    { column = 'source_id', type = 'text', not_null = true },
     { column = 'tags', type = 'jsonb' },
     { column = 'meta', type = 'jsonb' },
     { column = 'geom', type = 'linestring' },
@@ -95,8 +92,9 @@ local routing_infra_table = osm2pgsql.define_table({
   indexes = {
     { column = { 'minzoom', 'geom' }, method = 'gist' },
     { column = 'id', method = 'btree', unique = true },
-    { column = 'parent_id', method = 'btree' },
-    { column = { 'source_table', 'source_id' }, method = 'btree' },
+    -- Join keys live in `tags` like on every other rendering table.
+    { expression = "(tags ->> 'parent_id')", method = 'btree' },
+    { expression = "(tags ->> 'source_id')", method = 'btree' },
   }
 })
 
