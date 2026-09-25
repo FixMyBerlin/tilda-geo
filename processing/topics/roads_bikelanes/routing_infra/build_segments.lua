@@ -156,12 +156,22 @@ local function build_segments(context)
     end
     if cycleway._infrastructureExists and cycleway.category then
       has_virtual_infra = true
+      local side = cycleway._side or 'self'
+      local geom = nil
+      local edge_oneway = nil
+      if side == 'self' and object_tags.oneway == '-1' and cycleway.oneway ~= 'car_not_bike' then
+        -- Same as path edges: derive_oneway has no `-1` case, so orient the edge here.
+        geom = reverse_linestring(object_geom)
+        edge_oneway = 'yes'
+      end
       table.insert(segments, {
         segment_id = cycleway._id,
-        side = cycleway._side or 'self',
+        side = side,
         parent_id = object_default_id,
         source_table = 'bikelanes',
         source_id = cycleway._id,
+        geom = geom,
+        edge_oneway = edge_oneway,
         tags = merge_table({ parent_id = object_default_id }, cycleway),
         category = cycleway.category,
       })

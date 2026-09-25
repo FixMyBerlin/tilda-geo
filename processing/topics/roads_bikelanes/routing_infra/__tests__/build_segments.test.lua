@@ -316,6 +316,28 @@ describe('build_segments join keys', function()
     assert.are.equal(segments[1].edge_oneway, 'no')
   end)
 
+  it('self bikelane oneway=-1 is yes with reversed geometry', function()
+    local reversed_geom = {}
+    local way_geom = {}
+    function way_geom:reverse()
+      return reversed_geom
+    end
+
+    local segments = build_segments({
+      object_tags = { highway = 'cycleway', oneway = '-1', _id = 24, _type = 'way' },
+      object_geom = way_geom,
+      cycleways = {
+        { _id = 'way/24', _side = 'self', _infrastructureExists = true, category = 'cycleway_isolated', oneway = 'assumed_no' },
+      },
+      shared_result_tags = { road = 'cycleway' },
+    })
+
+    assert.are.equal(#segments, 1)
+    assert.are.equal(segments[1].source_table, 'bikelanes')
+    assert.are.equal(segments[1].edge_oneway, 'yes')
+    assert.are.equal(segments[1].geom, reversed_geom)
+  end)
+
   it('path edge oneway=-1 is yes with reversed geometry', function()
     local reversed_geom = {}
     local path_geom = {}
