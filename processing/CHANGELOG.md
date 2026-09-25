@@ -4,6 +4,10 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-09
 
+### `roads`, `roadsPathClasses`, `bikelanes`, `bikelanesPresence`, `bikeSuitability`, `routing`
+
+- Network noise, detected once on the `routing` graph (one geometry per OSM parent way): **islands** (the way touches no other line) and **short dangling tips** (`length` < 20 m, one end attached, the other free, nothing else touching the way). Single pass: a way that only becomes a tip once its own tips are hidden stays. Lines outside `routing` (eg. motorways) count as connectors; with `PROCESS_ONLY_BBOX` (local dev), ways not fully inside the bbox (minus ~10 m) are skipped. Map tables: `minzoom` is at least 14, so the lines stay in the data and in the z14 tile (overzoomed) and the inspector still works. `routing`: the rows are removed from the graph and moved to `_routing_discarded` (`discard_reason` `island` | `stub`, not published) for debugging. `todos_lines` is unchanged. SQL: `topics/roads_bikelanes/4_hide_network_noise.sql`.
+
 ### `parkings`, `off_street_parking_areas`, `parkings_edges`, `parking_errors`
 
 - New `condition_category=invalid`: a `*:conditional` value the classifier reads has broken syntax (unbalanced or nested brackets, `@` inside the condition, a part without `value @ condition`; also `maxstay` values with a broken `@`). We can not tell the real restriction, so we do not guess (dropping e.g. `no_stopping @ …` would read as free parking). `condition_category_primary` / `condition_category_left|right` carry `invalid` too (last in the priority list); map styles have no own colour and use the fallback on purpose.

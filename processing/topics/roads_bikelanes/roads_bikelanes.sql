@@ -9,5 +9,6 @@
 -- (`roads_bikelanes_bikelanes.lua`, `routing_infra/build_segments.lua`).
 -- See topic-doc chapter `versetzte-geometrien` and processing/CHANGELOG.md.
 \i '/processing/topics/roads_bikelanes/3_cleanup_todos_lines.sql'
+\i '/processing/topics/roads_bikelanes/4_hide_network_noise.sql'
 
 DO $$ BEGIN RAISE NOTICE 'FINISH topics/roads_bikelanes/roads_bikelanes.sql at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
