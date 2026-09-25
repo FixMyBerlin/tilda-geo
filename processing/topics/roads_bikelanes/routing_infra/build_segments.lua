@@ -142,6 +142,10 @@ local function build_segments(context)
           edge_oneway = 'yes'
         end
       end
+      if side == 'left' then
+        -- Same as `bikelanes`: left-side lines run against the OSM way (right-hand-traffic flow).
+        geom = reverse_linestring(object_geom)
+      end
       if side == 'self' and cycleway.oneway == 'car_not_bike' then
         -- E.g. Fahrradstraße with two-way cycling: same contraflow flag as carriageway edges.
         oneway_motor = 'yes'
