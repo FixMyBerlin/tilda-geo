@@ -62,7 +62,7 @@ export const NotesDetailOsm = ({ noteId }: Props) => {
     <div>
       <section className="px-3 py-5">
         <ul>
-          {thread.comments?.map((comment, index) => {
+          {thread.comments.map((comment, index) => {
             const firstComment = index === 0
 
             return (

@@ -13,16 +13,13 @@ type Props = {
   title?: string
 }
 
-/**
- * "Status: offen/geschlossen" (or erledigt) switch shared by `EditNoteResolvedAtForm` (TILDA
- * notes) and `OsmNoteCommentForm` (OSM notes) — same look, configurable labels only.
- */
+/** Status switch for TILDA and OSM notes (e.g. offen / erledigt). */
 export const ModeStatusSwitch = ({
   checked,
   onChange,
   checkedLabel,
   uncheckedLabel,
-  pending = false,
+  pending,
   title,
 }: Props) => (
   <Field as="div" className="flex items-center gap-1.5 text-sm" title={title}>
