@@ -4,11 +4,8 @@ import { auth } from '@/server/auth/auth.server'
 import { AuthorizationError } from '@/server/auth/errors'
 import { requireAuth } from '@/server/auth/session.server'
 
-/**
- * Shared POST helper for OSM API v0.6 write endpoints (create/comment/close/reopen note) that
- * reuse the app's OSM OAuth `write_notes` token.
- */
-export async function osmApiPost(path: string, body: Record<string, unknown>, errorLabel: string) {
+/** POST to an OSM API notes endpoint with the user's OSM OAuth token (`write_notes`). */
+export async function postOsmNote(path: string, body: Record<string, unknown>) {
   const headers = getRequestHeaders()
   const appSession = await requireAuth(headers)
 
@@ -21,8 +18,7 @@ export async function osmApiPost(path: string, body: Record<string, unknown>, er
     throw new AuthorizationError('OSM access token not available')
   }
 
-  const apiUrl = getOsmApiUrl(path)
-  const response = await fetch(apiUrl, {
+  const response = await fetch(getOsmApiUrl(path), {
     method: 'POST',
     headers: {
       Accept: 'application/json',
@@ -35,9 +31,7 @@ export async function osmApiPost(path: string, body: Record<string, unknown>, er
   if (!response.ok) {
     const errorText = await response.text()
     throw new Error(
-      `Failed to ${errorLabel}: ${response.status} ${response.statusText}. ${errorText}`,
+      `OSM API ${path} failed: ${response.status} ${response.statusText}. ${errorText}`,
     )
   }
-
-  return response.json()
 }

@@ -53,10 +53,9 @@ const sharedFeaturePointSchema = z.object({
     coordinates: z.tuple([z.number(), z.number()]), // [longitude, latitude]
   }),
 })
-export const osmApiFeaturePointSchema = sharedFeaturePointSchema.extend({
+const osmApiFeaturePointSchema = sharedFeaturePointSchema.extend({
   properties: osmApiNoteSchema,
 })
-export type OsmApiFeaturePointType = z.infer<typeof osmApiFeaturePointSchema>
 const osmFeaturePointSchema = sharedFeaturePointSchema.extend({
   id: z.number(),
   properties: osmNoteSchema,
