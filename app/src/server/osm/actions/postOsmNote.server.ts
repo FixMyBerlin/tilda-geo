@@ -4,7 +4,8 @@ import { auth } from '@/server/auth/auth.server'
 import { AuthorizationError } from '@/server/auth/errors'
 import { requireAuth } from '@/server/auth/session.server'
 
-export async function createOsmNote(input: { lat: number; lon: number; text: string }) {
+/** POST to an OSM API notes endpoint with the user's OSM OAuth token (`write_notes`). */
+export async function postOsmNote(path: string, body: Record<string, unknown>) {
   const headers = getRequestHeaders()
   const appSession = await requireAuth(headers)
 
@@ -17,27 +18,20 @@ export async function createOsmNote(input: { lat: number; lon: number; text: str
     throw new AuthorizationError('OSM access token not available')
   }
 
-  const apiUrl = getOsmApiUrl('/notes.json')
-  const response = await fetch(apiUrl, {
+  const response = await fetch(getOsmApiUrl(path), {
     method: 'POST',
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
       Authorization: `Bearer ${tokenResponse.accessToken}`,
     },
-    body: JSON.stringify({
-      lat: input.lat,
-      lon: input.lon,
-      text: input.text,
-    }),
+    body: JSON.stringify(body),
   })
 
   if (!response.ok) {
     const errorText = await response.text()
     throw new Error(
-      `Failed to create OSM note: ${response.status} ${response.statusText}. ${errorText}`,
+      `OSM API ${path} failed: ${response.status} ${response.statusText}. ${errorText}`,
     )
   }
-
-  return response.json()
 }
