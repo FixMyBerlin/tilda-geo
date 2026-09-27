@@ -1,6 +1,6 @@
 ---
 name: test-processing-diff
-description: Run local Docker processing in reference then fixed diffing mode to validate Lua/SQL topic changes via public.*_diff tables. From app/, use `processing` (interactive Clack on a TTY: show or run the compose line; agents/CI pass the full non-interactive flag set and capture stdout). Triggers on processing verification, bbox/topic-limited runs, or diff regression after editing processing/topics.
+description: Run local Docker processing in reference then fixed diffing mode to validate Lua/SQL topic changes via public.*_diff tables. From app/, use `processing` (interactive Clack on a TTY: show or run the compose line; agents/CI pass the full non-interactive flag set and capture stdout). Triggers on processing verification, bbox/topic-limited runs, diff regression after editing processing/topics, or noisy diffs from pseudo-tag CSVs (sidepath, settlement, Mapillary) that must be pinned between runs.
 ---
 
 # Test processing with diffing (local Docker)
@@ -89,6 +89,34 @@ Do **not** change other diff-related flags between reference and fixed unless yo
 
 **Mapillary pseudo-tags:** With `reference`, processing always re-downloads `mapillary_coverage.csv`. With `fixed`, it reuses that file (no re-download) so `mapillary_coverage` diffs reflect Lua changes only. Run reference before fixed on the same Docker volume.
 
+### Pseudo-tag CSVs: pin them, or the diff is noisy
+
+Afterthoughts write `is_sidepath_estimation.csv` (and `settlement_area_estimation.csv` when landcover runs) into `/data/pseudoTagsData` **for the next run**; `roads_bikelanes` reads them at the start. So reference and fixed read different inputs unless you pin them. Symptom: `_is_sidepath` / `in_settlement_area` / `adjoining_*` diffs your code did not cause.
+
+Clean sequence (same generated line, only `PROCESSING_DIFFING_MODE` changes):
+
+1. Baseline checkout → **warm-up** run with `off` (inputs now come from baseline code on this bbox).
+2. **Pin:** copy the CSVs out of the volume.
+3. **Reference** run → save its output CSVs.
+4. **Restore** the pinned CSVs into the volume.
+5. Branch checkout → **fixed** run → save its output CSVs.
+
+The volume is `<compose project>_osmfiles` (`tilda-geo_osmfiles` for the default stack). Copy with the local processing image (no pull). Use a shell **function**, not a command stored in a string (zsh does not word-split `$VAR`):
+
+```bash
+OUT=../tilda-geo--diff-runs/$(date +%F)   # from repo root; persistent (/tmp is wiped on reboot)
+mkdir -p "$OUT"
+vol() { docker run --rm --entrypoint sh -v tilda-geo_osmfiles:/data -v "$(cd "$OUT" && pwd)":/out processing:latest -c "$1"; }
+# step 2 (same pattern with /out/<step-name> to save each run's output)
+vol 'mkdir -p /out/1-pinned-input && cp /data/pseudoTagsData/is_sidepath_estimation.csv /data/pseudoTagsData/settlement_area_estimation.csv /out/1-pinned-input/ 2>/dev/null; ls /out/1-pinned-input'
+# step 4
+vol 'cp /out/1-pinned-input/*.csv /data/pseudoTagsData/'
+```
+
+Compare the saved outputs (`md5 -q …/*.csv` on macOS, `md5sum` on Linux): identical reference and fixed outputs mean your change does not affect the estimation. A `fixed` rerun (e.g. after a code fix) must restore the pinned input first; the reference snapshot stays valid.
+
+**Worktrees:** the post-checkout hook removes `.env.local` when you switch between baseline and branch. Re-add `DEV_ATTACH_STACK=default` afterwards if you attached to the develop stack.
+
 Detached: use `--detach` in the generate invocation; the printed line uses `docker compose up -d processing`; then `docker logs -f processing`.
 
 ## Review `*_diff` tables
@@ -111,11 +139,21 @@ Map topics → table names via topic Lua/SQL or `processing/utils/TableNames.lua
 
 - Diffs compare **`tags` JSON** vs the reference snapshot (`processing/README.md`).
 - Large diff ⇒ possible regression or broad tag changes; tiny/empty ⇒ often in-bounds or out of bbox/topic scope.
-- **Noise:** rerun reference + fixed with `--skip-unchanged 0` and stable bbox/topics if unsure.
+- **Noise:** first rule out unpinned pseudo-tag CSVs (above); then rerun reference + fixed with `--skip-unchanged 0` and stable bbox/topics.
+- **Reference is bbox-clipped:** `diffing_reference.*` only holds rows matched by the diff bbox, while `public.*` keeps everything processing wrote (including lines that cross the bbox edge, even with identical bboxes). Compare totals inside the bbox only (`geom && ST_Transform(ST_MakeEnvelope(…, 4326), 3857)`).
+- **Tables new on the branch:** the baseline does not write them, so the reference snapshot copies whatever stale `public` table an earlier run left. Its `_diff` is not baseline-vs-branch; ignore it, or drop the table before the reference run.
 
 ```sql
 SELECT COUNT(*) FROM public.mytable_diff;
 SELECT * FROM public.mytable_diff LIMIT 50;
+
+-- What changed, grouped by tag key (`tags.CHANGE` = added | removed | modified)
+SELECT d.tags->>'CHANGE' AS change, k AS key, count(*)
+FROM public.mytable_diff d
+LEFT JOIN LATERAL jsonb_object_keys(
+  CASE WHEN d.tags->>'CHANGE' = 'modified' THEN d.tags - 'CHANGE' ELSE '{}'::jsonb END
+) k ON true
+GROUP BY 1, 2 ORDER BY 3 DESC;
 ```
 
 ## Quick sanity: Lua unit tests
