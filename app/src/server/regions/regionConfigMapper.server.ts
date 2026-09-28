@@ -102,56 +102,39 @@ function regionWriteInputToScalarData(config: RegionWriteInput) {
   }
 }
 
-/**
- * Prisma `region.create` payload.
- *
- * `RegionWriteInput` is the API/form shape (flat id arrays + nav link objects). Prisma create
- * needs nested `create` for assignment/link tables, plus `prismaJsonField` for nullable JSON —
- * this mapper is that bridge. Update uses `regionWriteInputToUpdateData` (nested deleteMany +
- * create on the same child relations).
- */
+/** Prisma `region.create` payload: scalars only; child rows are written by `writeRegionChildRows`. */
 export function regionWriteInputToCreateData(config: RegionWriteInput) {
+  return regionWriteInputToScalarData(config)
+}
+
+/** Prisma `region.update` payload: scalars (slug omitted — it is the where-key). */
+export function regionWriteInputToUpdateData(config: RegionWriteInput) {
+  const { slug: _slug, ...scalars } = regionWriteInputToScalarData(config)
+  return scalars
+}
+
+/**
+ * Child rows of a region (assignment/link tables) in DB column shape, without `regionId`.
+ *
+ * `RegionWriteInput` is the API/form shape (flat id arrays + nav link objects). The write service
+ * replaces these tables with top-level `deleteMany` + `createManyAndReturn` so the audit extension
+ * logs each row — nested writes inside `region.update` are invisible to it.
+ */
+export function regionWriteInputToChildRows(config: RegionWriteInput) {
   return {
-    ...regionWriteInputToScalarData(config),
-    categoryAssignments: {
-      create: config.categories.map((categoryId, sortOrder) => ({ categoryId, sortOrder })),
-    },
-    backgroundAssignments: {
-      create: config.backgroundSources.map((sourceId) => ({ sourceId })),
-    },
-    exportAssignments: {
-      create: config.exports.map((exportId) => ({ exportId })),
-    },
-    navigationLinks: {
-      // Write-input link objects already match the nested create columns.
-      create: config.navigationLinks,
-    },
+    categories: config.categories.map((categoryId, sortOrder) => ({ categoryId, sortOrder })),
+    backgroundSources: config.backgroundSources.map((sourceId) => ({ sourceId })),
+    exports: config.exports.map((exportId) => ({ exportId })),
+    navigationLinks: config.navigationLinks.map((link) => ({
+      name: link.name,
+      internalPath: link.internalPath ?? null,
+      externalUrl: link.externalUrl ?? null,
+      sortOrder: link.sortOrder,
+    })),
   }
 }
 
-/** Prisma `region.update` payload: scalars (slug omitted — it is the where-key) + full relation replace. */
-export function regionWriteInputToUpdateData(config: RegionWriteInput) {
-  const { slug: _slug, ...scalars } = regionWriteInputToScalarData(config)
-  return {
-    ...scalars,
-    categoryAssignments: {
-      deleteMany: {},
-      create: config.categories.map((categoryId, sortOrder) => ({ categoryId, sortOrder })),
-    },
-    backgroundAssignments: {
-      deleteMany: {},
-      create: config.backgroundSources.map((sourceId) => ({ sourceId })),
-    },
-    exportAssignments: {
-      deleteMany: {},
-      create: config.exports.map((exportId) => ({ exportId })),
-    },
-    navigationLinks: {
-      deleteMany: {},
-      create: config.navigationLinks,
-    },
-  }
-}
+export type RegionChildRows = ReturnType<typeof regionWriteInputToChildRows>
 
 type RegionWithRelations = Prisma.RegionGetPayload<{ include: typeof regionInclude }>
 

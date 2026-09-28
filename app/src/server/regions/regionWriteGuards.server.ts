@@ -5,7 +5,7 @@
  * Unlike region-contract admin (`regions: { connect }` / `regions: { set }`), region writes set
  * `contractId` as a scalar FK on Region, so contract existence must be checked here (Zod cannot;
  * Prisma's FK error is opaque). Category/background/export/nav lists are child rows replaced via
- * nested deleteMany + create in `regionWriteInputToUpdateData`, not M2M connect/set.
+ * top-level deleteMany + create in `writeRegionChildRows`, not M2M connect/set.
  */
 import db from '@/server/db.server'
 import { RegionNotFoundError } from '@/server/regions/regionWriteErrors.server'
