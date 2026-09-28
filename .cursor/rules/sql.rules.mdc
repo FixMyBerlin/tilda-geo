@@ -23,8 +23,9 @@ alwaysApply: false
 - Tables hold millions of rows on the full Germany extract. Test timings on a large extract, not only a small bbox.
 - `TEMP` tables live in per-session `temp_buffers` (processing sessions get 1GB via `PGOPTIONS` in `docker-compose.yml`) and can never be scanned by parallel workers. For large helper tables that are joined spatially, prefer `UNLOGGED` tables in `public` and drop them at the end of the file (see `topics/roads_bikelanes/4_hide_network_noise.sql`).
 - `INSERT … SELECT` never runs in parallel; `CREATE TABLE … AS SELECT` can.
+- Anything parallel-unsafe in a query forces a serial plan: `nextval()`, custom aggregates without a combine function, and functions not marked `PARALLEL SAFE` (the default is unsafe). Prefer set-based steps (`WITH ORDINALITY`, `GROUP BY`) and mark own SQL helpers `IMMUTABLE PARALLEL SAFE` when they are (see `topics/roads_bikelanes/pseudo_tags_sidepath/sql/is_sidepath_estimation.sql`).
 - `random_page_cost=1.0` (`configs/postgres.conf`) makes the planner favour index scans. On tables clustered by geometry, reading millions of rows through a non-spatial index is random I/O; check `EXPLAIN (ANALYZE, BUFFERS)` for large `read=` counts.
-- Log step durations with `RAISE NOTICE` so slow steps show in the server logs.
+- Log step durations (`RAISE NOTICE`, or `\echo` + `\timing on` in psql scripts) so slow steps show in the server logs.
 
 ## Query format
 
