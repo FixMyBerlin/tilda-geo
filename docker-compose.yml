@@ -9,6 +9,9 @@ services:
       PGDATABASE: ${DATABASE_NAME}
       PGUSER: ${DATABASE_USER}
       PGPASSWORD: ${DATABASE_PASSWORD}
+      # Processing SQL builds large TEMP tables (millions of rows); the server-wide temp_buffers
+      # (configs/postgres.conf) is sized for app/tiles sessions. Only processing sessions get more.
+      PGOPTIONS: -c temp_buffers=1GB
       PROCESS_GEOFABRIK_DOWNLOAD_URL:
       PROCESS_GEOFABRIK_OAUTH_OSM_USERNAME:
       PROCESS_GEOFABRIK_OAUTH_OSM_PASSWORD:

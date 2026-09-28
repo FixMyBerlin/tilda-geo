@@ -18,6 +18,14 @@ alwaysApply: false
 - For `/app/scripts` and `/processing` use the PostgreSQL Bun integration, see https://bun.com/docs/api/sql
 - For your own LLM queries use your MCP server
 
+## Processing performance (`/processing` SQL)
+
+- Tables hold millions of rows on the full Germany extract. Test timings on a large extract, not only a small bbox.
+- `TEMP` tables live in per-session `temp_buffers` (processing sessions get 1GB via `PGOPTIONS` in `docker-compose.yml`) and can never be scanned by parallel workers. For large helper tables that are joined spatially, prefer `UNLOGGED` tables in `public` and drop them at the end of the file (see `topics/roads_bikelanes/4_hide_network_noise.sql`).
+- `INSERT … SELECT` never runs in parallel; `CREATE TABLE … AS SELECT` can.
+- `random_page_cost=1.0` (`configs/postgres.conf`) makes the planner favour index scans. On tables clustered by geometry, reading millions of rows through a non-spatial index is random I/O; check `EXPLAIN (ANALYZE, BUFFERS)` for large `read=` counts.
+- Log step durations with `RAISE NOTICE` so slow steps show in the server logs.
+
 ## Query format
 
 - Always prefix DB tables with the right schema, be very explicit. The format is `public."SomeTable"`
