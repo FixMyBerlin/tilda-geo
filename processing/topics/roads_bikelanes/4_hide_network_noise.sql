@@ -3,7 +3,9 @@
 -- Two cheap filters on the `routing` graph, collapsed to one geometry per OSM parent way
 -- (carriageway and left/right bike lane edges of the same way count as one):
 --
--- 1. Islands: the parent touches no other line at all.
+-- 1. Islands: `tags.length` < 100 m and the parent touches no other line at all.
+--    Longer islands stay visible: they are real paths with a mapping gap (eg. a separately
+--    mapped cycleway that is not connected), which should show on the map, not be hidden.
 -- 2. Short dangling tips (one pass): `tags.length` < 20 m, exactly one end attached,
 --    the other end free, and nothing else touches the line (no interior T, no crossing).
 --    We do not recompute after hiding stubs, so a short way that only becomes a stub
@@ -275,7 +277,10 @@ WHERE
     OR ST_Within (l.geom, clip.inner_area)
   )
   AND (
-    s.attached_count = 0
+    (
+      s.attached_count = 0
+      AND l.length < 100
+    )
     OR (
       s.attached_count = 1
       AND l.length < 20
