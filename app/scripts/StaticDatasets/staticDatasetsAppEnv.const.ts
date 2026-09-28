@@ -1,3 +1,4 @@
+import type { AppInstance } from '@/components/shared/utils/appInstances.const'
 import { getAppBaseUrl } from '@/components/shared/utils/getAppBaseUrl'
 import type { EnvironmentValues } from '@/server/envSchema'
 import type { StaticDatasetsApiConfig } from './api'
@@ -45,9 +46,9 @@ function resolveAtlasApiKeyForStaticDatasets(appEnv: EnvironmentValues) {
   }
 }
 
-export function buildStaticDatasetsApiConfig(appEnv: EnvironmentValues) {
+export function buildStaticDatasetsApiConfig(appEnv: EnvironmentValues, instance: AppInstance) {
   return {
-    apiRootUrl: getAppBaseUrl('/api', appEnv),
+    apiRootUrl: getAppBaseUrl('/api', appEnv, instance),
     atlasApiKey: resolveAtlasApiKeyForStaticDatasets(appEnv),
   } satisfies StaticDatasetsApiConfig
 }

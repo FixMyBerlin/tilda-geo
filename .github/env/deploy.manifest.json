@@ -79,7 +79,7 @@
       "sourceEnv": "VAR_VITE_APP_ORIGIN",
       "required": true,
       "githubSource": "vars.VITE_APP_ORIGIN",
-      "description": "Public app origin."
+      "description": "Public app origin. Must be listed in `app/src/components/shared/utils/appInstances.const.ts`."
     },
     {
       "name": "VITE_APP_ENV",

@@ -5,6 +5,7 @@ import { parseArgs } from 'node:util'
 import { select } from '@clack/prompts'
 import { parse } from 'parse-gitignore'
 import slugify from 'slugify'
+import { type AppInstance, appInstanceNames } from '@/components/shared/utils/appInstances.const'
 import { S3_UPLOAD_FOLDER_BY_APP_ENV } from '@/server/s3UploadEnvFolder.const'
 import { getValidatedEnv, staticDatasetsS3CredentialsSchema } from '../shared/env'
 import { getRegions } from './api'
@@ -30,6 +31,7 @@ const { values, positionals: _positionals } = parseArgs({
   args: Bun.argv,
   options: {
     env: { type: 'string' },
+    instance: { type: 'string', default: 'tilda' },
     'keep-tmp': { type: 'boolean' },
     'folder-filter': { type: 'string' },
   },
@@ -62,10 +64,18 @@ if (values.env) {
   cliEnv = selected
 }
 
+const isAppInstance = (value: string): value is AppInstance =>
+  (appInstanceNames as readonly string[]).includes(value)
+if (!isAppInstance(values.instance)) {
+  red(`Invalid instance: ${values.instance}. Must be one of: ${appInstanceNames.join(', ')}`)
+  process.exit(1)
+}
+const instance = values.instance
+
 getValidatedEnv(staticDatasetsS3CredentialsSchema)
 
 const appEnv = STATIC_DATASETS_CLI_ENV_TO_APP[cliEnv]
-const api = buildStaticDatasetsApiConfig(appEnv)
+const api = buildStaticDatasetsApiConfig(appEnv, instance)
 
 const geoJsonFolder = 'scripts/StaticDatasets/geojson'
 export const tempFolder = 'scripts/StaticDatasets/_geojson_temp'
