@@ -39,6 +39,12 @@ SET max_parallel_workers_per_gather = 4;
 -- Touch tolerance below is 1 unit in EPSG:3857 (same ballpark as SnapToGrid 0.5).
 DROP TABLE IF EXISTS _network_noise_lines;
 
+-- Read `routing` sequentially and sort. Otherwise the planner walks the `parent_id` index, which
+-- on the geometry-clustered table means millions of random reads (5 min on staging).
+SET enable_indexscan = off;
+
+SET enable_bitmapscan = off;
+
 CREATE UNLOGGED TABLE _network_noise_lines AS
 SELECT DISTINCT
   ON (tags ->> 'parent_id') tags ->> 'parent_id' AS parent_id,
@@ -52,6 +58,10 @@ WHERE
 ORDER BY
   tags ->> 'parent_id',
   id;
+
+RESET enable_indexscan;
+
+RESET enable_bitmapscan;
 
 DO $$ BEGIN RAISE NOTICE 'hide network noise: collect routing parent lines took %', clock_timestamp() - current_setting('tilda.noise_step')::timestamptz; PERFORM set_config('tilda.noise_step', clock_timestamp()::text, false); END $$;
 
