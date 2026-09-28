@@ -2,25 +2,17 @@ import db from '@/server/db.server'
 
 let cached: boolean | null = null
 
-async function hasRegionsMigrationSchema() {
-  const rows = await db.$queryRaw<{ ok: number }[]>`
-    SELECT 1 AS ok
-    FROM information_schema.columns
-    WHERE table_schema = 'public'
-      AND table_name = 'Region'
-      AND column_name = 'name'
-    LIMIT 1
-  `
-  return rows.length > 0
-}
-
-/** True when local Postgres has the regions migration schema. False in CI, offline, or unmigrated dev DBs. */
+/**
+ * True when local Postgres is reachable and has the regions schema. False in CI, offline, or
+ * unmigrated dev DBs. Probes through the client so the check follows the Prisma schema (`Region`
+ * lives in `prisma`, not `public`); the query fails on both an unreachable DB and a missing column.
+ */
 export async function isIntegrationDbAvailable() {
   if (process.env.CI) return false
   if (cached != null) return cached
   try {
-    await db.$queryRaw`SELECT 1`
-    cached = await hasRegionsMigrationSchema()
+    await db.region.findFirst({ select: { name: true } })
+    cached = true
   } catch {
     cached = false
   }
