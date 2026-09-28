@@ -1,27 +1,31 @@
 {
   "mcpServers": {
     "tilda-geo-admin--DEV": {
+      "type": "http",
       "url": "http://127.0.0.1:5173/mcp",
       "headers": {
         "Authorization": "Bearer tildageode_admin_local_dev_mcp_only"
       }
     },
     "tilda-geo-admin--STG": {
+      "type": "http",
       "url": "https://staging.tilda-geo.de/mcp",
       "headers": {
-        "Authorization": "Bearer ${env:TILDA_GEO_ADMIN_API_TOKEN_STG}"
+        "Authorization": "Bearer ${TILDA_GEO_ADMIN_API_TOKEN_STG}"
       }
     },
     "tilda-geo-admin--PRD": {
+      "type": "http",
       "url": "https://tilda-geo.de/mcp",
       "headers": {
-        "Authorization": "Bearer ${env:TILDA_GEO_ADMIN_API_TOKEN_PRD}"
+        "Authorization": "Bearer ${TILDA_GEO_ADMIN_API_TOKEN_PRD}"
       }
     },
     "tilda-geo-admin--FLAECHENFINDER": {
+      "type": "http",
       "url": "https://flaechenfinder.tilda-geo.de/mcp",
       "headers": {
-        "Authorization": "Bearer ${env:TILDA_GEO_ADMIN_API_TOKEN_FLAECHENFINDER}"
+        "Authorization": "Bearer ${TILDA_GEO_ADMIN_API_TOKEN_FLAECHENFINDER}"
       }
     }
   }
