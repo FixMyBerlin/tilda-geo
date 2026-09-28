@@ -44,3 +44,8 @@ const AccessedRegionSchema = z.object({
 export const AccessedRegionsSchema = z.array(AccessedRegionSchema).default([])
 
 export type AccessedRegionType = z.infer<typeof AccessedRegionSchema>
+
+export const UpdateUserRoleSchema = z.object({
+  userId: z.string().min(1),
+  role: z.enum(['USER', 'ADMIN'], { message: 'Bitte eine Rolle wählen.' }),
+})

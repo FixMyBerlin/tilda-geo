@@ -22,7 +22,7 @@ describe('buildAdminRegionNavigation', () => {
     })
     // The lists open filtered to the region.
     for (const [key, to] of [
-      ['members', '/admin/memberships'],
+      ['members', '/admin/users'],
       ['newMembership', '/admin/memberships/new'],
       ['uploads', '/admin/map-dataset-uploads'],
       ['qaConfigs', '/admin/qa-configs'],

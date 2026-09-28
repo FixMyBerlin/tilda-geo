@@ -10,7 +10,7 @@ export const AuditLogUserCell = ({ row }: { row: Pick<AuditLogRow, 'userId' | 'u
 
   return (
     <span className="inline-flex flex-wrap items-center gap-1">
-      <Link to="/admin/memberships/new" search={{ userId: row.userId }}>
+      <Link to="/admin/users/$userId/edit" params={{ userId: row.userId }}>
         {label}
       </Link>
       {isAdmin(row.user) ? (

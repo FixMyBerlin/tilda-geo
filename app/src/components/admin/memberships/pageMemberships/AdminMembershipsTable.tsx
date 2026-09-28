@@ -43,7 +43,9 @@ export const AdminMembershipsTable = ({ users, total, accessedRegionsCutoffAt, f
         return (
           <tr key={user.id}>
             <td className={twMerge(adminTableClasses.td, 'py-3 align-top')}>
-              <strong className="font-medium text-gray-900">OSM: {user.osmName}</strong>{' '}
+              <Link to="/admin/users/$userId/edit" params={{ userId: user.id }}>
+                <strong className="font-medium">OSM: {user.osmName}</strong>
+              </Link>{' '}
               <span className="text-gray-400">({user.osmId})</span>
               {user.role === 'ADMIN' && (
                 <Pill color="pink" className="ml-1 bg-pink-300 text-pink-950 ring-0">

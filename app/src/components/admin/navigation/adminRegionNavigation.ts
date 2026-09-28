@@ -44,7 +44,7 @@ export function buildAdminRegionNavigation(region: AdminRegionNavRegion) {
     {
       key: 'members',
       name: 'Mitglieder',
-      to: '/admin/memberships',
+      to: '/admin/users',
       search: { regionSlug },
     },
     {

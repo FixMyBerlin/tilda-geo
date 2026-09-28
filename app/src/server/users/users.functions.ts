@@ -4,9 +4,10 @@ import { z } from 'zod'
 import { persistOsmUserDescriptionIfPresent } from './actions/pollOsmUserDescription.server'
 import { updateOsmDescription } from './mutations/updateOsmDescription.server'
 import { updateUserWithData } from './mutations/updateUser.server'
+import { updateUserRoleWithData } from './mutations/updateUserRole.server'
 import { getCurrentUser } from './queries/getCurrentUser.server'
 import { getUserWithMemberships } from './queries/getUserWithMemberships.server'
-import { UpdateOsmDescription, UpdateUserSchema } from './schema'
+import { UpdateOsmDescription, UpdateUserRoleSchema, UpdateUserSchema } from './schema'
 
 export const getCurrentUserLoaderFn = createServerFn({ method: 'GET' }).handler(async () => {
   const user = await getCurrentUser(getRequestHeaders())
@@ -32,3 +33,7 @@ export const updateOsmDescriptionFn = createServerFn({ method: 'POST' })
 export const updateUserFn = createServerFn({ method: 'POST' })
   .validator((data: z.infer<typeof UpdateUserSchema>) => UpdateUserSchema.parse(data))
   .handler(async ({ data }) => updateUserWithData(data, getRequestHeaders()))
+
+export const updateUserRoleFn = createServerFn({ method: 'POST' })
+  .validator((data: z.infer<typeof UpdateUserRoleSchema>) => UpdateUserRoleSchema.parse(data))
+  .handler(async ({ data }) => updateUserRoleWithData(data, getRequestHeaders()))

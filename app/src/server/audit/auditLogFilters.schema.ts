@@ -28,7 +28,7 @@ const optionalAuditLogDateBound = (bound: 'from' | 'to') =>
 export const auditLogFilterWireFields = {
   model: z.string().optional(),
   recordId: z.coerce.string().optional(),
-  userId: z.string().optional(),
+  userId: z.coerce.string().optional(),
   changeSource: z.enum(AUDIT_CHANGE_SOURCES).optional(),
   from: z.string().optional(),
   to: z.string().optional(),

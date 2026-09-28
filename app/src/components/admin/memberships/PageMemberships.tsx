@@ -7,7 +7,7 @@ import { AdminSearchField, useAdminSearchQuery } from '@/components/admin/AdminS
 import { Link } from '@/components/shared/links/Link'
 import { AdminMembershipsTable } from './pageMemberships/AdminMembershipsTable'
 
-const routeApi = getRouteApi('/admin/memberships/')
+const routeApi = getRouteApi('/admin/users/')
 
 export function PageMemberships() {
   const loaderData = routeApi.useLoaderData()

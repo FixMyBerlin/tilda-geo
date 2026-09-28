@@ -4,7 +4,7 @@ import type { Prisma } from '@/prisma/generated/client'
 // its link counts always match the rows of the filtered list. Callers trim the slug (see
 // `optionalTrimmed`) so whitespace-only `?regionSlug=` is treated as no filter.
 
-/** Users with a membership in the region (`/admin/memberships`). */
+/** Users with a membership in the region (`/admin/users`). */
 export const usersInRegionWhere = (regionSlug: string) =>
   ({ memberships: { some: { region: { slug: regionSlug } } } }) satisfies Prisma.UserWhereInput
 

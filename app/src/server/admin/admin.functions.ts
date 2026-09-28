@@ -28,6 +28,7 @@ import {
 import { getUploads } from '@/server/uploads/queries/getUploads.server'
 import { getUploadWithRegions } from '@/server/uploads/queries/getUploadWithRegions.server'
 import { buildUsersAndMembershipsWhere } from '@/server/users/buildUsersAndMembershipsWhere.server'
+import { getUserForAdmin } from '@/server/users/queries/getUserForAdmin.server'
 import { getUsers } from '@/server/users/queries/getUsers.server'
 import { getUsersAndMemberships } from '@/server/users/queries/getUsersAndMemberships.server'
 import { optionalTrimmed } from '@/server/utils/searchString'
@@ -189,14 +190,14 @@ export const getAdminNoteFolderEditLoaderFn = createServerFn({ method: 'GET' })
     return { folder, regions, auditHistory }
   })
 
-const AdminMembershipsLoaderInput = createPageSearchSchema().extend({
+const AdminUsersLoaderInput = createPageSearchSchema().extend({
   q: optionalSearchString(),
   regionSlug: optionalSearchString(),
 })
 
-export const getAdminMembershipsLoaderFn = createServerFn({ method: 'GET' })
-  .validator((data: z.input<typeof AdminMembershipsLoaderInput>) =>
-    AdminMembershipsLoaderInput.parse(data ?? {}),
+export const getAdminUsersLoaderFn = createServerFn({ method: 'GET' })
+  .validator((data: z.input<typeof AdminUsersLoaderInput>) =>
+    AdminUsersLoaderInput.parse(data ?? {}),
   )
   .handler(async ({ data: { q, regionSlug, ...page } }) => {
     const result = await getUsersAndMemberships(
@@ -208,6 +209,21 @@ export const getAdminMembershipsLoaderFn = createServerFn({ method: 'GET' })
       // Stable cutoff for the "accessed regions" default filter (last 30 days) — computed once
       // here so the client never recomputes "now" during render (would cause a hydration mismatch).
       accessedRegionsCutoffAt: subDays(new Date(), 30).getTime(),
+    }
+  })
+
+const AdminUserEditInput = z.object({ userId: z.string() })
+
+export const getAdminUserEditLoaderFn = createServerFn({ method: 'GET' })
+  .validator((data: z.infer<typeof AdminUserEditInput>) => AdminUserEditInput.parse(data))
+  .handler(async ({ data }) => {
+    const headers = getRequestHeaders()
+    const user = await getUserForAdmin({ userId: data.userId }, headers)
+    // Counts for the aside links; each equals the rows of the linked, filtered list.
+    const auditHistory = await db.auditLog.count({ where: { model: 'User', recordId: user.id } })
+    return {
+      user,
+      linkCounts: { memberships: user._count.memberships, auditHistory },
     }
   })
 

@@ -143,7 +143,7 @@ test.describe('Admin Pages (stubbed login)', () => {
       const serverErrors = collectServerErrors(page, baseURL)
 
       // Small page size so the seeded users span several pages.
-      await page.goto('/admin/memberships?pageSize=1')
+      await page.goto('/admin/users?pageSize=1')
       const pagination = page.getByRole('navigation', { name: 'Seitennummerierung' })
       await expect(pagination).toBeVisible()
       await expect(pagination.getByRole('link', { name: 'Seite 1' })).toHaveAttribute(
@@ -176,8 +176,8 @@ test.describe('Admin Pages (stubbed login)', () => {
       await expect(page).not.toHaveURL(/[?&]page=/)
 
       // Invalid values fall back to the defaults, which are stripped from the URL.
-      await page.goto('/admin/memberships?page=abc&pageSize=9999')
-      await expect(page).toHaveURL(/\/admin\/memberships$/)
+      await page.goto('/admin/users?page=abc&pageSize=9999')
+      await expect(page).toHaveURL(/\/admin\/users$/)
 
       await expectNoServerErrors(page, serverErrors)
     })
@@ -199,7 +199,7 @@ test.describe('Admin Pages (stubbed login)', () => {
       })
       const serverErrors = collectServerErrors(page, baseURL)
 
-      await page.goto('/admin/memberships?regionSlug=radinfra')
+      await page.goto('/admin/users?regionSlug=radinfra')
       // `exact: true`: the sidebar's own region switcher ("Region öffnen…") is now on every admin
       // page, so a substring match on "Region" would resolve to both comboboxes.
       const regionFilter = page.getByRole('combobox', { name: 'Region', exact: true })
@@ -218,6 +218,37 @@ test.describe('Admin Pages (stubbed login)', () => {
 
     test.afterEach(async () => {
       await cleanupStubbedSessionData('ADMIN', 'admin-memberships-region-filter')
+    })
+  })
+
+  test.describe('users', () => {
+    test('opens the user edit page from the list', async ({ page }, testInfo) => {
+      const baseURL = testInfo.project.use.baseURL
+      if (typeof baseURL !== 'string') {
+        throw new Error('Playwright baseURL must be a string for stubbed login tests')
+      }
+
+      await createStubbedAdminSession(page, baseURL, { identityKey: 'admin-users-edit' })
+      const serverErrors = collectServerErrors(page, baseURL)
+
+      await page.goto('/admin/users')
+      await page
+        .getByRole('link', { name: /^OSM: / })
+        .first()
+        .click()
+      await expect(page).toHaveURL(/\/admin\/users\/[^/]+\/edit$/)
+      await expect(page.getByRole('radio', { name: /^Admin/ })).toBeVisible()
+      // Related data opens the existing lists, filtered to this user.
+      await expect(page.getByRole('link', { name: /Mitgliedschaften/ }).first()).toHaveAttribute(
+        'href',
+        /\/admin\/users\?q=/,
+      )
+
+      await expectNoServerErrors(page, serverErrors)
+    })
+
+    test.afterEach(async () => {
+      await cleanupStubbedSessionData('ADMIN', 'admin-users-edit')
     })
   })
 })

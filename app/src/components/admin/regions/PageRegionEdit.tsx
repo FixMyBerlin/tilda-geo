@@ -86,7 +86,7 @@ export function PageRegionEdit() {
               </AdminAsideLink>
               <AdminAsideLink
                 icon={UsersIcon}
-                to="/admin/memberships"
+                to="/admin/users"
                 search={regionSearch}
                 count={linkCounts.memberships}
               >

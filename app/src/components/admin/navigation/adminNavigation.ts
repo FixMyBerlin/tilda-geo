@@ -108,7 +108,7 @@ export const adminNavigation: AdminNavItem[] = [
   },
   {
     name: 'Nutzer & Rechte',
-    to: '/admin/memberships',
+    to: '/admin/users',
     icon: UsersIcon,
     countKey: 'users',
     description: 'Nutzer und ihre Mitgliedschaften in Regionen.',

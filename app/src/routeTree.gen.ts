@@ -32,13 +32,13 @@ import { Route as ApiProcessingDatesRouteImport } from './routes/api/processing-
 import { Route as ApiMapStyleRouteImport } from './routes/api/map-style'
 import { Route as ApiCampaignsRouteImport } from './routes/api/campaigns'
 import { Route as ApiBoundaryRouteImport } from './routes/api/boundary'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as AdminReviewListsRouteImport } from './routes/admin/review-lists'
 import { Route as AdminRegionsRouteImport } from './routes/admin/regions'
 import { Route as AdminRegionContractsRouteImport } from './routes/admin/region-contracts'
 import { Route as AdminQaConfigsRouteImport } from './routes/admin/qa-configs'
 import { Route as AdminProcessingRouteImport } from './routes/admin/processing'
 import { Route as AdminNoteFoldersRouteImport } from './routes/admin/note-folders'
-import { Route as AdminMembershipsRouteImport } from './routes/admin/memberships'
 import { Route as AdminMapDatasetUploadsRouteImport } from './routes/admin/map-dataset-uploads'
 import { Route as AdminMapDatasetCategoriesRouteImport } from './routes/admin/map-dataset-categories'
 import { Route as AdminDataSchemaRouteImport } from './routes/admin/data-schema'
@@ -50,13 +50,13 @@ import { Route as PagesDatenschutzRouteImport } from './routes/_pages/datenschut
 import { Route as PagesAccessDeniedRouteImport } from './routes/_pages/access-denied'
 import { Route as RegionenRegionSlugRouteRouteImport } from './routes/regionen/$regionSlug/route'
 import { Route as RegionenRegionSlugIndexRouteImport } from './routes/regionen/$regionSlug/index'
+import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
 import { Route as AdminReviewListsIndexRouteImport } from './routes/admin/review-lists/index'
 import { Route as AdminRegionsIndexRouteImport } from './routes/admin/regions/index'
 import { Route as AdminRegionContractsIndexRouteImport } from './routes/admin/region-contracts/index'
 import { Route as AdminQaConfigsIndexRouteImport } from './routes/admin/qa-configs/index'
 import { Route as AdminProcessingIndexRouteImport } from './routes/admin/processing/index'
 import { Route as AdminNoteFoldersIndexRouteImport } from './routes/admin/note-folders/index'
-import { Route as AdminMembershipsIndexRouteImport } from './routes/admin/memberships/index'
 import { Route as AdminMapDatasetUploadsIndexRouteImport } from './routes/admin/map-dataset-uploads/index'
 import { Route as AdminMapDatasetCategoriesIndexRouteImport } from './routes/admin/map-dataset-categories/index'
 import { Route as RegionenRegionSlugQaRouteImport } from './routes/regionen/$regionSlug/qa'
@@ -105,6 +105,7 @@ import { Route as ApiAdminRegionsSlugRouteImport } from './routes/api/admin/regi
 import { Route as ApiAdminRegionUploadsUploadRouteImport } from './routes/api/admin/region-uploads.upload'
 import { Route as ApiAdminProcessingMetaIdRouteImport } from './routes/api/admin/processing.$metaId'
 import { Route as ApiAdminDataSchemaImportRouteImport } from './routes/api/admin/data-schema.import'
+import { Route as AdminUsersUserIdEditRouteImport } from './routes/admin/users/$userId.edit'
 import { Route as AdminReviewListsIdEditRouteImport } from './routes/admin/review-lists/$id.edit'
 import { Route as AdminRegionsRegionSlugEditRouteImport } from './routes/admin/regions/$regionSlug.edit'
 import { Route as AdminRegionContractsSlugEditRouteImport } from './routes/admin/region-contracts/$slug.edit'
@@ -227,6 +228,11 @@ const ApiBoundaryRoute = ApiBoundaryRouteImport.update({
   path: '/api/boundary',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminReviewListsRoute = AdminReviewListsRouteImport.update({
   id: '/review-lists',
   path: '/review-lists',
@@ -255,11 +261,6 @@ const AdminProcessingRoute = AdminProcessingRouteImport.update({
 const AdminNoteFoldersRoute = AdminNoteFoldersRouteImport.update({
   id: '/note-folders',
   path: '/note-folders',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminMembershipsRoute = AdminMembershipsRouteImport.update({
-  id: '/memberships',
-  path: '/memberships',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminMapDatasetUploadsRoute = AdminMapDatasetUploadsRouteImport.update({
@@ -318,6 +319,11 @@ const RegionenRegionSlugIndexRoute = RegionenRegionSlugIndexRouteImport.update({
   path: '/',
   getParentRoute: () => RegionenRegionSlugRouteRoute,
 } as any)
+const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminUsersRoute,
+} as any)
 const AdminReviewListsIndexRoute = AdminReviewListsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -348,11 +354,6 @@ const AdminNoteFoldersIndexRoute = AdminNoteFoldersIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminNoteFoldersRoute,
-} as any)
-const AdminMembershipsIndexRoute = AdminMembershipsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminMembershipsRoute,
 } as any)
 const AdminMapDatasetUploadsIndexRoute =
   AdminMapDatasetUploadsIndexRouteImport.update({
@@ -498,9 +499,9 @@ const AdminProcessingMetaIdRoute = AdminProcessingMetaIdRouteImport.update({
   getParentRoute: () => AdminProcessingRoute,
 } as any)
 const AdminMembershipsNewRoute = AdminMembershipsNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => AdminMembershipsRoute,
+  id: '/memberships/new',
+  path: '/memberships/new',
+  getParentRoute: () => AdminRoute,
 } as any)
 const AdminMapDatasetUploadsSlugRoute =
   AdminMapDatasetUploadsSlugRouteImport.update({
@@ -619,6 +620,11 @@ const ApiAdminDataSchemaImportRoute =
     path: '/api/admin/data-schema/import',
     getParentRoute: () => rootRouteImport,
   } as any)
+const AdminUsersUserIdEditRoute = AdminUsersUserIdEditRouteImport.update({
+  id: '/$userId/edit',
+  path: '/$userId/edit',
+  getParentRoute: () => AdminUsersRoute,
+} as any)
 const AdminReviewListsIdEditRoute = AdminReviewListsIdEditRouteImport.update({
   id: '/$id/edit',
   path: '/$id/edit',
@@ -669,13 +675,13 @@ export interface FileRoutesByFullPath {
   '/admin/data-schema': typeof AdminDataSchemaRoute
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesRouteWithChildren
   '/admin/map-dataset-uploads': typeof AdminMapDatasetUploadsRouteWithChildren
-  '/admin/memberships': typeof AdminMembershipsRouteWithChildren
   '/admin/note-folders': typeof AdminNoteFoldersRouteWithChildren
   '/admin/processing': typeof AdminProcessingRouteWithChildren
   '/admin/qa-configs': typeof AdminQaConfigsRouteWithChildren
   '/admin/region-contracts': typeof AdminRegionContractsRouteWithChildren
   '/admin/regions': typeof AdminRegionsRouteWithChildren
   '/admin/review-lists': typeof AdminReviewListsRouteWithChildren
+  '/admin/users': typeof AdminUsersRouteWithChildren
   '/api/boundary': typeof ApiBoundaryRoute
   '/api/campaigns': typeof ApiCampaignsRoute
   '/api/map-style': typeof ApiMapStyleRoute
@@ -727,19 +733,20 @@ export interface FileRoutesByFullPath {
   '/regionen/$regionSlug/qa': typeof RegionenRegionSlugQaRoute
   '/admin/map-dataset-categories/': typeof AdminMapDatasetCategoriesIndexRoute
   '/admin/map-dataset-uploads/': typeof AdminMapDatasetUploadsIndexRoute
-  '/admin/memberships/': typeof AdminMembershipsIndexRoute
   '/admin/note-folders/': typeof AdminNoteFoldersIndexRoute
   '/admin/processing/': typeof AdminProcessingIndexRoute
   '/admin/qa-configs/': typeof AdminQaConfigsIndexRoute
   '/admin/region-contracts/': typeof AdminRegionContractsIndexRoute
   '/admin/regions/': typeof AdminRegionsIndexRoute
   '/admin/review-lists/': typeof AdminReviewListsIndexRoute
+  '/admin/users/': typeof AdminUsersIndexRoute
   '/regionen/$regionSlug/': typeof RegionenRegionSlugIndexRoute
   '/admin/note-folders/$id/edit': typeof AdminNoteFoldersIdEditRoute
   '/admin/qa-configs/$id/edit': typeof AdminQaConfigsIdEditRoute
   '/admin/region-contracts/$slug/edit': typeof AdminRegionContractsSlugEditRoute
   '/admin/regions/$regionSlug/edit': typeof AdminRegionsRegionSlugEditRoute
   '/admin/review-lists/$id/edit': typeof AdminReviewListsIdEditRoute
+  '/admin/users/$userId/edit': typeof AdminUsersUserIdEditRoute
   '/api/admin/data-schema/import': typeof ApiAdminDataSchemaImportRoute
   '/api/admin/processing/$metaId': typeof ApiAdminProcessingMetaIdRoute
   '/api/admin/region-uploads/upload': typeof ApiAdminRegionUploadsUploadRoute
@@ -818,19 +825,20 @@ export interface FileRoutesByTo {
   '/regionen/$regionSlug/qa': typeof RegionenRegionSlugQaRoute
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesIndexRoute
   '/admin/map-dataset-uploads': typeof AdminMapDatasetUploadsIndexRoute
-  '/admin/memberships': typeof AdminMembershipsIndexRoute
   '/admin/note-folders': typeof AdminNoteFoldersIndexRoute
   '/admin/processing': typeof AdminProcessingIndexRoute
   '/admin/qa-configs': typeof AdminQaConfigsIndexRoute
   '/admin/region-contracts': typeof AdminRegionContractsIndexRoute
   '/admin/regions': typeof AdminRegionsIndexRoute
   '/admin/review-lists': typeof AdminReviewListsIndexRoute
+  '/admin/users': typeof AdminUsersIndexRoute
   '/regionen/$regionSlug': typeof RegionenRegionSlugIndexRoute
   '/admin/note-folders/$id/edit': typeof AdminNoteFoldersIdEditRoute
   '/admin/qa-configs/$id/edit': typeof AdminQaConfigsIdEditRoute
   '/admin/region-contracts/$slug/edit': typeof AdminRegionContractsSlugEditRoute
   '/admin/regions/$regionSlug/edit': typeof AdminRegionsRegionSlugEditRoute
   '/admin/review-lists/$id/edit': typeof AdminReviewListsIdEditRoute
+  '/admin/users/$userId/edit': typeof AdminUsersUserIdEditRoute
   '/api/admin/data-schema/import': typeof ApiAdminDataSchemaImportRoute
   '/api/admin/processing/$metaId': typeof ApiAdminProcessingMetaIdRoute
   '/api/admin/region-uploads/upload': typeof ApiAdminRegionUploadsUploadRoute
@@ -865,13 +873,13 @@ export interface FileRoutesById {
   '/admin/data-schema': typeof AdminDataSchemaRoute
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesRouteWithChildren
   '/admin/map-dataset-uploads': typeof AdminMapDatasetUploadsRouteWithChildren
-  '/admin/memberships': typeof AdminMembershipsRouteWithChildren
   '/admin/note-folders': typeof AdminNoteFoldersRouteWithChildren
   '/admin/processing': typeof AdminProcessingRouteWithChildren
   '/admin/qa-configs': typeof AdminQaConfigsRouteWithChildren
   '/admin/region-contracts': typeof AdminRegionContractsRouteWithChildren
   '/admin/regions': typeof AdminRegionsRouteWithChildren
   '/admin/review-lists': typeof AdminReviewListsRouteWithChildren
+  '/admin/users': typeof AdminUsersRouteWithChildren
   '/api/boundary': typeof ApiBoundaryRoute
   '/api/campaigns': typeof ApiCampaignsRoute
   '/api/map-style': typeof ApiMapStyleRoute
@@ -923,19 +931,20 @@ export interface FileRoutesById {
   '/regionen/$regionSlug/qa': typeof RegionenRegionSlugQaRoute
   '/admin/map-dataset-categories/': typeof AdminMapDatasetCategoriesIndexRoute
   '/admin/map-dataset-uploads/': typeof AdminMapDatasetUploadsIndexRoute
-  '/admin/memberships/': typeof AdminMembershipsIndexRoute
   '/admin/note-folders/': typeof AdminNoteFoldersIndexRoute
   '/admin/processing/': typeof AdminProcessingIndexRoute
   '/admin/qa-configs/': typeof AdminQaConfigsIndexRoute
   '/admin/region-contracts/': typeof AdminRegionContractsIndexRoute
   '/admin/regions/': typeof AdminRegionsIndexRoute
   '/admin/review-lists/': typeof AdminReviewListsIndexRoute
+  '/admin/users/': typeof AdminUsersIndexRoute
   '/regionen/$regionSlug/': typeof RegionenRegionSlugIndexRoute
   '/admin/note-folders/$id/edit': typeof AdminNoteFoldersIdEditRoute
   '/admin/qa-configs/$id/edit': typeof AdminQaConfigsIdEditRoute
   '/admin/region-contracts/$slug/edit': typeof AdminRegionContractsSlugEditRoute
   '/admin/regions/$regionSlug/edit': typeof AdminRegionsRegionSlugEditRoute
   '/admin/review-lists/$id/edit': typeof AdminReviewListsIdEditRoute
+  '/admin/users/$userId/edit': typeof AdminUsersUserIdEditRoute
   '/api/admin/data-schema/import': typeof ApiAdminDataSchemaImportRoute
   '/api/admin/processing/$metaId': typeof ApiAdminProcessingMetaIdRoute
   '/api/admin/region-uploads/upload': typeof ApiAdminRegionUploadsUploadRoute
@@ -970,13 +979,13 @@ export interface FileRouteTypes {
     | '/admin/data-schema'
     | '/admin/map-dataset-categories'
     | '/admin/map-dataset-uploads'
-    | '/admin/memberships'
     | '/admin/note-folders'
     | '/admin/processing'
     | '/admin/qa-configs'
     | '/admin/region-contracts'
     | '/admin/regions'
     | '/admin/review-lists'
+    | '/admin/users'
     | '/api/boundary'
     | '/api/campaigns'
     | '/api/map-style'
@@ -1028,19 +1037,20 @@ export interface FileRouteTypes {
     | '/regionen/$regionSlug/qa'
     | '/admin/map-dataset-categories/'
     | '/admin/map-dataset-uploads/'
-    | '/admin/memberships/'
     | '/admin/note-folders/'
     | '/admin/processing/'
     | '/admin/qa-configs/'
     | '/admin/region-contracts/'
     | '/admin/regions/'
     | '/admin/review-lists/'
+    | '/admin/users/'
     | '/regionen/$regionSlug/'
     | '/admin/note-folders/$id/edit'
     | '/admin/qa-configs/$id/edit'
     | '/admin/region-contracts/$slug/edit'
     | '/admin/regions/$regionSlug/edit'
     | '/admin/review-lists/$id/edit'
+    | '/admin/users/$userId/edit'
     | '/api/admin/data-schema/import'
     | '/api/admin/processing/$metaId'
     | '/api/admin/region-uploads/upload'
@@ -1119,19 +1129,20 @@ export interface FileRouteTypes {
     | '/regionen/$regionSlug/qa'
     | '/admin/map-dataset-categories'
     | '/admin/map-dataset-uploads'
-    | '/admin/memberships'
     | '/admin/note-folders'
     | '/admin/processing'
     | '/admin/qa-configs'
     | '/admin/region-contracts'
     | '/admin/regions'
     | '/admin/review-lists'
+    | '/admin/users'
     | '/regionen/$regionSlug'
     | '/admin/note-folders/$id/edit'
     | '/admin/qa-configs/$id/edit'
     | '/admin/region-contracts/$slug/edit'
     | '/admin/regions/$regionSlug/edit'
     | '/admin/review-lists/$id/edit'
+    | '/admin/users/$userId/edit'
     | '/api/admin/data-schema/import'
     | '/api/admin/processing/$metaId'
     | '/api/admin/region-uploads/upload'
@@ -1165,13 +1176,13 @@ export interface FileRouteTypes {
     | '/admin/data-schema'
     | '/admin/map-dataset-categories'
     | '/admin/map-dataset-uploads'
-    | '/admin/memberships'
     | '/admin/note-folders'
     | '/admin/processing'
     | '/admin/qa-configs'
     | '/admin/region-contracts'
     | '/admin/regions'
     | '/admin/review-lists'
+    | '/admin/users'
     | '/api/boundary'
     | '/api/campaigns'
     | '/api/map-style'
@@ -1223,19 +1234,20 @@ export interface FileRouteTypes {
     | '/regionen/$regionSlug/qa'
     | '/admin/map-dataset-categories/'
     | '/admin/map-dataset-uploads/'
-    | '/admin/memberships/'
     | '/admin/note-folders/'
     | '/admin/processing/'
     | '/admin/qa-configs/'
     | '/admin/region-contracts/'
     | '/admin/regions/'
     | '/admin/review-lists/'
+    | '/admin/users/'
     | '/regionen/$regionSlug/'
     | '/admin/note-folders/$id/edit'
     | '/admin/qa-configs/$id/edit'
     | '/admin/region-contracts/$slug/edit'
     | '/admin/regions/$regionSlug/edit'
     | '/admin/review-lists/$id/edit'
+    | '/admin/users/$userId/edit'
     | '/api/admin/data-schema/import'
     | '/api/admin/processing/$metaId'
     | '/api/admin/region-uploads/upload'
@@ -1458,6 +1470,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiBoundaryRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/review-lists': {
       id: '/admin/review-lists'
       path: '/review-lists'
@@ -1498,13 +1517,6 @@ declare module '@tanstack/react-router' {
       path: '/note-folders'
       fullPath: '/admin/note-folders'
       preLoaderRoute: typeof AdminNoteFoldersRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/memberships': {
-      id: '/admin/memberships'
-      path: '/memberships'
-      fullPath: '/admin/memberships'
-      preLoaderRoute: typeof AdminMembershipsRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/map-dataset-uploads': {
@@ -1584,6 +1596,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegionenRegionSlugIndexRouteImport
       parentRoute: typeof RegionenRegionSlugRouteRoute
     }
+    '/admin/users/': {
+      id: '/admin/users/'
+      path: '/'
+      fullPath: '/admin/users/'
+      preLoaderRoute: typeof AdminUsersIndexRouteImport
+      parentRoute: typeof AdminUsersRoute
+    }
     '/admin/review-lists/': {
       id: '/admin/review-lists/'
       path: '/'
@@ -1625,13 +1644,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/note-folders/'
       preLoaderRoute: typeof AdminNoteFoldersIndexRouteImport
       parentRoute: typeof AdminNoteFoldersRoute
-    }
-    '/admin/memberships/': {
-      id: '/admin/memberships/'
-      path: '/'
-      fullPath: '/admin/memberships/'
-      preLoaderRoute: typeof AdminMembershipsIndexRouteImport
-      parentRoute: typeof AdminMembershipsRoute
     }
     '/admin/map-dataset-uploads/': {
       id: '/admin/map-dataset-uploads/'
@@ -1824,10 +1836,10 @@ declare module '@tanstack/react-router' {
     }
     '/admin/memberships/new': {
       id: '/admin/memberships/new'
-      path: '/new'
+      path: '/memberships/new'
       fullPath: '/admin/memberships/new'
       preLoaderRoute: typeof AdminMembershipsNewRouteImport
-      parentRoute: typeof AdminMembershipsRoute
+      parentRoute: typeof AdminRoute
     }
     '/admin/map-dataset-uploads/$slug': {
       id: '/admin/map-dataset-uploads/$slug'
@@ -1969,6 +1981,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminDataSchemaImportRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin/users/$userId/edit': {
+      id: '/admin/users/$userId/edit'
+      path: '/$userId/edit'
+      fullPath: '/admin/users/$userId/edit'
+      preLoaderRoute: typeof AdminUsersUserIdEditRouteImport
+      parentRoute: typeof AdminUsersRoute
+    }
     '/admin/review-lists/$id/edit': {
       id: '/admin/review-lists/$id/edit'
       path: '/$id/edit'
@@ -2071,19 +2090,6 @@ const AdminMapDatasetUploadsRouteWithChildren =
     AdminMapDatasetUploadsRouteChildren,
   )
 
-interface AdminMembershipsRouteChildren {
-  AdminMembershipsNewRoute: typeof AdminMembershipsNewRoute
-  AdminMembershipsIndexRoute: typeof AdminMembershipsIndexRoute
-}
-
-const AdminMembershipsRouteChildren: AdminMembershipsRouteChildren = {
-  AdminMembershipsNewRoute: AdminMembershipsNewRoute,
-  AdminMembershipsIndexRoute: AdminMembershipsIndexRoute,
-}
-
-const AdminMembershipsRouteWithChildren =
-  AdminMembershipsRoute._addFileChildren(AdminMembershipsRouteChildren)
-
 interface AdminNoteFoldersRouteChildren {
   AdminNoteFoldersIndexRoute: typeof AdminNoteFoldersIndexRoute
   AdminNoteFoldersIdEditRoute: typeof AdminNoteFoldersIdEditRoute
@@ -2173,20 +2179,35 @@ const AdminReviewListsRouteChildren: AdminReviewListsRouteChildren = {
 const AdminReviewListsRouteWithChildren =
   AdminReviewListsRoute._addFileChildren(AdminReviewListsRouteChildren)
 
+interface AdminUsersRouteChildren {
+  AdminUsersIndexRoute: typeof AdminUsersIndexRoute
+  AdminUsersUserIdEditRoute: typeof AdminUsersUserIdEditRoute
+}
+
+const AdminUsersRouteChildren: AdminUsersRouteChildren = {
+  AdminUsersIndexRoute: AdminUsersIndexRoute,
+  AdminUsersUserIdEditRoute: AdminUsersUserIdEditRoute,
+}
+
+const AdminUsersRouteWithChildren = AdminUsersRoute._addFileChildren(
+  AdminUsersRouteChildren,
+)
+
 interface AdminRouteChildren {
   AdminApiTokensRoute: typeof AdminApiTokensRoute
   AdminAuditLogRoute: typeof AdminAuditLogRoute
   AdminDataSchemaRoute: typeof AdminDataSchemaRoute
   AdminMapDatasetCategoriesRoute: typeof AdminMapDatasetCategoriesRouteWithChildren
   AdminMapDatasetUploadsRoute: typeof AdminMapDatasetUploadsRouteWithChildren
-  AdminMembershipsRoute: typeof AdminMembershipsRouteWithChildren
   AdminNoteFoldersRoute: typeof AdminNoteFoldersRouteWithChildren
   AdminProcessingRoute: typeof AdminProcessingRouteWithChildren
   AdminQaConfigsRoute: typeof AdminQaConfigsRouteWithChildren
   AdminRegionContractsRoute: typeof AdminRegionContractsRouteWithChildren
   AdminRegionsRoute: typeof AdminRegionsRouteWithChildren
   AdminReviewListsRoute: typeof AdminReviewListsRouteWithChildren
+  AdminUsersRoute: typeof AdminUsersRouteWithChildren
   AdminIndexRoute: typeof AdminIndexRoute
+  AdminMembershipsNewRoute: typeof AdminMembershipsNewRoute
 }
 
 const AdminRouteChildren: AdminRouteChildren = {
@@ -2195,14 +2216,15 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminDataSchemaRoute: AdminDataSchemaRoute,
   AdminMapDatasetCategoriesRoute: AdminMapDatasetCategoriesRouteWithChildren,
   AdminMapDatasetUploadsRoute: AdminMapDatasetUploadsRouteWithChildren,
-  AdminMembershipsRoute: AdminMembershipsRouteWithChildren,
   AdminNoteFoldersRoute: AdminNoteFoldersRouteWithChildren,
   AdminProcessingRoute: AdminProcessingRouteWithChildren,
   AdminQaConfigsRoute: AdminQaConfigsRouteWithChildren,
   AdminRegionContractsRoute: AdminRegionContractsRouteWithChildren,
   AdminRegionsRoute: AdminRegionsRouteWithChildren,
   AdminReviewListsRoute: AdminReviewListsRouteWithChildren,
+  AdminUsersRoute: AdminUsersRouteWithChildren,
   AdminIndexRoute: AdminIndexRoute,
+  AdminMembershipsNewRoute: AdminMembershipsNewRoute,
 }
 
 const AdminRouteWithChildren = AdminRoute._addFileChildren(AdminRouteChildren)

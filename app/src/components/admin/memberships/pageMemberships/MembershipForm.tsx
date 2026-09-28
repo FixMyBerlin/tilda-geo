@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { useNavigate } from '@tanstack/react-router'
 import { useState } from 'react'
 import type { z } from 'zod'
 import { AdminFormLayout } from '@/components/admin/aside/AdminFormLayout'
@@ -83,6 +84,7 @@ function MembershipFormFields({
 
 export function MembershipForm({ regions, users, initialValues }: Props) {
   const [selectedUserId, setSelectedUserId] = useState(initialValues?.userId ?? '')
+  const navigate = useNavigate()
 
   return (
     <Form
@@ -101,7 +103,8 @@ export function MembershipForm({ regions, users, initialValues }: Props) {
           },
         })
         if (result.success) {
-          return { success: true, message: 'Angelegt.', redirect: '/admin/memberships' }
+          await navigate({ to: '/admin/users/$userId/edit', params: { userId: values.userId } })
+          return { success: true, message: 'Angelegt.' }
         }
         return result
       }}
@@ -111,7 +114,7 @@ export function MembershipForm({ regions, users, initialValues }: Props) {
           fieldLabels={sectionLabels}
           form={form}
           submitLabel="Erstellen"
-          cancel={{ to: '/admin/memberships' }}
+          cancel={{ to: '/admin/users' }}
           submitError={submitError}
         >
           <AdminFormSection id="membership" title={sectionLabels.membership}>

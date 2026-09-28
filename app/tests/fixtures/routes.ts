@@ -41,7 +41,7 @@ export const ADMIN_ROUTES = [
   '/admin/map-dataset-uploads',
   '/admin/map-dataset-categories',
   '/admin/qa-configs',
-  '/admin/memberships',
+  '/admin/users',
   '/admin/review-lists',
   '/admin/audit-log',
   '/admin/api-tokens',

@@ -9,12 +9,12 @@ Two things are easy to mix up:
 
 ## Roles
 
-| Role   | How you get it                                                   | Scope                                                                     |
-| ------ | ---------------------------------------------------------------- | ------------------------------------------------------------------------- |
-| Guest  | Not signed in                                                    | Public pages, PUBLIC regions                                              |
-| User   | Signed in with OpenStreetMap                                     | Same as guest, plus own profile and OSM notes under their own OSM account |
-| Member | A `Membership` row for that region (set in `/admin/memberships`) | Member-only features of that region                                       |
-| Admin  | `User.role = ADMIN` in the database                              | Everything. Counts as a member of every region                            |
+| Role   | How you get it                                             | Scope                                                                     |
+| ------ | ---------------------------------------------------------- | ------------------------------------------------------------------------- |
+| Guest  | Not signed in                                              | Public pages, PUBLIC regions                                              |
+| User   | Signed in with OpenStreetMap                               | Same as guest, plus own profile and OSM notes under their own OSM account |
+| Member | A `Membership` row for that region (set in `/admin/users`) | Member-only features of that region                                       |
+| Admin  | `User.role = ADMIN` in the database                        | Everything. Counts as a member of every region                            |
 
 Sign-in is OpenStreetMap OAuth only; email/password is disabled (`app/src/server/auth/auth.server.ts`). Membership is the only per-region permission. There are no per-feature or per-category roles.
 

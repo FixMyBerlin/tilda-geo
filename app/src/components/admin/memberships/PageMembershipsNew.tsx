@@ -14,7 +14,7 @@ export function PageMembershipsNew() {
     <>
       <AdminPageHeader
         title="Neue Mitgliedschaft"
-        parent={{ label: 'Nutzer & Rechte', to: '/admin/memberships' }}
+        parent={{ label: 'Nutzer & Rechte', to: '/admin/users' }}
       />
 
       <MembershipForm
