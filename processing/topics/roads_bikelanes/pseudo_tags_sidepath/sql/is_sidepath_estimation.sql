@@ -30,29 +30,29 @@
 \if :{?buffer_distance} \else \set buffer_distance 190.0 \endif
 \if :{?buffer_size} \else \set buffer_size 22.0 \endif
 
--- Objects of the former JSONB aggregate implementation (quiet: they only exist once per database).
+-- Drop every tilda_sidepath_* function and aggregate (any signature, including older variants of the
+-- former JSONB aggregate implementation still present on long-lived databases). The functions below are
+-- recreated right after.
 SET client_min_messages = warning;
-DROP FUNCTION IF EXISTS tilda_sidepath_csv(double precision, double precision);
-DROP FUNCTION IF EXISTS tilda_sidepath_dict_checkpoints_and_roads_left_outer_join(double precision, double precision);
-DROP AGGREGATE IF EXISTS tilda_sidepath_dict_agg(bigint, text, bigint, text, text, text, text);
-DROP FUNCTION IF EXISTS tilda_sidepath_dict_acc(jsonb, bigint, text, bigint, text, text, text, text);
-DROP FUNCTION IF EXISTS tilda_sidepath_dict_add_result(jsonb, jsonb, bigint, text, bigint, text, text, text, text);
-DROP FUNCTION IF EXISTS tilda_sidepath_dict_add_visited(jsonb, bigint, text, bigint, text, text, text);
-DROP FUNCTION IF EXISTS tilda_sidepath_dict_acc_init_if_null(jsonb);
-DROP FUNCTION IF EXISTS tilda_sidepath_dict_get_result(jsonb);
-DROP FUNCTION IF EXISTS tilda_sidepath_dict_is_sidepath(jsonb);
-DROP FUNCTION IF EXISTS tilda_sidepath_dict_is_sidepath_by_checks(integer, jsonb);
-DROP FUNCTION IF EXISTS tilda_sidepath_dict_dominant_highway(jsonb);
-DROP FUNCTION IF EXISTS tilda_sidepath_dict_adjoining_maxspeed(jsonb, text);
-DROP FUNCTION IF EXISTS tilda_sidepath_dict_max_field(jsonb, text, text);
-DROP FUNCTION IF EXISTS tilda_sidepath_dict_valid_speed(text);
-DROP FUNCTION IF EXISTS tilda_sidepath_dict_inc_field(jsonb, jsonb, text, bigint);
-DROP FUNCTION IF EXISTS tilda_sidepath_integer_inc_not_visited(jsonb, text, integer);
-DROP FUNCTION IF EXISTS tilda_sidepath_dict_add_entry(jsonb, text, bigint);
-DROP FUNCTION IF EXISTS tilda_sidepath_jsonb_intset_add(jsonb, bigint);
-DROP FUNCTION IF EXISTS tilda_sidepath_jsonb_get_or_default(jsonb, text, jsonb);
-DROP FUNCTION IF EXISTS tilda_sidepath_text_both_null_or_eq(text, text);
-DROP FUNCTION IF EXISTS tilda_sidepath_text_empty_if_null(text);
+DO $$
+DECLARE
+  r record;
+BEGIN
+  FOR r IN
+    SELECT p.oid::regprocedure::text AS sig, p.prokind
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public' AND p.proname LIKE 'tilda\_sidepath\_%'
+    ORDER BY p.prokind = 'a' DESC
+  LOOP
+    IF r.prokind = 'a' THEN
+      EXECUTE format('DROP AGGREGATE IF EXISTS %s CASCADE', r.sig);
+    ELSE
+      EXECUTE format('DROP FUNCTION IF EXISTS %s CASCADE', r.sig);
+    END IF;
+  END LOOP;
+END
+$$;
 DROP SEQUENCE IF EXISTS tilda_sidepath_checkpoint_nr_sequence;
 RESET client_min_messages;
 
