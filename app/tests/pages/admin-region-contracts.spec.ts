@@ -55,9 +55,12 @@ test.describe('Admin region contracts CRUD', () => {
     await asideActions.getByRole('button', { name: 'Speichern' }).click()
     await expect(page.getByRole('heading', { name: UPDATED_NAME })).toBeVisible()
 
-    // Aside deletes confirm via the native `window.confirm` dialog.
-    page.once('dialog', (dialog) => dialog.accept())
+    // Aside deletes confirm in the `AdminDeleteButton` dialog.
     await asideActions.getByRole('button', { name: 'Auftrag löschen' }).click()
+    await page
+      .getByRole('dialog', { name: `Auftrag „${UPDATED_NAME}“ löschen?` })
+      .getByRole('button', { name: 'Löschen', exact: true })
+      .click()
 
     await expect(page).toHaveURL(/\/admin\/region-contracts$/)
     await expect(page.getByRole('row', { name: new RegExp(UPDATED_NAME) })).toHaveCount(0)
