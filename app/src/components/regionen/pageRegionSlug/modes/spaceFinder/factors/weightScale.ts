@@ -1,4 +1,4 @@
-import { WEIGHT_GROUPS, type ModifierDirection } from './planningDefaults'
+import { WEIGHT_GROUPS, type ModifierDirection } from './spaceFinderDefaults'
 
 // Gewichte werden intern als 0–1 gespeichert (so erwartet es der Worker). In der UI haben die
 // beiden Faktorarten aber unterschiedliche Einheiten, weil sie in scorer.py unterschiedlich

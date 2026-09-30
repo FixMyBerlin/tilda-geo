@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { DEFAULT_FACTOR_TEMPLATE } from './planningDefaults'
+import { DEFAULT_FACTOR_TEMPLATE } from './spaceFinderDefaults'
 import { criterionShares, groupShare, modifierPointRange, weightToPoints } from './weightScale'
 
 // `FactorConfig` ist ein passthrough-Schema, `weights` daher `unknown` — für die Tests einmal

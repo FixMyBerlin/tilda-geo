@@ -1,6 +1,6 @@
 import { twJoin } from 'tailwind-merge'
 import type { StoreFeaturesInspector } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
-import { WEIGHT_GROUPS } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/planningDefaults'
+import { WEIGHT_GROUPS } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/spaceFinderDefaults'
 import {
   criterionShares,
   groupShare,
@@ -8,9 +8,9 @@ import {
   weightToPoints,
 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/weightScale'
 import {
-  planningGroupBarStyle,
-  planningGroupStyle,
-} from '@/components/regionen/pageRegionSlug/modes/spaceFinder/planningPanelStyles'
+  spaceFinderGroupBarStyle,
+  spaceFinderGroupStyle,
+} from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderPanelStyles'
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
 import type { VariantFactorConfig } from '@/server/planning/mergeFactorConfig'
@@ -43,7 +43,7 @@ const SCORE_LABELS: Record<string, string> = {
 //   modifiers → Zu-/Abschlag in Punkten (kann negativ sein) → Balken relativ zum Maximaleffekt
 const SCORE_GROUPS: {
   // Gruppenschlüssel wie in WEIGHT_GROUPS — verbindet die Sidebar mit den Gewichten der Variante
-  // und mit den Gruppenfarben (`planningGroupStyle`) des Flächenfinder-Panels.
+  // und mit den Gruppenfarben (`spaceFinderGroupStyle`) des Flächenfinder-Panels.
   key: 'bedarf' | 'bebauung'
   label: string
   scoreKey: string
@@ -171,12 +171,12 @@ const modifierFillClassName = (
   groupKey: 'bedarf' | 'bebauung' | 'eigendaten',
 ) =>
   value != null && value > 0
-    ? planningGroupBarStyle[groupKey].full
+    ? spaceFinderGroupBarStyle[groupKey].full
     : value != null && value < 0
-      ? planningGroupBarStyle[groupKey].pale
+      ? spaceFinderGroupBarStyle[groupKey].pale
       : 'bg-gray-300'
 
-export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
+export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
   const { spaceFinderMode } = useSpaceFinderModeParam()
   const areaFilterOn = (spaceFinderMode.minArea ?? 0) > 0
   const { runId, variant } = useSpaceFinderSelection()
@@ -256,14 +256,14 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
                 key={group.scoreKey}
                 className={twJoin(
                   'rounded-r border-l-[3px] py-1 pr-1 pl-2',
-                  planningGroupStyle[group.key].block,
+                  spaceFinderGroupStyle[group.key].block,
                 )}
               >
                 <div className="mb-5 flex items-center justify-between">
                   <div
                     className={twJoin(
                       'text-xs font-semibold uppercase',
-                      planningGroupStyle[group.key].text,
+                      spaceFinderGroupStyle[group.key].text,
                     )}
                   >
                     {group.label}
@@ -276,7 +276,7 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
                   <span
                     className={twJoin(
                       'text-2xl leading-none font-bold tabular-nums',
-                      planningGroupStyle[group.key].text,
+                      spaceFinderGroupStyle[group.key].text,
                     )}
                   >
                     {groupVal != null ? Math.round(groupVal) : '–'}
@@ -293,7 +293,10 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
                         className={twJoin(ROW_GRID, 'border-b border-gray-100 py-1.5')}
                       >
                         <span className="pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</span>
-                        <BarTrack pct={pct} fillClassName={planningGroupBarStyle[group.key].full} />
+                        <BarTrack
+                          pct={pct}
+                          fillClassName={spaceFinderGroupBarStyle[group.key].full}
+                        />
                         <span className="text-right font-mono text-gray-600">
                           {value != null ? Math.round(value) : '–'}
                         </span>
@@ -341,20 +344,20 @@ export const InspectorFeaturePlanningHexagon = ({ feature }: Props) => {
           })}
 
           {/* Eigene Daten: eigene Kategorie (nicht in Bedarf/Bebauung), Amber (größter
-              Farbabstand zu Blau/Lila auf dem Farbkreis, siehe planningPanelStyles.ts) —
+              Farbabstand zu Blau/Lila auf dem Farbkreis, siehe spaceFinderPanelStyles.ts) —
               unabhängig von der Kartenlayer-Farbe der hochgeladenen Flächen (Violett).
               Signierter Effekt in Punkten; NULL bei Ausschluss-Modi (dort wirkt der harte Cut). */}
           {props.score_eigendaten != null && (
             <div
               className={twJoin(
                 'rounded-r border-l-[3px] py-1 pr-1 pl-2',
-                planningGroupStyle.eigendaten.block,
+                spaceFinderGroupStyle.eigendaten.block,
               )}
             >
               <div
                 className={twJoin(
                   'mb-1 text-xs font-semibold uppercase',
-                  planningGroupStyle.eigendaten.text,
+                  spaceFinderGroupStyle.eigendaten.text,
                 )}
               >
                 Eigene Daten

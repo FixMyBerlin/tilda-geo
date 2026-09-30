@@ -18,8 +18,8 @@ import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { reviewEntriesInteractiveLayerIds } from '../SourcesAndLayers/reviewEntriesLayers.const'
 import { internalNotesLayerId } from '../SourcesAndLayers/SourcesLayersInternalNotes'
 import { osmNotesLayerId } from '../SourcesAndLayers/SourcesLayersOsmNotes'
-import { planningHexagonsLayerId } from '../SourcesAndLayers/SourcesLayersPlanning'
 import { qaLayerId } from '../SourcesAndLayers/SourcesLayersQa'
+import { planningHexagonsLayerId } from '../SourcesAndLayers/SourcesLayersSpaceFinder'
 import { MASK_INTERACTIVE_LAYER_IDS } from './maskLayerUtils'
 
 type Props = { categories: MapDataCategoryConfig[] | undefined }

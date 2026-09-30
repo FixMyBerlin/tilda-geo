@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { planningPanelTitleInputClass } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/planningPanelStyles'
+import { spaceFinderPanelTitleInputClass } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderPanelStyles'
 import { frenchQuote } from '@/components/shared/text/Quotes'
 import { createPlanningVariantFn } from '@/server/planning/planning.functions'
 import {
@@ -49,7 +49,7 @@ export const SpaceFinderNewVariantDetail = ({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="z. B. Variante 2"
-          className={planningPanelTitleInputClass}
+          className={spaceFinderPanelTitleInputClass}
         />
       </label>
       {mutation.isError && (

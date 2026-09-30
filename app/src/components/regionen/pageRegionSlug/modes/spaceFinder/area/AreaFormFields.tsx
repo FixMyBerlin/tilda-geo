@@ -4,19 +4,19 @@ import { useEffect, useMemo } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
 import { MAX_STUDY_AREA_KM2, studyAreaSizeKm2 } from '@/lib/planningStudyAreaLimit'
-import { usePlanningBoundaryState } from '../../../hooks/mapState/usePlanningBoundaryState'
+import { useSpaceFinderBoundaryState } from '../../../hooks/mapState/useSpaceFinderBoundaryState'
 import {
   GROUP_HELP,
   PLANNING_USE_CASES,
   SHOW_PLANNING_USE_CASE_UI,
   type PlanningUseCase,
-} from '../factors/planningDefaults'
+} from '../factors/spaceFinderDefaults'
 import { InfoTooltip } from '../InfoTooltip'
 import {
-  planningNumberInputClass,
-  planningPanelTitleInputClass,
-  planningRadioButtonClass,
-} from '../planningPanelStyles'
+  spaceFinderNumberInputClass,
+  spaceFinderPanelTitleInputClass,
+  spaceFinderRadioButtonClass,
+} from '../spaceFinderPanelStyles'
 import { BoundaryPicker } from './BoundaryPicker'
 import type { StudyAreaGeometry } from './extractStudyAreaGeometry'
 import { GeoJsonUpload } from './GeoJsonUpload'
@@ -77,11 +77,11 @@ export const AreaFormFields = ({
   geometryStepTitle = 'Gebiet auswählen',
 }: AreaFormFieldsProps) => {
   const { mainMap: map } = useMap()
-  const setBoundaryHighlightGeom = usePlanningBoundaryState((s) => s.setBoundaryHighlightGeom)
-  const setDrawingActive = usePlanningBoundaryState((s) => s.setDrawingActive)
-  const drawingActive = usePlanningBoundaryState((s) => s.drawingActive)
-  const drawnGeometry = usePlanningBoundaryState((s) => s.drawnGeometry)
-  const setDrawnGeometry = usePlanningBoundaryState((s) => s.setDrawnGeometry)
+  const setBoundaryHighlightGeom = useSpaceFinderBoundaryState((s) => s.setBoundaryHighlightGeom)
+  const setDrawingActive = useSpaceFinderBoundaryState((s) => s.setDrawingActive)
+  const drawingActive = useSpaceFinderBoundaryState((s) => s.drawingActive)
+  const drawnGeometry = useSpaceFinderBoundaryState((s) => s.drawnGeometry)
+  const setDrawnGeometry = useSpaceFinderBoundaryState((s) => s.setDrawnGeometry)
 
   const effectiveStudyArea = state.studyArea ?? drawnGeometry
 
@@ -148,7 +148,7 @@ export const AreaFormFields = ({
           value={state.title}
           onChange={(e) => onTitleChange(e.target.value)}
           className={twJoin(
-            planningPanelTitleInputClass,
+            spaceFinderPanelTitleInputClass,
             titleMissing && 'border-red-500 focus:border-red-500 focus:ring-red-500',
           )}
         />
@@ -156,7 +156,7 @@ export const AreaFormFields = ({
       {titleMissing && <p className="text-xs text-red-600">Bitte einen Namen angeben.</p>}
 
       {/* TODO Flächenfinder: Auswahl „Art & Größe der gesuchten Fläche“ ist über
-          `SHOW_PLANNING_USE_CASE_UI` (planningDefaults.ts) ausgeblendet, weil sie bisher keinen
+          `SHOW_PLANNING_USE_CASE_UI` (spaceFinderDefaults.ts) ausgeblendet, weil sie bisher keinen
           Effekt auf Score oder Flächensuche hat. Der Block bleibt bewusst stehen und wird durch
           Umstellen des Flags wieder sichtbar; die Werte laufen weiterhin über die Defaults der
           aufrufenden Formulare (AreaWizard/AreaEditor) und werden gespeichert. */}
@@ -175,7 +175,7 @@ export const AreaFormFields = ({
                   const defaultAreaM2 = PLANNING_USE_CASES.find((u) => u.key === key)?.defaultAreaM2
                   if (defaultAreaM2 != null) onAreaSizeM2Change(defaultAreaM2)
                 }}
-                className={planningRadioButtonClass(state.useCase === key)}
+                className={spaceFinderRadioButtonClass(state.useCase === key)}
               >
                 {label}
               </button>
@@ -193,7 +193,7 @@ export const AreaFormFields = ({
                   e.target.value === '' ? null : Math.max(0, Number(e.target.value)),
                 )
               }
-              className={planningNumberInputClass}
+              className={spaceFinderNumberInputClass}
             />
           </label>
         </div>
@@ -239,7 +239,7 @@ export const AreaFormFields = ({
               onClick={toggleDrawing}
               className={twJoin(
                 'flex items-center justify-center gap-1.5',
-                planningRadioButtonClass(drawingActive),
+                spaceFinderRadioButtonClass(drawingActive),
               )}
             >
               <PencilSquareIcon className="h-4 w-4" />
@@ -290,7 +290,7 @@ export const AreaFormFields = ({
 }
 
 export const useEffectiveStudyArea = (studyArea: unknown) => {
-  const drawnGeometry = usePlanningBoundaryState((s) => s.drawnGeometry)
+  const drawnGeometry = useSpaceFinderBoundaryState((s) => s.drawnGeometry)
   return studyArea ?? drawnGeometry
 }
 

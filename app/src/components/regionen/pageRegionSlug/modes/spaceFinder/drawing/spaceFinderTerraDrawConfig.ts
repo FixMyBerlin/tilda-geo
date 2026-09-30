@@ -16,7 +16,7 @@ const colorByDrawingState = (feature: GeoJSONStoreFeatures) =>
     : PLANNING_TERRA_COLORS.unselected
 
 /** Polygon draw + select/edit modes for defining a single study area. */
-export const createPlanningTerraDrawModes = () => [
+export const createSpaceFinderTerraDrawModes = () => [
   new TerraDrawPolygonMode({
     pointerDistance: 6,
     styles: {

@@ -1,4 +1,4 @@
-import { DEFAULT_FACTOR_TEMPLATE } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/planningDefaults'
+import { DEFAULT_FACTOR_TEMPLATE } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/spaceFinderDefaults'
 import { sanitizeUserGeojson } from '@/lib/planningUserGeojson'
 import type { Prisma } from '@/prisma/generated/client'
 import { PlanningJobStatus, PlanningRunStatus } from '@/prisma/generated/client'

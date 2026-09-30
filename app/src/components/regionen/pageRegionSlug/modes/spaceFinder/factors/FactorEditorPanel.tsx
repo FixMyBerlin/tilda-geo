@@ -12,17 +12,17 @@ import {
   planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
-import { usePlanningBoundaryState } from '../../../hooks/mapState/usePlanningBoundaryState'
+import { useSpaceFinderBoundaryState } from '../../../hooks/mapState/useSpaceFinderBoundaryState'
 import { USER_GEOJSON_MODES, type UserGeojsonMode } from '../area/UserObstaclesField'
 import { DisclosureChevron } from '../CollapsibleBox'
 import { InfoTooltip } from '../InfoTooltip'
-import {
-  planningDisclosureBoxClass,
-  planningDisclosureHeaderClass,
-  planningGroupStyle,
-  planningNumberInputClass,
-} from '../planningPanelStyles'
 import { SegmentedChoice } from '../SegmentedChoice'
+import {
+  spaceFinderDisclosureBoxClass,
+  spaceFinderDisclosureHeaderClass,
+  spaceFinderGroupStyle,
+  spaceFinderNumberInputClass,
+} from '../spaceFinderPanelStyles'
 import { OepnvCategorySliders } from './OepnvCategorySliders'
 import { readOepnvShares, type OepnvShares } from './oepnvShares'
 import {
@@ -33,7 +33,7 @@ import {
   PARKING_DATA_DEPENDENT_KEYS,
   WEIGHT_GROUPS,
   WEIGHT_LABELS,
-} from './planningDefaults'
+} from './spaceFinderDefaults'
 import {
   criterionShares,
   groupShare,
@@ -53,7 +53,7 @@ import { ZielortCategorySliders } from './ZielortCategorySliders'
 import { readZielortShares, type ZielortShares } from './zielortShares'
 
 /** Hinweis unter den Parkdaten-abhängigen Faktoren, wenn `parkingDataAvailable` false ist —
- * siehe [[PARKING_DATA_DEPENDENT_KEYS]] in planningDefaults.ts. */
+ * siehe [[PARKING_DATA_DEPENDENT_KEYS]] in spaceFinderDefaults.ts. */
 const PARKING_DATA_HINT = 'Keine Parkdaten für dieses Gebiet verfügbar — Faktor hier deaktiviert.'
 
 const FactorInfo = ({ factorKey, extra }: { factorKey: string; extra?: string }) => {
@@ -95,7 +95,7 @@ const GroupShareChips = ({ config }: { config: FactorConfig }) => {
           key={group.key}
           className={twJoin(
             'rounded px-1.5 py-0.5 text-[11px] font-medium',
-            planningGroupStyle[group.key].chip,
+            spaceFinderGroupStyle[group.key].chip,
           )}
         >
           {group.label}{' '}
@@ -108,7 +108,7 @@ const GroupShareChips = ({ config }: { config: FactorConfig }) => {
         <span
           className={twJoin(
             'rounded px-1.5 py-0.5 text-[11px] font-medium',
-            planningGroupStyle.eigendaten.chip,
+            spaceFinderGroupStyle.eigendaten.chip,
           )}
         >
           Eigene Daten <span className="font-bold tabular-nums">{eigendatenChipValue(config)}</span>
@@ -197,7 +197,7 @@ const FactorParamInputs = ({
               const value = Number(e.target.value)
               setField(key, min != null ? Math.max(min, value) : value)
             }}
-            className={planningNumberInputClass}
+            className={spaceFinderNumberInputClass}
           />
         </label>
         {key === 'bewohnerbedarf_saettigung_ew' && !disabled && (
@@ -279,10 +279,12 @@ const FactorFields = ({
             key={group.key}
             className={twJoin(
               'mt-3 rounded-r border-l-[3px] py-1.5 pr-1 pl-2 first:mt-0',
-              planningGroupStyle[group.key].block,
+              spaceFinderGroupStyle[group.key].block,
             )}
           >
-            <div className={twJoin(groupHeadlineBaseClass, planningGroupStyle[group.key].headline)}>
+            <div
+              className={twJoin(groupHeadlineBaseClass, spaceFinderGroupStyle[group.key].headline)}
+            >
               <span className="flex items-center gap-1">
                 {group.label}
                 <InfoTooltip>{GROUP_HELP[group.key]}</InfoTooltip>
@@ -448,10 +450,12 @@ const FactorFields = ({
         <div
           className={twJoin(
             'rounded-r border-l-[3px] py-1.5 pr-1 pl-2',
-            planningGroupStyle.eigendaten.block,
+            spaceFinderGroupStyle.eigendaten.block,
           )}
         >
-          <div className={twJoin(groupHeadlineBaseClass, planningGroupStyle.eigendaten.headline)}>
+          <div
+            className={twJoin(groupHeadlineBaseClass, spaceFinderGroupStyle.eigendaten.headline)}
+          >
             <span className="flex items-center gap-1">
               Eigene Daten
               <InfoTooltip>{GROUP_HELP.eigendaten}</InfoTooltip>
@@ -501,7 +505,7 @@ const FactorFields = ({
               value={Number(config.min_score_threshold ?? 0)}
               disabled={readOnly}
               onChange={(e) => setField('min_score_threshold', Number(e.target.value))}
-              className={planningNumberInputClass}
+              className={spaceFinderNumberInputClass}
             />
           </label>
           <label className="flex items-center gap-1 text-xs text-gray-600">
@@ -571,7 +575,7 @@ const FactorEditorPanelForm = ({
   const [config, setConfig] = useState<FactorConfig>(factorConfig)
   const [open, setOpen] = useState(defaultOpen)
   const prevReadOnly = useRef(readOnly)
-  const setFactorSavePending = usePlanningBoundaryState((s) => s.setFactorSavePending)
+  const setFactorSavePending = useSpaceFinderBoundaryState((s) => s.setFactorSavePending)
   // Fingerprint des Stands, der zuletzt an den Server geschickt wurde — der Vergleich mit dem
   // aktuellen Entwurf steuert Auto-Save, Verwerfen-Button und die Sperre von „Neu berechnen".
   const [savedFingerprint, setSavedFingerprint] = useState(() => factorFingerprint(factorConfig))
@@ -729,11 +733,11 @@ const FactorEditorPanelForm = ({
   }
 
   return (
-    <Disclosure as="div" className={planningDisclosureBoxClass(open)}>
+    <Disclosure as="div" className={spaceFinderDisclosureBoxClass(open)}>
       <DisclosureButton
         as="div"
         onClick={() => setOpen((v) => !v)}
-        className={planningDisclosureHeaderClass(open, !open)}
+        className={spaceFinderDisclosureHeaderClass(open, !open)}
       >
         <div className="flex w-full items-center gap-2">
           <span className="flex-1">Faktoren</span>

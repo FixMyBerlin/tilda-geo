@@ -234,7 +234,7 @@ const CollapsibleStepGroup = ({
  * `weights` (Faktor-Gewichte des Szenarios) markiert einen Schritt bei Gewicht
  * 0 als „übersprungen".
  */
-export const PlanningSteps = ({
+export const SpaceFinderRunSteps = ({
   currentStep,
   weights,
   userObstacles,

@@ -1,5 +1,5 @@
 // `reproject` and `epsg` ship no types. Minimal ambient declarations for the
-// subset used by `planningGeoConversion.ts`.
+// subset used by `spaceFinderGeoConversion.ts`.
 declare module 'reproject' {
   export function toWgs84<T extends GeoJSON.GeoJSON>(
     geojson: T,

@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { InfoTooltip } from './InfoTooltip'
-import { planningRadioButtonClass } from './planningPanelStyles'
+import { spaceFinderRadioButtonClass } from './spaceFinderPanelStyles'
 
 /**
  * Segmented button group for picking one value from a small fixed set. Extracted
@@ -35,7 +35,7 @@ export function SegmentedChoice<T extends string>({
             onClick={() => onChange(val)}
             className={twJoin(
               'w-full disabled:cursor-not-allowed',
-              planningRadioButtonClass(value === val, 'green'),
+              spaceFinderRadioButtonClass(value === val, 'green'),
               disabled && value !== val && 'opacity-50',
               info && 'pr-5',
             )}

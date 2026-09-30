@@ -6,7 +6,7 @@ import { create } from 'zustand'
  * time from the rendered tile feature — the selection therefore survives panning
  * away from the hexagon (no re-query of the vector source needed).
  */
-export type PlanningCandidate = {
+export type SpaceFinderCandidate = {
   /** `h3_id` of the hexagon (the tile source's `promoteId`); identity of a candidate. */
   h3Id: string
   /** Hexagon outline from the vector tile (lng/lat), reused for the highlight and the export. */
@@ -25,9 +25,9 @@ type Store = {
   setSelectActive: (active: boolean) => void
 
   /** Selected hexagons in selection order (the order the sidebar list and export use). */
-  candidates: PlanningCandidate[]
+  candidates: SpaceFinderCandidate[]
   /** Adds the hexagon or – when it is already selected – removes it again. */
-  toggleCandidate: (candidate: PlanningCandidate) => void
+  toggleCandidate: (candidate: SpaceFinderCandidate) => void
   removeCandidate: (h3Id: string) => void
   clearCandidates: () => void
 }
@@ -35,10 +35,10 @@ type Store = {
 /**
  * Candidate selection of the planning module. Kept in a store (NOT in the URL) for
  * the same reason as `vegetationVisible`/`carriagewaysVisible` in
- * usePlanningBoundaryState: it changes on every click and would otherwise trigger a
+ * useSpaceFinderBoundaryState: it changes on every click and would otherwise trigger a
  * router navigation per hexagon — and the geometries it holds don't belong in a URL.
  */
-export const usePlanningCandidatesState = create<Store>((set) => ({
+export const useSpaceFinderCandidatesState = create<Store>((set) => ({
   selectActive: false,
   setSelectActive: (active) => set({ selectActive: active }),
 

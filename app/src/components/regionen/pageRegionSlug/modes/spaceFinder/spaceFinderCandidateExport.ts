@@ -1,4 +1,4 @@
-import type { PlanningCandidate } from '../../hooks/mapState/usePlanningCandidatesState'
+import type { SpaceFinderCandidate } from '../../hooks/mapState/useSpaceFinderCandidatesState'
 
 /**
  * Die ausgewählten Hexagone als GeoJSON-FeatureCollection: potentielle Standorte
@@ -6,7 +6,7 @@ import type { PlanningCandidate } from '../../hooks/mapState/usePlanningCandidat
  * Ausschluss-Flags) werden unverändert übernommen und um die Position in der
  * Auswahlliste ergänzt, damit die Reihenfolge aus der Sidebar erhalten bleibt.
  */
-const candidatesToGeojson = (candidates: PlanningCandidate[]) => ({
+const candidatesToGeojson = (candidates: SpaceFinderCandidate[]) => ({
   type: 'FeatureCollection' as const,
   features: candidates.map((candidate, index) => ({
     type: 'Feature' as const,
@@ -29,7 +29,7 @@ export const candidateExportFileName = (variantId: number | null | undefined) =>
 
 /** Triggert den Browser-Download der Auswahl (Blob statt data-URL wegen der Größe). */
 export const downloadCandidatesGeojson = (
-  candidates: PlanningCandidate[],
+  candidates: SpaceFinderCandidate[],
   fileName: string,
 ): void => {
   const blob = new Blob([JSON.stringify(candidatesToGeojson(candidates), null, 2)], {

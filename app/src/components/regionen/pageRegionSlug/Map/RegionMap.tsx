@@ -14,8 +14,8 @@ import {
   useMapCalculatorDrawActive,
   useMapInspectorFeatures,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
-import { usePlanningBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningBoundaryState'
-import { usePlanningCandidatesState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningCandidatesState'
+import { useSpaceFinderBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/useSpaceFinderBoundaryState'
+import { useSpaceFinderCandidatesState } from '@/components/regionen/pageRegionSlug/hooks/mapState/useSpaceFinderCandidatesState'
 import { useBg3dParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBg3dParam'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
@@ -41,7 +41,7 @@ import { NotesNewRelatedGeometry } from '../modes/notes/new/NotesNewRelatedGeome
 import { useNotesComposeActive } from '../modes/notes/useNotesComposeActive'
 import { ReviewMapDrawing } from '../modes/reviewLists/drawing/ReviewMapDrawing'
 import { useReviewDrawActive } from '../modes/reviewLists/useReviewDrawActive'
-import { PlanningMapDrawing } from '../modes/spaceFinder/drawing/PlanningMapDrawing'
+import { SpaceFinderMapDrawing } from '../modes/spaceFinder/drawing/SpaceFinderMapDrawing'
 import { useCurrentMode } from '../modes/useCurrentMode'
 import { useRegion } from '../regionUtils/useRegion'
 import { Calculator } from './Calculator/Calculator'
@@ -54,12 +54,12 @@ import { SourcesLayersInternalNotes } from './SourcesAndLayers/SourcesLayersInte
 import { SourcesLayersMap3dBuildings } from './SourcesAndLayers/SourcesLayersMap3dBuildings'
 import { SourcesLayersMap3dDem } from './SourcesAndLayers/SourcesLayersMap3dDem'
 import { SourcesLayersOsmNotes } from './SourcesAndLayers/SourcesLayersOsmNotes'
-import {
-  planningHexagonsSourceLayer,
-  SourcesLayersPlanning,
-} from './SourcesAndLayers/SourcesLayersPlanning'
 import { SourcesLayersQa } from './SourcesAndLayers/SourcesLayersQa'
 import { SourcesLayersReviewEntries } from './SourcesAndLayers/SourcesLayersReviewEntries'
+import {
+  planningHexagonsSourceLayer,
+  SourcesLayersSpaceFinder,
+} from './SourcesAndLayers/SourcesLayersSpaceFinder'
 import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersStaticDatasets'
 import { SourcesLayersSystemDatasets } from './SourcesAndLayers/SourcesLayersSystemDatasets'
 import { TerrainProfileHoverMarkerLayer } from './SourcesAndLayers/TerrainProfileHoverMarkerLayer'
@@ -117,9 +117,9 @@ export const RegionMap = () => {
   const calculatorDrawActive = useMapCalculatorDrawActive()
   const notesComposeActive = useNotesComposeActive()
   const reviewDrawActive = useReviewDrawActive()
-  const planningPolygonDrawing = usePlanningBoundaryState((s) => s.polygonDrawInProgress)
-  const candidateSelectActive = usePlanningCandidatesState((s) => s.selectActive)
-  const toggleCandidate = usePlanningCandidatesState((s) => s.toggleCandidate)
+  const spaceFinderPolygonDrawing = useSpaceFinderBoundaryState((s) => s.polygonDrawInProgress)
+  const candidateSelectActive = useSpaceFinderCandidatesState((s) => s.selectActive)
+  const toggleCandidate = useSpaceFinderCandidatesState((s) => s.toggleCandidate)
 
   const handleClick = ({ features, ...event }: MapLayerMouseEvent) => {
     if (reviewDrawActive) return
@@ -303,7 +303,7 @@ export const RegionMap = () => {
     calculatorDrawActive ||
     notesComposeActive ||
     reviewDrawActive ||
-    (currentMode.isSpaceFinder && planningPolygonDrawing)
+    (currentMode.isSpaceFinder && spaceFinderPolygonDrawing)
       ? NO_INTERACTIVE_LAYERS
       : computedInteractiveLayerIds
 
@@ -381,8 +381,8 @@ export const RegionMap = () => {
       <NotesNewRelatedGeometry />
       {currentMode.isSpaceFinder && (
         <>
-          <SourcesLayersPlanning />
-          <PlanningMapDrawing />
+          <SourcesLayersSpaceFinder />
+          <SpaceFinderMapDrawing />
         </>
       )}
       {/* Last in tree + moveLayer: stay above remounted highlights. Do not use this layer as beforeId. */}

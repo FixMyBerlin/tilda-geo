@@ -26,7 +26,7 @@ import { allUrlFeaturesInBounds, createBoundingPolygon, fitBounds } from './util
 /**
  * Feature inspector. The Flächenfinder candidate-selection tool no longer takes this over (phase
  * 4 — it moved into the mode panel's »Auswahl« section); clicking a result hexagon while not
- * selecting candidates opens it here as usual (`InspectorFeaturePlanningHexagon`).
+ * selecting candidates opens it here as usual (`InspectorFeatureSpaceFinderHexagon`).
  */
 export const SidebarInspector = () => {
   const checkBounds = useRef(true)

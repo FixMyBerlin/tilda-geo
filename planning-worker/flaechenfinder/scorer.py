@@ -132,7 +132,7 @@ def assign_clusters(hex_proj: gpd.GeoDataFrame, min_score: float) -> gpd.GeoData
 # Die 14 fachlichen Schritte des Laufs, in Reihenfolge. Wird sowohl für die
 # Log-Ausgabe als auch (via progress_cb) für die Fortschrittsanzeige im UI
 # verwendet. Die Namen müssen mit der Schrittliste im Frontend übereinstimmen
-# (PlanningSteps.tsx). Schritt 1 (Vegetationsflächen berechnen) und Schritt 14
+# (SpaceFinderRunSteps.tsx). Schritt 1 (Vegetationsflächen berechnen) und Schritt 14
 # (Ergebnisse speichern) laufen außerhalb von run_flaechenfinder() im Worker
 # (worker.py); die Nummerierung hier beginnt daher bei 2.
 # Kreuzungen (7) und KFZ-Parkflächen (8) sind eigene, sichtbare Ladeschritte –

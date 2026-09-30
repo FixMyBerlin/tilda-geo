@@ -1,18 +1,19 @@
 import { twJoin } from 'tailwind-merge'
 import type { PlanningScoreMode } from '@/shared/regionen/planningScoreMode.const'
 
-const planningToggleButtonBase = 'rounded border px-2 py-1.5 text-xs font-medium transition-colors'
-const planningToggleButtonInactive = 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
+const spaceFinderToggleButtonBase =
+  'rounded border px-2 py-1.5 text-xs font-medium transition-colors'
+const spaceFinderToggleButtonInactive = 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
 
 /** Radio-artige Auswahlbuttons (eine Option aktiv). Farbe bleibt pro Kontext. */
-export const planningRadioButtonClass = (active: boolean, accent: 'blue' | 'green' = 'blue') =>
+export const spaceFinderRadioButtonClass = (active: boolean, accent: 'blue' | 'green' = 'blue') =>
   twJoin(
-    planningToggleButtonBase,
+    spaceFinderToggleButtonBase,
     active
       ? accent === 'green'
         ? 'border-green-700 bg-green-50 text-green-700'
         : 'border-blue-600 bg-blue-50 text-blue-700'
-      : planningToggleButtonInactive,
+      : spaceFinderToggleButtonInactive,
   )
 
 /**
@@ -20,10 +21,10 @@ export const planningRadioButtonClass = (active: boolean, accent: 'blue' | 'gree
  * die flachen Info-/Schalterzeilen des Panels und wird als klickbar übersehen — deshalb bekommt
  * sie zugeklappt einen gefüllten Kopf und einen kräftigeren Rahmen.
  */
-export const planningDisclosureBoxClass = (open: boolean) =>
+export const spaceFinderDisclosureBoxClass = (open: boolean) =>
   twJoin('rounded border', open ? 'border-gray-200' : 'border-gray-300 hover:border-gray-400')
 
-export const planningDisclosureHeaderClass = (open: boolean, twoLine = false) =>
+export const spaceFinderDisclosureHeaderClass = (open: boolean, twoLine = false) =>
   twJoin(
     'flex w-full cursor-pointer px-2.5 py-2 text-left text-sm font-semibold text-gray-800',
     twoLine ? 'flex-col gap-1.5' : 'items-center gap-2',
@@ -38,17 +39,17 @@ export const planningDisclosureHeaderClass = (open: boolean, twoLine = false) =>
  * sondern das gemeinsame Ergebnis. `eigendaten` ist Amber: auf dem Farbkreis der größte Abstand zu
  * Blau (bedarf, ~221°) und Lila (bebauung, ~271°) — Violett (~258°) läge dazwischen und wäre kaum
  * unterscheidbar. Bewusst in Kauf genommen: der Kartenlayer der hochgeladenen Flächen
- * (`UserObstaclesLayer` in `SourcesLayersPlanning.tsx`) bleibt Violett (`#7c3aed`) und der
- * Fahrbahnen-Ausschluss-Layer ist ebenfalls Amber (`carriageways.py`/`SourcesLayersPlanning.tsx`,
+ * (`UserObstaclesLayer` in `SourcesLayersSpaceFinder.tsx`) bleibt Violett (`#7c3aed`) und der
+ * Fahrbahnen-Ausschluss-Layer ist ebenfalls Amber (`carriageways.py`/`SourcesLayersSpaceFinder.tsx`,
  * anderer Layer, andere Bedeutung) — beides Farbüberschneidungen mit anderen Kartenlayern, aber
  * keine mit den beiden übrigen Faktorgruppen. Die übrigen Farben selbst haben keine eigene
  * Bedeutung und sind bewusst nicht die der Kartenlayer.
  *
  * `chip` = farbiger Wert-Chip, `block` = linker Streifen + Tönung eines Gruppenblocks,
  * `headline` = Überschrift mit Unterstrich, `text` = nur die Textfarbe, `button` = aktiver
- * Zustand eines Toggle-Buttons (siehe `planningGroupButtonClass`).
+ * Zustand eines Toggle-Buttons (siehe `spaceFinderGroupButtonClass`).
  */
-export const planningGroupStyle: Record<
+export const spaceFinderGroupStyle: Record<
   'bedarf' | 'bebauung' | 'eigendaten',
   { chip: string; block: string; headline: string; text: string; button: string }
 > = {
@@ -76,12 +77,12 @@ export const planningGroupStyle: Record<
 }
 
 /**
- * Balkenfarben der Faktor-Zeilen im Hexagon-Inspector (`InspectorFeaturePlanningHexagon`), in der
- * Gruppenfarbe aus `planningGroupStyle` statt einer von der Gruppe unabhängigen Farbcodierung.
+ * Balkenfarben der Faktor-Zeilen im Hexagon-Inspector (`InspectorFeatureSpaceFinderHexagon`), in der
+ * Gruppenfarbe aus `spaceFinderGroupStyle` statt einer von der Gruppe unabhängigen Farbcodierung.
  * `full` = Kriterien-Balken sowie Zuschläge, `pale` = Abschläge (Vorzeichen bleibt so über die
  * Sättigung erkennbar, ohne die Gruppenzuordnung zu verlassen).
  */
-export const planningGroupBarStyle: Record<
+export const spaceFinderGroupBarStyle: Record<
   'bedarf' | 'bebauung' | 'eigendaten',
   { full: string; pale: string }
 > = {
@@ -94,24 +95,24 @@ export const planningGroupBarStyle: Record<
  * Toggle-Button in der Gruppenfarbe (aktiv) bzw. neutral (inaktiv) — für `ScoreModeSwitcher`.
  * Kombination hat keine Gruppenfarbe und fällt auf den ursprünglichen Grün-Akzent zurück.
  */
-export const planningGroupButtonClass = (active: boolean, mode: PlanningScoreMode) =>
+export const spaceFinderGroupButtonClass = (active: boolean, mode: PlanningScoreMode) =>
   twJoin(
-    planningToggleButtonBase,
+    spaceFinderToggleButtonBase,
     active
       ? mode === 'kombination'
         ? 'border-green-700 bg-green-50 text-green-700'
-        : planningGroupStyle[mode].button
-      : planningToggleButtonInactive,
+        : spaceFinderGroupStyle[mode].button
+      : spaceFinderToggleButtonInactive,
   )
 
 /** Kompakte Eingabefelder — eine Stufe kleiner als Panel-Fließtext (`text-sm`). */
-const planningInputClass =
+const spaceFinderInputClass =
   'rounded border border-gray-300 p-[3px] text-xs leading-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400'
 
-export const planningNumberInputClass = `${planningInputClass} w-14 text-right tabular-nums`
+export const spaceFinderNumberInputClass = `${spaceFinderInputClass} w-14 text-right tabular-nums`
 
-export const planningTextInputClass = `${planningInputClass} w-full`
+export const spaceFinderTextInputClass = `${spaceFinderInputClass} w-full`
 
 /** Volle Panel-Breite, normale Schriftgröße — für Titel/Name-Felder im Assistenten. */
-export const planningPanelTitleInputClass =
+export const spaceFinderPanelTitleInputClass =
   'w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:border-blue-400 focus:ring-1 focus:ring-blue-400 focus:outline-none'

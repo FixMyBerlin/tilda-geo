@@ -16,21 +16,21 @@ import { areaInputFromRow } from '@/server/planning/mergeFactorConfig'
 import type { FactorConfig, getPlanningVariantFn } from '@/server/planning/planning.functions'
 import { updatePlanningVariantFn } from '@/server/planning/planning.functions'
 import { planningVariantQueryOptions } from '@/server/planning/planningQueryOptions'
-import { usePlanningBoundaryState } from '../../hooks/mapState/usePlanningBoundaryState'
+import { useSpaceFinderBoundaryState } from '../../hooks/mapState/useSpaceFinderBoundaryState'
 import { modePanelMutedClassName } from '../modePanel.const'
 import { CollapsibleBox } from './CollapsibleBox'
 import { FactorEditorPanel } from './factors/FactorEditorPanel'
 import { InfoTooltip } from './InfoTooltip'
-import { planningNumberInputClass } from './planningPanelStyles'
 import { JobStatusBadge } from './run/JobStatusBadge'
 import { ScoreModeSwitcher } from './ScoreModeSwitcher'
 import { SpaceFinderCandidatesSection } from './SpaceFinderCandidatesSection'
+import { spaceFinderNumberInputClass } from './spaceFinderPanelStyles'
 import { useSpaceFinderModeParam } from './useSpaceFinderModeParam'
 
 /**
  * Ein/Aus-Schalter für einen der Kontroll-Layer der Karte (Vegetation, Fahrbahnen,
  * Eigene Daten). Die Schalterfarbe entspricht der Layer-Farbe in der Karte,
- * siehe SourcesLayersPlanning.
+ * siehe SourcesLayersSpaceFinder.
  */
 const LayerToggle = ({
   label,
@@ -69,8 +69,8 @@ const LayerToggle = ({
 )
 
 const VegetationToggle = () => {
-  const vegetationOn = usePlanningBoundaryState((s) => s.vegetationVisible)
-  const setVegetationOn = usePlanningBoundaryState((s) => s.setVegetationVisible)
+  const vegetationOn = useSpaceFinderBoundaryState((s) => s.vegetationVisible)
+  const setVegetationOn = useSpaceFinderBoundaryState((s) => s.setVegetationVisible)
   return (
     <LayerToggle
       label="Vegetationsflächen"
@@ -82,8 +82,8 @@ const VegetationToggle = () => {
 }
 
 const CarriagewaysToggle = () => {
-  const carriagewaysOn = usePlanningBoundaryState((s) => s.carriagewaysVisible)
-  const setCarriagewaysOn = usePlanningBoundaryState((s) => s.setCarriagewaysVisible)
+  const carriagewaysOn = useSpaceFinderBoundaryState((s) => s.carriagewaysVisible)
+  const setCarriagewaysOn = useSpaceFinderBoundaryState((s) => s.setCarriagewaysVisible)
   return (
     <LayerToggle
       label="Fahrbahnen"
@@ -96,8 +96,8 @@ const CarriagewaysToggle = () => {
 }
 
 const CensusToggle = () => {
-  const censusOn = usePlanningBoundaryState((s) => s.censusVisible)
-  const setCensusOn = usePlanningBoundaryState((s) => s.setCensusVisible)
+  const censusOn = useSpaceFinderBoundaryState((s) => s.censusVisible)
+  const setCensusOn = useSpaceFinderBoundaryState((s) => s.setCensusVisible)
   return (
     <LayerToggle
       label="Zensus-Einwohner"
@@ -110,8 +110,8 @@ const CensusToggle = () => {
 }
 
 const UserObstaclesToggle = () => {
-  const userObstaclesOn = usePlanningBoundaryState((s) => s.userObstaclesVisible)
-  const setUserObstaclesOn = usePlanningBoundaryState((s) => s.setUserObstaclesVisible)
+  const userObstaclesOn = useSpaceFinderBoundaryState((s) => s.userObstaclesVisible)
+  const setUserObstaclesOn = useSpaceFinderBoundaryState((s) => s.setUserObstaclesVisible)
   return (
     <LayerToggle
       label="Eigene Daten"
@@ -206,7 +206,7 @@ const MinAreaFilterForm = ({
         onKeyDown={(e) => {
           if (e.key === 'Enter') e.currentTarget.blur()
         }}
-        className={planningNumberInputClass}
+        className={spaceFinderNumberInputClass}
       />
     </div>
   )
@@ -338,8 +338,8 @@ export const SpaceFinderBody = ({
    */
   editable?: boolean
 }) => {
-  const setVegetationAttribution = usePlanningBoundaryState((s) => s.setVegetationAttribution)
-  const setUserObstaclesGeom = usePlanningBoundaryState((s) => s.setUserObstaclesGeom)
+  const setVegetationAttribution = useSpaceFinderBoundaryState((s) => s.setVegetationAttribution)
+  const setUserObstaclesGeom = useSpaceFinderBoundaryState((s) => s.setUserObstaclesGeom)
   const { data: variant } = useQuery(planningVariantQueryOptions(variantId))
 
   useEffect(() => {

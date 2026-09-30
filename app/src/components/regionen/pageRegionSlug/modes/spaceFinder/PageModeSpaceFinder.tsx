@@ -10,7 +10,7 @@ import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { frenchQuote } from '@/components/shared/text/Quotes'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 import { planningAreasQueryOptions } from '@/server/planning/planningQueryOptions'
-import { usePlanningBoundaryState } from '../../hooks/mapState/usePlanningBoundaryState'
+import { useSpaceFinderBoundaryState } from '../../hooks/mapState/useSpaceFinderBoundaryState'
 import { ModePanel } from '../ModePanel'
 import { modePanelHeaderIconButtonClassName, modePanelMutedClassName } from '../modePanel.const'
 import { SpaceFinderEditAreaDetail } from './detail/SpaceFinderEditAreaDetail'
@@ -67,8 +67,8 @@ export const PageModeSpaceFinder = () => {
   const { regionSlug } = routeApi.useParams()
   const isDesktop = useBreakpoint('sm')
   const { mainMap: map } = useMap()
-  const setBoundaryHighlightGeom = usePlanningBoundaryState((s) => s.setBoundaryHighlightGeom)
-  const setLastFittedBoundaryKey = usePlanningBoundaryState((s) => s.setLastFittedBoundaryKey)
+  const setBoundaryHighlightGeom = useSpaceFinderBoundaryState((s) => s.setBoundaryHighlightGeom)
+  const setLastFittedBoundaryKey = useSpaceFinderBoundaryState((s) => s.setLastFittedBoundaryKey)
 
   // Primed by the route loader (ensureQueryData).
   const { data: areas } = useSuspenseQuery(planningAreasQueryOptions(regionSlug))
@@ -132,7 +132,7 @@ export const PageModeSpaceFinder = () => {
           properties: {},
         })
         const boundaryKey = [minLng, minLat, maxLng, maxLat].map((v) => v.toFixed(6)).join(',')
-        if (usePlanningBoundaryState.getState().lastFittedBoundaryKey !== boundaryKey) {
+        if (useSpaceFinderBoundaryState.getState().lastFittedBoundaryKey !== boundaryKey) {
           setLastFittedBoundaryKey(boundaryKey)
           map.fitBounds([minLng, minLat, maxLng, maxLat], { padding: 60, duration: 800 })
         }

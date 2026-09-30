@@ -2,11 +2,14 @@ import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from '@head
 import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { useState } from 'react'
 import { twJoin } from 'tailwind-merge'
-import { planningDisclosureBoxClass, planningDisclosureHeaderClass } from './planningPanelStyles'
+import {
+  spaceFinderDisclosureBoxClass,
+  spaceFinderDisclosureHeaderClass,
+} from './spaceFinderPanelStyles'
 
 /**
  * Chevron der Klapp-Boxen. Zugeklappt sitzt er in einem weißen Chip — zusammen mit dem gefüllten
- * Kopf (siehe `planningDisclosureHeaderClass`) ist die Zeile so auch ohne sichtbaren Inhalt klar
+ * Kopf (siehe `spaceFinderDisclosureHeaderClass`) ist die Zeile so auch ohne sichtbaren Inhalt klar
  * als aufklappbar zu erkennen.
  */
 export const DisclosureChevron = ({ open }: { open: boolean }) => (
@@ -39,11 +42,11 @@ export const CollapsibleBox = ({
   const [open, setOpen] = useState(defaultOpen)
 
   return (
-    <Disclosure as="div" className={planningDisclosureBoxClass(open)}>
+    <Disclosure as="div" className={spaceFinderDisclosureBoxClass(open)}>
       <DisclosureButton
         as="div"
         onClick={() => setOpen((v) => !v)}
-        className={planningDisclosureHeaderClass(open)}
+        className={spaceFinderDisclosureHeaderClass(open)}
       >
         {leading}
         <span className="flex-1">{title}</span>

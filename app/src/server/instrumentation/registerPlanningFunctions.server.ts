@@ -194,7 +194,7 @@ async function registerHexagonsFunction() {
       ) AS tile;
 
       -- Eigener Punkt-Layer für das Label (nur ab z18, siehe HEXAGON_LABEL_MIN_ZOOM in
-      -- SourcesLayersPlanning.tsx): der Fläche-Layer oben puffert & schneidet die
+      -- SourcesLayersSpaceFinder.tsx): der Fläche-Layer oben puffert & schneidet die
       -- Hexagon-Polygone pro Kachel (buffer=256) für nahtlose Füllung an
       -- Kachelgrenzen — dasselbe Polygon liegt dadurch oft in mehreren Kacheln, je
       -- mit einem eigenen, zur sichtbaren Teilfläche versetzten Zentroid. Ein

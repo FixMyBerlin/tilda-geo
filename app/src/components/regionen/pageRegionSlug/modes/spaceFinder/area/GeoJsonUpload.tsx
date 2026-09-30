@@ -7,14 +7,14 @@ import {
   isGeopackageFile,
   mightNeedReprojection,
   reprojectToWgs84,
-} from './planningGeoConversion'
+} from './spaceFinderGeoConversion'
 import {
   deleteGeojsonHistoryEntry,
   type GeojsonHistoryEntry,
   type GeojsonHistoryKind,
   listGeojsonHistoryEntries,
   saveGeojsonHistoryEntry,
-} from './planningGeojsonHistory'
+} from './spaceFinderGeojsonHistory'
 
 /**
  * Normalises an uploaded file to a GeoJSON string before it reaches `parse`: converts

@@ -9,8 +9,8 @@ import {
   planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
-import { usePlanningBoundaryState } from '../../../hooks/mapState/usePlanningBoundaryState'
-import type { PlanningUseCase } from '../factors/planningDefaults'
+import { useSpaceFinderBoundaryState } from '../../../hooks/mapState/useSpaceFinderBoundaryState'
+import type { PlanningUseCase } from '../factors/spaceFinderDefaults'
 import { useSpaceFinderModeParam } from '../useSpaceFinderModeParam'
 import { AreaFormFields, useEffectiveStudyArea, useStudyAreaKm2 } from './AreaFormFields'
 import type { UserGeojsonMode } from './UserObstaclesField'
@@ -33,7 +33,7 @@ const AreaEditorForm = ({
   onDeleted?: () => void
 }) => {
   const queryClient = useQueryClient()
-  const setBoundaryHighlightGeom = usePlanningBoundaryState((s) => s.setBoundaryHighlightGeom)
+  const setBoundaryHighlightGeom = useSpaceFinderBoundaryState((s) => s.setBoundaryHighlightGeom)
   const { spaceFinderMode, setSpaceFinderModeParam } = useSpaceFinderModeParam()
 
   const [title, setTitle] = useState(area.title)

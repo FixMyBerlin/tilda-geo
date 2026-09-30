@@ -3,13 +3,13 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { bbox } from '@turf/turf'
 import { useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
-import { usePlanningBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningBoundaryState'
+import { useSpaceFinderBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/useSpaceFinderBoundaryState'
 import { useDebouncedValue } from '@/components/shared/hooks/useDebouncedValue'
 import {
   adminBoundariesQueryOptions,
   boundaryGeomQueryOptions,
 } from '@/server/planning/planningQueryOptions'
-import { planningTextInputClass } from '../planningPanelStyles'
+import { spaceFinderTextInputClass } from '../spaceFinderPanelStyles'
 
 // Level 9 ist regional uneinheitlich: in Berlin Bezirk, in Brandenburg meist Ortsteil.
 const LEVEL_LABELS: Record<string, string> = {
@@ -38,7 +38,7 @@ export const BoundaryPicker = ({
 }) => {
   const { mainMap: map } = useMap()
   const queryClient = useQueryClient()
-  const setBoundaryHighlightGeom = usePlanningBoundaryState((s) => s.setBoundaryHighlightGeom)
+  const setBoundaryHighlightGeom = useSpaceFinderBoundaryState((s) => s.setBoundaryHighlightGeom)
   const [query, setQuery] = useState('')
   // Das gewählte Gebiet kommt aus der Trefferliste des Moments der Auswahl; da die Liste
   // suchabhängig ist, wird es hier festgehalten, statt es später wieder nachzuschlagen.
@@ -107,7 +107,7 @@ export const BoundaryPicker = ({
   return (
     <Combobox as="div" value={currentBoundary} onChange={handleChange} by="id">
       <ComboboxInput
-        className={`w-full ${planningTextInputClass}`}
+        className={`w-full ${spaceFinderTextInputClass}`}
         displayValue={displayName}
         onChange={(e) => setQuery(e.target.value)}
         onFocus={() => setQuery('')}

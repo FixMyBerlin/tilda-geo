@@ -7,7 +7,7 @@ import {
   planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
-import { DEFAULT_FACTOR_TEMPLATE, type PlanningUseCase } from '../factors/planningDefaults'
+import { DEFAULT_FACTOR_TEMPLATE, type PlanningUseCase } from '../factors/spaceFinderDefaults'
 import { AreaFormFields, useEffectiveStudyArea, useStudyAreaKm2 } from './AreaFormFields'
 import type { UserGeojsonMode } from './UserObstaclesField'
 

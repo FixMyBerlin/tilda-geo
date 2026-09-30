@@ -1,7 +1,7 @@
 import type { Map as MapLibreMap } from 'maplibre-gl'
 import { TerraDraw } from 'terra-draw'
 import { TerraDrawMapLibreGLAdapter } from 'terra-draw-maplibre-gl-adapter'
-import { PLANNING_TERRA_MODE, createPlanningTerraDrawModes } from './planningTerraDrawConfig'
+import { PLANNING_TERRA_MODE, createSpaceFinderTerraDrawModes } from './spaceFinderTerraDrawConfig'
 
 type Handlers = {
   /** Called with the single drawn study-area geometry, or null when cleared. */
@@ -14,9 +14,9 @@ type Handlers = {
   onDrawingStateChange: (isDrawing: boolean) => void
 }
 
-type PlanningMapDrawingControlOptions = {
+type SpaceFinderMapDrawingControlOptions = {
   getHandlers: () => Handlers
-  onReady?: (control: PlanningMapDrawingControl) => void
+  onReady?: (control: SpaceFinderMapDrawingControl) => void
 }
 
 /**
@@ -27,16 +27,16 @@ type PlanningMapDrawingControlOptions = {
  * style swap — but is restricted to exactly one polygon: each (re)activation starts a fresh draw,
  * and finishing the polygon switches to select mode so vertices stay editable.
  */
-export class PlanningMapDrawingControl {
+export class SpaceFinderMapDrawingControl {
   private map: MapLibreMap | null = null
   private draw: TerraDraw | null = null
   private isInitialized = false
   private restorePending = false
   private styleLoadHandler = () => this.reinitAfterStyleChange()
   private initHandler = () => this.tryInitialize()
-  private readonly options: PlanningMapDrawingControlOptions
+  private readonly options: SpaceFinderMapDrawingControlOptions
 
-  constructor(options: PlanningMapDrawingControlOptions) {
+  constructor(options: SpaceFinderMapDrawingControlOptions) {
     this.options = options
   }
 
@@ -89,7 +89,7 @@ export class PlanningMapDrawingControl {
   private createDrawInstance(map: MapLibreMap) {
     return new TerraDraw({
       adapter: new TerraDrawMapLibreGLAdapter({ map }),
-      modes: createPlanningTerraDrawModes(),
+      modes: createSpaceFinderTerraDrawModes(),
     })
   }
 

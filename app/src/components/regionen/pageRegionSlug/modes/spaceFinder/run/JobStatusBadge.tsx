@@ -5,7 +5,7 @@ import {
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
 import { Spinner } from '../Spinner'
-import { deriveScoringStep, PlanningSteps } from './PlanningSteps'
+import { deriveScoringStep, SpaceFinderRunSteps } from './SpaceFinderRunSteps'
 
 const LABELS: Record<string, string> = {
   QUEUED: 'In Warteschlange…',
@@ -80,7 +80,7 @@ export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId:
         </div>
       ) : null}
       {showProgress ? (
-        <PlanningSteps
+        <SpaceFinderRunSteps
           currentStep={currentStep}
           weights={data.weights}
           userObstacles={{ present: data.userGeojsonPresent, mode: data.userGeojsonMode }}

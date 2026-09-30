@@ -5,13 +5,13 @@ import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import {
-  type PlanningCandidate,
-  usePlanningCandidatesState,
-} from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningCandidatesState'
+  type SpaceFinderCandidate,
+  useSpaceFinderCandidatesState,
+} from '@/components/regionen/pageRegionSlug/hooks/mapState/useSpaceFinderCandidatesState'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { CollapsibleBox } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/CollapsibleBox'
 import { ModeListItem } from '../ModeListItem'
-import { candidateExportFileName, downloadCandidatesGeojson } from './planningCandidateExport'
+import { candidateExportFileName, downloadCandidatesGeojson } from './spaceFinderCandidateExport'
 import { useSpaceFinderSelection } from './useSpaceFinderSelection'
 
 const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
@@ -31,11 +31,11 @@ const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
  */
 export const SpaceFinderCandidateSelectionReset = () => {
   const { runId } = useSpaceFinderSelection()
-  const setSelectActive = usePlanningCandidatesState((s) => s.setSelectActive)
-  const clearCandidates = usePlanningCandidatesState((s) => s.clearCandidates)
+  const setSelectActive = useSpaceFinderCandidatesState((s) => s.setSelectActive)
+  const clearCandidates = useSpaceFinderCandidatesState((s) => s.clearCandidates)
 
   useEffect(
-    function resetCandidateSelectionOutsidePlanningResult() {
+    function resetCandidateSelectionOutsideSpaceFinderResult() {
       if (runId != null) return
       setSelectActive(false)
       clearCandidates()
@@ -56,7 +56,7 @@ export const SpaceFinderCandidateSelectionReset = () => {
 
 const candidateListItemId = (h3Id: string) => `spaceFinder-candidate-${h3Id}`
 
-const candidateCentroid = (candidate: PlanningCandidate): [number, number] => {
+const candidateCentroid = (candidate: SpaceFinderCandidate): [number, number] => {
   const coordinates = centroid({
     type: 'Feature',
     geometry: candidate.geometry as GeoJSON.Geometry,
@@ -71,7 +71,7 @@ const CandidateRow = ({
   onFocus,
   onRemove,
 }: {
-  candidate: PlanningCandidate
+  candidate: SpaceFinderCandidate
   index: number
   onFocus: () => void
   onRemove: () => void
@@ -126,16 +126,16 @@ const CandidateRow = ({
  * The only output is the GeoJSON download — no Prüflisten handover.
  */
 export const SpaceFinderCandidatesSection = ({ variantId }: { variantId: number }) => {
-  const candidates = usePlanningCandidatesState((s) => s.candidates)
-  const selectActive = usePlanningCandidatesState((s) => s.selectActive)
-  const setSelectActive = usePlanningCandidatesState((s) => s.setSelectActive)
-  const removeCandidate = usePlanningCandidatesState((s) => s.removeCandidate)
-  const clearCandidates = usePlanningCandidatesState((s) => s.clearCandidates)
+  const candidates = useSpaceFinderCandidatesState((s) => s.candidates)
+  const selectActive = useSpaceFinderCandidatesState((s) => s.selectActive)
+  const setSelectActive = useSpaceFinderCandidatesState((s) => s.setSelectActive)
+  const removeCandidate = useSpaceFinderCandidatesState((s) => s.removeCandidate)
+  const clearCandidates = useSpaceFinderCandidatesState((s) => s.clearCandidates)
   const { clearInspectorFeatures } = useMapActions()
   const { setFeaturesParam } = useFeaturesParam()
   const { mainMap: map } = useMap()
 
-  const focusCandidate = (candidate: PlanningCandidate) => {
+  const focusCandidate = (candidate: SpaceFinderCandidate) => {
     if (!map) return
     const [minLng, minLat, maxLng, maxLat] = bbox({
       type: 'Feature',

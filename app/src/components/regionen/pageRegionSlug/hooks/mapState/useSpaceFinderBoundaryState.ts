@@ -93,7 +93,7 @@ type Store = {
   setLastFittedBoundaryKey: (key: string | null) => void
 }
 
-export const usePlanningBoundaryState = create<Store>((set) => ({
+export const useSpaceFinderBoundaryState = create<Store>((set) => ({
   boundaryHighlightGeom: null,
   boundaryHighlightFilled: true,
   setBoundaryHighlightGeom: (geom, opts) =>

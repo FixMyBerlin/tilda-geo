@@ -1,7 +1,7 @@
 import { useEffect } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
-import { usePlanningBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningBoundaryState'
-import { usePlanningCandidatesState } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningCandidatesState'
+import { useSpaceFinderBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/useSpaceFinderBoundaryState'
+import { useSpaceFinderCandidatesState } from '@/components/regionen/pageRegionSlug/hooks/mapState/useSpaceFinderCandidatesState'
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
 import { getTilesUrl } from '@/components/shared/utils/getTilesUrl'
@@ -61,7 +61,7 @@ const HEXAGON_LABEL_MIN_ZOOM = 18
 // Deckkraft graduell ein (statt hart bei 0 umzuschalten) – sonst entsteht bei
 // vielen knapp über 0 liegenden Werten ein löchriges Muster aus abrupt
 // wechselnden transparenten und undurchsichtigen Nachbar-Hexagonen. Der Farbton
-// hängt vom aktiven Anzeigemodus ab — dieselben Farben wie `planningGroupStyle`
+// hängt vom aktiven Anzeigemodus ab — dieselben Farben wie `spaceFinderGroupStyle`
 // (Bedarf blau, Bebauung lila); Kombination bleibt beim ursprünglichen Rot, da sie
 // keine Faktorgruppe mit eigener Farbe ist.
 const HEXAGON_FADE_IN_THRESHOLD = 10
@@ -232,8 +232,8 @@ const censusLabelLayerProps = {
 }
 
 const BoundaryHighlightLayer = () => {
-  const geom = usePlanningBoundaryState((s) => s.boundaryHighlightGeom)
-  const filled = usePlanningBoundaryState((s) => s.boundaryHighlightFilled)
+  const geom = useSpaceFinderBoundaryState((s) => s.boundaryHighlightGeom)
+  const filled = useSpaceFinderBoundaryState((s) => s.boundaryHighlightFilled)
   if (!geom) return null
   return (
     <Source
@@ -262,8 +262,8 @@ const BoundaryHighlightLayer = () => {
 // Linien und Flächen werden mit eigenen Layern dargestellt. Über den Schalter im
 // Panel (userObstaclesVisible) ein- und ausblendbar wie Vegetation/Fahrbahnen.
 const UserObstaclesLayer = () => {
-  const geom = usePlanningBoundaryState((s) => s.userObstaclesGeom)
-  const visible = usePlanningBoundaryState((s) => s.userObstaclesVisible)
+  const geom = useSpaceFinderBoundaryState((s) => s.userObstaclesGeom)
+  const visible = useSpaceFinderBoundaryState((s) => s.userObstaclesVisible)
   if (!geom || !visible) return null
   return (
     <Source id="planning-user-obstacles" type="geojson" data={geom as any}>
@@ -305,8 +305,8 @@ const UserObstaclesLayer = () => {
 // Markierung damit aus, ohne die Auswahl selbst zu löschen (siehe PlanningCandidateToggle,
 // SidebarInspector handleClose).
 const CandidateHighlightLayer = () => {
-  const selectActive = usePlanningCandidatesState((s) => s.selectActive)
-  const candidates = usePlanningCandidatesState((s) => s.candidates)
+  const selectActive = useSpaceFinderCandidatesState((s) => s.selectActive)
+  const candidates = useSpaceFinderCandidatesState((s) => s.candidates)
   if (!selectActive || !candidates.length) return null
 
   return (
@@ -332,17 +332,17 @@ const CandidateHighlightLayer = () => {
   )
 }
 
-export const SourcesLayersPlanning = () => {
+export const SourcesLayersSpaceFinder = () => {
   const { runId } = useSpaceFinderSelection()
   const { spaceFinderMode } = useSpaceFinderModeParam()
   const scoreMode = spaceFinderMode.score ?? 'kombination'
   const hexagonsOpacityPct = spaceFinderMode.opacity ?? 100
   const minArea = spaceFinderMode.minArea ?? 0
   const areaFilterOn = minArea > 0
-  const vegetationOn = usePlanningBoundaryState((s) => s.vegetationVisible)
-  const vegetationAttribution = usePlanningBoundaryState((s) => s.vegetationAttribution)
-  const carriagewaysOn = usePlanningBoundaryState((s) => s.carriagewaysVisible)
-  const censusOn = usePlanningBoundaryState((s) => s.censusVisible)
+  const vegetationOn = useSpaceFinderBoundaryState((s) => s.vegetationVisible)
+  const vegetationAttribution = useSpaceFinderBoundaryState((s) => s.vegetationAttribution)
+  const carriagewaysOn = useSpaceFinderBoundaryState((s) => s.carriagewaysVisible)
+  const censusOn = useSpaceFinderBoundaryState((s) => s.censusVisible)
 
   useEffect(() => {
     if (runId != null) {
