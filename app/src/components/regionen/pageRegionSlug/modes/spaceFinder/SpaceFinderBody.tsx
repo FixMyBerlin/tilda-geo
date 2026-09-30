@@ -143,6 +143,11 @@ const MinAreaFilterForm = ({
   const urlMinArea = spaceFinderMode.minArea ?? 0
   const filterOn = urlMinArea > 0
   const [minArea, setLocalMinArea] = useState(savedMinArea)
+  // Checkbox an, aber noch keine Zahl > 0: `ff.minArea` bleibt leer (Filter wirkt noch nicht),
+  // das Feld muss trotzdem freigegeben sein — sonst kommt man ohne gespeicherten Wert nie hinein
+  // und das Feld sperrt sich, sobald man die Zahl zum Neueintippen löscht.
+  const [awaitingValue, setAwaitingValue] = useState(false)
+  const checked = filterOn || awaitingValue
   const lastSaved = useRef(savedMinArea)
 
   // Beim Öffnen einer Variante deren gespeicherten Wert einmalig in die Karte übernehmen
@@ -169,15 +174,17 @@ const MinAreaFilterForm = ({
     if (minArea !== lastSaved.current) mutation.mutate(minArea)
   }
 
-  const setFilterOn = (checked: boolean) => {
+  const setFilterOn = (on: boolean) => {
+    setAwaitingValue(on && minArea <= 0)
     setSpaceFinderModeParam({
       ...spaceFinderMode,
-      minArea: checked ? minArea || undefined : undefined,
+      minArea: on && minArea > 0 ? minArea : undefined,
     })
   }
 
   const setMinArea = (value: number) => {
     setLocalMinArea(value)
+    setAwaitingValue(value <= 0)
     setSpaceFinderModeParam({ ...spaceFinderMode, minArea: value > 0 ? value : undefined })
   }
 
@@ -186,7 +193,7 @@ const MinAreaFilterForm = ({
       <label className="flex items-center gap-2 font-medium text-gray-800">
         <input
           type="checkbox"
-          checked={filterOn}
+          checked={checked}
           onChange={(e) => setFilterOn(e.target.checked)}
           className="rounded border-gray-300"
         />
@@ -196,8 +203,8 @@ const MinAreaFilterForm = ({
         type="number"
         min={0}
         step={5}
-        placeholder="aus"
-        disabled={!filterOn}
+        placeholder={checked ? 'm²' : 'aus'}
+        disabled={!checked}
         value={minArea > 0 ? minArea : ''}
         onChange={(e) =>
           setMinArea(e.target.value === '' ? 0 : Math.max(0, Number(e.target.value)))
