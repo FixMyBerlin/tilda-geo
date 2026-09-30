@@ -6,7 +6,7 @@ from typing import Dict, Optional
 # Die vier Kategorien, die processing/topics/poiClassification vergibt. Reihenfolge und
 # Schreibweise müssen exakt zu den Werten in public."poiClassification".tags->>'category'
 # passen (siehe postgis_loader.load_target_locations) und zur UI-Liste in
-# app/.../Planning/zielortCategories.ts.
+# app/.../modes/spaceFinder/factors/zielortCategories.ts.
 ZIELORT_CATEGORIES = ("Grundversorgung", "Bildung", "Einkauf", "Freizeit")
 
 # Gleichverteilung: der Stand, mit dem sich der Zielorte-Bonus verhält wie vor der
@@ -41,7 +41,7 @@ def zielort_category_factors(shares: Dict[str, float]) -> Dict[str, float]:
 # Die beiden Gruppen, in die score_oepnv zerfällt: "ÖPNV" fasst die fünf klassischen
 # Haltestellentypen (U-Bahn-Eingang, Straßenbahn, Bus, Bahnhof, Bahnhofsgebäude) weiterhin per
 # max() zusammen, "Bikesharing" bleibt ein eigener Typ. Reihenfolge/Schreibweise müssen zur
-# UI-Liste in app/.../Planning/oepnvCategories.ts passen.
+# UI-Liste in app/.../modes/spaceFinder/factors/oepnvCategories.ts passen.
 OEPNV_CATEGORIES = ("ÖPNV", "Bikesharing")
 
 # Gleichverteilung (50/50) — ANDERS als bei Zielorte NICHT der Stand von vor der
@@ -185,7 +185,7 @@ class UseCaseConfig:
     zielort_radius_m: float = 20.0        # Reichweite ab Gebäudekante (fest, wie Bewohnerbedarf)
 
     # Verhältnis der vier Kategorien zueinander, in Prozent (Summe 100; UI-Regler, siehe
-    # app/.../Planning/ZielortCategorySliders.tsx). Gerechnet wird mit dem auf das MAXIMUM
+    # app/.../modes/spaceFinder/factors/ZielortCategorySliders.tsx). Gerechnet wird mit dem auf das MAXIMUM
     # normierten Anteil: die stärkste Kategorie steht für den vollen Zuschlag, eine halb so
     # stark gewichtete für den halben (siehe `zielort_category_factors` und scorer.py).
     # Gleichverteilung (Default) heißt also: jede Kategorie löst wie bisher den vollen
@@ -195,7 +195,7 @@ class UseCaseConfig:
     )
 
     # Verhältnis von ÖPNV zu Bikesharing zueinander, in Prozent (Summe 100; UI-Regler, siehe
-    # app/.../Planning/OepnvCategorySliders.tsx). Anders als bei Zielorte ist Gleichverteilung
+    # app/.../modes/spaceFinder/factors/OepnvCategorySliders.tsx). Anders als bei Zielorte ist Gleichverteilung
     # HIER NICHT non-breaking (siehe Kommentar an `DEFAULT_OEPNV_CATEGORY_SHARES` in diesem
     # Modul) — score_oepnv kombinierte die Typen vorher über max(), jetzt über die gekappte
     # Summe der beiden Gruppenanteile.

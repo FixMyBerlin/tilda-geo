@@ -4,22 +4,22 @@ import { useEffect, useMemo } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
 import { MAX_STUDY_AREA_KM2, studyAreaSizeKm2 } from '@/lib/planningStudyAreaLimit'
-import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
-import { BoundaryPicker } from './BoundaryPicker'
-import type { StudyAreaGeometry } from './extractStudyAreaGeometry'
-import { GeoJsonUpload } from './GeoJsonUpload'
-import { InfoTooltip } from './InfoTooltip'
+import { usePlanningBoundaryState } from '../../../hooks/mapState/usePlanningBoundaryState'
 import {
   GROUP_HELP,
   PLANNING_USE_CASES,
   SHOW_PLANNING_USE_CASE_UI,
   type PlanningUseCase,
-} from './planningDefaults'
+} from '../factors/planningDefaults'
+import { InfoTooltip } from '../InfoTooltip'
 import {
   planningNumberInputClass,
   planningPanelTitleInputClass,
   planningRadioButtonClass,
-} from './planningPanelStyles'
+} from '../planningPanelStyles'
+import { BoundaryPicker } from './BoundaryPicker'
+import type { StudyAreaGeometry } from './extractStudyAreaGeometry'
+import { GeoJsonUpload } from './GeoJsonUpload'
 import { UserObstaclesField, type UserGeojsonMode } from './UserObstaclesField'
 import { WizardStep } from './WizardStep'
 

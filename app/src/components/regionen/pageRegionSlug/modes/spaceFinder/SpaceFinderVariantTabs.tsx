@@ -1,7 +1,6 @@
 import { CheckIcon, ExclamationTriangleIcon } from '@heroicons/react/20/solid'
 import { twJoin } from 'tailwind-merge'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
-import { Spinner } from '../../Planning/Spinner'
 import { modeIdentity } from '../modeIdentity'
 import { modePanelFilterControlClassName } from '../modePanel.const'
 import {
@@ -11,6 +10,7 @@ import {
   spaceFinderVariantStatus,
 } from './spaceFinderCollectionOptions'
 import { SpaceFinderVariantManageMenu, SpaceFinderVariantNewMenu } from './SpaceFinderMenus'
+import { Spinner } from './Spinner'
 import type { SpaceFinderCommands } from './useSpaceFinderCommands'
 
 const statusText = {

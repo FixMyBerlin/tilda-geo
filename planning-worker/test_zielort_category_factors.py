@@ -1,5 +1,5 @@
 """Spiegel der `zielortCategoryEffect`-Fälle in
-`app/src/components/regionen/pageRegionSlug/Planning/zielortShares.test.ts` — beide Seiten müssen
+`app/src/components/regionen/pageRegionSlug/modes/spaceFinder/factors/zielortShares.test.ts` — beide Seiten müssen
 denselben Kategorie-Faktor ergeben, sonst zeigt die UI etwas anderes an, als der Worker rechnet.
 """
 

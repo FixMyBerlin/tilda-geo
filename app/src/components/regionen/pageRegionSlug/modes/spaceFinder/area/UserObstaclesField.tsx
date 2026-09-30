@@ -4,9 +4,9 @@ import {
   parseUserGeojson,
 } from '@/lib/planningUserGeojson'
 import type { FactorConfig } from '@/server/planning/planning.functions'
+import { ModifierSlider } from '../factors/WeightSlider'
+import { SegmentedChoice } from '../SegmentedChoice'
 import { GeoJsonUploadField } from './GeoJsonUpload'
-import { SegmentedChoice } from './SegmentedChoice'
-import { ModifierSlider } from './WeightSlider'
 
 /** `[value, label, tooltip]` — die Erklärung erscheint als Info-Icon auf dem jeweiligen Button. */
 export const USER_GEOJSON_MODES = [

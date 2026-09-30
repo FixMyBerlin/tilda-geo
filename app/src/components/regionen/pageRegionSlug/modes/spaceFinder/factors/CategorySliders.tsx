@@ -1,5 +1,6 @@
 import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { twJoin } from 'tailwind-merge'
+import { InfoTooltip } from '../InfoTooltip'
 import {
   CATEGORY_SHARE_STEP,
   CATEGORY_SHARE_TOTAL,
@@ -7,7 +8,6 @@ import {
   rebalanceCategoryShares,
   type CategoryShares,
 } from './categoryShares'
-import { InfoTooltip } from './InfoTooltip'
 
 /** Farbpunkte mit ihrem Anteil je Kategorie — zugeklappt der einzige Hinweis auf die Aufteilung. */
 const SharePreview = <K extends string>({

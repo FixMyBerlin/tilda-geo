@@ -1,4 +1,4 @@
-import { CollapsibleBox } from './CollapsibleBox'
+import { CollapsibleBox } from '../CollapsibleBox'
 
 /**
  * Nummerierter, unabhängig auf-/zuklappbarer Schritt eines Assistenten (z.B. `AreaWizard`).

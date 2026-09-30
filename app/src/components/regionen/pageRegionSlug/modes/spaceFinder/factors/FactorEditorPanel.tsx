@@ -12,9 +12,17 @@ import {
   planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
-import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
-import { DisclosureChevron } from './CollapsibleBox'
-import { InfoTooltip } from './InfoTooltip'
+import { usePlanningBoundaryState } from '../../../hooks/mapState/usePlanningBoundaryState'
+import { USER_GEOJSON_MODES, type UserGeojsonMode } from '../area/UserObstaclesField'
+import { DisclosureChevron } from '../CollapsibleBox'
+import { InfoTooltip } from '../InfoTooltip'
+import {
+  planningDisclosureBoxClass,
+  planningDisclosureHeaderClass,
+  planningGroupStyle,
+  planningNumberInputClass,
+} from '../planningPanelStyles'
+import { SegmentedChoice } from '../SegmentedChoice'
 import { OepnvCategorySliders } from './OepnvCategorySliders'
 import { readOepnvShares, type OepnvShares } from './oepnvShares'
 import {
@@ -26,14 +34,6 @@ import {
   WEIGHT_GROUPS,
   WEIGHT_LABELS,
 } from './planningDefaults'
-import {
-  planningDisclosureBoxClass,
-  planningDisclosureHeaderClass,
-  planningGroupStyle,
-  planningNumberInputClass,
-} from './planningPanelStyles'
-import { SegmentedChoice } from './SegmentedChoice'
-import { USER_GEOJSON_MODES, type UserGeojsonMode } from './UserObstaclesField'
 import {
   criterionShares,
   groupShare,

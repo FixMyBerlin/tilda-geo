@@ -4,8 +4,8 @@ import {
   planningJobQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
+import { Spinner } from '../Spinner'
 import { deriveScoringStep, PlanningSteps } from './PlanningSteps'
-import { Spinner } from './Spinner'
 
 const LABELS: Record<string, string> = {
   QUEUED: 'In Warteschlange…',

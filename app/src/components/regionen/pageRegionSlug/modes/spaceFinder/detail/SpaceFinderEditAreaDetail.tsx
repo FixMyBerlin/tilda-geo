@@ -1,4 +1,4 @@
-import { AreaEditor } from '@/components/regionen/pageRegionSlug/Planning/AreaEditor'
+import { AreaEditor } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/area/AreaEditor'
 import { useSpaceFinderModeParam } from '../useSpaceFinderModeParam'
 
 /** ModePanel detail view for »Gebiet bearbeiten« (`ff.edit === 'area'`), driven by the existing editor. */

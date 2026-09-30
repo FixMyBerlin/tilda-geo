@@ -1,5 +1,5 @@
 """Spiegel der `oepnvCategoryEffect`-Fälle in
-`app/src/components/regionen/pageRegionSlug/Planning/oepnvShares.test.ts` — beide Seiten müssen
+`app/src/components/regionen/pageRegionSlug/modes/spaceFinder/factors/oepnvShares.test.ts` — beide Seiten müssen
 denselben Kategorie-Faktor ergeben, sonst zeigt die UI etwas anderes an, als der Worker rechnet.
 """
 

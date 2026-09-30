@@ -9,7 +9,7 @@ import {
   adminBoundariesQueryOptions,
   boundaryGeomQueryOptions,
 } from '@/server/planning/planningQueryOptions'
-import { planningTextInputClass } from './planningPanelStyles'
+import { planningTextInputClass } from '../planningPanelStyles'
 
 // Level 9 ist regional uneinheitlich: in Berlin Bezirk, in Brandenburg meist Ortsteil.
 const LEVEL_LABELS: Record<string, string> = {

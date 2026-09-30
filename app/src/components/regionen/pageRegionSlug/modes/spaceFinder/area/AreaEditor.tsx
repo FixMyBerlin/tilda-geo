@@ -9,10 +9,10 @@ import {
   planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
-import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
-import { useSpaceFinderModeParam } from '../modes/spaceFinder/useSpaceFinderModeParam'
+import { usePlanningBoundaryState } from '../../../hooks/mapState/usePlanningBoundaryState'
+import type { PlanningUseCase } from '../factors/planningDefaults'
+import { useSpaceFinderModeParam } from '../useSpaceFinderModeParam'
 import { AreaFormFields, useEffectiveStudyArea, useStudyAreaKm2 } from './AreaFormFields'
-import type { PlanningUseCase } from './planningDefaults'
 import type { UserGeojsonMode } from './UserObstaclesField'
 
 type PlanningAreaDetail = Awaited<ReturnType<typeof getPlanningAreaFn>>

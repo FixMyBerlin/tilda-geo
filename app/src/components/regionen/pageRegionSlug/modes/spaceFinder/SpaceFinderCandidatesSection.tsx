@@ -9,7 +9,7 @@ import {
   usePlanningCandidatesState,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/usePlanningCandidatesState'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
-import { CollapsibleBox } from '@/components/regionen/pageRegionSlug/Planning/CollapsibleBox'
+import { CollapsibleBox } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/CollapsibleBox'
 import { ModeListItem } from '../ModeListItem'
 import { candidateExportFileName, downloadCandidatesGeojson } from './planningCandidateExport'
 import { useSpaceFinderSelection } from './useSpaceFinderSelection'

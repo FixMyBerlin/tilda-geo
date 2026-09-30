@@ -1,18 +1,18 @@
 import { twJoin } from 'tailwind-merge'
 import type { StoreFeaturesInspector } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
-import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
-import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
-import { WEIGHT_GROUPS } from '@/components/regionen/pageRegionSlug/Planning/planningDefaults'
-import {
-  planningGroupBarStyle,
-  planningGroupStyle,
-} from '@/components/regionen/pageRegionSlug/Planning/planningPanelStyles'
+import { WEIGHT_GROUPS } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/planningDefaults'
 import {
   criterionShares,
   groupShare,
   MODIFIER_MAX_POINTS,
   weightToPoints,
-} from '@/components/regionen/pageRegionSlug/Planning/weightScale'
+} from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/weightScale'
+import {
+  planningGroupBarStyle,
+  planningGroupStyle,
+} from '@/components/regionen/pageRegionSlug/modes/spaceFinder/planningPanelStyles'
+import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
+import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
 import type { VariantFactorConfig } from '@/server/planning/mergeFactorConfig'
 import { Disclosure } from './Disclosure/Disclosure'
 

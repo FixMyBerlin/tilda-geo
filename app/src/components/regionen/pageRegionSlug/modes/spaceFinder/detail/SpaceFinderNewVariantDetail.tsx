@@ -1,6 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { planningPanelTitleInputClass } from '@/components/regionen/pageRegionSlug/Planning/planningPanelStyles'
+import { planningPanelTitleInputClass } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/planningPanelStyles'
 import { frenchQuote } from '@/components/shared/text/Quotes'
 import { createPlanningVariantFn } from '@/server/planning/planning.functions'
 import {

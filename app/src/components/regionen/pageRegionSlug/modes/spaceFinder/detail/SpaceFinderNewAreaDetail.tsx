@@ -1,4 +1,4 @@
-import { AreaWizard } from '@/components/regionen/pageRegionSlug/Planning/AreaWizard'
+import { AreaWizard } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/area/AreaWizard'
 import { useSpaceFinderModeParam } from '../useSpaceFinderModeParam'
 
 /** ModePanel detail view for »Neues Planungsgebiet« (`ff.new === 'area'`), driven by the existing wizard. */

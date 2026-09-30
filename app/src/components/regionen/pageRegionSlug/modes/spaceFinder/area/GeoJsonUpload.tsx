@@ -1,20 +1,20 @@
 import { ArrowUpTrayIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { useEffect, useRef, useState } from 'react'
+import { Spinner } from '../Spinner'
+import { type StudyAreaGeometry, parseStudyAreaGeometry } from './extractStudyAreaGeometry'
 import {
   convertGeopackageToGeoJson,
   isGeopackageFile,
   mightNeedReprojection,
   reprojectToWgs84,
-} from '@/lib/planningGeoConversion'
+} from './planningGeoConversion'
 import {
   deleteGeojsonHistoryEntry,
   type GeojsonHistoryEntry,
   type GeojsonHistoryKind,
   listGeojsonHistoryEntries,
   saveGeojsonHistoryEntry,
-} from '@/lib/planningGeojsonHistory'
-import { type StudyAreaGeometry, parseStudyAreaGeometry } from './extractStudyAreaGeometry'
-import { Spinner } from './Spinner'
+} from './planningGeojsonHistory'
 
 /**
  * Normalises an uploaded file to a GeoJSON string before it reaches `parse`: converts

@@ -4,7 +4,7 @@ import {
   planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
-import { usePlanningBoundaryState } from '../hooks/mapState/usePlanningBoundaryState'
+import { usePlanningBoundaryState } from '../../../hooks/mapState/usePlanningBoundaryState'
 import { JobStatusBadge } from './JobStatusBadge'
 
 type LatestJob = { id: number; status: string }

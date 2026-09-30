@@ -7,8 +7,8 @@ import {
   planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
+import { DEFAULT_FACTOR_TEMPLATE, type PlanningUseCase } from '../factors/planningDefaults'
 import { AreaFormFields, useEffectiveStudyArea, useStudyAreaKm2 } from './AreaFormFields'
-import { DEFAULT_FACTOR_TEMPLATE, type PlanningUseCase } from './planningDefaults'
 import type { UserGeojsonMode } from './UserObstaclesField'
 
 /** Reduced wizard: name + geometry + eigene Daten. Creates area + first variant (no auto-run). */
