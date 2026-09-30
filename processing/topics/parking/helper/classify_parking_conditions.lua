@@ -1,5 +1,6 @@
 local log = require('topics.helper.log')
 
+local condition_category_primary = require('topics.parking.helper.condition_category_primary')
 local invert_time_condition = require('topics.parking.helper.invert_time_condition')
 local is_valid_conditional_value = require('topics.parking.helper.is_valid_conditional_value')
 local parse_conditional_value = require('topics.parking.helper.parse_conditional_value')
@@ -168,7 +169,7 @@ end
 -- Uses only `tags` (e.g. unnested parking:left/right from the way, or full tags on a parking area). Highway-only tags must not be merged in here for road-derived parkings.
 ---@param tags OsmTags<string, string|nil> Parking-scoped OSM tags (unnested `parking:*` side tags or element tags)
 ---@param default_category 'assumed_free'|'assumed_private' Default category to use when no condition is found
----@return {condition_category?: string, invalid_conditional_tags?: table<string, string>}
+---@return {condition_category?: string, condition_category_primary?: string, invalid_conditional_tags?: table<string, string>}
 function classify_parking_conditions(tags, default_category)
   local function t(k) return tags[k] end
 
@@ -176,7 +177,7 @@ function classify_parking_conditions(tags, default_category)
   -- callers log `invalid_conditional_tags` to `parking_errors`.
   local invalid_conditional_tags = collect_invalid_conditional_tags(tags)
   if invalid_conditional_tags then
-    return { condition_category = 'invalid', invalid_conditional_tags = invalid_conditional_tags }
+    return { condition_category = 'invalid', condition_category_primary = condition_category_primary('invalid'), invalid_conditional_tags = invalid_conditional_tags }
   end
 
   -- Initialize categories
@@ -683,6 +684,7 @@ function classify_parking_conditions(tags, default_category)
 
   return {
     condition_category = condition_category_str,
+    condition_category_primary = condition_category_primary(condition_category_str),
   }
 end
 

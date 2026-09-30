@@ -1,6 +1,6 @@
 import type { MapboxStyleLayer } from './mapboxStyles/types'
 
-// KEEP IN SYNC with `processing/topics/parking/custom_functions/condition_category_primary.sql`
+// KEEP IN SYNC with `processing/topics/parking/helper/condition_category_primary.lua`
 // and `mapboxStyles/groups/park_street_default.ts` / `park_off_default_area.ts`.
 const conditionCategoryPrimaryLineColor = (property: string) => [
   'match',

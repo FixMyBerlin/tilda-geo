@@ -857,7 +857,7 @@ WITH
         END
         ELSE c.side
       END AS side,
-      tilda_condition_category_primary (m.tags ->> 'condition_category') AS category,
+      m.tags ->> 'condition_category_primary' AS category,
       m.tags ->> 'parking' AS parking,
       m.tags ->> 'surface' AS surface,
       m.tags ->> 'operator_type' AS operator_type,
@@ -1070,7 +1070,7 @@ ORDER BY
 
 CREATE INDEX _parking_edges_side_winner_idx ON _parking_edges_side_winner (edge_id, side, operator_type);
 
--- Winner-subset paint: most capacity, then `tilda_condition_category_priority()` (same order as the map style).
+-- Winner-subset paint: most capacity, then `tilda_condition_category_priority()` (same order as `helper/condition_category_primary.lua`).
 DROP TABLE IF EXISTS _parking_edges_side_category;
 
 CREATE TEMP TABLE _parking_edges_side_category AS

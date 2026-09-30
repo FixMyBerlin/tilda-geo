@@ -49,6 +49,7 @@ local function result_tags_separate_parking(category, object, area)
 
     -- Parking properties
     condition_category = conditional_categories_result.condition_category,
+    condition_category_primary = conditional_categories_result.condition_category_primary,
     covered = SANITIZE_TAGS.covered(object.tags.covered),
     direction = SANITIZE_PARKING_TAGS.direction(object.tags.direction),
     informal = SANITIZE_TAGS.informal(object.tags.informal),

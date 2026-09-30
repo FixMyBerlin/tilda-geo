@@ -15,6 +15,7 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 - `maxstay=1 hour @ (Mo-Fr …)` without `:conditional` is read like `maxstay:conditional` → `time_limited (1 hour) (Mo-Fr …)` instead of nested brackets.
 - Street parkings from `parking:left|right|both:*` now log rejected sanitizer values to `parking_errors` too (previously dropped silently).
 - Docs: `condition_category_primary` and `condition_category_left|right` document `default` ("Keine Zuordnung": category not in the style priority list, e.g. `no_standing`). `capacity_source=area` (off-street) was already documented via `valuesAdd`.
+- `condition_category_primary` is now computed in Lua next to `condition_category` (was a SQL function at finalize). Same values; it is now also on `parkings_no` and `parkings_separate`.
 - Note: condition detail strings are mostly passed through from OSM verbatim (only fee inversion and time subtraction rebuild them), so casing like `mo-Fr` can appear. The inspector translates weekdays case-insensitively.
 
 ### `bikelanes`, `routing`

@@ -53,6 +53,7 @@ SELECT
     --
     -- Parking properties
     'condition_category', tags ->> 'condition_category',
+    'condition_category_primary', tags ->> 'condition_category_primary',
     'covered', tags ->> 'covered',
     'direction', tags ->> 'direction',
     'informal', tags ->> 'informal',

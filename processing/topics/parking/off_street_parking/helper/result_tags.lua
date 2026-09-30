@@ -50,6 +50,7 @@ local function result_tags_off_street_parking(result, area)
 
     -- Parking properties
     condition_category = conditional_categories_result.condition_category,
+    condition_category_primary = conditional_categories_result.condition_category_primary,
     covered = SANITIZE_TAGS.covered(result.object.tags.covered),
     direction = SANITIZE_PARKING_TAGS.direction(result.object.tags.direction),
     informal = SANITIZE_TAGS.informal(result.object.tags.informal),
