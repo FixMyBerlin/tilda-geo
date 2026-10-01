@@ -45,10 +45,11 @@ local function off_street_parking_areas(object)
   local result = categorize_off_street_parking(object, off_street_parking_area_categories)
   if result.object then
     local area = area_sqm(result.object)
-    local row_data, replaced_tags = result_tags(result, area)
+    local row_data, replaced_tags, rewritten_tags = result_tags(result, area)
     local row = merge_table({ geom = result.object:as_multipolygon() }, row_data)
 
     LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'off_street_parking_areas')
+    LOG_ERROR.REWRITTEN_VALUE(result.object, row.geom, rewritten_tags, 'off_street_parking_areas')
     -- `:as_multipolygon()` will create a postgis-polygon or postgis-multipoligon.
     -- With `:num_geometries()` we filter to only allow polygons which is our table column data type.
     if row.geom:num_geometries() == 1 then

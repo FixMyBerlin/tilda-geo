@@ -79,7 +79,7 @@ local function result_tags_off_street_parking(result, area)
   local result_meta = metadata(result.object)
 
   local cleaned_tags, replaced_tags = CLEANER.separate_tags(result_tags, result.object.tags)
-  for key, value in pairs(conditional_categories_result.rejected_tags or {}) do
+  for key, value in pairs(conditional_categories_result.dropped_tags or {}) do
     replaced_tags[key] = value
   end
 
@@ -88,7 +88,7 @@ local function result_tags_off_street_parking(result, area)
     tags = cleaned_tags,
     meta = result_meta,
     minzoom = area_minzoom(area),
-  }, replaced_tags
+  }, replaced_tags, conditional_categories_result.rewritten_tags or {}
 end
 
 return result_tags_off_street_parking

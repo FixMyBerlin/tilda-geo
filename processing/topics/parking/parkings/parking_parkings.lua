@@ -24,10 +24,14 @@ function parking_parkings(object)
   local transformed_objects = transform_parkings(object)
   -- One error row per way: `parking:both:*` would otherwise be logged for each side
   local replaced_tags_all_sides = {}
+  local rewritten_tags_all_sides = {}
   for _, transformed_object in pairs(transformed_objects) do
-    local row_data, replaced_tags = result_tags(transformed_object)
+    local row_data, replaced_tags, rewritten_tags = result_tags(transformed_object)
     for key, value in pairs(replaced_tags) do
       replaced_tags_all_sides[key] = value
+    end
+    for key, value in pairs(rewritten_tags) do
+      rewritten_tags_all_sides[key] = value
     end
 
     -- Note: No geometry for this table
@@ -36,6 +40,9 @@ function parking_parkings(object)
 
   if next(replaced_tags_all_sides) ~= nil then
     LOG_ERROR.SANITIZED_VALUE(object, object:as_linestring(), replaced_tags_all_sides, 'parking_parkings')
+  end
+  if next(rewritten_tags_all_sides) ~= nil then
+    LOG_ERROR.REWRITTEN_VALUE(object, object:as_linestring(), rewritten_tags_all_sides, 'parking_parkings')
   end
 end
 

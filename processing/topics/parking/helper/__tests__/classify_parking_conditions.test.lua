@@ -85,14 +85,15 @@ describe('classify_parking_conditions', function()
     it('maps known opening_hours comments to tokens', function()
       local result = classify_parking_conditions({ ['fee:conditional'] = 'yes @ ("large events")' }, 'assumed_free')
       assert.are.equal('paid (large_events)', result.condition_category)
-      assert.is_nil(result.rejected_tags)
+      assert.is_nil(result.dropped_tags)
+      assert.is_nil(result.rewritten_tags)
     end)
 
     it('replaces unknown comments and reports the tag', function()
       local value = 'yes @ ("<img src=x onerror=alert>")'
       local result = classify_parking_conditions({ ['fee:conditional'] = value }, 'assumed_free')
       assert.are.equal('paid (other_comment)', result.condition_category)
-      assert.are.same({ ['fee:conditional'] = value }, result.rejected_tags)
+      assert.are.same({ ['fee:conditional'] = value }, result.dropped_tags)
     end)
 
     it('normalizes maxstay durations', function()
@@ -106,60 +107,62 @@ describe('classify_parking_conditions', function()
       for value, duration in pairs(cases) do
         local result = classify_parking_conditions({ maxstay = value }, 'assumed_free')
         assert.are.equal('time_limited (' .. duration .. ')', result.condition_category)
-        assert.are.same({ maxstay = value }, result.rejected_tags)
+        assert.are.same({ maxstay = value }, result.rewritten_tags)
       end
       local zero = classify_parking_conditions({ maxstay = '0' }, 'assumed_free')
       assert.are.equal('time_limited', zero.condition_category)
-      assert.are.same({ maxstay = '0' }, zero.rejected_tags)
+      assert.are.same({ maxstay = '0' }, zero.dropped_tags)
     end)
 
     it('drops unknown maxstay values but keeps the time limit, and reports the tag', function()
       local result = classify_parking_conditions({ maxstay = 'left' }, 'assumed_free')
       assert.are.equal('time_limited', result.condition_category)
-      assert.are.same({ maxstay = 'left' }, result.rejected_tags)
+      assert.are.same({ maxstay = 'left' }, result.dropped_tags)
     end)
 
     it('keeps the interval of a conditional maxstay with an unknown value', function()
       local result = classify_parking_conditions({ ['maxstay:conditional'] = 'kurz @ (Mo-Fr 08:00-18:00)' }, 'assumed_free')
       assert.are.equal('time_limited (Mo-Fr 08:00-18:00)', result.condition_category)
-      assert.are.same({ ['maxstay:conditional'] = 'kurz @ (Mo-Fr 08:00-18:00)' }, result.rejected_tags)
+      assert.are.same({ ['maxstay:conditional'] = 'kurz @ (Mo-Fr 08:00-18:00)' }, result.dropped_tags)
     end)
 
     it('rewrites weekday and time spelling and reports the tag', function()
       local value = 'no_stopping @ (Mo-FR 7:00-9:00)'
       local result = classify_parking_conditions({ ['restriction:conditional'] = value }, 'assumed_free')
       assert.are.equal('no_stopping (Mo-Fr 07:00-09:00)', result.condition_category)
-      assert.are.same({ ['restriction:conditional'] = value }, result.rejected_tags)
+      assert.are.same({ ['restriction:conditional'] = value }, result.rewritten_tags)
     end)
 
     it('replaces broken times by other_condition and reports the tag', function()
       local value = 'no_parking @ (Sa 076:00-09:00)'
       local result = classify_parking_conditions({ ['restriction:conditional'] = value }, 'assumed_free')
       assert.are.equal('no_parking (Sa other_condition)', result.condition_category)
-      assert.are.same({ ['restriction:conditional'] = value }, result.rejected_tags)
+      assert.are.same({ ['restriction:conditional'] = value }, result.dropped_tags)
     end)
 
     it('does not report valid conditions', function()
       local result = classify_parking_conditions({ ['restriction:conditional'] = 'no_parking @ (Mo-Fr 08:00-18:00); none @ residents' }, 'assumed_free')
-      assert.is_nil(result.rejected_tags)
+      assert.is_nil(result.dropped_tags)
+      assert.is_nil(result.rewritten_tags)
     end)
 
     it('ignores access=unknown and reports it', function()
       local result = classify_parking_conditions({ fee = 'yes', access = 'unknown' }, 'assumed_free')
       assert.are.equal('paid', result.condition_category)
-      assert.are.same({ access = 'unknown' }, result.rejected_tags)
+      assert.are.same({ access = 'unknown' }, result.dropped_tags)
     end)
 
     it('keeps access_restriction without detail for unknown access values', function()
       local result = classify_parking_conditions({ access = 'restricted' }, 'assumed_free')
       assert.are.equal('access_restriction', result.condition_category)
-      assert.are.same({ access = 'restricted' }, result.rejected_tags)
+      assert.are.same({ access = 'restricted' }, result.dropped_tags)
     end)
 
     it('keeps known access values as detail', function()
       local result = classify_parking_conditions({ access = 'customers' }, 'assumed_free')
       assert.are.equal('access_restriction (customers)', result.condition_category)
-      assert.is_nil(result.rejected_tags)
+      assert.is_nil(result.dropped_tags)
+      assert.is_nil(result.rewritten_tags)
     end)
   end)
 
@@ -220,7 +223,7 @@ describe('classify_parking_conditions', function()
     }
     local result = classify_parking_conditions(tags, 'assumed_free')
     assert.are.equal('invalid', result.condition_category)
-    assert.are.same({ ['restriction:conditional'] = tags['restriction:conditional'] }, result.rejected_tags)
+    assert.are.same({ ['restriction:conditional'] = tags['restriction:conditional'] }, result.dropped_tags)
   end)
 
   it('reports malformed vehicle conditionals and malformed maxstay with @', function()
@@ -233,12 +236,13 @@ describe('classify_parking_conditions', function()
     assert.are.same({
       ['disabled:conditional'] = tags['disabled:conditional'],
       maxstay = tags.maxstay,
-    }, result.rejected_tags)
+    }, result.dropped_tags)
   end)
 
   it('keeps the maxstay:conditional=yes flag valid', function()
     local tags = { ['maxstay:conditional'] = 'yes' }
     local result = classify_parking_conditions(tags, 'assumed_free')
-    assert.is_nil(result.rejected_tags)
+    assert.is_nil(result.dropped_tags)
+    assert.is_nil(result.rewritten_tags)
   end)
 end)
