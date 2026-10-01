@@ -1,5 +1,9 @@
 import { describe, expect, test } from 'vitest'
-import { compactSpaceFinderModeParam, zodSpaceFinderModeParam } from './spaceFinderModeParam'
+import {
+  compactSpaceFinderModeParam,
+  isSpaceFinderAreaFormOpen,
+  zodSpaceFinderModeParam,
+} from './spaceFinderModeParam'
 
 describe('spaceFinderModeParam', () => {
   test('parses a flat ff object with key', () => {
@@ -54,5 +58,12 @@ describe('spaceFinderModeParam', () => {
     expect(compactSpaceFinderModeParam({})).toBeUndefined()
     expect(compactSpaceFinderModeParam({ key: undefined })).toBeUndefined()
     expect(compactSpaceFinderModeParam({ key: 3 })).toEqual({ key: 3 })
+  })
+
+  test('isSpaceFinderAreaFormOpen only for creating or editing a Planungsgebiet', () => {
+    expect(isSpaceFinderAreaFormOpen({ key: 3, new: 'area' })).toBe(true)
+    expect(isSpaceFinderAreaFormOpen({ key: 3, edit: 'area' })).toBe(true)
+    expect(isSpaceFinderAreaFormOpen({ key: 3, new: 'variant' })).toBe(false)
+    expect(isSpaceFinderAreaFormOpen({ key: 3 })).toBe(false)
   })
 })

@@ -22,6 +22,13 @@ export const zodSpaceFinderModeParam = z.object({
 
 export type SpaceFinderModeParam = z.infer<typeof zodSpaceFinderModeParam>
 
+/**
+ * A Planungsgebiet is being created or edited. `key` stays set as the way back (»Abbrechen«) and,
+ * for editing, as the Gebiet being edited — but no result is shown meanwhile (`useSpaceFinderSelection`).
+ */
+export const isSpaceFinderAreaFormOpen = (param: SpaceFinderModeParam) =>
+  param.new === 'area' || param.edit === 'area'
+
 export const compactSpaceFinderModeParam = (param: SpaceFinderModeParam) => {
   const next: SpaceFinderModeParam = {}
   if (param.key !== undefined) next.key = param.key

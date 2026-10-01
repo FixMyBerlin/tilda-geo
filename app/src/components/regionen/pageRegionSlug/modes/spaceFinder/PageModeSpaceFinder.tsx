@@ -10,7 +10,10 @@ import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { frenchQuote } from '@/components/shared/text/Quotes'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 import { planningAreasQueryOptions } from '@/server/planning/planningQueryOptions'
+import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
+import { useMapActions } from '../../hooks/mapState/useMapState'
 import { useSpaceFinderBoundaryState } from '../../hooks/mapState/useSpaceFinderBoundaryState'
+import { useRegionSearchNavigation } from '../../hooks/useQueryState/useRegionSearchNavigation'
 import { ModePanel } from '../ModePanel'
 import { modePanelHeaderIconButtonClassName, modePanelMutedClassName } from '../modePanel.const'
 import { SpaceFinderEditAreaDetail } from './detail/SpaceFinderEditAreaDetail'
@@ -24,6 +27,7 @@ import {
   spaceFinderSelectedVariant,
 } from './spaceFinderCollectionOptions'
 import { SpaceFinderAreaManageMenu } from './SpaceFinderMenus'
+import { compactSpaceFinderModeParam, isSpaceFinderAreaFormOpen } from './spaceFinderModeParam'
 import { SpaceFinderNameModal } from './SpaceFinderNameModal'
 import { SpaceFinderSelect } from './SpaceFinderSelect'
 import { SpaceFinderVariantTabs } from './SpaceFinderVariantTabs'
@@ -75,6 +79,8 @@ export const PageModeSpaceFinder = () => {
   const sortedAreas = sortedSpaceFinderAreas(areas)
 
   const { spaceFinderMode, setSpaceFinderModeParam } = useSpaceFinderModeParam()
+  const { clearInspectorFeatures } = useMapActions()
+  const { updateSearch } = useRegionSearchNavigation()
   // Area id and shown run are always derived from the active variant (D7).
   const { variantId: activeVariant, areaId: activeArea, variant } = useSpaceFinderSelection()
   const selectedOption = spaceFinderSelectedVariant(areas, activeVariant)
@@ -111,7 +117,7 @@ export const PageModeSpaceFinder = () => {
   const commands = useSpaceFinderCommands({ regionSlug, areas, selectedOption, onSelect })
 
   const studyArea = variant?.area.studyArea as GeoJSON.Geometry | undefined
-  const creatingOrEditingArea = spaceFinderMode.new === 'area' || spaceFinderMode.edit === 'area'
+  const creatingOrEditingArea = isSpaceFinderAreaFormOpen(spaceFinderMode)
 
   // Outline lives on the page (not the body) so it stays on the map while switching variants of
   // the same planungsgebiet, and while a detail view replaces the body.
@@ -189,8 +195,22 @@ export const PageModeSpaceFinder = () => {
       : undefined
   const panelDetail = newAreaDetail ?? newVariantDetail ?? editAreaDetail
 
+  // The area form shows no result (`useSpaceFinderSelection`), so an inspected hexagon of the
+  // previous run must not stay open beside it. One navigation for both params: separate ones
+  // could overwrite each other and would leave an extra history entry.
+  const openAreaForm = (form: { new: 'area' } | { edit: 'area' }) => {
+    clearInspectorFeatures()
+    updateSearch(
+      {
+        [searchParamsRegistry.f]: undefined,
+        [searchParamsRegistry.ff]: compactSpaceFinderModeParam({ ...spaceFinderMode, ...form }),
+      },
+      { replace: true },
+    )
+  }
+
   // Header ➕/⋯ menus: hidden in a detail view and on mobile (D10 — creating/editing needs desktop).
-  const openNewArea = () => setSpaceFinderModeParam({ ...spaceFinderMode, new: 'area' })
+  const openNewArea = () => openAreaForm({ new: 'area' })
 
   // Header actions belong to the Planungsgebiet (the collection); variant actions live in the
   // Varianten row. Without any Gebiet, ➕ creates the first one — like Prüflisten with zero lists.
@@ -198,7 +218,7 @@ export const PageModeSpaceFinder = () => {
   const actions = !showHeaderActions ? undefined : selectedOption ? (
     <SpaceFinderAreaManageMenu
       selected={selectedOption}
-      onEditArea={() => setSpaceFinderModeParam({ ...spaceFinderMode, edit: 'area' })}
+      onEditArea={() => openAreaForm({ edit: 'area' })}
       commands={commands}
     />
   ) : sortedAreas.length === 0 ? (
