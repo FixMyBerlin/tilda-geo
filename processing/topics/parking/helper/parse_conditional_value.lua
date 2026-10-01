@@ -1,6 +1,8 @@
 -- Parse OSM conditional tag values in format: value1 @ (condition1); value2 @ (condition2); ...
 -- Examples: 'no_stopping @ (Mo-Fr 06:00-09:00)', 'loading_only @ (08:00-18:00)'
 
+local CONDITION_SYNTAX = require('topics.parking.helper.condition_syntax')
+
 local function trim(str)
   return str:match('^%s*(.-)%s*$')
 end
@@ -9,18 +11,8 @@ local function trim_parentheses(str)
   return str:gsub('^%(', ''):gsub('%)$', '')
 end
 
--- Clean up known mapper mistakes in a condition so the DB only holds one spelling.
--- `weightrating > 7.5` is a typo of the OSM key `maxweightrating`; comparison operators get single spaces.
----@param condition string
----@return string
-local function normalize_condition(condition)
-  local out = condition:gsub('%f[%w_]weightrating%f[^%w_]', 'maxweightrating')
-  out = out:gsub('(maxweightrating)%s*([<>]=?)%s*', '%1 %2 ')
-  return out
-end
-
 ---@param value string|nil The conditional value string to parse
----@return {value: string, condition: string}[]|nil List of parsed conditional values or nil if none valid
+---@return {value: string, condition: string, condition_raw: string}[]|nil `condition` is normalized (see `condition_syntax.lua`) List of parsed conditional values or nil if none valid
 local function parse_conditional_value(value)
   if not value or type(value) ~= 'string' then
     return nil
@@ -72,9 +64,11 @@ local function parse_conditional_value(value)
     end
 
     if value_part and condition_part then
+      local condition_raw = trim_parentheses(trim(condition_part))
       table.insert(results, {
         value = trim(value_part),
-        condition = normalize_condition(trim_parentheses(trim(condition_part)))
+        condition = CONDITION_SYNTAX.normalize(condition_raw),
+        condition_raw = condition_raw,
       })
     end
   end

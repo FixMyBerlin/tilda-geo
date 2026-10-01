@@ -125,6 +125,25 @@ describe('classify_parking_conditions', function()
       assert.are.same({ ['maxstay:conditional'] = 'kurz @ (Mo-Fr 08:00-18:00)' }, result.rejected_tags)
     end)
 
+    it('rewrites weekday and time spelling and reports the tag', function()
+      local value = 'no_stopping @ (Mo-FR 7:00-9:00)'
+      local result = classify_parking_conditions({ ['restriction:conditional'] = value }, 'assumed_free')
+      assert.are.equal('no_stopping (Mo-Fr 07:00-09:00)', result.condition_category)
+      assert.are.same({ ['restriction:conditional'] = value }, result.rejected_tags)
+    end)
+
+    it('replaces broken times by other_condition and reports the tag', function()
+      local value = 'no_parking @ (Sa 076:00-09:00)'
+      local result = classify_parking_conditions({ ['restriction:conditional'] = value }, 'assumed_free')
+      assert.are.equal('no_parking (Sa other_condition)', result.condition_category)
+      assert.are.same({ ['restriction:conditional'] = value }, result.rejected_tags)
+    end)
+
+    it('does not report valid conditions', function()
+      local result = classify_parking_conditions({ ['restriction:conditional'] = 'no_parking @ (Mo-Fr 08:00-18:00); none @ residents' }, 'assumed_free')
+      assert.is_nil(result.rejected_tags)
+    end)
+
     it('ignores access=unknown and reports it', function()
       local result = classify_parking_conditions({ fee = 'yes', access = 'unknown' }, 'assumed_free')
       assert.are.equal('paid', result.condition_category)

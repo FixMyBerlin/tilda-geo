@@ -41,6 +41,7 @@ export const parkingConditionDetailTokenTranslations = {
   off: 'ausgenommen',
   only: 'nur',
   other_comment: 'sonstiger Hinweis',
+  other_condition: 'unklare Angabe',
   passenger_car: 'Pkw',
   permissive: 'geduldeter Zugang',
   permit: 'mit Genehmigung',

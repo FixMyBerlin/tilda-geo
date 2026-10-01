@@ -2,6 +2,7 @@ local log = require('topics.helper.log')
 
 local condition_category_primary = require('topics.parking.helper.condition_category_primary')
 local DETAIL_TOKENS = require('topics.parking.helper.condition_detail_tokens')
+local CONDITION_SYNTAX = require('topics.parking.helper.condition_syntax')
 local invert_time_condition = require('topics.parking.helper.invert_time_condition')
 local is_valid_conditional_value = require('topics.parking.helper.is_valid_conditional_value')
 local parse_conditional_value = require('topics.parking.helper.parse_conditional_value')
@@ -185,13 +186,23 @@ function classify_parking_conditions(tags, default_category)
   -- Values we replace below because we do not know them; callers log them to `parking_errors`.
   ---@type table<string, string>
   local rejected_tags = {}
-  for _, key in ipairs(CONDITIONAL_KEYS) do
+  local function collect_rejected(key)
     local value = tags[key]
     for comment in (value or ''):gmatch('"([^"]*)"') do
       local _, known = DETAIL_TOKENS.comment_token(comment)
       if not known then rejected_tags[key] = value end
     end
+    -- Conditions we rewrote (`Mo-FR`, `9:00`) or do not understand (`12:00.18:00`)
+    for _, entry in ipairs(parse_conditional_value(value) or {}) do
+      if entry.condition ~= entry.condition_raw or not CONDITION_SYNTAX.is_known(entry.condition) then
+        rejected_tags[key] = value
+      end
+    end
   end
+  for _, key in ipairs(CONDITIONAL_KEYS) do
+    collect_rejected(key)
+  end
+  if tags.maxstay and string.find(tags.maxstay, '@') then collect_rejected('maxstay') end
 
   -- Initialize categories
   ---@type string[]
@@ -724,6 +735,10 @@ function classify_parking_conditions(tags, default_category)
     return (DETAIL_TOKENS.comment_token(comment))
   end)
   condition_category_str = condition_category_str:gsub('"', '')
+  -- Atoms we do not understand → `other_condition` (their tags are in `rejected_tags`)
+  condition_category_str = condition_category_str:gsub('%(([^()]*)%)', function(detail)
+    return '(' .. CONDITION_SYNTAX.clean(detail) .. ')'
+  end)
   condition_category_str = condition_category_str:gsub('<(%s*/?%s*%a[^>]-)>', '[%1]')
   condition_category_str = sanitize_string(condition_category_str) --[[@as string]]
 

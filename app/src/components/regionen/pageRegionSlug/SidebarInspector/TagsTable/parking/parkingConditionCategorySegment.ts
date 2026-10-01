@@ -196,6 +196,7 @@ function translateParkingConditionCategoryMonths(detail: string) {
  */
 const PARKING_CONDITION_DETAIL_TOKEN_IDS_LONGEST_FIRST = [
   'maxweightrating',
+  'other_condition',
   'mobile_library',
   'other_comment',
   'large_events',
