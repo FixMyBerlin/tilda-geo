@@ -1,11 +1,8 @@
 import { Switch } from '@headlessui/react'
-import { PencilSquareIcon } from '@heroicons/react/24/outline'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { formatDate } from '@/components/shared/date/formatDate'
-import { frenchQuote } from '@/components/shared/text/Quotes'
-import { studyAreaSizeKm2 } from '@/lib/planningStudyAreaLimit'
 import {
   areaInputsDiffer,
   comparableRunSnapshot,
@@ -225,50 +222,6 @@ const MinAreaFilter = (props: { variantId: number; savedMinArea: number }) => (
 
 type PlanningVariantDetail = Awaited<ReturnType<typeof getPlanningVariantFn>>
 
-/** »Planungsgebiet«: name, km², Eigene Daten yes/no — a pencil opens the area editor detail view. */
-const AreaSummarySection = ({
-  variant,
-  editable,
-}: {
-  variant: PlanningVariantDetail
-  editable: boolean
-}) => {
-  const { spaceFinderMode, setSpaceFinderModeParam } = useSpaceFinderModeParam()
-  const area = variant.area
-  const km2 = area.studyArea
-    ? studyAreaSizeKm2(area.studyArea as unknown as GeoJSON.Geometry)
-    : null
-
-  return (
-    <CollapsibleBox title="Planungsgebiet" defaultOpen={false}>
-      <div className="flex items-center justify-between gap-2">
-        <span className="font-medium text-gray-800">{frenchQuote(area.title)}</span>
-        {editable && (
-          <button
-            type="button"
-            onClick={() => setSpaceFinderModeParam({ ...spaceFinderMode, edit: 'area' })}
-            title="Planungsgebiet bearbeiten"
-            aria-label="Planungsgebiet bearbeiten"
-            className="shrink-0 rounded p-1 text-gray-500 hover:bg-gray-100 hover:text-gray-800"
-          >
-            <PencilSquareIcon className="size-4" />
-          </button>
-        )}
-      </div>
-      <div className="flex flex-col gap-1 text-xs text-gray-600">
-        <div className="flex justify-between">
-          <span>Größe</span>
-          <span>{km2 != null ? `${km2.toFixed(2)} km²` : '–'}</span>
-        </div>
-        <div className="flex justify-between">
-          <span>Eigene Daten</span>
-          <span>{area.userGeojson != null ? 'Ja' : 'Nein'}</span>
-        </div>
-      </div>
-    </CollapsibleBox>
-  )
-}
-
 /** Status line (D5): run state, outdated reason, progress while running. */
 const StatusSection = ({ variant }: { variant: PlanningVariantDetail }) => {
   const latestJob = variant.jobs[0] ?? null
@@ -325,7 +278,7 @@ const ResultSection = ({ variant }: { variant: PlanningVariantDetail }) => {
 }
 
 /**
- * Flächenfinder panel body (D5): status line, Planungsgebiet summary, Faktoren, Ergebnis (only with
+ * Flächenfinder panel body (D5): status line, Faktoren, Ergebnis (only with
  * a complete run) and Auswahl — collapsible sections, no list, replacing the former
  * `SpaceFinderPanelBody`/`VariantDetail`. The Eigene-Daten layer toggle is independent of
  * `hasCompleteRun` (uploaded data shows on the map before the first run) and therefore lives
@@ -340,7 +293,7 @@ export const SpaceFinderBody = ({
   variantId: number
   /**
    * Desktop only (D10): hides Faktoren editing, the run button (footer, handled by the caller)
-   * and candidate selection behind a short notice. Status, Planungsgebiet summary and Ergebnis
+   * and candidate selection behind a short notice. Status and Ergebnis
    * (view-only controls) stay visible.
    */
   editable?: boolean
@@ -372,7 +325,6 @@ export const SpaceFinderBody = ({
     <div className="flex flex-col">
       <StatusSection variant={variant} />
       <div className="flex flex-col gap-3 p-3">
-        <AreaSummarySection variant={variant} editable={editable} />
         {editable ? (
           <FactorEditorPanel
             variantId={variant.id}
