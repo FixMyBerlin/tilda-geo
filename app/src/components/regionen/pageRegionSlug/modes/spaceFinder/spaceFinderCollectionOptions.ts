@@ -47,7 +47,7 @@ export const firstSpaceFinderVariantId = (areas: readonly PlanningAreasRow[]) =>
 
 export type SpaceFinderVariantStatus = 'running' | 'stale' | 'complete' | 'none'
 
-/** Run state of a variant for the variant pills; mirrors the status line in the panel body. */
+/** Run state of a variant for the Varianten dropdown; mirrors the status line in the panel body. */
 export const spaceFinderVariantStatus = (
   variant: Pick<PlanningAreaVariantRow, 'currentRunId' | 'jobs' | 'runs'>,
 ): SpaceFinderVariantStatus => {

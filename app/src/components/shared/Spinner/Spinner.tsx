@@ -5,9 +5,13 @@ type Props = {
   size?: keyof typeof sizeClasses
   color?: keyof typeof colorClasses
   screenReaderLabel?: boolean
+  /** Text for screen readers. */
+  label?: string
 }
 
 const sizeClasses = {
+  '3': 'size-3',
+  '4': 'size-4',
   '5': 'size-5',
   '8': 'size-8',
   '12': 'size-12',
@@ -17,6 +21,9 @@ const colorClasses = {
   blue: 'border-gray-500',
   teal: 'border-teal-100',
   yellow: 'border-yellow-400',
+  primary: 'border-blue-500',
+  white: 'border-white',
+  current: 'border-current',
 }
 
 const ringBase =
@@ -27,6 +34,7 @@ export const Spinner = ({
   size = '12',
   color = 'blue',
   screenReaderLabel = true,
+  label = 'Loading',
 }: Props) => {
   return (
     <div
@@ -36,7 +44,7 @@ export const Spinner = ({
         className,
       )}
     >
-      {screenReaderLabel ? <span className="sr-only">Loading</span> : null}
+      {screenReaderLabel ? <span className="sr-only">{label}</span> : null}
       <span
         aria-hidden="true"
         className={twJoin(ringBase, sizeClasses[size], colorClasses[color])}

@@ -1,10 +1,10 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
+import { Spinner } from '@/components/shared/Spinner/Spinner'
 import {
   planningJobQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
-import { Spinner } from '../Spinner'
 import { deriveScoringStep, SpaceFinderRunSteps } from './SpaceFinderRunSteps'
 
 const LABELS: Record<string, string> = {
@@ -59,10 +59,7 @@ export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId:
       <div className="flex items-center justify-between gap-2">
         <span className="flex items-center gap-1.5">
           {jobActive ? (
-            <Spinner
-              className="h-3 w-3 border-current"
-              label={LABELS[data.status] ?? data.status}
-            />
+            <Spinner size="3" color="current" label={LABELS[data.status] ?? data.status} />
           ) : null}
           <span>
             {LABELS[data.status] ?? data.status}

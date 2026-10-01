@@ -30,7 +30,7 @@ import { SpaceFinderAreaManageMenu } from './SpaceFinderMenus'
 import { compactSpaceFinderModeParam, isSpaceFinderAreaFormOpen } from './spaceFinderModeParam'
 import { SpaceFinderNameModal } from './SpaceFinderNameModal'
 import { SpaceFinderSelect } from './SpaceFinderSelect'
-import { SpaceFinderVariantTabs } from './SpaceFinderVariantTabs'
+import { SpaceFinderVariantSelect } from './SpaceFinderVariantSelect'
 import { useSpaceFinderCommands } from './useSpaceFinderCommands'
 import { useSpaceFinderModeParam } from './useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from './useSpaceFinderSelection'
@@ -62,7 +62,7 @@ const SpaceFinderEmptyState = ({ onCreate }: { onCreate: () => void }) => (
 
 /**
  * Flächenfinder mode page (D4/D5/D6): the Planungsgebiete are the header collection (like Ordner
- * in Hinweise), their Varianten a row of pills below the header, then panel body sections
+ * in Hinweise), their Varianten a second dropdown bar directly below it, then panel body sections
  * instead of a list (status, Planungsgebiet, Faktoren, Ergebnis, Auswahl), and a
  * sticky footer for the primary »Berechnen«/»Neu berechnen« action. Desktop-first (D10) — on
  * mobile the mode is reachable but read-only.
@@ -213,7 +213,7 @@ export const PageModeSpaceFinder = () => {
   const openNewArea = () => openAreaForm({ new: 'area' })
 
   // Header actions belong to the Planungsgebiet (the collection); variant actions live in the
-  // Varianten row. Without any Gebiet, ➕ creates the first one — like Prüflisten with zero lists.
+  // Varianten bar. Without any Gebiet, ➕ creates the first one — like Prüflisten with zero lists.
   const showHeaderActions = !panelDetail && isDesktop
   const actions = !showHeaderActions ? undefined : selectedOption ? (
     <SpaceFinderAreaManageMenu
@@ -234,9 +234,9 @@ export const PageModeSpaceFinder = () => {
     </Tooltip>
   ) : undefined
 
-  const variantTabs =
+  const variantSelect =
     !panelDetail && selectedOption && selectedArea ? (
-      <SpaceFinderVariantTabs
+      <SpaceFinderVariantSelect
         variants={selectedArea.variants}
         selected={selectedOption}
         onSelect={onSelect}
@@ -273,7 +273,7 @@ export const PageModeSpaceFinder = () => {
         />
       }
       actions={actions}
-      filter={variantTabs}
+      subHeader={variantSelect}
       footer={footer}
     >
       <SpaceFinderCandidateSelectionReset />

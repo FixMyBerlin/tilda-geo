@@ -1,6 +1,6 @@
 import { ArrowUpTrayIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { useEffect, useRef, useState } from 'react'
-import { Spinner } from '../Spinner'
+import { Spinner } from '@/components/shared/Spinner/Spinner'
 import { type StudyAreaGeometry, parseStudyAreaGeometry } from './extractStudyAreaGeometry'
 import {
   convertGeopackageToGeoJson,
@@ -145,7 +145,7 @@ export function GeoJsonUploadField<T>({
       >
         {isConverting ? (
           <>
-            <Spinner className="h-5 w-5 border-blue-500" />
+            <Spinner size="5" color="primary" label="Wird verarbeitet" />
             <span>Datei wird verarbeitet …</span>
           </>
         ) : (
