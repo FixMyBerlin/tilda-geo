@@ -1,4 +1,5 @@
 import { create } from 'zustand'
+import { createJSONStorage, persist } from 'zustand/middleware'
 
 /**
  * One hexagon the user picked as a candidate for a future Abstellanlage.
@@ -24,12 +25,16 @@ type Store = {
   selectActive: boolean
   setSelectActive: (active: boolean) => void
 
-  /** Selected hexagons in selection order (the order the sidebar list and export use). */
-  candidates: SpaceFinderCandidate[]
+  /**
+   * Selected hexagons per `PlanningRun` id, each in selection order (the order the sidebar list
+   * and export use). Keyed by run, not variant: candidates belong to exactly one result, so a
+   * recalculated variant starts with an empty list and switching variants never mixes lists.
+   */
+  candidatesByRun: Record<number, SpaceFinderCandidate[]>
   /** Adds the hexagon or – when it is already selected – removes it again. */
-  toggleCandidate: (candidate: SpaceFinderCandidate) => void
-  removeCandidate: (h3Id: string) => void
-  clearCandidates: () => void
+  toggleCandidate: (runId: number, candidate: SpaceFinderCandidate) => void
+  removeCandidate: (runId: number, h3Id: string) => void
+  clearCandidates: (runId: number) => void
 }
 
 /**
@@ -37,19 +42,63 @@ type Store = {
  * the same reason as `vegetationVisible`/`carriagewaysVisible` in
  * useSpaceFinderBoundaryState: it changes on every click and would otherwise trigger a
  * router navigation per hexagon — and the geometries it holds don't belong in a URL.
+ *
+ * `candidatesByRun` is persisted to sessionStorage so a selection survives switching to another
+ * mode or variant and reloading the tab; `selectActive` is not persisted.
  */
-export const useSpaceFinderCandidatesState = create<Store>((set) => ({
-  selectActive: false,
-  setSelectActive: (active) => set({ selectActive: active }),
+export const useSpaceFinderCandidatesState = create<Store>()(
+  persist(
+    (set) => ({
+      selectActive: false,
+      setSelectActive: (active) => set({ selectActive: active }),
 
-  candidates: [],
-  toggleCandidate: (candidate) =>
-    set((state) =>
-      state.candidates.some((c) => c.h3Id === candidate.h3Id)
-        ? { candidates: state.candidates.filter((c) => c.h3Id !== candidate.h3Id) }
-        : { candidates: [...state.candidates, candidate] },
-    ),
-  removeCandidate: (h3Id) =>
-    set((state) => ({ candidates: state.candidates.filter((c) => c.h3Id !== h3Id) })),
-  clearCandidates: () => set({ candidates: [] }),
-}))
+      candidatesByRun: {},
+      toggleCandidate: (runId, candidate) =>
+        set((state) => {
+          const candidates = state.candidatesByRun[runId] ?? []
+          return {
+            candidatesByRun: {
+              ...state.candidatesByRun,
+              [runId]: candidates.some((c) => c.h3Id === candidate.h3Id)
+                ? candidates.filter((c) => c.h3Id !== candidate.h3Id)
+                : [...candidates, candidate],
+            },
+          }
+        }),
+      removeCandidate: (runId, h3Id) =>
+        set((state) => ({
+          candidatesByRun: {
+            ...state.candidatesByRun,
+            [runId]: (state.candidatesByRun[runId] ?? []).filter((c) => c.h3Id !== h3Id),
+          },
+        })),
+      clearCandidates: (runId) =>
+        set((state) => {
+          const { [runId]: _cleared, ...candidatesByRun } = state.candidatesByRun
+          return { candidatesByRun }
+        }),
+    }),
+    {
+      name: 'fmc-spacefinder-candidates',
+      storage: createJSONStorage(() => {
+        if (typeof window === 'undefined') {
+          return {
+            getItem: () => null,
+            setItem: () => undefined,
+            removeItem: () => undefined,
+          }
+        }
+        return sessionStorage
+      }),
+      partialize: (state) => ({ candidatesByRun: state.candidatesByRun }),
+    },
+  ),
+)
+
+const noCandidates: SpaceFinderCandidate[] = []
+
+/** Candidates of one run; a stable empty array when there is no run or no selection yet. */
+export const useSpaceFinderCandidates = (runId: number | null) =>
+  useSpaceFinderCandidatesState((s) =>
+    runId == null ? noCandidates : (s.candidatesByRun[runId] ?? noCandidates),
+  )

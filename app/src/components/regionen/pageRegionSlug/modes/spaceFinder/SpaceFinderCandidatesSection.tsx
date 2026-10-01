@@ -6,6 +6,7 @@ import { twJoin } from 'tailwind-merge'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import {
   type SpaceFinderCandidate,
+  useSpaceFinderCandidates,
   useSpaceFinderCandidatesState,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useSpaceFinderCandidatesState'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
@@ -23,32 +24,22 @@ const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
 }
 
 /**
- * Resets the candidate-selection tool once no run is shown any more — the candidates belong to
- * exactly that result and are never persisted (D6). Runs on every variant/mode-leave change and on
- * unmount (leaving the Flächenfinder mode unmounts `PageModeSpaceFinder`, and with it this
- * component). Kept separate from the toggle button below: this must keep running even while the
+ * Turns the candidate-selection tool off whenever the shown run changes and on unmount (leaving
+ * the Flächenfinder mode unmounts `PageModeSpaceFinder`, and with it this component). The
+ * candidates themselves are kept per run (`useSpaceFinderCandidatesState`) and come back with
+ * their run. Kept separate from the toggle button below: this must keep running even while the
  * »Auswahl« section itself is collapsed or not rendered (no complete run yet).
  */
 export const SpaceFinderCandidateSelectionReset = () => {
   const { runId } = useSpaceFinderSelection()
   const setSelectActive = useSpaceFinderCandidatesState((s) => s.setSelectActive)
-  const clearCandidates = useSpaceFinderCandidatesState((s) => s.clearCandidates)
 
   useEffect(
-    function resetCandidateSelectionOutsideSpaceFinderResult() {
-      if (runId != null) return
+    function stopCandidateSelectionOnRunChange() {
       setSelectActive(false)
-      clearCandidates()
+      return () => setSelectActive(false)
     },
-    [runId, setSelectActive, clearCandidates],
-  )
-
-  useEffect(
-    () => () => {
-      setSelectActive(false)
-      clearCandidates()
-    },
-    [setSelectActive, clearCandidates],
+    [runId, setSelectActive],
   )
 
   return null
@@ -126,7 +117,8 @@ const CandidateRow = ({
  * The only output is the GeoJSON download — no Prüflisten handover.
  */
 export const SpaceFinderCandidatesSection = ({ variantId }: { variantId: number }) => {
-  const candidates = useSpaceFinderCandidatesState((s) => s.candidates)
+  const { runId } = useSpaceFinderSelection()
+  const candidates = useSpaceFinderCandidates(runId)
   const selectActive = useSpaceFinderCandidatesState((s) => s.selectActive)
   const setSelectActive = useSpaceFinderCandidatesState((s) => s.setSelectActive)
   const removeCandidate = useSpaceFinderCandidatesState((s) => s.removeCandidate)
@@ -184,7 +176,7 @@ export const SpaceFinderCandidatesSection = ({ variantId }: { variantId: number 
               candidate={candidate}
               index={index}
               onFocus={() => focusCandidate(candidate)}
-              onRemove={() => removeCandidate(candidate.h3Id)}
+              onRemove={() => runId != null && removeCandidate(runId, candidate.h3Id)}
             />
           ))}
         </ul>
@@ -203,7 +195,7 @@ export const SpaceFinderCandidatesSection = ({ variantId }: { variantId: number 
         {candidates.length > 0 && (
           <button
             type="button"
-            onClick={clearCandidates}
+            onClick={() => runId != null && clearCandidates(runId)}
             className="text-xs text-gray-500 hover:text-gray-800"
           >
             Auswahl leeren

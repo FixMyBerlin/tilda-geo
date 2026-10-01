@@ -42,6 +42,7 @@ import { useNotesComposeActive } from '../modes/notes/useNotesComposeActive'
 import { ReviewMapDrawing } from '../modes/reviewLists/drawing/ReviewMapDrawing'
 import { useReviewDrawActive } from '../modes/reviewLists/useReviewDrawActive'
 import { SpaceFinderMapDrawing } from '../modes/spaceFinder/drawing/SpaceFinderMapDrawing'
+import { useSpaceFinderSelection } from '../modes/spaceFinder/useSpaceFinderSelection'
 import { useCurrentMode } from '../modes/useCurrentMode'
 import { useRegion } from '../regionUtils/useRegion'
 import { Calculator } from './Calculator/Calculator'
@@ -120,6 +121,7 @@ export const RegionMap = () => {
   const spaceFinderPolygonDrawing = useSpaceFinderBoundaryState((s) => s.polygonDrawInProgress)
   const candidateSelectActive = useSpaceFinderCandidatesState((s) => s.selectActive)
   const toggleCandidate = useSpaceFinderCandidatesState((s) => s.toggleCandidate)
+  const { runId: spaceFinderRunId } = useSpaceFinderSelection()
 
   const handleClick = ({ features, ...event }: MapLayerMouseEvent) => {
     if (reviewDrawActive) return
@@ -133,8 +135,8 @@ export const RegionMap = () => {
     if (currentMode.isSpaceFinder && candidateSelectActive) {
       const hexagon = features?.find((f) => f.sourceLayer === planningHexagonsSourceLayer)
       const h3Id = hexagon?.properties?.h3_id
-      if (hexagon && h3Id) {
-        toggleCandidate({
+      if (hexagon && h3Id && spaceFinderRunId != null) {
+        toggleCandidate(spaceFinderRunId, {
           h3Id: String(h3Id),
           geometry: hexagon.geometry,
           properties: { ...hexagon.properties },

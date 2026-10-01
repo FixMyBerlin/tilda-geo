@@ -1,7 +1,10 @@
 import { useEffect } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { useSpaceFinderBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/useSpaceFinderBoundaryState'
-import { useSpaceFinderCandidatesState } from '@/components/regionen/pageRegionSlug/hooks/mapState/useSpaceFinderCandidatesState'
+import {
+  useSpaceFinderCandidates,
+  useSpaceFinderCandidatesState,
+} from '@/components/regionen/pageRegionSlug/hooks/mapState/useSpaceFinderCandidatesState'
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
 import { getTilesUrl } from '@/components/shared/utils/getTilesUrl'
@@ -304,9 +307,9 @@ const UserObstaclesLayer = () => {
 // oder Schließen der Kandidaten-Sidebar setzen selectActive auf false und blenden die
 // Markierung damit aus, ohne die Auswahl selbst zu löschen (siehe PlanningCandidateToggle,
 // SidebarInspector handleClose).
-const CandidateHighlightLayer = () => {
+const CandidateHighlightLayer = ({ runId }: { runId: number | null }) => {
   const selectActive = useSpaceFinderCandidatesState((s) => s.selectActive)
-  const candidates = useSpaceFinderCandidatesState((s) => s.candidates)
+  const candidates = useSpaceFinderCandidates(runId)
   if (!selectActive || !candidates.length) return null
 
   return (
@@ -359,7 +362,6 @@ export const SourcesLayersSpaceFinder = () => {
       <>
         <BoundaryHighlightLayer />
         <UserObstaclesLayer />
-        <CandidateHighlightLayer />
       </>
     )
 
@@ -404,7 +406,7 @@ export const SourcesLayersSpaceFinder = () => {
       )}
 
       {/* Nach den Hexagon-Layern, damit die gelbe Auswahl-Umrandung darüber liegt. */}
-      <CandidateHighlightLayer />
+      <CandidateHighlightLayer runId={runId} />
 
       <UserObstaclesLayer />
 
