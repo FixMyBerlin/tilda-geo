@@ -101,6 +101,18 @@ describe('classify_parking_conditions', function()
       assert.are.equal('time_limited (2 hours)', classify_parking_conditions({ maxstay = '2 hours' }, 'assumed_free').condition_category)
     end)
 
+    it('reads bare maxstay numbers as hours (<10) or minutes, and still reports the tag', function()
+      local cases = { ['120'] = '120 minutes', ['60'] = '60 minutes', ['30'] = '30 minutes', ['1'] = '1 hour', ['2'] = '2 hours' }
+      for value, duration in pairs(cases) do
+        local result = classify_parking_conditions({ maxstay = value }, 'assumed_free')
+        assert.are.equal('time_limited (' .. duration .. ')', result.condition_category)
+        assert.are.same({ maxstay = value }, result.rejected_tags)
+      end
+      local zero = classify_parking_conditions({ maxstay = '0' }, 'assumed_free')
+      assert.are.equal('time_limited', zero.condition_category)
+      assert.are.same({ maxstay = '0' }, zero.rejected_tags)
+    end)
+
     it('drops unknown maxstay values but keeps the time limit, and reports the tag', function()
       local result = classify_parking_conditions({ maxstay = 'left' }, 'assumed_free')
       assert.are.equal('time_limited', result.condition_category)

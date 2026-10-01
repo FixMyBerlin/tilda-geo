@@ -536,12 +536,15 @@ function classify_parking_conditions(tags, default_category)
     local first_maxstay = maxstay_conditional[1]
     local maxstay_cond = first_maxstay and first_maxstay.value -- Different conditions at the same spot are very uncommon, so we just need the first value.
     if maxstay_cond and not is_empty_or_no(maxstay_cond) and maxstay_cond ~= 'unlimited' then
-      local duration = DETAIL_TOKENS.clean_duration(maxstay_cond)
+      local duration, assumed_unit = DETAIL_TOKENS.clean_duration(maxstay_cond)
+      -- Log unknown durations and bare numbers (unit assumed) so they can be fixed in OSM
+      if not duration or assumed_unit then
+        rejected_tags[t('maxstay:conditional') and 'maxstay:conditional' or 'maxstay'] = t('maxstay:conditional') or maxstay
+      end
       if duration then
         condition_class = add_condition_class(condition_class, 'time_limited', duration .. ') (' .. maxstay_interval)
       else
         -- Unknown duration: keep the time limit and its interval, drop the value
-        rejected_tags[t('maxstay:conditional') and 'maxstay:conditional' or 'maxstay'] = t('maxstay:conditional') or maxstay
         condition_class = add_condition_class(condition_class, 'time_limited', maxstay_interval)
       end
     end
@@ -549,8 +552,8 @@ function classify_parking_conditions(tags, default_category)
     if maxstay == 'yes' then
       condition_class = add_condition_class(condition_class, 'time_limited')
     else
-      local duration = DETAIL_TOKENS.clean_duration(maxstay)
-      if not duration then rejected_tags.maxstay = maxstay end
+      local duration, assumed_unit = DETAIL_TOKENS.clean_duration(maxstay)
+      if not duration or assumed_unit then rejected_tags.maxstay = maxstay end
       condition_class = add_condition_class(condition_class, 'time_limited', duration)
     end
   end

@@ -57,14 +57,23 @@ local DURATION_UNITS = {
 }
 
 -- `2 hours`, `30 min`, `1.5 h`, `load-unload` → one spelling; anything else → nil.
+-- A bare number has no unit in OSM: we assume hours below 10 and minutes from 10 on
+-- (`2` → `2 hours`, `120` → `120 minutes`) and tell the caller, so it can still be logged.
 ---@param value string
----@return string|nil
+---@return string|nil duration
+---@return boolean assumed_unit
 function M.clean_duration(value)
-  if value == 'load-unload' then return value end
+  if value == 'load-unload' then return value, false end
+  local bare = tonumber(value:match('^%s*(%d+)%s*$'))
+  if bare then
+    if bare == 0 then return nil, false end
+    local unit = bare < 10 and 'hour' or 'minute'
+    return bare .. ' ' .. unit .. (bare == 1 and '' or 's'), true
+  end
   local num, unit = value:match('^%s*(%d+[%.,]?%d*)%s*(%a+)%s*$')
   unit = unit and DURATION_UNITS[unit:lower()]
-  if not num or not unit then return nil end
-  return num .. ' ' .. unit .. (num == '1' and '' or 's')
+  if not num or not unit then return nil, false end
+  return num .. ' ' .. unit .. (num == '1' and '' or 's'), false
 end
 
 return M
