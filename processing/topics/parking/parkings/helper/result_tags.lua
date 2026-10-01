@@ -101,7 +101,7 @@ local function result_tags_parkings(object)
   }
 
   local cleaned_tags, unnested_replaced_tags = CLEANER.separate_tags(result_tags, object.tags)
-  for key, value in pairs(conditional_categories_result.invalid_conditional_tags or {}) do
+  for key, value in pairs(conditional_categories_result.rejected_tags or {}) do
     unnested_replaced_tags[key] = value
   end
   -- Log with the original OSM keys (`parking:left:orientation`), not the unnested ones

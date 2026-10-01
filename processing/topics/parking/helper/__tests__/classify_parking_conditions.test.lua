@@ -81,6 +81,69 @@ describe('classify_parking_conditions', function()
     assert.are.equal(result_private.condition_category, 'assumed_private')
   end)
 
+  describe('details only hold processed data', function()
+    it('maps known opening_hours comments to tokens', function()
+      local result = classify_parking_conditions({ ['fee:conditional'] = 'yes @ ("large events")' }, 'assumed_free')
+      assert.are.equal('paid (large_events)', result.condition_category)
+      assert.is_nil(result.rejected_tags)
+    end)
+
+    it('replaces unknown comments and reports the tag', function()
+      local value = 'yes @ ("<img src=x onerror=alert>")'
+      local result = classify_parking_conditions({ ['fee:conditional'] = value }, 'assumed_free')
+      assert.are.equal('paid (other_comment)', result.condition_category)
+      assert.are.same({ ['fee:conditional'] = value }, result.rejected_tags)
+    end)
+
+    it('normalizes maxstay durations', function()
+      assert.are.equal('time_limited (30 minutes)', classify_parking_conditions({ maxstay = '30 min' }, 'assumed_free').condition_category)
+      assert.are.equal('time_limited (1 hour)', classify_parking_conditions({ maxstay = '1 h' }, 'assumed_free').condition_category)
+      assert.are.equal('time_limited (2 hours)', classify_parking_conditions({ maxstay = '2 hours' }, 'assumed_free').condition_category)
+    end)
+
+    it('drops unknown maxstay values but keeps the time limit, and reports the tag', function()
+      local result = classify_parking_conditions({ maxstay = 'left' }, 'assumed_free')
+      assert.are.equal('time_limited', result.condition_category)
+      assert.are.same({ maxstay = 'left' }, result.rejected_tags)
+    end)
+
+    it('keeps the interval of a conditional maxstay with an unknown value', function()
+      local result = classify_parking_conditions({ ['maxstay:conditional'] = 'kurz @ (Mo-Fr 08:00-18:00)' }, 'assumed_free')
+      assert.are.equal('time_limited (Mo-Fr 08:00-18:00)', result.condition_category)
+      assert.are.same({ ['maxstay:conditional'] = 'kurz @ (Mo-Fr 08:00-18:00)' }, result.rejected_tags)
+    end)
+
+    it('ignores access=unknown and reports it', function()
+      local result = classify_parking_conditions({ fee = 'yes', access = 'unknown' }, 'assumed_free')
+      assert.are.equal('paid', result.condition_category)
+      assert.are.same({ access = 'unknown' }, result.rejected_tags)
+    end)
+
+    it('keeps access_restriction without detail for unknown access values', function()
+      local result = classify_parking_conditions({ access = 'restricted' }, 'assumed_free')
+      assert.are.equal('access_restriction', result.condition_category)
+      assert.are.same({ access = 'restricted' }, result.rejected_tags)
+    end)
+
+    it('keeps known access values as detail', function()
+      local result = classify_parking_conditions({ access = 'customers' }, 'assumed_free')
+      assert.are.equal('access_restriction (customers)', result.condition_category)
+      assert.is_nil(result.rejected_tags)
+    end)
+  end)
+
+  it('keeps comparison operators in condition details', function()
+    local tags = { ['restriction:conditional'] = 'loading_only @ (maxweightrating > 7.5)' }
+    local result = classify_parking_conditions(tags, 'assumed_free')
+    assert.are.equal('loading (maxweightrating > 7.5)', result.condition_category)
+  end)
+
+  it('writes the weightrating typo as maxweightrating', function()
+    local tags = { ['restriction:conditional'] = 'no_stopping @ (weightrating > 7.5)' }
+    local result = classify_parking_conditions(tags, 'assumed_free')
+    assert.are.equal('no_stopping (maxweightrating > 7.5)', result.condition_category)
+  end)
+
   it('handles conditional time in restriction', function()
     local tags = { ['restriction:conditional'] = 'loading_only @ (Mo-Sa 11:00-21:00)' }
     local result = classify_parking_conditions(tags, 'assumed_free')
@@ -126,7 +189,7 @@ describe('classify_parking_conditions', function()
     }
     local result = classify_parking_conditions(tags, 'assumed_free')
     assert.are.equal('invalid', result.condition_category)
-    assert.are.same({ ['restriction:conditional'] = tags['restriction:conditional'] }, result.invalid_conditional_tags)
+    assert.are.same({ ['restriction:conditional'] = tags['restriction:conditional'] }, result.rejected_tags)
   end)
 
   it('reports malformed vehicle conditionals and malformed maxstay with @', function()
@@ -139,12 +202,12 @@ describe('classify_parking_conditions', function()
     assert.are.same({
       ['disabled:conditional'] = tags['disabled:conditional'],
       maxstay = tags.maxstay,
-    }, result.invalid_conditional_tags)
+    }, result.rejected_tags)
   end)
 
   it('keeps the maxstay:conditional=yes flag valid', function()
     local tags = { ['maxstay:conditional'] = 'yes' }
     local result = classify_parking_conditions(tags, 'assumed_free')
-    assert.is_nil(result.invalid_conditional_tags)
+    assert.is_nil(result.rejected_tags)
   end)
 end)

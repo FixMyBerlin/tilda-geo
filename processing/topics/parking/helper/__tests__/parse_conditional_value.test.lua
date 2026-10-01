@@ -22,6 +22,13 @@ describe('parse_conditional_value', function()
     assert.are.equal(result[1].condition, 'Mo-Fr 08:00-18:00')
   end)
 
+  it('normalizes the weightrating typo and operator spacing', function()
+    assert.are.equal('maxweightrating > 7.5', parse_conditional_value('no_stopping @ (weightrating > 7.5)')[1].condition)
+    assert.are.equal('maxweightrating > 7.5', parse_conditional_value('loading_only @ (maxweightrating>7.5)')[1].condition)
+    assert.are.equal('maxweightrating > 7.5', parse_conditional_value('loading_only @ (maxweightrating > 7.5)')[1].condition)
+    assert.are.equal('maxweightrating <= 3.5', parse_conditional_value('no_parking @ (weightrating<=3.5)')[1].condition)
+  end)
+
   it('returns nil for invalid format', function()
     local result = parse_conditional_value('invalid_format')
     assert.are.equal(result, nil)

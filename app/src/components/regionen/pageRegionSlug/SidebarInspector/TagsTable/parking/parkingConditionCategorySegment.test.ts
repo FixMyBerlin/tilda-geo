@@ -84,6 +84,33 @@ describe('formatParkingConditionCategorySegment (Lua examples)', () => {
     ).toBe(`${tCat('time_limited')} (2 ${tTok('days')})`)
   })
 
+  test('comment tokens: paid (large_events), no_stopping (other_comment)', () => {
+    expect(
+      formatParkingConditionCategorySegment(
+        'paid (large_events)',
+        resolveParkingConditionCategoryBase,
+        resolveParkingConditionDetailToken,
+      ),
+    ).toBe(`${tCat('paid')} (${tTok('large_events')})`)
+    expect(
+      formatParkingConditionCategorySegment(
+        'no_stopping (other_comment)',
+        resolveParkingConditionCategoryBase,
+        resolveParkingConditionDetailToken,
+      ),
+    ).toBe(`${tCat('no_stopping')} (${tTok('other_comment')})`)
+  })
+
+  test('loading (maxweightrating > 7.5)', () => {
+    expect(
+      formatParkingConditionCategorySegment(
+        'loading (maxweightrating > 7.5)',
+        resolveParkingConditionCategoryBase,
+        resolveParkingConditionDetailToken,
+      ),
+    ).toBe(`${tCat('loading')} (${tTok('maxweightrating')} > 7.5)`)
+  })
+
   test('time_limited (4 hours) (08:00-18:00)', () => {
     expect(
       formatParkingConditionCategorySegment(
