@@ -1,9 +1,6 @@
-import { Disclosure, DisclosureButton, DisclosurePanel } from '@headlessui/react'
 import { ArrowLeftIcon } from '@heroicons/react/24/outline'
 import type { ReactNode } from 'react'
 import { twJoin } from 'tailwind-merge'
-import { DisclosureChevron } from '@/components/shared/DisclosureChevron/DisclosureChevron'
-import { MotionCollapse } from '@/components/shared/motion/MotionCollapse'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 import { modeIdentity } from './modeIdentity'
 import {
@@ -18,6 +15,10 @@ import {
   modePanelSectionClassName,
   modePanelTitleClassName,
 } from './modePanel.const'
+import {
+  ModePanelCollectionDisclosure,
+  ModePanelListHeading,
+} from './ModePanelCollectionDisclosure'
 import { useCurrentMode } from './useCurrentMode'
 import { useListHoverMarkerPosition } from './useListHoverMarkerPosition'
 
@@ -31,32 +32,6 @@ type ModePanelDetail = {
   children: ReactNode
 }
 
-type ModePanelListHeading = {
-  title: string
-  subtitle?: ReactNode
-  mutedClassName: string
-}
-
-const ModePanelListHeading = ({ title, subtitle, mutedClassName }: ModePanelListHeading) => {
-  const tooltip = subtitle ? `${title} — ${subtitle}` : title
-  return (
-    <Tooltip text={tooltip} className="max-w-full min-w-0">
-      <div className="flex min-w-0 flex-col justify-center gap-0 leading-tight">
-        <h1
-          className={twJoin(modePanelTitleClassName, 'min-w-0 truncate leading-tight text-inherit')}
-        >
-          {title}
-        </h1>
-        {subtitle ? (
-          <div className={twJoin('min-w-0 truncate text-xs leading-4', mutedClassName)}>
-            {subtitle}
-          </div>
-        ) : null}
-      </div>
-    </Tooltip>
-  )
-}
-
 type Props = {
   title: string
   subtitle?: ReactNode
@@ -64,6 +39,11 @@ type Props = {
   collection?: ReactNode
   /** Keep the collection picker visible and non-collapsible (e.g. no Prüfliste exists yet). */
   collectionAlwaysOpen?: boolean
+  /**
+   * Second header row directly below the header, without a gap (e.g. Flächenfinder Varianten).
+   * Brings its own colours and bottom border. Hidden in detail view.
+   */
+  subHeader?: ReactNode
   filter?: ReactNode
   actions?: ReactNode
   detail?: ModePanelDetail
@@ -87,6 +67,7 @@ export const ModePanel = ({
   subtitle,
   collection,
   collectionAlwaysOpen = false,
+  subHeader,
   filter,
   actions,
   detail,
@@ -100,6 +81,7 @@ export const ModePanel = ({
   const isDetail = detail !== undefined
   const hoverMarkerPosition = useListHoverMarkerPosition()
   const showOutsideFooter = !isDetail && hoverMarkerPosition?.atEdge === true
+  const showSubHeader = !isDetail && subHeader != null
 
   return (
     <section
@@ -108,7 +90,8 @@ export const ModePanel = ({
     >
       <header
         className={twJoin(
-          isDetail ? 'flex items-stretch border-b border-white/80' : 'border-b border-white/80',
+          isDetail && 'flex items-stretch',
+          !showSubHeader && 'border-b border-white/80',
           accent.className,
           accent.invertedFgClassName,
         )}
@@ -169,36 +152,14 @@ export const ModePanel = ({
             <div className={modePanelCollectionClassName}>{collection}</div>
           </>
         ) : collection ? (
-          <Disclosure as="div">
-            {({ open }) => (
-              <>
-                <div className="flex items-stretch">
-                  <DisclosureButton
-                    className={twJoin(
-                      modePanelHeaderBarClassName,
-                      'grow justify-between text-left hover:bg-white/10 focus:outline-none focus-visible:bg-white/15 focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-inset',
-                    )}
-                  >
-                    <div className="flex min-w-0 items-center gap-2">
-                      <Icon className="size-5 shrink-0" aria-hidden />
-                      <ModePanelListHeading
-                        title={title}
-                        subtitle={subtitle}
-                        mutedClassName={accent.invertedMutedClassName}
-                      />
-                    </div>
-                    <DisclosureChevron open={open} side="trailing" className="size-5" />
-                  </DisclosureButton>
-                  {actions && <div className={modePanelListHeaderActionsClassName}>{actions}</div>}
-                </div>
-                <MotionCollapse open={open}>
-                  <DisclosurePanel static className={modePanelCollectionClassName}>
-                    {collection}
-                  </DisclosurePanel>
-                </MotionCollapse>
-              </>
-            )}
-          </Disclosure>
+          <ModePanelCollectionDisclosure
+            icon={<Icon className="size-5 shrink-0" aria-hidden />}
+            title={title}
+            subtitle={subtitle}
+            mutedClassName={accent.invertedMutedClassName}
+            collection={collection}
+            actions={actions}
+          />
         ) : (
           <div className={twJoin(modePanelHeaderBarClassName, 'justify-between')}>
             <div className="flex min-w-0 items-center gap-2">
@@ -213,6 +174,7 @@ export const ModePanel = ({
           </div>
         )}
       </header>
+      {showSubHeader && subHeader}
       {!isDetail && filter && <div className={modePanelSectionClassName}>{filter}</div>}
       <div className={modePanelScrollClassName}>{isDetail ? detail.children : children}</div>
       {showOutsideFooter ? (
