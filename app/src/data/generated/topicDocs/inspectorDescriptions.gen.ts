@@ -237,7 +237,7 @@ const data = {
       capacity_source: 'Herkunft der Stellplatzanzahl inklusive Schätz- oder Umverteilungslogik.',
       orientation: 'Ausrichtung der Fahrzeuge im Straßenland zur Verkehrsrichtung.',
       condition_category_primary:
-        'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
+        'Der für die Darstellung wichtigste Wert aus `condition_category`. Reihenfolge: Sonderparkplätze (Behinderte, Taxi, Ladezone, E-Laden, Carsharing) vor Park- und Haltverboten, dann private/eingeschränkte Flächen, dann Höchstparkdauer vor Bewirtschaftung. Nur zur Darstellung; fachlich gilt `condition_category`.',
       staggered:
         'Besondere Merkmale zur Parkweise, insbesondere bei alternierendem/versetztem Parken auf Fahrbahnen, die zu schmal sind um auf beiden Seiten gleichzeitig zu parken, keine Markierungen und Beschilderungen aufweisen, die das Parken regeln und auf denen gewöhnlich wechselseitig abschnittsweise auf der einen oder anderen Straßenseite geparkt wird oder geparkt werden kann.',
       length:
@@ -303,7 +303,7 @@ const data = {
       parking: 'Lage oder Art des Parkraums im Straßenland.',
       reason: 'Angabe eines Grundes bei Nicht-Parken.',
       condition_category_primary:
-        'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
+        'Der für die Darstellung wichtigste Wert aus `condition_category`. Reihenfolge: Sonderparkplätze (Behinderte, Taxi, Ladezone, E-Laden, Carsharing) vor Park- und Haltverboten, dann private/eingeschränkte Flächen, dann Höchstparkdauer vor Bewirtschaftung. Nur zur Darstellung; fachlich gilt `condition_category`.',
       capacity: 'Geschätzte oder explizit erfasste Anzahl von Stellplätzen.',
       capacity_source: 'Herkunft der Stellplatzanzahl inklusive Schätz- oder Umverteilungslogik.',
       orientation: 'Ausrichtung der Fahrzeuge im Straßenland zur Verkehrsrichtung.',
@@ -352,7 +352,7 @@ const data = {
       capacity: 'Geschätzte oder explizit erfasste Anzahl von Stellplätzen.',
       capacity_source: 'Herkunft der Stellplatzanzahl inklusive Schätz- oder Umverteilungslogik.',
       condition_category_primary:
-        'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
+        'Der für die Darstellung wichtigste Wert aus `condition_category`. Reihenfolge: Sonderparkplätze (Behinderte, Taxi, Ladezone, E-Laden, Carsharing) vor Park- und Haltverboten, dann private/eingeschränkte Flächen, dann Höchstparkdauer vor Bewirtschaftung. Nur zur Darstellung; fachlich gilt `condition_category`.',
       area: 'Fläche in Quadratmetern.',
       surface: 'Oberflächenbelag des Parkraumabschnitts.',
       orientation: 'Ausrichtung der Fahrzeuge im Straßenland zur Verkehrsrichtung.',
@@ -378,7 +378,7 @@ const data = {
       parking: 'Typ der Parkmöglichkeit.',
       capacity: 'Geschätzte oder explizit erfasste Anzahl von Stellplätzen.',
       condition_category_primary:
-        'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
+        'Der für die Darstellung wichtigste Wert aus `condition_category`. Reihenfolge: Sonderparkplätze (Behinderte, Taxi, Ladezone, E-Laden, Carsharing) vor Park- und Haltverboten, dann private/eingeschränkte Flächen, dann Höchstparkdauer vor Bewirtschaftung. Nur zur Darstellung; fachlich gilt `condition_category`.',
       area: 'Fläche in Quadratmetern.',
       surface: 'Oberflächenbelag des Parkraumabschnitts.',
       orientation: 'Ausrichtung der Fahrzeuge im Straßenland zur Verkehrsrichtung.',

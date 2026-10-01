@@ -1,11 +1,14 @@
 -- Rendering-only: pick the primary base of `condition_category` for styling.
 --
--- KEEP IN SYNC with the token order in
--- `park_street_default.ts` and `park_off_default_area.ts`
--- (generated from Mapbox Studio via `scripts/MapboxStyles/process.ts`)
--- and with `tilda_condition_category_priority()` in
+-- This list is the source of truth for the order (agreed in FixMyBerlin/private-issues#3193):
+-- special-use spaces first (they are the relevant info even inside a no-stopping / bus lane window),
+-- then prohibitions, then private/access limits, then `time_limited` before the zone-wide
+-- `mixed`/`residents`/`paid` so it stays visible inside a managed zone.
+-- KEEP IN SYNC with `tilda_condition_category_priority()` in
 -- `custom_functions/condition_category_priority.sql` (edge-side tie-break, SQL copy).
--- Edge colours: `parkingTildaEdgesLayers.const.ts` (`conditionCategoryPrimaryLineColor`).
+-- The map styles (`park_street_default.ts`, `park_off_default_area.ts`,
+-- `parkingTildaEdgesLayers.const.ts`) match the value with `==`; their order does not matter,
+-- but every value here needs a colour there.
 --
 -- `classify_parking_conditions` can emit extra bases (e.g. `no_standing`); those are
 -- not in this list and fall through to `'default'`.
@@ -13,24 +16,24 @@
 -- First list match wins; nil/empty/no match → 'default'.
 
 local PRIORITY = {
-  'no_stopping',
-  'bus_lane',
-  'no_parking',
-  'disabled_private',
   'disabled',
+  'disabled_private',
+  'taxi',
   'loading',
   'charging',
-  'taxi',
   'car_sharing',
+  'no_parking',
+  'no_stopping',
+  'bus_lane',
   'private',
   'assumed_private',
   'vehicle_restriction',
   'access_restriction',
   'maxweight',
+  'time_limited',
   'mixed',
   'residents',
   'paid',
-  'time_limited',
   'unspecified',
   'free',
   'assumed_free',

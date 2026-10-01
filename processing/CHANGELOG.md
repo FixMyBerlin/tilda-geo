@@ -16,6 +16,7 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 - Street parkings from `parking:left|right|both:*` now log rejected sanitizer values to `parking_errors` too (previously dropped silently).
 - Docs: `condition_category_primary` and `condition_category_left|right` document `default` ("Keine Zuordnung": category not in the style priority list, e.g. `no_standing`). `capacity_source=area` (off-street) was already documented via `valuesAdd`.
 - `condition_category_primary` is now computed in Lua next to `condition_category` (was a SQL function at finalize). Same values; it is now also on `parkings_no` and `parkings_separate`.
+- `condition_category_primary` / `condition_category_left|right`: new priority order. Special-use spaces win over prohibitions, and `time_limited` over zone rules: `disabled`, `disabled_private`, `taxi`, `loading`, `charging`, `car_sharing`, `no_parking`, `no_stopping`, `bus_lane`, `private`, `assumed_private`, `vehicle_restriction`, `access_restriction`, `maxweight`, `time_limited`, `mixed`, `residents`, `paid`, `unspecified`, `free`, `assumed_free`, `invalid`. E.g. `bus_lane (05:00-19:00);taxi (19:00-05:00)` is now `taxi` (was `bus_lane`). The order lives in `helper/condition_category_primary.lua`; map styles match by value.
 - Note: condition detail strings are mostly passed through from OSM verbatim (only fee inversion and time subtraction rebuild them), so casing like `mo-Fr` can appear. The inspector translates weekdays case-insensitively.
 
 ### `bikelanes`, `routing`

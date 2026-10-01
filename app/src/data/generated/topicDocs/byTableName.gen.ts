@@ -4422,7 +4422,7 @@ const data = {
         label: 'Primäre Parkbeschränkung',
         purpose: 'rendering',
         description:
-          'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
+          'Der für die Darstellung wichtigste Wert aus `condition_category`. Reihenfolge: Sonderparkplätze (Behinderte, Taxi, Ladezone, E-Laden, Carsharing) vor Park- und Haltverboten, dann private/eingeschränkte Flächen, dann Höchstparkdauer vor Bewirtschaftung. Nur zur Darstellung; fachlich gilt `condition_category`.',
         values: [
           {
             value: 'access_restriction',
@@ -5191,7 +5191,7 @@ const data = {
         label: 'Primäre Parkbeschränkung',
         purpose: 'rendering',
         description:
-          'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
+          'Der für die Darstellung wichtigste Wert aus `condition_category`. Reihenfolge: Sonderparkplätze (Behinderte, Taxi, Ladezone, E-Laden, Carsharing) vor Park- und Haltverboten, dann private/eingeschränkte Flächen, dann Höchstparkdauer vor Bewirtschaftung. Nur zur Darstellung; fachlich gilt `condition_category`.',
         values: [
           {
             value: 'access_restriction',
@@ -5940,7 +5940,7 @@ const data = {
         label: 'Primäre Parkbeschränkung',
         purpose: 'rendering',
         description:
-          'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
+          'Der für die Darstellung wichtigste Wert aus `condition_category`. Reihenfolge: Sonderparkplätze (Behinderte, Taxi, Ladezone, E-Laden, Carsharing) vor Park- und Haltverboten, dann private/eingeschränkte Flächen, dann Höchstparkdauer vor Bewirtschaftung. Nur zur Darstellung; fachlich gilt `condition_category`.',
         values: [
           {
             value: 'access_restriction',
@@ -8678,7 +8678,7 @@ const data = {
         label: 'Primäre Parkbeschränkung',
         purpose: 'rendering',
         description:
-          'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
+          'Der für die Darstellung wichtigste Wert aus `condition_category`. Reihenfolge: Sonderparkplätze (Behinderte, Taxi, Ladezone, E-Laden, Carsharing) vor Park- und Haltverboten, dann private/eingeschränkte Flächen, dann Höchstparkdauer vor Bewirtschaftung. Nur zur Darstellung; fachlich gilt `condition_category`.',
         values: [
           {
             value: 'access_restriction',
