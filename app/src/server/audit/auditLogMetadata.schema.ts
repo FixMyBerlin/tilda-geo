@@ -7,6 +7,7 @@ import {
 const auditLogMetadataSchema = z.object({
   changeSource: z.enum(AUDIT_CHANGE_SOURCES).optional(),
   adminTokenId: z.string().optional(),
+  externalTokenId: z.string().optional(),
 })
 
 export type AuditLogMetadata = z.infer<typeof auditLogMetadataSchema>

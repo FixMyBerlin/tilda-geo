@@ -31,6 +31,15 @@ export const appInstances = {
   flaechenfinder: { staging: flaechenfinder, production: flaechenfinder },
 } as const satisfies Record<string, Record<DeployedEnvironment, DeploymentOrigins>>
 
+/**
+ * Browser origins that may call the external notes API (our iD editor fork), on every deployment.
+ * Exact origins, no wildcards. See `docs/External-Notes-API.md`.
+ */
+export const externalApiOrigins = [
+  'http://127.0.0.1:8080', // iD dev server
+  'https://deploy-preview-10--tordans-id-experiments.netlify.app', // iD fork, Netlify preview
+]
+
 export type AppInstance = keyof typeof appInstances
 
 export const appInstanceNames = Object.keys(appInstances) as AppInstance[]

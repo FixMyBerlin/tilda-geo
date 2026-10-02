@@ -1,7 +1,7 @@
-import type { AppSession } from '@/server/auth/types'
+import type { SessionActor } from '@/server/auth/types'
 import { membershipExists } from '@/server/memberships/queries/membershipExists.server'
 
-export async function getRegionHasPermissions(session: AppSession | null, regionSlug: string) {
+export async function getRegionHasPermissions(session: SessionActor | null, regionSlug: string) {
   const role = session?.role
   if (role === 'ADMIN') {
     return true

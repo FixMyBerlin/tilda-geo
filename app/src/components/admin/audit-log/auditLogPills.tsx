@@ -22,6 +22,8 @@ export const auditChangeSourceColor = (source: AuditChangeSource) => {
       return 'blue' as const
     case 'API':
       return 'purple' as const
+    case 'EXTERNAL_API':
+      return 'pink' as const
     case 'MIGRATION':
       return 'yellow' as const
     default:
