@@ -20,6 +20,10 @@ const data = {
         'Ein berechneter Wert für das OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genauigkeit für Deutschland.',
       prefix:
         'Kennzeichnet, aus welcher OSM-Tagfamilie die Radverkehrsinformationen für dieses Objekt extrahiert wurden. Der Wert wird im Processing gesetzt und beschreibt die verwendete Tag-Präfixlogik, nicht die Quelle im Sinne eines externen Datensatzes.',
+      width:
+        'Wert des OSM-Tags `width`. Fehlt er oder ist er nicht lesbar, der geschätzte Wert aus `est_width` (siehe `width_confidence`).',
+      width_source:
+        'Wert des OSM-Tags `source:width`. Nur gesetzt, wenn eine Breite gesetzt ist. Bei einem nicht lesbaren `width` entfällt die Quelle, auch wenn `est_width` genutzt wird.',
       mapillary_coverage:
         'Basiert auf einer Analyse der Mapillary-Foto-Sequenzen der letzten ca. 2 Jahre, die mit den OSM-Wegen verschnitten wurden. Mehr unter https://tilda-geo.de/docs/mapillary-coverage',
       mapillary:
@@ -34,6 +38,10 @@ const data = {
         'Reiner Darstellungswert für den Kartenstil – empfohlener seitlicher Versatz in Metern. Die Geometrie bleibt auf der Straßen-Mittellinie; der Versatz wird ausschließlich visuell als `line-offset` angewendet und verändert die Daten nicht. Vorzeichen: positiv = links, negativ = rechts der Mittellinie. Der Betrag wird im Processing aus der halben Straßenbreite berechnet.',
     },
     values: {
+      width_confidence: {
+        high: 'Wert stammt aus dem OSM-Tag `width`.',
+        low: 'Wert stammt aus dem OSM-Tag `est_width`, weil `width` fehlt oder nicht lesbar ist.',
+      },
       oneway: {
         assumed_no:
           'Keine explizite OSM-Angabe zur Verkehrsrichtung vorhanden. Aus Führungsform und Umfeld wird hier beide Richtungen als wahrscheinlich angenommen.',
@@ -117,6 +125,10 @@ const data = {
       name_ref: 'Enthält Kurznamen wie `A 100` oder `B 96`, übernommen aus dem OSM-Tag `ref`.',
       length:
         'Ein berechneter Wert für das OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genauigkeit für Deutschland.',
+      width:
+        'Wert des OSM-Tags `width`. Fehlt er oder ist er nicht lesbar, der geschätzte Wert aus `est_width` (siehe `width_confidence`).',
+      width_source:
+        'Wert des OSM-Tags `source:width`. Nur gesetzt, wenn eine Breite gesetzt ist. Bei einem nicht lesbaren `width` entfällt die Quelle, auch wenn `est_width` genutzt wird.',
       mapillary_coverage:
         'Basiert auf einer Analyse der Mapillary-Foto-Sequenzen der letzten ca. 2 Jahre, die mit den OSM-Wegen verschnitten wurden. Mehr unter https://tilda-geo.de/docs/mapillary-coverage',
       mapillary:
@@ -129,6 +141,10 @@ const data = {
         'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
     },
     values: {
+      width_confidence: {
+        high: 'Wert stammt aus dem OSM-Tag `width`.',
+        low: 'Wert stammt aus dem OSM-Tag `est_width`, weil `width` fehlt oder nicht lesbar ist.',
+      },
       tunnel: {
         yes: 'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',
       },
@@ -152,6 +168,10 @@ const data = {
         'Mapillary-Bild-IDs in Gegenrichtung (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
       mapillary_traffic_sign:
         'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
+      width:
+        'Wert des OSM-Tags `width`. Fehlt er oder ist er nicht lesbar, der geschätzte Wert aus `est_width` (siehe `width_confidence`).',
+      width_source:
+        'Wert des OSM-Tags `source:width`. Nur gesetzt, wenn eine Breite gesetzt ist. Bei einem nicht lesbaren `width` entfällt die Quelle, auch wenn `est_width` genutzt wird.',
       adjoining_road:
         'Ein Indikator für die Gefährdung durch nahen Kfz-Verkehr: TILDA-Straßenklasse der relevanten Kfz-Straße (keine Aussage, ob der Weg zu dieser Straße gehört). Bei begleitenden Wegen die parallele Straße; bei Querungen die gequerte Straße. Primär, außer bei Querungen: OSM `is_sidepath:of`, über die TILDA-Straßenklassifikation gemappt (nur die `highway`-Klasse, ohne Untertags). Damit kann eine Kartierung die Schätzung überschreiben. `residential_priority_road` entsteht so nicht; der gröbere `:of`-Wert bleibt. Unbrauchbare `:of`-Werte (Tippfehler, Straßenname, `trunk`) fallen auf die Schätzung zurück. Bei Querungen immer nur die Schätzung (gequerte Straße), nie `:of`. Auch gesetzt, wenn der Weg selbstständig geführt ist.',
       adjoining_maxspeed:
@@ -161,6 +181,10 @@ const data = {
       covered: {
         covered:
           'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
+      },
+      width_confidence: {
+        high: 'Wert stammt aus dem OSM-Tag `width`.',
+        low: 'Wert stammt aus dem OSM-Tag `est_width`, weil `width` fehlt oder nicht lesbar ist.',
       },
     },
   },
@@ -186,6 +210,10 @@ const data = {
         'Mapillary-Bild-IDs in Gegenrichtung (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
       mapillary_traffic_sign:
         'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
+      width:
+        'Wert des OSM-Tags `width`. Fehlt er oder ist er nicht lesbar, der geschätzte Wert aus `est_width` (siehe `width_confidence`).',
+      width_source:
+        'Wert des OSM-Tags `source:width`. Nur gesetzt, wenn eine Breite gesetzt ist. Bei einem nicht lesbaren `width` entfällt die Quelle, auch wenn `est_width` genutzt wird.',
     },
     values: {
       covered: {

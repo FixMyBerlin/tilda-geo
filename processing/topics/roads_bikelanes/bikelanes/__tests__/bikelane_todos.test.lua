@@ -398,6 +398,36 @@ describe('bikelane_todos', function()
       assert.are.equal(data._id, 'way/1')
       assert.are.equal(table_includes(data._todo_list, 'missing_width'), false)
     end)
+
+    -- The `missing_width` campaign asks mappers to add `est_width` when they can only estimate.
+    it('skips missing_width when only est_width is given', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'cycleway',
+          ['is_sidepath'] = 'yes',
+          ['est_width'] = '2',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local data = run_bikelanes(input_object)[1]
+      assert.are.equal(data.width, 2)
+      assert.are.equal(data.width_confidence, 'low')
+      assert.are.equal(table_includes(data._todo_list, 'missing_width'), false)
+    end)
+
+    it('creates missing_width when neither width nor est_width is given', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'cycleway',
+          ['is_sidepath'] = 'yes',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local data = run_bikelanes(input_object)[1]
+      assert.are.equal(table_includes(data._todo_list, 'missing_width'), true)
+    end)
   end)
 
   describe('`missing_segregated`:', function()

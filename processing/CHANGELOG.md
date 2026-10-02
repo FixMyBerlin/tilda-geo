@@ -4,6 +4,14 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-09
 
+### `roads`, `roadsPathClasses`, `bikelanes`
+
+- `width` falls back to OSM `est_width` when `width` is missing or unparsable.
+- New `width_confidence`: `high` (from `width`) | `low` (from `est_width`). Missing when there is no usable width.
+- `width_source` (`source:width`) is only set together with `width`; it is dropped when `width` is present but unparsable. `bikelanes` now sanitizes it like `roads`.
+- `bikelanes` todo `missing_width` no longer lists ways that have `est_width` (the campaign already asks mappers to add `est_width` when they can only estimate).
+- `routing` inherits the fallback via `width` (without `width_confidence`).
+
 ### `roads`, `roadsPathClasses`, `bikelanes`, `bikelanesPresence`, `bikeSuitability`, `routing`
 
 - Network noise, detected once on the `routing` graph (one geometry per OSM parent way): **islands** (the way touches no other line) and **short dangling tips** (`length` < 20 m, one end attached, the other free, nothing else touching the way). Single pass: a way that only becomes a tip once its own tips are hidden stays. Lines outside `routing` (eg. motorways) count as connectors; with `PROCESS_ONLY_BBOX` (local dev), ways not fully inside the bbox (minus ~10 m) are skipped. Map tables: `minzoom` is at least 14, so the lines stay in the data and in the z14 tile (overzoomed) and the inspector still works. `routing`: the rows are removed from the graph and moved to `_routing_discarded` (`discard_reason` `island` | `stub`, not published) for debugging. `todos_lines` is unchanged. SQL: `topics/roads_bikelanes/4_hide_network_noise.sql`.

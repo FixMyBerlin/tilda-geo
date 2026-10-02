@@ -40,6 +40,8 @@ attributes:
     ref: roads.width
   - key: width_source
     ref: roads.width_source
+  - key: width_confidence
+    ref: roads.width_confidence
   - key: surface
     ref: roads.surface
   - key: surface_source
