@@ -76,12 +76,6 @@ export const litMissingDataLegendRadinfra = {
   style: { type: 'line', color: litColors.missingRadinfra, dasharray: [3, 2], width: 2 },
 } satisfies FileMapDataSubcategoryStyleLegend
 
-export const litMissingAreaDataLegendRadinfra = {
-  id: 'missing',
-  name: 'Daten fehlen',
-  style: { type: 'fill', color: litColors.missingRadinfra },
-} satisfies FileMapDataSubcategoryStyleLegend
-
 export function litLineLayers() {
   return [
     {
@@ -240,46 +234,4 @@ export function litAreaLayers() {
       },
     },
   ]
-}
-
-function litAreaMissingLayersRadinfra() {
-  const missingMinzoom = 9
-  return [
-    {
-      id: 'lit-missing-fill',
-      type: 'fill',
-      minzoom: missingMinzoom,
-      filter: ['!', ['has', 'lit']],
-      paint: {
-        'fill-color': litColors.missingRadinfra,
-        'fill-opacity': 0.35,
-      },
-    },
-    {
-      id: 'lit-missing-outline',
-      type: 'line',
-      minzoom: missingMinzoom,
-      filter: ['!', ['has', 'lit']],
-      paint: {
-        'line-color': litColors.missingRadinfra,
-        'line-opacity': 0.85,
-        'line-width': areaOutlineWidth,
-        'line-dasharray': [3, 1],
-      },
-    },
-    {
-      id: 'hitarea-lit-missing-area',
-      type: 'fill',
-      minzoom: missingMinzoom,
-      filter: ['!', ['has', 'lit']],
-      paint: {
-        'fill-color': 'rgb(216, 20, 255)',
-        'fill-opacity': 0,
-      },
-    },
-  ] satisfies MapboxStyleLayer[]
-}
-
-export function litAreaCompletenessLayersRadinfra() {
-  return [...litAreaLayers(), ...litAreaMissingLayersRadinfra()]
 }
