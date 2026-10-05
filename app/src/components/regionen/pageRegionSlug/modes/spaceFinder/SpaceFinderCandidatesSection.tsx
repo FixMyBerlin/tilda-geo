@@ -12,6 +12,11 @@ import {
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { CollapsibleBox } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/CollapsibleBox'
 import { ModeListItem } from '../ModeListItem'
+import {
+  modePanelListMetaClassName,
+  modePanelListTitleClassName,
+  modePanelTintHairlineTopClassName,
+} from '../modePanel.const'
 import { candidateExportFileName, downloadCandidatesGeojson } from './spaceFinderCandidateExport'
 import { useSpaceFinderSelection } from './useSpaceFinderSelection'
 
@@ -75,22 +80,22 @@ const CandidateRow = ({
       id={candidateListItemId(candidate.h3Id)}
       coordinates={candidateCentroid(candidate)}
       onClick={onFocus}
-      buttonClassName="px-2.5 py-1.5"
-      className="border-b border-gray-100 last:border-0"
       actions={
         <button
           type="button"
           onClick={onRemove}
           aria-label={`Kandidat ${index + 1} entfernen`}
-          className="shrink-0 text-gray-400 hover:text-gray-800"
+          className="-mr-0.5 shrink-0 rounded p-0.5 text-gray-400 hover:bg-white hover:text-gray-800"
         >
           <XMarkIcon className="size-4" />
         </button>
       }
     >
       <div className="flex items-center gap-2">
-        <span className="w-5 shrink-0 text-right text-xs text-gray-400">{index + 1}.</span>
-        <span className="min-w-0 flex-1 truncate font-mono text-xs text-gray-500">
+        <span className={twJoin('w-5 shrink-0 text-right', modePanelListMetaClassName)}>
+          {index + 1}.
+        </span>
+        <span className={twJoin('min-w-0 flex-1 truncate font-mono', modePanelListMetaClassName)}>
           {candidate.h3Id}
         </span>
         {eignungsklasse && (
@@ -102,7 +107,7 @@ const CandidateRow = ({
             {eignungsklasse}
           </span>
         )}
-        <span className="w-8 shrink-0 text-right text-base font-bold text-gray-800">
+        <span className={twJoin('w-8 shrink-0 text-right', modePanelListTitleClassName)}>
           {typeof score === 'number' ? Math.round(score) : '–'}
         </span>
       </div>
@@ -169,7 +174,8 @@ export const SpaceFinderCandidatesSection = ({ variantId }: { variantId: number 
           Ausgewählte Hexagone sind gelb umrandet.
         </p>
       ) : (
-        <ul className="-mx-2.5 flex flex-col">
+        // Edge to edge inside the box (cancels its `p-2.5`), hairlines like the Hinweise list.
+        <ul className={twJoin('-mx-2.5 flex flex-col', modePanelTintHairlineTopClassName)}>
           {candidates.map((candidate, index) => (
             <CandidateRow
               key={candidate.h3Id}
