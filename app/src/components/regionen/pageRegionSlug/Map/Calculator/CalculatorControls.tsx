@@ -50,7 +50,6 @@ export const CalculatorControls = ({ queryLayers }: Props) => {
   )
 
   const handleUserGeometry = (next: DrawArea[]) => {
-    void setDrawAreas(next)
     updateCalculation(queryLayers, next)
     lastCalculationSignatureRef.current = buildCalculationSignature(queryLayers, next, mapBounds)
   }
@@ -78,6 +77,7 @@ export const CalculatorControls = ({ queryLayers }: Props) => {
       drawMode={drawMode}
       getFeatureLabel={({ index }) => (drawAreas.length > 1 ? `Fläche ${index + 1}` : undefined)}
       onUserGeometryChange={handleUserGeometry}
+      onUserGeometryCommit={setDrawAreas}
       onUserDrawModeChange={handleUserDrawModeChange}
     />
   )

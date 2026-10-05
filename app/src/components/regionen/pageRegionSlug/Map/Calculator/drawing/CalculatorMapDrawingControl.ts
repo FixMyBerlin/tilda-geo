@@ -9,8 +9,14 @@ import type { DrawArea } from './drawAreaTypes'
 import { drawAreasToStoreFeatures, snapshotToDrawAreas } from './mapDrawingGeometry'
 
 type Handlers = {
+  /** Every change to the finished areas, including each step of a drag. */
   onUserGeometryChange: (areas: DrawArea[]) => void
+  /** The areas once the user's edit has settled; this is what belongs in the URL. */
+  onUserGeometryCommit: (areas: DrawArea[]) => void
 }
+
+// Edits without a TerraDraw `finish` event (midpoint insert, delete) commit after this pause.
+const COMMIT_SETTLE_MS = 250
 
 type CalculatorMapDrawingControlOptions = {
   getHandlers: () => Handlers
@@ -26,6 +32,9 @@ export class CalculatorMapDrawingControl {
   private pendingDrawMode: CalculatorUrlDrawMode | null = 'polygon'
   private selectedFeatureIds: (string | number)[] = []
   private restorePending = false
+  private lastEmittedSerialized = ''
+  private uncommittedAreas: DrawArea[] | null = null
+  private commitTimer: ReturnType<typeof setTimeout> | null = null
   private styleLoadHandler = () => this.reinitAfterStyleChange()
   private initHandler = () => this.tryInitialize()
   private readonly options: CalculatorMapDrawingControlOptions
@@ -52,6 +61,7 @@ export class CalculatorMapDrawingControl {
     map.off('load', this.initHandler)
     map.off('idle', this.initHandler)
     map.off('styledata', this.initHandler)
+    this.flushCommit()
     this.map = null
     if (this.draw) {
       this.draw.stop()
@@ -85,6 +95,7 @@ export class CalculatorMapDrawingControl {
 
   replaceFromUrl(drawAreas: DrawArea[]) {
     if (!this.draw || !this.isInitialized) return
+    this.cancelCommit()
     this.isApplyingExternalState = true
     try {
       this.draw.clear()
@@ -94,6 +105,7 @@ export class CalculatorMapDrawingControl {
     } finally {
       this.isApplyingExternalState = false
     }
+    this.lastEmittedSerialized = jurlStringify(this.readFinishedAreas())
   }
 
   setDrawMode(mode: CalculatorUrlDrawMode) {
@@ -162,12 +174,46 @@ export class CalculatorMapDrawingControl {
       if (!this.draw) return
       if (this.isApplyingExternalState) return
 
-      const areas = snapshotToDrawAreas(this.draw.getSnapshot())
-      const simplified = simplifyPositions(areas)
-      const serialized = jurlStringify(simplified)
-      this.options.setLastSyncedDrawSerialized(serialized)
-      this.options.getHandlers().onUserGeometryChange(simplified)
+      // TerraDraw fires `change` on every pointer move while a polygon is being drawn. The
+      // finished areas stay the same during that time, so this returns early.
+      const areas = this.readFinishedAreas()
+      const serialized = jurlStringify(areas)
+      if (serialized === this.lastEmittedSerialized) return
+      this.lastEmittedSerialized = serialized
+
+      this.options.getHandlers().onUserGeometryChange(areas)
+      this.scheduleCommit(areas)
     })
+
+    // Closing a polygon and releasing a drag are settled edits; commit them right away.
+    this.draw.on('finish', () => this.flushCommit())
+  }
+
+  private readFinishedAreas() {
+    if (!this.draw) return []
+    return simplifyPositions(snapshotToDrawAreas(this.draw.getSnapshot()))
+  }
+
+  private scheduleCommit(areas: DrawArea[]) {
+    this.uncommittedAreas = areas
+    if (this.commitTimer) clearTimeout(this.commitTimer)
+    this.commitTimer = setTimeout(() => this.flushCommit(), COMMIT_SETTLE_MS)
+  }
+
+  private cancelCommit() {
+    if (this.commitTimer) clearTimeout(this.commitTimer)
+    this.commitTimer = null
+    this.uncommittedAreas = null
+  }
+
+  private flushCommit() {
+    const areas = this.uncommittedAreas
+    this.cancelCommit()
+    if (!areas) return
+    // Record what goes to the URL before it arrives back as props, so the echo is not
+    // mistaken for an external change that has to replace the TerraDraw store.
+    this.options.setLastSyncedDrawSerialized(jurlStringify(areas))
+    this.options.getHandlers().onUserGeometryCommit(areas)
   }
 
   private reinitAfterStyleChange() {
@@ -175,7 +221,9 @@ export class CalculatorMapDrawingControl {
     if (this.restorePending) return
     this.restorePending = true
 
-    const snapshot = this.draw.getSnapshot().slice()
+    // Only finished areas survive: helper points and a half-drawn polygon belong to mode state
+    // that the new instance does not have.
+    const snapshot = drawAreasToStoreFeatures(snapshotToDrawAreas(this.draw.getSnapshot()))
     const mode = this.draw.getMode()
 
     // Style was replaced; do not call stop() — TerraDraw layers are already gone (see terra-draw-maplibre adapter).

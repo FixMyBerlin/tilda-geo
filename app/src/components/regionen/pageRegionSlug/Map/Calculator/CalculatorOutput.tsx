@@ -97,7 +97,7 @@ export const CalculatorOutput = ({
 
   const handleDelete = (key: string) => {
     const next = drawAreas.filter((a) => a.id !== key)
-    void setDrawAreas(next)
+    setDrawAreas(next)
     updateCalculation(queryLayers, next)
   }
 

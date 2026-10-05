@@ -78,4 +78,33 @@ describe('mapDrawingGeometry', () => {
     const back = snapshotToDrawAreas(snapshot)
     expect(back[0]?.id).toBe('fixed-test-uuid')
   })
+
+  test('snapshotToDrawAreas skips a polygon that is still being drawn and drops selection state', () => {
+    const coordinates = [
+      [
+        [0, 0],
+        [2, 0],
+        [2, 2],
+        [0, 2],
+        [0, 0],
+      ],
+    ]
+    const snapshot = [
+      {
+        type: 'Feature' as const,
+        id: 'finished',
+        geometry: { type: 'Polygon' as const, coordinates },
+        properties: { mode: 'polygon', selected: true },
+      },
+      {
+        type: 'Feature' as const,
+        id: 'in-progress',
+        geometry: { type: 'Polygon' as const, coordinates },
+        properties: { mode: 'polygon', currentlyDrawing: true },
+      },
+    ]
+    const back = snapshotToDrawAreas(snapshot)
+    expect(back.map((area) => area.id)).toEqual(['finished'])
+    expect(back[0]?.properties).toEqual({ mode: 'polygon' })
+  })
 })
