@@ -60,7 +60,13 @@ export const CalculatorControls = ({ queryLayers }: Props) => {
 
   useEffect(
     function updateCalculatorAfterMapStateChange() {
-      if (!mapLoaded || showMapLoadingIndicator) return
+      if (!mapLoaded) return
+      if (showMapLoadingIndicator) {
+        // The rendered features are about to change (e.g. the calculator layer was just switched
+        // on again), so the last result must not block the calculation once the map is idle.
+        lastCalculationSignatureRef.current = null
+        return
+      }
 
       const calculationSignature = buildCalculationSignature(queryLayers, drawAreas, mapBounds)
       if (lastCalculationSignatureRef.current === calculationSignature) return
