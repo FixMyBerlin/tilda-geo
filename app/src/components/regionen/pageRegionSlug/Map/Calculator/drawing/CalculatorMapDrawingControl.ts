@@ -121,18 +121,6 @@ export class CalculatorMapDrawingControl {
     return mode
   }
 
-  removeByCalculatorId(id: string) {
-    if (!this.draw || !this.isInitialized) return
-    const snap = this.draw.getSnapshot()
-    const target = snap.find(
-      (f) =>
-        String(f.id) === id ||
-        (typeof f.properties?.tildaCalcId === 'string' && f.properties.tildaCalcId === id),
-    )
-    if (!target || target.id === undefined) return
-    this.draw.removeFeatures([target.id])
-  }
-
   deleteSelectionOrAll() {
     if (!this.draw || !this.isInitialized) return
     if (this.selectedFeatureIds.length > 0) {
