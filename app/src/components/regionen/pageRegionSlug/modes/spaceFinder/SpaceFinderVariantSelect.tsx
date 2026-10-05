@@ -1,8 +1,7 @@
 import { CheckIcon, ExclamationTriangleIcon } from '@heroicons/react/20/solid'
-import { DocumentDuplicateIcon } from '@heroicons/react/24/outline'
 import { Spinner } from '@/components/shared/Spinner/Spinner'
 import { frenchQuote } from '@/components/shared/text/Quotes'
-import { ModeCollectionActionRow } from '../ModeCollectionActionRow'
+import { ModeCollectionNewRow } from '../ModeCollectionNewRow'
 import { ModeCollectionSelect } from '../ModeCollectionSelect'
 import { modeIdentity } from '../modeIdentity'
 import { ModePanelCollectionDisclosure } from '../ModePanelCollectionDisclosure'
@@ -50,9 +49,9 @@ type Props = {
 
 /**
  * Second level directly below the Planungsgebiet header: the Gebiet's Varianten as a dropdown that
- * looks and works like the Planungsgebiet one (same bar, same option list, trailing »Neu…« rows),
- * in a lighter green so the two levels stay distinguishable. The ⋯ acts on the active variant;
- * the Gebiet keeps its own menu in the panel header.
+ * looks and works like the Planungsgebiet one (same bar, same option list, trailing »Neu…« row),
+ * in a lighter green so the two levels stay distinguishable. The ⋯ acts on the active variant
+ * (duplicate, rename, delete); the Gebiet keeps its own menu in the panel header.
  */
 export const SpaceFinderVariantSelect = ({
   variants,
@@ -65,7 +64,6 @@ export const SpaceFinderVariantSelect = ({
   const { accent } = modeIdentity.spaceFinder
   const activeVariant = variants.find((variant) => variant.id === selected.variantId)
   const activeStatus = activeVariant ? spaceFinderVariantStatus(activeVariant) : 'none'
-  const { duplicateVariant } = commands
 
   return (
     <div className="border-b border-white/80 bg-emerald-600 text-white">
@@ -93,20 +91,9 @@ export const SpaceFinderVariantSelect = ({
               onChange={(next) => onSelect(Number(next))}
             />
             {editable ? (
-              <>
-                <ModeCollectionActionRow
-                  icon={<DocumentDuplicateIcon className="size-4 shrink-0" aria-hidden />}
-                  disabled={duplicateVariant.isPending}
-                  onClick={() => duplicateVariant.mutate(selected.variantId)}
-                >
-                  {duplicateVariant.isPending
-                    ? 'Wird dupliziert…'
-                    : `Variante ${frenchQuote(selected.variantTitle)} duplizieren`}
-                </ModeCollectionActionRow>
-                <ModeCollectionActionRow onClick={onNewVariant}>
-                  Neue Variante mit Standardwerten…
-                </ModeCollectionActionRow>
-              </>
+              <ModeCollectionNewRow onClick={onNewVariant}>
+                Neue Variante mit Standardwerten…
+              </ModeCollectionNewRow>
             ) : null}
           </div>
         }

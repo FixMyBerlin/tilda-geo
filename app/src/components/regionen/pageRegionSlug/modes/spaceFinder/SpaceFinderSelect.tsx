@@ -1,4 +1,4 @@
-import { ModeCollectionActionRow } from '../ModeCollectionActionRow'
+import { ModeCollectionNewRow } from '../ModeCollectionNewRow'
 import { ModeCollectionSelect } from '../ModeCollectionSelect'
 import type { PlanningAreasRow } from './spaceFinderCollectionOptions'
 
@@ -38,7 +38,7 @@ export const SpaceFinderSelect = ({ areas, selectedAreaId, onSelectArea, onNewAr
         <p className="px-2 py-1.5 text-sm text-white/90">Noch kein Planungsgebiet angelegt.</p>
       )}
       {onNewArea ? (
-        <ModeCollectionActionRow onClick={onNewArea}>Neues Planungsgebiet…</ModeCollectionActionRow>
+        <ModeCollectionNewRow onClick={onNewArea}>Neues Planungsgebiet…</ModeCollectionNewRow>
       ) : null}
     </div>
   )

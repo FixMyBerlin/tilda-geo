@@ -70,7 +70,7 @@ export const SpaceFinderAreaManageMenu = ({
 /** ⋯ in the Varianten bar: acts on the active variant. A Gebiet keeps at least one variant. */
 export const SpaceFinderVariantManageMenu = ({
   selected,
-  commands: { openNameModal, deleteVariant },
+  commands: { openNameModal, deleteVariant, duplicateVariant },
 }: {
   selected: SpaceFinderSelectedVariant
   commands: SpaceFinderCommands
@@ -83,6 +83,15 @@ export const SpaceFinderVariantManageMenu = ({
         <EllipsisHorizontalIcon className="size-5" aria-hidden="true" />
       </MenuButton>
       <MenuItems anchor="bottom end" modal={false} className={menuItemsClassName}>
+        <MenuItem disabled={duplicateVariant.isPending}>
+          <button
+            type="button"
+            onClick={() => duplicateVariant.mutate(selected.variantId)}
+            className={menuItemClassName}
+          >
+            {duplicateVariant.isPending ? 'Wird dupliziert…' : 'Duplizieren'}
+          </button>
+        </MenuItem>
         <MenuItem>
           <button
             type="button"
