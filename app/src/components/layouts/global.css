@@ -2,6 +2,8 @@
 
 @source './src/**/*.{js,jsx,ts,tsx,mdx}';
 @source './public/**/*.html';
+/* Tailwind does not scan node_modules; the photo viewer and date slider come with classes. */
+@source '../../../node_modules/@osm-editor-kit/street-imagery-react';
 
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
@@ -23,6 +25,31 @@
   --color-slate-*: initial;
   --color-neutral-*: initial;
   --color-stone-*: initial;
+
+  /* `@osm-editor-kit/street-imagery-react` (photo viewer, date slider) is styled with slate and
+     zinc: without them its bars, track and handles are invisible. Map both to our gray. */
+  --color-slate-50: var(--color-gray-50);
+  --color-slate-100: var(--color-gray-100);
+  --color-slate-200: var(--color-gray-200);
+  --color-slate-300: var(--color-gray-300);
+  --color-slate-400: var(--color-gray-400);
+  --color-slate-500: var(--color-gray-500);
+  --color-slate-600: var(--color-gray-600);
+  --color-slate-700: var(--color-gray-700);
+  --color-slate-800: var(--color-gray-800);
+  --color-slate-900: var(--color-gray-900);
+  --color-slate-950: var(--color-gray-950);
+  --color-zinc-50: var(--color-gray-50);
+  --color-zinc-100: var(--color-gray-100);
+  --color-zinc-200: var(--color-gray-200);
+  --color-zinc-300: var(--color-gray-300);
+  --color-zinc-400: var(--color-gray-400);
+  --color-zinc-500: var(--color-gray-500);
+  --color-zinc-600: var(--color-gray-600);
+  --color-zinc-700: var(--color-gray-700);
+  --color-zinc-800: var(--color-gray-800);
+  --color-zinc-900: var(--color-gray-900);
+  --color-zinc-950: var(--color-gray-950);
 
   /* FixMyCity/TILDA brand color + light variant for surfaces/backgrounds */
   --color-brand: #fabe48;
