@@ -4,18 +4,10 @@ import type {
   MapDataSourceInspectorEditor,
 } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { Link } from '@/components/shared/links/Link'
-import { isProd } from '@/components/shared/utils/isEnv'
 import type { InspectorFeature } from '../Inspector'
 import { editorUrl } from './osmUrls/editorUrl'
 import { extractOsmTypeIdByConfig } from './osmUrls/extractOsmTypeIdByConfig'
-import {
-  historyUrl,
-  osmEditIdUrl,
-  osmEditJosmUrl,
-  osmEditKyleKiwiIdUrl,
-  osmEditRapidUrl,
-  osmOrgUrl,
-} from './osmUrls/osmUrls'
+import { historyUrl, osmEditIdUrl, osmEditJosmUrl, osmOrgUrl } from './osmUrls/osmUrls'
 import { ToolsLinkNewInternalNote } from './ToolsLinkNewInternalNote'
 import { ToolsLinkNewOsmNote } from './ToolsLinkNewOsmNote'
 import { ToolsLinksImagery } from './ToolsLinksImagery'
@@ -32,8 +24,8 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: ToolsLinksProps) =
   const osmUrlHref = osmOrgUrl(osmTypeId)
   const osmEditIdUrlHref = osmEditIdUrl(osmTypeId)
   const osmEditJosmUrlHref = osmEditJosmUrl(osmTypeId)
-  const osmEditKyleKiwiIdUrlHref = osmEditKyleKiwiIdUrl(osmTypeId)
-  const osmEditRapidUrlHref = osmEditRapidUrl(osmTypeId)
+  // const osmEditKyleKiwiIdUrlHref = osmEditKyleKiwiIdUrl(osmTypeId)
+  // const osmEditRapidUrlHref = osmEditRapidUrl(osmTypeId)
 
   const changesetLinks = [
     {
@@ -86,17 +78,16 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: ToolsLinksProps) =
             JOSM
           </Link>
         )}
-        {osmEditKyleKiwiIdUrlHref && (
+        {/* {osmEditKyleKiwiIdUrlHref && (
           <Link blank button href={osmEditKyleKiwiIdUrlHref}>
             kiwiD
           </Link>
-        )}
-        {/* Just for testing for now… */}
-        {!isProd && osmEditRapidUrlHref && (
+        )} */}
+        {/* {!isProd && osmEditRapidUrlHref && (
           <Link blank button href={osmEditRapidUrlHref}>
             Bearbeiten (Rapid) (Staging only)
           </Link>
-        )}
+        )} */}
         <ToolsLinksImagery geometry={feature.geometry} />
         <ToolsLinkNewOsmNote
           properties={feature.properties}
