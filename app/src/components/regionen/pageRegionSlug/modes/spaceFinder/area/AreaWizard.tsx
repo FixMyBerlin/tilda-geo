@@ -59,10 +59,14 @@ export const AreaWizard = ({
         },
       })
     },
-    onSuccess: (created) => {
-      queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
-      queryClient.invalidateQueries(planningAreaQueryOptions(created.areaId))
-      queryClient.invalidateQueries(planningVariantQueryOptions(created.variantId))
+    onSuccess: async (created) => {
+      // Wait for the refetch: selecting the new variant while the area list is still the old one
+      // looks like an orphaned key, and the page's auto-select would jump to the first Gebiet.
+      await Promise.all([
+        queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug)),
+        queryClient.invalidateQueries(planningAreaQueryOptions(created.areaId)),
+        queryClient.invalidateQueries(planningVariantQueryOptions(created.variantId)),
+      ])
       onCreated(created.areaId, created.variantId)
     },
   })
