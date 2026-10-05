@@ -63,7 +63,7 @@ const SpaceFinderEmptyState = ({ onCreate }: { onCreate: () => void }) => (
 /**
  * Flächenfinder mode page (D4/D5/D6): the Planungsgebiete are the header collection (like Ordner
  * in Hinweise), their Varianten a second dropdown bar directly below it, then panel body sections
- * instead of a list (status, Faktoren, Ergebnis, Auswahl), and a
+ * instead of a list (status, Faktoren, Anzeige, Auswahl), and a
  * sticky footer for the primary »Berechnen«/»Neu berechnen« action. Desktop-first (D10) — on
  * mobile the mode is reachable but read-only.
  */

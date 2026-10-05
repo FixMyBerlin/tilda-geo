@@ -20,8 +20,8 @@ const MODES: [PlanningScoreMode, string][] = [
 // ursprünglichen, vollen Layer-Deckkraft vor Einführung des Reglers.
 const DEFAULT_OPACITY = 100
 
-// `compact`: nur die Modus-Buttons (für die eingeklappte Panel-Breadcrumb-Zeile) —
-// ohne "Anzeige"-Überschrift und ohne Transparenz-Regler.
+// `compact`: nur die Modus-Buttons (für die eingeklappte Panel-Breadcrumb-Zeile) — ohne
+// Transparenz-Regler. Keine eigene Überschrift: die umgebende Box heißt bereits »Anzeige«.
 export const ScoreModeSwitcher = ({ compact = false }: { compact?: boolean }) => {
   const { spaceFinderMode, setSpaceFinderModeParam } = useSpaceFinderModeParam()
   const mode = spaceFinderMode.score ?? 'kombination'
@@ -35,7 +35,6 @@ export const ScoreModeSwitcher = ({ compact = false }: { compact?: boolean }) =>
 
   return (
     <div className={twJoin('flex flex-col gap-1', !compact && 'mt-1')}>
-      {!compact && <span className="py-0.5 text-xs font-medium text-gray-500">Anzeige</span>}
       <div className="flex gap-1.5">
         {MODES.map(([value, label]) => (
           <button

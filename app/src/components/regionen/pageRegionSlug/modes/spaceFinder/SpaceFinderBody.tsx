@@ -257,14 +257,14 @@ const StatusSection = ({ variant }: { variant: PlanningVariantDetail }) => {
   )
 }
 
-/** »Ergebnis« (only with a complete run): score mode, opacity, Gesuchte-Fläche filter, layer toggles. */
+/** »Anzeige« (only with a complete run): score mode, opacity, Gesuchte-Fläche filter, layer toggles. */
 const ResultSection = ({ variant }: { variant: PlanningVariantDetail }) => {
   const latestRun = variant.runs[0] ?? null
   const lastRunConfig = (latestRun?.factorConfigSnapshot as FactorConfig | undefined) ?? null
   const factorConfig = variant.factorConfig as FactorConfig
 
   return (
-    <CollapsibleBox title="Ergebnis">
+    <CollapsibleBox title="Anzeige">
       <MinAreaFilter variantId={variant.id} savedMinArea={factorConfig?.min_area_m2 ?? 0} />
       <ScoreModeSwitcher />
       {(latestRun?.vegCount ?? 0) > 0 && <VegetationToggle />}
@@ -278,7 +278,7 @@ const ResultSection = ({ variant }: { variant: PlanningVariantDetail }) => {
 }
 
 /**
- * Flächenfinder panel body (D5): status line, Faktoren, Ergebnis (only with
+ * Flächenfinder panel body (D5): status line, Faktoren, Anzeige (only with
  * a complete run) and Auswahl — collapsible sections, no list, replacing the former
  * `SpaceFinderPanelBody`/`VariantDetail`. The Eigene-Daten layer toggle is independent of
  * `hasCompleteRun` (uploaded data shows on the map before the first run) and therefore lives
@@ -293,7 +293,7 @@ export const SpaceFinderBody = ({
   variantId: number
   /**
    * Desktop only (D10): hides Faktoren editing, the run button (footer, handled by the caller)
-   * and candidate selection behind a short notice. Status and Ergebnis
+   * and candidate selection behind a short notice. Status and Anzeige
    * (view-only controls) stay visible.
    */
   editable?: boolean
