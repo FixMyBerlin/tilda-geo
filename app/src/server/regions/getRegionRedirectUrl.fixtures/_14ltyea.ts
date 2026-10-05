@@ -1,8 +1,8 @@
 // Legacy RegionConfigTemplate fixture for getRegionRedirectUrl migration tests.
-import type { MapDataCategoryParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
+import type { LegacyMapDataCategoryParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
 
 // For regions parkraum-berlin-euvm
-export const _14ltyea: MapDataCategoryParam[] = [
+export const _14ltyea: LegacyMapDataCategoryParam[] = [
   {
     id: 'parkingTilda',
     active: false,

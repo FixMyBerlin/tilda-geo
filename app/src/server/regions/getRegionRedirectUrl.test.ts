@@ -25,7 +25,7 @@ const { regionFixtures } = vi.hoisted(() => ({
   regionFixtures: {
     parkraum: {
       map: { lat: 52.4918, lng: 13.4261, zoom: 13.5 },
-      categories: ['parkingLars', 'mapillary'],
+      categories: ['parkingLars'],
       notesOsm: true,
       notesInternal: false,
     },
@@ -39,35 +39,25 @@ const { regionFixtures } = vi.hoisted(() => ({
         'parkingLars',
         'bicycleParking',
         'poi',
-        'mapillary',
       ],
       notesOsm: true,
       notesInternal: true,
     },
     'bb-pg': {
       map: { lat: 52.3968, lng: 13.0342, zoom: 11 },
-      categories: ['poi', 'bikelanes', 'roads', 'surface', 'bicycleParking', 'mapillary'],
+      categories: ['poi', 'bikelanes', 'roads', 'surface', 'bicycleParking'],
     },
     bibi: {
       map: { lat: 48.95793, lng: 9.1395, zoom: 13 },
-      categories: [
-        'poi',
-        'bikelanes',
-        'roads',
-        'surface',
-        'lit',
-        'parkingLars',
-        'parkingTilda',
-        'mapillary',
-      ],
+      categories: ['poi', 'bikelanes', 'roads', 'surface', 'lit', 'parkingLars', 'parkingTilda'],
     },
     bb: {
       map: { lat: 52.3968, lng: 13.0342, zoom: 11 },
-      categories: ['poi', 'bikelanes', 'roads', 'surface', 'bicycleParking', 'mapillary'],
+      categories: ['poi', 'bikelanes', 'roads', 'surface', 'bicycleParking'],
     },
     'parkraum-berlin-euvm': {
       map: { lat: 52.507, lng: 13.367, zoom: 11.8 },
-      categories: ['parkingTilda', 'roads', 'mapillary'],
+      categories: ['parkingTilda', 'roads'],
     },
   } as Record<
     string,
@@ -132,6 +122,11 @@ function extractSlugFromUrl(url: string) {
   return parts[1] ?? parts[0] ?? ''
 }
 
+/** Today's config of a test region: its checksum changes whenever a category changes. */
+const currentConfig = (regionSlug: string) =>
+  createFreshCategoriesConfig(regionFixtures[regionSlug]!.categories as MapDataCategoryId[])
+const currentChecksum = (regionSlug: string) => calcConfigChecksum(currentConfig(regionSlug))
+
 function parseCategoryFromResponse(
   redirectUrl: string | null,
   expectedChecksum: string,
@@ -146,8 +141,13 @@ function parseCategoryFromResponse(
 
   const checksum = configParam?.split('.')[0]
   if (!configParam || !checksum) throw new Error('Missing config param or checksum')
-  const simplifiedConfig = getLegacyConfigTemplate(checksum)
-  if (!simplifiedConfig) throw new Error(`Missing fixture template for checksum ${checksum}`)
+  // The result is encoded for today's config of its region; old checksums have a fixture.
+  const simplifiedConfig =
+    getLegacyConfigTemplate(checksum) ??
+    Object.keys(regionFixtures)
+      .map(currentConfig)
+      .find((config) => calcConfigChecksum(config) === checksum)
+  if (!simplifiedConfig) throw new Error(`Missing template for checksum ${checksum}`)
   const parsedConfig = parse(configParam, simplifiedConfig as MapDataCategoryConfig[])
   const category = parsedConfig.find((c) => c.id === categoryId)
   if (!category) throw new Error('Category not found')
@@ -573,7 +573,7 @@ describe('getRegionRedirectUrl()', () => {
       const resultUrl = getUrl(redirectUrl)
 
       expect(resultUrl.searchParams.get('v')).toBe('3')
-      expect(resultUrl.searchParams.get('config')).toBe('166cmie.ivb7ah.2r53k')
+      expect(resultUrl.searchParams.get('config')).toBe('1s8ehxg.ivb7ah.3mhc')
     })
 
     test('MIGRATION: Preserve already-short config when version is missing', async () => {
@@ -619,9 +619,9 @@ describe('getRegionRedirectUrl()', () => {
       const configParam = resultUrl.searchParams.get('config')
       expect(configParam).toBeTruthy()
 
-      // The migrated config should use the new checksum for parkraum (12nl2cs) which uses parkingLars
+      // The migrated config should use today's checksum for parkraum, which uses parkingLars
       // The config should be successfully transformed, _not_ reset to defaults
-      expect(configParam?.startsWith('12nl2cs')).toBe(true)
+      expect(configParam?.startsWith(currentChecksum('parkraum'))).toBe(true)
 
       // Verify the config is valid (not empty or error state)
       expect(configParam?.length).toBeGreaterThan(10)
@@ -634,7 +634,11 @@ describe('getRegionRedirectUrl()', () => {
         'http://127.0.0.1:5173/regionen/parkraum-berlin-euvm?map=13.5%2F52.4918%2F13.4261&config=14ltyea.a09bxt.0&v=2'
       const redirectUrl = await redirectOnly(url, extractSlugFromUrl(url))
       expect(redirectUrl).toBeTruthy()
-      const parkingTildaCategory = parseCategoryFromResponse(redirectUrl, '1qldklk', 'parkingTilda')
+      const parkingTildaCategory = parseCategoryFromResponse(
+        redirectUrl,
+        currentChecksum('parkraum-berlin-euvm'),
+        'parkingTilda',
+      )
 
       // Öffentliches Straßenparken => Surface is and stay active
       const parkingTilda = parkingTildaCategory.subcategories.find((s) => s.id === 'parkingTilda')!
@@ -706,7 +710,9 @@ describe('getRegionRedirectUrl()', () => {
       const redirectUrl = await redirectOnly(url, extractSlugFromUrl(url))
       expect(redirectUrl).toBeTruthy()
       expect(mockGetRegionConfigTemplate).toHaveBeenCalledWith('1r6doko')
-      expect(getUrl(redirectUrl).searchParams.get('config')?.startsWith('12nl2cs')).toBe(true)
+      expect(
+        getUrl(redirectUrl).searchParams.get('config')?.startsWith(currentChecksum('parkraum')),
+      ).toBe(true)
     })
 
     test('CONFIG: unknown checksum resets to region defaults', async () => {
@@ -841,7 +847,11 @@ describe('getRegionRedirectUrl()', () => {
         'http://127.0.0.1:5173/regionen/parkraum-berlin-euvm?map=15/52.4928/13.4088&config=14ltyea.a099j9.0&v=2'
       const redirectUrl = await redirectOnly(url, extractSlugFromUrl(url))
       expect(redirectUrl).toBeTruthy()
-      const parkingTildaCategory = parseCategoryFromResponse(redirectUrl, '1qldklk', 'parkingTilda')
+      const parkingTildaCategory = parseCategoryFromResponse(
+        redirectUrl,
+        currentChecksum('parkraum-berlin-euvm'),
+        'parkingTilda',
+      )
 
       // Privates Straßenparken => Was checkbox (off), should now have "hidden" active
       const parkingTildaPrivate = parkingTildaCategory.subcategories.find(

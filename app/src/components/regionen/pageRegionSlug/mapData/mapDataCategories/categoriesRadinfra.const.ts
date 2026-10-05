@@ -1,7 +1,6 @@
 import { subcat_bikelanes_plus_routes } from '../mapDataSubcategories/subcat_bikelanes_plus_routes.const'
 import { subcat_bikelanes_plus_surface_text } from '../mapDataSubcategories/subcat_bikelanes_plus_surface_text.const'
 import { subcat_bikelanes_plus_width_text } from '../mapDataSubcategories/subcat_bikelanes_plus_width_text.const'
-import { subcat_mapillaryCoverage } from '../mapDataSubcategories/subcat_mapillaryCoverage.const'
 import { subcat_radinfra_bikelanes } from '../mapDataSubcategories/subcat_radinfra_bikelanes.const'
 import { subcat_radinfra_campaigns } from '../mapDataSubcategories/subcat_radinfra_campaigns.const'
 import { subcat_radinfra_currentness } from '../mapDataSubcategories/subcat_radinfra_currentness.const'
@@ -10,7 +9,6 @@ import { subcat_radinfra_lit_highway_areas } from '../mapDataSubcategories/subca
 import { subcat_radinfra_lit_path_classes } from '../mapDataSubcategories/subcat_radinfra_lit_path_classes.const'
 import { subcat_radinfra_lit_roads } from '../mapDataSubcategories/subcat_radinfra_lit_roads.const'
 import { subcat_radinfra_oneway } from '../mapDataSubcategories/subcat_radinfra_oneway.const'
-import { subcat_radinfraPlusMapillary } from '../mapDataSubcategories/subcat_radinfra_plus_mapillary.const'
 import { subcat_radinfra_smoothness } from '../mapDataSubcategories/subcat_radinfra_smoothness.const'
 import { subcat_radinfra_stats } from '../mapDataSubcategories/subcat_radinfra_stats'
 import { subcat_radinfra_trafficSigns } from '../mapDataSubcategories/subcat_radinfra_trafficSigns.const'
@@ -95,15 +93,6 @@ export const categoriesRadinfra: StaticMapDataCategory[] = [
     subcategories: [
       { ...subcat_radinfra_stats, defaultStyle: 'default' },
       // { ...subcat_poi_boundaries, defaultStyle: 'default' },
-    ],
-  },
-  {
-    id: 'radinfra_mapillary',
-    name: 'Mapillary',
-    desc: 'Straßenlevel Fotos',
-    subcategories: [
-      { ...subcat_mapillaryCoverage, defaultStyle: 'default' },
-      { ...subcat_radinfraPlusMapillary, defaultStyle: 'hidden' },
     ],
   },
 ]

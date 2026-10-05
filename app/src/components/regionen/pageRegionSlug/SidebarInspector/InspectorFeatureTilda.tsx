@@ -1,6 +1,5 @@
 import { FormattedMessage, IntlProvider } from 'react-intl'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
-import { mapillaryKeyUrl } from '@/lib/mapillaryPKeyUrl'
 import { parseSourceKeyAtlasGeo } from '../utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
 import { Disclosure } from './Disclosure/Disclosure'
 import type { InspectorFeature } from './Inspector'
@@ -9,7 +8,6 @@ import {
   useNoticeMaprouletteVisible,
 } from './InspectorFeatureSource/NoticeMaproulette'
 import { NoticeTransformedGeometry } from './InspectorFeatureSource/NoticeTransformedGeometry'
-import { MapillaryIframe } from './MapillaryIframe/MapillaryIframe'
 import { TagsTable } from './TagsTable/TagsTable'
 import { translations } from './TagsTable/translations/translations.const'
 import { extractOsmTypeIdByConfig } from './Tools/osmUrls/extractOsmTypeIdByConfig'
@@ -41,9 +39,7 @@ export const InspectorFeatureTilda = ({ sourceKey, feature }: InspectorFeature) 
   if (!sourceId) return null
 
   const showTransformedGeometryNotice = !!properties.prefix
-  const showMapillaryIframe = sourceId.includes('mapillary') && !!mapillaryKeyUrl(properties.id)
-  const hasPreTableContent =
-    showTransformedGeometryNotice || showMaprouletteNotice || showMapillaryIframe
+  const hasPreTableContent = showTransformedGeometryNotice || showMaprouletteNotice
 
   return (
     <IntlProvider messages={translations} locale="de" defaultLocale="de">
@@ -57,9 +53,6 @@ export const InspectorFeatureTilda = ({ sourceKey, feature }: InspectorFeature) 
           properties={properties}
           geometry={geometry}
         />
-
-        {/* Mapillary Source: Show preview */}
-        <MapillaryIframe visible={sourceId.includes('mapillary')} pKey={properties.id} />
 
         {hasPreTableContent && <div className="py-1" />}
 

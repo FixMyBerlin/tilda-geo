@@ -18,6 +18,7 @@ import {
   zodNotesModeParam,
 } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
 import { zodQaParam } from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
+import { streetImageryFromLegacyMapillaryCategory } from '@/server/regions/migrateLegacyMapillaryCategory.server'
 import { migrateOldLitCategory } from '@/server/regions/migrateLitCompletenessConfig.server'
 import { getRegion } from '@/server/regions/queries/getRegion.server'
 import type { TRegion } from '@/server/regions/regionConfigMapper.server'
@@ -284,6 +285,10 @@ export async function getRegionRedirectUrl(locationHref: string, regionSlug: str
       try {
         const parsedConfig = parseConfig(configParam, simplifiedConfig as MapDataCategoryConfig[])
         const migratedConfig = migrateConfigCategoryIds(parsedConfig)
+        const legacyStreetImagery = streetImageryFromLegacyMapillaryCategory(migratedConfig)
+        if (legacyStreetImagery && !u.searchParams.has(searchParamsRegistry.photos)) {
+          u.searchParams.set(searchParamsRegistry.photos, JSON.stringify(legacyStreetImagery))
+        }
         const mergedConfig = mergeCategoriesConfig({
           freshConfig,
           urlConfig: migratedConfig,

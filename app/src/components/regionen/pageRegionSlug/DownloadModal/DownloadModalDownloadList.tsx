@@ -110,8 +110,6 @@ const VectorTileUrlsSection = () => {
 
   // Get source data for each unique source ID
   sourceIds.forEach((sourceId) => {
-    // Skip mapillary_coverage
-    if (sourceId === 'mapillary_coverage') return
     try {
       const sourceData = getSourceData(sourceId as SourcesId)
       sourceMap.set(sourceId, sourceData)

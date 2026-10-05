@@ -61,7 +61,7 @@ const allTestData = [
   {
     map: {
       id: 776457396685869,
-      source: 'cat:mapillary--source:mapillary_coverage--subcat:mapillaryCoverage',
+      source: 'cat:trafficSigns--source:atlas_trafficSigns--subcat:trafficSigns',
       geometry: {
         type: 'Point',
         coordinates: [13.64569, 52.378193],
@@ -69,10 +69,10 @@ const allTestData = [
     },
     url: {
       id: 776457396685869,
-      sourceId: 'mapillary_coverage',
+      sourceId: 'atlas_trafficSigns',
       coordinates: [13.64569, 52.378193],
     },
-    query: '21|776457396685869|13.64569|52.378193',
+    query: '20|776457396685869|13.64569|52.378193',
   },
   // feature from source osm-notes
   {

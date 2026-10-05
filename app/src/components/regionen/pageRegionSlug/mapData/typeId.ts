@@ -55,10 +55,6 @@ import type {
   SubcatLitRoadsStyleIds,
 } from './mapDataSubcategories/subcat_lit_roads.const'
 import type {
-  SubcatMapillaryCoverageId,
-  SubcatMapillaryCoverageStyleIds,
-} from './mapDataSubcategories/subcat_mapillaryCoverage.const'
-import type {
   SubcatMaxspeedId,
   SubcatMaxspeedStyleIds,
 } from './mapDataSubcategories/subcat_maxspeed.const'
@@ -168,10 +164,6 @@ import type {
   SubcatRadinfraLitRoadsStyleIds,
 } from './mapDataSubcategories/subcat_radinfra_lit_roads.const'
 import type {
-  SubcatRadinfraPlusMapillaryId,
-  SubcatRadinfraPlusMapillaryStyleIds,
-} from './mapDataSubcategories/subcat_radinfra_plus_mapillary.const'
-import type {
   SubcatRadinfraStatsId,
   SubcatRadinfraStatsStyleIds,
 } from './mapDataSubcategories/subcat_radinfra_stats'
@@ -214,7 +206,6 @@ export type SubcategoryId =
   | SubcatLitBikelanesId
   | SubcatLitHighwayAreasId
   | SubcatLitPathClassesId
-  | SubcatMapillaryCoverageId
   | SubcatMaxspeedId
   | SubcatMaxspeedPlusPresenceId
   | SubcatParkingLarsAreasId
@@ -243,7 +234,6 @@ export type SubcategoryId =
   | SubcatRadinfraLitHighwayAreasId
   | SubcatRadinfraLitPathClassesId
   | SubcatRadinfraLitRoadsId
-  | SubcatRadinfraPlusMapillaryId
   | SubcatRadinfraStatsId
   | SubcatRadinfraStatsId
   | SubcatRoadsId
@@ -274,7 +264,6 @@ export type StyleId =
   | SubcatLitHighwayAreasStyleIds
   | SubcatLitPathClassesStyleIds
   | SubcatLitRoadsStyleIds
-  | SubcatMapillaryCoverageStyleIds
   | SubcatMaxspeedPlusPresenceStyleIds
   | SubcatMaxspeedStyleIds
   | SubcatParkingLarsAreasStyleIds
@@ -303,7 +292,6 @@ export type StyleId =
   | SubcatRadinfraLitHighwayAreasStyleIds
   | SubcatRadinfraLitPathClassesStyleIds
   | SubcatRadinfraLitRoadsStyleIds
-  | SubcatRadinfraPlusMapillaryStyleIds
   | SubcatRadinfraStatsStyleIds
   | SubcatRadinfraStatsStyleIds
   | SubcatRoadsPlusFootwaysStyleIds
