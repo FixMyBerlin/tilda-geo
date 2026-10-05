@@ -35,7 +35,8 @@ export const createCalculatorTerraDrawModes = () => [
           draggable: true,
           coordinates: {
             draggable: true,
-            midpoints: true,
+            // Dragging a midpoint adds the corner and moves it in one gesture.
+            midpoints: { draggable: true },
           },
         },
       },

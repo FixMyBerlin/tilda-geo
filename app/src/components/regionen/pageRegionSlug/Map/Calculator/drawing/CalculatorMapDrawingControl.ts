@@ -13,6 +13,8 @@ type Handlers = {
   onUserGeometryChange: (areas: DrawArea[]) => void
   /** The areas once the user's edit has settled; this is what belongs in the URL. */
   onUserGeometryCommit: (areas: DrawArea[]) => void
+  /** The control changed the mode on its own (after a polygon was closed). */
+  onDrawModeChange: (mode: CalculatorUrlDrawMode) => void
 }
 
 // Edits without a TerraDraw `finish` event (midpoint insert, delete) commit after this pause.
@@ -174,7 +176,18 @@ export class CalculatorMapDrawingControl {
     })
 
     // Closing a polygon and releasing a drag are settled edits; commit them right away.
-    this.draw.on('finish', () => this.flushCommit())
+    this.draw.on('finish', (_id, context) => {
+      this.flushCommit()
+      // A closed polygon is usually adjusted next, so continue in edit mode.
+      // Deferred: TerraDraw is still finishing the polygon while this event fires.
+      if (context.action === 'draw') {
+        queueMicrotask(() => {
+          if (!this.draw) return
+          this.applyDrawMode('edit')
+          this.options.getHandlers().onDrawModeChange('edit')
+        })
+      }
+    })
   }
 
   private readFinishedAreas() {
