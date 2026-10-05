@@ -152,7 +152,14 @@ export const SpaceFinderCandidatesSection = ({ variantId }: { variantId: number 
   }
 
   return (
-    <CollapsibleBox title="Auswahl" defaultOpen={selectActive || candidates.length > 0}>
+    <CollapsibleBox
+      title="Auswahl"
+      defaultOpen={selectActive || candidates.length > 0}
+      // Collapsing ends the selection like »Auswahl beenden«; the candidates stay.
+      onOpenChange={(open) => {
+        if (!open) setSelectActive(false)
+      }}
+    >
       <button
         type="button"
         onClick={toggleSelect}

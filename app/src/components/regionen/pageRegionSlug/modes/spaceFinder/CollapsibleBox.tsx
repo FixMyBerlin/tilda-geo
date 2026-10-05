@@ -32,11 +32,14 @@ export const CollapsibleBox = ({
   title,
   leading,
   defaultOpen = true,
+  onOpenChange,
   children,
 }: {
   title: React.ReactNode
   leading?: React.ReactNode
   defaultOpen?: boolean
+  /** Called when the user opens or closes the box. */
+  onOpenChange?: (open: boolean) => void
   children: React.ReactNode
 }) => {
   const [open, setOpen] = useState(defaultOpen)
@@ -45,7 +48,10 @@ export const CollapsibleBox = ({
     <Disclosure as="div" className={spaceFinderDisclosureBoxClass(open)}>
       <DisclosureButton
         as="div"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          setOpen(!open)
+          onOpenChange?.(!open)
+        }}
         className={spaceFinderDisclosureHeaderClass(open)}
       >
         {leading}
