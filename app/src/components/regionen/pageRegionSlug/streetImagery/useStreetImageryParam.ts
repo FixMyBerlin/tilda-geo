@@ -31,10 +31,7 @@ export const useStreetImageryParam = () => {
       const providers = current.providers.includes(providerId)
         ? current.providers.filter((id) => id !== providerId)
         : [...current.providers, providerId]
-      // A photo of a provider that is off has no layer on the map to show it on.
-      const photo =
-        current.photo && providers.includes(current.photo.provider) ? current.photo : undefined
-      return { ...current, providers, photo }
+      return { ...current, providers }
     })
   }
 

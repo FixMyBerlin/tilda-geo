@@ -140,9 +140,10 @@ export const sources: MapDataSource<SourcesId>[] = [
         'traffic_mode_right__if_present',
         'composit_surface_smoothness',
         'surface_color__if_present',
-        'composit_mapillary',
         'description__if_present',
         'length',
+        // Last: links to photos, not a property of the object.
+        'composit_mapillary',
       ],
     },
     // presence: { enabled: true },
@@ -206,10 +207,11 @@ export const sources: MapDataSource<SourcesId>[] = [
         'lit__if_present',
         'composit_maxspeed',
         'traffic_sign',
-        'composit_mapillary',
         'width',
         'length',
         'description__if_present',
+        // Last: links to photos, not a property of the object.
+        'composit_mapillary',
       ],
     },
     // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
@@ -269,10 +271,11 @@ export const sources: MapDataSource<SourcesId>[] = [
         'lit__if_present',
         'composit_maxspeed',
         'traffic_sign',
-        'composit_mapillary',
         'width',
         'length',
         'description__if_present',
+        // Last: links to photos, not a property of the object.
+        'composit_mapillary',
       ],
     },
     // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
@@ -426,8 +429,9 @@ export const sources: MapDataSource<SourcesId>[] = [
         'covered',
         'operator_type__if_present',
         'lit__if_present',
-        'composit_mapillary',
         'description__if_present',
+        // Last: links to photos, not a property of the object.
+        'composit_mapillary',
       ],
     },
     // presence: { enabled: false },

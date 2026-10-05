@@ -29,7 +29,9 @@ export const SourcesLayersStreetImagery = () => {
     <>
       {/* "Öffnen in …" of the layer controls: the next click on the map opens that place. */}
       <LocationPickOnMap />
-      {providers.length > 0 && (
+      {/* Without a layer on, the shown photo (e.g. opened from the inspector) still gets its
+          marker, view cone and sequence line. */}
+      {(providers.length > 0 || photo) && (
         <StreetLevelImagerySourcesAndLayers
           providers={providers}
           bbox={bbox}
