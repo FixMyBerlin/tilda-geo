@@ -403,6 +403,8 @@ const data = {
       parking: 'Lage oder Art des Parkraums im Straßenland.',
       capacity: 'Geschätzte oder explizit erfasste Anzahl von Stellplätzen.',
       orientation: 'Ausrichtung der Fahrzeuge im Straßenland zur Verkehrsrichtung.',
+      condition_category_primary:
+        'Der für die Darstellung wichtigste Wert aus `condition_category`. Reihenfolge: Sonderparkplätze (Behinderte, Taxi, Ladezone, E-Laden, Carsharing) vor Park- und Haltverboten, dann private/eingeschränkte Flächen, dann Höchstparkdauer vor Bewirtschaftung. Nur zur Darstellung; fachlich gilt `condition_category`.',
       staggered:
         'Besondere Merkmale zur Parkweise, insbesondere bei alternierendem/versetztem Parken auf Fahrbahnen, die zu schmal sind um auf beiden Seiten gleichzeitig zu parken, keine Markierungen und Beschilderungen aufweisen, die das Parken regeln und auf denen gewöhnlich wechselseitig abschnittsweise auf der einen oder anderen Straßenseite geparkt wird oder geparkt werden kann.',
       length:
@@ -432,6 +434,10 @@ const data = {
     },
     values: {
       condition_category: {
+        invalid:
+          'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
+      },
+      condition_category_primary: {
         invalid:
           'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
       },
