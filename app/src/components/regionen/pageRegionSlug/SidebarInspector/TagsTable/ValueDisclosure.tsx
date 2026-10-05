@@ -34,9 +34,9 @@ export const ValueDisclosureButton = ({
   if (hasBody === false) return <div className="w-full min-w-0">{children}</div>
 
   return (
-    <DisclosureButton className="group/button flex w-full min-w-0 cursor-pointer items-center gap-1 text-left">
+    <DisclosureButton className="group/button flex w-full min-w-0 cursor-pointer items-start gap-1 text-left">
       <div className="min-w-0 flex-1">{children}</div>
-      <div className="focus-visible:ring-opacity-75 shrink-0 rounded border border-transparent bg-gray-50 text-left text-sm font-medium group-hover/button:border-gray-500 group-hover/button:bg-yellow-100 focus:outline-none focus-visible:ring focus-visible:ring-gray-500">
+      <div className="focus-visible:ring-opacity-75 -my-px shrink-0 rounded border border-transparent bg-gray-50 text-left text-sm font-medium group-hover/button:border-gray-500 group-hover/button:bg-yellow-100 focus:outline-none focus-visible:ring focus-visible:ring-gray-500">
         <InformationCircleIcon
           data-active-icon="open" // see ValueDisclosure
           className="hidden size-4"
@@ -59,7 +59,7 @@ export const ValueDisclosurePanel = ({ children }: { children: React.ReactNode }
     <DisclosurePanel static>
       {({ open }) => (
         <MotionCollapse open={open}>
-          <div className="mt-0.5 text-xs leading-tight [&>p]:mt-1 [&>p]:first:mt-0">{children}</div>
+          <div className="mt-1 text-xs leading-tight [&>p]:mt-1 [&>p]:first:mt-0">{children}</div>
         </MotionCollapse>
       )}
     </DisclosurePanel>
