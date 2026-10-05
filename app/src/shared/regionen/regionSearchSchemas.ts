@@ -20,6 +20,7 @@ import {
   zodQaParam,
 } from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
 import { zodReviewListsModeParam } from '@/components/regionen/pageRegionSlug/modes/reviewLists/reviewListsModeParam'
+import { zodStreetImageryParam } from '@/components/regionen/pageRegionSlug/streetImagery/streetImageryParam'
 import {
   optionalSearchJson,
   optionalSearchBoolean,
@@ -85,6 +86,7 @@ export const regionSearchSchema = z.object({
   // per-child validateSearch schemas.
   [searchParamsRegistry.notes]: optionalSearchJson(zodNotesModeParam),
   [searchParamsRegistry.review]: optionalSearchJson(zodReviewListsModeParam),
+  [searchParamsRegistry.photos]: optionalSearchJson(zodStreetImageryParam),
 })
 
 export type RegionSearch = z.infer<typeof regionSearchSchema>

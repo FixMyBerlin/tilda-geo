@@ -1,3 +1,4 @@
+import { StreetImageryLocaleProvider } from '@osm-editor-kit/street-imagery-react'
 import { addProtocol, removeProtocol } from 'maplibre-gl'
 import { Protocol } from 'pmtiles'
 import { useEffect } from 'react'
@@ -23,6 +24,8 @@ import { NotesNewCenterPin } from './modes/notes/new/NotesNewCenterPin'
 import { OsmNotes } from './modes/notes/OsmNotes'
 import { SidebarInspector } from './SidebarInspector/SidebarInspector'
 import { SidebarLayerControls } from './SidebarLayerControls/SidebarLayerControls'
+import { StreetImageryPickOverlay } from './streetImagery/StreetImageryPickOverlay'
+import { StreetImageryViewer } from './streetImagery/StreetImageryViewer'
 import { DesktopOnly } from './utils/Breakpoint'
 
 export const MapInterface = () => {
@@ -45,57 +48,66 @@ export const MapInterface = () => {
   // <MapProvider> is hoisted up to LayoutRegionSlug so the mode panels (rendered in the layout's
   // <Outlet/>) share the same map instance as the one mounted here.
   return (
-    <div className="relative h-full w-full">
-      {/* Map canvas only. Desktop height is pinned to the visible box (viewport minus header)
+    <StreetImageryLocaleProvider locale="de">
+      <div className="relative h-full w-full">
+        {/* Map canvas only. Desktop height is pinned to the visible box (viewport minus header)
           rather than `h-full`: with the welcome panel closed that is exactly this container, and
           when the panel opens and shrinks `main` the map keeps its size and gets pushed down /
           clipped by the parent `overflow-hidden` instead of making MapLibre re-layout every
           animation frame. Mobile stays `fixed inset-0` for edge-to-edge under browser chrome. */}
-      <div className="fixed inset-0 z-0 sm:absolute sm:inset-x-0 sm:top-0 sm:h-[calc(var(--app-height,100dvh)-var(--app-header-height))] sm:w-full">
-        <div className="relative h-full w-full">
-          <RegionMap />
-          <NotesNewCenterPin />
+        <div className="fixed inset-0 z-0 sm:absolute sm:inset-x-0 sm:top-0 sm:h-[calc(var(--app-height,100dvh)-var(--app-header-height))] sm:w-full">
+          <div className="relative h-full w-full">
+            <RegionMap />
+            <NotesNewCenterPin />
+            <StreetImageryPickOverlay />
+          </div>
         </div>
-      </div>
 
-      <MobileMapHeader />
-      {/* Top-right: search above glued zoom ± (one stack, not a side-by-side row).
+        <MobileMapHeader />
+        {/* Top-right: search above glued zoom ± (one stack, not a side-by-side row).
           Mobile search is in MobileMapHeader; zoom/compass only when 3D is on. */}
-      <DesktopOnly>
-        <div className={mapOverlayTopRightControlsClassName}>
-          <PlaceSearch />
-          <MapNavigationButtons showCompass={is3dActive} />
-        </div>
-      </DesktopOnly>
-      {!isDesktop && is3dActive && (
-        <div className="pointer-events-none absolute top-[calc(var(--map-chrome-top-inset)+3rem)] right-[calc(env(safe-area-inset-right)+0.5rem)] z-20 *:pointer-events-auto">
-          <MapNavigationButtons showCompass />
-        </div>
-      )}
-      <OsmNotes />
-      <SidebarLayerControls />
-      <SidebarInspector />
-      <div className={mapOverlayBottomRightControlsClassName}>
-        {isDesktop ? (
-          <>
-            <div className="absolute right-full bottom-0 mr-2 flex flex-wrap items-end justify-end">
-              <BackgroundLegend />
-            </div>
-            <div className={mapOverlayControlStackClassName}>
-              <LoadingIndicator />
-              <DebugButton />
-              <RegionDataModals />
-              <SelectBackground />
-            </div>
-          </>
-        ) : (
-          <>
-            <LoadingIndicator />
-            <SelectBackground />
-            <MobileLayerButton />
-          </>
+        <DesktopOnly>
+          <div className={mapOverlayTopRightControlsClassName}>
+            <PlaceSearch />
+            <MapNavigationButtons showCompass={is3dActive} />
+          </div>
+        </DesktopOnly>
+        {!isDesktop && is3dActive && (
+          <div className="pointer-events-none absolute top-[calc(var(--map-chrome-top-inset)+3rem)] right-[calc(env(safe-area-inset-right)+0.5rem)] z-20 *:pointer-events-auto">
+            <MapNavigationButtons showCompass />
+          </div>
         )}
+        <OsmNotes />
+        <SidebarLayerControls />
+        <SidebarInspector />
+        {/* Floats above the map and its controls; the user can move it out of the way. The box is
+            the package's; these classes give it the look of our sheets (`mapOverlaySheetClassName`:
+            radius, hairline, shadow) in place of its own. */}
+        <div className="pointer-events-none absolute inset-0 z-30 *:pointer-events-auto [&>section]:rounded [&>section]:shadow-[0_4px_6px_-1px_rgb(0_0_0/0.18),0_2px_4px_-2px_rgb(0_0_0/0.15)] [&>section]:ring-0 [&>section]:outline-1 [&>section]:outline-gray-950/15">
+          <StreetImageryViewer />
+        </div>
+        <div className={mapOverlayBottomRightControlsClassName}>
+          {isDesktop ? (
+            <>
+              <div className="absolute right-full bottom-0 mr-2 flex flex-wrap items-end justify-end">
+                <BackgroundLegend />
+              </div>
+              <div className={mapOverlayControlStackClassName}>
+                <LoadingIndicator />
+                <DebugButton />
+                <RegionDataModals />
+                <SelectBackground />
+              </div>
+            </>
+          ) : (
+            <>
+              <LoadingIndicator />
+              <SelectBackground />
+              <MobileLayerButton />
+            </>
+          )}
+        </div>
       </div>
-    </div>
+    </StreetImageryLocaleProvider>
   )
 }

@@ -1,3 +1,7 @@
+import {
+  streetImageryInteractiveLayerIds,
+  useArmedLocationOpenerId,
+} from '@osm-editor-kit/street-imagery-react'
 import { bbox, bboxPolygon, buffer } from '@turf/turf'
 import { differenceBy, uniqBy } from 'es-toolkit/compat'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -40,6 +44,11 @@ import { ReviewMapDrawing } from '../modes/reviewLists/drawing/ReviewMapDrawing'
 import { useReviewDrawActive } from '../modes/reviewLists/useReviewDrawActive'
 import { useCurrentMode } from '../modes/useCurrentMode'
 import { useRegion } from '../regionUtils/useRegion'
+import {
+  clickedStreetImageryPhoto,
+  isStreetImageryFeature,
+} from '../streetImagery/streetImageryClick'
+import { useStreetImageryParam } from '../streetImagery/useStreetImageryParam'
 import { Calculator } from './Calculator/Calculator'
 import { Map3dTouchRotation } from './Map3dTouchRotation'
 import { SearchResultLayers } from './Search/SearchResultLayers'
@@ -53,6 +62,7 @@ import { SourcesLayersOsmNotes } from './SourcesAndLayers/SourcesLayersOsmNotes'
 import { SourcesLayersQa } from './SourcesAndLayers/SourcesLayersQa'
 import { SourcesLayersReviewEntries } from './SourcesAndLayers/SourcesLayersReviewEntries'
 import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersStaticDatasets'
+import { SourcesLayersStreetImagery } from './SourcesAndLayers/SourcesLayersStreetImagery'
 import { SourcesLayersSystemDatasets } from './SourcesAndLayers/SourcesLayersSystemDatasets'
 import { TerrainProfileHoverMarkerLayer } from './SourcesAndLayers/TerrainProfileHoverMarkerLayer'
 import { UpdateFeatureState } from './UpdateFeatureState'
@@ -109,10 +119,20 @@ export const RegionMap = () => {
   const calculatorDrawActive = useMapCalculatorDrawActive()
   const notesComposeActive = useNotesComposeActive()
   const reviewDrawActive = useReviewDrawActive()
+  const { providers: streetImageryProviders, setPhoto: setStreetImageryPhoto } =
+    useStreetImageryParam()
+  // "Öffnen in …" is armed: the next click opens that place (<LocationPickOnMap>), nothing else.
+  const pickingLocation = useArmedLocationOpenerId() != null
 
   const handleClick = ({ features, ...event }: MapLayerMouseEvent) => {
     if (reviewDrawActive) return
+    if (pickingLocation) return
     if (containMaskFeature(features)) {
+      return
+    }
+    const photo = clickedStreetImageryPhoto(features)
+    if (photo) {
+      setStreetImageryPhoto(photo)
       return
     }
     if (!isProd) {
@@ -191,8 +211,9 @@ export const RegionMap = () => {
   const handleMouseMove = ({ features }: MapLayerMouseEvent) => {
     features = extractInteractiveFeatures(mapParam, features)
     updateCursor(features)
-    updateHover(features)
-    updateMapListHover(features)
+    const tildaFeatures = features.filter((feature) => !isStreetImageryFeature(feature))
+    updateHover(tildaFeatures)
+    updateMapListHover(tildaFeatures)
   }
 
   const handleMouseLeave = (_e: MapLayerMouseEvent) => {
@@ -253,7 +274,10 @@ export const RegionMap = () => {
   const interactiveLayerIds =
     calculatorDrawActive || notesComposeActive || reviewDrawActive
       ? NO_INTERACTIVE_LAYERS
-      : computedInteractiveLayerIds
+      : [
+          ...computedInteractiveLayerIds,
+          ...streetImageryInteractiveLayerIds(streetImageryProviders),
+        ]
 
   if (!mapParam) {
     return null
@@ -298,7 +322,7 @@ export const RegionMap = () => {
       interactiveLayerIds={interactiveLayerIds}
       // onMouseMove={}
       // onLoad={handleInspect}
-      cursor={cursorStyle}
+      cursor={pickingLocation ? 'crosshair' : cursorStyle}
       onMove={notifyMapViewChanged}
       onResize={notifyMapViewChanged}
       onMoveEnd={handleMoveEnd}
@@ -322,6 +346,7 @@ export const RegionMap = () => {
       <SourcesLayersSystemDatasets />
       <SourcesLayersAtlasGeo />
       <SourcesLayersStaticDatasets />
+      <SourcesLayersStreetImagery />
       <SourcesLayersOsmNotes />
       <SourcesLayersInternalNotes />
       <SourcesLayersQa />
