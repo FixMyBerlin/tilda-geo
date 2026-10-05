@@ -140,7 +140,10 @@ export const RegionMap = () => {
       // Allow multi select with Control (Windows) / Command (Mac) — inspector domain only
       multiselect: event.originalEvent.ctrlKey || event.originalEvent.metaKey,
     })
-    replaceInspectorFeatures(nextInspectorFeatures)
+    replaceInspectorFeatures({
+      features: nextInspectorFeatures,
+      clickLngLat: [event.lngLat.lng, event.lngLat.lat],
+    })
     setFeaturesParam(nextUrlFeatures.length > 0 ? nextUrlFeatures : null)
     clearHoveredListItem()
   }

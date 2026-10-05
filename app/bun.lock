@@ -16,6 +16,7 @@
         "@headlessui/react": "2.2.10",
         "@json2csv/plainjs": "7.0.7",
         "@modelcontextprotocol/sdk": "1.29.0",
+        "@osm-editor-kit/street-imagery": "0.1.0-alpha.7",
         "@osm-traffic-signs/converter": "0.6.0",
         "@prisma/adapter-pg": "7.8.0",
         "@prisma/client": "7.8.0",
@@ -516,6 +517,8 @@
     "@oozcitak/util": ["@oozcitak/util@10.0.0", "", {}, "sha512-hAX0pT/73190NLqBPPWSdBVGtbY6VOhWYK3qqHqtXQ1gK7kS2yz4+ivsN07hpJ6I3aeMtKP6J6npsEKOAzuTLA=="],
 
     "@opentelemetry/semantic-conventions": ["@opentelemetry/semantic-conventions@1.40.0", "", {}, "sha512-cifvXDhcqMwwTlTK04GBNeIe7yyo28Mfby85QXFe1Yk8nmi36Ab/5UQwptOx84SsoGNRg+EVSjwzfSZMy6pmlw=="],
+
+    "@osm-editor-kit/street-imagery": ["@osm-editor-kit/street-imagery@0.1.0-alpha.7", "", { "dependencies": { "@mapbox/vector-tile": "^3.0.0", "date-fns": "^4.4.0", "pbf": "^5.1.0" } }, "sha512-hPDOjjU1s5LbHWlopmM+9xQpxnz0j696/9lgRERNuUm601TlBna5Xt9Mau1dLtzHxS6zfWQaiBT2vVpC6X43Tg=="],
 
     "@osm-traffic-signs/converter": ["@osm-traffic-signs/converter@0.6.0", "", { "dependencies": { "opening_hours": "^3.12.0" } }, "sha512-KjMOEv3qsnC5lzMK1CS9sdA3xTjEnabVshWxgAan0envgyvpVYeZIIvhv6aUNUT9mlg/LLdZs7aEKcnXG5Lgmw=="],
 

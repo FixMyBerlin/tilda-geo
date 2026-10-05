@@ -1,5 +1,4 @@
 import { Fragment } from 'react'
-import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
 import type {
   MapDataOsmIdConfig,
   MapDataSourceInspectorEditor,
@@ -11,7 +10,6 @@ import { editorUrl } from './osmUrls/editorUrl'
 import { extractOsmTypeIdByConfig } from './osmUrls/extractOsmTypeIdByConfig'
 import {
   historyUrl,
-  mapillaryUrl,
   osmEditIdUrl,
   osmEditJosmUrl,
   osmEditKyleKiwiIdUrl,
@@ -20,6 +18,7 @@ import {
 } from './osmUrls/osmUrls'
 import { ToolsLinkNewInternalNote } from './ToolsLinkNewInternalNote'
 import { ToolsLinkNewOsmNote } from './ToolsLinkNewOsmNote'
+import { ToolsLinksImagery } from './ToolsLinksImagery'
 
 type ToolsLinksProps = {
   feature: InspectorFeature['feature']
@@ -28,7 +27,6 @@ type ToolsLinksProps = {
 }
 
 export const ToolsLinks = ({ feature, editors, osmIdConfig }: ToolsLinksProps) => {
-  const { mapParam } = useMapParam()
   const osmTypeId = extractOsmTypeIdByConfig(feature.properties, osmIdConfig)
 
   const osmUrlHref = osmOrgUrl(osmTypeId)
@@ -36,7 +34,6 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: ToolsLinksProps) =
   const osmEditJosmUrlHref = osmEditJosmUrl(osmTypeId)
   const osmEditKyleKiwiIdUrlHref = osmEditKyleKiwiIdUrl(osmTypeId)
   const osmEditRapidUrlHref = osmEditRapidUrl(osmTypeId)
-  const mapillaryUrlHref = mapillaryUrl(feature.geometry, { zoom: mapParam.zoom })
 
   const changesetLinks = [
     {
@@ -100,11 +97,7 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: ToolsLinksProps) =
             Bearbeiten (Rapid) (Staging only)
           </Link>
         )}
-        {mapillaryUrlHref && (
-          <Link blank button href={mapillaryUrlHref}>
-            Mapillary
-          </Link>
-        )}
+        <ToolsLinksImagery geometry={feature.geometry} />
         <ToolsLinkNewOsmNote
           properties={feature.properties}
           geometry={feature.geometry}

@@ -113,6 +113,7 @@
     "@headlessui/react": "2.2.10",
     "@json2csv/plainjs": "7.0.7",
     "@modelcontextprotocol/sdk": "1.29.0",
+    "@osm-editor-kit/street-imagery": "0.1.0-alpha.7",
     "@osm-traffic-signs/converter": "0.6.0",
     "@prisma/adapter-pg": "7.8.0",
     "@prisma/client": "7.8.0",
