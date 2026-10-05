@@ -17,6 +17,7 @@ import { useSpaceFinderBoundaryState } from '../../hooks/mapState/useSpaceFinder
 import { modePanelMutedClassName } from '../modePanel.const'
 import { CollapsibleBox } from './CollapsibleBox'
 import { FactorEditorPanel } from './factors/FactorEditorPanel'
+import { DEFAULT_FACTOR_TEMPLATE } from './factors/spaceFinderDefaults'
 import { InfoTooltip } from './InfoTooltip'
 import { JobStatusBadge } from './run/JobStatusBadge'
 import { ScoreModeSwitcher } from './ScoreModeSwitcher'
@@ -131,9 +132,12 @@ const UserObstaclesToggle = () => {
 const MinAreaFilterForm = ({
   variantId,
   savedMinArea,
+  clusterMinScore,
 }: {
   variantId: number
   savedMinArea: number
+  /** Score from which hexagons form a cluster in the shown run (`min_score_threshold`). */
+  clusterMinScore: number | undefined
 }) => {
   const queryClient = useQueryClient()
   const { spaceFinderMode, setSpaceFinderModeParam } = useSpaceFinderModeParam()
@@ -187,15 +191,25 @@ const MinAreaFilterForm = ({
 
   return (
     <div className="flex items-center justify-between gap-2 rounded border border-gray-200 px-2.5 py-2 text-sm">
-      <label className="flex items-center gap-2 font-medium text-gray-800">
-        <input
-          type="checkbox"
-          checked={checked}
-          onChange={(e) => setFilterOn(e.target.checked)}
-          className="rounded border-gray-300"
-        />
-        Gesuchte Fläche (m²)
-      </label>
+      <span className="flex items-center gap-1">
+        <label className="flex items-center gap-2 font-medium text-gray-800">
+          <input
+            type="checkbox"
+            checked={checked}
+            onChange={(e) => setFilterOn(e.target.checked)}
+            className="rounded border-gray-300"
+          />
+          Gesuchte Fläche (m²)
+        </label>
+        {/* Outside the label so opening the tooltip does not toggle the checkbox. */}
+        <InfoTooltip>
+          Hebt zusammenhängende Flächen hervor, die mindestens so groß sind wie angegeben. Als
+          zusammenhängend zählen benachbarte Hexagone ab dem „Mindest-Score (Flächensuche)“
+          {clusterMinScore != null ? ` (${clusterMinScore})` : ''} aus den Faktoren. Alle anderen
+          Hexagone werden abgedunkelt. Nur eine Anzeige in der Karte — die Berechnung ändert sich
+          dadurch nicht.
+        </InfoTooltip>
+      </span>
       <input
         type="number"
         min={0}
@@ -216,9 +230,11 @@ const MinAreaFilterForm = ({
   )
 }
 
-const MinAreaFilter = (props: { variantId: number; savedMinArea: number }) => (
-  <MinAreaFilterForm key={props.variantId} {...props} />
-)
+const MinAreaFilter = (props: {
+  variantId: number
+  savedMinArea: number
+  clusterMinScore: number | undefined
+}) => <MinAreaFilterForm key={props.variantId} {...props} />
 
 type PlanningVariantDetail = Awaited<ReturnType<typeof getPlanningVariantFn>>
 
@@ -265,7 +281,14 @@ const ResultSection = ({ variant }: { variant: PlanningVariantDetail }) => {
 
   return (
     <CollapsibleBox title="Anzeige">
-      <MinAreaFilter variantId={variant.id} savedMinArea={factorConfig?.min_area_m2 ?? 0} />
+      <MinAreaFilter
+        variantId={variant.id}
+        savedMinArea={factorConfig?.min_area_m2 ?? 0}
+        // The clusters on the map were built with the run's threshold, not the current factors.
+        clusterMinScore={
+          lastRunConfig?.min_score_threshold ?? DEFAULT_FACTOR_TEMPLATE.min_score_threshold
+        }
+      />
       <ScoreModeSwitcher />
       {(latestRun?.vegCount ?? 0) > 0 && <VegetationToggle />}
       {factorConfig?.exclude_carriageways && <CarriagewaysToggle />}
