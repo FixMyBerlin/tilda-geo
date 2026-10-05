@@ -40,8 +40,8 @@ type Props = {
   /** Keep the collection picker visible and non-collapsible (e.g. no Prüfliste exists yet). */
   collectionAlwaysOpen?: boolean
   /**
-   * Second header row directly below the header, without a gap (e.g. Flächenfinder Varianten).
-   * Brings its own colours and bottom border. Hidden in detail view.
+   * Second header row directly below the header, separated by the header's white hairline (e.g.
+   * Flächenfinder Varianten). Brings its own colours and bottom border. Hidden in detail view.
    */
   subHeader?: ReactNode
   filter?: ReactNode
@@ -91,7 +91,7 @@ export const ModePanel = ({
       <header
         className={twJoin(
           isDetail && 'flex items-stretch',
-          !showSubHeader && 'border-b border-white/80',
+          'border-b border-white/80',
           accent.className,
           accent.invertedFgClassName,
         )}
