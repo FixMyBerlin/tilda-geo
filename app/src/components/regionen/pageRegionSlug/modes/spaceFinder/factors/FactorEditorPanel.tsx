@@ -30,6 +30,7 @@ import {
   FACTOR_HELP,
   FACTOR_PARAMS,
   GROUP_HELP,
+  MIN_SCORE_THRESHOLD_LABEL,
   PARKING_DATA_DEPENDENT_KEYS,
   WEIGHT_GROUPS,
   WEIGHT_LABELS,
@@ -496,7 +497,7 @@ const FactorFields = ({
         <div className="mt-1 space-y-2">
           <label className="flex items-center justify-between gap-2 text-xs text-gray-600">
             <div className="flex items-center gap-1">
-              Mindest-Score (Flächensuche)
+              {MIN_SCORE_THRESHOLD_LABEL}
               <InfoTooltip>{FACTOR_HELP.min_score_threshold}</InfoTooltip>
             </div>
             <input

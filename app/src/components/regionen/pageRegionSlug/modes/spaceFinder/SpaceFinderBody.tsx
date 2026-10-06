@@ -17,7 +17,11 @@ import { useSpaceFinderBoundaryState } from '../../hooks/mapState/useSpaceFinder
 import { modePanelMutedClassName } from '../modePanel.const'
 import { CollapsibleBox } from './CollapsibleBox'
 import { FactorEditorPanel } from './factors/FactorEditorPanel'
-import { DEFAULT_FACTOR_TEMPLATE } from './factors/spaceFinderDefaults'
+import {
+  DEFAULT_FACTOR_TEMPLATE,
+  MIN_AREA_FILTER_LABEL,
+  MIN_SCORE_THRESHOLD_LABEL,
+} from './factors/spaceFinderDefaults'
 import { InfoTooltip } from './InfoTooltip'
 import { JobStatusBadge } from './run/JobStatusBadge'
 import { ScoreModeSwitcher } from './ScoreModeSwitcher'
@@ -199,12 +203,12 @@ const MinAreaFilterForm = ({
             onChange={(e) => setFilterOn(e.target.checked)}
             className="rounded border-gray-300"
           />
-          Gesuchte Fläche (m²)
+          {MIN_AREA_FILTER_LABEL}
         </label>
         {/* Outside the label so opening the tooltip does not toggle the checkbox. */}
         <InfoTooltip>
           Hebt zusammenhängende Flächen hervor, die mindestens so groß sind wie angegeben. Als
-          zusammenhängend zählen benachbarte Hexagone ab dem „Mindest-Score (Flächensuche)“
+          zusammenhängend zählen benachbarte Hexagone ab dem „{MIN_SCORE_THRESHOLD_LABEL}“
           {clusterMinScore != null ? ` (${clusterMinScore})` : ''} aus den Faktoren. Alle anderen
           Hexagone werden abgedunkelt. Nur eine Anzeige in der Karte — die Berechnung ändert sich
           dadurch nicht.
