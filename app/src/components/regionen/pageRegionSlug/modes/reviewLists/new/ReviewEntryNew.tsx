@@ -4,8 +4,9 @@ import { modePanelMutedClassName } from '../../modePanel.const'
 export const ReviewEntryNew = () => (
   <div className="px-4 py-3">
     <p className={modePanelMutedClassName}>
-      Wählen Sie Punkt, Linie oder Fläche und zeichnen Sie den neuen Eintrag auf der Karte. Der
-      Eintrag wird gespeichert, sobald die Zeichnung fertig ist.
+      Wählen Sie Punkt, Linie oder Fläche und zeichnen Sie den neuen Eintrag auf der Karte. Jeder
+      Klick setzt einen Eckpunkt; Linien und Flächen schließen Sie mit einem Doppelklick oder über
+      „Fertig“ ab. Der Eintrag wird gespeichert, sobald die Zeichnung fertig ist.
     </p>
   </div>
 )

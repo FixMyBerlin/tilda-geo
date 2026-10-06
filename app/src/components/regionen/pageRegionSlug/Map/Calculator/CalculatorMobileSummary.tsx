@@ -4,9 +4,9 @@ import { MobileBottomSheet } from '@/components/regionen/pageRegionSlug/mobile/M
 import { AnimatedNumber } from '@/components/shared/motion/AnimatedNumber'
 
 type Props = {
-  /** Metric label shown above the number (or a generic title when no areas). */
+  /** Metric label shown above the number. */
   label: string
-  /** Raw total (animated count-up), or null to show the "draw areas" prompt instead. */
+  /** Raw total (animated count-up), or null when the metric has no values. */
   total: number | null
   /** Formats the total for display. */
   formatTotal: (value: number) => string
@@ -29,7 +29,7 @@ export const CalculatorMobileSummary = ({ label, total, formatTotal, children }:
         type="button"
         onClick={() => setOpen(true)}
         aria-label="Summierung anzeigen"
-        className="absolute top-29 left-2 z-1000 flex max-w-[75vw] items-center gap-3 rounded-md bg-fuchsia-800/90 py-1.5 pr-2 pl-3 text-left text-white shadow-xl active:bg-fuchsia-700"
+        className="absolute top-26 left-2 z-1000 flex max-w-[75vw] items-center gap-3 rounded-md bg-fuchsia-800/90 py-1.5 pr-2 pl-3 text-left text-white shadow-xl active:bg-fuchsia-700"
       >
         <span className="flex min-w-0 flex-col items-start">
           <span className="truncate text-[0.6rem] font-semibold tracking-wide text-white/80 uppercase">
@@ -40,7 +40,7 @@ export const CalculatorMobileSummary = ({ label, total, formatTotal, children }:
               <AnimatedNumber value={total} format={formatTotal} />
             </span>
           ) : (
-            <span className="text-xs">Flächen zeichnen</span>
+            <span className="text-xs">Keine Werte</span>
           )}
         </span>
         <ChevronRightIcon className="size-5 shrink-0 text-white/70" aria-hidden="true" />

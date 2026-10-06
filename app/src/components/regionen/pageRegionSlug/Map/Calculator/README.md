@@ -1,13 +1,14 @@
 # Calculator map drawing
 
-Drawing uses [TerraDraw](https://github.com/JamesLMilner/terra-draw) with the MapLibre adapter (`terra-draw-maplibre-gl-adapter`), mounted via `react-map-gl` `useControl` (see `drawing/CalculatorMapDrawingControl.ts`).
+Drawing uses [`@osm-editor-kit/react-map-gl-draw`](https://github.com/osm-editor-kit/react-map-gl-draw): the areas are a controlled value, the layers are declarative `<Source>`/`<Layer>`, and pointer gestures arrive through `<Map>` props.
 
-## URL state
+- `drawing/useCalculatorDraw.ts` — the drawing surface (options, limits). `RegionMap` spreads its `mapProps` onto `<Map>`.
+- `drawing/CalculatorMapDrawing.tsx` — `<DrawLayers>`, the area labels and the toolbar.
+- `drawing/calculatorDrawStyles.ts` — layer styles.
 
-- `draw` — jsurl-encoded list of `DrawArea` polygons (see `useDrawSession.ts`).
-- Draw mode (`polygon` / `edit`) is local React UI state in `CalculatorControls`.
+## State
 
-## References
+- `draw` URL param — jsurl-encoded list of `DrawArea` polygons (see `useDrawSession.ts`). Updated once per finished edit.
+- Tool, selection and a drag in progress live in the package's own store. `useCalculatorLiveAreas()` returns the areas including a running drag, so the result follows the pointer.
 
-- React Map GL `useControl`: https://visgl.github.io/react-map-gl/docs/api-reference/use-control
-- TerraDraw styling: https://github.com/JamesLMilner/terra-draw/blob/main/guides/5.STYLING.md
+There are no draw/edit modes. The first click starts an area; afterwards it can be changed directly. A further area starts from the plus button.

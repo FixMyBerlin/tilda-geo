@@ -117,7 +117,6 @@ export const CalculatorOutput = ({
   const hasAreas = calculatorAreasWithFeatures.length > 0
 
   const breakdownData: CalculatorBreakdownData = {
-    hasAreas,
     displayName,
     sumKeys,
     sourceId,
@@ -134,27 +133,29 @@ export const CalculatorOutput = ({
     formatNumber: (value) => numberFormatter.format(value),
     formatMetricValue,
   }
+  // Before the first area the drawing toolbar shows a hint on the map instead.
+  if (!hasAreas) return null
+
   const breakdown = <CalculatorBreakdown data={breakdownData} />
 
   // Headline for the mobile pill: combined across areas, else the single area's total.
-  const total =
-    summary && hasAreas
-      ? summary.byArea.length > 1
-        ? summary.combined.total
-        : (summary.byArea[0]?.summary.total ?? 0)
-      : null
+  const total = summary
+    ? summary.byArea.length > 1
+      ? summary.combined.total
+      : (summary.byArea[0]?.summary.total ?? 0)
+    : null
 
   return (
     <IntlProvider messages={translations} locale="de" defaultLocale="de">
       {isDesktop ? (
         // Desktop: inline panel next to the sidebar.
-        <section className="absolute top-18.75 left-67.5 z-1000 flex min-h-16.25 max-w-65 min-w-0 rounded-md bg-fuchsia-800/90 px-2 py-2 text-white shadow-xl">
+        <section className="absolute top-14.5 left-67.5 z-1000 flex max-w-65 min-w-0 rounded-md bg-fuchsia-800/90 px-2 py-2 text-white shadow-xl">
           {breakdown}
         </section>
       ) : (
         // Mobile: compact total pill that opens the breakdown in a bottom sheet.
         <CalculatorMobileSummary
-          label={hasAreas ? selectedMetricLabel : 'Summierung'}
+          label={selectedMetricLabel}
           total={total}
           formatTotal={(value) => numberFormatter.format(value)}
         >

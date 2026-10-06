@@ -41,6 +41,7 @@ import { listItemIdFromMapFeatures } from '../modes/modeListItemId'
 import { NotesNewRelatedGeometry } from '../modes/notes/new/NotesNewRelatedGeometry'
 import { useNotesComposeActive } from '../modes/notes/useNotesComposeActive'
 import { ReviewMapDrawing } from '../modes/reviewLists/drawing/ReviewMapDrawing'
+import { useReviewDraw } from '../modes/reviewLists/drawing/useReviewDraw'
 import { useReviewDrawActive } from '../modes/reviewLists/useReviewDrawActive'
 import { useCurrentMode } from '../modes/useCurrentMode'
 import { useRegion } from '../regionUtils/useRegion'
@@ -50,6 +51,7 @@ import {
 } from '../streetImagery/streetImageryClick'
 import { useStreetImageryParam } from '../streetImagery/useStreetImageryParam'
 import { Calculator } from './Calculator/Calculator'
+import { useCalculatorDraw } from './Calculator/drawing/useCalculatorDraw'
 import { Map3dTouchRotation } from './Map3dTouchRotation'
 import { SearchResultLayers } from './Search/SearchResultLayers'
 import { MAPTERHORN_DEM_SOURCE_ID } from './SourcesAndLayers/mapterhornDem'
@@ -117,6 +119,8 @@ export const RegionMap = () => {
 
   const inspectorFeatures = useMapInspectorFeatures()
   const calculatorDrawActive = useMapCalculatorDrawActive()
+  const calculatorDraw = useCalculatorDraw()
+  const { draw: reviewDraw } = useReviewDraw()
   const notesComposeActive = useNotesComposeActive()
   const reviewDrawActive = useReviewDrawActive()
   const { providers: streetImageryProviders, setPhoto: setStreetImageryPhoto } =
@@ -208,7 +212,16 @@ export const RegionMap = () => {
     else clearHoveredMapItem()
   }
 
-  const handleMouseMove = ({ features }: MapLayerMouseEvent) => {
+  // Empty unless a drawing surface is active; then pointer gestures on the map belong to it.
+  const {
+    cursor: drawCursor,
+    onMouseMove: drawOnMouseMove,
+    ...drawMapProps
+  } = { ...calculatorDraw.mapProps, ...reviewDraw.mapProps }
+
+  const handleMouseMove = (event: MapLayerMouseEvent) => {
+    drawOnMouseMove?.(event)
+    let { features } = event
     features = extractInteractiveFeatures(mapParam, features)
     updateCursor(features)
     const tildaFeatures = features.filter((feature) => !isStreetImageryFeature(feature))
@@ -322,7 +335,7 @@ export const RegionMap = () => {
       interactiveLayerIds={interactiveLayerIds}
       // onMouseMove={}
       // onLoad={handleInspect}
-      cursor={pickingLocation ? 'crosshair' : cursorStyle}
+      cursor={pickingLocation ? 'crosshair' : (drawCursor ?? cursorStyle)}
       onMove={notifyMapViewChanged}
       onResize={notifyMapViewChanged}
       onMoveEnd={handleMoveEnd}
@@ -334,6 +347,7 @@ export const RegionMap = () => {
       onData={startMapDataLoading}
       onIdle={finishMapDataLoading}
       doubleClickZoom={true}
+      {...drawMapProps}
       terrain={is3dActive ? { source: MAPTERHORN_DEM_SOURCE_ID, exaggeration: 1.5 } : undefined}
       minZoom={SIMPLIFY_MIN_ZOOM}
       attributionControl={false}

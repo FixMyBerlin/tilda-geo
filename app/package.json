@@ -113,6 +113,7 @@
     "@headlessui/react": "2.2.10",
     "@json2csv/plainjs": "7.0.7",
     "@modelcontextprotocol/sdk": "1.31.0",
+    "@osm-editor-kit/react-map-gl-draw": "0.0.2",
     "@osm-editor-kit/street-imagery": "0.1.0-alpha.8",
     "@osm-editor-kit/street-imagery-react": "0.1.0-alpha.10",
     "@osm-traffic-signs/converter": "0.6.0",
@@ -169,8 +170,6 @@
     "slugify": "1.6.9",
     "sonner": "^2.0.7",
     "tailwind-merge": "3.6.0",
-    "terra-draw": "1.31.2",
-    "terra-draw-maplibre-gl-adapter": "1.4.1",
     "tiny-invariant": "1.3.3",
     "zod": "4.4.3",
     "zustand": "5.0.14"

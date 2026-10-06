@@ -1,15 +1,14 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import {
   useMapActions,
   useMapBounds,
   useMapLoaded,
   useShowMapLoadingIndicator,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
-import { useDrawSession } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useDrawSession'
 import type { MapDataSourceCalculator } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { CalculatorMapDrawing } from './drawing/CalculatorMapDrawing'
-import type { CalculatorUrlDrawMode } from './drawing/calculatorUrlDrawMode'
 import type { DrawArea } from './drawing/drawAreaTypes'
+import { useCalculatorLiveAreas } from './drawing/useCalculatorDraw'
 import { useUpdateCalculation } from './utils/useUpdateCalculation'
 
 type Props = {
@@ -28,35 +27,24 @@ const buildCalculationSignature = (
   })
 
 export const CalculatorControls = ({ queryLayers }: Props) => {
-  const { drawAreas, setDrawAreas } = useDrawSession()
+  // Includes a drag in progress, so the result follows the pointer.
+  const liveAreas = useCalculatorLiveAreas()
   const { updateCalculation } = useUpdateCalculation()
   const mapBounds = useMapBounds()
   const mapLoaded = useMapLoaded()
   const showMapLoadingIndicator = useShowMapLoadingIndicator()
   const { setCalculatorDrawActive } = useMapActions()
   const lastCalculationSignatureRef = useRef<string | null>(null)
-  const [drawMode, setDrawMode] = useState<CalculatorUrlDrawMode>(() =>
-    drawAreas.length > 0 ? 'edit' : 'polygon',
-  )
 
   useEffect(
     function flagCalculatorDrawActiveWhileMounted() {
-      // While the calculator draw tool is on screen (polygon or edit), map clicks
-      // should not open the feature inspector (see RegionMap.handleClick).
+      // While the calculator draw tool is on screen, map clicks belong to drawing and
+      // should not open the feature inspector (see RegionMap).
       setCalculatorDrawActive(true)
       return () => setCalculatorDrawActive(false)
     },
     [setCalculatorDrawActive],
   )
-
-  const handleUserGeometry = (next: DrawArea[]) => {
-    updateCalculation(queryLayers, next)
-    lastCalculationSignatureRef.current = buildCalculationSignature(queryLayers, next, mapBounds)
-  }
-
-  const handleUserDrawModeChange = (mode: CalculatorUrlDrawMode) => {
-    setDrawMode(mode)
-  }
 
   useEffect(
     function updateCalculatorAfterMapStateChange() {
@@ -68,23 +56,19 @@ export const CalculatorControls = ({ queryLayers }: Props) => {
         return
       }
 
-      const calculationSignature = buildCalculationSignature(queryLayers, drawAreas, mapBounds)
+      const calculationSignature = buildCalculationSignature(queryLayers, liveAreas, mapBounds)
       if (lastCalculationSignatureRef.current === calculationSignature) return
 
-      updateCalculation(queryLayers, drawAreas)
+      updateCalculation(queryLayers, liveAreas)
       lastCalculationSignatureRef.current = calculationSignature
     },
-    [mapLoaded, showMapLoadingIndicator, queryLayers, drawAreas, mapBounds, updateCalculation],
+    [mapLoaded, showMapLoadingIndicator, queryLayers, liveAreas, mapBounds, updateCalculation],
   )
 
   return (
     <CalculatorMapDrawing
-      drawAreas={drawAreas}
-      drawMode={drawMode}
-      getFeatureLabel={({ index }) => (drawAreas.length > 1 ? `Fläche ${index + 1}` : undefined)}
-      onUserGeometryChange={handleUserGeometry}
-      onUserGeometryCommit={setDrawAreas}
-      onUserDrawModeChange={handleUserDrawModeChange}
+      areas={liveAreas}
+      getFeatureLabel={({ index }) => (liveAreas.length > 1 ? `Fläche ${index + 1}` : undefined)}
     />
   )
 }

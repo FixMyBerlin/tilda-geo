@@ -90,8 +90,10 @@ export const ReviewEntryDetail = ({ entryId }: Props) => {
               />
               {REVIEW_ENTRY_MOVE_COLOR_LABEL}
             </span>
-            ). Das Element auf der Karte ziehen oder über die Werkzeugleiste Teile hinzufügen und
-            löschen.
+            ). Punkte lassen sich direkt ziehen. Bei Linien und Flächen Eckpunkte oder Kanten
+            ziehen; der Griff verschiebt die Form als Ganzes, ein Doppelklick auf einen Eckpunkt
+            entfernt ihn. Ein Klick auf das Ende einer Linie setzt sie fort. Über die Werkzeugleiste
+            lassen sich Teile hinzufügen und löschen.
           </p>
         ) : null}
 

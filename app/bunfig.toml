@@ -7,6 +7,7 @@ minimumReleaseAgeExcludes = [
   "@osm-traffic-signs/converter",
   "@osm-editor-kit/street-imagery",
   "@osm-editor-kit/street-imagery-react",
+  "@osm-editor-kit/react-map-gl-draw",
 ]
 
 # Global virtual store — requires isolated linker. Reinstall after changing: rm -rf node_modules && bun install

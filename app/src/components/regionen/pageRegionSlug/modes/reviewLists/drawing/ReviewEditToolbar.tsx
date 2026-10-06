@@ -1,82 +1,65 @@
-import { PencilIcon, PlusIcon, TrashIcon } from '@heroicons/react/24/outline'
-import { twJoin } from 'tailwind-merge'
-import type { ReviewGeometryFamily } from './reviewGeometryParts'
-import { REVIEW_DRAW_MODE, type ReviewDrawMode } from './reviewTerraDrawConfig'
+import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline'
+import { reviewToolbarButtonClassName, reviewToolbarClassName } from './ReviewDrawingToolbar'
 
 type Props = {
-  mode: ReviewDrawMode
-  family: ReviewGeometryFamily | null
-  onModeChange: (mode: ReviewDrawMode) => void
-  onDeletePart: () => void
+  isDrawing: boolean
+  isAddingPart: boolean
+  canAddPart: boolean
   canDeletePart: boolean
+  onAddPart: () => void
+  onDeletePart: () => void
+  onFinish: () => void
+  onCancel: () => void
 }
 
 const DELETE_DISABLED_TITLE =
-  'Der Eintrag braucht mindestens eine Geometrie – nutzen Sie den Löschen-Button oben, um den ganzen Eintrag zu löschen.'
+  'Erst einen Teil auf der Karte auswählen. Der Eintrag braucht mindestens eine Geometrie – nutzen Sie den Löschen-Button oben, um den ganzen Eintrag zu löschen.'
 
-const segmentClassName = ({ active, disabled }: { active: boolean; disabled: boolean }) =>
-  twJoin(
-    '-ml-px inline-flex min-h-10 items-center gap-1.5 px-3 py-1.5 text-sm font-semibold ring-1 ring-inset focus:z-10 focus:outline-none focus-visible:ring-2 focus-visible:ring-yellow-500',
-    active
-      ? 'bg-yellow-400 text-gray-900 ring-yellow-400'
-      : disabled
-        ? 'cursor-not-allowed bg-white text-gray-400 ring-gray-300'
-        : 'bg-white text-gray-700 ring-gray-300 hover:bg-yellow-50',
-  )
-
-/** Edit-session toolbar: select, add a part of the same family, or delete the selected part. */
+/**
+ * Edit-session toolbar: add a part of the same type, or delete the selected part. The
+ * geometry itself is changed directly on the map.
+ */
 export const ReviewEditToolbar = ({
-  mode,
-  family,
-  onModeChange,
-  onDeletePart,
+  isDrawing,
+  isAddingPart,
+  canAddPart,
   canDeletePart,
-}: Props) => {
-  const addMode = family ? REVIEW_DRAW_MODE[family] : null
-  const canAddPart = addMode !== null
-  const selectPressed = mode === REVIEW_DRAW_MODE.select
-  const addPressed = canAddPart && mode === addMode
-
-  return (
-    <div className="pointer-events-auto absolute top-14 left-1/2 isolate z-1000 inline-flex -translate-x-1/2 rounded-md shadow-xs sm:top-[10px]">
-      <button
-        type="button"
-        aria-pressed={selectPressed}
-        onClick={() => onModeChange(REVIEW_DRAW_MODE.select)}
-        className={twJoin(
-          segmentClassName({ active: selectPressed, disabled: false }),
-          'rounded-l-md',
-        )}
-      >
-        <PencilIcon className="size-4" aria-hidden />
-        Ändern
-      </button>
-      <button
-        type="button"
-        aria-pressed={addPressed}
-        disabled={!canAddPart}
-        onClick={() => {
-          if (!addMode) return
-          onModeChange(addMode)
-        }}
-        className={segmentClassName({ active: addPressed, disabled: !canAddPart })}
-      >
-        <PlusIcon className="size-4" aria-hidden />
-        Teil hinzufügen
-      </button>
+  onAddPart,
+  onDeletePart,
+  onFinish,
+  onCancel,
+}: Props) => (
+  <div className={reviewToolbarClassName} role="group" aria-label="Geometrie bearbeiten">
+    <button
+      type="button"
+      aria-pressed={isAddingPart}
+      disabled={!canAddPart}
+      onClick={onAddPart}
+      className={reviewToolbarButtonClassName({ active: isAddingPart, disabled: !canAddPart })}
+    >
+      <PlusIcon className="size-4" aria-hidden />
+      Teil hinzufügen
+    </button>
+    {isDrawing ? (
+      <>
+        <button type="button" onClick={onFinish} className={reviewToolbarButtonClassName()}>
+          Fertig
+        </button>
+        <button type="button" onClick={onCancel} className={reviewToolbarButtonClassName()}>
+          Abbrechen
+        </button>
+      </>
+    ) : (
       <button
         type="button"
         disabled={!canDeletePart}
         title={canDeletePart ? undefined : DELETE_DISABLED_TITLE}
         onClick={onDeletePart}
-        className={twJoin(
-          segmentClassName({ active: false, disabled: !canDeletePart }),
-          'rounded-r-md',
-        )}
+        className={reviewToolbarButtonClassName({ disabled: !canDeletePart })}
       >
         <TrashIcon className="size-4" aria-hidden />
         Teil löschen
       </button>
-    </div>
-  )
-}
+    )}
+  </div>
+)

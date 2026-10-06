@@ -1,4 +1,4 @@
-import { ArrowUpIcon, TrashIcon } from '@heroicons/react/20/solid'
+import { TrashIcon } from '@heroicons/react/20/solid'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { twJoin } from 'tailwind-merge'
 import type { MapDataSourceCalculator } from '@/components/regionen/pageRegionSlug/mapData/types'
@@ -21,7 +21,6 @@ type CalculatorAreaSummary = CalculatorSummary['byArea'][number]['summary']
  * button). Passed as one object to keep call sites tidy.
  */
 export type CalculatorBreakdownData = {
-  hasAreas: boolean
   displayName: string | undefined
   sumKeys: MapDataSourceCalculator['sumKeys']
   sourceId: string | undefined
@@ -44,22 +43,6 @@ const toggleClassName = (active: boolean) =>
     'px-1.5 py-0.5 text-xs leading-tight sm:text-[0.62rem]',
     active ? 'bg-white text-fuchsia-900' : 'text-white/85 hover:bg-white/10',
   )
-
-/** Shown before any area is drawn. */
-const CalculatorEmpty = ({ displayName }: { displayName: string | undefined }) => (
-  <div className="min-w-0 text-sm leading-tight sm:text-xs">
-    <div className="flex items-center gap-1 text-right">
-      <ArrowUpIcon className="size-4" />
-      <strong>SUMME</strong>
-    </div>
-    {displayName && (
-      <div className="w-full min-w-0 truncate text-xs leading-tight text-white/40 sm:text-[0.6rem]">
-        {displayName}
-      </div>
-    )}
-    <div className="mt-1.5 text-white">Flächen zeichnen</div>
-  </div>
-)
 
 /** Warning that the calculation only covers what's currently in the viewport. */
 const ViewportWarning = ({ onShowArea }: { onShowArea: () => void }) => (
@@ -212,13 +195,11 @@ const AreaSummary = ({
 
 /**
  * The calculator breakdown (header + viewport warning + metric controls + per-area
- * summaries + combined total), or the "draw areas" prompt when nothing is drawn yet.
+ * summaries + combined total). Only rendered once an area is drawn.
  * Presentational only — all data/handlers come from CalculatorOutput via `data`. Styled
  * white-on-fuchsia so it works in both the desktop panel and the mobile sheet.
  */
 export const CalculatorBreakdown = ({ data }: { data: CalculatorBreakdownData }) => {
-  if (!data.hasAreas) return <CalculatorEmpty displayName={data.displayName} />
-
   const { summary, selectedMetric, selectedMetricLabel, metrics } = data
 
   return (
