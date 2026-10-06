@@ -1,10 +1,10 @@
 import { CheckIcon, ExclamationTriangleIcon } from '@heroicons/react/20/solid'
 import { Spinner } from '@/components/shared/Spinner/Spinner'
 import { frenchQuote } from '@/components/shared/text/Quotes'
-import { ModeCollectionNewRow } from '../ModeCollectionNewRow'
-import { ModeCollectionSelect } from '../ModeCollectionSelect'
-import { modeIdentity } from '../modeIdentity'
-import { ModePanelCollectionDisclosure } from '../ModePanelCollectionDisclosure'
+import { ModeCollectionNewRow } from '../../ModeCollectionNewRow'
+import { ModeCollectionSelect } from '../../ModeCollectionSelect'
+import { modeIdentity } from '../../modeIdentity'
+import { ModePanelCollectionDisclosure } from '../../ModePanelCollectionDisclosure'
 import {
   type PlanningAreaVariantRow,
   type SpaceFinderSelectedVariant,

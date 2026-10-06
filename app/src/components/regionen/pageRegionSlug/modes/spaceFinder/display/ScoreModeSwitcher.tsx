@@ -2,8 +2,8 @@ import { EyeSlashIcon } from '@heroicons/react/24/outline'
 import { twJoin } from 'tailwind-merge'
 import { radioButtonClass } from '@/components/shared/SegmentedChoice/radioButtonClass'
 import type { PlanningScoreMode } from '@/shared/regionen/planningScoreMode.const'
-import { spaceFinderGroupButtonClass } from './spaceFinderPanelStyles'
-import { useSpaceFinderModeParam } from './useSpaceFinderModeParam'
+import { spaceFinderGroupButtonClass } from '../spaceFinderPanelStyles'
+import { useSpaceFinderModeParam } from '../useSpaceFinderModeParam'
 
 // Tab-like switcher for the three display modes (Issue #3415): the demand
 // probability, the buildability probability, or their combination. Colors the

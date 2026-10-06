@@ -1,9 +1,9 @@
 import { Menu, MenuButton, MenuItem, MenuItems } from '@headlessui/react'
 import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline'
 import { twJoin } from 'tailwind-merge'
+import { mapOverlayMenuClassName } from '@/components/regionen/pageRegionSlug/mapOverlayChrome.const'
 import { frenchQuote } from '@/components/shared/text/Quotes'
-import { mapOverlayMenuClassName } from '../../mapOverlayChrome.const'
-import { modePanelHeaderIconButtonClassName } from '../modePanel.const'
+import { modePanelHeaderIconButtonClassName } from '../../modePanel.const'
 import type { SpaceFinderSelectedVariant } from './spaceFinderCollectionOptions'
 import type { SpaceFinderCommands } from './useSpaceFinderCommands'
 

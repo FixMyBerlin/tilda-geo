@@ -1,5 +1,5 @@
-import { ModeCollectionNewRow } from '../ModeCollectionNewRow'
-import { ModeCollectionSelect } from '../ModeCollectionSelect'
+import { ModeCollectionNewRow } from '../../ModeCollectionNewRow'
+import { ModeCollectionSelect } from '../../ModeCollectionSelect'
 import type { PlanningAreasRow } from './spaceFinderCollectionOptions'
 
 type Props = {

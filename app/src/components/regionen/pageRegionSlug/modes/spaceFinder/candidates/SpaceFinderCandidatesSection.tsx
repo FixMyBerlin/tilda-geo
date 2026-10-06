@@ -11,14 +11,14 @@ import {
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useSpaceFinderCandidatesState'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { CollapsibleBox } from '@/components/shared/CollapsibleBox/CollapsibleBox'
-import { ModeListItem } from '../ModeListItem'
+import { ModeListItem } from '../../ModeListItem'
 import {
   modePanelListMetaClassName,
   modePanelListTitleClassName,
   modePanelTintHairlineTopClassName,
-} from '../modePanel.const'
+} from '../../modePanel.const'
+import { useSpaceFinderSelection } from '../useSpaceFinderSelection'
 import { candidateExportFileName, downloadCandidatesGeojson } from './spaceFinderCandidateExport'
-import { useSpaceFinderSelection } from './useSpaceFinderSelection'
 
 const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
   ausgeschlossen: 'bg-gray-200 text-gray-700',

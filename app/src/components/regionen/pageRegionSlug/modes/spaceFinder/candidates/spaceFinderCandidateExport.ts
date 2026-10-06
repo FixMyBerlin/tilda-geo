@@ -1,4 +1,4 @@
-import type { SpaceFinderCandidate } from '../../hooks/mapState/useSpaceFinderCandidatesState'
+import type { SpaceFinderCandidate } from '@/components/regionen/pageRegionSlug/hooks/mapState/useSpaceFinderCandidatesState'
 
 /**
  * Die ausgewählten Hexagone als GeoJSON-FeatureCollection: potentielle Standorte

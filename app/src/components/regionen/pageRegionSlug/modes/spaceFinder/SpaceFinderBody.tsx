@@ -17,6 +17,8 @@ import { updatePlanningVariantFn } from '@/server/planning/planning.functions'
 import { planningVariantQueryOptions } from '@/server/planning/planningQueryOptions'
 import { useSpaceFinderBoundaryState } from '../../hooks/mapState/useSpaceFinderBoundaryState'
 import { modePanelMutedClassName } from '../modePanel.const'
+import { SpaceFinderCandidatesSection } from './candidates/SpaceFinderCandidatesSection'
+import { ScoreModeSwitcher } from './display/ScoreModeSwitcher'
 import { FactorEditorPanel } from './factors/FactorEditorPanel'
 import {
   DEFAULT_FACTOR_TEMPLATE,
@@ -24,8 +26,6 @@ import {
   MIN_SCORE_THRESHOLD_LABEL,
 } from './factors/spaceFinderDefaults'
 import { JobStatusBadge } from './run/JobStatusBadge'
-import { ScoreModeSwitcher } from './ScoreModeSwitcher'
-import { SpaceFinderCandidatesSection } from './SpaceFinderCandidatesSection'
 import { spaceFinderNumberInputClass } from './spaceFinderPanelStyles'
 import { useSpaceFinderModeParam } from './useSpaceFinderModeParam'
 

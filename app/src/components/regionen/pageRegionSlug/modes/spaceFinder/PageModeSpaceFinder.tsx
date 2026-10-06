@@ -16,22 +16,22 @@ import { useSpaceFinderBoundaryState } from '../../hooks/mapState/useSpaceFinder
 import { useRegionSearchNavigation } from '../../hooks/useQueryState/useRegionSearchNavigation'
 import { ModePanel } from '../ModePanel'
 import { modePanelHeaderIconButtonClassName, modePanelMutedClassName } from '../modePanel.const'
-import { SpaceFinderEditAreaDetail } from './detail/SpaceFinderEditAreaDetail'
-import { SpaceFinderNewAreaDetail } from './detail/SpaceFinderNewAreaDetail'
-import { SpaceFinderNewVariantDetail } from './detail/SpaceFinderNewVariantDetail'
-import { SpaceFinderBody } from './SpaceFinderBody'
-import { SpaceFinderCandidateSelectionReset } from './SpaceFinderCandidatesSection'
+import { SpaceFinderCandidateSelectionReset } from './candidates/SpaceFinderCandidatesSection'
 import {
   firstSpaceFinderVariantId,
   sortedSpaceFinderAreas,
   spaceFinderSelectedVariant,
-} from './spaceFinderCollectionOptions'
-import { SpaceFinderAreaManageMenu } from './SpaceFinderMenus'
+} from './collection/spaceFinderCollectionOptions'
+import { SpaceFinderAreaManageMenu } from './collection/SpaceFinderMenus'
+import { SpaceFinderNameModal } from './collection/SpaceFinderNameModal'
+import { SpaceFinderSelect } from './collection/SpaceFinderSelect'
+import { SpaceFinderVariantSelect } from './collection/SpaceFinderVariantSelect'
+import { useSpaceFinderCommands } from './collection/useSpaceFinderCommands'
+import { SpaceFinderEditAreaDetail } from './detail/SpaceFinderEditAreaDetail'
+import { SpaceFinderNewAreaDetail } from './detail/SpaceFinderNewAreaDetail'
+import { SpaceFinderNewVariantDetail } from './detail/SpaceFinderNewVariantDetail'
+import { SpaceFinderBody } from './SpaceFinderBody'
 import { compactSpaceFinderModeParam, isSpaceFinderAreaFormOpen } from './spaceFinderModeParam'
-import { SpaceFinderNameModal } from './SpaceFinderNameModal'
-import { SpaceFinderSelect } from './SpaceFinderSelect'
-import { SpaceFinderVariantSelect } from './SpaceFinderVariantSelect'
-import { useSpaceFinderCommands } from './useSpaceFinderCommands'
 import { useSpaceFinderModeParam } from './useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from './useSpaceFinderSelection'
 
