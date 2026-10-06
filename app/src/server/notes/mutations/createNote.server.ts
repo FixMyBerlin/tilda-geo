@@ -23,10 +23,9 @@ export async function createNote(input: z.infer<typeof Schema>, caller: MemberCa
   await authorizeRegionMemberByRegionSlug(session, regionSlug)
   await assertFolderInRegion(createData.folderId, regionSlug)
 
-  const result = await runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
+  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
     db.note.create({
       data: { ...createData, userId: session.userId },
     }),
   )
-  return result
 }

@@ -23,10 +23,9 @@ export async function createNoteComment(input: z.infer<typeof Schema>, caller: M
   await authorizeRegionMemberByRegionSlug(session, parsed.regionSlug)
   await assertNoteInRegion(parsed.noteId, parsed.regionSlug)
 
-  const result = await runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
+  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
     db.noteComment.create({
       data: { noteId: parsed.noteId, body: parsed.body, userId: session.userId },
     }),
   )
-  return result
 }

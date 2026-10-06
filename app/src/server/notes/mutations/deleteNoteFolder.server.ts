@@ -1,5 +1,10 @@
 import { z } from 'zod'
-import { type MemberCaller, requireMemberSession } from '@/server/auth/memberCaller.server'
+import { runWithAuditContextAsync } from '@/server/audit/auditContext.server'
+import {
+  type MemberCaller,
+  memberAuditContext,
+  requireMemberSession,
+} from '@/server/auth/memberCaller.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
 
@@ -32,5 +37,7 @@ export async function deleteNoteFolder(input: z.infer<typeof Schema>, caller: Me
     )
   }
 
-  return db.noteFolder.delete({ where: { id: folder.id } })
+  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
+    db.noteFolder.delete({ where: { id: folder.id } }),
+  )
 }

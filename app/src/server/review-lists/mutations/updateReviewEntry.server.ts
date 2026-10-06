@@ -29,7 +29,7 @@ export async function updateReviewEntry(input: z.infer<typeof Schema>, caller: M
   await authorizeRegionMemberByRegionSlug(session, regionSlug)
   await assertEntryInRegion(entryId, regionSlug)
 
-  const result = await runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
+  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
     db.reviewEntry.update({
       where: { id: entryId },
       data: {
@@ -48,5 +48,4 @@ export async function updateReviewEntry(input: z.infer<typeof Schema>, caller: M
       select: { id: true, status: true },
     }),
   )
-  return result
 }

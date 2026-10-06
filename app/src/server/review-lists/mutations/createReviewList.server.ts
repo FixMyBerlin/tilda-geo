@@ -1,5 +1,10 @@
 import { z } from 'zod'
-import { type MemberCaller, requireMemberSession } from '@/server/auth/memberCaller.server'
+import { runWithAuditContextAsync } from '@/server/audit/auditContext.server'
+import {
+  type MemberCaller,
+  memberAuditContext,
+  requireMemberSession,
+} from '@/server/auth/memberCaller.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
 import { getRegionIdBySlug } from '@/server/regions/queries/getRegionIdBySlug.server'
@@ -17,13 +22,15 @@ export async function createReviewList(input: z.infer<typeof Schema>, caller: Me
   await authorizeRegionMemberByRegionSlug(session, regionSlug)
   const regionId = await getRegionIdBySlug(regionSlug)
 
-  return db.reviewList.create({
-    data: {
-      name,
-      createdById: session.userId,
-      updatedById: session.userId,
-      regions: { connect: { id: regionId } },
-    },
-    select: { id: true, name: true },
-  })
+  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
+    db.reviewList.create({
+      data: {
+        name,
+        createdById: session.userId,
+        updatedById: session.userId,
+        regions: { connect: { id: regionId } },
+      },
+      select: { id: true, name: true },
+    }),
+  )
 }

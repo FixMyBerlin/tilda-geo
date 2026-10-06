@@ -26,11 +26,10 @@ export async function createReviewEntryComment(
   await authorizeRegionMemberByRegionSlug(session, regionSlug)
   await assertEntryInRegion(entryId, regionSlug)
 
-  const result = await runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
+  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
     db.reviewEntryComment.create({
       data: { entryId, userId: session.userId, body },
       select: { id: true },
     }),
   )
-  return result
 }

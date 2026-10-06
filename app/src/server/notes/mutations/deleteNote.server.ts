@@ -32,8 +32,7 @@ export async function deleteNote(input: z.infer<typeof Schema>, caller: MemberCa
 
   // Note: schema.prisma defines an `onDelete: cascade` rule which will remove all noteComments whenever a node is deleted
   // Docs: https://www.prisma.io/docs/orm/prisma-schema/data-model/relations/referential-actions#cascade
-  const result = await runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
+  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
     db.note.deleteMany({ where: { id: parsed.noteId } }),
   )
-  return result
 }

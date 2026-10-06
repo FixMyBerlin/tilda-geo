@@ -30,8 +30,7 @@ export async function updateNoteComment(input: z.infer<typeof Schema>, caller: M
     throw new AuthorizationError('Only the author can update this comment')
   }
 
-  const result = await runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
+  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
     db.noteComment.update({ where: { id: parsed.commentId }, data: { body: parsed.body } }),
   )
-  return result
 }

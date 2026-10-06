@@ -22,11 +22,10 @@ export async function updateNoteResolvedAt(input: z.infer<typeof Schema>, caller
   await authorizeRegionMemberByRegionSlug(session, parsed.regionSlug)
   await assertNoteInRegion(parsed.noteId, parsed.regionSlug)
 
-  const result = await runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
+  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
     db.note.update({
       where: { id: parsed.noteId },
       data: { resolvedAt: parsed.resolved ? new Date() : null },
     }),
   )
-  return result
 }

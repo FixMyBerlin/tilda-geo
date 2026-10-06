@@ -28,7 +28,7 @@ export async function createReviewEntry(input: z.infer<typeof Schema>, caller: M
   await assertListInRegion(listId, regionSlug)
 
   const normalizedGeometry = normalizeGeometry(geometry)
-  const result = await runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
+  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
     db.reviewEntry.create({
       data: {
         listId,
@@ -43,5 +43,4 @@ export async function createReviewEntry(input: z.infer<typeof Schema>, caller: M
       select: { id: true },
     }),
   )
-  return result
 }

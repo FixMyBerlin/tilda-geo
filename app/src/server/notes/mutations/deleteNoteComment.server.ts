@@ -30,8 +30,7 @@ export async function deleteNoteComment(input: z.infer<typeof Schema>, caller: M
     throw new AuthorizationError('Only the author can delete this comment')
   }
 
-  const result = await runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
+  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
     db.noteComment.deleteMany({ where: { id: parsed.commentId } }),
   )
-  return result
 }
