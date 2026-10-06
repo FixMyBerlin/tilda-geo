@@ -1,94 +1,91 @@
-import { useMutation } from '@tanstack/react-query'
-import { getRouteApi, useNavigate, useRouter } from '@tanstack/react-router'
-import { AdminPageTitleEdit, AdminPageTitleEditLabel } from '@/components/admin/adminPageTitle'
-import { AdminTrashIconButton } from '@/components/admin/AdminTrashIconButton'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { getRouteApi, useNavigate } from '@tanstack/react-router'
+import { AdminDeleteButton } from '@/components/admin/AdminDeleteButton'
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
+import { AdminTechnicalDetails } from '@/components/admin/AdminTechnicalDetails'
+import { toAdminAsideSections } from '@/components/admin/aside/adminAsideSection'
 import { AuditHistoryPanel } from '@/components/admin/audit-log/AuditHistoryPanel'
-import { Breadcrumb } from '@/components/admin/Breadcrumb'
-import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
-import { toastError } from '@/components/shared/toast/toastError'
-import {
-  deleteRegionContractFn,
-  updateRegionContractFn,
-} from '@/server/region-contracts/region-contracts.functions'
-import {
-  regionContractConfigToFormValues,
-  UpdateRegionContractFormSchema,
-} from '@/server/region-contracts/regionContractSchema'
+import { toastSuccess } from '@/components/shared/toast/toastSuccess'
+import { adminNavCountsQueryOptions } from '@/server/admin/adminNavQueryOptions'
+import { deleteRegionContractFn } from '@/server/region-contracts/region-contracts.functions'
+import { regionContractConfigToFormValues } from '@/server/region-contracts/regionContractSchema'
 import { RegionContractForm } from './pageRegionContracts/RegionContractForm'
 
 const routeApi = getRouteApi('/admin/region-contracts/$slug/edit')
 
+/** Sections after the two form field groups (`RegionContractForm`). */
+const pageSectionLabels = {
+  history: 'Änderungsverlauf',
+  technical: 'Technische Details',
+} satisfies Record<string, string>
+
 export function PageRegionContractEdit() {
   const { contract, regions, auditHistory } = routeApi.useLoaderData()
-  const router = useRouter()
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
 
-  const { mutate: deleteMutation, isPending: isDeleting } = useMutation({
+  const deleteContract = useMutation({
     mutationFn: () => deleteRegionContractFn({ data: { slug: contract.slug } }),
     onSuccess: async () => {
-      await router.invalidate()
-      navigate({ to: '/admin/region-contracts' })
+      await queryClient.invalidateQueries({ queryKey: adminNavCountsQueryOptions().queryKey })
+      toastSuccess('Gelöscht.')
+      await navigate({ to: '/admin/region-contracts' })
     },
-    // Surface the server's guard message (e.g. "… hat noch N zugewiesene Region(en). Bitte zuerst
-    // Regionen entfernen.") — otherwise a blocked delete looks like nothing happened.
-    onError: (error) => toastError(error, 'Löschen fehlgeschlagen'),
   })
-
-  const handleDelete = () => {
-    if (window.confirm(`Auftrag »${contract.name}« unwiderruflich löschen?`)) {
-      deleteMutation()
-    }
-  }
 
   return (
     <>
-      <HeaderWrapper>
-        <Breadcrumb
-          pages={[
-            { href: '/admin/region-contracts', name: 'Regionen-Aufträge' },
-            {
-              href: `/admin/region-contracts/${contract.slug}/edit`,
-              name: <AdminPageTitleEditLabel name={contract.name} variant="breadcrumb" />,
-            },
-          ]}
-        />
-      </HeaderWrapper>
-
-      <AdminPageTitleEdit name={contract.name} />
+      <AdminPageHeader
+        title={contract.name}
+        parent={{ label: 'Regionen-Aufträge', to: '/admin/region-contracts' }}
+      />
 
       <RegionContractForm
-        actionBarRight={
-          <AdminTrashIconButton
-            ariaLabel={`Auftrag ${contract.name} löschen`}
-            disabled={isDeleting}
-            size="comfortable"
-            onClick={handleDelete}
-          />
-        }
-        schema={UpdateRegionContractFormSchema}
-        defaultValues={regionContractConfigToFormValues({
+        mode="edit"
+        contractId={contract.id}
+        contractSlug={contract.slug}
+        initialValues={regionContractConfigToFormValues({
           slug: contract.slug,
           name: contract.name,
           status: contract.status,
           regionSlugs: contract.regionSlugs,
         })}
-        submitLabel="Auftrag aktualisieren"
-        editingContractId={contract.id}
         regions={regions.map((r) => ({
           slug: r.slug,
           name: r.name,
           contract: r.contract ? { id: r.contract.id, name: r.contract.name } : null,
         }))}
-        slugDisabled
-        onSubmit={async (values) =>
-          updateRegionContractFn({ data: { ...values, slug: contract.slug } })
-        }
-      />
-
-      <AuditHistoryPanel
-        rows={auditHistory}
-        model="RegionContract"
-        recordId={String(contract.id)}
+        pageExtras={{
+          sections: toAdminAsideSections(pageSectionLabels),
+          content: (
+            <>
+              <AuditHistoryPanel
+                id="history"
+                rows={auditHistory}
+                model="RegionContract"
+                recordId={String(contract.id)}
+              />
+              <AdminTechnicalDetails
+                id="technical"
+                items={[
+                  { label: 'ID', value: contract.id },
+                  { label: 'Slug', value: <code>{contract.slug}</code> },
+                ]}
+                dumps={[{ title: 'Auftrag', data: contract }]}
+              />
+            </>
+          ),
+          destructiveAction: (
+            <AdminDeleteButton
+              label="Auftrag löschen"
+              title={`Auftrag „${contract.name}“ löschen?`}
+              description={`Der Auftrag »${contract.slug}« wird unwiderruflich gelöscht.`}
+              onDelete={async () => {
+                await deleteContract.mutateAsync()
+              }}
+            />
+          ),
+        }}
       />
     </>
   )

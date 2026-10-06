@@ -1,6 +1,7 @@
-import { adminBulletedListClassName } from '@/components/admin/adminListClasses'
-import { AdminViewActionLink } from '@/components/admin/adminPageTitle'
+import type { ReactNode } from 'react'
+import { adminBulletedListClassName } from '@/components/admin/adminClasses'
 import { AdminTable, adminTableClasses } from '@/components/admin/AdminTable'
+import { AdminTableActions, AdminTableViewLink } from '@/components/admin/AdminTableActions'
 import { buildUploadsListSearch } from '@/components/admin/map-dataset-uploads/pageMapDatasetUploads/mapDatasetUploadsListSearch'
 import { Link } from '@/components/shared/links/Link'
 import { Pill } from '@/components/shared/text/Pill'
@@ -10,12 +11,24 @@ import type { TUpload } from '@/server/uploads/queries/getUploads.server'
 export const MapDatasetUploadsTable = ({
   uploads,
   listKind,
+  footer,
 }: {
   uploads: TUpload[]
   listKind?: UploadKind
+  /** Rendered inside the table card (pagination). */
+  footer?: ReactNode
 }) => {
   return (
-    <AdminTable header={['Slug', 'Zugriff', 'Regionen', 'Ansichten', '']}>
+    <AdminTable
+      header={[
+        'Slug',
+        'Zugriff',
+        'Regionen',
+        'Ansichten',
+        { id: 'actions', label: 'Aktionen', srOnly: true, align: 'right' },
+      ]}
+      footer={footer}
+    >
       {uploads.map((upload) => {
         return (
           <tr key={upload.id}>
@@ -59,10 +72,12 @@ export const MapDatasetUploadsTable = ({
               </ul>
             </td>
             <td className={adminTableClasses.td}>
-              <AdminViewActionLink
-                to="/admin/map-dataset-uploads/$slug"
-                params={{ slug: upload.slug }}
-              />
+              <AdminTableActions>
+                <AdminTableViewLink
+                  to="/admin/map-dataset-uploads/$slug"
+                  params={{ slug: upload.slug }}
+                />
+              </AdminTableActions>
             </td>
           </tr>
         )

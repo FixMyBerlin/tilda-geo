@@ -1,28 +1,31 @@
 import { z } from 'zod'
+import { runWithAuditContextAsync } from '@/server/audit/auditContext.server'
 import {
-  memberFormAuditContext,
-  runWithAuditContextAsync,
-} from '@/server/audit/auditContext.server'
-import { requireAuth } from '@/server/auth/session.server'
+  type MemberCaller,
+  memberAuditContext,
+  requireMemberSession,
+} from '@/server/auth/memberCaller.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
-import { getRegionIdBySlug } from '@/server/regions/queries/getRegionIdBySlug.server'
+import { assertFolderInRegion } from '../queries/assertFolderInRegion.server'
 import { CreateNoteSchema } from '../schemas'
 
-const Schema = CreateNoteSchema.extend({ regionSlug: z.string() })
+const Schema = CreateNoteSchema.extend({
+  regionSlug: z.string(),
+  folderId: z.number(),
+})
 
-export async function createNote(input: z.infer<typeof Schema>, headers: Headers) {
-  const session = await requireAuth(headers)
+export async function createNote(input: z.infer<typeof Schema>, caller: MemberCaller) {
+  const session = await requireMemberSession(caller)
   const parsed = Schema.parse(input)
   const { regionSlug, ...createData } = parsed
 
   await authorizeRegionMemberByRegionSlug(session, regionSlug)
+  await assertFolderInRegion(createData.folderId, regionSlug)
 
-  const regionId = await getRegionIdBySlug(regionSlug)
-
-  const result = await runWithAuditContextAsync(
-    memberFormAuditContext(headers, session.userId),
-    () => db.note.create({ data: { ...createData, regionId, userId: session.userId } }),
+  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
+    db.note.create({
+      data: { ...createData, userId: session.userId },
+    }),
   )
-  return result
 }

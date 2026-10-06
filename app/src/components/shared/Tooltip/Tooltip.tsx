@@ -15,16 +15,28 @@ import {
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 import type React from 'react'
 import { useState } from 'react'
-import { twJoin } from 'tailwind-merge'
+import { twMerge } from 'tailwind-merge'
 import { UI_SPRING } from '@/components/shared/motion/spring.const'
 
 type Props = {
   text: string
   className?: string
+  /** Floating UI placement; defaults to top. */
+  placement?: 'top' | 'bottom' | 'left' | 'right'
+  /** `span` when the trigger sits inside a `<button>` (phrasing content only). */
+  as?: 'div' | 'span'
   children: React.ReactNode
+  'aria-label'?: string
 }
 
-export const Tooltip = ({ text, children, className }: Props) => {
+export const Tooltip = ({
+  text,
+  children,
+  className,
+  placement: preferredPlacement = 'top',
+  as: Wrapper = 'div',
+  'aria-label': ariaLabel,
+}: Props) => {
   const [open, setOpen] = useState(false)
   const reducedMotion = useReducedMotion()
 
@@ -32,7 +44,7 @@ export const Tooltip = ({ text, children, className }: Props) => {
   const { refs, floatingStyles, context, placement, isPositioned } = useFloating({
     open,
     onOpenChange: setOpen,
-    placement: 'top',
+    placement: preferredPlacement,
     transform: false,
     whileElementsMounted: autoUpdate,
     middleware: [offset(8), flip({ padding: 8 }), shift({ padding: 8 })],
@@ -42,7 +54,7 @@ export const Tooltip = ({ text, children, className }: Props) => {
   // (needed for multi-line copy users may want to read).
   const hover = useHover(context, {
     move: false,
-    delay: { open: 200, close: 0 },
+    delay: { open: 50, close: 0 },
     handleClose: safePolygon(),
   })
   // React `onFocus` uses focusin, so focusing a wrapped button still opens the tooltip.
@@ -62,9 +74,9 @@ export const Tooltip = ({ text, children, className }: Props) => {
           : { y: 4 }
 
   return (
-    <div
-      className={twJoin('relative', className)}
-      {...getReferenceProps({ ref: refs.setReference })}
+    <Wrapper
+      className={twMerge('relative', Wrapper === 'span' && 'inline-flex', className)}
+      {...getReferenceProps({ ref: refs.setReference, 'aria-label': ariaLabel })}
     >
       {children}
       <FloatingPortal>
@@ -81,7 +93,7 @@ export const Tooltip = ({ text, children, className }: Props) => {
               }
               exit={reducedMotion ? { opacity: 0 } : { opacity: 0, scale: 0.96, ...enterOffset }}
               transition={reducedMotion ? { duration: 0 } : UI_SPRING}
-              className="z-50 w-max max-w-82 rounded bg-gray-900/90 p-2 text-xs text-white shadow-md select-none"
+              className="z-50 w-max max-w-82 rounded bg-gray-900/90 p-2 text-xs whitespace-pre-line text-white shadow-md select-none"
               {...getFloatingProps({ ref: refs.setFloating, style: floatingStyles })}
             >
               {text}
@@ -89,6 +101,6 @@ export const Tooltip = ({ text, children, className }: Props) => {
           )}
         </AnimatePresence>
       </FloatingPortal>
-    </div>
+    </Wrapper>
   )
 }

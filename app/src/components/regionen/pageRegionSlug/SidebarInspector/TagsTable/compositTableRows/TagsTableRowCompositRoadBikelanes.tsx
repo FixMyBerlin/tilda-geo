@@ -1,6 +1,7 @@
 import { bikelanesPresenceColors } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/subcat_bikelanes_plus_presence.const'
 import { getDescriptionForInspectorTag } from '@/data/topicDocs/runtime'
 import {
+  tagsTableCompositRowClass,
   tagsTableCompositSubLabelCellClass,
   tagsTableCompositSubRowHeaderClass,
   tagsTableCompositSubValueCellClass,
@@ -76,37 +77,29 @@ export const TagsTableRowCompositRoadBikelanes = ({
 
   return (
     <TagsTableRowFrame label="Radinfrastruktur">
-      <table className={tagsTableCompositTableClass}>
-        <tbody>
-          <tr>
-            <td colSpan={2} className="py-1">
-              <CompositRoadBikelanesTableValue
-                label="Links"
-                tagKey="bikelane_left"
-                tagValue={properties.bikelane_left}
-              />
-            </td>
-          </tr>
-          <tr className="border-t">
-            <td colSpan={2} className="py-1">
-              <CompositRoadBikelanesTableValue
-                label="Fahrbahn"
-                tagKey="bikelane_self"
-                tagValue={properties.bikelane_self}
-              />
-            </td>
-          </tr>
-          <tr className="border-t">
-            <td colSpan={2} className="py-1">
-              <CompositRoadBikelanesTableValue
-                label="Rechts"
-                tagKey="bikelane_right"
-                tagValue={properties.bikelane_right}
-              />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+      <div className={tagsTableCompositTableClass}>
+        <div className={tagsTableCompositRowClass}>
+          <CompositRoadBikelanesTableValue
+            label="Links"
+            tagKey="bikelane_left"
+            tagValue={properties.bikelane_left}
+          />
+        </div>
+        <div className={tagsTableCompositRowClass}>
+          <CompositRoadBikelanesTableValue
+            label="Fahrbahn"
+            tagKey="bikelane_self"
+            tagValue={properties.bikelane_self}
+          />
+        </div>
+        <div className={tagsTableCompositRowClass}>
+          <CompositRoadBikelanesTableValue
+            label="Rechts"
+            tagKey="bikelane_right"
+            tagValue={properties.bikelane_right}
+          />
+        </div>
+      </div>
       <p className="mt-1 text-xs text-gray-400">
         Angaben in OSM-Linienrichtung. Siehe Doppelpfeil ab Zoom 13.
       </p>

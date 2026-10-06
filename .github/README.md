@@ -49,7 +49,7 @@
 | `PROCESS_GEOFABRIK_OAUTH_OSM_PASSWORD` | `secrets.PROCESS_GEOFABRIK_OAUTH_OSM_PASSWORD` | no | Optional Geofabrik OAuth password. Sensitive. |
 | `TILES_URL` | `vars.TILES_URL` | yes | Public tile endpoint hostname. |
 | `CACHELESS_URL` | `vars.CACHELESS_URL` | yes | Cacheless tile endpoint hostname. |
-| `VITE_APP_ORIGIN` | `vars.VITE_APP_ORIGIN` | yes | Public app origin. |
+| `VITE_APP_ORIGIN` | `vars.VITE_APP_ORIGIN` | yes | Public app origin. Must be listed in `app/src/components/shared/utils/appInstances.const.ts`. |
 | `VITE_APP_ENV` | `vars.VITE_APP_ENV` | yes | App environment for client/server behavior. |
 | `APP_URL` | `vars.APP_URL` | yes | Main app hostname used by Traefik labels. |
 | `SESSION_SECRET_KEY` | `secrets.SESSION_SECRET_KEY` | yes | Session signing secret. Sensitive. |

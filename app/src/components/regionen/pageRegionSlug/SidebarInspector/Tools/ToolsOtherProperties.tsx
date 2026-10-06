@@ -1,12 +1,11 @@
-import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { format, formatDistanceToNow, fromUnixTime } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { useId } from 'react'
-import { twJoin } from 'tailwind-merge'
 import {
   useMapActions,
   useMapInspectorOtherPropertiesOpen,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
+import { DisclosureChevron } from '@/components/shared/DisclosureChevron/DisclosureChevron'
 import { Link } from '@/components/shared/links/Link'
 import { MotionCollapse } from '@/components/shared/motion/MotionCollapse'
 import { TopicDocAttributePurposePill } from '@/components/shared/topicDocs/TopicDocAttributePurposePill'
@@ -101,11 +100,10 @@ export const ToolsOtherProperties = ({ feature, sourceId }: Props) => {
         aria-controls={panelId}
         onClick={() => setInspectorOtherPropertiesVisibility(!inspectorOtherPropertiesOpen)}
       >
-        <ChevronRightIcon
-          className={twJoin(
-            'mr-1 -ml-1.5 size-5 shrink-0 transition-transform',
-            inspectorOtherPropertiesOpen ? 'rotate-90 transform' : '',
-          )}
+        <DisclosureChevron
+          open={inspectorOtherPropertiesOpen}
+          side="leading"
+          className="mr-1 -ml-1.5 size-5"
         />
         <span>Weitere Daten an diesem Element</span>
       </button>

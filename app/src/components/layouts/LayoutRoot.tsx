@@ -1,36 +1,37 @@
-import { TanStackDevtools } from '@tanstack/react-devtools'
-import { formDevtoolsPlugin } from '@tanstack/react-form-devtools'
 import { HeadContent, Outlet, Scripts, useMatches, useRouteContext } from '@tanstack/react-router'
-import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import { MotionConfig } from 'motion/react'
 import { StrictMode } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { Footer } from '@/components/layouts/Footer/Footer'
 import { HeaderApp } from '@/components/layouts/Header/HeaderApp/HeaderApp'
-import { TailwindResponsiveHelper } from '@/components/layouts/helper/TailwindResponsiveHelper'
+import { DevHelpers } from '@/components/layouts/helper/DevHelpers'
 import { ErrorBoundary, RootErrorFallback } from '@/components/shared/error/ErrorBoundary'
 import { useVisibleViewportHeightVar } from '@/components/shared/hooks/viewport/useVisibleViewportHeightVar'
-import TanStackQueryDevtools from '@/components/shared/providers/tanstack-query/devtools'
 import { Provider as TanStackQueryProvider } from '@/components/shared/providers/tanstack-query/root-provider'
 import { AppToaster } from '@/components/shared/toast/AppToaster'
 
-// Region map/preview routes use their own chrome — skip app header/footer here.
-const HIDE_APP_CHROME_ROUTE_IDS = new Set([
+// Region map/preview routes use their own chrome — skip app header/footer and lock the body to the map.
+const FULL_BLEED_MAP_ROUTE_IDS = new Set([
   '/regionen/$regionSlug',
   '/preview/region-pending',
   '/preview/region-error',
 ])
 
+// Admin renders its own sidebar shell (LayoutAdmin) but scrolls like a normal page.
+const ADMIN_ROUTE_ID = '/admin'
+
 export function LayoutRoot() {
   const { queryClient } = useRouteContext({ from: '__root__' })
   const matches = useMatches()
-  const hideAppChrome = matches.some((m) => HIDE_APP_CHROME_ROUTE_IDS.has(m.routeId))
+  const isFullBleedMapRoute = matches.some((m) => FULL_BLEED_MAP_ROUTE_IDS.has(m.routeId))
+  const isAdminRoute = matches.some((m) => m.routeId === ADMIN_ROUTE_ID)
+  const hideAppChrome = isFullBleedMapRoute || isAdminRoute
 
-  useVisibleViewportHeightVar(hideAppChrome)
+  useVisibleViewportHeightVar(isFullBleedMapRoute)
 
   return (
     // Full-bleed routes: map bg `#f0f0f0` on html/body blends iOS 26 status-bar chrome into the map.
-    <html lang="de" className={twJoin('h-full', hideAppChrome && 'bg-[#f0f0f0]')}>
+    <html lang="de" className={twJoin('h-full', isFullBleedMapRoute && 'bg-[#f0f0f0]')}>
       <head>
         <HeadContent />
       </head>
@@ -38,7 +39,7 @@ export function LayoutRoot() {
         suppressHydrationWarning
         className={twJoin(
           'flex w-full min-w-0 flex-col bg-white text-gray-800 antialiased',
-          hideAppChrome
+          isFullBleedMapRoute
             ? 'h-(--app-height,100dvh) overflow-hidden overscroll-none bg-[#f0f0f0]'
             : 'min-h-dvh overflow-x-clip',
         )}
@@ -55,15 +56,7 @@ export function LayoutRoot() {
               </div>
               {!hideAppChrome && <Footer />}
               <AppToaster />
-              <TailwindResponsiveHelper />
-              <TanStackDevtools
-                config={{ position: 'bottom-left' }}
-                plugins={[
-                  { name: 'Tanstack Router', render: <TanStackRouterDevtoolsPanel /> },
-                  { name: 'TanStack Query', render: <TanStackQueryDevtools /> },
-                  formDevtoolsPlugin(),
-                ]}
-              />
+              <DevHelpers />
             </TanStackQueryProvider>
           </MotionConfig>
         </StrictMode>

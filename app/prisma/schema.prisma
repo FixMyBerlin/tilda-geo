@@ -44,8 +44,16 @@ model User {
   noteComments  NoteComment[]
   qaEvaluations   QaEvaluation[]
   adminApiTokens  AdminApiToken[]
+  externalApiTokens ExternalApiToken[]
   dataSchemaImportsCreated DataSchemaImport[] @relation("DataSchemaImportCreatedBy")
   dataSchemaImportsUpdated DataSchemaImport[] @relation("DataSchemaImportUpdatedBy")
+  reviewEntryComments ReviewEntryComment[]
+  reviewListsCreated ReviewList[] @relation("ReviewListCreatedBy")
+  reviewListsUpdated ReviewList[] @relation("ReviewListUpdatedBy")
+  reviewEntriesCreated ReviewEntry[] @relation("ReviewEntryCreatedBy")
+  reviewEntriesUpdated ReviewEntry[] @relation("ReviewEntryUpdatedBy")
+  noteFoldersCreated NoteFolder[] @relation("NoteFolderCreatedBy")
+  noteFoldersUpdated NoteFolder[] @relation("NoteFolderUpdatedBy")
 
   @@map("User")
   @@schema("prisma")
@@ -131,14 +139,6 @@ enum RegionProduct {
   @@schema("prisma")
 }
 
-enum RegionNotesMode {
-  osmNotes
-  internalNotes
-  disabled
-
-  @@schema("prisma")
-}
-
 enum RegionContractStatus {
   ACTIVE
   INACTIVE
@@ -171,7 +171,9 @@ model Region {
   name       String        @default("")
   fullName   String        @default("")
   product    RegionProduct @default(radverkehr)
-  notes      RegionNotesMode @default(osmNotes)
+  // Independent flags on purpose (product may allow both later); today RegionWriteSchema rejects both being true.
+  notesOsm      Boolean @default(true)
+  notesInternal Boolean @default(false)
   showSearch Boolean       @default(false)
 
   mapLat  Float @default(0)
@@ -214,8 +216,9 @@ model Region {
   memberships       Membership[]
   mapDatasetUploads MapDatasetUpload[] @relation("RegionToMapDatasetUpload")
   regionUploads     RegionUpload[]     @relation("RegionUploadLibrary")
-  noteRecords       Note[]
   qaConfigs         QaConfig[]
+  reviewLists       ReviewList[]
+  noteFolders       NoteFolder[]
 
   @@index([contractId])
   @@index([headerLogoId])
@@ -342,6 +345,24 @@ model AdminApiToken {
   createdBy   User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
 
   @@map("AdminApiToken")
+  @@schema("prisma")
+}
+
+// Short-lived Bearer tokens for the external notes API, issued in exchange for a
+// verified OSM access token. Not audited: create/expire noise like Better Auth's `Verification`.
+model ExternalApiToken {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  hashedToken String    @unique
+  scope       String // see ExternalApiTokenScope
+  expiresAt   DateTime
+  lastUsedAt  DateTime?
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("ExternalApiToken")
   @@schema("prisma")
 }
 
@@ -475,8 +496,8 @@ model Note {
   author       User          @relation(fields: [userId], references: [id])
   userId       String
   //
-  region       Region        @relation(fields: [regionId], references: [id])
-  regionId     Int
+  folder       NoteFolder    @relation(fields: [folderId], references: [id], onDelete: Restrict)
+  folderId     Int
   //
   subject      String
   body         String?
@@ -488,7 +509,30 @@ model Note {
   //
   noteComments NoteComment[]
 
+  @@index([folderId])
   @@map("Note")
+  @@schema("prisma")
+}
+
+// Folders ("Ordner") for internal TILDA notes. Many-to-many with regions so one folder can be
+// shared across several region views of the same customer (like ReviewList.regions). A note lives
+// in exactly one folder; its regions are the folder's regions.
+model NoteFolder {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  //
+  name      String
+  //
+  createdById String?
+  createdBy   User?   @relation("NoteFolderCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String?
+  updatedBy   User?   @relation("NoteFolderUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  //
+  regions Region[]
+  notes   Note[]
+
+  @@map("NoteFolder")
   @@schema("prisma")
 }
 
@@ -506,6 +550,110 @@ model NoteComment {
   body      String
 
   @@map("NoteComment")
+  @@schema("prisma")
+}
+
+// Review lists ("Prüflisten"): uploadable/drawable lists of candidate locations to review.
+// A list has a many-to-many relation to regions (one list can be shared across region views).
+// Entries are deliberately a separate table from Notes (Prisma has no polymorphic associations);
+// they are functionally analogous but not shared code.
+model ReviewList {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  //
+  name      String
+  //
+  createdById String?
+  createdBy   User?   @relation("ReviewListCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String?
+  updatedBy   User?   @relation("ReviewListUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  //
+  regions   Region[]
+  entries   ReviewEntry[]
+
+  @@map("ReviewList")
+  @@schema("prisma")
+}
+
+model ReviewEntry {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  //
+  list      ReviewList @relation(fields: [listId], references: [id], onDelete: Cascade)
+  listId    Int
+  //
+  // GeoJSON geometry + free-form display properties (from upload or drawing).
+  geometry     Json
+  geometryType ReviewEntryGeometryType
+  properties   Json?
+  //
+  // Import identity (not the SQL id). A dedicated column so matching survives user edits
+  // to `properties` and can use @@index([listId, importId]) instead of a JSON scan.
+  importId String?
+  //
+  // Provenance: uploaded (from a GeoJSON file) vs. manually drawn in the app.
+  source     ReviewEntrySource @default(UPLOAD)
+  sourceMeta Json? // e.g. { filename } for uploads, { date } for manual entries
+  // Author of a manually drawn entry is createdBy; uploaded entries carry the importer as createdBy.
+  createdById String?
+  createdBy   User?   @relation("ReviewEntryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  updatedById String?
+  updatedBy   User?   @relation("ReviewEntryUpdatedBy", fields: [updatedById], references: [id], onDelete: SetNull)
+  //
+  // Evaluation status set by members in the Prüflisten panel; OPEN → OK | PROBLEM.
+  status   ReviewEntryStatus @default(OPEN)
+  //
+  comments ReviewEntryComment[]
+
+  // Serves both list scans and import matching (listId is a prefix of this composite).
+  @@index([listId, importId])
+  @@map("ReviewEntry")
+  @@schema("prisma")
+}
+
+model ReviewEntryComment {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  //
+  author  User        @relation(fields: [userId], references: [id])
+  userId  String
+  //
+  entry   ReviewEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+  entryId Int
+  //
+  body    String
+
+  @@index([entryId])
+  @@map("ReviewEntryComment")
+  @@schema("prisma")
+}
+
+enum ReviewEntryGeometryType {
+  POINT
+  LINESTRING
+  POLYGON
+  MULTIPOINT
+  MULTILINESTRING
+  MULTIPOLYGON
+
+  @@schema("prisma")
+}
+
+enum ReviewEntrySource {
+  UPLOAD
+  MANUAL
+
+  @@schema("prisma")
+}
+
+enum ReviewEntryStatus {
+  OPEN
+  OK
+  PROBLEM
+
   @@schema("prisma")
 }
 

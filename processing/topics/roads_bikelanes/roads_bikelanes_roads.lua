@@ -1,25 +1,25 @@
-local SET = require('topics.helper.sets')
 local highway_classes = require('topics.helper.highway_classes')
-local exclude = require('topics.roads_bikelanes.helper.exclude_highways')
 local maxspeed = require('topics.roads_bikelanes.maxspeed.maxspeed')
 local merge_table = require('topics.helper.merge_table')
-local category_is_sidepath = require('topics.roads_bikelanes.bikelanes.categories.category_is_sidepath')
 local extract_public_tags = require('topics.helper.extract_public_tags')
 local default_id = require('topics.helper.default_id')
 local paths_generalization = require('topics.roads_bikelanes.paths.paths_generalization')
 local road_generalization = require('topics.roads_bikelanes.roads.road_generalization')
 local road_todo_categories = require('topics.roads_bikelanes.roads.road_todo_categories')
+local adjoining_of_vs_csv_todo = require('topics.roads_bikelanes.pseudo_tags_sidepath.adjoining_of_vs_csv_todo')
+local road_todos = adjoining_of_vs_csv_todo.append_to(road_todo_categories)
 local collect_todos = require('topics.helper.collect_todos')
 local to_markdown_list = require('topics.helper.to_markdown_list')
 local to_todo_tags = require('topics.helper.to_todo_tags')
 local categorize_bike_suitability = require('topics.roads_bikelanes.roads.bike_suitability')
 local road_classification_road_value = require('topics.roads_bikelanes.roads.road_classification_road_value')
 local transform_highway_path_with_foot_or_bicycle_no = require('topics.roads_bikelanes.helper.transform_tags.transform_highway_path_with_foot_or_bicycle_no')
-local EXIT = require('topics.roads_bikelanes.helper.exit_processing')
+local excluded_from_roads_tables = require('topics.roads_bikelanes.helper.excluded_from_roads_tables')
 local SANITIZE_ROAD_TAGS = require('topics.roads_bikelanes.helper.sanitize_road_tags')
 local CLEANER = require('topics.helper.sanitize_cleaner')
 local LOG_ERROR = require('topics.roads_bikelanes.roads_bikelanes_errors')
 local roads_bikelanes_tables = require('topics.roads_bikelanes.roads_bikelanes_tables')
+local adjoining_context = require('topics.roads_bikelanes.pseudo_tags_sidepath.adjoining_context')
 
 local roads_table = roads_bikelanes_tables.roads_table
 local roads_path_classes_table = roads_bikelanes_tables.roads_path_classes_table
@@ -40,7 +40,7 @@ local function roads_bikelanes_roads(context)
   if not highway_classes.sidepath_highway_classes[object_tags.highway] then
     merge_table(result_tags, maxspeed(object_tags))
   end
-  local todos = collect_todos(road_todo_categories, object_tags, result_tags)
+  local todos = collect_todos(road_todos, object_tags, result_tags)
   result_tags._todo_list = to_todo_tags(todos)
   result_tags.todos = to_markdown_list(todos)
 
@@ -59,14 +59,8 @@ local function roads_bikelanes_roads(context)
   end
   LOG_ERROR.SANITIZED_VALUE(object_tags._type, object_tags._id, object_geom, replaced_tags, 'roads_bikelanes_roads')
 
-  if category_is_sidepath(object_tags) then return end
-  local forbidden_accesses_roads = SET.join_sets({
-    EXIT.forbidden_accesses_bikelanes,
-    SET.set({ 'destination', 'customers' })
-  })
-  if exclude.by_access(object_tags, forbidden_accesses_roads) then return end
-  if exclude.by_indoor(object_tags) then return end
-  if exclude.by_informal(object_tags) then return end
+  -- Same skip as routing mixedTrafficFoot (join symmetry with roadsPathClasses).
+  if excluded_from_roads_tables(object_tags) then return end
 
   local bike_suitability = categorize_bike_suitability(object_tags)
   if bike_suitability then
@@ -91,12 +85,18 @@ local function roads_bikelanes_roads(context)
       if cycleway._side == 'right' then result_tags['bikelane_right'] = cycleway.category end
     end
 
+    local path_tags = merge_table(extract_public_tags(result_tags), {
+      _is_sidepath = object_tags._is_sidepath,
+      _in_settlement_area = object_tags._in_settlement_area,
+    })
+    merge_table(
+      path_tags,
+      adjoining_context.derive_adjoining_context(object_tags, object_tags)
+    )
+
     roads_path_classes_table:insert({
       id = default_id({ type = object_tags._type, id = object_tags._id }),
-      tags = merge_table(extract_public_tags(result_tags), {
-        _is_sidepath = object_tags._is_sidepath,
-        _in_settlement_area = object_tags._in_settlement_area,
-      }),
+      tags = path_tags,
       meta = object_meta,
       geom = object_geom,
       minzoom = paths_generalization(object_tags, result_tags)
@@ -122,7 +122,7 @@ local function roads_bikelanes_roads(context)
     }
     todo_lines_table:insert({
       id = default_id({ type = object_tags._type, id = object_tags._id }),
-      table = 'roads',
+      source_table = 'roads',
       tags = result_tags._todo_list,
       meta = merge_table(todo_meta, object_meta),
       length = math.floor(result_tags.length),

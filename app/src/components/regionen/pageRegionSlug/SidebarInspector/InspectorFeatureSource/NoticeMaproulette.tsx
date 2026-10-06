@@ -30,16 +30,11 @@ export type NoticeMaproulette = {
   geometry: MapGeoJSONFeature['geometry'] | undefined
 }
 
-export const NoticeMaproulette = ({
+const useNoticeMaprouletteProjectKeys = ({
   sourceId,
-  osmTypeIdString,
-  kind,
   properties,
-  geometry,
-}: NoticeMaproulette) => {
+}: Pick<NoticeMaproulette, 'sourceId' | 'properties'>) => {
   const { categoriesConfig } = useCategoriesConfig()
-  const openProjectKey = useMaprouletteOpenProjectKey()
-  const { setOpenProjectKey } = useMaprouletteTasksActions()
 
   // This is how we store todos on `bikelanes`, `roads`
   const todosKeyFromTodoTag = todoMarkdownToMaprouletteCampaignKey(properties?.todos)
@@ -48,10 +43,34 @@ export const NoticeMaproulette = ({
   // When we are on `bikelanes`, `roads`, we only show some todos
   const rawMaprouletteProjectKeys =
     sourceId === 'atlas_todos_lines' ? todoKeysFromKeys : todosKeyFromTodoTag
-  const maprouletteProjectKeys = filterMaprouletteProjectKeys(
+
+  return filterMaprouletteProjectKeys(
     rawMaprouletteProjectKeys,
     getActiveRadinfraCampaignStyleId(categoriesConfig),
   )
+}
+
+export const useNoticeMaprouletteVisible = ({
+  sourceId,
+  osmTypeIdString,
+  properties,
+  geometry,
+}: NoticeMaproulette) => {
+  const maprouletteProjectKeys = useNoticeMaprouletteProjectKeys({ sourceId, properties })
+
+  return !!(maprouletteProjectKeys.length && osmTypeIdString && geometry?.type === 'LineString')
+}
+
+export const NoticeMaproulette = ({
+  sourceId,
+  osmTypeIdString,
+  kind,
+  properties,
+  geometry,
+}: NoticeMaproulette) => {
+  const maprouletteProjectKeys = useNoticeMaprouletteProjectKeys({ sourceId, properties })
+  const openProjectKey = useMaprouletteOpenProjectKey()
+  const { setOpenProjectKey } = useMaprouletteTasksActions()
 
   if (!maprouletteProjectKeys.length || !osmTypeIdString || geometry?.type !== 'LineString') {
     return null

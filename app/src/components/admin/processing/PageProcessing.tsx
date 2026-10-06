@@ -1,9 +1,12 @@
 import { getRouteApi } from '@tanstack/react-router'
 import { useState } from 'react'
-import { twMerge } from 'tailwind-merge'
-import { AdminPrivateHooksSection } from '@/components/admin/AdminPrivateHooksSection'
-import { Breadcrumb } from '@/components/admin/Breadcrumb'
-import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
+import { twJoin } from 'tailwind-merge'
+import { adminCardClassName } from '@/components/admin/adminClasses'
+import { AdminEmptyState } from '@/components/admin/AdminEmptyState'
+import { AdminIntro } from '@/components/admin/AdminIntro'
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
+import { AdminPagination } from '@/components/admin/AdminPagination'
+import { Link } from '@/components/shared/links/Link'
 import type { TopicId } from '@/data/processingTypes/topicId.generated.const'
 import type { ChartPhaseFilter } from '@/server/processing/parseTopicTimings'
 import {
@@ -18,61 +21,85 @@ import { ProcessingStatusPill } from './ProcessingStatusPill'
 
 const routeApi = getRouteApi('/admin/processing/')
 
-const sectionClassName = twMerge(
-  'rounded-xl bg-white/90 p-4 shadow-sm ring-1 ring-gray-900/5 sm:p-6',
-)
+const sectionTitleClassName = 'text-base/7 font-semibold text-gray-900'
 
 export function PageProcessing() {
-  const { runs } = routeApi.useLoaderData()
-  const latestRun = runs[0]
+  const { runs, latestRuns } = routeApi.useLoaderData()
+  const latestRun = latestRuns[0]
   const [topicFilter, setTopicFilter] = useState<TopicId | 'all'>('all')
   const [phaseFilter, setPhaseFilter] = useState<ChartPhaseFilter>('both')
-  const chartRuns = getRunsForChart(runs)
+  const chartRuns = getRunsForChart(latestRuns)
   const orphanedTopicIds = collectOrphanedTopicIdsFromRuns(chartRuns)
 
   return (
-    <div className="mx-auto max-w-6xl">
-      <HeaderWrapper>
-        <Breadcrumb pages={[{ href: '/admin/processing', name: 'Processing' }]} />
-      </HeaderWrapper>
-
-      <section className={sectionClassName}>
-        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-lg font-semibold text-gray-900">14-Tage-Übersicht</h2>
-            <p className="mt-1 text-sm text-gray-600">
-              Gestapelte Fläche über Zeit (Lua hell, SQL dunkler) — Laufzeiten pro Run im Vergleich.
+    <>
+      <AdminPageHeader
+        title="Processing-Läufe"
+        intro={
+          <AdminIntro>
+            <p>
+              Laufzeiten der OSM-Verarbeitung pro Topic. Tabellen unter <code>data.*</code>{' '}
+              verwaltet <Link to="/admin/data-schema">Data-Schema</Link>. Manuelle Auslöser für die
+              nachgelagerten Schritte stehen unter{' '}
+              <Link to="/admin/processing/hooks">Pipeline-Hooks</Link>.
             </p>
+          </AdminIntro>
+        }
+      />
+
+      <div className="space-y-8">
+        <section
+          aria-labelledby="processing-chart-title"
+          className={twJoin(adminCardClassName, 'p-4 sm:p-6')}
+        >
+          <div className="mb-4 flex flex-wrap items-start justify-between gap-3">
+            <div>
+              <h2 id="processing-chart-title" className={sectionTitleClassName}>
+                14-Tage-Übersicht
+              </h2>
+              <p className="mt-1 text-sm/6 text-gray-600">
+                Gestapelte Laufzeiten pro Lauf (Lua hell, SQL dunkler).
+              </p>
+            </div>
+            {latestRun ? (
+              <div className="flex items-center gap-2 text-sm text-gray-600">
+                Letzter Lauf
+                <ProcessingStatusPill status={latestRun.status} />
+              </div>
+            ) : null}
           </div>
-          {latestRun ? <ProcessingStatusPill status={latestRun.status} /> : null}
-        </div>
 
-        <ProcessingChartFilters
-          topicFilter={topicFilter}
-          phaseFilter={phaseFilter}
-          onTopicFilterChange={setTopicFilter}
-          onPhaseFilterChange={setPhaseFilter}
-        />
-
-        <div className="mt-6">
-          <ProcessingRunStackChart
-            runs={runs}
+          <ProcessingChartFilters
             topicFilter={topicFilter}
             phaseFilter={phaseFilter}
+            onTopicFilterChange={setTopicFilter}
+            onPhaseFilterChange={setPhaseFilter}
           />
-          <ProcessingOrphanedTopicsNotice
-            topicIds={orphanedTopicIds}
-            className="mt-4 text-sm text-gray-600"
-          />
-        </div>
-      </section>
 
-      <section className={twMerge(sectionClassName, 'mt-8')}>
-        <h2 className="mb-4 text-lg font-semibold text-gray-900">Läufe</h2>
-        <ProcessingRunsTable runs={runs} />
-      </section>
+          <div className="mt-6">
+            <ProcessingRunStackChart
+              runs={latestRuns}
+              topicFilter={topicFilter}
+              phaseFilter={phaseFilter}
+            />
+            <ProcessingOrphanedTopicsNotice
+              topicIds={orphanedTopicIds}
+              className="mt-4 text-sm text-gray-600"
+            />
+          </div>
+        </section>
 
-      <AdminPrivateHooksSection />
-    </div>
+        <section aria-labelledby="processing-runs-title" className="space-y-4">
+          <h2 id="processing-runs-title" className={sectionTitleClassName}>
+            Läufe
+          </h2>
+          {runs.rows.length === 0 ? (
+            <AdminEmptyState>Noch keine Processing-Läufe vorhanden.</AdminEmptyState>
+          ) : (
+            <ProcessingRunsTable runs={runs.rows} footer={<AdminPagination pagination={runs} />} />
+          )}
+        </section>
+      </div>
+    </>
   )
 }

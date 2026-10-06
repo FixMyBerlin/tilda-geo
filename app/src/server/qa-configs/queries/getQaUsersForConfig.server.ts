@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { getAppSession } from '@/server/auth/session.server'
+import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
-import { canAccessQaForRegion } from '@/server/qa-configs/authorization/canAccessQaForRegion.server'
 
 const Schema = z.object({
   configId: z.number(),
@@ -14,16 +14,22 @@ export async function getQaUsersForConfig(input: z.infer<typeof Schema>, headers
   const { configId, regionSlug } = Schema.parse(input)
 
   // Check authorization for the region
-  const authResult = await canAccessQaForRegion(appSession, regionSlug)
+  const authResult = await canAccessMemberModeForRegion(appSession, regionSlug)
   if (!authResult.isAuthorized) {
     return []
   }
+
+  const config = await db.qaConfig.findFirst({
+    where: { id: configId, region: { slug: regionSlug } },
+    select: { id: true },
+  })
+  if (!config) return []
 
   // Get unique users and their evaluation counts at the database level
   const userCounts = await db.qaEvaluation.groupBy({
     by: ['userId'],
     where: {
-      configId,
+      configId: config.id,
       evaluatorType: 'USER',
       userId: { not: null },
     },

@@ -19,21 +19,12 @@ const bibiExports = [
 ] as [ExportId, ...ExportId[]]
 
 const bibi: RegionForDatasetDerivation = {
-  categories: [
-    'poi',
-    'bikelanes',
-    'roads',
-    'surface',
-    'lit',
-    'parkingLars',
-    'parkingTilda',
-    'mapillary',
-  ],
+  categories: ['poi', 'bikelanes', 'roads', 'surface', 'lit', 'parkingLars', 'parkingTilda'],
   exports: bibiExports,
 }
 
 const parkraumBerlin: RegionForDatasetDerivation = {
-  categories: ['parkingTilda', 'parkingLars', 'mapillary'],
+  categories: ['parkingTilda', 'parkingLars'],
   exports: null,
 }
 

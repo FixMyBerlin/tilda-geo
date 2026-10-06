@@ -34,7 +34,7 @@ export const TagsTableRowCompositConditionCategory = ({
   return (
     <TagsTableRow key={tagKey} sourceId={sourceId} tagKey="condition_category">
       {sole === undefined ? (
-        <ul className="list-disc pl-4">
+        <ul className="list-disc pl-3">
           {items.map(({ segment, line }) => (
             <li key={segment}>
               <span title={isDev ? segment : undefined}>{line}</span>

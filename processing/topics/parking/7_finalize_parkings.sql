@@ -19,8 +19,7 @@ SELECT
     tags || jsonb_build_object(
       'area', ROUND(NULLIF(tags ->> 'area', '')::NUMERIC, 2),
       'length', ROUND(length::NUMERIC, 2),
-      'capacity', tilda_round_capacity ((tags ->> 'capacity')::NUMERIC),
-      'condition_category_primary', tilda_condition_category_primary (tags ->> 'condition_category')
+      'capacity', tilda_round_capacity ((tags ->> 'capacity')::NUMERIC)
     )
   ),
   meta,

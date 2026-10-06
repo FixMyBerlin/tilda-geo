@@ -6,7 +6,10 @@ import {
   useMapDebugShowDebugInfo,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapDebugState'
 import { MobileBottomSheet } from '../mobile/MobileBottomSheet'
-import { mobileControlButtonClassName } from '../mobile/mobileControlButton.const'
+import {
+  mapControlIconClassName,
+  mobileMapIconButtonClassName,
+} from '../mobile/mobileControlButton.const'
 import { DebugMap } from './DebugMap'
 import { DebugStateInteraction } from './DebugStateInteraction'
 
@@ -15,8 +18,8 @@ import { DebugStateInteraction } from './DebugStateInteraction'
  * is on (toggled via the user menu). Opens the merged DebugMap +
  * DebugStateInteraction panels in a bottom sheet instead of floating boxes on the map.
  *
- * Placed in both the MobileMapHeader (mobile) and the bottom controls cluster
- * (desktop); each is rendered only on its breakpoint, so no breakpoint class is needed.
+ * Placed in both the MobileMapHeader (mobile) and the desktop bottom control
+ * stack (always first in that stack); each is rendered only on its breakpoint.
  */
 export const DebugButton = () => {
   const showDebugInfo = useMapDebugShowDebugInfo()
@@ -33,13 +36,13 @@ export const DebugButton = () => {
         aria-label="Debug"
         aria-expanded={open}
         className={twMerge(
-          mobileControlButtonClassName,
+          mobileMapIconButtonClassName,
           // Admin colors (the debug tools were pink/purple), but shaped like the other buttons.
-          'size-10 border-pink-400 bg-pink-300 text-pink-900 hover:bg-pink-400 focus:ring-pink-500',
+          'border-pink-400 bg-pink-300 text-pink-900 hover:bg-pink-400 focus:ring-pink-500',
           open && 'border-pink-600 bg-pink-400',
         )}
       >
-        <BugAntIcon className="size-6" aria-hidden="true" />
+        <BugAntIcon className={mapControlIconClassName} aria-hidden="true" />
       </button>
 
       <MobileBottomSheet open={open} onClose={() => setOpen(false)} title="Debug" tone="debug">

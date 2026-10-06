@@ -1,12 +1,11 @@
 import { subcat_bikelanes_plus_routes } from '../mapDataSubcategories/subcat_bikelanes_plus_routes.const'
 import { subcat_bikelanes_plus_surface_text } from '../mapDataSubcategories/subcat_bikelanes_plus_surface_text.const'
 import { subcat_bikelanes_plus_width_text } from '../mapDataSubcategories/subcat_bikelanes_plus_width_text.const'
-import { subcat_mapillaryCoverage } from '../mapDataSubcategories/subcat_mapillaryCoverage.const'
 import { subcat_radinfra_bikelanes } from '../mapDataSubcategories/subcat_radinfra_bikelanes.const'
 import { subcat_radinfra_campaigns } from '../mapDataSubcategories/subcat_radinfra_campaigns.const'
 import { subcat_radinfra_currentness } from '../mapDataSubcategories/subcat_radinfra_currentness.const'
+import { subcat_radinfra_lit_bikelanes } from '../mapDataSubcategories/subcat_radinfra_lit_bikelanes.const'
 import { subcat_radinfra_oneway } from '../mapDataSubcategories/subcat_radinfra_oneway.const'
-import { subcat_radinfraPlusMapillary } from '../mapDataSubcategories/subcat_radinfra_plus_mapillary.const'
 import { subcat_radinfra_smoothness } from '../mapDataSubcategories/subcat_radinfra_smoothness.const'
 import { subcat_radinfra_stats } from '../mapDataSubcategories/subcat_radinfra_stats'
 import { subcat_radinfra_trafficSigns } from '../mapDataSubcategories/subcat_radinfra_trafficSigns.const'
@@ -36,6 +35,16 @@ export const categoriesRadinfra: StaticMapDataCategory[] = [
         defaultStyle: 'hidden',
       },
     ],
+  },
+  {
+    id: 'radinfra_lit',
+    name: 'Beleuchtung',
+    desc: 'Beleuchtung der Infrastruktur',
+    // radinfra.de only shows RVA (`bikelanes`), like every other category here.
+    // The roads, path classes and highway areas variants (`subcat_radinfra_lit_roads`,
+    // `subcat_radinfra_lit_path_classes`, `subcat_radinfra_lit_highway_areas`) were added in
+    // f911e4d92 and removed again; restore them from git history if we want them back.
+    subcategories: [{ ...subcat_radinfra_lit_bikelanes, defaultStyle: 'default' }],
   },
   {
     id: 'radinfra_width',
@@ -80,15 +89,6 @@ export const categoriesRadinfra: StaticMapDataCategory[] = [
     subcategories: [
       { ...subcat_radinfra_stats, defaultStyle: 'default' },
       // { ...subcat_poi_boundaries, defaultStyle: 'default' },
-    ],
-  },
-  {
-    id: 'radinfra_mapillary',
-    name: 'Mapillary',
-    desc: 'Straßenlevel Fotos',
-    subcategories: [
-      { ...subcat_mapillaryCoverage, defaultStyle: 'default' },
-      { ...subcat_radinfraPlusMapillary, defaultStyle: 'hidden' },
     ],
   },
 ]

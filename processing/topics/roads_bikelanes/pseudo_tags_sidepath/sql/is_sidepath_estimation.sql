@@ -2,281 +2,222 @@
 -- is_sidepath estimation (CSV output only).
 -- Adapted from https://github.com/lu-fennell/OSM-Sidepath-Estimation
 --
--- Prerequisites: views (created by the entry script) must expose geometry in SRID 3857 (meters):
---   _sidepath_estimation_paths(osm_id bigint, geom geometry, layer text) -- geom in 3857
---   _sidepath_estimation_roads(osm_id bigint, geom geometry, highway text, name text, layer text, maxspeed text) -- geom in 3857
+-- Prerequisites: tables (created by the entry script) must expose geometry in SRID 3857 (meters):
+--   _sidepath_estimation_paths(path_nr bigint, osm_id bigint, geom geometry, layer text, is_crossing boolean)
+--   _sidepath_estimation_roads(osm_id bigint, geom geometry, road text, name text, layer text, maxspeed text)
 -- The entry script casts source geoms to geometry in SRID 3857, so buffer_distance and buffer_size are in meters.
 -- If geoms were 4326, ST_Length would be in degrees and ST_DWithin(..., 22) would be 22 degrees (wrong).
 --
--- Provided: tilda_sidepath_csv(buffer_distance, buffer_size) -> (osm_id text, is_sidepath_estimation text)
+-- Provided: table _sidepath_estimation_result
+--   (osm_id bigint, is_sidepath_estimation text, adjoining_road text, adjoining_maxspeed text)
 --
 -- Default parameters (override with -v when invoking the entry script):
 --   buffer_distance  Distance between checkpoints along a path, in meters (default 190.0).
 --   buffer_size      Radius of each checkpoint for ST_DWithin to roads, in meters (default 22.0).
+--
+-- Voting (per path osm_id):
+--   checks  = number of checkpoints of the path.
+--   votes   = number of checkpoints that see a given road id / road class / road name (NULL name = '')
+--             within buffer_size on the same layer (both layers NULL or equal).
+--   is_sidepath when any road id, class or name passes `tilda_sidepath_is_sidepath_by_checks`.
+--   adjoining_road = road class with most votes (ties: `tilda_sidepath_highway_rank`);
+--   adjoining_maxspeed = highest numeric maxspeed of that class among the hits.
+--
+-- Written as plain set-based CREATE TABLE AS steps (no sequences, no custom aggregates) so Postgres
+-- can use parallel workers for the checkpoint and spatial join steps.
 -------------------------------------------
 
 \if :{?buffer_distance} \else \set buffer_distance 190.0 \endif
 \if :{?buffer_size} \else \set buffer_size 22.0 \endif
 
-BEGIN;
-
--- Input temp tables _sidepath_estimation_paths and _sidepath_estimation_roads must exist
--- (created by the entry script).
-
-CREATE SEQUENCE IF NOT EXISTS tilda_sidepath_checkpoint_nr_sequence;
-
-CREATE OR REPLACE FUNCTION tilda_sidepath_text_empty_if_null(t text) RETURNS text AS $$
-  SELECT CASE WHEN t IS NULL THEN '' ELSE t END
-$$ LANGUAGE SQL;
-
-CREATE OR REPLACE FUNCTION tilda_sidepath_text_both_null_or_eq(v1 text, v2 text) RETURNS boolean AS $$
-  SELECT (v1 IS NULL AND v2 IS NULL) OR v1 = v2
-$$ LANGUAGE SQL;
-
-CREATE OR REPLACE FUNCTION tilda_sidepath_jsonb_get_or_default(o jsonb, k text, df jsonb) RETURNS jsonb AS $$
-  SELECT CASE WHEN o ? k THEN o -> k ELSE df END
-$$ LANGUAGE SQL;
-
-CREATE OR REPLACE FUNCTION tilda_sidepath_jsonb_intset_add(o jsonb, n bigint) RETURNS jsonb AS $$
-  SELECT jsonb_set(o, ARRAY[n::text], 'true'::jsonb)
-$$ LANGUAGE SQL;
-
-CREATE OR REPLACE FUNCTION tilda_sidepath_dict_add_entry(o jsonb, k text, buffer_id bigint) RETURNS jsonb AS $$
-  SELECT CASE WHEN k is NULL
-    THEN
-      o
+-- Drop every tilda_sidepath_* function and aggregate (any signature, including older variants of the
+-- former JSONB aggregate implementation still present on long-lived databases). The functions below are
+-- recreated right after.
+SET client_min_messages = warning;
+DO $$
+DECLARE
+  r record;
+BEGIN
+  FOR r IN
+    SELECT p.oid::regprocedure::text AS sig, p.prokind
+    FROM pg_proc p
+    JOIN pg_namespace n ON n.oid = p.pronamespace
+    WHERE n.nspname = 'public' AND p.proname LIKE 'tilda\_sidepath\_%'
+    ORDER BY p.prokind = 'a' DESC
+  LOOP
+    IF r.prokind = 'a' THEN
+      EXECUTE format('DROP AGGREGATE IF EXISTS %s CASCADE', r.sig);
     ELSE
-      jsonb_set(o, ARRAY[k], tilda_sidepath_jsonb_intset_add(tilda_sidepath_jsonb_get_or_default(o, k, '{}'::jsonb), buffer_id))
-    END
-$$ LANGUAGE SQL;
-
-CREATE OR REPLACE FUNCTION tilda_sidepath_integer_inc_not_visited(visited jsonb, t text, n integer) RETURNS integer AS $$
-  SELECT CASE WHEN visited ? t THEN n ELSE n + 1 END
-$$ LANGUAGE SQL;
-
-CREATE OR REPLACE FUNCTION tilda_sidepath_dict_inc_field(o jsonb, visited jsonb, field text, buffer_id bigint) RETURNS jsonb AS $$
-  SELECT CASE WHEN field IS NULL
-    THEN
-      o
-    ELSE
-      jsonb_set(o, ARRAY[field], to_jsonb(tilda_sidepath_integer_inc_not_visited(visited -> field, buffer_id::text, tilda_sidepath_jsonb_get_or_default(o, field, '0'::jsonb)::integer)))
-    END
-$$ LANGUAGE SQL;
-
-CREATE OR REPLACE FUNCTION tilda_sidepath_dict_valid_speed(v text) RETURNS boolean AS $$
-  SELECT v IS NOT NULL AND v ~ '^[0-9][0-9.]*$'
-$$ LANGUAGE SQL;
-
-CREATE OR REPLACE FUNCTION tilda_sidepath_dict_max_field(o jsonb, field text, value text) RETURNS jsonb AS $$
-  SELECT CASE WHEN field IS NOT NULL AND tilda_sidepath_dict_valid_speed(value)
-    THEN
-      jsonb_set(
-        o,
-        ARRAY[field],
-        to_jsonb(
-          GREATEST(
-            tilda_sidepath_jsonb_get_or_default(o, field, to_jsonb(value::numeric))::numeric,
-            value::numeric
-          )
-        )
-      )
-    ELSE
-      o
-    END
-$$ LANGUAGE SQL;
-
-CREATE OR REPLACE FUNCTION tilda_sidepath_dict_add_result(
-  result jsonb,
-  visited jsonb,
-  buffer_id bigint,
-  buffer_layer text,
-  road_id bigint,
-  road_highway text,
-  road_name text,
-  road_layer text,
-  road_maxspeed text
-) RETURNS jsonb AS $$
-  SELECT
-    jsonb_set(
-      result,
-      ARRAY['checks'], to_jsonb(tilda_sidepath_integer_inc_not_visited(visited -> 'nrs', buffer_id::text, (result -> 'checks')::integer))
-    ) || CASE WHEN road_id IS NOT NULL AND tilda_sidepath_text_both_null_or_eq(buffer_layer, road_layer)
-         THEN
-           jsonb_build_object(
-             'id', tilda_sidepath_dict_inc_field(result -> 'id', visited -> 'road_ids', road_id::text, buffer_id),
-             'highway', tilda_sidepath_dict_inc_field(result -> 'highway', visited -> 'highways', road_highway, buffer_id),
-             'name', tilda_sidepath_dict_inc_field(result -> 'name', visited -> 'names', tilda_sidepath_text_empty_if_null(road_name), buffer_id),
-             'maxspeed', tilda_sidepath_dict_max_field(result -> 'maxspeed', road_highway, road_maxspeed)
-           )
-         ELSE
-           '{}'::jsonb
-         END
-$$ LANGUAGE SQL;
-
-CREATE OR REPLACE FUNCTION tilda_sidepath_dict_add_visited(
-  visited jsonb,
-  buffer_id bigint,
-  buffer_layer text,
-  road_id bigint,
-  road_highway text,
-  road_name text,
-  road_layer text
-) RETURNS jsonb AS $$
-  SELECT
-    jsonb_set(
-      visited,
-      ARRAY['nrs'], tilda_sidepath_jsonb_intset_add(visited -> 'nrs', buffer_id)
-    ) || CASE WHEN road_id IS NOT NULL AND tilda_sidepath_text_both_null_or_eq(buffer_layer, road_layer)
-         THEN
-           jsonb_build_object(
-                 'road_ids', tilda_sidepath_dict_add_entry(visited -> 'road_ids', road_id::text, buffer_id),
-                 'highways', tilda_sidepath_dict_add_entry(visited -> 'highways', road_highway, buffer_id),
-                 'names', tilda_sidepath_dict_add_entry(visited -> 'names', tilda_sidepath_text_empty_if_null(road_name), buffer_id)
-            )
-         ELSE
-           '{}'::jsonb
-         END
-$$ LANGUAGE SQL;
-
-CREATE OR REPLACE FUNCTION tilda_sidepath_dict_acc_init_if_null(acc jsonb) RETURNS jsonb AS $$
-  SELECT CASE WHEN acc IS NULL
-    THEN '{
-      "visited": { "nrs": {}, "road_ids": {}, "highways": {}, "names": {} },
-      "result": { "checks": 0, "id": {}, "highway": {}, "name": {}, "maxspeed": {} }
-      }'::jsonb
-    ELSE
-      acc
-    END
-$$ LANGUAGE SQL;
-
-CREATE OR REPLACE FUNCTION tilda_sidepath_dict_acc(
-  acc jsonb,
-  buffer_id bigint,
-  buffer_layer text,
-  road_id bigint,
-  road_highway text,
-  road_name text,
-  road_layer text,
-  road_maxspeed text
-) RETURNS jsonb AS $$
-  SELECT   jsonb_build_object(
-      'visited', tilda_sidepath_dict_add_visited(acc -> 'visited', buffer_id, buffer_layer, road_id, road_highway, road_name, road_layer),
-      'result', tilda_sidepath_dict_add_result(acc -> 'result', acc -> 'visited', buffer_id, buffer_layer, road_id, road_highway, road_name, road_layer, road_maxspeed)
-      )
-$$ LANGUAGE SQL;
-
-CREATE OR REPLACE FUNCTION tilda_sidepath_dict_get_result(acc jsonb) RETURNS jsonb AS $$
-  SELECT acc -> 'result'
-$$ LANGUAGE SQL;
-
-CREATE OR REPLACE AGGREGATE tilda_sidepath_dict_agg(
-  buffer_id bigint,
-  buffer_layer text,
-  road_id bigint,
-  road_highway text,
-  road_name text,
-  road_layer text,
-  road_maxspeed text
-) (
-  sfunc = tilda_sidepath_dict_acc,
-  stype = jsonb,
-  finalfunc = tilda_sidepath_dict_get_result,
-  initcond =  '{
-      "visited": { "nrs": {}, "road_ids": {}, "highways": {}, "names": {} },
-      "result": { "checks": 0, "id": {}, "highway": {}, "name": {}, "maxspeed": {} }
-      }');
+      EXECUTE format('DROP FUNCTION IF EXISTS %s CASCADE', r.sig);
+    END IF;
+  END LOOP;
+END
+$$;
+DROP SEQUENCE IF EXISTS tilda_sidepath_checkpoint_nr_sequence;
+RESET client_min_messages;
 
 CREATE OR REPLACE FUNCTION tilda_sidepath_dict_interpolated_points(point_distance float, geom geometry) RETURNS setof geometry AS $$
-  SELECT (
-      ST_Dump(
-        ST_Union(
-          CASE
-            WHEN ST_Length(geom) >= point_distance THEN ARRAY [
-                                                ST_Startpoint(geom),
-                                                ST_Endpoint(geom),
-                                                ST_Lineinterpolatepoints(geom, point_distance/st_length(geom))
-                                            ]
-            ELSE ARRAY [
-                                                ST_Startpoint(geom),
-                                                ST_Endpoint(geom)
-                                            ]
-          END
-        )
-      )
-    ).geom
-$$ LANGUAGE SQL;
+  -- Inset ends by 20 m so start/end don't vote on the crossing street.
+  -- Paths shorter than 40 m: one midpoint (too short for inset+mid+inset).
+  -- Do not ST_Union (it silently collapses nearby points and lowers `checks`).
+  SELECT pt FROM (
+    SELECT ST_LineInterpolatePoint(geom, 0.5) AS pt
+    WHERE ST_Length(geom) < 40
+    UNION ALL
+    SELECT ST_LineInterpolatePoint(geom, LEAST(1.0, GREATEST(0.0, 20.0 / NULLIF(ST_Length(geom), 0))))
+    WHERE ST_Length(geom) >= 40
+    UNION ALL
+    SELECT ST_LineInterpolatePoint(geom, 0.5)
+    WHERE ST_Length(geom) >= 40
+    UNION ALL
+    SELECT ST_LineInterpolatePoint(geom, 1.0 - LEAST(1.0, GREATEST(0.0, 20.0 / NULLIF(ST_Length(geom), 0))))
+    WHERE ST_Length(geom) >= 40
+    UNION ALL
+    SELECT (ST_Dump(ST_LineInterpolatePoints(geom, point_distance / ST_Length(geom)))).geom
+    WHERE ST_Length(geom) >= GREATEST(point_distance, 40)
+  ) s
+  WHERE pt IS NOT NULL
+$$ LANGUAGE SQL IMMUTABLE PARALLEL SAFE;
 
-CREATE OR REPLACE FUNCTION tilda_sidepath_dict_is_sidepath_by_checks(checks int, histogram jsonb) RETURNS boolean AS $$
-  SELECT EXISTS (
-    SELECT value FROM jsonb_each(histogram)
-    WHERE (checks <= 2 AND value::int = checks)
-    OR    checks::float * 0.66 <= value::float
-  )
-$$ LANGUAGE SQL;
-
-CREATE OR REPLACE FUNCTION tilda_sidepath_dict_is_sidepath(entry jsonb) RETURNS boolean AS $$
+CREATE OR REPLACE FUNCTION tilda_sidepath_is_sidepath_by_checks(checks bigint, votes bigint) RETURNS boolean AS $$
+  -- checks=1: path shorter than 40 m (single midpoint). A hit is enough — otherwise every
+  -- short sidepath (cycleway links, sidewalk stubs) would be assumed_no while adjoining_* is set.
+  -- checks=2: both checkpoints must agree.
+  -- checks>=3: 66 % majority.
   SELECT
-    tilda_sidepath_dict_is_sidepath_by_checks((entry -> 'checks')::int, entry -> 'id')
-    OR tilda_sidepath_dict_is_sidepath_by_checks((entry -> 'checks')::int, entry -> 'highway')
-    OR tilda_sidepath_dict_is_sidepath_by_checks((entry -> 'checks')::int, entry -> 'name')
-$$ LANGUAGE SQL;
+    (checks = 1 AND votes = 1)
+    OR (checks = 2 AND votes = checks)
+    OR (checks >= 3 AND checks::float * 0.66 <= votes::float)
+$$ LANGUAGE SQL IMMUTABLE PARALLEL SAFE;
 
--- Postgres rejects CREATE OR REPLACE when the OUT row type of a RETURNS TABLE function changes.
--- Drop dependents first, then the set-returning function (e.g. after adding columns to the result row).
-DROP FUNCTION IF EXISTS tilda_sidepath_csv(double precision, double precision);
-DROP FUNCTION IF EXISTS tilda_sidepath_dict_checkpoints_and_roads_left_outer_join(double precision, double precision);
+-- KEEP IN SYNC — ranks TILDA `roads.tags->>'road'` values.
+-- Must cover every class in run_is_sidepath_estimation.sql's `_sidepath_estimation_roads` IN list
+-- (same string literals). When that IN list changes, update this CASE … END ordering too.
+CREATE OR REPLACE FUNCTION tilda_sidepath_highway_rank(highway text) RETURNS integer AS $$
+  SELECT CASE highway
+    WHEN 'primary' THEN 0
+    WHEN 'primary_link' THEN 1
+    WHEN 'secondary' THEN 2
+    WHEN 'secondary_link' THEN 3
+    WHEN 'tertiary' THEN 4
+    WHEN 'tertiary_link' THEN 5
+    WHEN 'unclassified' THEN 6
+    WHEN 'residential_priority_road' THEN 7
+    WHEN 'residential' THEN 8
+    WHEN 'unspecified_road' THEN 9
+    WHEN 'living_street' THEN 10
+    WHEN 'pedestrian' THEN 11
+    ELSE 999
+  END
+$$ LANGUAGE SQL IMMUTABLE PARALLEL SAFE;
 
--- Single output used: CSV. Reads from _sidepath_estimation_* with osm_id and explicit road/path columns.
-CREATE FUNCTION tilda_sidepath_dict_checkpoints_and_roads_left_outer_join(buffer_distance float, buffer_size float)
-  RETURNS TABLE (
-    osm_id bigint,
-    nr bigint,
-    layer text,
-    road_id bigint,
-    road_highway text,
-    road_name text,
-    road_layer text,
-    road_maxspeed text
-  ) AS $$
-  WITH points AS (
-    SELECT
-      p.osm_id,
-      nextval('tilda_sidepath_checkpoint_nr_sequence') AS nr,
-      p.layer,
-      (tilda_sidepath_dict_interpolated_points($1, p.geom)) AS geom
-    FROM
-      _sidepath_estimation_paths p
-    ORDER BY
-      p.osm_id
-  )
-  SELECT
-    points.osm_id,
-    points.nr,
-    points.layer,
-    roads.osm_id AS road_id,
-    roads.highway AS road_highway,
-    roads.name AS road_name,
-    roads.layer AS road_layer,
-    roads.maxspeed AS road_maxspeed
-  FROM
-    points
-    LEFT OUTER JOIN _sidepath_estimation_roads roads ON ST_DWithin(points.geom, roads.geom, $2)
-  ORDER BY
-    points.osm_id
-$$ LANGUAGE SQL;
+-- One row per checkpoint; (path_nr, nr) identifies it.
+DROP TABLE IF EXISTS public._sidepath_estimation_checkpoints;
+\echo 'sidepath: checkpoints'
+\timing on
+CREATE UNLOGGED TABLE public._sidepath_estimation_checkpoints AS
+SELECT
+  p.path_nr,
+  pt.nr,
+  p.osm_id,
+  p.layer,
+  pt.geom
+FROM public._sidepath_estimation_paths p
+CROSS JOIN LATERAL tilda_sidepath_dict_interpolated_points(:buffer_distance, p.geom) WITH ORDINALITY AS pt(geom, nr)
+WHERE NOT p.is_crossing;
+\timing off
 
-CREATE FUNCTION tilda_sidepath_csv(buffer_distance float, buffer_size float)
-  RETURNS TABLE (osm_id text, is_sidepath_estimation text) AS $$
-  SELECT
-    j.osm_id::text,
-    tilda_sidepath_dict_is_sidepath(j.entry)::text
-  FROM (
-    SELECT
-      osm_id,
-      tilda_sidepath_dict_agg(nr, layer, road_id, road_highway, road_name, road_layer, road_maxspeed) AS entry
-    FROM tilda_sidepath_dict_checkpoints_and_roads_left_outer_join(buffer_distance, buffer_size)
-    GROUP BY osm_id
-  ) j
-$$ LANGUAGE SQL;
+-- Checkpoint × road pairs within buffer_size on the same layer.
+DROP TABLE IF EXISTS public._sidepath_estimation_hits;
+\echo 'sidepath: hits'
+\timing on
+CREATE UNLOGGED TABLE public._sidepath_estimation_hits AS
+SELECT
+  c.osm_id,
+  c.path_nr,
+  c.nr,
+  r.osm_id AS road_id,
+  r.road,
+  COALESCE(r.name, '') AS name,
+  r.maxspeed
+FROM public._sidepath_estimation_checkpoints c
+JOIN public._sidepath_estimation_roads r ON ST_DWithin(c.geom, r.geom, :buffer_size)
+WHERE c.layer IS NOT DISTINCT FROM r.layer;
+\timing off
 
-COMMIT;
+DROP TABLE IF EXISTS public._sidepath_estimation_result;
+\echo 'sidepath: votes'
+\timing on
+CREATE UNLOGGED TABLE public._sidepath_estimation_result AS
+WITH checks AS (
+  SELECT osm_id, count(*) AS checks
+  FROM public._sidepath_estimation_checkpoints
+  GROUP BY osm_id
+),
+id_votes AS (
+  SELECT osm_id, count(DISTINCT (path_nr, nr)) AS votes
+  FROM public._sidepath_estimation_hits
+  GROUP BY osm_id, road_id
+),
+road_votes AS (
+  SELECT osm_id, road, count(DISTINCT (path_nr, nr)) AS votes
+  FROM public._sidepath_estimation_hits
+  GROUP BY osm_id, road
+),
+name_votes AS (
+  SELECT osm_id, count(DISTINCT (path_nr, nr)) AS votes
+  FROM public._sidepath_estimation_hits
+  GROUP BY osm_id, name
+),
+all_votes AS (
+  SELECT osm_id, votes FROM id_votes
+  UNION ALL
+  SELECT osm_id, votes FROM road_votes
+  UNION ALL
+  SELECT osm_id, votes FROM name_votes
+),
+sidepaths AS (
+  SELECT DISTINCT v.osm_id
+  FROM all_votes v
+  JOIN checks c USING (osm_id)
+  WHERE tilda_sidepath_is_sidepath_by_checks(c.checks, v.votes)
+),
+dominant_road AS (
+  SELECT DISTINCT ON (osm_id) osm_id, road
+  FROM road_votes
+  ORDER BY osm_id, votes DESC, tilda_sidepath_highway_rank(road)
+),
+maxspeeds AS (
+  SELECT osm_id, road, max(maxspeed::numeric)::text AS maxspeed
+  FROM public._sidepath_estimation_hits
+  WHERE maxspeed ~ '^[0-9][0-9.]*$'
+  GROUP BY osm_id, road
+)
+-- Non-crossings: checkpoint vote.
+SELECT
+  c.osm_id,
+  (s.osm_id IS NOT NULL)::text AS is_sidepath_estimation,
+  d.road AS adjoining_road,
+  m.maxspeed AS adjoining_maxspeed
+FROM checks c
+LEFT JOIN sidepaths s USING (osm_id)
+LEFT JOIN dominant_road d USING (osm_id)
+LEFT JOIN maxspeeds m ON m.osm_id = c.osm_id AND m.road = d.road
+UNION ALL
+-- Crossings: the road this geometry actually intersects (highest class if several arms).
+-- Not a sidepath; traffic islands that hit no centerline stay empty.
+SELECT
+  p.osm_id,
+  'false',
+  x.road,
+  x.maxspeed
+FROM public._sidepath_estimation_paths p
+LEFT JOIN LATERAL (
+  SELECT r.road, r.maxspeed
+  FROM public._sidepath_estimation_roads r
+  WHERE ST_Intersects(p.geom, r.geom)
+  ORDER BY tilda_sidepath_highway_rank(r.road), r.osm_id
+  LIMIT 1
+) x ON true
+WHERE p.is_crossing;
+\timing off

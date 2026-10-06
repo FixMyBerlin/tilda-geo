@@ -32,5 +32,5 @@ export const proseInLayoutMainClasses = 'max-w-none'
 /** Inverted typography for markdown on dark panels (region welcome, inspector answers, …). */
 export const proseInvertedPanelClasses = [
   'prose-invert max-w-none',
-  'prose-a:text-brand prose-a:underline prose-a:underline-offset-2 hover:prose-a:text-brand-light',
+  'prose-a:text-brand prose-a:underline prose-a:underline-offset-2 prose-a:hover:text-brand-light',
 ].join(' ')

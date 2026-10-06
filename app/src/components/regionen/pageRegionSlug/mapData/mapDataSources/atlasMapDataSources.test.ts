@@ -34,7 +34,6 @@ describe('atlas map data sources', () => {
         'atlas_presenceStats',
         'accidents_unfallatlas',
         'atlas_aggregated_lengths',
-        'mapillary_coverage',
       ].sort(),
     )
 

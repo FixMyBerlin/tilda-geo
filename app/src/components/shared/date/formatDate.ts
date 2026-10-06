@@ -8,5 +8,5 @@ export function formatDate(date: Date | string | number | null | undefined) {
 
 export function formatDateTime(date: Date | string | number | null | undefined) {
   if (!date) return ''
-  return format(new Date(date), 'dd.MM.yyyy HH:mm', { locale: de })
+  return format(new Date(date), 'EEEEEE, dd.MM.yyyy HH:mm', { locale: de })
 }

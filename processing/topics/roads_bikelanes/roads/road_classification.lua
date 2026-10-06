@@ -15,7 +15,7 @@ local function road_classification(object_tags)
     width_source = SANITIZE_TAGS.safe_string(object_tags['source:width']),
     width_effective = parse_length(object_tags['width:effective']),
     bridge = SANITIZE_TAGS.boolean_yes(object_tags.bridge),
-    tunnel = SANITIZE_TAGS.boolean_yes(object_tags.tunnel),
+    tunnel = SANITIZE_TAGS.tunnel(object_tags.tunnel),
   }
 
   merge_table(result_tags, derive_traffic_signs(object_tags))

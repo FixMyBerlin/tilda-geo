@@ -1,32 +1,39 @@
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
+import { subDays } from 'date-fns'
 import { z } from 'zod'
 import { mapDatasetUploadsSearchSchema } from '@/lib/mapDatasetUploadsSearchSchema'
+import { optionalSearchString } from '@/lib/searchParamsSchema'
 import { auditLogListSchema } from '@/server/audit/auditLogFilters.schema'
-import {
-  getAuditHistoryForRecord,
-  getAuditHistoryForRegionEdit,
-  listAuditLog,
-} from '@/server/audit/queries/listAuditLog.server'
+import { getAuditHistoryForRecord, listAuditLog } from '@/server/audit/queries/listAuditLog.server'
 import { requireAdmin } from '@/server/auth/session.server'
 import db from '@/server/db.server'
+import { getNoteFolder } from '@/server/notes/queries/getNoteFolder.server'
+import { getNoteFoldersForAdmin } from '@/server/notes/queries/getNoteFoldersForAdmin.server'
 import { getQaConfig } from '@/server/qa-configs/queries/getQaConfig.server'
 import { getQaConfigsForAdmin } from '@/server/qa-configs/queries/getQaConfigsForAdmin.server'
 import { getQaConfigStatsForAdmin } from '@/server/qa-configs/queries/getQaConfigStatsForAdmin.server'
+import { getQaOrphanedEvaluationsForAdmin } from '@/server/qa-configs/queries/getQaOrphanedEvaluationsForAdmin.server'
 import { getRegionContractBySlug } from '@/server/region-contracts/queries/getRegionContract.server'
 import { getRegionContracts } from '@/server/region-contracts/queries/getRegionContracts.server'
 import { getRegionEditData } from '@/server/regions/queries/getRegion.server'
+import { getRegionAdminLinkCounts } from '@/server/regions/queries/getRegionAdminLinkCounts.server'
 import { getRegionRows, getRegions } from '@/server/regions/queries/getRegions.server'
+import { getReviewList } from '@/server/review-lists/queries/getReviewList.server'
+import { getReviewListsForAdmin } from '@/server/review-lists/queries/getReviewListsForAdmin.server'
 import {
-  buildMapDatasetUploadsRegionWhere,
+  buildMapDatasetUploadsFilterWhere,
   buildMapDatasetUploadsWhere,
 } from '@/server/uploads/buildMapDatasetUploadsWhere.server'
 import { getUploads } from '@/server/uploads/queries/getUploads.server'
 import { getUploadWithRegions } from '@/server/uploads/queries/getUploadWithRegions.server'
+import { buildUsersAndMembershipsWhere } from '@/server/users/buildUsersAndMembershipsWhere.server'
+import { getUserForAdmin } from '@/server/users/queries/getUserForAdmin.server'
 import { getUsers } from '@/server/users/queries/getUsers.server'
 import { getUsersAndMemberships } from '@/server/users/queries/getUsersAndMemberships.server'
-import { getUsersForRegion } from '@/server/users/queries/getUsersForRegion.server'
-import { createOffsetSearchSchema } from '@/shared/pagination/offsetSearchSchema'
+import { optionalTrimmed } from '@/server/utils/searchString'
+import { createPageSearchSchema } from '@/shared/pagination/pageSearchSchema'
+import { pageToSkipTake } from '@/shared/pagination/pageToSkipTake'
 
 export const getAdminRegionsLoaderFn = createServerFn({ method: 'GET' }).handler(async () => {
   // Server fns are independently callable RPC endpoints; the /admin beforeLoad guards page nav but
@@ -49,29 +56,29 @@ export const getAdminRegionEditLoaderFn = createServerFn({ method: 'GET' })
   .handler(async ({ data }) => {
     const headers = getRequestHeaders()
     await requireAdmin(headers)
-    const [{ region, config: formConfig, formValues }, users, contracts] = await Promise.all([
+    const [{ region, config: formConfig, formValues }, contracts] = await Promise.all([
       getRegionEditData({ slug: data.regionSlug }),
-      getUsersForRegion({ regionSlug: data.regionSlug }, headers),
       getRegionContracts(headers),
     ])
-    const auditHistory = await getAuditHistoryForRegionEdit(headers, region.id)
-    return { region, users, formConfig, formValues, contracts, auditHistory }
+    const linkCounts = await getRegionAdminLinkCounts(region)
+    return { region, formConfig, formValues, contracts, linkCounts }
   })
 
 const AdminUploadsLoaderInput = mapDatasetUploadsSearchSchema
 
 export const getAdminUploadsLoaderFn = createServerFn({ method: 'GET' })
-  .validator((data: z.infer<typeof AdminUploadsLoaderInput>) =>
+  .validator((data: z.input<typeof AdminUploadsLoaderInput>) =>
     AdminUploadsLoaderInput.parse(data ?? {}),
   )
   .handler(async ({ data }) => {
     const headers = getRequestHeaders()
+    await requireAdmin(headers)
     const where = buildMapDatasetUploadsWhere(data)
-    const regionWhere = buildMapDatasetUploadsRegionWhere(data.regionSlug)
+    const filterWhere = buildMapDatasetUploadsFilterWhere(data)
     const [result, datasetsCount, systemCount] = await Promise.all([
-      getUploads({ where, skip: data.skip, take: data.take }, headers),
-      db.mapDatasetUpload.count({ where: { ...regionWhere, systemLayer: false } }),
-      db.mapDatasetUpload.count({ where: { ...regionWhere, systemLayer: true } }),
+      getUploads({ where, ...pageToSkipTake(data) }, headers),
+      db.mapDatasetUpload.count({ where: { ...filterWhere, systemLayer: false } }),
+      db.mapDatasetUpload.count({ where: { ...filterWhere, systemLayer: true } }),
     ])
     return {
       ...result,
@@ -94,18 +101,23 @@ export const getAdminUploadLoaderFn = createServerFn({ method: 'GET' })
     return { upload, auditHistory }
   })
 
-const AdminQaConfigEditInput = z.object({ id: z.number() })
+const AdminQaConfigEditInput = z.object({ id: z.number() }).extend(createPageSearchSchema().shape)
 
 export const getAdminQaConfigEditLoaderFn = createServerFn({ method: 'GET' })
-  .validator((data: z.infer<typeof AdminQaConfigEditInput>) => AdminQaConfigEditInput.parse(data))
+  .validator((data: z.input<typeof AdminQaConfigEditInput>) => AdminQaConfigEditInput.parse(data))
   .handler(async ({ data }) => {
     const headers = getRequestHeaders()
-    const [qaConfig, regions, auditHistory] = await Promise.all([
+    const [qaConfig, regions, auditHistory, stats] = await Promise.all([
       getQaConfig({ id: data.id }, headers),
       getRegionRows({}, headers),
       getAuditHistoryForRecord(headers, 'QaConfig', String(data.id)),
+      getQaConfigStatsForAdmin({ configId: data.id }, headers),
     ])
-    return { qaConfig, regions, auditHistory }
+    const orphanedEvaluations = await getQaOrphanedEvaluationsForAdmin(
+      { configId: qaConfig.id, mapTable: qaConfig.mapTable, ...pageToSkipTake(data) },
+      headers,
+    )
+    return { qaConfig, regions, auditHistory, orphanedEvaluations, stats }
   })
 
 export const getAdminQaConfigNewLoaderFn = createServerFn({ method: 'GET' }).handler(async () => {
@@ -113,27 +125,107 @@ export const getAdminQaConfigNewLoaderFn = createServerFn({ method: 'GET' }).han
   return { regions }
 })
 
-export const getAdminQaConfigsLoaderFn = createServerFn({ method: 'GET' }).handler(async () => {
-  const headers = getRequestHeaders()
-  const qaConfigs = await getQaConfigsForAdmin(headers)
-  const statsByConfigId = Object.fromEntries(
-    await Promise.all(
-      qaConfigs.map(async (qaConfig) => {
-        const stats = await getQaConfigStatsForAdmin({ configId: qaConfig.id }, headers)
-        return [qaConfig.id, stats] as const
-      }),
-    ),
-  )
-  return { qaConfigs, statsByConfigId }
+const AdminRegionFilterInput = z.object({
+  regionSlug: optionalSearchString().catch(undefined),
 })
 
-const AdminMembershipsLoaderInput = createOffsetSearchSchema({ maxTake: 200 })
-
-export const getAdminMembershipsLoaderFn = createServerFn({ method: 'GET' })
-  .validator((data: z.infer<typeof AdminMembershipsLoaderInput>) =>
-    AdminMembershipsLoaderInput.parse(data ?? {}),
+export const getAdminQaConfigsLoaderFn = createServerFn({ method: 'GET' })
+  .validator((data: z.input<typeof AdminRegionFilterInput>) =>
+    AdminRegionFilterInput.parse(data ?? {}),
   )
-  .handler(async ({ data }) => getUsersAndMemberships(data, getRequestHeaders()))
+  .handler(async ({ data }) => {
+    const qaConfigs = await getQaConfigsForAdmin(data, getRequestHeaders())
+    return { qaConfigs }
+  })
+
+export const getAdminReviewListsLoaderFn = createServerFn({ method: 'GET' })
+  .validator((data: z.input<typeof AdminRegionFilterInput>) =>
+    AdminRegionFilterInput.parse(data ?? {}),
+  )
+  .handler(async ({ data }) => {
+    const lists = await getReviewListsForAdmin(data, getRequestHeaders())
+    return { lists }
+  })
+
+const AdminReviewListEditInput = z.object({ id: z.number() })
+
+export const getAdminReviewListEditLoaderFn = createServerFn({ method: 'GET' })
+  .validator((data: z.infer<typeof AdminReviewListEditInput>) =>
+    AdminReviewListEditInput.parse(data),
+  )
+  .handler(async ({ data }) => {
+    const headers = getRequestHeaders()
+    await requireAdmin(headers)
+    const [list, regions, auditHistory] = await Promise.all([
+      getReviewList({ id: data.id }, headers),
+      getRegions(),
+      getAuditHistoryForRecord(headers, 'ReviewList', String(data.id)),
+    ])
+    return { list, regions, auditHistory }
+  })
+
+export const getAdminNoteFoldersLoaderFn = createServerFn({ method: 'GET' })
+  .validator((data: z.input<typeof AdminRegionFilterInput>) =>
+    AdminRegionFilterInput.parse(data ?? {}),
+  )
+  .handler(async ({ data }) => {
+    const folders = await getNoteFoldersForAdmin(data, getRequestHeaders())
+    return { folders }
+  })
+
+const AdminNoteFolderEditInput = z.object({ id: z.number() })
+
+export const getAdminNoteFolderEditLoaderFn = createServerFn({ method: 'GET' })
+  .validator((data: z.infer<typeof AdminNoteFolderEditInput>) =>
+    AdminNoteFolderEditInput.parse(data),
+  )
+  .handler(async ({ data }) => {
+    const headers = getRequestHeaders()
+    await requireAdmin(headers)
+    const [folder, regions, auditHistory] = await Promise.all([
+      getNoteFolder({ id: data.id }, headers),
+      getRegions(),
+      getAuditHistoryForRecord(headers, 'NoteFolder', String(data.id)),
+    ])
+    return { folder, regions, auditHistory }
+  })
+
+const AdminUsersLoaderInput = createPageSearchSchema().extend({
+  q: optionalSearchString(),
+  regionSlug: optionalSearchString(),
+})
+
+export const getAdminUsersLoaderFn = createServerFn({ method: 'GET' })
+  .validator((data: z.input<typeof AdminUsersLoaderInput>) =>
+    AdminUsersLoaderInput.parse(data ?? {}),
+  )
+  .handler(async ({ data: { q, regionSlug, ...page } }) => {
+    const result = await getUsersAndMemberships(
+      { ...pageToSkipTake(page), where: buildUsersAndMembershipsWhere({ q, regionSlug }) },
+      getRequestHeaders(),
+    )
+    return {
+      ...result,
+      // Stable cutoff for the "accessed regions" default filter (last 30 days) — computed once
+      // here so the client never recomputes "now" during render (would cause a hydration mismatch).
+      accessedRegionsCutoffAt: subDays(new Date(), 30).getTime(),
+    }
+  })
+
+const AdminUserEditInput = z.object({ userId: z.string() })
+
+export const getAdminUserEditLoaderFn = createServerFn({ method: 'GET' })
+  .validator((data: z.infer<typeof AdminUserEditInput>) => AdminUserEditInput.parse(data))
+  .handler(async ({ data }) => {
+    const headers = getRequestHeaders()
+    const user = await getUserForAdmin({ userId: data.userId }, headers)
+    // Counts for the aside links; each equals the rows of the linked, filtered list.
+    const auditHistory = await db.auditLog.count({ where: { model: 'User', recordId: user.id } })
+    return {
+      user,
+      linkCounts: { memberships: user._count.memberships, auditHistory },
+    }
+  })
 
 export const getAdminRegionContractsLoaderFn = createServerFn({ method: 'GET' }).handler(
   async () => {
@@ -178,9 +270,29 @@ export const getAdminMembershipNewLoaderFn = createServerFn({ method: 'GET' }).h
   return { regions, users }
 })
 
+const AdminAuditLogLoaderInput = auditLogListSchema
+  .omit({ skip: true, take: true })
+  .extend(createPageSearchSchema().shape)
+  .extend({ regionSlug: optionalSearchString().catch(undefined) })
+
 export const getAdminAuditLogLoaderFn = createServerFn({ method: 'GET' })
-  .validator((data: z.input<typeof auditLogListSchema>) => auditLogListSchema.parse(data ?? {}))
-  .handler(async ({ data }) => {
+  .validator((data: z.input<typeof AdminAuditLogLoaderInput>) =>
+    AdminAuditLogLoaderInput.parse(data ?? {}),
+  )
+  .handler(async ({ data: { page, pageSize, regionSlug, ...filters } }) => {
     await requireAdmin(getRequestHeaders())
-    return listAuditLog(data)
+    const slug = optionalTrimmed(regionSlug)
+    // `?regionSlug=` → the region's edit history scope (region row + assignment rows). An unknown
+    // slug matches no region id, so the list stays empty like the other region-filtered lists.
+    const region = slug
+      ? await db.region.findUnique({ where: { slug }, select: { id: true } })
+      : undefined
+    return listAuditLog(
+      {
+        ...filters,
+        ...(slug ? { regionId: region?.id ?? -1 } : {}),
+        ...pageToSkipTake({ page, pageSize }),
+      },
+      { fallbackToLastPage: true },
+    )
   })

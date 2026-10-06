@@ -28,7 +28,7 @@ const optionalAuditLogDateBound = (bound: 'from' | 'to') =>
 export const auditLogFilterWireFields = {
   model: z.string().optional(),
   recordId: z.coerce.string().optional(),
-  userId: z.string().optional(),
+  userId: z.coerce.string().optional(),
   changeSource: z.enum(AUDIT_CHANGE_SOURCES).optional(),
   from: z.string().optional(),
   to: z.string().optional(),
@@ -40,9 +40,7 @@ const auditLogFilterFields = {
   to: optionalAuditLogDateBound('to'),
 } as const
 
-export const auditLogListSchema = z
-  .object(auditLogFilterFields)
-  .extend(offsetSearchFields({ maxTake: 200 }))
+export const auditLogListSchema = z.object(auditLogFilterFields).extend(offsetSearchFields())
 
 /** Parsed audit-log query filters (dates expanded at the schema boundary). */
 export type AuditLogListFilters = Partial<z.output<typeof auditLogListSchema>>

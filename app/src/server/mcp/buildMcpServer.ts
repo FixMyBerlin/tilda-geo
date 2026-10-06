@@ -1,6 +1,10 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
-import { adminApiAuditContext, type AdminApiAuth } from '@/server/api/admin/guardAdminApi.server'
+import {
+  adminApiAuditContext,
+  adminApiMemberCaller,
+  type AdminApiAuth,
+} from '@/server/api/admin/guardAdminApi.server'
 import { AUDITED_MODELS } from '@/server/audit/auditAuditedModels.const'
 import { auditChangeSourceFilterLabel } from '@/server/audit/auditChangeSources.const'
 import { auditLogFilterWireFields, auditLogListSchema } from '@/server/audit/auditLogFilters.schema'
@@ -12,13 +16,34 @@ import {
 import { dataSchemaIdentifierSchema } from '@/server/dataSchema/dataSchemaSpec.schema'
 import { importDataSchemaTable } from '@/server/dataSchema/importDataSchemaTable.server'
 import { extendBunRequestIdleTimeout } from '@/server/http/extendBunRequestIdleTimeout.server'
+import {
+  createMapDatasetCategory,
+  CreateMapDatasetCategoryInput,
+  deleteMapDatasetCategory,
+  getMapDatasetCategory,
+  listMapDatasetCategories,
+  mapDatasetCategoryInputFields,
+  updateMapDatasetCategory,
+  UpdateMapDatasetCategoryInput,
+} from '@/server/map-dataset-categories/mapDatasetCategoryWriteService.server'
 import { mcpEnvLabel } from '@/server/mcp/mcpCursorConfig'
+import { ok, run } from '@/server/mcp/mcpToolResult'
+import { registerNotesTools } from '@/server/mcp/tools/registerNotesTools'
+import { registerReviewListsTools } from '@/server/mcp/tools/registerReviewListsTools'
 import {
   mapProcessingRunDetail,
   mapProcessingRunListItem,
 } from '@/server/processing/mapProcessingRunTimings'
 import { getProcessingRun } from '@/server/processing/queries/getProcessingRun.server'
 import { listProcessingRuns } from '@/server/processing/queries/listProcessingRuns.server'
+import { RegionContractConfigSchema } from '@/server/region-contracts/regionContractSchema'
+import {
+  createRegionContract,
+  deleteRegionContractBySlug,
+  getRegionContractDetail,
+  listRegionContracts,
+  updateRegionContract,
+} from '@/server/region-contracts/regionContractWriteService.server'
 import { getRegionWithWriteConfig } from '@/server/regions/queries/getRegion.server'
 import { getRegionsWithWriteConfig } from '@/server/regions/queries/getRegions.server'
 import {
@@ -30,33 +55,6 @@ import { createRegionUploadFromBytes } from '@/server/regions/uploads/createRegi
 import { regionUploadFromBytesInputSchema } from '@/server/regions/uploads/regionUploadFromBytes.schema'
 import { joinCommaList } from '@/shared/orderedList/commaList'
 import { offsetSearchFields } from '@/shared/pagination/offsetSearchSchema'
-
-const ok = (data: unknown) => ({
-  content: [
-    {
-      type: 'text' as const,
-      text: typeof data === 'string' ? data : JSON.stringify(data, null, 2),
-    },
-  ],
-})
-
-const fail = (error: unknown) => ({
-  content: [
-    {
-      type: 'text' as const,
-      text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-    },
-  ],
-  isError: true,
-})
-
-const run = async (fn: () => Promise<unknown>) => {
-  try {
-    return ok(await fn())
-  } catch (error) {
-    return fail(error)
-  }
-}
 
 const regionConfigDescription =
   'the full RegionWriteInput (slug, name, fullName, product, status, mapLat/Lng/Zoom, categories, ' +
@@ -84,13 +82,17 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
     {
       instructions:
         `TILDA admin tools bound to the ${envLabel} environment (${origin}). ` +
-        `Writes (regions_create / regions_update / regions_delete / region_uploads_create / data_schema_import) mutate the ${envLabel} database — ` +
+        `Writes (regions_*, region_uploads_create, region_contracts_*, map_dataset_categories_*, data_schema_import) mutate the ${envLabel} database — ` +
         `call env_info first and confirm you are on the intended environment before any write. ` +
         `Writes are attributed in the audit log to the API token owner. ` +
         `regions_get / regions_list return { region, config }; use config for regions_update. ` +
         `Upload logo/welcome files with region_uploads_create, then attach via headerLogoId or welcome.image.uploadId. ` +
         `data_schema_list / data_schema_imports_list show S3 dumps, Postgres data.* tables, and Import runs on this environment. ` +
-        `processing_runs_list / processing_runs_get read nightly processing timings from public.meta (same data as /admin/processing).`,
+        `region_contracts_* manage contracts (Aufträge) and which regions belong to them. ` +
+        `map_dataset_categories_* manage the categories that map dataset uploads (static datasets) are grouped under. ` +
+        `processing_runs_list / processing_runs_get read nightly processing timings from public.meta (same data as /admin/processing). ` +
+        `note_folders_* / notes_* / note_comments_* manage internal notes (Hinweise) and review_lists_* / review_entries_* / review_entry_comments_* manage review lists (Prüflisten) of one region (regionSlug). ` +
+        `They act as the API token owner with the same rules as the region UI: notes and comments can only be edited or deleted by their author (the tool answers "Not allowed: …" otherwise), and only empty folders and lists can be deleted. note_folders_update / review_lists_update also set which regions a folder or list is linked to.`,
     },
   )
 
@@ -100,7 +102,9 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
       description:
         'Report which TILDA environment (DEV/STG/PRD) and origin this MCP server is bound to. ' +
         'Call this first to confirm the target environment before any write. ' +
-        'Tools include data_schema_*, processing_runs_*, region_uploads_create, and audit_list.',
+        'Tools include regions_*, region_uploads_create, region_contracts_*, map_dataset_categories_*, ' +
+        'data_schema_*, processing_runs_*, audit_list, note_folders_*, notes_*, note_comments_*, ' +
+        'review_lists_*, review_entries_* and review_entry_comments_*.',
     },
     () => ok({ environment: envLabel, origin, viteAppEnv: process.env.VITE_APP_ENV }),
   )
@@ -166,6 +170,123 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
   )
 
   server.registerTool(
+    'region_contracts_list',
+    {
+      description:
+        'List region contracts (Aufträge) as { id, slug, name, status, regionCount }, sorted by name.',
+    },
+    () => run(() => listRegionContracts()),
+  )
+
+  server.registerTool(
+    'region_contracts_get',
+    {
+      description: 'Get one region contract by slug, including its assigned regionSlugs.',
+      inputSchema: { slug: z.string() },
+    },
+    ({ slug }) => run(() => getRegionContractDetail(slug)),
+  )
+
+  server.registerTool(
+    'region_contracts_create',
+    {
+      description:
+        'Create a region contract. regionSlugs assigns existing regions to it ' +
+        '(a region belongs to at most one contract, so this moves them from any other contract).',
+      inputSchema: RegionContractConfigSchema.shape,
+    },
+    (args) => run(() => createRegionContract(args, auditContext())),
+  )
+
+  server.registerTool(
+    'region_contracts_update',
+    {
+      description:
+        'Update a region contract by slug (the slug itself cannot change). Full replace: ' +
+        'name, status and regionSlugs are all set; regions missing from regionSlugs are unassigned.',
+      inputSchema: RegionContractConfigSchema.shape,
+    },
+    (args) => run(() => updateRegionContract(args.slug, args, auditContext())),
+  )
+
+  server.registerTool(
+    'region_contracts_delete',
+    {
+      description:
+        'Delete a region contract by slug. Fails while regions are still assigned — ' +
+        'remove them first with region_contracts_update.',
+      inputSchema: { slug: z.string() },
+    },
+    ({ slug }) => run(() => deleteRegionContractBySlug(slug, auditContext())),
+  )
+
+  server.registerTool(
+    'map_dataset_categories_list',
+    {
+      description:
+        'List map dataset categories (the groups static dataset uploads are listed under), ordered by ' +
+        'groupKey, sortOrder, categoryKey. key is "<groupKey>/<categoryKey>".',
+    },
+    () => run(() => listMapDatasetCategories()),
+  )
+
+  server.registerTool(
+    'map_dataset_categories_get',
+    {
+      description: 'Get one map dataset category by key ("<groupKey>/<categoryKey>").',
+      inputSchema: { key: z.string().min(1) },
+    },
+    ({ key }) =>
+      run(async () => {
+        const category = await getMapDatasetCategory(key)
+        if (!category) throw new Error(`Map dataset category not found: ${key}`)
+        return category
+      }),
+  )
+
+  server.registerTool(
+    'map_dataset_categories_create',
+    {
+      description:
+        'Create a map dataset category. key becomes "<groupKey>/<categoryKey>" (segments must not ' +
+        'contain "/"). sortOrder orders categories within a group; subtitle is optional.',
+      inputSchema: mapDatasetCategoryInputFields,
+    },
+    (args) =>
+      run(() =>
+        createMapDatasetCategory(CreateMapDatasetCategoryInput.parse(args), auditContext()),
+      ),
+  )
+
+  server.registerTool(
+    'map_dataset_categories_update',
+    {
+      description:
+        'Update a map dataset category by its current key. Full replace of groupKey, categoryKey, ' +
+        'sortOrder, title, subtitle; changing groupKey/categoryKey renames the key.',
+      inputSchema: { key: z.string().min(1).max(191), ...mapDatasetCategoryInputFields },
+    },
+    (args) =>
+      run(async () => {
+        const result = await updateMapDatasetCategory(
+          UpdateMapDatasetCategoryInput.parse(args),
+          auditContext(),
+        )
+        if (!result.ok) throw new Error(`A category with that key already exists (${result.error})`)
+        return result.category
+      }),
+  )
+
+  server.registerTool(
+    'map_dataset_categories_delete',
+    {
+      description: 'Delete a map dataset category by key.',
+      inputSchema: { key: z.string().min(1).max(191) },
+    },
+    ({ key }) => run(() => deleteMapDatasetCategory(key, auditContext())),
+  )
+
+  server.registerTool(
     'data_schema_list',
     {
       description:
@@ -185,7 +306,7 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
       inputSchema: {
         table: dataSchemaIdentifierSchema.optional(),
         status: z.enum(['PENDING', 'RUNNING', 'SUCCESS', 'FAILED']).optional(),
-        ...offsetSearchFields({ maxTake: 200 }),
+        ...offsetSearchFields(),
       },
     },
     (args) => run(() => listDataSchemaImports(args)),
@@ -221,7 +342,7 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
         'Each item has status, durations, OSM date, topic completed/skipped counts, and the slowest topics. ' +
         'Paginate with take/skip (default 50, max 200). Use processing_runs_get for per-topic timings.',
       inputSchema: {
-        ...offsetSearchFields({ maxTake: 200 }),
+        ...offsetSearchFields(),
       },
     },
     (args) =>
@@ -262,11 +383,15 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
         'dates); paginate with take/skip. Useful for inspecting or planning a rollback.',
       inputSchema: {
         ...auditLogFilterWireFields,
-        ...offsetSearchFields({ maxTake: 200 }),
+        ...offsetSearchFields(),
       },
     },
     (args) => run(() => listAuditLog(auditLogListSchema.parse(args))),
   )
+
+  const memberCaller = adminApiMemberCaller(auth, request)
+  registerNotesTools(server, memberCaller)
+  registerReviewListsTools(server, memberCaller)
 
   return server
 }

@@ -33,7 +33,7 @@ export const InspectorFeatureStaticDataset = ({ sourceKey, feature }: InspectorF
         <p
           // oxlint-disable-next-line react/no-danger -- attribution HTML from dataset config
           dangerouslySetInnerHTML={{ __html: sourceData.attributionHtml }}
-          className="border-b py-1.5 pr-3 pl-4 text-gray-400"
+          className="border-b py-1.5 pr-2 pl-2 text-gray-400"
         />
         <TagsTable
           properties={feature.properties}

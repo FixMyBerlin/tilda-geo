@@ -1,4 +1,3 @@
-import { differenceBy } from 'es-toolkit/compat'
 import { useEffect, useRef } from 'react'
 import type { MapGeoJSONFeature } from 'react-map-gl/maplibre'
 import { useMap } from 'react-map-gl/maplibre'
@@ -6,43 +5,30 @@ import {
   useMapInspectorFeatures,
   useMapLoaded,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
+import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useSelectedFeatures } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useSelectedFeatures'
+import { isModeOwnedSource } from '@/components/regionen/pageRegionSlug/modes/modeScopedSelection'
+import { syncSelectedFeatureState } from './syncSelectedFeatureState'
 import { safeSetFeatureState } from './utils/safeSetFeatureState'
-
-const key = (f: MapGeoJSONFeature) => `${f.id}:::${f.layer.id}`
-
-type FeatureStateMapWriter = {
-  setFeatureState: (feature: MapGeoJSONFeature, state: { selected: boolean }) => void
-}
-
-export const syncSelectedFeatureState = ({
-  map,
-  currentSelectedFeatures,
-  previousSelectedFeatures,
-}: {
-  map: FeatureStateMapWriter
-  currentSelectedFeatures: MapGeoJSONFeature[]
-  previousSelectedFeatures: MapGeoJSONFeature[]
-}) => {
-  differenceBy(previousSelectedFeatures, currentSelectedFeatures, key).forEach((f) => {
-    map.setFeatureState(f, { selected: false })
-  })
-
-  differenceBy(currentSelectedFeatures, previousSelectedFeatures, key).forEach((f) => {
-    map.setFeatureState(f, { selected: true })
-  })
-}
 
 export const UpdateFeatureState = () => {
   const { mainMap } = useMap()
   const mapLoaded = useMapLoaded()
   const previous = useRef<MapGeoJSONFeature[]>([])
   const inspectorFeatures = useMapInspectorFeatures()
-  const selectedFeatures = useSelectedFeatures(!inspectorFeatures.length)
-
-  const currentSelectedFeatures = inspectorFeatures.length
-    ? inspectorFeatures
-    : selectedFeatures.map((f) => f.mapFeature).filter(Boolean)
+  const { featuresParam } = useFeaturesParam()
+  const hasModeUrlSelection = featuresParam.some((feature) => isModeOwnedSource(feature.sourceId))
+  const selectedFeatures = useSelectedFeatures(!inspectorFeatures.length || hasModeUrlSelection)
+  const inspectorDomainFeatures = inspectorFeatures.filter(
+    (feature) => !isModeOwnedSource(feature.source),
+  )
+  const urlMapFeatures = selectedFeatures.map((f) => f.mapFeature).filter(Boolean)
+  const currentSelectedFeatures = inspectorDomainFeatures.length
+    ? [
+        ...inspectorDomainFeatures,
+        ...urlMapFeatures.filter((feature) => isModeOwnedSource(feature.source)),
+      ]
+    : urlMapFeatures
 
   useEffect(
     function syncSelectedFeatureStateToMap() {
@@ -64,7 +50,8 @@ export const UpdateFeatureState = () => {
 
       previous.current = current
     },
-    [currentSelectedFeatures, mainMap, mapLoaded],
+    // oxlint-disable-next-line react/exhaustive-deps -- oxlint --fix-dangerously drops this and leaves selection highlighting stale
+    [mainMap, mapLoaded, currentSelectedFeatures],
   )
 
   return null

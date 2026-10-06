@@ -44,9 +44,9 @@ sourceNumericId|featureId|coord1|coord2|coord3|coord4         # Line/Polygon
 
 The `sourceNumericId` maps a source name to a numeric ID for compact URLs.
 
-### For TILDA data and Mapillary
+### For TILDA data
 
-The [mapping in `url.ts`](../app/src/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/url.ts) provides the `sourceNumericId` for each TILDA source (e.g., `atlas_bikelanes`, `atlas_roads`). Mapillary is treated as a special case and also has an ID in this mapping.
+The [mapping in `url.ts`](../app/src/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/url.ts) provides the `sourceNumericId` for each TILDA source (e.g., `atlas_bikelanes`, `atlas_roads`). Mapillary photos are not selected with `f` anymore: street imagery has its own `photos` param.
 
 ### For static data
 
@@ -90,13 +90,13 @@ See [`util.ts`](../app/src/components/regionen/pageRegionSlug/SidebarInspector/u
 
 ## Examples
 
-### Point (Mapillary)
+### Point (Traffic signs)
 
 ```
-f=21|776457396685869|13.64569|52.378193
+f=20|776457396685869|13.64569|52.378193
 ```
 
-- `sourceNumericId`: 21 (`mapillary_coverage`)
+- `sourceNumericId`: 20 (`atlas_trafficSigns`)
 - `featureId`: `776457396685869`
 - `coord1|coord2`: Point at lon=13.64569, lat=52.378193 (EPSG:4326)
 

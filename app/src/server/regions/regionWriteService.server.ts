@@ -8,6 +8,12 @@ import {
   syncRegionMaskAfterWrite,
 } from '@/server/regions/masks/syncRegionMaskAfterWrite.server'
 import {
+  regionChildRowsInclude,
+  regionRowToChildRows,
+  writeRegionChildRows,
+} from '@/server/regions/regionChildRows.server'
+import {
+  regionWriteInputToChildRows,
   regionWriteInputToCreateData,
   regionWriteInputToUpdateData,
   regionInclude,
@@ -53,10 +59,8 @@ export async function createRegionConfig(
   return runWithAuditContextAsync(auditContext, async () => {
     const createData = regionWriteInputToCreateData(parsed)
     await db.$transaction(async (tx) => {
-      await tx.region.create({
-        data: createData,
-        include: regionInclude,
-      })
+      const region = await tx.region.create({ data: createData })
+      await writeRegionChildRows(tx, region.id, regionWriteInputToChildRows(parsed), null)
       await upsertRegionConfigTemplate(parsed.categories as MapDataCategoryId[], tx)
     })
 
@@ -82,7 +86,7 @@ export async function updateRegionConfig(
   return runWithAuditContextAsync(auditContext, async () => {
     const existing = await db.region.findUnique({
       where: { slug },
-      include: { categoryAssignments: true },
+      include: regionChildRowsInclude,
     })
     if (!existing) throw new RegionNotFoundError(slug)
 
@@ -106,8 +110,8 @@ export async function updateRegionConfig(
       await upsertRegionConfigTemplate(oldCategories)
     }
 
-    // Join lists are full-replaced via nested Prisma deleteMany + create (ordered catalog rows; no
-    // stable child IDs). Scalar FKs (contractId, headerLogoId) stay on the parent — contract admin
+    // Changed join lists are full-replaced by `writeRegionChildRows` (top-level writes, so each child
+    // row is audited). Scalar FKs (contractId, headerLogoId) stay on the parent — contract admin
     // reassigns the inverse with regions.set. Mask columns are synced after write via
     // syncRegionMaskAfterWrite (geometry upload + column update).
     await db.$transaction(async (tx) => {
@@ -115,6 +119,12 @@ export async function updateRegionConfig(
         where: { slug },
         data: regionWriteInputToUpdateData(parsed),
       })
+      await writeRegionChildRows(
+        tx,
+        existing.id,
+        regionWriteInputToChildRows(parsed),
+        regionRowToChildRows(existing),
+      )
       await upsertRegionConfigTemplate(parsed.categories as MapDataCategoryId[], tx)
     })
 

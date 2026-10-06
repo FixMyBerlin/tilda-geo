@@ -61,6 +61,57 @@ describe('bikelanes', function()
       assert.are.equal(result[1].width, 5)
     end)
 
+    it('sets parent_maxspeed on virtual bikelanes', function()
+      local input_object = {
+        tags = {
+          highway = 'residential',
+          maxspeed = '30',
+          ['cycleway:left'] = 'track',
+        },
+        id = 1,
+        type = 'way',
+      }
+      local result = run_bikelanes(input_object)
+      assert.are.equal(result[1].parent_road, 'residential')
+      assert.are.equal(result[1].parent_maxspeed, 30)
+      assert.is_nil(result[1].adjoining_road)
+    end)
+
+    it('sets adjoining_* on standalone path bikelanes even when estimation says assumed_no', function()
+      local input_object = {
+        tags = {
+          highway = 'path',
+          bicycle = 'designated',
+          foot = 'designated',
+          segregated = 'yes',
+          _is_sidepath = 'assumed_no',
+          _sidepath_adjoining_road = 'tertiary',
+          _sidepath_adjoining_maxspeed = '50',
+        },
+        id = 1,
+        type = 'way',
+      }
+      local result = run_bikelanes(input_object)
+      assert.are.equal(result[1].adjoining_road, 'tertiary')
+      assert.are.equal(result[1].adjoining_maxspeed, 50)
+    end)
+
+    it('does not set adjoining_* on Fahrradstraße (own traffic, not a neighbour)', function()
+      local input_object = {
+        tags = {
+          highway = 'cycleway',
+          bicycle_road = 'yes',
+          _sidepath_adjoining_road = 'residential',
+          _sidepath_adjoining_maxspeed = '30',
+        },
+        id = 1,
+        type = 'way',
+      }
+      local result = run_bikelanes(input_object)
+      assert.are.equal(result[1].category, 'bicycleRoad')
+      assert.is_nil(result[1].adjoining_road)
+    end)
+
     it('handels nested width on paths', function()
       local input_object = {
         tags = {

@@ -21,10 +21,11 @@ local function parking_separate_parking_points(object)
 
   local result = categorize_separate_parking(object, separate_parking_point_categories)
   if result.object then
-    local row_data, replaced_tags = result_tags(result.category, result.object, nil)
+    local row_data, replaced_tags, rewritten_tags = result_tags(result.category, result.object, nil)
     local row = merge_table({ geom = result.object:as_point() }, row_data)
 
     LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'parking_separate_parking_points')
+    LOG_ERROR.REWRITTEN_VALUE(result.object, row.geom, rewritten_tags, 'parking_separate_parking_points')
     db_table:insert(row)
   end
 end

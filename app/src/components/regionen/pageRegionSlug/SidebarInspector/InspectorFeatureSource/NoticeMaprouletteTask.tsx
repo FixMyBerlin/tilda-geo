@@ -7,7 +7,7 @@ import type { TodoId } from '@/data/processingTypes/todoId.generated.const'
 import { campaigns } from '@/data/radinfra-de/campaigns'
 import { buildHashtags } from '@/data/radinfra-de/utils/buildHashtags'
 import { buildTaskInstructions } from '@/data/radinfra-de/utils/buildTaskInstructions'
-import { osmEditIdUrl, osmEditJosmUrl, osmEditKyleKiwiIdUrl } from '../Tools/osmUrls/osmUrls'
+import { osmEditIdUrl, osmEditJosmUrl } from '../Tools/osmUrls/osmUrls'
 import { pointFromGeometry } from '../Tools/osmUrls/pointFromGeometry'
 import type { NoticeMaproulette } from './NoticeMaproulette'
 
@@ -100,7 +100,7 @@ export const NoticeMaprouletteTask = ({
   const campaignParams = [paramsMap, paramsMaproulette, paramsDisabled, paramsMapillary].filter(
     Boolean,
   )
-  const rapidCampaignLink = `https://rapideditor.org/edit#${campaignParams.join('&')}`
+  // const rapidCampaignLink = `https://rapideditor.org/edit#${campaignParams.join('&')}`
   // Experimental MapRoulette-in-iD (https://github.com/tordans/iD/pull/4)
   const idMaprouletteCampaignLink = `https://deploy-preview-4--tordans-id-experiments.netlify.app/#${campaignParams.join('&')}`
 
@@ -128,7 +128,7 @@ export const NoticeMaprouletteTask = ({
     source: 'radinfra_de',
   })
   const osmEditJosmUrlHref = osmEditJosmUrl({ osmType, osmId })
-  const osmEditKyleKiwiIdUrlHref = osmEditKyleKiwiIdUrl({ osmType, osmId })
+  // const osmEditKyleKiwiIdUrlHref = osmEditKyleKiwiIdUrl({ osmType, osmId })
   const completed = data?.status && maprouletteStatusCompleted.includes(data.status)
 
   return (
@@ -188,19 +188,19 @@ export const NoticeMaprouletteTask = ({
               Bearbeiten im iD Editor
             </Link>
           )}
-          <Link href={rapidCampaignLink} blank>
+          {/* <Link href={rapidCampaignLink} blank>
             Rapid
-          </Link>
+          </Link> */}
           {osmEditJosmUrlHref && (
             <Link href={osmEditJosmUrlHref} blank>
               JOSM
             </Link>
           )}
-          {osmEditKyleKiwiIdUrlHref && (
+          {/* {osmEditKyleKiwiIdUrlHref && (
             <Link href={osmEditKyleKiwiIdUrlHref} blank>
               kiwiD
             </Link>
-          )}
+          )} */}
         </div>
       </div>
       <Markdown

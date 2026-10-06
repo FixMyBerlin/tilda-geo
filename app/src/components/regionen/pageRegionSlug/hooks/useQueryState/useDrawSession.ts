@@ -1,4 +1,3 @@
-import { useThrottledCallback } from '@tanstack/react-pacer'
 import type { DrawArea } from '@/components/regionen/pageRegionSlug/Map/Calculator/drawing/drawAreaTypes'
 import { getDrawAreasFromSearch, serializeDrawParam } from '@/shared/regionen/regionSearchSchemas'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
@@ -8,16 +7,11 @@ export const useDrawSession = () => {
   const { search, updateSearch } = useRegionSearchNavigation()
   const drawAreas = getDrawAreasFromSearch(search)
 
-  const commitDrawAreas = (areas: DrawArea[]) => {
+  // Not throttled: `drawAreas` is read back from the URL, so a delayed write hands callers a
+  // stale value. Callers pass settled edits only (see CalculatorMapDrawingControl).
+  const setDrawAreas = (areas: DrawArea[]) => {
     updateSearch({ [searchParamsRegistry.draw]: serializeDrawParam(areas) }, { replace: true })
   }
 
-  const throttledCommitDrawAreas = useThrottledCallback(commitDrawAreas, { wait: 2000 })
-
-  return {
-    drawAreas,
-    setDrawAreas: (areas: DrawArea[]) => {
-      throttledCommitDrawAreas(areas)
-    },
-  }
+  return { drawAreas, setDrawAreas }
 }

@@ -3,6 +3,10 @@ export type PaginationSummary = {
   to: number
   count: number
   hasMore: boolean
+  /** 1-based page of `skip`. */
+  page: number
+  /** 0 when there are no rows. */
+  pageCount: number
 }
 
 export type PaginatedList<TRow> = {

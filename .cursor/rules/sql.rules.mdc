@@ -9,7 +9,7 @@ alwaysApply: false
 - The schema `prisma` is managed by Prisma, see `app/prisma/schema.prisma`; this holds sensitive data.
   - Use `bun run migrate-create` to create a migration for changes to the schema.prisma.
 - The schema `public` is managed by `/processing` using osm2pgsql and custom .sql files; this data is recreated each night.
-- The schema `data` is loaded locally with `data-schema-load` and imported via `/admin/data-schema` (published `pg_dump` artifacts). Procedure: [`.cursor/skills/add-db-data-table/SKILL.md`](../skills/add-db-data-table/SKILL.md).
+- The schema `data` is loaded locally with `data-schema-load` and imported via `/admin/data-schema` (published `pg_dump` artifacts). Procedure: [`.agents/skills/add-db-data-table/SKILL.md`](../../.agents/skills/add-db-data-table/SKILL.md).
 - We have have the SQL Formatter VSCode (https://marketplace.visualstudio.com/items?itemName=ReneSaarsoo.sql-formatter-vsc) running
 
 ## Queries
@@ -17,6 +17,15 @@ alwaysApply: false
 - For things inside the NextJS app, use Prisma (Version specified in `/app/package.json`)
 - For `/app/scripts` and `/processing` use the PostgreSQL Bun integration, see https://bun.com/docs/api/sql
 - For your own LLM queries use your MCP server
+
+## Processing performance (`/processing` SQL)
+
+- Tables hold millions of rows on the full Germany extract. Test timings on a large extract, not only a small bbox.
+- `TEMP` tables live in per-session `temp_buffers` (processing sessions get 1GB via `PGOPTIONS` in `docker-compose.yml`) and can never be scanned by parallel workers. For large helper tables that are joined spatially, prefer `UNLOGGED` tables in `public` and drop them at the end of the file (see `topics/roads_bikelanes/4_hide_network_noise.sql`).
+- `INSERT … SELECT` never runs in parallel; `CREATE TABLE … AS SELECT` can.
+- Anything parallel-unsafe in a query forces a serial plan: `nextval()`, custom aggregates without a combine function, and functions not marked `PARALLEL SAFE` (the default is unsafe). Prefer set-based steps (`WITH ORDINALITY`, `GROUP BY`) and mark own SQL helpers `IMMUTABLE PARALLEL SAFE` when they are (see `topics/roads_bikelanes/pseudo_tags_sidepath/sql/is_sidepath_estimation.sql`).
+- `random_page_cost=1.0` (`configs/postgres.conf`) makes the planner favour index scans. On tables clustered by geometry, reading millions of rows through a non-spatial index is random I/O; check `EXPLAIN (ANALYZE, BUFFERS)` for large `read=` counts.
+- Log step durations (`RAISE NOTICE`, or `\echo` + `\timing on` in psql scripts) so slow steps show in the server logs.
 
 ## Query format
 

@@ -4,7 +4,7 @@
  * directly with types from env.d.ts; coercion would give inferred types that don't match runtime.
  */
 import { z } from 'zod'
-import { getAppBaseUrl } from '@/components/shared/utils/getAppBaseUrl'
+import { deployedOrigins } from '@/components/shared/utils/appInstances.const'
 import { DEFAULT_TILES_PORT } from './envDefaultPorts'
 import { databaseEnvSchema } from './envSchema.database'
 
@@ -14,7 +14,12 @@ const requiredString = z.string().min(1)
 
 const envViteSchema = z.object({
   VITE_APP_ENV: environmentValues,
-  VITE_APP_ORIGIN: z.url(),
+  /** This deployment's origin, without path or trailing slash. */
+  VITE_APP_ORIGIN: z
+    .url()
+    .refine((value) => URL.canParse(value) && new URL(value).origin === value, {
+      message: 'Must be an origin without path or trailing slash',
+    }),
   VITE_PLAYWRIGHT_ENABLED: z.string().optional(),
 })
 
@@ -36,20 +41,9 @@ const envServerSchema = z.object({
 
 const envAppSchemaPart = envViteSchema.extend(envServerSchema.shape)
 
-const apiRootUrlByEnvironment = {
-  development: getAppBaseUrl('/api', 'development'),
-  staging: getAppBaseUrl('/api', 'staging'),
-  production: getAppBaseUrl('/api', 'production'),
-}
-
 const envScriptOnlySchemaPart = z.object({
   MAPBOX_STYLE_ACCESS_TOKEN: mapboxToken,
   MAPBOX_PARKING_STYLE_ACCESS_TOKEN: mapboxToken,
-  API_ROOT_URL: z.enum([
-    apiRootUrlByEnvironment.development,
-    apiRootUrlByEnvironment.staging,
-    apiRootUrlByEnvironment.production,
-  ]),
   S3_UPLOAD_FOLDER: z.enum(['production', 'staging', 'localdev']),
   /** Local `.env` only: `bun run static-datasets-update -- --env=staging` requires this (no fallback to ATLAS_API_KEY). */
   ATLAS_API_KEY_STAGING: z.string().optional(),
@@ -84,6 +78,8 @@ export const envAppStartupValidationSchema = z.discriminatedUnion('VITE_APP_ENV'
   }),
   envAppSchemaPart.extend({
     VITE_APP_ENV: z.literal(['staging', 'production']),
+    /** Deploys must be listed in `appInstances.const.ts`. */
+    VITE_APP_ORIGIN: z.enum(deployedOrigins('app')),
     BREVO_API_KEY: requiredString,
   }),
 ])

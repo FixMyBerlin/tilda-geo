@@ -1,3 +1,6 @@
+import { twJoin } from 'tailwind-merge'
+import { adminCardClassName } from '@/components/admin/adminClasses'
+import { AdminIntro } from '@/components/admin/AdminIntro'
 import { Disclosure } from '@/components/regionen/pageRegionSlug/SidebarInspector/Disclosure/Disclosure'
 import { Link } from '@/components/shared/links/Link'
 import { adminMcpCursorDocsUrl, adminMcpRemoteServersDocsUrl } from '@/content/adminMcpSetup'
@@ -16,14 +19,16 @@ export function PageApiTokensMcpSetup({ envLabel, origin }: PageApiTokensMcpSetu
   const serverName = `tilda-geo-admin--${envLabel}`
 
   return (
-    <div className="mb-6 max-w-prose space-y-4 text-sm text-gray-600">
-      <p>
-        Bearer-Tokens autorisieren die Admin-REST-API (<code>GET/POST/PUT/DELETE /api/admin/*</code>
-        ) und den <strong>Remote-MCP-Server</strong> unter <code>{origin}/mcp</code>. Der Token-Wert
-        wird nur einmal beim Erstellen angezeigt. Ein aktiver Token erlaubt Region-CRUD,
-        Data-Schema-Import, Processing-Timings und Audit-Log-Lesen — bei Verlust oder Ende der
-        Nutzung widerrufen.
-      </p>
+    <div className={twJoin(adminCardClassName, 'mb-6 space-y-4 p-4 sm:p-6')}>
+      <AdminIntro>
+        <p>
+          Bearer-Tokens autorisieren die Admin-REST-API (
+          <code>GET/POST/PUT/DELETE /api/admin/*</code>) und den <strong>Remote-MCP-Server</strong>{' '}
+          unter <code>{origin}/mcp</code>. Der Token-Wert wird nur einmal beim Erstellen angezeigt.
+          Ein aktiver Token erlaubt Region-CRUD, Data-Schema-Import, Processing-Timings und
+          Audit-Log-Lesen — bei Verlust oder Ende der Nutzung widerrufen.
+        </p>
+      </AdminIntro>
 
       <Disclosure title="MCP einrichten (Cursor, Claude & Co.)" defaultOpen={false}>
         <div className="space-y-5 p-4 text-sm text-gray-700">

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { parseCommaList } from '@/shared/orderedList/commaList'
 
 const emptyish = z.union([z.null(), z.undefined(), z.literal('')])
 
@@ -41,7 +42,7 @@ export const optionalSearchBoolean = () =>
     })
     .optional()
 
-/** String list from comma-separated wire, JSON array string, or native array. */
+/** String list from comma-separated wire, legacy JSON array string, or native array. */
 export const searchStringArray = () =>
   z
     .union([z.array(z.coerce.string()), z.string(), emptyish])
@@ -51,19 +52,24 @@ export const searchStringArray = () =>
       if (raw.startsWith('[')) {
         try {
           const parsed = JSON.parse(raw) as unknown
-          return Array.isArray(parsed) ? parsed.map(String) : [raw]
+          return Array.isArray(parsed) ? parsed.map(String) : parseCommaList(raw)
         } catch {
-          return raw.split(',').filter(Boolean)
+          return parseCommaList(raw)
         }
       }
-      return raw.includes(',') ? raw.split(',').filter(Boolean) : [raw]
+      return parseCommaList(raw)
     })
     .catch([])
 
-/** JSON object from wire string or router-parsed object. */
+/**
+ * JSON object from a wire string or a router-parsed value.
+ * `parseSearch` JSON-parses each query value, so a legacy flag such as `notes=false`
+ * arrives as a boolean. Drop non-objects so `validateSearch` does not fail the region
+ * route before the loader migrates the raw URL.
+ */
 export const optionalSearchJson = <T extends z.ZodType>(schema: T) =>
   z
-    .union([schema, z.string(), z.record(z.string(), z.unknown()), emptyish])
+    .unknown()
     .transform((raw): z.infer<T> | undefined => {
       if (raw === undefined || raw === null || raw === '') return undefined
       if (typeof raw === 'object' && !Array.isArray(raw)) {

@@ -19,13 +19,14 @@ type Props = {
  * Shared "something to look at" indicator dot for the floating map-control buttons
  * (download, user, …). One fixed position / size / ring so every button's dot looks
  * identical — only the colour may vary via `className`. The parent button must be
- * positioned (`relative`).
+ * positioned (`relative`). The dot is translated so it hangs off the corner without
+ * contributing to the button's layout width (keeps map chrome columns aligned).
  */
 export function ControlButtonDot({ srLabel, className, ping = false }: Props) {
   return (
     <span
       className={twMerge(
-        'absolute -top-0.5 -right-0.5 size-2.5 rounded-full bg-amber-500 ring-2 ring-white',
+        'pointer-events-none absolute top-0 right-0 size-2.5 translate-x-1/2 -translate-y-1/2 rounded-full bg-amber-500 ring-2 ring-white',
         className,
       )}
     >

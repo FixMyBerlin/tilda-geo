@@ -13,6 +13,7 @@ export type TableId =
   | 'places'
   | 'poiClassification'
   | 'publicTransport'
+  | 'highwayAreas'
   | 'roads'
   | 'roadsPathClasses'
   | 'bikelanesPresence' // based on `roads`

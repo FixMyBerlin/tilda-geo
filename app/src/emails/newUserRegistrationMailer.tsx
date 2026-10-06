@@ -29,7 +29,7 @@ function formatOsmDescriptionAsBlockquote(osmDescription: string | null) {
 
 function buildMailContent(user: User) {
   const baseUrl = getDomain()
-  const adminMembershipsUrl = `${baseUrl}/admin/memberships`
+  const adminUsersUrl = `${baseUrl}/admin/users`
   const createMembershipUrl = `${baseUrl}/admin/memberships/new?userId=${user.id}`
 
   const registrationDate = formatDateTimeBerlin(user.createdAt)
@@ -63,7 +63,7 @@ ${osmDescriptionBlock}
     introMarkdown,
     ctaLink: createMembershipUrl,
     ctaText: 'Mitgliedschaft für diesen Benutzer erstellen',
-    outroMarkdown: `[Alle Mitgliedschaften anzeigen](${adminMembershipsUrl})`,
+    outroMarkdown: `[Alle Mitgliedschaften anzeigen](${adminUsersUrl})`,
   }
 }
 

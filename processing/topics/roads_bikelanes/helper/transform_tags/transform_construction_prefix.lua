@@ -4,8 +4,8 @@ local has_prefix = require('topics.helper.has_prefix')
 -- - Function returns the old tags `<oldKey>=<oldValue>` for debugging … but we don't use that ATM
 -- - Deletes the original `construction:*` values because they are now obsolete
 -- Docs: https://wiki.openstreetmap.org/wiki/Lifecycle_prefix#Common_prefixes
----@param destTags table<string, string> The input table of OSM tags to mutate in-place
----@return table<string, string> unmodified_tags A table containing the original values that were overwritten
+---@param destTags OsmTags The input table of OSM tags to mutate in-place
+---@return OsmTags unmodified_tags A table containing the original values that were overwritten
 local function transform_construction_prefix(destTags)
   local unmodified_tags = {}
 

@@ -2,7 +2,9 @@ import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
 import {
   ArrowDownTrayIcon,
   BookOpenIcon,
+  ClipboardDocumentCheckIcon,
   ExclamationTriangleIcon,
+  FolderIcon,
   InformationCircleIcon,
   PencilIcon,
   XMarkIcon,
@@ -12,15 +14,42 @@ import type React from 'react'
 import { useRef } from 'react'
 import { twJoin } from 'tailwind-merge'
 import {
+  type ModeAccentMode,
+  modeIdentity,
+} from '@/components/regionen/pageRegionSlug/modes/modeIdentity'
+import {
   clearModalOpenOrigin,
   getModalOpenOriginOffset,
 } from '@/components/shared/motion/modalOpenOrigin'
 import { UI_SPRING } from '@/components/shared/motion/spring.const'
 
+type ModalIcon =
+  | 'info'
+  | 'error'
+  | 'copyright'
+  | 'download'
+  | 'edit'
+  | 'docs'
+  | 'reviewList'
+  | 'noteFolder'
+
+/** Escape hatch for callers with their own Heroicon (e.g. `ConfirmDialog`) instead of a preset key. */
+export type ModalCustomIcon = {
+  Icon: typeof PencilIcon
+  bgClass: string
+  iconClass: string
+}
+
 type Props = {
   title: string
-  icon: 'info' | 'error' | 'copyright' | 'download' | 'edit' | 'docs'
+  icon: ModalIcon | ModalCustomIcon
+  /** Tint header icon with a region mode accent (notes / qa / reviewLists). */
+  mode?: ModeAccentMode
   buttonCloseName?: string
+  /** Left-aligned footer action (e.g. delete). */
+  footerStart?: React.ReactNode
+  /** Primary footer action (e.g. submit). Rendered next to the close button. */
+  primaryAction?: React.ReactNode
   open: boolean
   setOpen: (value: boolean) => void
   children: React.ReactNode
@@ -32,9 +61,12 @@ type Props = {
 export const ModalDialog = ({
   title,
   icon,
+  mode,
   open,
   setOpen,
   buttonCloseName,
+  footerStart,
+  primaryAction,
   children,
   panelTestId,
   onExitComplete,
@@ -47,29 +79,48 @@ export const ModalDialog = ({
   const iconComponent = {
     info: {
       bgClass: 'bg-green-100',
-      icon: <InformationCircleIcon className="size-6 text-green-600" aria-hidden="true" />,
+      iconClass: 'text-green-600',
+      Icon: InformationCircleIcon,
     },
     error: {
       bgClass: 'bg-red-100',
-      icon: <ExclamationTriangleIcon className="size-6 text-red-600" aria-hidden="true" />,
+      iconClass: 'text-red-600',
+      Icon: ExclamationTriangleIcon,
     },
     copyright: {
       bgClass: 'bg-blue-100',
-      icon: <BookOpenIcon className="size-6 text-blue-600" aria-hidden="true" />,
+      iconClass: 'text-blue-600',
+      Icon: BookOpenIcon,
     },
     download: {
       bgClass: 'bg-purple-100',
-      icon: <ArrowDownTrayIcon className="size-6 text-purple-600" aria-hidden="true" />,
+      iconClass: 'text-purple-600',
+      Icon: ArrowDownTrayIcon,
     },
     docs: {
       bgClass: 'bg-blue-100',
-      icon: <BookOpenIcon className="size-6 text-blue-600" aria-hidden="true" />,
+      iconClass: 'text-blue-600',
+      Icon: BookOpenIcon,
     },
     edit: {
       bgClass: 'bg-gray-100',
-      icon: <PencilIcon className="size-6 text-gray-600" aria-hidden="true" />,
+      iconClass: 'text-gray-600',
+      Icon: PencilIcon,
     },
-  } satisfies Record<Props['icon'], { bgClass: string; icon: React.ReactNode }>
+    reviewList: {
+      bgClass: 'bg-teal-100',
+      iconClass: 'text-teal-600',
+      Icon: ClipboardDocumentCheckIcon,
+    },
+    noteFolder: {
+      bgClass: 'bg-teal-100',
+      iconClass: 'text-teal-600',
+      Icon: FolderIcon,
+    },
+  } satisfies Record<ModalIcon, { bgClass: string; iconClass: string; Icon: typeof PencilIcon }>
+
+  const { bgClass, iconClass, Icon } = typeof icon === 'string' ? iconComponent[icon] : icon
+  const accent = mode ? modeIdentity[mode].accent : undefined
 
   // Motion + `Dialog static` (same split as MobileBottomSheet): Headless UI keeps the
   // a11y plumbing (focus trap, Escape, outside click), Motion runs enter/exit springs.
@@ -113,11 +164,14 @@ export const ModalDialog = ({
                   <div className="flex items-center gap-3">
                     <div
                       className={twJoin(
-                        iconComponent[icon].bgClass,
+                        accent ? twJoin(accent.className, accent.invertedFgClassName) : bgClass,
                         'flex size-10 shrink-0 items-center justify-center rounded-full',
                       )}
                     >
-                      {iconComponent[icon].icon}
+                      <Icon
+                        className={twJoin('size-6', mode ? undefined : iconClass)}
+                        aria-hidden="true"
+                      />
                     </div>
 
                     <DialogTitle
@@ -140,17 +194,39 @@ export const ModalDialog = ({
 
                   <div className="mt-3 text-gray-700">{children}</div>
 
-                  {buttonCloseName && (
-                    <div className="mt-5 sm:mt-4 sm:flex sm:justify-end">
-                      <button
-                        type="button"
-                        className="inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs inset-ring-1 inset-ring-gray-300 hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500 sm:w-auto"
-                        onClick={() => setOpen(false)}
-                      >
-                        {buttonCloseName}
-                      </button>
-                    </div>
-                  )}
+                  {(footerStart || primaryAction || buttonCloseName) &&
+                    (footerStart ? (
+                      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 sm:mt-4">
+                        <div className="flex shrink-0 items-center gap-3">{footerStart}</div>
+                        {(primaryAction || buttonCloseName) && (
+                          <div className="flex w-full flex-col-reverse gap-3 sm:ml-auto sm:w-auto sm:flex-row-reverse sm:gap-3">
+                            {primaryAction}
+                            {buttonCloseName ? (
+                              <button
+                                type="button"
+                                className="inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs inset-ring-1 inset-ring-gray-300 hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500 sm:w-auto"
+                                onClick={() => setOpen(false)}
+                              >
+                                {buttonCloseName}
+                              </button>
+                            ) : null}
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse sm:gap-3">
+                        {primaryAction}
+                        {buttonCloseName ? (
+                          <button
+                            type="button"
+                            className="mt-3 inline-flex w-full justify-center rounded-md bg-white px-3 py-2 text-sm font-semibold text-gray-900 shadow-xs inset-ring-1 inset-ring-gray-300 hover:bg-gray-50 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-yellow-500 sm:mt-0 sm:w-auto"
+                            onClick={() => setOpen(false)}
+                          >
+                            {buttonCloseName}
+                          </button>
+                        ) : null}
+                      </div>
+                    ))}
                 </DialogPanel>
               </motion.div>
             </div>

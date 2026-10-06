@@ -1,7 +1,7 @@
 import type { MapDataCategoryId } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/MapDataCategoryId'
 import type { ExportId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/exports/exports.const'
 import type { SourcesRasterIds } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
-import { RegionNotesMode, RegionProduct, RegionStatus } from '@/prisma/generated/client'
+import { RegionProduct, RegionStatus } from '@/prisma/generated/client'
 import type { RegionMaskConfig } from '@/server/regions/regionConfigMapper.server'
 import type { RegionGeoJsonBBox } from '@/server/regions/regionGeoJson'
 import type { RegionWriteInput } from '@/server/regions/regionWriteSchema'
@@ -44,6 +44,7 @@ const defaultRadverkehrExports = [
   'bikeroutes',
   'roads',
   'roadsPathClasses',
+  'highwayAreas',
   'poiClassification',
   'places',
   'publicTransport',
@@ -54,11 +55,12 @@ const regionalNetworkExports = [
   'bicycleParking_points',
 ] satisfies ExportId[]
 
-const minimalCategories = ['roads', 'mapillary'] satisfies MapDataCategoryId[]
+const minimalCategories = ['roads'] satisfies MapDataCategoryId[]
 
 const baseRegionConfig = {
   product: RegionProduct.radverkehr,
-  notes: RegionNotesMode.osmNotes,
+  notesOsm: true,
+  notesInternal: false,
   showSearch: false,
   logoWhiteBackgroundRequired: false,
   headerLogoId: null,
@@ -110,7 +112,8 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       fullName: 'Dev-Region: Status öffentlich, nicht gelistet',
       promoted: false,
       status: RegionStatus.PUBLIC,
-      notes: RegionNotesMode.internalNotes,
+      notesOsm: false,
+      notesInternal: true,
       mapLat: 52.5,
       mapLng: 13.4,
       mapZoom: 10,
@@ -157,6 +160,8 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       fullName: 'Dev-Region: öffentlich und auf /regionen gelistet',
       promoted: true,
       status: RegionStatus.PUBLIC,
+      notesOsm: true,
+      notesInternal: true,
       mapLat: 52.5,
       mapLng: 13.4,
       mapZoom: 10,
@@ -175,7 +180,7 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       mapLat: 52.35,
       mapLng: 13.61,
       mapZoom: 12,
-      categories: ['poi', 'bikelanes', 'roads', 'mapillary'],
+      categories: ['poi', 'bikelanes', 'roads'],
       ...withDownloads(13.3579, 52.2095, 13.825, 52.4784, [...regionalNetworkExports]),
     },
   },
@@ -188,6 +193,8 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       fullName: 'Dev-Region: keine BBox, keine Export-Assignments',
       promoted: false,
       status: RegionStatus.PUBLIC,
+      notesOsm: false,
+      notesInternal: false,
       mapLat: 52.5,
       mapLng: 13.4,
       mapZoom: 10,
@@ -210,12 +217,12 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       categories: [
         'radinfra_bikelanes',
         'radinfra_surface',
+        'radinfra_lit',
         'radinfra_width',
         'radinfra_oneway',
         'radinfra_trafficSigns',
         'radinfra_currentness',
         'radinfra_campagins',
-        'radinfra_mapillary',
       ],
       cacheWarming: {
         minZoom: 5,
@@ -252,7 +259,7 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       mapLng: 13.367,
       mapZoom: 11.8,
       backgroundSources: [...cityParkraumBackgroundSources],
-      categories: ['parkingTilda', 'parkingLars', 'mapillary'],
+      categories: ['parkingTilda', 'parkingLars'],
       ...withDownloads(13.0883, 52.3382, 13.7611, 52.6755, [
         'parkings',
         'parkings_edges',
@@ -278,7 +285,7 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       mapLng: 13.61,
       mapZoom: 12,
       backgroundSources: [...regionalNetworkBackgroundSources],
-      categories: ['poi', 'bikelanes', 'roads', 'surface', 'lit', 'bicycleParking', 'mapillary'],
+      categories: ['poi', 'bikelanes', 'roads', 'surface', 'lit', 'bicycleParking'],
       ...withDownloads(13.3579, 52.2095, 13.825, 52.4784, [...regionalNetworkExports]),
     },
     mask: {
@@ -319,12 +326,12 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       categories: [
         'radinfra_bikelanes',
         'radinfra_surface',
+        'radinfra_lit',
         'radinfra_width',
         'radinfra_oneway',
         'radinfra_trafficSigns',
         'radinfra_currentness',
         'radinfra_campagins',
-        'radinfra_mapillary',
       ],
       cacheWarming: {
         minZoom: 5,
@@ -363,7 +370,7 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       mapLng: 13.0342,
       mapZoom: 11,
       logoWhiteBackgroundRequired: true,
-      categories: ['bikelanes', 'roads', 'surface', 'boundaries', 'mapillary'],
+      categories: ['bikelanes', 'roads', 'surface', 'boundaries'],
       backgroundSources: [...regionalNetworkBackgroundSources],
       // Welcome copy on create; hero image attached later (needs regionId).
       welcome: regionWelcomeDemoSpecToWriteInput(regionWelcomeDemoSpecs['bb-kampagne'], null),
@@ -386,7 +393,7 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       mapLat: 52.4918,
       mapLng: 13.4261,
       mapZoom: 13.5,
-      categories: ['parkingLars', 'mapillary'],
+      categories: ['parkingLars'],
       backgroundSources: [...cityParkraumBackgroundSources],
       // Text-only welcome (no hero image).
       welcome: regionWelcomeDemoSpecToWriteInput(regionWelcomeDemoSpecs.parkraum, null),
@@ -405,7 +412,7 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       mapLat: 52.507,
       mapLng: 13.367,
       mapZoom: 11.8,
-      categories: ['parkingTilda', 'parkingLars', 'mapillary'],
+      categories: ['parkingTilda', 'parkingLars'],
       backgroundSources: [...cityParkraumBackgroundSources],
     },
     mask: {
@@ -427,8 +434,9 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       mapLat: 52.507,
       mapLng: 13.367,
       mapZoom: 11.8,
-      notes: RegionNotesMode.internalNotes,
-      categories: ['parkingTilda', 'roads', 'mapillary'],
+      notesOsm: false,
+      notesInternal: true,
+      categories: ['parkingTilda', 'roads'],
       backgroundSources: [...cityParkraumBackgroundSources],
       ...withDownloads(13.0883, 52.3382, 13.7611, 52.6755, [
         'parkings',

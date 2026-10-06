@@ -5,7 +5,7 @@
 --    Optional: PT_MEMORY_REPORT_EVERY=N (default 100000).
 --
 -- Reports `collectgarbage('count')` (Lua heap only — not osm2pgsql C++ memory) as MEMORY: lines.
--- When and how: `.cursor/skills/test-processing-diff/SKILL.md` § Lua heap profiling.
+-- When and how: `.agents/skills/test-processing-diff/SKILL.md` § Lua heap profiling.
 
 local ENABLED = os.getenv('PT_MEMORY_REPORT') == '1'
 local REPORT_EVERY = tonumber(os.getenv('PT_MEMORY_REPORT_EVERY')) or 100000

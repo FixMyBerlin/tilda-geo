@@ -1,25 +1,16 @@
-import { z } from 'zod'
-import type { EnvironmentValues } from '@/server/envSchema'
+import { appInstances, currentAppInstance, deployedHostSchema } from './appInstances.const'
 import { devTilesPort } from './devTilesPort'
 import { envKey } from './isEnv'
-import { makeOriginFromParts, type UrlParts } from './urlParts'
 
-const tilesBaseUrl: Record<EnvironmentValues, UrlParts> = {
-  development: { protocol: 'http', host: 'localhost', port: devTilesPort() },
-  staging: { protocol: 'https', host: 'staging-tiles.tilda-geo.de' },
-  production: { protocol: 'https', host: 'tiles.tilda-geo.de' },
-}
+const devTilesHost = 'localhost'
 
-export const tilesHostSchema = z.enum([
-  tilesBaseUrl.development.host,
-  tilesBaseUrl.staging.host,
-  tilesBaseUrl.production.host,
-])
+export const tilesHostSchema = deployedHostSchema('tiles', devTilesHost)
 
 export const getTilesUrl = (path?: string) => {
-  const base = makeOriginFromParts(tilesBaseUrl[envKey])
+  const base =
+    envKey === 'development'
+      ? `http://${devTilesHost}:${devTilesPort()}`
+      : appInstances[currentAppInstance()][envKey].tiles
 
-  if (!path) return base
-  const cleanPath = path.startsWith('/') ? path.slice(1) : path
-  return `${base}/${cleanPath}`
+  return path ? `${base}/${path.replace(/^\//, '')}` : base
 }

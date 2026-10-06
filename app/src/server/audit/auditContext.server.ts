@@ -29,7 +29,9 @@ export async function runWithAuditContextAsync<T>(
   context: AuditContext,
   fn: () => Promise<T>,
 ): Promise<T> {
-  return auditContextStorage.run(context, fn)
+  // Await inside `run`: PrismaPromise is lazy and only queries once awaited. Returning it un-awaited
+  // (`() => db.x.create(...)`) would start the query — and the audit `getContext` — outside the store.
+  return auditContextStorage.run(context, async () => await fn())
 }
 
 /** Audit context for admin UI form writes — attributes to the signed-in admin. */

@@ -18,8 +18,8 @@ Controlled by **SubmitResult** from `onSubmit`: `{ success: true, message?, redi
 
 ## Action bar / submit button
 
-- **`submitLabel`** — Renders `FormActionBar` with a standard submit button (label + disabled when invalid/submitting). Use for most forms.
-- **Omit `submitLabel`** — No action bar; put your submit button (and any UI, e.g. spinner) in `children`. See [OsmNotesNewForm](../../regionen/[regionSlug]/_components/notes/OsmNotes/OsmNotesNewForm.tsx) or [QaEvaluationForm](../../regionen/[regionSlug]/_components/SidebarInspector/InspectorQa/QaEvaluationForm.tsx).
+- **`submitLabel`** — Renders `FormActionBar` with a standard submit button (label + disabled when invalid/submitting; a `SmallSpinner` appears next to the label while submitting). Use for most forms.
+- **`actionBarPlacement="none"`** — No action bar; put your submit button (and any UI, e.g. spinner) in `children`. `submitLabel` is optional in this case. See [OsmNotesNewForm](../../regionen/[regionSlug]/_components/notes/OsmNotes/OsmNotesNewForm.tsx) or [QaEvaluationForm](../../regionen/[regionSlug]/_components/SidebarInspector/InspectorQa/QaEvaluationForm.tsx).
 
 **FormActionBar** ([FormActionBar.tsx](./FormActionBar.tsx)) is layout only: `left` / `right` slots.
 

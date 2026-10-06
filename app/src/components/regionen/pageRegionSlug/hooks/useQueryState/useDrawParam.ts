@@ -6,7 +6,7 @@ export const useDrawParam = () => {
   return {
     drawParam: drawAreas,
     setDrawParam: (value: DrawArea[] | null) => {
-      void setDrawAreas(value ?? [])
+      setDrawAreas(value ?? [])
     },
   }
 }

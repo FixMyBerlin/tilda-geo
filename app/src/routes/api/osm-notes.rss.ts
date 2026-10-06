@@ -152,7 +152,7 @@ export const Route = createFileRoute('/api/osm-notes/rss')({
           <rss version="2.0">
             <channel>
               <title>OSM Notes »${q}« in Deutschland</title>
-              <link>https://tilda-geo.de/regionen/radinfra?map=6.1/51.312/10.529&config=1ops5da.7h39.3cw&v=2&osmNotes=true</link>
+              <link>https://tilda-geo.de/regionen/radinfra/hinweise?map=6.1/51.312/10.529&config=1ops5da.7h39.3cw&v=3</link>
               <description>OSM Notes für das Suchwort »${q}« in Deutschland ab dem ${params.from}</description>
               <language>de</language>
               ${rssItems}

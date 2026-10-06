@@ -1,10 +1,18 @@
 import { featureCollection } from '@turf/turf'
-import { useOsmNotesFeatures } from '@/components/regionen/pageRegionSlug/hooks/mapState/userMapNotes'
-import { useOsmFilterParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesOsmParams'
+import type { z } from 'zod'
+import { osmNoteReplyCount } from '@/components/regionen/pageRegionSlug/modes/notes/osmNotesSchema'
+import { useOsmNotesQuery } from '@/components/regionen/pageRegionSlug/modes/notes/useOsmNotesQuery'
+import type { zodInternalNotesFilterParam } from '@/shared/regionen/regionSearchZod'
 
-export const useFilteredOsmNotes = () => {
-  const { osmNotesFilterParam: filter } = useOsmFilterParam()
-  const osmNotesFeatureCollection = useOsmNotesFeatures()
+type NotesFilter = z.infer<typeof zodInternalNotesFilterParam>
+
+/**
+ * OSM notes from the Query cache, optionally filtered. The filter is passed in (owned by the notes
+ * mode); the map overlay on other modes does not load OSM notes.
+ */
+export const useFilteredOsmNotes = (filter?: NotesFilter | null) => {
+  const { data } = useOsmNotesQuery()
+  const osmNotesFeatureCollection = data ?? featureCollection([])
 
   // Filter data
   let filteredOsmNotes = osmNotesFeatureCollection.features
@@ -34,16 +42,11 @@ export const useFilteredOsmNotes = () => {
       if (filter.user === note.properties.comments.at(0)?.user) return true
       return false
     })
-    // Filter by `commented` on note.noteComments
+    // Filter by `commented` — OSM `comments[0]` is the original note, not a reply.
     filteredOsmNotes = filteredOsmNotes.filter((note) => {
       if (typeof filter.commented !== 'boolean') return true
-      const fullNote = osmNotesFeatureCollection.features.find(
-        (fNote) => fNote.id === note.properties.id,
-      )?.properties
-      if (fullNote?.comments?.length && filter.commented === fullNote.comments.length > 1) {
-        return true
-      }
-      return false
+      const hasReplies = osmNoteReplyCount(note.properties.comments) > 0
+      return filter.commented === hasReplies
     })
   }
   return featureCollection(filteredOsmNotes)

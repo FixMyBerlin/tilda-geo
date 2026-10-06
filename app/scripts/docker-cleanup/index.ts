@@ -25,7 +25,9 @@ import {
 
 const CONCEPTS =
   'Images = templates (no app data). Containers = instances; stopped ones are usually safe.\n' +
-  'Volumes = persistent data (e.g. DB); pruning can delete data.\n' +
+  'Volumes = persistent data. Postgres (`*_db_postgres_17`) and OSM (`*_osmfiles`) hold stack data.\n' +
+  '`*_processing_node_modules` is the processing dependency cache. Safe to delete.\n' +
+  'A green volume is still attached to a container, including a stopped one. Remove that container first.\n' +
   'Build cache = build layers; pruning is safe but next build may be slower.'
 
 const PREVIEW_NAME_LIMIT = 15
@@ -37,6 +39,10 @@ async function getReclaimableLabel(
   if (action.id === 'stopped_dev_stacks') {
     const stacks = listStoppedDevStacks(await listDevStacks())
     return stacks.length === 1 ? '1 stack' : `${stacks.length} stacks`
+  }
+  if (action.id === 'unused_node_modules_volumes') {
+    const names = action.getPreviewNames ? await action.getPreviewNames() : []
+    return names.length === 1 ? '1 volume' : `${names.length} volumes`
   }
   return await getPreviewGB(summary, action)
 }

@@ -1,6 +1,6 @@
 # Docker local development
 
-Agent workflow source of truth: [TILDA Geo agent workflow](../.cursor/skills/tilda-geo-agent-workflow/SKILL.md).
+Agent workflow source of truth: [TILDA Geo agent workflow](../.agents/skills/tilda-geo-agent-workflow/SKILL.md).
 
 This page is a human landing page only. Keep operational rules for worktrees, predev, `.env.local`, ports, and Docker stack behavior in the agent workflow skill so agents do not have competing sources of truth.
 
@@ -47,4 +47,8 @@ bun run docker-cleanup -- --quick      # run pre-selected defaults
 bun run docker-cleanup -- --dry-run    # show plan, no changes
 ```
 
-Avoid volume prune unless you intend to delete Postgres/OSM data from old stacks.
+`Unused processing node_modules volumes` deletes only unused `*_processing_node_modules` caches. Postgres (`*_db_postgres_17`) and OSM (`*_osmfiles`) stay.
+
+`Unused volumes (all, including databases)` also deletes those data volumes. Use that only when an old stack's database can go.
+
+A green dot on a volume means some container still references it, including a stopped `processing` container. Select stopped containers in the same run so those caches become unused and removable.

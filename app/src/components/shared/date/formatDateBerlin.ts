@@ -18,3 +18,11 @@ export function formatDateBerlin(date: Date | string | number, formatStr: string
 export function formatDateTimeBerlin(date: Date | string | number) {
   return formatDateBerlin(date, 'dd.MM.yyyy HH:mm')
 }
+
+/**
+ * Format a date and time in Berlin timezone with German locale, including the weekday
+ * (e.g. "Mo, 08.09.2026 14:03").
+ */
+export function formatDateTimeBerlinWithWeekday(date: Date | string | number) {
+  return formatDateBerlin(date, 'EEEEEE, dd.MM.yyyy HH:mm')
+}

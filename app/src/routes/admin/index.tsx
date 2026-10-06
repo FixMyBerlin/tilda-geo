@@ -4,7 +4,7 @@ import { PageIndex } from '@/components/admin/PageIndex'
 export const Route = createFileRoute('/admin/')({
   ssr: true,
   head: () => ({
-    meta: [{ title: 'Dashboard – ADMIN TILDA' }],
+    meta: [{ title: 'Übersicht – ADMIN TILDA' }],
   }),
   component: PageIndex,
 })

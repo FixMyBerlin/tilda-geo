@@ -1,24 +1,44 @@
 import { resolveUploadKind, type UploadKind } from '@/lib/mapDatasetUploadsSearchSchema'
 import type { Prisma } from '@/prisma/generated/client'
+import { optionalTrimmed, searchTerms } from '@/server/utils/searchString'
 
-export function buildMapDatasetUploadsWhere(input: {
-  kind?: UploadKind
+type UploadsFilterInput = {
   regionSlug?: string
-}): Prisma.MapDatasetUploadWhereInput {
+  q?: string
+}
+
+export function buildMapDatasetUploadsWhere(
+  input: UploadsFilterInput & { kind?: UploadKind },
+): Prisma.MapDatasetUploadWhereInput {
   const kind = resolveUploadKind(input.kind)
-  const regionSlug = input.regionSlug?.trim()
 
   return {
     systemLayer: kind === 'system',
-    ...(regionSlug ? { regions: { some: { slug: regionSlug } } } : {}),
+    ...buildMapDatasetUploadsFilterWhere(input),
   }
 }
 
-/** Region clause only — used for kind chip counts scoped to the active region filter. */
-export function buildMapDatasetUploadsRegionWhere(
-  regionSlug: string | undefined,
-): Prisma.MapDatasetUploadWhereInput {
-  const slug = regionSlug?.trim()
-  if (!slug) return {}
-  return { regions: { some: { slug } } }
+/**
+ * Region and `?q=` clauses without the kind — used for the kind chip counts, so they match the
+ * active filters. Every whitespace-separated term of `q` must match the slug or a view (layer
+ * config) name, case-insensitively.
+ */
+export function buildMapDatasetUploadsFilterWhere({
+  regionSlug,
+  q,
+}: UploadsFilterInput): Prisma.MapDatasetUploadWhereInput {
+  const slug = optionalTrimmed(regionSlug)
+  const terms = searchTerms(q)
+
+  return {
+    ...(slug ? { regions: { some: { slug } } } : {}),
+    ...(terms.length
+      ? {
+          AND: terms.map((term) => {
+            const contains = { contains: term, mode: 'insensitive' } as const
+            return { OR: [{ slug: contains }, { layerConfigs: { some: { name: contains } } }] }
+          }),
+        }
+      : {}),
+  }
 }

@@ -10,13 +10,17 @@ attributes:
       - value: construction
         label: Straße ist in Bau
       - value: cycleway_crossing
-        label: Straßenquerung (Radverkehr)
+        label: Straßenquerung (Radweg)
       - value: cycleway
         label: Radweg
       - value: footway_cycleway_crossing
-        label: Straßenquerung (Fußverkehr)
+        label: Straßenquerung (Fuß- und Radweg)
+      - value: footway_crossing
+        label: Straßenquerung (Fußweg)
       - value: footway_sidewalk
         label: Gehweg
+      - value: footway_steps
+        label: Treppe
       - value: footway
         label: Fußweg
       - value: living_street
@@ -53,10 +57,6 @@ attributes:
         label: Zufahrtsweg
       - value: service_uncategorized
         label: Zufahrtsweg (unbekannte Klassifizierung)
-      - value: service
-        label: Zufahrtsweg
-      - value: steps
-        label: Stufen
       - value: tertiary_link
         label: Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße
       - value: tertiary
@@ -123,7 +123,7 @@ attributes:
   - key: length
     format: meter
     label: Länge
-    description: Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.
+    description: Ein berechneter Wert für das OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genauigkeit für Deutschland.
   - key: lifecycle
     label: Status
     values:
@@ -176,6 +176,7 @@ attributes:
     values:
       - value: yes
         label: Ja
+        description: Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.
   - key: mapillary_coverage
     ref: bikelanes.mapillary_coverage
   - key: mapillary
@@ -216,46 +217,20 @@ attributes:
     values:
       - value: covered
         label: Überdacht
+        description: Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).
       - value: partial
         label: Teilweise überdacht
       - value: indoor
         label: In einem Gebäude
   - key: bikelane_left
     label: Radinfrastruktur links
-    valuesRef: bikelanes.category
-    valuesAdd:
-      - value: data_no
-        label: Vollständig (explizit keine)
-      - value: not_expected
-        label: Keine Infrastruktur erwartet
-      - value: assumed_no
-        label: Vermutlich vollständig
-      - value: missing
-        label: Unvollständig
+    ref: bikelanesPresence.bikelane_left
   - key: bikelane_self
     label: Radinfrastruktur mittig
-    valuesRef: bikelanes.category
-    valuesAdd:
-      - value: data_no
-        label: Vollständig (explizit keine)
-      - value: not_expected
-        label: Keine Infrastruktur erwartet
-      - value: assumed_no
-        label: Vermutlich vollständig
-      - value: missing
-        label: Unvollständig
+    ref: bikelanesPresence.bikelane_self
   - key: bikelane_right
     label: Radinfrastruktur rechts
-    valuesRef: bikelanes.category
-    valuesAdd:
-      - value: data_no
-        label: Vollständig (explizit keine)
-      - value: not_expected
-        label: Keine Infrastruktur erwartet
-      - value: assumed_no
-        label: Vermutlich vollständig
-      - value: missing
-        label: Unvollständig
+    ref: bikelanesPresence.bikelane_right
   - key: maxspeed
     label: Höchstgeschwindigkeit
     format: kilometer_per_hour

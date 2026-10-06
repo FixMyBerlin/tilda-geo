@@ -11,6 +11,8 @@ attributes:
     ref: parkings.orientation
   - key: condition_category
     ref: parkings.condition_category
+  - key: condition_category_primary
+    ref: parkings.condition_category_primary
   - key: staggered
     ref: parkings.staggered
   - key: length

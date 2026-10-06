@@ -7,9 +7,8 @@ function getVersion(url: string) {
   const v = new URL(url).searchParams.get('v')
   if (v === null) return 0
   const version = Number(v)
-  if (Number.isNaN(version) || version < 0 || version > currentVersion) {
-    throw new Error(`Invalid searchParams version ${v}`)
-  }
+  if (Number.isNaN(version) || version < 0) return 0
+  if (version > currentVersion) return currentVersion
   return version
 }
 

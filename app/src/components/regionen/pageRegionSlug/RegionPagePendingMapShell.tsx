@@ -1,25 +1,80 @@
-import 'maplibre-gl/dist/maplibre-gl.css'
-import { twJoin } from 'tailwind-merge'
-import { Spinner } from '@/components/shared/Spinner/Spinner'
-import { isProd } from '@/components/shared/utils/isEnv'
-import { mobileControlButtonClassName } from './mobile/mobileControlButton.const'
 import {
-  mobileMapBottomControlsClassName,
-  mobileMapHeaderClassName,
-} from './mobile/mobileMapChrome.const'
-
-const pulseButton = twJoin(
+  GlobeAltIcon,
+  MagnifyingGlassIcon,
+  MinusIcon,
+  PlusIcon,
+  Square3Stack3DIcon,
+} from '@heroicons/react/24/outline'
+import { twJoin, twMerge } from 'tailwind-merge'
+import { Spinner } from '@/components/shared/Spinner/Spinner'
+import {
+  mapOverlayBottomRightControlsClassName,
+  mapOverlayControlSizeClassName,
+  mapOverlayTopRightControlsClassName,
+} from './mapOverlayChrome.const'
+import {
+  mapControlButtonGroupClassName,
+  mapControlButtonGroupSegmentClassName,
+  mapControlIconClassName,
   mobileControlButtonClassName,
-  'pointer-events-none animate-pulse bg-white/80',
+} from './mobile/mobileControlButton.const'
+import { mobileMapHeaderClassName } from './mobile/mobileMapChrome.const'
+
+/** Skeleton map control — gray tile, faint icon, no elevation. */
+const pendingControlClassName = twMerge(
+  mobileControlButtonClassName,
+  'pointer-events-none animate-pulse bg-gray-100 text-gray-400 shadow-none outline-none',
 )
 
-export function RegionPagePendingMapShell() {
-  const showDebugPlaceholder = !isProd
-  // The region config isn't resolved at pending time (it now lives in the route loader, not
-  // beforeLoad context), so render the search-button placeholder generically. This skeleton only
-  // appears on slow path/region loads (route pendingMs), so exact parity here is not important.
-  const showSearchPlaceholder = true
+const pendingControlGroupClassName = twMerge(
+  mapControlButtonGroupClassName,
+  'pointer-events-none animate-pulse shadow-none',
+)
 
+const pendingZoomSegmentClassName = twMerge(
+  pendingControlClassName,
+  mapOverlayControlSizeClassName,
+  mapControlButtonGroupSegmentClassName,
+)
+
+function PendingSearchButton() {
+  return (
+    <div className={twJoin(pendingControlClassName, mapOverlayControlSizeClassName)}>
+      <MagnifyingGlassIcon className={mapControlIconClassName} aria-hidden="true" />
+    </div>
+  )
+}
+
+function PendingZoomButtons() {
+  return (
+    <div className={pendingControlGroupClassName}>
+      <div className={twMerge(pendingZoomSegmentClassName, 'rounded-t-md')}>
+        <PlusIcon className={mapControlIconClassName} aria-hidden="true" />
+      </div>
+      <div className={twMerge(pendingZoomSegmentClassName, 'rounded-b-md')}>
+        <MinusIcon className={mapControlIconClassName} aria-hidden="true" />
+      </div>
+    </div>
+  )
+}
+
+function PendingGlobeButton() {
+  return (
+    <div className={twJoin(pendingControlClassName, mapOverlayControlSizeClassName)}>
+      <GlobeAltIcon className={mapControlIconClassName} aria-hidden="true" />
+    </div>
+  )
+}
+
+function PendingLayersButton() {
+  return (
+    <div className={twJoin(pendingControlClassName, 'size-13')}>
+      <Square3Stack3DIcon className="size-8" strokeWidth={1.125} aria-hidden="true" />
+    </div>
+  )
+}
+
+export function RegionPagePendingMapShell() {
   return (
     <div className="relative flex h-full w-full flex-row gap-4">
       <div
@@ -27,73 +82,55 @@ export function RegionPagePendingMapShell() {
         aria-hidden="true"
       />
 
-      {/* Desktop sidebar placeholder (mobile uses the floating buttons below) */}
-      <section
-        className="absolute top-0 left-0 z-20 hidden max-h-full w-65 bg-white py-px shadow-md sm:block"
+      {/* Desktop: collapsed categories button (same spot as SidebarLayerControls). */}
+      <div
+        className="absolute top-[var(--map-overlay-inset)] left-[var(--map-overlay-inset)] z-30 hidden sm:block"
         aria-hidden="true"
-      />
+      >
+        <PendingLayersButton />
+      </div>
 
-      {/* Mobile floating-button skeleton, mirroring MobileMapHeader's layout */}
-      <div className={twJoin(mobileMapHeaderClassName, 'sm:hidden')} aria-hidden="true">
-        <div className="flex items-start gap-2">
-          <div className={twJoin(pulseButton, 'h-10 w-12 min-w-10')} />
-          <div className={twJoin(pulseButton, 'size-10')} />
-          <div className={twJoin(pulseButton, 'size-10')} />
-        </div>
-        {(showDebugPlaceholder || showSearchPlaceholder) && (
-          <div className="flex items-start gap-2">
-            {showDebugPlaceholder && <div className={twJoin(pulseButton, 'size-10')} />}
-            {showSearchPlaceholder && <div className={twJoin(pulseButton, 'size-10')} />}
-          </div>
+      {/* Mobile: search lives in the floating header, same as MobileMapHeader. */}
+      <div
+        className={twMerge(mobileMapHeaderClassName, 'justify-end sm:hidden')}
+        aria-hidden="true"
+      >
+        <PendingSearchButton />
+      </div>
+
+      {/* Desktop: search above zoom ± — same column as MapInterface. */}
+      <div
+        className={twMerge(
+          mapOverlayTopRightControlsClassName,
+          'hidden *:pointer-events-none sm:flex',
         )}
-      </div>
-
-      {/* Desktop zoom controls placeholder (hidden on mobile, matching the live map) */}
-      <div
-        className="maplibregl-ctrl pointer-events-none absolute top-2 right-2 z-10 hidden sm:block"
         aria-hidden="true"
       >
-        <div className="maplibregl-ctrl-group">
-          <button
-            type="button"
-            disabled
-            tabIndex={-1}
-            className="maplibregl-ctrl-zoom-in"
-            aria-hidden="true"
-          />
-          <button
-            type="button"
-            disabled
-            tabIndex={-1}
-            className="maplibregl-ctrl-zoom-out"
-            aria-hidden="true"
-          />
-        </div>
+        <PendingSearchButton />
+        <PendingZoomButtons />
       </div>
 
-      {/* Mobile bottom controls skeleton (OsmNotes, InternalNotes, SelectBackground, MobileLayerButton) */}
+      {/* Mobile: globe + layers, same bottom-right cluster as MapInterface. */}
       <div
-        className={twJoin(mobileMapBottomControlsClassName, 'sm:hidden')}
-        data-map-controls="true"
+        className={twMerge(
+          mapOverlayBottomRightControlsClassName,
+          '*:pointer-events-none sm:hidden',
+        )}
         aria-hidden="true"
       >
-        <div className={twJoin(pulseButton, 'size-10')} />
-        <div className={twJoin(pulseButton, 'size-10')} />
-        <div className={twJoin(pulseButton, 'size-10')} />
-        <div className={twJoin(pulseButton, 'size-13')} />
+        <PendingGlobeButton />
+        <PendingLayersButton />
       </div>
 
-      {/* Desktop bottom controls skeleton */}
+      {/* Desktop: globe only (debug / download / notes are not always present). */}
       <div
-        className={twJoin(mobileMapBottomControlsClassName, 'hidden sm:flex')}
-        data-map-controls="true"
+        className={twMerge(
+          mapOverlayBottomRightControlsClassName,
+          'hidden *:pointer-events-none sm:flex',
+        )}
         aria-hidden="true"
       >
-        <div className={twJoin(pulseButton, 'size-10')} />
-        <div className={twJoin(pulseButton, 'size-10')} />
-        <div className={twJoin(pulseButton, 'size-10')} />
-        <div className={twJoin(pulseButton, 'size-10')} />
-        <div className={twJoin(pulseButton, 'size-10')} />
+        <PendingGlobeButton />
       </div>
 
       <div className="pointer-events-none absolute inset-0 z-5 flex flex-col items-center justify-center gap-4">

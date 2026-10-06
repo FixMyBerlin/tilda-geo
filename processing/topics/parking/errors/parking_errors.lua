@@ -6,6 +6,7 @@ local INSTRUCTIONS = require('topics.helper.topic_error_instructions')
 if type(osm2pgsql) ~= 'table' or osm2pgsql.define_table == nil then
   return {
     SANITIZED_VALUE = function() end,
+    REWRITTEN_VALUE = function() end,
     RELATION = function() end,
   }
 end
@@ -44,6 +45,19 @@ return {
       caller_name,
       INSTRUCTIONS.SANITIZED_VALUE.key,
       INSTRUCTIONS.SANITIZED_VALUE.instruction
+    )
+  end,
+  -- Values with a clear mistake that we corrected (see `sanitize_condition_tags.lua`)
+  REWRITTEN_VALUE = function(object, geom, tags, caller_name)
+    insert_topic_error_row(
+      db_table,
+      object.type,
+      object.id,
+      geom,
+      tags,
+      caller_name,
+      INSTRUCTIONS.REWRITTEN_VALUE.key,
+      INSTRUCTIONS.REWRITTEN_VALUE.instruction
     )
   end,
   RELATION = function(object, geom, caller_name)

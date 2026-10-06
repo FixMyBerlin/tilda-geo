@@ -748,10 +748,6 @@ const data = {
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
           },
           {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
-          {
             value: 'cycleway_isolated',
             label: 'Radweg, selbstständig geführt',
           },
@@ -819,16 +815,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -840,7 +828,7 @@ const data = {
           },
           {
             value: 'sharedMotorVehicleLane',
-            label: 'Gemeinsamer Fahrstreifen',
+            label: 'Anteilig genutzter Fahrstreifen (Sharrows)',
           },
           {
             value: 'needsClarification',
@@ -863,7 +851,7 @@ const data = {
           },
           {
             value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
+            label: 'Straßenquerung (Radweg)',
           },
           {
             value: 'cycleway',
@@ -871,11 +859,19 @@ const data = {
           },
           {
             value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
           },
           {
             value: 'footway_sidewalk',
             label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
           },
           {
             value: 'footway',
@@ -950,12 +946,137 @@ const data = {
             label: 'Zufahrtsweg (unbekannte Klassifizierung)',
           },
           {
-            value: 'service',
+            value: 'tertiary_link',
+            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
+          },
+          {
+            value: 'tertiary',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
+          },
+          {
+            value: 'track',
+            label: 'Wald- / Feldweg',
+          },
+          {
+            value: 'unclassified',
+            label: 'Nebenstraße mit Verbindungscharakter',
+          },
+          {
+            value: 'unspecified_road',
+            label: 'Unkategorisierte Straße',
+          },
+        ],
+      },
+      {
+        key: 'parent_road',
+        type: 'string',
+        label: 'Straßentyp',
+        description:
+          'TILDA-Straßentyp (`roads.road`) der zugeordneten Straßenmittellinie für aus ihr abgeleitete, straßenbegleitende Radinfrastruktur.',
+        values: [
+          {
+            value: 'bicycle_road',
+            label: 'Fahrradstraße',
+          },
+          {
+            value: 'construction',
+            label: 'Straße ist in Bau',
+          },
+          {
+            value: 'cycleway_crossing',
+            label: 'Straßenquerung (Radweg)',
+          },
+          {
+            value: 'cycleway',
+            label: 'Radweg',
+          },
+          {
+            value: 'footway_cycleway_crossing',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
+          },
+          {
+            value: 'footway_sidewalk',
+            label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
+          },
+          {
+            value: 'footway',
+            label: 'Fußweg',
+          },
+          {
+            value: 'living_street',
+            label: 'Verkehrsberuhigter Bereich',
+          },
+          {
+            value: 'motorway_link',
+            label: 'Zufahrt einer Autobahn',
+          },
+          {
+            value: 'motorway',
+            label: 'Autobahn',
+          },
+          {
+            value: 'path',
+            label: 'Weg / Pfad',
+          },
+          {
+            value: 'pedestrian',
+            label: 'Fußgängerzone',
+          },
+          {
+            value: 'primary_link',
+            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
+          },
+          {
+            value: 'primary',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
+          },
+          {
+            value: 'residential',
+            label: 'Anwohnerstraße',
+          },
+          {
+            value: 'residential_priority_road',
+            label: 'residential_priority_road',
+          },
+          {
+            value: 'secondary_link',
+            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
+          },
+          {
+            value: 'secondary',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
+          },
+          {
+            value: 'service_alley',
+            label: 'Gasse',
+          },
+          {
+            value: 'service_driveway',
+            label: 'Grundstückszufahrt',
+          },
+          {
+            value: 'service_emergency_access',
+            label: 'Rettungsweg',
+          },
+          {
+            value: 'service_parking_aisle',
+            label: 'Parkplatzweg',
+          },
+          {
+            value: 'service_road',
             label: 'Zufahrtsweg',
           },
           {
-            value: 'steps',
-            label: 'Stufen',
+            value: 'service_uncategorized',
+            label: 'Zufahrtsweg (unbekannte Klassifizierung)',
           },
           {
             value: 'tertiary_link',
@@ -980,13 +1101,52 @@ const data = {
         ],
       },
       {
-        key: 'highway',
+        key: 'parent_maxspeed',
+        type: 'kilometer_per_hour',
+        label: 'Höchstgeschwindigkeit der zugeordneten Straße',
+        description:
+          'Abgeleitete Höchstgeschwindigkeit der zugeordneten Straßenmittellinie für aus ihr abgeleitete, straßenbegleitende Radinfrastruktur.',
+        values: [],
+      },
+      {
+        key: 'adjoining_road',
         type: 'string',
-        label: 'Straßentyp Fahrbahn',
+        label: 'Straßentyp der angrenzenden Straße',
+        description:
+          'Ein Indikator für die Gefährdung durch nahen Kfz-Verkehr: TILDA-Straßenklasse der relevanten Kfz-Straße (keine Aussage, ob der Weg zu dieser Straße gehört). Bei begleitenden Wegen die parallele Straße; bei Querungen die gequerte Straße. Primär, außer bei Querungen: OSM `is_sidepath:of`, über die TILDA-Straßenklassifikation gemappt (nur die `highway`-Klasse, ohne Untertags). Damit kann eine Kartierung die Schätzung überschreiben. `residential_priority_road` entsteht so nicht; der gröbere `:of`-Wert bleibt. Unbrauchbare `:of`-Werte (Tippfehler, Straßenname, `trunk`) fallen auf die Schätzung zurück. Bei Querungen immer nur die Schätzung (gequerte Straße), nie `:of`. Auch gesetzt, wenn der Weg selbstständig geführt ist.',
+        chapterRefs: ['adjoining-road'],
         values: [
+          {
+            value: 'bicycle_road',
+            label: 'Fahrradstraße',
+          },
+          {
+            value: 'construction',
+            label: 'Straße ist in Bau',
+          },
+          {
+            value: 'cycleway_crossing',
+            label: 'Straßenquerung (Radweg)',
+          },
           {
             value: 'cycleway',
             label: 'Radweg',
+          },
+          {
+            value: 'footway_cycleway_crossing',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
+          },
+          {
+            value: 'footway_sidewalk',
+            label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
           },
           {
             value: 'footway',
@@ -997,6 +1157,14 @@ const data = {
             label: 'Verkehrsberuhigter Bereich',
           },
           {
+            value: 'motorway_link',
+            label: 'Zufahrt einer Autobahn',
+          },
+          {
+            value: 'motorway',
+            label: 'Autobahn',
+          },
+          {
             value: 'path',
             label: 'Weg / Pfad',
           },
@@ -1005,44 +1173,60 @@ const data = {
             label: 'Fußgängerzone',
           },
           {
-            value: 'primary',
-            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
-          },
-          {
             value: 'primary_link',
             label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
+          },
+          {
+            value: 'primary',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
           },
           {
             value: 'residential',
             label: 'Anwohnerstraße',
           },
           {
-            value: 'road',
-            label: 'Unkategorisierte Straße',
-          },
-          {
-            value: 'secondary',
-            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
+            value: 'residential_priority_road',
+            label: 'residential_priority_road',
           },
           {
             value: 'secondary_link',
             label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
           },
           {
-            value: 'service',
+            value: 'secondary',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
+          },
+          {
+            value: 'service_alley',
+            label: 'Gasse',
+          },
+          {
+            value: 'service_driveway',
+            label: 'Grundstückszufahrt',
+          },
+          {
+            value: 'service_emergency_access',
+            label: 'Rettungsweg',
+          },
+          {
+            value: 'service_parking_aisle',
+            label: 'Parkplatzweg',
+          },
+          {
+            value: 'service_road',
             label: 'Zufahrtsweg',
           },
           {
-            value: 'steps',
-            label: 'Stufen',
-          },
-          {
-            value: 'tertiary',
-            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
+            value: 'service_uncategorized',
+            label: 'Zufahrtsweg (unbekannte Klassifizierung)',
           },
           {
             value: 'tertiary_link',
             label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
+          },
+          {
+            value: 'tertiary',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
           },
           {
             value: 'track',
@@ -1051,83 +1235,20 @@ const data = {
           {
             value: 'unclassified',
             label: 'Nebenstraße mit Verbindungscharakter',
+          },
+          {
+            value: 'unspecified_road',
+            label: 'Unkategorisierte Straße',
           },
         ],
       },
       {
-        key: '_parent_highway',
-        type: 'string',
-        label: 'Straßentyp Fahrbahn',
-        values: [
-          {
-            value: 'cycleway',
-            label: 'Radweg',
-          },
-          {
-            value: 'footway',
-            label: 'Fußweg',
-          },
-          {
-            value: 'living_street',
-            label: 'Verkehrsberuhigter Bereich',
-          },
-          {
-            value: 'path',
-            label: 'Weg / Pfad',
-          },
-          {
-            value: 'pedestrian',
-            label: 'Fußgängerzone',
-          },
-          {
-            value: 'primary',
-            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
-          },
-          {
-            value: 'primary_link',
-            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
-          },
-          {
-            value: 'residential',
-            label: 'Anwohnerstraße',
-          },
-          {
-            value: 'road',
-            label: 'Unkategorisierte Straße',
-          },
-          {
-            value: 'secondary',
-            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
-          },
-          {
-            value: 'secondary_link',
-            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
-          },
-          {
-            value: 'service',
-            label: 'Zufahrtsweg',
-          },
-          {
-            value: 'steps',
-            label: 'Stufen',
-          },
-          {
-            value: 'tertiary',
-            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
-          },
-          {
-            value: 'tertiary_link',
-            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
-          },
-          {
-            value: 'track',
-            label: 'Wald- / Feldweg',
-          },
-          {
-            value: 'unclassified',
-            label: 'Nebenstraße mit Verbindungscharakter',
-          },
-        ],
+        key: 'adjoining_maxspeed',
+        type: 'kilometer_per_hour',
+        label: 'Höchstgeschwindigkeit der angrenzenden Straße',
+        description:
+          'TILDA-Höchstgeschwindigkeit (gleiche Ableitung wie roads.maxspeed: Tags, Zonen, Straßenklasse) der angrenzenden Straße; Maximum über die zugeordneten Straßensegmente der dominanten Klasse.',
+        values: [],
       },
       {
         key: 'name',
@@ -1140,7 +1261,7 @@ const data = {
         type: 'meter',
         label: 'Länge',
         description:
-          'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',
+          'Ein berechneter Wert für das OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genauigkeit für Deutschland.',
         values: [],
       },
       {
@@ -1263,6 +1384,8 @@ const data = {
           {
             value: 'yes',
             label: 'Ja',
+            description:
+              'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',
           },
         ],
       },
@@ -1688,6 +1811,8 @@ const data = {
           {
             value: 'covered',
             label: 'Überdacht',
+            description:
+              'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
           },
           {
             value: 'partial',
@@ -1696,6 +1821,25 @@ const data = {
           {
             value: 'indoor',
             label: 'In einem Gebäude',
+          },
+        ],
+      },
+      {
+        key: 'lit',
+        type: 'string',
+        label: 'Beleuchtung',
+        values: [
+          {
+            value: 'yes',
+            label: 'Beleuchtet',
+          },
+          {
+            value: 'no',
+            label: 'Nicht beleuchtet',
+          },
+          {
+            value: 'special',
+            label: 'Spezielle Angaben',
           },
         ],
       },
@@ -2031,10 +2175,16 @@ const data = {
     ],
     chapters: [
       {
+        id: 'adjoining-road',
+        title: 'Angrenzende Straße (`adjoining_*`)',
+        markdown:
+          '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
       },
     ],
   },
@@ -2076,10 +2226,6 @@ const data = {
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
           },
           {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
-          {
             value: 'cycleway_isolated',
             label: 'Radweg, selbstständig geführt',
           },
@@ -2147,16 +2293,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -2168,7 +2306,7 @@ const data = {
           },
           {
             value: 'sharedMotorVehicleLane',
-            label: 'Gemeinsamer Fahrstreifen',
+            label: 'Anteilig genutzter Fahrstreifen (Sharrows)',
           },
           {
             value: 'needsClarification',
@@ -2181,6 +2319,10 @@ const data = {
           {
             value: 'not_expected',
             label: 'Keine Infrastruktur erwartet',
+          },
+          {
+            value: 'separate_geometry',
+            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'assumed_no',
@@ -2218,10 +2360,6 @@ const data = {
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
           },
           {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
-          {
             value: 'cycleway_isolated',
             label: 'Radweg, selbstständig geführt',
           },
@@ -2289,16 +2427,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -2310,7 +2440,7 @@ const data = {
           },
           {
             value: 'sharedMotorVehicleLane',
-            label: 'Gemeinsamer Fahrstreifen',
+            label: 'Anteilig genutzter Fahrstreifen (Sharrows)',
           },
           {
             value: 'needsClarification',
@@ -2323,6 +2453,10 @@ const data = {
           {
             value: 'not_expected',
             label: 'Keine Infrastruktur erwartet',
+          },
+          {
+            value: 'separate_geometry',
+            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'assumed_no',
@@ -2360,10 +2494,6 @@ const data = {
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
           },
           {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
-          {
             value: 'cycleway_isolated',
             label: 'Radweg, selbstständig geführt',
           },
@@ -2431,16 +2561,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -2452,7 +2574,7 @@ const data = {
           },
           {
             value: 'sharedMotorVehicleLane',
-            label: 'Gemeinsamer Fahrstreifen',
+            label: 'Anteilig genutzter Fahrstreifen (Sharrows)',
           },
           {
             value: 'needsClarification',
@@ -2467,6 +2589,10 @@ const data = {
             label: 'Keine Infrastruktur erwartet',
           },
           {
+            value: 'separate_geometry',
+            label: 'RVA als separate Geometrie erfasst',
+          },
+          {
             value: 'assumed_no',
             label: 'Vermutlich vollständig',
           },
@@ -2479,10 +2605,16 @@ const data = {
     ],
     chapters: [
       {
+        id: 'adjoining-road',
+        title: 'Angrenzende Straße (`adjoining_*`)',
+        markdown:
+          '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
       },
     ],
   },
@@ -2676,7 +2808,7 @@ const data = {
           },
           {
             value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
+            label: 'Straßenquerung (Radweg)',
           },
           {
             value: 'cycleway',
@@ -2684,11 +2816,19 @@ const data = {
           },
           {
             value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
           },
           {
             value: 'footway_sidewalk',
             label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
           },
           {
             value: 'footway',
@@ -2763,14 +2903,6 @@ const data = {
             label: 'Zufahrtsweg (unbekannte Klassifizierung)',
           },
           {
-            value: 'service',
-            label: 'Zufahrtsweg',
-          },
-          {
-            value: 'steps',
-            label: 'Stufen',
-          },
-          {
             value: 'tertiary_link',
             label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
           },
@@ -2803,7 +2935,7 @@ const data = {
         type: 'meter',
         label: 'Länge',
         description:
-          'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',
+          'Ein berechneter Wert für das OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genauigkeit für Deutschland.',
         values: [],
       },
       {
@@ -2929,6 +3061,8 @@ const data = {
           {
             value: 'covered',
             label: 'Überdacht',
+            description:
+              'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
           },
           {
             value: 'partial',
@@ -3089,10 +3223,16 @@ const data = {
     ],
     chapters: [
       {
+        id: 'adjoining-road',
+        title: 'Angrenzende Straße (`adjoining_*`)',
+        markdown:
+          '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
       },
     ],
   },
@@ -3179,6 +3319,644 @@ const data = {
       },
     ],
     chapters: [],
+  },
+  highwayAreas: {
+    topic: 'roads_bikelanes',
+    tableName: 'highwayAreas',
+    sourceIds: ['tilda_highwayAreas'],
+    title: 'Daten zu Straßenflächen',
+    summary:
+      '**Experimentell, noch nicht stabil.** Attribute und Datenfilter können sich noch ändern.',
+    groups: [],
+    attributes: [
+      {
+        key: 'road',
+        type: 'string',
+        label: 'Straßentyp',
+        values: [
+          {
+            value: 'bicycle_road',
+            label: 'Fahrradstraße',
+          },
+          {
+            value: 'construction',
+            label: 'Straße ist in Bau',
+          },
+          {
+            value: 'cycleway_crossing',
+            label: 'Straßenquerung (Radweg)',
+          },
+          {
+            value: 'cycleway',
+            label: 'Radweg',
+          },
+          {
+            value: 'footway_cycleway_crossing',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
+          },
+          {
+            value: 'footway_sidewalk',
+            label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
+          },
+          {
+            value: 'footway',
+            label: 'Fußweg',
+          },
+          {
+            value: 'living_street',
+            label: 'Verkehrsberuhigter Bereich',
+          },
+          {
+            value: 'motorway_link',
+            label: 'Zufahrt einer Autobahn',
+          },
+          {
+            value: 'motorway',
+            label: 'Autobahn',
+          },
+          {
+            value: 'path',
+            label: 'Weg / Pfad',
+          },
+          {
+            value: 'pedestrian',
+            label: 'Fußgängerzone',
+          },
+          {
+            value: 'primary_link',
+            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
+          },
+          {
+            value: 'primary',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
+          },
+          {
+            value: 'residential',
+            label: 'Anwohnerstraße',
+          },
+          {
+            value: 'residential_priority_road',
+            label: 'residential_priority_road',
+          },
+          {
+            value: 'secondary_link',
+            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
+          },
+          {
+            value: 'secondary',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
+          },
+          {
+            value: 'service_alley',
+            label: 'Gasse',
+          },
+          {
+            value: 'service_driveway',
+            label: 'Grundstückszufahrt',
+          },
+          {
+            value: 'service_emergency_access',
+            label: 'Rettungsweg',
+          },
+          {
+            value: 'service_parking_aisle',
+            label: 'Parkplatzweg',
+          },
+          {
+            value: 'service_road',
+            label: 'Zufahrtsweg',
+          },
+          {
+            value: 'service_uncategorized',
+            label: 'Zufahrtsweg (unbekannte Klassifizierung)',
+          },
+          {
+            value: 'tertiary_link',
+            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
+          },
+          {
+            value: 'tertiary',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
+          },
+          {
+            value: 'track',
+            label: 'Wald- / Feldweg',
+          },
+          {
+            value: 'unclassified',
+            label: 'Nebenstraße mit Verbindungscharakter',
+          },
+          {
+            value: 'unspecified_road',
+            label: 'Unkategorisierte Straße',
+          },
+        ],
+      },
+      {
+        key: 'name',
+        type: 'sanitized_strings',
+        label: 'Name',
+        values: [],
+      },
+      {
+        key: 'area',
+        type: 'square_meter',
+        label: 'Fläche',
+        description: 'Fläche in Quadratmetern, aus der Geometrie.',
+        values: [],
+      },
+      {
+        key: 'lifecycle',
+        type: 'string',
+        label: 'Status',
+        values: [
+          {
+            value: 'blocked',
+            label: 'Gesperrt (Sperrung)',
+          },
+          {
+            value: 'construction',
+            label: 'In Bau',
+          },
+          {
+            value: 'construction_no_access',
+            label: 'Gesperrt aufgrund einer Baustelle',
+          },
+          {
+            value: 'temporary',
+            label: 'Temporärer Weg',
+          },
+        ],
+      },
+      {
+        key: 'oneway',
+        type: 'string',
+        label: 'Verkehrsrichtung',
+        values: [
+          {
+            value: 'no',
+            label: 'Beide Richtungen',
+          },
+          {
+            value: 'yes',
+            label: 'Einbahnstraße',
+          },
+          {
+            value: 'yes_dual_carriageway',
+            label: 'Einbahnstraße da separate Geometrie pro Seite',
+          },
+        ],
+      },
+      {
+        key: 'oneway_bicycle',
+        type: 'string',
+        label: 'Verkehrsrichtung Fahrrad',
+        values: [
+          {
+            value: 'no',
+            label: 'Beide Richtungen für Radverkehr',
+          },
+          {
+            value: 'yes',
+            label: 'Eine Richtung (auch für Radverkehr)',
+          },
+        ],
+      },
+      {
+        key: 'mapillary_coverage',
+        type: 'string',
+        label: 'Mapillary-Abdeckung',
+        description:
+          'Basiert auf einer Analyse der Mapillary-Foto-Sequenzen der letzten ca. 2 Jahre, die mit den OSM-Wegen verschnitten wurden. Mehr unter https://tilda-geo.de/docs/mapillary-coverage',
+        values: [
+          {
+            value: 'regular',
+            label: 'Standard-Aufnahmen',
+          },
+          {
+            value: 'pano',
+            label: 'Panorama-Aufnahmen',
+          },
+        ],
+      },
+      {
+        key: 'mapillary',
+        type: 'sanitized_strings',
+        label: 'Straßenfotos (Mapillary)',
+        description:
+          'Mapillary-Bild-IDs (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
+        values: [],
+      },
+      {
+        key: 'mapillary_forward',
+        type: 'sanitized_strings',
+        label: 'Mapillary in Linienrichtung',
+        description:
+          'Mapillary-Bild-IDs in Linienrichtung (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
+        values: [],
+      },
+      {
+        key: 'mapillary_backward',
+        type: 'sanitized_strings',
+        label: 'Mapillary gegen Linienrichtung',
+        description:
+          'Mapillary-Bild-IDs in Gegenrichtung (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
+        values: [],
+      },
+      {
+        key: 'mapillary_traffic_sign',
+        type: 'sanitized_strings',
+        label: 'Mapillary für Verkehrszeichen',
+        description:
+          'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
+        values: [],
+      },
+      {
+        key: 'traffic_sign',
+        type: 'sanitized_strings',
+        label: 'Beschilderung',
+        values: [
+          {
+            value: 'none',
+            label: 'Unbeschildert',
+          },
+        ],
+      },
+      {
+        key: 'description',
+        type: 'sanitized_strings',
+        label: 'Hinweis aus OSM',
+        values: [],
+      },
+      {
+        key: 'operator_type',
+        type: 'string',
+        label: 'Betreibertyp',
+        values: [
+          {
+            value: 'private',
+            label: 'Privat',
+          },
+          {
+            value: 'public',
+            label: 'Öffentlich',
+          },
+        ],
+      },
+      {
+        key: 'informal',
+        type: 'string',
+        label: 'Trampelpfad',
+        values: [
+          {
+            value: 'yes',
+            label: 'Weg als informeller Weg erfasst',
+          },
+        ],
+      },
+      {
+        key: 'covered',
+        type: 'string',
+        label: 'Überdacht',
+        values: [
+          {
+            value: 'covered',
+            label: 'Überdacht',
+            description:
+              'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
+          },
+          {
+            value: 'partial',
+            label: 'Teilweise überdacht',
+          },
+          {
+            value: 'indoor',
+            label: 'In einem Gebäude',
+          },
+        ],
+      },
+      {
+        key: 'lit',
+        type: 'string',
+        label: 'Beleuchtung',
+        values: [
+          {
+            value: 'yes',
+            label: 'Beleuchtet',
+          },
+          {
+            value: 'no',
+            label: 'Nicht beleuchtet',
+          },
+          {
+            value: 'special',
+            label: 'Spezielle Angaben',
+          },
+        ],
+      },
+      {
+        key: 'width',
+        type: 'meter',
+        label: 'Breite',
+        values: [],
+      },
+      {
+        key: 'width_source',
+        type: 'sanitized_strings',
+        label: 'Quelle Breite',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'ALKIS',
+            label: 'Aus ALKIS Daten ausgemessen',
+          },
+          {
+            value: 'ARCore',
+            label: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
+          },
+        ],
+      },
+      {
+        key: 'bridge',
+        type: 'string',
+        label: 'Brücke',
+        values: [
+          {
+            value: 'yes',
+            label: 'Ja',
+          },
+        ],
+      },
+      {
+        key: 'tunnel',
+        type: 'string',
+        label: 'Tunnel',
+        values: [
+          {
+            value: 'yes',
+            label: 'Ja',
+            description:
+              'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',
+          },
+        ],
+      },
+      {
+        key: 'surface',
+        type: 'string',
+        label: 'Oberfläche',
+        values: [
+          {
+            value: 'asphalt',
+            label: 'Asphalt',
+          },
+          {
+            value: 'paved',
+            label: 'Befestigt (unspezifisch)',
+          },
+          {
+            value: 'unpaved',
+            label: 'Unbefestigt',
+          },
+          {
+            value: 'concrete',
+            label: 'Beton',
+          },
+          {
+            value: 'concrete:plates',
+            label: 'Betonplatten',
+          },
+          {
+            value: 'concrete:lanes',
+            label: 'Betonstreifen / -bahnen',
+          },
+          {
+            value: 'paving_stones',
+            label: 'Verbund&shy;pflastersteine',
+          },
+          {
+            value: 'paving_stones:lanes',
+            label: 'Pflasterstein&shy;bahnen',
+          },
+          {
+            value: 'sett',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
+          },
+          {
+            value: 'mosaic_sett',
+            label: 'Mosaikpflaster',
+          },
+          {
+            value: 'small_sett',
+            label: 'Kleinpflaster',
+          },
+          {
+            value: 'large_sett',
+            label: 'Großpflaster',
+          },
+          {
+            value: 'bricks',
+            label: 'Ziegel',
+          },
+          {
+            value: 'stone',
+            label: 'Stein',
+          },
+          {
+            value: 'ground',
+            label: 'Erde/Boden',
+          },
+          {
+            value: 'grass',
+            label: 'Gras',
+          },
+          {
+            value: 'sand',
+            label: 'Sand',
+          },
+          {
+            value: 'compacted',
+            label: 'Verdichteter Untergrund',
+          },
+          {
+            value: 'fine_gravel',
+            label: 'Splitt',
+          },
+          {
+            value: 'gravel',
+            label: 'Schotter',
+          },
+          {
+            value: 'pebblestone',
+            label: 'Kieselsteine',
+          },
+          {
+            value: 'wood',
+            label: 'Holz',
+          },
+          {
+            value: 'woodchips',
+            label: 'Hackschnitzel',
+          },
+          {
+            value: 'metal',
+            label: 'Metall',
+          },
+          {
+            value: 'metal_grid',
+            label: 'Metallgitter',
+          },
+          {
+            value: 'plastic',
+            label: 'Kunststoff',
+          },
+          {
+            value: 'rubber',
+            label: 'Gummi',
+          },
+          {
+            value: 'grass_paver',
+            label: 'Rasengitter / Grasgitter',
+          },
+        ],
+      },
+      {
+        key: 'surface_source',
+        type: 'string',
+        label: 'Herkunft der Oberfläche',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'tag',
+            label: 'Explizite Angabe aus OSM',
+          },
+          {
+            value: 'tag_transformed',
+            label: 'Aus OSM-Tag normalisiert',
+          },
+          {
+            value: 'parent_highway_tag',
+            label: 'Von zugeordneter Straße (OSM)',
+          },
+          {
+            value: 'parent_highway_tag_transformed',
+            label: 'Von zugeordneter Straße, normalisiert',
+          },
+        ],
+      },
+      {
+        key: 'surface_confidence',
+        type: 'string',
+        label: 'Konfidenz der Oberfläche',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'high',
+            label: 'Hoch',
+          },
+          {
+            value: 'medium',
+            label: 'Mittel',
+          },
+          {
+            value: 'low',
+            label: 'Niedrig',
+          },
+        ],
+      },
+      {
+        key: 'smoothness',
+        type: 'string',
+        label: 'Ober&shy;flächen&shy;qualität',
+        values: [
+          {
+            value: 'excellent',
+            label: 'Sehr gut',
+          },
+          {
+            value: 'good',
+            label: 'Gut',
+          },
+          {
+            value: 'intermediate',
+            label: 'Mittel gut',
+          },
+          {
+            value: 'bad',
+            label: 'Schlecht',
+          },
+          {
+            value: 'very_bad',
+            label: 'Sehr schlecht',
+          },
+        ],
+      },
+      {
+        key: 'smoothness_source',
+        type: 'string',
+        label: 'Herkunft der Ober&shy;flächen&shy;qualität',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'tag',
+            label: 'OSM-Tag `smoothness`',
+          },
+          {
+            value: 'tag_normalized',
+            label: 'OSM-Tag `smoothness` (normalisiert)',
+          },
+          {
+            value: 'surface_to_smoothness',
+            label: 'Abgeleitet von `surface`',
+          },
+          {
+            value: 'tracktype_to_smoothness',
+            label: 'Abgeleitet von `tracktype`',
+          },
+          {
+            value: 'mtb:scale_to_smoothness',
+            label: 'Abgeleitet von `mtb:scale`',
+          },
+        ],
+      },
+      {
+        key: 'smoothness_confidence',
+        type: 'string',
+        label: 'Konfidenz Ober&shy;flächen&shy;qualität',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'high',
+            label: 'Hoch',
+          },
+          {
+            value: 'medium',
+            label: 'Mittel',
+          },
+        ],
+      },
+    ],
+    chapters: [
+      {
+        id: 'adjoining-road',
+        title: 'Angrenzende Straße (`adjoining_*`)',
+        markdown:
+          '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
+      },
+      {
+        id: 'versetzte-geometrien',
+        title: 'Versetzte Geometrien',
+        markdown:
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
+      },
+    ],
   },
   landuse: {
     topic: 'landuse',
@@ -3579,6 +4357,12 @@ const data = {
             label: 'Keine Parkbeschränkungen',
           },
           {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
+          },
+          {
             value: 'loading',
             label: 'Ladezone',
           },
@@ -3638,7 +4422,7 @@ const data = {
         label: 'Primäre Parkbeschränkung',
         purpose: 'rendering',
         description:
-          'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
+          'Der für die Darstellung wichtigste Wert aus `condition_category`. Reihenfolge: Sonderparkplätze (Behinderte, Taxi, Ladezone, E-Laden, Carsharing) vor Park- und Haltverboten, dann private/eingeschränkte Flächen, dann Höchstparkdauer vor Bewirtschaftung. Nur zur Darstellung; fachlich gilt `condition_category`.',
         values: [
           {
             value: 'access_restriction',
@@ -3675,6 +4459,12 @@ const data = {
           {
             value: 'free',
             label: 'Keine Parkbeschränkungen',
+          },
+          {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
           },
           {
             value: 'loading',
@@ -3727,6 +4517,10 @@ const data = {
           {
             value: 'vehicle_restriction',
             label: 'Beschränkung auf Fahrzeugklassen',
+          },
+          {
+            value: 'default',
+            label: 'Keine Zuordnung',
           },
         ],
       },
@@ -4332,6 +5126,12 @@ const data = {
             label: 'Keine Parkbeschränkungen',
           },
           {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
+          },
+          {
             value: 'loading',
             label: 'Ladezone',
           },
@@ -4391,7 +5191,7 @@ const data = {
         label: 'Primäre Parkbeschränkung',
         purpose: 'rendering',
         description:
-          'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
+          'Der für die Darstellung wichtigste Wert aus `condition_category`. Reihenfolge: Sonderparkplätze (Behinderte, Taxi, Ladezone, E-Laden, Carsharing) vor Park- und Haltverboten, dann private/eingeschränkte Flächen, dann Höchstparkdauer vor Bewirtschaftung. Nur zur Darstellung; fachlich gilt `condition_category`.',
         values: [
           {
             value: 'access_restriction',
@@ -4428,6 +5228,12 @@ const data = {
           {
             value: 'free',
             label: 'Keine Parkbeschränkungen',
+          },
+          {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
           },
           {
             value: 'loading',
@@ -4480,6 +5286,10 @@ const data = {
           {
             value: 'vehicle_restriction',
             label: 'Beschränkung auf Fahrzeugklassen',
+          },
+          {
+            value: 'default',
+            label: 'Keine Zuordnung',
           },
         ],
       },
@@ -5065,6 +5875,12 @@ const data = {
             label: 'Keine Parkbeschränkungen',
           },
           {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
+          },
+          {
             value: 'loading',
             label: 'Ladezone',
           },
@@ -5124,7 +5940,7 @@ const data = {
         label: 'Primäre Parkbeschränkung',
         purpose: 'rendering',
         description:
-          'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
+          'Der für die Darstellung wichtigste Wert aus `condition_category`. Reihenfolge: Sonderparkplätze (Behinderte, Taxi, Ladezone, E-Laden, Carsharing) vor Park- und Haltverboten, dann private/eingeschränkte Flächen, dann Höchstparkdauer vor Bewirtschaftung. Nur zur Darstellung; fachlich gilt `condition_category`.',
         values: [
           {
             value: 'access_restriction',
@@ -5161,6 +5977,12 @@ const data = {
           {
             value: 'free',
             label: 'Keine Parkbeschränkungen',
+          },
+          {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
           },
           {
             value: 'loading',
@@ -5214,6 +6036,10 @@ const data = {
             value: 'vehicle_restriction',
             label: 'Beschränkung auf Fahrzeugklassen',
           },
+          {
+            value: 'default',
+            label: 'Keine Zuordnung',
+          },
         ],
       },
       {
@@ -5241,7 +6067,7 @@ const data = {
         type: 'meter',
         label: 'Länge',
         description:
-          'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',
+          'Ein berechneter Wert für das OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genauigkeit für Deutschland.',
         values: [],
       },
       {
@@ -5286,10 +6112,10 @@ const data = {
       {
         key: 'geom_sources',
         type: 'sanitized_strings',
-        label: '(Intern) OSM-IDs der Geometiren',
+        label: '(Intern) OSM-IDs der Geometrien',
         purpose: 'qa',
         description:
-          'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendeten wurden.',
+          'Interne Hilfswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendet wurden.',
         values: [],
       },
       {
@@ -5298,7 +6124,7 @@ const data = {
         label: 'Tag-Quellen',
         purpose: 'qa',
         description:
-          'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.',
+          'Interne Hilfswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.',
         values: [],
       },
       {
@@ -5317,7 +6143,7 @@ const data = {
           },
           {
             value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
+            label: 'Straßenquerung (Radweg)',
           },
           {
             value: 'cycleway',
@@ -5325,11 +6151,19 @@ const data = {
           },
           {
             value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
           },
           {
             value: 'footway_sidewalk',
             label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
           },
           {
             value: 'footway',
@@ -5402,14 +6236,6 @@ const data = {
           {
             value: 'service_uncategorized',
             label: 'Zufahrtsweg (unbekannte Klassifizierung)',
-          },
-          {
-            value: 'service',
-            label: 'Zufahrtsweg',
-          },
-          {
-            value: 'steps',
-            label: 'Stufen',
           },
           {
             value: 'tertiary_link',
@@ -6792,7 +7618,7 @@ const data = {
           },
           {
             value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
+            label: 'Straßenquerung (Radweg)',
           },
           {
             value: 'cycleway',
@@ -6800,11 +7626,19 @@ const data = {
           },
           {
             value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
           },
           {
             value: 'footway_sidewalk',
             label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
           },
           {
             value: 'footway',
@@ -6877,14 +7711,6 @@ const data = {
           {
             value: 'service_uncategorized',
             label: 'Zufahrtsweg (unbekannte Klassifizierung)',
-          },
-          {
-            value: 'service',
-            label: 'Zufahrtsweg',
-          },
-          {
-            value: 'steps',
-            label: 'Stufen',
           },
           {
             value: 'tertiary_link',
@@ -7025,6 +7851,12 @@ const data = {
             label: 'Keine Parkbeschränkungen',
           },
           {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
+          },
+          {
             value: 'loading',
             label: 'Ladezone',
           },
@@ -7075,6 +7907,10 @@ const data = {
           {
             value: 'vehicle_restriction',
             label: 'Beschränkung auf Fahrzeugklassen',
+          },
+          {
+            value: 'default',
+            label: 'Keine Zuordnung',
           },
         ],
       },
@@ -7123,6 +7959,12 @@ const data = {
             label: 'Keine Parkbeschränkungen',
           },
           {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
+          },
+          {
             value: 'loading',
             label: 'Ladezone',
           },
@@ -7173,6 +8015,10 @@ const data = {
           {
             value: 'vehicle_restriction',
             label: 'Beschränkung auf Fahrzeugklassen',
+          },
+          {
+            value: 'default',
+            label: 'Keine Zuordnung',
           },
         ],
       },
@@ -7767,6 +8613,12 @@ const data = {
             label: 'Keine Parkbeschränkungen',
           },
           {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
+          },
+          {
             value: 'loading',
             label: 'Ladezone',
           },
@@ -7817,6 +8669,114 @@ const data = {
           {
             value: 'vehicle_restriction',
             label: 'Beschränkung auf Fahrzeugklassen',
+          },
+        ],
+      },
+      {
+        key: 'condition_category_primary',
+        type: 'string',
+        label: 'Primäre Parkbeschränkung',
+        purpose: 'rendering',
+        description:
+          'Der für die Darstellung wichtigste Wert aus `condition_category`. Reihenfolge: Sonderparkplätze (Behinderte, Taxi, Ladezone, E-Laden, Carsharing) vor Park- und Haltverboten, dann private/eingeschränkte Flächen, dann Höchstparkdauer vor Bewirtschaftung. Nur zur Darstellung; fachlich gilt `condition_category`.',
+        values: [
+          {
+            value: 'access_restriction',
+            label: 'Zugangsbeschränkung',
+          },
+          {
+            value: 'assumed_free',
+            label: 'Wahrscheinlich keine Parkbeschränkungen',
+          },
+          {
+            value: 'assumed_private',
+            label: 'Sehr wahrscheinlich privat',
+          },
+          {
+            value: 'bus_lane',
+            label: 'Bussonderfahrstreifen',
+          },
+          {
+            value: 'car_sharing',
+            label: 'Nur für Carsharing-Fahrzeuge',
+          },
+          {
+            value: 'charging',
+            label: 'Laden von Elektrofahrzeugen',
+          },
+          {
+            value: 'disabled',
+            label: 'Behindertenparkplatz',
+          },
+          {
+            value: 'disabled_private',
+            label: 'Personenbezogener Behindertenparkplatz',
+          },
+          {
+            value: 'free',
+            label: 'Keine Parkbeschränkungen',
+          },
+          {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
+          },
+          {
+            value: 'loading',
+            label: 'Ladezone',
+          },
+          {
+            value: 'maxweight',
+            label: 'Gewichtsbegrenzung',
+          },
+          {
+            value: 'mixed',
+            label: 'Nur mit Parkschein oder Bewohnerparkausweis',
+          },
+          {
+            value: 'no_parking',
+            label: 'Eingeschränktes Haltverbot',
+          },
+          {
+            value: 'no_standing',
+            label: 'Nur kurzes Halten erlaubt',
+          },
+          {
+            value: 'no_stopping',
+            label: 'Absolutes Haltverbot',
+          },
+          {
+            value: 'paid',
+            label: 'Nur mit Parkschein',
+          },
+          {
+            value: 'private',
+            label: 'Privat',
+          },
+          {
+            value: 'residents',
+            label: 'Nur mit Bewohnerparkausweis',
+          },
+          {
+            value: 'taxi',
+            label: 'Taxenstand',
+          },
+          {
+            value: 'time_limited',
+            label: 'Höchstparkdauer',
+          },
+          {
+            value: 'unspecified',
+            label: 'Unbestimmt',
+          },
+          {
+            value: 'vehicle_restriction',
+            label: 'Beschränkung auf Fahrzeugklassen',
+          },
+          {
+            value: 'default',
+            label: 'Keine Zuordnung',
           },
         ],
       },
@@ -7970,10 +8930,10 @@ const data = {
       {
         key: 'geom_sources',
         type: 'sanitized_strings',
-        label: '(Intern) OSM-IDs der Geometiren',
+        label: '(Intern) OSM-IDs der Geometrien',
         purpose: 'qa',
         description:
-          'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendeten wurden.',
+          'Interne Hilfswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendet wurden.',
         values: [],
       },
       {
@@ -7982,7 +8942,7 @@ const data = {
         label: 'Tag-Quellen',
         purpose: 'qa',
         description:
-          'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.',
+          'Interne Hilfswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.',
         values: [],
       },
       {
@@ -8001,7 +8961,7 @@ const data = {
           },
           {
             value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
+            label: 'Straßenquerung (Radweg)',
           },
           {
             value: 'cycleway',
@@ -8009,11 +8969,19 @@ const data = {
           },
           {
             value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
           },
           {
             value: 'footway_sidewalk',
             label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
           },
           {
             value: 'footway',
@@ -8086,14 +9054,6 @@ const data = {
           {
             value: 'service_uncategorized',
             label: 'Zufahrtsweg (unbekannte Klassifizierung)',
-          },
-          {
-            value: 'service',
-            label: 'Zufahrtsweg',
-          },
-          {
-            value: 'steps',
-            label: 'Stufen',
           },
           {
             value: 'tertiary_link',
@@ -8823,6 +9783,12 @@ const data = {
             label: 'Keine Parkbeschränkungen',
           },
           {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
+          },
+          {
             value: 'loading',
             label: 'Ladezone',
           },
@@ -8877,6 +9843,114 @@ const data = {
         ],
       },
       {
+        key: 'condition_category_primary',
+        type: 'string',
+        label: 'Primäre Parkbeschränkung',
+        purpose: 'rendering',
+        description:
+          'Der für die Darstellung wichtigste Wert aus `condition_category`. Reihenfolge: Sonderparkplätze (Behinderte, Taxi, Ladezone, E-Laden, Carsharing) vor Park- und Haltverboten, dann private/eingeschränkte Flächen, dann Höchstparkdauer vor Bewirtschaftung. Nur zur Darstellung; fachlich gilt `condition_category`.',
+        values: [
+          {
+            value: 'access_restriction',
+            label: 'Zugangsbeschränkung',
+          },
+          {
+            value: 'assumed_free',
+            label: 'Wahrscheinlich keine Parkbeschränkungen',
+          },
+          {
+            value: 'assumed_private',
+            label: 'Sehr wahrscheinlich privat',
+          },
+          {
+            value: 'bus_lane',
+            label: 'Bussonderfahrstreifen',
+          },
+          {
+            value: 'car_sharing',
+            label: 'Nur für Carsharing-Fahrzeuge',
+          },
+          {
+            value: 'charging',
+            label: 'Laden von Elektrofahrzeugen',
+          },
+          {
+            value: 'disabled',
+            label: 'Behindertenparkplatz',
+          },
+          {
+            value: 'disabled_private',
+            label: 'Personenbezogener Behindertenparkplatz',
+          },
+          {
+            value: 'free',
+            label: 'Keine Parkbeschränkungen',
+          },
+          {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
+          },
+          {
+            value: 'loading',
+            label: 'Ladezone',
+          },
+          {
+            value: 'maxweight',
+            label: 'Gewichtsbegrenzung',
+          },
+          {
+            value: 'mixed',
+            label: 'Nur mit Parkschein oder Bewohnerparkausweis',
+          },
+          {
+            value: 'no_parking',
+            label: 'Eingeschränktes Haltverbot',
+          },
+          {
+            value: 'no_standing',
+            label: 'Nur kurzes Halten erlaubt',
+          },
+          {
+            value: 'no_stopping',
+            label: 'Absolutes Haltverbot',
+          },
+          {
+            value: 'paid',
+            label: 'Nur mit Parkschein',
+          },
+          {
+            value: 'private',
+            label: 'Privat',
+          },
+          {
+            value: 'residents',
+            label: 'Nur mit Bewohnerparkausweis',
+          },
+          {
+            value: 'taxi',
+            label: 'Taxenstand',
+          },
+          {
+            value: 'time_limited',
+            label: 'Höchstparkdauer',
+          },
+          {
+            value: 'unspecified',
+            label: 'Unbestimmt',
+          },
+          {
+            value: 'vehicle_restriction',
+            label: 'Beschränkung auf Fahrzeugklassen',
+          },
+          {
+            value: 'default',
+            label: 'Keine Zuordnung',
+          },
+        ],
+      },
+      {
         key: 'staggered',
         type: 'string',
         label: 'Parkweise',
@@ -8901,7 +9975,7 @@ const data = {
         type: 'meter',
         label: 'Länge',
         description:
-          'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',
+          'Ein berechneter Wert für das OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genauigkeit für Deutschland.',
         values: [],
       },
       {
@@ -8946,10 +10020,10 @@ const data = {
       {
         key: 'geom_sources',
         type: 'sanitized_strings',
-        label: '(Intern) OSM-IDs der Geometiren',
+        label: '(Intern) OSM-IDs der Geometrien',
         purpose: 'qa',
         description:
-          'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendeten wurden.',
+          'Interne Hilfswerte. Semikolonseparierte Liste der OSM-IDs die für eine Geometrie verwendet wurden.',
         values: [],
       },
       {
@@ -8958,7 +10032,7 @@ const data = {
         label: 'Tag-Quellen',
         purpose: 'qa',
         description:
-          'Interne Hilftswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.',
+          'Interne Hilfswerte. Semikolonseparierte Liste der OSM-IDs aus denen die OSM-Tags abgeleitet wurden.',
         values: [],
       },
       {
@@ -8977,7 +10051,7 @@ const data = {
           },
           {
             value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
+            label: 'Straßenquerung (Radweg)',
           },
           {
             value: 'cycleway',
@@ -8985,11 +10059,19 @@ const data = {
           },
           {
             value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
           },
           {
             value: 'footway_sidewalk',
             label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
           },
           {
             value: 'footway',
@@ -9062,14 +10144,6 @@ const data = {
           {
             value: 'service_uncategorized',
             label: 'Zufahrtsweg (unbekannte Klassifizierung)',
-          },
-          {
-            value: 'service',
-            label: 'Zufahrtsweg',
-          },
-          {
-            value: 'steps',
-            label: 'Stufen',
           },
           {
             value: 'tertiary_link',
@@ -10929,7 +12003,7 @@ const data = {
           },
           {
             value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
+            label: 'Straßenquerung (Radweg)',
           },
           {
             value: 'cycleway',
@@ -10937,11 +12011,19 @@ const data = {
           },
           {
             value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
           },
           {
             value: 'footway_sidewalk',
             label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
           },
           {
             value: 'footway',
@@ -11014,14 +12096,6 @@ const data = {
           {
             value: 'service_uncategorized',
             label: 'Zufahrtsweg (unbekannte Klassifizierung)',
-          },
-          {
-            value: 'service',
-            label: 'Zufahrtsweg',
-          },
-          {
-            value: 'steps',
-            label: 'Stufen',
           },
           {
             value: 'tertiary_link',
@@ -11155,7 +12229,7 @@ const data = {
         type: 'meter',
         label: 'Länge',
         description:
-          'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',
+          'Ein berechneter Wert für das OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genauigkeit für Deutschland.',
         values: [],
       },
       {
@@ -11262,6 +12336,8 @@ const data = {
           {
             value: 'yes',
             label: 'Ja',
+            description:
+              'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',
           },
         ],
       },
@@ -11387,6 +12463,8 @@ const data = {
           {
             value: 'covered',
             label: 'Überdacht',
+            description:
+              'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
           },
           {
             value: 'partial',
@@ -11424,10 +12502,6 @@ const data = {
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
           },
           {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
-          {
             value: 'cycleway_isolated',
             label: 'Radweg, selbstständig geführt',
           },
@@ -11495,16 +12569,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -11516,7 +12582,7 @@ const data = {
           },
           {
             value: 'sharedMotorVehicleLane',
-            label: 'Gemeinsamer Fahrstreifen',
+            label: 'Anteilig genutzter Fahrstreifen (Sharrows)',
           },
           {
             value: 'needsClarification',
@@ -11529,6 +12595,10 @@ const data = {
           {
             value: 'not_expected',
             label: 'Keine Infrastruktur erwartet',
+          },
+          {
+            value: 'separate_geometry',
+            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'assumed_no',
@@ -11566,10 +12636,6 @@ const data = {
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
           },
           {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
-          {
             value: 'cycleway_isolated',
             label: 'Radweg, selbstständig geführt',
           },
@@ -11637,16 +12703,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -11658,7 +12716,7 @@ const data = {
           },
           {
             value: 'sharedMotorVehicleLane',
-            label: 'Gemeinsamer Fahrstreifen',
+            label: 'Anteilig genutzter Fahrstreifen (Sharrows)',
           },
           {
             value: 'needsClarification',
@@ -11671,6 +12729,10 @@ const data = {
           {
             value: 'not_expected',
             label: 'Keine Infrastruktur erwartet',
+          },
+          {
+            value: 'separate_geometry',
+            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'assumed_no',
@@ -11708,10 +12770,6 @@ const data = {
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
           },
           {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
-          {
             value: 'cycleway_isolated',
             label: 'Radweg, selbstständig geführt',
           },
@@ -11779,16 +12837,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -11800,7 +12850,7 @@ const data = {
           },
           {
             value: 'sharedMotorVehicleLane',
-            label: 'Gemeinsamer Fahrstreifen',
+            label: 'Anteilig genutzter Fahrstreifen (Sharrows)',
           },
           {
             value: 'needsClarification',
@@ -11813,6 +12863,10 @@ const data = {
           {
             value: 'not_expected',
             label: 'Keine Infrastruktur erwartet',
+          },
+          {
+            value: 'separate_geometry',
+            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'assumed_no',
@@ -12195,10 +13249,16 @@ const data = {
     ],
     chapters: [
       {
+        id: 'adjoining-road',
+        title: 'Angrenzende Straße (`adjoining_*`)',
+        markdown:
+          '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
       },
     ],
   },
@@ -12229,7 +13289,7 @@ const data = {
           },
           {
             value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
+            label: 'Straßenquerung (Radweg)',
           },
           {
             value: 'cycleway',
@@ -12237,11 +13297,19 @@ const data = {
           },
           {
             value: 'footway_cycleway_crossing',
-            label: 'Straßenquerung (Fußverkehr)',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
           },
           {
             value: 'footway_sidewalk',
             label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
           },
           {
             value: 'footway',
@@ -12316,14 +13384,6 @@ const data = {
             label: 'Zufahrtsweg (unbekannte Klassifizierung)',
           },
           {
-            value: 'service',
-            label: 'Zufahrtsweg',
-          },
-          {
-            value: 'steps',
-            label: 'Stufen',
-          },
-          {
             value: 'tertiary_link',
             label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
           },
@@ -12356,7 +13416,7 @@ const data = {
         type: 'meter',
         label: 'Länge',
         description:
-          'Ein berechneter Wert für as OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genaugikeit für Deutschland.',
+          'Ein berechneter Wert für das OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genauigkeit für Deutschland.',
         values: [],
       },
       {
@@ -12516,6 +13576,8 @@ const data = {
           {
             value: 'covered',
             label: 'Überdacht',
+            description:
+              'Vollständig überdachte Wege (`covered=yes`) und Arkaden (`covered=arcade`, zur Seite hin offen).',
           },
           {
             value: 'partial',
@@ -12851,10 +13913,6 @@ const data = {
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
           },
           {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
-          },
-          {
             value: 'cycleway_isolated',
             label: 'Radweg, selbstständig geführt',
           },
@@ -12922,16 +13980,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -12943,7 +13993,7 @@ const data = {
           },
           {
             value: 'sharedMotorVehicleLane',
-            label: 'Gemeinsamer Fahrstreifen',
+            label: 'Anteilig genutzter Fahrstreifen (Sharrows)',
           },
           {
             value: 'needsClarification',
@@ -12956,6 +14006,10 @@ const data = {
           {
             value: 'not_expected',
             label: 'Keine Infrastruktur erwartet',
+          },
+          {
+            value: 'separate_geometry',
+            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'assumed_no',
@@ -12970,7 +14024,7 @@ const data = {
       {
         key: 'bikelane_self',
         type: 'string',
-        label: 'Radinfrastruktur links',
+        label: 'Radinfrastruktur mittig',
         values: [
           {
             value: 'bicycleRoad',
@@ -12991,10 +14045,6 @@ const data = {
           {
             value: 'cycleway_adjoiningOrIsolated',
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
-          },
-          {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
           },
           {
             value: 'cycleway_isolated',
@@ -13064,16 +14114,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -13085,7 +14127,7 @@ const data = {
           },
           {
             value: 'sharedMotorVehicleLane',
-            label: 'Gemeinsamer Fahrstreifen',
+            label: 'Anteilig genutzter Fahrstreifen (Sharrows)',
           },
           {
             value: 'needsClarification',
@@ -13098,6 +14140,10 @@ const data = {
           {
             value: 'not_expected',
             label: 'Keine Infrastruktur erwartet',
+          },
+          {
+            value: 'separate_geometry',
+            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'assumed_no',
@@ -13112,7 +14158,7 @@ const data = {
       {
         key: 'bikelane_right',
         type: 'string',
-        label: 'Radinfrastruktur links',
+        label: 'Radinfrastruktur rechts',
         values: [
           {
             value: 'bicycleRoad',
@@ -13133,10 +14179,6 @@ const data = {
           {
             value: 'cycleway_adjoiningOrIsolated',
             label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
-          },
-          {
-            value: 'cycleway_crossing',
-            label: 'Straßenquerung (Radverkehr)',
           },
           {
             value: 'cycleway_isolated',
@@ -13206,16 +14248,8 @@ const data = {
             label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
           },
           {
-            value: 'livingStreet',
-            label: 'Verkehrsberuhigter Bereich (Spielstraße)',
-          },
-          {
             value: 'pedestrianAreaBicycleYes',
             label: 'Fußgängerzone, Fahrrad frei',
-          },
-          {
-            value: 'separate_geometry',
-            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'sharedBusLaneBikeWithBus',
@@ -13227,7 +14261,7 @@ const data = {
           },
           {
             value: 'sharedMotorVehicleLane',
-            label: 'Gemeinsamer Fahrstreifen',
+            label: 'Anteilig genutzter Fahrstreifen (Sharrows)',
           },
           {
             value: 'needsClarification',
@@ -13240,6 +14274,10 @@ const data = {
           {
             value: 'not_expected',
             label: 'Keine Infrastruktur erwartet',
+          },
+          {
+            value: 'separate_geometry',
+            label: 'RVA als separate Geometrie erfasst',
           },
           {
             value: 'assumed_no',
@@ -13259,6 +14297,148 @@ const data = {
         values: [],
       },
       {
+        key: 'adjoining_road',
+        type: 'string',
+        label: 'Straßentyp der angrenzenden Straße',
+        description:
+          'Ein Indikator für die Gefährdung durch nahen Kfz-Verkehr: TILDA-Straßenklasse der relevanten Kfz-Straße (keine Aussage, ob der Weg zu dieser Straße gehört). Bei begleitenden Wegen die parallele Straße; bei Querungen die gequerte Straße. Primär, außer bei Querungen: OSM `is_sidepath:of`, über die TILDA-Straßenklassifikation gemappt (nur die `highway`-Klasse, ohne Untertags). Damit kann eine Kartierung die Schätzung überschreiben. `residential_priority_road` entsteht so nicht; der gröbere `:of`-Wert bleibt. Unbrauchbare `:of`-Werte (Tippfehler, Straßenname, `trunk`) fallen auf die Schätzung zurück. Bei Querungen immer nur die Schätzung (gequerte Straße), nie `:of`. Auch gesetzt, wenn der Weg selbstständig geführt ist.',
+        chapterRefs: ['adjoining-road'],
+        values: [
+          {
+            value: 'bicycle_road',
+            label: 'Fahrradstraße',
+          },
+          {
+            value: 'construction',
+            label: 'Straße ist in Bau',
+          },
+          {
+            value: 'cycleway_crossing',
+            label: 'Straßenquerung (Radweg)',
+          },
+          {
+            value: 'cycleway',
+            label: 'Radweg',
+          },
+          {
+            value: 'footway_cycleway_crossing',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
+          },
+          {
+            value: 'footway_sidewalk',
+            label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
+          },
+          {
+            value: 'footway',
+            label: 'Fußweg',
+          },
+          {
+            value: 'living_street',
+            label: 'Verkehrsberuhigter Bereich',
+          },
+          {
+            value: 'motorway_link',
+            label: 'Zufahrt einer Autobahn',
+          },
+          {
+            value: 'motorway',
+            label: 'Autobahn',
+          },
+          {
+            value: 'path',
+            label: 'Weg / Pfad',
+          },
+          {
+            value: 'pedestrian',
+            label: 'Fußgängerzone',
+          },
+          {
+            value: 'primary_link',
+            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
+          },
+          {
+            value: 'primary',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
+          },
+          {
+            value: 'residential',
+            label: 'Anwohnerstraße',
+          },
+          {
+            value: 'residential_priority_road',
+            label: 'residential_priority_road',
+          },
+          {
+            value: 'secondary_link',
+            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
+          },
+          {
+            value: 'secondary',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
+          },
+          {
+            value: 'service_alley',
+            label: 'Gasse',
+          },
+          {
+            value: 'service_driveway',
+            label: 'Grundstückszufahrt',
+          },
+          {
+            value: 'service_emergency_access',
+            label: 'Rettungsweg',
+          },
+          {
+            value: 'service_parking_aisle',
+            label: 'Parkplatzweg',
+          },
+          {
+            value: 'service_road',
+            label: 'Zufahrtsweg',
+          },
+          {
+            value: 'service_uncategorized',
+            label: 'Zufahrtsweg (unbekannte Klassifizierung)',
+          },
+          {
+            value: 'tertiary_link',
+            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
+          },
+          {
+            value: 'tertiary',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
+          },
+          {
+            value: 'track',
+            label: 'Wald- / Feldweg',
+          },
+          {
+            value: 'unclassified',
+            label: 'Nebenstraße mit Verbindungscharakter',
+          },
+          {
+            value: 'unspecified_road',
+            label: 'Unkategorisierte Straße',
+          },
+        ],
+      },
+      {
+        key: 'adjoining_maxspeed',
+        type: 'kilometer_per_hour',
+        label: 'Höchstgeschwindigkeit der angrenzenden Straße',
+        description:
+          'TILDA-Höchstgeschwindigkeit (gleiche Ableitung wie roads.maxspeed: Tags, Zonen, Straßenklasse) der angrenzenden Straße; Maximum über die zugeordneten Straßensegmente der dominanten Klasse.',
+        values: [],
+      },
+      {
         key: '_is_sidepath',
         type: 'ignore',
         label: '_is_sidepath',
@@ -13275,10 +14455,899 @@ const data = {
     ],
     chapters: [
       {
+        id: 'adjoining-road',
+        title: 'Angrenzende Straße (`adjoining_*`)',
+        markdown:
+          '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
+      },
+    ],
+  },
+  routing: {
+    topic: 'roads_bikelanes',
+    tableName: 'routing',
+    sourceIds: [],
+    title: 'Routing',
+    summary:
+      'Score-free road+bike edges for routing (one row per carriageway, bike lane or path), derived from roads_bikelanes infrastructure.',
+    groups: [],
+    attributes: [
+      {
+        key: 'category',
+        type: 'string',
+        label: 'Bauliche Führung',
+        description:
+          'TILDA-Bikelane-Kategorie (maßgebliche Klassifikation). `mixedTrafficFoot` auf Wege-Kanten (`source_table=roadsPathClasses`), wenn keine Self-Kategorie vorliegt.',
+        values: [
+          {
+            value: 'bicycleRoad',
+            label: 'Fahrradstraße',
+          },
+          {
+            value: 'bicycleRoad_vehicleDestination',
+            label: 'Fahrradstraße mit Anlieger/Kfz frei',
+          },
+          {
+            value: 'crossing',
+            label: 'Straßenquerung',
+          },
+          {
+            value: 'cycleway_adjoining',
+            label: 'Radweg (straßenbegleitend)',
+          },
+          {
+            value: 'cycleway_adjoiningOrIsolated',
+            label: 'Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
+          },
+          {
+            value: 'cycleway_isolated',
+            label: 'Radweg, selbstständig geführt',
+          },
+          {
+            value: 'cyclewayLink',
+            label: 'Radweg-Verbindungsstück',
+          },
+          {
+            value: 'cyclewayOnHighway_advisory',
+            label: 'Schutzstreifen',
+          },
+          {
+            value: 'cyclewayOnHighway_advisoryOrExclusive',
+            label: 'Radfahrstreifen oder Schutzstreifen (Kategorisierung unklar)',
+          },
+          {
+            value: 'cyclewayOnHighway_exclusive',
+            label: 'Radfahrstreifen',
+          },
+          {
+            value: 'cyclewayOnHighwayBetweenLanes',
+            label: 'Radfahrstreifen in Mittellage (Fahrradweiche)',
+          },
+          {
+            value: 'cyclewayOnHighwayProtected',
+            label: 'Geschützter Radfahrstreifen (PBL)',
+          },
+          {
+            value: 'footAndCyclewaySegregated_adjoining',
+            label: 'Getrennter Rad- und Gehweg, straßenbegleitend',
+          },
+          {
+            value: 'footAndCyclewaySegregated_adjoiningOrIsolated',
+            label:
+              'Getrennter Rad- und Gehweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
+          },
+          {
+            value: 'footAndCyclewaySegregated_isolated',
+            label: 'Getrennter Rad- und Gehweg, selbstständig geführt',
+          },
+          {
+            value: 'footAndCyclewayShared_adjoining',
+            label: 'Gemeinsamer Geh- und Radweg, straßenbegleitend',
+          },
+          {
+            value: 'footAndCyclewayShared_adjoiningOrIsolated',
+            label:
+              'Gemeinsamer Geh- und Radweg (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
+          },
+          {
+            value: 'footAndCyclewayShared_isolated',
+            label: 'Gemeinsamer Geh- und Radweg, selbstständig geführt',
+          },
+          {
+            value: 'footwayBicycleYes_adjoining',
+            label: 'Gehweg mit Radfahrer frei, straßenbegleitend',
+          },
+          {
+            value: 'footwayBicycleYes_adjoiningOrIsolated',
+            label:
+              'Gehweg mit Radfahrer frei (Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)',
+          },
+          {
+            value: 'footwayBicycleYes_isolated',
+            label: 'Gehweg mit Radfahrer frei, selbstständig geführt',
+          },
+          {
+            value: 'pedestrianAreaBicycleYes',
+            label: 'Fußgängerzone, Fahrrad frei',
+          },
+          {
+            value: 'sharedBusLaneBikeWithBus',
+            label: 'Radfahrstreifen mit Freigabe Busverkehr',
+          },
+          {
+            value: 'sharedBusLaneBusWithBike',
+            label: 'Bussonderfahrstreifen mit Fahrrad frei',
+          },
+          {
+            value: 'sharedMotorVehicleLane',
+            label: 'Anteilig genutzter Fahrstreifen (Sharrows)',
+          },
+          {
+            value: 'needsClarification',
+            label: 'Führungsform unklar',
+          },
+          {
+            value: 'mixedTrafficMotor',
+            label: 'Mischverkehr mit Kfz-Verkehr',
+            description:
+              'Verarbeitung zugewiesen (keine OSM-Kategorie). Fahrbahn-Kante ohne bauliche Radinfrastruktur.',
+          },
+          {
+            value: 'mixedTrafficFoot',
+            label: 'Mischverkehr mit Fußverkehr',
+            description:
+              'Verarbeitung zugewiesen auf Wege-Kanten (`source_table=roadsPathClasses`), wenn keine Self-Bikelane-Kategorie vorliegt.',
+          },
+        ],
+      },
+      {
+        key: 'road',
+        type: 'string',
+        label: 'Straßentyp',
+        values: [
+          {
+            value: 'bicycle_road',
+            label: 'Fahrradstraße',
+          },
+          {
+            value: 'construction',
+            label: 'Straße ist in Bau',
+          },
+          {
+            value: 'cycleway_crossing',
+            label: 'Straßenquerung (Radweg)',
+          },
+          {
+            value: 'cycleway',
+            label: 'Radweg',
+          },
+          {
+            value: 'footway_cycleway_crossing',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
+          },
+          {
+            value: 'footway_sidewalk',
+            label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
+          },
+          {
+            value: 'footway',
+            label: 'Fußweg',
+          },
+          {
+            value: 'living_street',
+            label: 'Verkehrsberuhigter Bereich',
+          },
+          {
+            value: 'motorway_link',
+            label: 'Zufahrt einer Autobahn',
+          },
+          {
+            value: 'motorway',
+            label: 'Autobahn',
+          },
+          {
+            value: 'path',
+            label: 'Weg / Pfad',
+          },
+          {
+            value: 'pedestrian',
+            label: 'Fußgängerzone',
+          },
+          {
+            value: 'primary_link',
+            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
+          },
+          {
+            value: 'primary',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
+          },
+          {
+            value: 'residential',
+            label: 'Anwohnerstraße',
+          },
+          {
+            value: 'residential_priority_road',
+            label: 'residential_priority_road',
+          },
+          {
+            value: 'secondary_link',
+            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
+          },
+          {
+            value: 'secondary',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
+          },
+          {
+            value: 'service_alley',
+            label: 'Gasse',
+          },
+          {
+            value: 'service_driveway',
+            label: 'Grundstückszufahrt',
+          },
+          {
+            value: 'service_emergency_access',
+            label: 'Rettungsweg',
+          },
+          {
+            value: 'service_parking_aisle',
+            label: 'Parkplatzweg',
+          },
+          {
+            value: 'service_road',
+            label: 'Zufahrtsweg',
+          },
+          {
+            value: 'service_uncategorized',
+            label: 'Zufahrtsweg (unbekannte Klassifizierung)',
+          },
+          {
+            value: 'tertiary_link',
+            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
+          },
+          {
+            value: 'tertiary',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
+          },
+          {
+            value: 'track',
+            label: 'Wald- / Feldweg',
+          },
+          {
+            value: 'unclassified',
+            label: 'Nebenstraße mit Verbindungscharakter',
+          },
+          {
+            value: 'unspecified_road',
+            label: 'Unkategorisierte Straße',
+          },
+        ],
+      },
+      {
+        key: 'parent_road',
+        type: 'string',
+        label: 'Straßentyp',
+        description:
+          'TILDA-Straßentyp (`roads.road`) der zugeordneten Straßenmittellinie für aus ihr abgeleitete, straßenbegleitende Radinfrastruktur.',
+        values: [
+          {
+            value: 'bicycle_road',
+            label: 'Fahrradstraße',
+          },
+          {
+            value: 'construction',
+            label: 'Straße ist in Bau',
+          },
+          {
+            value: 'cycleway_crossing',
+            label: 'Straßenquerung (Radweg)',
+          },
+          {
+            value: 'cycleway',
+            label: 'Radweg',
+          },
+          {
+            value: 'footway_cycleway_crossing',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
+          },
+          {
+            value: 'footway_sidewalk',
+            label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
+          },
+          {
+            value: 'footway',
+            label: 'Fußweg',
+          },
+          {
+            value: 'living_street',
+            label: 'Verkehrsberuhigter Bereich',
+          },
+          {
+            value: 'motorway_link',
+            label: 'Zufahrt einer Autobahn',
+          },
+          {
+            value: 'motorway',
+            label: 'Autobahn',
+          },
+          {
+            value: 'path',
+            label: 'Weg / Pfad',
+          },
+          {
+            value: 'pedestrian',
+            label: 'Fußgängerzone',
+          },
+          {
+            value: 'primary_link',
+            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
+          },
+          {
+            value: 'primary',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
+          },
+          {
+            value: 'residential',
+            label: 'Anwohnerstraße',
+          },
+          {
+            value: 'residential_priority_road',
+            label: 'residential_priority_road',
+          },
+          {
+            value: 'secondary_link',
+            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
+          },
+          {
+            value: 'secondary',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
+          },
+          {
+            value: 'service_alley',
+            label: 'Gasse',
+          },
+          {
+            value: 'service_driveway',
+            label: 'Grundstückszufahrt',
+          },
+          {
+            value: 'service_emergency_access',
+            label: 'Rettungsweg',
+          },
+          {
+            value: 'service_parking_aisle',
+            label: 'Parkplatzweg',
+          },
+          {
+            value: 'service_road',
+            label: 'Zufahrtsweg',
+          },
+          {
+            value: 'service_uncategorized',
+            label: 'Zufahrtsweg (unbekannte Klassifizierung)',
+          },
+          {
+            value: 'tertiary_link',
+            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
+          },
+          {
+            value: 'tertiary',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
+          },
+          {
+            value: 'track',
+            label: 'Wald- / Feldweg',
+          },
+          {
+            value: 'unclassified',
+            label: 'Nebenstraße mit Verbindungscharakter',
+          },
+          {
+            value: 'unspecified_road',
+            label: 'Unkategorisierte Straße',
+          },
+        ],
+      },
+      {
+        key: 'adjoining_road',
+        type: 'string',
+        label: 'Straßentyp der angrenzenden Straße',
+        description:
+          'Kfz-Straße neben der Radinfrastruktur. Auf `side=self` gleicher Wert wie `bikelanes.adjoining_road` (begleitende bzw. bei Querungen die gequerte Straße). Auf `side=left`/`right` die Elternstraße, auf der der Streifen liegt (`bikelanes.parent_road`).',
+        chapterRefs: ['adjoining-road'],
+        values: [
+          {
+            value: 'bicycle_road',
+            label: 'Fahrradstraße',
+          },
+          {
+            value: 'construction',
+            label: 'Straße ist in Bau',
+          },
+          {
+            value: 'cycleway_crossing',
+            label: 'Straßenquerung (Radweg)',
+          },
+          {
+            value: 'cycleway',
+            label: 'Radweg',
+          },
+          {
+            value: 'footway_cycleway_crossing',
+            label: 'Straßenquerung (Fuß- und Radweg)',
+          },
+          {
+            value: 'footway_crossing',
+            label: 'Straßenquerung (Fußweg)',
+          },
+          {
+            value: 'footway_sidewalk',
+            label: 'Gehweg',
+          },
+          {
+            value: 'footway_steps',
+            label: 'Treppe',
+          },
+          {
+            value: 'footway',
+            label: 'Fußweg',
+          },
+          {
+            value: 'living_street',
+            label: 'Verkehrsberuhigter Bereich',
+          },
+          {
+            value: 'motorway_link',
+            label: 'Zufahrt einer Autobahn',
+          },
+          {
+            value: 'motorway',
+            label: 'Autobahn',
+          },
+          {
+            value: 'path',
+            label: 'Weg / Pfad',
+          },
+          {
+            value: 'pedestrian',
+            label: 'Fußgängerzone',
+          },
+          {
+            value: 'primary_link',
+            label: 'Zufahrt einer Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
+          },
+          {
+            value: 'primary',
+            label: 'Bundes&shy;straße/Haupt&shy;verbindungs&shy;straße',
+          },
+          {
+            value: 'residential',
+            label: 'Anwohnerstraße',
+          },
+          {
+            value: 'residential_priority_road',
+            label: 'residential_priority_road',
+          },
+          {
+            value: 'secondary_link',
+            label: 'Zufahrt einer Landes&shy;straße/wichtigen Durchgangs&shy;straße',
+          },
+          {
+            value: 'secondary',
+            label: 'Landes&shy;straße/Wichtige Durchgangs&shy;straße',
+          },
+          {
+            value: 'service_alley',
+            label: 'Gasse',
+          },
+          {
+            value: 'service_driveway',
+            label: 'Grundstückszufahrt',
+          },
+          {
+            value: 'service_emergency_access',
+            label: 'Rettungsweg',
+          },
+          {
+            value: 'service_parking_aisle',
+            label: 'Parkplatzweg',
+          },
+          {
+            value: 'service_road',
+            label: 'Zufahrtsweg',
+          },
+          {
+            value: 'service_uncategorized',
+            label: 'Zufahrtsweg (unbekannte Klassifizierung)',
+          },
+          {
+            value: 'tertiary_link',
+            label: 'Zufahrt einer Kreis&shy;straße/untergeordneten Durchgangs&shy;straße',
+          },
+          {
+            value: 'tertiary',
+            label: 'Kreis&shy;straße/Untergeordnete Durchgangs&shy;straße',
+          },
+          {
+            value: 'track',
+            label: 'Wald- / Feldweg',
+          },
+          {
+            value: 'unclassified',
+            label: 'Nebenstraße mit Verbindungscharakter',
+          },
+          {
+            value: 'unspecified_road',
+            label: 'Unkategorisierte Straße',
+          },
+        ],
+      },
+      {
+        key: 'adjoining_maxspeed',
+        type: 'kilometer_per_hour',
+        label: 'Höchstgeschwindigkeit der angrenzenden Straße',
+        description:
+          'Höchstgeschwindigkeit der Kfz-Straße aus `adjoining_road`. Auf `side=left`/`right` die der Elternstraße (`bikelanes.parent_maxspeed`).',
+        values: [],
+      },
+      {
+        key: 'maxspeed',
+        type: 'kilometer_per_hour',
+        label: 'Höchstgeschwindigkeit',
+        values: [],
+      },
+      {
+        key: 'prefix',
+        type: 'string',
+        label: 'Quellpräfix',
+        purpose: 'processing',
+        description:
+          'Kennzeichnet, aus welcher OSM-Tagfamilie die Radverkehrsinformationen für dieses Objekt extrahiert wurden. Der Wert wird im Processing gesetzt und beschreibt die verwendete Tag-Präfixlogik, nicht die Quelle im Sinne eines externen Datensatzes.',
+        chapterRefs: ['versetzte-geometrien'],
+        values: [
+          {
+            value: 'cycleway',
+            label: 'Aus `cycleway:*`-Tags extrahiert',
+          },
+          {
+            value: 'sidewalk',
+            label: 'Aus `sidewalk:*`-Tags extrahiert',
+          },
+        ],
+      },
+      {
+        key: 'offset',
+        type: 'meter',
+        label: 'Linien-Offset',
+        purpose: 'rendering',
+        description:
+          'Wie `bikelanes.offset`: Geometrie bleibt auf der Mittellinie; der Wert ist nur für die Kartendarstellung (`line-offset`). Fehlt auf der Mittellinie (`self`). Sonst halbe Straßenbreite (`road_width`: OSM `width`/`est_width`, sonst Highway-Default), positiv = links, negativ = rechts. Bei Radinfrastruktur-Kanten (`source_table=bikelanes`) läuft die linke Linie gegen die OSM-Way-Richtung, die rechte mit ihr, analog zu `bikelanes`. Fahrbahn-Kanten haben keinen Versatz. Transformierte Bikelanes übernehmen den bereits berechneten Wert.',
+        chapterRefs: ['versetzte-geometrien'],
+        values: [],
+      },
+      {
+        key: 'side',
+        type: 'string',
+        label: 'Seite',
+        purpose: 'processing',
+        description: 'Seite des Segments relativ zur Referenzlinie (left/right/self).',
+        values: [],
+      },
+      {
+        key: 'oneway',
+        type: 'string',
+        label: 'Einbahnrichtung',
+        description:
+          'Nur `yes` oder `no`: darf entgegen der Linienrichtung gefahren werden? Bei `yes` zeigt die Geometrie in die erlaubte Fahrtrichtung. Aus `bikelanes.oneway` abgeleitet: `implicit_yes` → `yes`; `assumed_no` und `car_not_bike` → `no`.',
+        values: [
+          {
+            value: 'yes',
+            label: 'Einbahnig (in Linienrichtung)',
+          },
+          {
+            value: 'no',
+            label: 'In beide Richtungen',
+          },
+        ],
+      },
+      {
+        key: 'oneway_motor',
+        type: 'string',
+        label: 'Einbahnstraße nur für Kfz',
+        description:
+          '`yes`, wenn nur der Kfz-Verkehr einbahnig ist und Radverkehr in beide Richtungen fahren darf (Fahrbahn, Fahrradstraße). Die Geometrie zeigt in Kfz-Fahrtrichtung; entgegen der Linie fahren heißt entgegen dem Kfz-Verkehr fahren. Sonst leer.',
+        values: [
+          {
+            value: 'yes',
+            label: 'Kfz einbahnig, Rad in beide Richtungen',
+          },
+        ],
+      },
+      {
+        key: 'parent_id',
+        type: 'string',
+        label: 'Parent-Way',
+        purpose: 'processing',
+        description:
+          'OSM-Parent-Way (`way/N`) für Carriageway- und Infrastruktur-Kanten. Join-Schlüssel (indiziert).',
+        values: [],
+      },
+      {
+        key: 'source_table',
+        type: 'string',
+        label: 'Quelltabelle',
+        purpose: 'processing',
+        description:
+          'Kantentyp und TILDA-Tabelle, aus der fachliche Attribute gejoint werden (`bikelanes`, `roads`, `roadsPathClasses`). Join-Schlüssel.',
+        values: [
+          {
+            value: 'bikelanes',
+            label: 'Radinfrastruktur',
+          },
+          {
+            value: 'roads',
+            label: 'Straßen',
+          },
+          {
+            value: 'roadsPathClasses',
+            label: 'Wege',
+            description:
+              'Join-Ziel für Wege-Kanten (Kategorie-ID der Self-Cycleway-Zeile oder mixedTrafficFoot). Jede solche Kante muss in roadsPathClasses existieren (gleicher Skip-Helper wie der Path-Writer).',
+          },
+        ],
+      },
+      {
+        key: 'source_id',
+        type: 'string',
+        label: 'Quell-ID',
+        purpose: 'processing',
+        description:
+          '`id` in `source_table`; entspricht der Objekt-`id`. Ausnahme: Radfahrstreifen in Mittellage haben die Objekt-`id` `way/N/cycleway/self` (neben der Fahrbahn `way/N`), `source_id` bleibt `way/N`. Join-Schlüssel (indiziert).',
+        values: [],
+      },
+      {
+        key: 'name',
+        type: 'sanitized_strings',
+        label: 'Name',
+        values: [],
+      },
+      {
+        key: 'length',
+        type: 'meter',
+        label: 'Länge',
+        description:
+          'Ein berechneter Wert für das OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genauigkeit für Deutschland.',
+        values: [],
+      },
+      {
+        key: 'surface',
+        type: 'string',
+        label: 'Oberfläche',
+        values: [
+          {
+            value: 'asphalt',
+            label: 'Asphalt',
+          },
+          {
+            value: 'paved',
+            label: 'Befestigt (unspezifisch)',
+          },
+          {
+            value: 'unpaved',
+            label: 'Unbefestigt',
+          },
+          {
+            value: 'concrete',
+            label: 'Beton',
+          },
+          {
+            value: 'concrete:plates',
+            label: 'Betonplatten',
+          },
+          {
+            value: 'concrete:lanes',
+            label: 'Betonstreifen / -bahnen',
+          },
+          {
+            value: 'paving_stones',
+            label: 'Verbund&shy;pflastersteine',
+          },
+          {
+            value: 'paving_stones:lanes',
+            label: 'Pflasterstein&shy;bahnen',
+          },
+          {
+            value: 'sett',
+            label: 'Behauenes Pflaster / Natursteinpflaster',
+          },
+          {
+            value: 'mosaic_sett',
+            label: 'Mosaikpflaster',
+          },
+          {
+            value: 'small_sett',
+            label: 'Kleinpflaster',
+          },
+          {
+            value: 'large_sett',
+            label: 'Großpflaster',
+          },
+          {
+            value: 'bricks',
+            label: 'Ziegel',
+          },
+          {
+            value: 'stone',
+            label: 'Stein',
+          },
+          {
+            value: 'ground',
+            label: 'Erde/Boden',
+          },
+          {
+            value: 'grass',
+            label: 'Gras',
+          },
+          {
+            value: 'sand',
+            label: 'Sand',
+          },
+          {
+            value: 'compacted',
+            label: 'Verdichteter Untergrund',
+          },
+          {
+            value: 'fine_gravel',
+            label: 'Splitt',
+          },
+          {
+            value: 'gravel',
+            label: 'Schotter',
+          },
+          {
+            value: 'pebblestone',
+            label: 'Kieselsteine',
+          },
+          {
+            value: 'wood',
+            label: 'Holz',
+          },
+          {
+            value: 'woodchips',
+            label: 'Hackschnitzel',
+          },
+          {
+            value: 'metal',
+            label: 'Metall',
+          },
+          {
+            value: 'metal_grid',
+            label: 'Metallgitter',
+          },
+          {
+            value: 'plastic',
+            label: 'Kunststoff',
+          },
+          {
+            value: 'rubber',
+            label: 'Gummi',
+          },
+          {
+            value: 'grass_paver',
+            label: 'Rasengitter / Grasgitter',
+          },
+        ],
+      },
+      {
+        key: 'smoothness',
+        type: 'string',
+        label: 'Ober&shy;flächen&shy;qualität',
+        values: [
+          {
+            value: 'excellent',
+            label: 'Sehr gut',
+          },
+          {
+            value: 'good',
+            label: 'Gut',
+          },
+          {
+            value: 'intermediate',
+            label: 'Mittel gut',
+          },
+          {
+            value: 'bad',
+            label: 'Schlecht',
+          },
+          {
+            value: 'very_bad',
+            label: 'Sehr schlecht',
+          },
+        ],
+      },
+      {
+        key: 'width',
+        type: 'meter',
+        label: 'Breite',
+        values: [],
+      },
+      {
+        key: 'access_bicycle',
+        type: 'string',
+        label: 'Zugang Radverkehr',
+        description:
+          'Aufgelöster Fahrrad-Zugang (OSM-Kette `bicycle` → `vehicle` → `access`, Allowlist). Kein Roh-OSM-Wert. Router können `use_sidepath` und `dismount` am Graphen entscheiden; die Kanten bleiben enthalten. Auf Radinfrastruktur, die an der Fahrbahn-Mittellinie gemappt ist (`side=left`/`right`), leer: der Zugang der Fahrbahn (z. B. `use_sidepath`) gilt nicht für den Radweg selbst.',
+        values: [
+          {
+            value: 'yes',
+            label: 'Ja',
+          },
+          {
+            value: 'no',
+            label: 'Nein',
+          },
+          {
+            value: 'designated',
+            label: 'Gebaut / vorgesehen',
+          },
+          {
+            value: 'permissive',
+            label: 'Geduldet',
+          },
+          {
+            value: 'use_sidepath',
+            label: 'Seitenweg benutzen',
+            description:
+              'Fahrbahn rechtlich nicht vorgesehen; parallele Infrastruktur nutzen. Kante bleibt im Graphen.',
+          },
+          {
+            value: 'optional_sidepath',
+            label: 'Seitenweg optional',
+          },
+          {
+            value: 'discouraged',
+            label: 'Unerwünscht',
+          },
+          {
+            value: 'dismount',
+            label: 'Absteigen',
+          },
+        ],
+      },
+    ],
+    chapters: [
+      {
+        id: 'adjoining-road',
+        title: 'Angrenzende Straße (`adjoining_*`)',
+        markdown:
+          '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
+      },
+      {
+        id: 'versetzte-geometrien',
+        title: 'Versetzte Geometrien',
+        markdown:
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
       },
     ],
   },
@@ -13297,7 +15366,7 @@ const data = {
     ],
     attributes: [
       {
-        key: 'table',
+        key: 'source_table',
         type: 'string',
         label: 'Quelle',
         values: [
@@ -13327,10 +15396,16 @@ const data = {
     ],
     chapters: [
       {
+        id: 'adjoining-road',
+        title: 'Angrenzende Straße (`adjoining_*`)',
+        markdown:
+          '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
       },
     ],
   },

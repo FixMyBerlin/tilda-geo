@@ -1,3 +1,4 @@
+import '@/lib/streetImageryConfig'
 import '@/lib/zodDeLocale'
 import { createRouter, type LinkProps } from '@tanstack/react-router'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'
@@ -14,12 +15,16 @@ export const getRouter = () => {
   const router = createRouter({
     routeTree,
     trailingSlash: 'never',
+    // Pretty JSON search via shared routerSearch; `draw` stays jsurl in its hook.
     parseSearch: routerSearch.parse,
     stringifySearch: routerSearch.stringify,
     context: {
       ...rqContext,
     },
     defaultPreload: 'intent',
+    // Loaders mostly prime the React Query cache (ensureQueryData); let React Query own staleness
+    // so hover-preloads always re-run the loader instead of Router serving a second, stale cache.
+    defaultPreloadStaleTime: 0,
     defaultErrorComponent: DefaultErrorComponent,
     defaultPendingComponent: DefaultPendingComponent,
     defaultNotFoundComponent: NotFoundComponent,
@@ -35,3 +40,5 @@ export type Router = ReturnType<typeof getRouter>
 // RoutePaths) so it honors `trailingSlash: 'never'` — RoutePaths also includes the trailing-slash
 // index variants that Link rejects.
 export type InternalPath = Extract<NonNullable<LinkProps['to']>, string>
+/** Like InternalPath but keeps LinkProps['to'] verbatim (incl. relative-path values like `..`). */
+export type InternalLinkTo = LinkProps['to']

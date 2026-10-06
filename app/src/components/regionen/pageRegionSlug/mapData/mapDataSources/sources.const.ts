@@ -1,13 +1,13 @@
 import { getTilesUrl } from '@/components/shared/utils/getTilesUrl'
 import { SIMPLIFY_MAX_ZOOM, SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
 import type { MapDataSource } from '../types'
-import { apiKeyMapbox, apiKeyMapillary } from './apiKeys.const'
+import { apiKeyMapbox } from './apiKeys.const'
 import type { SourcesParkingLarsId } from './sourcesParkingLars.const'
 import { sourcesParkingLars } from './sourcesParkingLars.const'
 import type { SourcesParkingTildaId } from './sourcesParkingTilda.const'
 import { sourcesParkingTilda } from './sourcesParkingTilda.const'
 
-type AtlasSourceId =
+type TildaSourceId =
   | 'atlas_barriers'
   | 'atlas_bicycleParking'
   | 'atlas_bikelanes'
@@ -25,15 +25,13 @@ type AtlasSourceId =
   | 'atlas_trafficSigns'
   | 'atlas_todos_lines'
   | 'atlas_aggregated_lengths'
-
-type MapillarySourceId = 'mapillary_coverage' | 'mapillary_mapfeatures' | 'mapillary_trafficSigns'
+  | 'tilda_highwayAreas'
 
 // TODO type MapDataConfigSourcesIds = typeof sources[number]['id']
 export type SourcesId =
   | SourcesParkingLarsId
   | SourcesParkingTildaId
-  | AtlasSourceId
-  | MapillarySourceId
+  | TildaSourceId
   | 'accidents_unfallatlas'
 
 export const sources: MapDataSource<SourcesId>[] = [
@@ -142,9 +140,10 @@ export const sources: MapDataSource<SourcesId>[] = [
         'traffic_mode_right__if_present',
         'composit_surface_smoothness',
         'surface_color__if_present',
-        'composit_mapillary',
         'description__if_present',
         'length',
+        // Last: links to photos, not a property of the object.
+        'composit_mapillary',
       ],
     },
     // presence: { enabled: true },
@@ -208,13 +207,44 @@ export const sources: MapDataSource<SourcesId>[] = [
         'lit__if_present',
         'composit_maxspeed',
         'traffic_sign',
-        'composit_mapillary',
         'width',
         'length',
         'description__if_present',
+        // Last: links to photos, not a property of the object.
+        'composit_mapillary',
       ],
     },
     // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
+    calculator: { enabled: false },
+  },
+  {
+    id: 'tilda_highwayAreas',
+    tileTables: ['highwayAreas'],
+    minzoom: SIMPLIFY_MIN_ZOOM,
+    maxzoom: SIMPLIFY_MAX_ZOOM,
+    attributionHtml:
+      '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
+    licence: 'ODbL',
+    promoteId: 'id',
+    osmIdConfig: { osmTypeId: 'id' },
+    inspector: {
+      enabled: true,
+      highlightingKey: 'id',
+      documentedKeys: [
+        'name',
+        'road',
+        'oneway__if_present',
+        'oneway_bicycle__if_present',
+        'lit__if_present',
+        'composit_surface_smoothness',
+        'traffic_sign',
+        'width__if_present',
+        'bridge__if_present',
+        'tunnel__if_present',
+        'area',
+        'description__if_present',
+      ],
+    },
     calculator: { enabled: false },
   },
   {
@@ -241,10 +271,11 @@ export const sources: MapDataSource<SourcesId>[] = [
         'lit__if_present',
         'composit_maxspeed',
         'traffic_sign',
-        'composit_mapillary',
         'width',
         'length',
         'description__if_present',
+        // Last: links to photos, not a property of the object.
+        'composit_mapillary',
       ],
     },
     // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
@@ -398,8 +429,9 @@ export const sources: MapDataSource<SourcesId>[] = [
         'covered',
         'operator_type__if_present',
         'lit__if_present',
-        'composit_mapillary',
         'description__if_present',
+        // Last: links to photos, not a property of the object.
+        'composit_mapillary',
       ],
     },
     // presence: { enabled: false },
@@ -460,58 +492,4 @@ export const sources: MapDataSource<SourcesId>[] = [
     // presence: { enabled: false },
     calculator: { enabled: false }, // TODO
   },
-  {
-    // https://www.mapillary.com/developer/api-documentation/#coverage-tiles
-    id: 'mapillary_coverage',
-    tileTables: null,
-    tilesUrl: `https://tiles.mapillary.com/maps/vtp/mly1_public/2/{z}/{x}/{y}?access_token=${apiKeyMapillary}`,
-    minzoom: 0,
-    maxzoom: 14,
-    attributionHtml: 'Daten von Mapillary', // TODO – could not find anything specific; they don't attribute on their own page.
-    licence: undefined, // TODO
-    promoteId: 'id', // required, because `feautre.id` is not unique and different from `properties.id`
-    osmIdConfig: { osmTypeId: 'id' },
-    inspector: {
-      enabled: true,
-      highlightingKey: 'id', // OR: 'image_id' for points, 'sequence_id' for lines
-      editors: [
-        {
-          name: 'Mapillary Image',
-          idKey: 'id',
-          urlTemplate: 'https://www.mapillary.com/app/?focus=photo&pKey={editor_id}',
-        },
-        {
-          name: 'Mapillary Panorama',
-          idKey: 'id',
-          urlTemplate: 'https://www.mapillary.com/app/?panos=true&pKey={editor_id}',
-        },
-        {
-          name: 'Kartaview',
-          urlTemplate: 'https://kartaview.org/map/@{latitude},{longitude},{zoom}z',
-        },
-      ],
-    },
-    // presence: { enabled: false },
-    calculator: { enabled: false },
-  },
-  // UNUSED ATM:
-  // {
-  //   // https://www.mapillary.com/developer/api-documentation/#point-tiles
-  //   id: 'mapillary_mapfeatures',
-  //   tiles: `https://tiles.mapillary.com/maps/vtp/mly_map_feature_point/2/{z}/{x}/{y}?access_token=${apiKeyMapillary}`,
-  //   minzoom: 14,
-  //   maxzoom: 14,
-  //   attributionHtml: 'Daten von Mapillary', // TODO – could not find anything specific; they don't attribute on their own page.
-  //   highlightingKey: 'id',
-  // },
-  // UNUSED ATM:
-  // {
-  //   // https://www.mapillary.com/developer/api-documentation/#traffic-sign-tiles
-  //   id: 'mapillary_trafficSigns',
-  //   tiles: `https://tiles.mapillary.com/maps/vtp/mly_map_feature_traffic_sign/2/{z}/{x}/{y}?access_token=${apiKeyMapillary}`,
-  //   minzoom: 14,
-  //   maxzoom: 14,
-  //   attributionHtml: 'Daten von Mapillary', // TODO – could not find anything specific; they don't attribute on their own page.
-  //   highlightingKey: 'id',
-  // },
 ]

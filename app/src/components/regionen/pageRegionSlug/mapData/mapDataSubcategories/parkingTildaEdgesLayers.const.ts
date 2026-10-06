@@ -1,7 +1,7 @@
 import type { MapboxStyleLayer } from './mapboxStyles/types'
 
-// KEEP IN SYNC with `processing/topics/parking/custom_functions/condition_category_primary.sql`
-// and `mapboxStyles/groups/park_street_default.ts` / `park_off_default_area.ts`.
+// KEEP IN SYNC: values from `processing/topics/parking/helper/condition_category_primary.lua`
+// (priority order lives there), colours from `mapboxStyles/groups/park_street_default.ts` / `park_off_default_area.ts`.
 const conditionCategoryPrimaryLineColor = (property: string) => [
   'match',
   ['get', property],

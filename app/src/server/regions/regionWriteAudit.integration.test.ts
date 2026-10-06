@@ -1,15 +1,33 @@
 import { afterAll, beforeAll, describe, expect, test } from 'vitest'
+import { sourcesBackgroundsRaster } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
 import { createAdminApiToken } from '@/server/admin/adminApiTokens.server'
 import { adminApiAuditContext } from '@/server/api/admin/guardAdminApi.server'
 import { adminFormAuditContext } from '@/server/audit/auditContext.server'
 import db from '@/server/db.server'
 import type { RegionWriteInput } from '@/server/regions/regionWriteSchema'
-import { updateRegionConfig } from '@/server/regions/regionWriteService.server'
+import { createRegionConfig, updateRegionConfig } from '@/server/regions/regionWriteService.server'
 import { isIntegrationDbAvailable } from '../../../test/integrationDb'
 
 const integrationDb = await isIntegrationDbAvailable()
+
+/** Audit rows of the region's child tables (categories, backgrounds, exports, nav links). */
+const childAuditWhere = (regionId: number) => ({
+  model: {
+    in: [
+      'RegionCategoryAssignment',
+      'RegionBackgroundAssignment',
+      'RegionExportAssignment',
+      'RegionNavigationLink',
+    ],
+  },
+  OR: [
+    { newData: { path: ['regionId'], equals: regionId } },
+    { oldData: { path: ['regionId'], equals: regionId } },
+  ],
+})
 const REGION_SLUG = 'vitest-admin-form-audit'
 const API_REGION_SLUG = 'vitest-api-audit'
+const CREATE_REGION_SLUG = 'vitest-admin-form-audit-create'
 const ADMIN_USER_ID = 'vitest-admin-form-audit-user'
 const API_ADMIN_USER_ID = 'vitest-api-audit-user'
 
@@ -20,7 +38,8 @@ const regionConfig = {
   promoted: false,
   status: 'PUBLIC',
   product: 'radverkehr',
-  notes: 'osmNotes',
+  notesOsm: true,
+  notesInternal: false,
   showSearch: false,
   mapLat: 52.5,
   mapLng: 13.4,
@@ -43,7 +62,7 @@ describe.skipIf(!integrationDb)('region write audit — ADMIN_FORM path (integra
   let regionRecordId = ''
 
   beforeAll(async () => {
-    await db.region.deleteMany({ where: { slug: REGION_SLUG } })
+    await db.region.deleteMany({ where: { slug: { in: [REGION_SLUG, CREATE_REGION_SLUG] } } })
     await db.user.deleteMany({ where: { id: ADMIN_USER_ID } })
 
     await db.user.create({
@@ -70,7 +89,7 @@ describe.skipIf(!integrationDb)('region write audit — ADMIN_FORM path (integra
   })
 
   afterAll(async () => {
-    await db.region.deleteMany({ where: { slug: REGION_SLUG } })
+    await db.region.deleteMany({ where: { slug: { in: [REGION_SLUG, CREATE_REGION_SLUG] } } })
     await db.user.deleteMany({ where: { id: ADMIN_USER_ID } })
   })
 
@@ -117,6 +136,67 @@ describe.skipIf(!integrationDb)('region write audit — ADMIN_FORM path (integra
     expect(assignmentAudit?.userId).toBe(ADMIN_USER_ID)
   })
 
+  test('createRegionConfig audits the initial category assignments', async () => {
+    const headers = new Headers({ 'user-agent': 'vitest-admin-form-audit' })
+
+    const region = await createRegionConfig(
+      { ...regionConfig, slug: CREATE_REGION_SLUG, categories: ['poi', 'roads'] },
+      adminFormAuditContext(headers, ADMIN_USER_ID),
+    )
+
+    const audits = await db.auditLog.findMany({
+      where: {
+        model: 'RegionCategoryAssignment',
+        action: 'CREATE',
+        newData: { path: ['regionId'], equals: region.id },
+      },
+    })
+    expect(audits).toHaveLength(2)
+    expect(audits.every((audit) => audit.userId === ADMIN_USER_ID)).toBe(true)
+  })
+
+  test('updateRegionConfig writes no child audit rows when the lists did not change', async () => {
+    const headers = new Headers({ 'user-agent': 'vitest-admin-form-audit' })
+    const config = { ...regionConfig, categories: ['poi', 'roads'] } satisfies RegionWriteInput
+    await updateRegionConfig(REGION_SLUG, config, adminFormAuditContext(headers, ADMIN_USER_ID))
+    const before = await db.auditLog.count({ where: childAuditWhere(Number(regionRecordId)) })
+
+    await updateRegionConfig(
+      REGION_SLUG,
+      { ...config, name: 'Vitest admin form audit (no list change)' },
+      adminFormAuditContext(headers, ADMIN_USER_ID),
+    )
+
+    expect(await db.auditLog.count({ where: childAuditWhere(Number(regionRecordId)) })).toBe(before)
+  })
+
+  test('updateRegionConfig audits navigation link and background source changes', async () => {
+    const headers = new Headers({ 'user-agent': 'vitest-admin-form-audit' })
+    const backgroundId = sourcesBackgroundsRaster[0]!.id
+
+    await updateRegionConfig(
+      REGION_SLUG,
+      {
+        ...regionConfig,
+        backgroundSources: [backgroundId],
+        navigationLinks: [{ name: 'Impressum', internalPath: '/impressum', sortOrder: 0 }],
+      },
+      adminFormAuditContext(headers, ADMIN_USER_ID),
+    )
+
+    for (const model of ['RegionNavigationLink', 'RegionBackgroundAssignment']) {
+      const audit = await db.auditLog.findFirst({
+        where: {
+          model,
+          action: 'CREATE',
+          newData: { path: ['regionId'], equals: Number(regionRecordId) },
+        },
+        orderBy: { createdAt: 'desc' },
+      })
+      expect(audit?.userId, model).toBe(ADMIN_USER_ID)
+    }
+  })
+
   test('updateRegionConfig audits welcome fields on Region', async () => {
     const headers = new Headers({ 'user-agent': 'vitest-admin-form-audit' })
 
@@ -148,9 +228,7 @@ describe.skipIf(!integrationDb)('region write audit — ADMIN_FORM path (integra
 
     expect(regionAudit).not.toBeNull()
     expect(regionAudit?.userId).toBe(ADMIN_USER_ID)
-    const changedFields = (regionAudit?.metadata as { changedFields?: string[] } | null)
-      ?.changedFields
-    expect(changedFields).toEqual(
+    expect(regionAudit?.changedFields).toEqual(
       expect.arrayContaining(['welcomeEnabled', 'welcomeTitle', 'welcomeSections']),
     )
   })
@@ -241,9 +319,7 @@ describe.skipIf(!integrationDb)('region write audit — API path (integration)',
     expect((regionAudit?.metadata as { adminTokenId?: string } | null)?.adminTokenId).toBe(
       adminTokenId,
     )
-    const changedFields = (regionAudit?.metadata as { changedFields?: string[] } | null)
-      ?.changedFields
-    expect(changedFields).toEqual(
+    expect(regionAudit?.changedFields).toEqual(
       expect.arrayContaining(['welcomeEnabled', 'welcomeTitle', 'welcomeSections']),
     )
   })

@@ -79,11 +79,20 @@ describe('Markdown', () => {
     expect(link).toHaveAttribute('data-blank', 'true')
   })
 
-  test('treats other hrefs as internal router links', () => {
+  test('treats pathname-only hrefs as internal router links', () => {
     render(<Markdown markdown={'[home](/regionen/foo)'} />)
     const link = screen.getByRole('link', { name: 'home' })
     expect(link).toHaveAttribute('href', '/regionen/foo')
     expect(link).toHaveAttribute('data-internal', 'true')
+  })
+
+  test('does not turn javascript: or protocol-relative hrefs into links', () => {
+    const { container } = render(
+      <Markdown markdown={'[js](javascript:alert(1)) and [evil](//evil.com)'} />,
+    )
+    expect(screen.queryByRole('link')).toBeNull()
+    expect(container.textContent).toContain('js')
+    expect(container.textContent).toContain('evil')
   })
 
   test('does not render raw HTML from markdown as DOM elements', () => {

@@ -66,6 +66,12 @@ describe('searchStringArray', () => {
 
   it('parses comma-separated strings', () => {
     expect(schema.parse({ data: 'a,b' })).toEqual({ data: ['a', 'b'] })
+    expect(schema.parse({ data: 'a, b' })).toEqual({ data: ['a', 'b'] })
+  })
+
+  it('parses legacy JSON array strings', () => {
+    expect(schema.parse({ data: '["a","b"]' })).toEqual({ data: ['a', 'b'] })
+    expect(schema.parse({ data: '[]' })).toEqual({ data: [] })
   })
 
   it('accepts native arrays', () => {
@@ -86,5 +92,11 @@ describe('optionalSearchJson', () => {
 
   it('parses JSON strings', () => {
     expect(schema.parse({ filter: '{"query":"x"}' })).toEqual({ filter: { query: 'x' } })
+  })
+
+  it('drops JSON booleans from legacy flags such as notes=false', () => {
+    expect(schema.parse({ filter: false })).toEqual({})
+    expect(schema.parse({ filter: true })).toEqual({})
+    expect(schema.parse({ filter: 'false' })).toEqual({})
   })
 })

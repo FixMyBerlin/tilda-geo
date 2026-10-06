@@ -1,47 +1,96 @@
 import { useQuery } from '@tanstack/react-query'
+import type { ExpressionSpecification } from 'maplibre-gl'
 import { Fragment } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { useQaMapState } from '@/components/regionen/pageRegionSlug/hooks/mapState/useQaMapState'
+import { useBackgroundParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBackgroundParam'
+import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useQaParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useQaParam'
-import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import {
-  systemStatusConfig,
-  userStatusConfig,
-} from '@/components/regionen/pageRegionSlug/SidebarInspector/InspectorQa/qaConfigs'
+  useHoveredListItem,
+  useHoveredMapItemId,
+} from '@/components/regionen/pageRegionSlug/modes/mode-list-store'
+import { modeIdentity } from '@/components/regionen/pageRegionSlug/modes/modeIdentity'
+import { qaHighlightIds } from '@/components/regionen/pageRegionSlug/modes/modeListItemId'
+import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
+import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { getTilesUrl } from '@/components/shared/utils/getTilesUrl'
 import { regionQaConfigsQueryOptions } from '@/server/regions/regionQueryOptions'
 import { getLayerHighlightId } from '../utils/layerHighlight'
 import { LayerHighlight } from './LayerHighlight'
+import {
+  QA_MAP_FILL_OPACITY,
+  QA_MAP_UNSTYLED_FILL,
+  QA_MAP_UNSTYLED_OUTLINE,
+  qaMapStatusColorExpression,
+} from './qaMapPaint'
 
 export const qaLayerId = 'qa-layer'
 export const qaSourceId = 'qa-source'
 export const qaMinZoom = 12
 
+const qaAccent = modeIdentity.qa.accent.hex
+
+/** Base fill/outline hide under pointer hover (feature-state) and under list-hover/selection ids. */
+const hideHoveredOrSelected = (highlightIdStrings: string[]) => {
+  const conditions: ExpressionSpecification[] = [
+    ['boolean', ['feature-state', 'hover'], false],
+    ['boolean', ['feature-state', 'selected'], false],
+  ]
+  if (highlightIdStrings.length > 0) {
+    conditions.push(['in', ['to-string', ['id']], ['literal', highlightIdStrings]])
+  }
+  return ['any', ...conditions] as ExpressionSpecification
+}
+
 export const SourcesLayersQa = () => {
+  useQaMapState()
   const hasPermissions = useHasPermissions()
   const { qaParamData } = useQaParam()
+  const { backgroundParam } = useBackgroundParam()
   const regionSlug = useRegionSlug()
-  // Initialize QA map state to trigger data loading and feature state updates
-  // Must be called before any conditional returns to satisfy Rules of Hooks
-  useQaMapState()
+  const currentMode = useCurrentMode()
+  const { featuresParam } = useFeaturesParam()
   const { data: qaConfigs } = useQuery({
     ...regionQaConfigsQueryOptions(regionSlug ?? ''),
     enabled: hasPermissions && Boolean(regionSlug),
   })
 
-  const activeQaConfig = qaConfigs?.find((config) => config.slug === qaParamData.configSlug)
+  const hoveredListItem = useHoveredListItem()
+  const hoveredMapItemId = useHoveredMapItemId()
+
+  const activeQaConfig = qaConfigs?.find((config) => config.slug === qaParamData.key)
+  const vectorSourceName = activeQaConfig?.mapTable.replace('public.', '')
+
+  const selectedIdStrings = featuresParam
+    .filter((feature) => feature.sourceId === qaSourceId)
+    .map((feature) => String(feature.id))
+  const highlightIdStrings = qaHighlightIds(
+    selectedIdStrings,
+    hoveredListItem?.id,
+    hoveredMapItemId,
+  )
+  const highlightFilter = [
+    'in',
+    ['to-string', ['id']],
+    ['literal', highlightIdStrings],
+  ] as ExpressionSpecification
+  const hideBaseFill = hideHoveredOrSelected(highlightIdStrings)
 
   if (!hasPermissions) {
     return null
   }
 
-  // Don't render if no QA config is selected or if style is 'none'
-  if (!activeQaConfig || qaParamData.style === 'none') {
+  // QA lives only in the QA mode now (not on the default map / other modes).
+  if (!currentMode.isQa) {
     return null
   }
 
-  const vectorSourceName = activeQaConfig.mapTable.replace('public.', '')
+  if (!activeQaConfig || !vectorSourceName) {
+    return null
+  }
+
   const dataUrl = getTilesUrl(vectorSourceName)
 
   // Key by vector tileset so Source + layers remount together when switching QA configs.
@@ -68,61 +117,11 @@ export const SourcesLayersQa = () => {
           source={qaSourceId}
           source-layer={vectorSourceName}
           type="fill"
+          beforeId={backgroundParam === 'default' ? 'atlas-app-beforeid-below-road' : undefined}
           paint={{
-            'fill-color': [
-              'case',
-              ['==', ['feature-state', 'userStatus'], 'S'],
-              userStatusConfig.OK_STRUCTURAL_CHANGE.hexColor,
-              ['==', ['feature-state', 'userStatus'], 'R'],
-              userStatusConfig.OK_REFERENCE_ERROR.hexColor,
-              ['==', ['feature-state', 'userStatus'], 'D'],
-              userStatusConfig.NOT_OK_DATA_ERROR.hexColor,
-              ['==', ['feature-state', 'userStatus'], 'P'],
-              userStatusConfig.NOT_OK_PROCESSING_ERROR.hexColor,
-              ['==', ['feature-state', 'userStatus'], 'QA'],
-              userStatusConfig.OK_QA_TOOLING_ERROR.hexColor,
-              ['==', ['feature-state', 'systemStatus'], 'G'],
-              systemStatusConfig.GOOD.hexColor,
-              ['==', ['feature-state', 'systemStatus'], 'N'],
-              systemStatusConfig.NEEDS_REVIEW.hexColor,
-              ['==', ['feature-state', 'systemStatus'], 'P'],
-              systemStatusConfig.PROBLEMATIC.hexColor,
-              ['==', ['feature-state', 'systemStatus'], 'T'],
-              systemStatusConfig.TRUSTED_EDITOR_CHANGE.hexColor,
-              'gray',
-            ],
-            'fill-opacity': [
-              'case',
-              [
-                'any',
-                ['boolean', ['feature-state', 'hover'], false],
-                ['boolean', ['feature-state', 'selected'], false],
-              ],
-              0,
-              0.7,
-            ],
-            'fill-outline-color': [
-              'case',
-              ['==', ['feature-state', 'userStatus'], 'S'],
-              userStatusConfig.OK_STRUCTURAL_CHANGE.hexColor,
-              ['==', ['feature-state', 'userStatus'], 'R'],
-              userStatusConfig.OK_REFERENCE_ERROR.hexColor,
-              ['==', ['feature-state', 'userStatus'], 'D'],
-              userStatusConfig.NOT_OK_DATA_ERROR.hexColor,
-              ['==', ['feature-state', 'userStatus'], 'P'],
-              userStatusConfig.NOT_OK_PROCESSING_ERROR.hexColor,
-              ['==', ['feature-state', 'userStatus'], 'QA'],
-              userStatusConfig.OK_QA_TOOLING_ERROR.hexColor,
-              ['==', ['feature-state', 'systemStatus'], 'G'],
-              systemStatusConfig.GOOD.hexColor,
-              ['==', ['feature-state', 'systemStatus'], 'N'],
-              systemStatusConfig.NEEDS_REVIEW.hexColor,
-              ['==', ['feature-state', 'systemStatus'], 'P'],
-              systemStatusConfig.PROBLEMATIC.hexColor,
-              ['==', ['feature-state', 'systemStatus'], 'T'],
-              systemStatusConfig.TRUSTED_EDITOR_CHANGE.hexColor,
-              '#333333',
-            ],
+            'fill-color': qaMapStatusColorExpression(QA_MAP_UNSTYLED_FILL),
+            'fill-opacity': ['case', hideBaseFill, 0, QA_MAP_FILL_OPACITY],
+            'fill-outline-color': qaMapStatusColorExpression(QA_MAP_UNSTYLED_OUTLINE),
           }}
         />
         <Layer
@@ -131,47 +130,50 @@ export const SourcesLayersQa = () => {
           source-layer={vectorSourceName}
           type="line"
           paint={{
-            'line-color': [
-              'case',
-              ['==', ['feature-state', 'userStatus'], 'S'],
-              userStatusConfig.OK_STRUCTURAL_CHANGE.hexColor,
-              ['==', ['feature-state', 'userStatus'], 'R'],
-              userStatusConfig.OK_REFERENCE_ERROR.hexColor,
-              ['==', ['feature-state', 'userStatus'], 'D'],
-              userStatusConfig.NOT_OK_DATA_ERROR.hexColor,
-              ['==', ['feature-state', 'userStatus'], 'P'],
-              userStatusConfig.NOT_OK_PROCESSING_ERROR.hexColor,
-              ['==', ['feature-state', 'userStatus'], 'QA'],
-              userStatusConfig.OK_QA_TOOLING_ERROR.hexColor,
-              ['==', ['feature-state', 'systemStatus'], 'G'],
-              systemStatusConfig.GOOD.hexColor,
-              ['==', ['feature-state', 'systemStatus'], 'N'],
-              systemStatusConfig.NEEDS_REVIEW.hexColor,
-              ['==', ['feature-state', 'systemStatus'], 'P'],
-              systemStatusConfig.PROBLEMATIC.hexColor,
-              ['==', ['feature-state', 'systemStatus'], 'T'],
-              systemStatusConfig.TRUSTED_EDITOR_CHANGE.hexColor,
-              '#333333',
-            ],
+            'line-color': qaMapStatusColorExpression(QA_MAP_UNSTYLED_OUTLINE),
             'line-width': 3,
-            'line-opacity': [
-              'case',
-              [
-                'any',
-                ['boolean', ['feature-state', 'hover'], false],
-                ['boolean', ['feature-state', 'selected'], false],
-              ],
-              0,
-              1,
-            ],
+            'line-opacity': ['case', hideBaseFill, 0, 1],
           }}
         />
+        {highlightIdStrings.length > 0 ? (
+          <>
+            <Layer
+              id={`${qaLayerId}-highlight`}
+              source={qaSourceId}
+              source-layer={vectorSourceName}
+              type="line"
+              filter={highlightFilter}
+              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+              paint={{
+                'line-color': qaAccent,
+                'line-opacity': 0.5,
+                'line-width': 10,
+                'line-offset': -5,
+              }}
+            />
+            <Layer
+              id={`${qaLayerId}-highlight-outline`}
+              source={qaSourceId}
+              source-layer={vectorSourceName}
+              type="line"
+              filter={highlightFilter}
+              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+              paint={{
+                'line-color': qaAccent,
+                'line-opacity': 0.5,
+                'line-width': 3,
+              }}
+            />
+          </>
+        ) : null}
         <LayerHighlight
           id={getLayerHighlightId(qaLayerId)}
           source={qaSourceId}
           source-layer={vectorSourceName}
           type="fill"
           paint={{}}
+          hoverColor={qaAccent}
+          includeSelected={false}
         />
         <LayerHighlight
           id={getLayerHighlightId(`${qaLayerId}-outline`)}
@@ -181,6 +183,8 @@ export const SourcesLayersQa = () => {
           paint={{
             'line-width': 3,
           }}
+          hoverColor={qaAccent}
+          includeSelected={false}
         />
       </Fragment>
     </>

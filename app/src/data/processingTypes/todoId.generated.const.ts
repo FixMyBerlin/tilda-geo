@@ -3,6 +3,7 @@
 // To update, run `docker compose up processing` with ENV=development
 
 export const todoIds = [
+  'adjoining_of_vs_csv',
   'adjoining_or_isolated',
   'advisory_or_exclusive',
   'advisory_or_exclusive__mapillary',

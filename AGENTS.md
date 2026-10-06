@@ -4,6 +4,8 @@ Code Comments: Only add comments that provide context/meaning not already expres
 
 Most agent commands run from `app/`. Do not hand-craft `docker compose` for db/tiles — use `bun run dev` (predev). Local Docker / isolation: [`docs/docker-local-development.md`](docs/docker-local-development.md).
 
+Permissions: Access rules (roles, region status, member-only modes, API keys) live in [`docs/Permissions.md`](docs/Permissions.md). Update it and the tests it names whenever you change an access check.
+
 Refactoring: When moving or renaming exports, update all importers and delete the old export—do not add re-export shims (`export { x } from '…'`) or `@deprecated` wrappers. Leave no forwarding layer. Exception: staged migrations (e.g. URL/config version migrations) may keep temporary compatibility code until the migration is complete.
 
 Agent orchestration (Grok 4.6 High parent + cursor-grok-4.6-low workers): see [`.cursor/rules/orchestrator-worker.md`](.cursor/rules/orchestrator-worker.md) (`@orchestrator-worker`).

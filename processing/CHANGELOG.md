@@ -4,6 +4,65 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-09
 
+### `roads`, `roadsPathClasses`, `bikelanes`, `bikelanesPresence`, `bikeSuitability`, `routing`
+
+- Network noise, detected once on the `routing` graph (one geometry per OSM parent way): **islands** (the way touches no other line) and **short dangling tips** (`length` < 20 m, one end attached, the other free, nothing else touching the way). Single pass: a way that only becomes a tip once its own tips are hidden stays. Lines outside `routing` (eg. motorways) count as connectors; with `PROCESS_ONLY_BBOX` (local dev), ways not fully inside the bbox (minus ~10 m) are skipped. Map tables: `minzoom` is at least 14, so the lines stay in the data and in the z14 tile (overzoomed) and the inspector still works. `routing`: the rows are removed from the graph and moved to `_routing_discarded` (`discard_reason` `island` | `stub`, not published) for debugging. `todos_lines` is unchanged. SQL: `topics/roads_bikelanes/4_hide_network_noise.sql`.
+
+### `parkings`, `off_street_parking_areas`, `parkings_edges`, `parking_errors`
+
+- New `condition_category=invalid`: a `*:conditional` value the classifier reads has broken syntax (unbalanced or nested brackets, `@` inside the condition, a part without `value @ condition`; also `maxstay` values with a broken `@`). We can not tell the real restriction, so we do not guess (dropping e.g. `no_stopping @ …` would read as free parking). `condition_category_primary` / `condition_category_left|right` carry `invalid` too (last in the priority list); map styles have no own colour and use the fallback on purpose.
+- The broken tags are logged to `parking_errors` (`SANITIZED_VALUE`) with their original key, e.g. `parking:both:restriction:conditional`, so they can be fixed in OSM. Real examples: `no_stopping @ (Mo-Sa 07:00-19:00; PH off)...)`, `no_parking @ (Mo-Fr 09:00-20:00; Sa 09:00-18:00; none @ residents`.
+- `maxstay=1 hour @ (Mo-Fr …)` without `:conditional` is read like `maxstay:conditional` → `time_limited (1 hour) (Mo-Fr …)` instead of nested brackets.
+- Street parkings from `parking:left|right|both:*` now log rejected sanitizer values to `parking_errors` too (previously dropped silently).
+- Docs: `condition_category_primary` and `condition_category_left|right` document `default` ("Keine Zuordnung": category not in the style priority list, e.g. `no_standing`). `capacity_source=area` (off-street) was already documented via `valuesAdd`.
+- `condition_category_primary` is now computed in Lua next to `condition_category` (was a SQL function at finalize). Same values; it is now also on `parkings_no` and `parkings_separate`.
+- `condition_category_primary` / `condition_category_left|right`: new priority order. Special-use spaces win over prohibitions, and `time_limited` over zone rules: `disabled`, `disabled_private`, `taxi`, `loading`, `charging`, `car_sharing`, `no_parking`, `no_stopping`, `bus_lane`, `private`, `assumed_private`, `vehicle_restriction`, `access_restriction`, `maxweight`, `time_limited`, `mixed`, `residents`, `paid`, `unspecified`, `free`, `assumed_free`, `invalid`. E.g. `bus_lane (05:00-19:00);taxi (19:00-05:00)` is now `taxi` (was `bus_lane`). The order lives in `helper/condition_category_primary.lua`; map styles match by value.
+- `condition_category` details: the mapper typo `weightrating` is written as `maxweightrating` (with single spaces around `<`/`>`), e.g. `no_stopping (maxweightrating > 7.5)`. Free text in details (e.g. opening_hours comments like `"large events"`) is sanitized like other free-text tags: control characters removed, HTML-like tags become `[…]`.
+- `condition_category` details now only hold processed values for comments, `maxstay` and `access`; what we do not know is logged to `parking_errors` (original OSM key) so the lists can grow:
+  - opening_hours comments (`"…"`) become tokens: `large_events`, `doctors`, `illegible`, `mobile_library`; unknown text → `other_comment`. Table: `topics/parking/helper/condition_detail_tokens.lua`.
+  - `maxstay` durations get one spelling (`30 min` → `30 minutes`, `1 h` → `1 hour`). A bare number gets an assumed unit and is still logged: below 10 hours, from 10 on minutes (`2` → `2 hours`, `120` → `120 minutes`). Unknown values (e.g. `maxstay=left`) → `time_limited` without the value; a conditional interval is kept.
+  - Time conditions (weekdays, times, months) are checked atom by atom (`topics/parking/helper/condition_syntax.lua`). Unambiguous mistakes are rewritten: weekday case and German weekdays (`Mo-FR`, `Mo-Do` → `Mo-Th`), `9:00` → `09:00`, `06:00-18` → `06:00-18:00`, `07:00-0900`, `12:00.18:00`, typographic dashes. Atoms we do not understand become `other_condition` (e.g. `no_parking (Mo-Fr other_condition)` for `Mo-Fr 076:00-09:00`). Complex but valid conditions pass unchanged.
+  - `access` / `motor_vehicle`: only known values are shown as detail of `access_restriction`. Other values → `access_restriction` without detail. `unknown` is treated as not tagged (e.g. `paid;access_restriction (unknown)` → `paid`).
+- `parking_errors`: new `_error_type=REWRITTEN_VALUE` for tags with a clear mistake that we corrected (weekday spelling, times like `9:00`, `maxstay` without unit, `weightrating`). `SANITIZED_VALUE` stays for values we did not understand and replaced or ignored. Both carry the original OSM key and value. All decisions are made in one place: `topics/parking/helper/sanitize_condition_tags.lua`.
+- Note: condition detail strings are mostly passed through from OSM verbatim (only fee inversion and time subtraction rebuild them), so casing like `mo-Fr` can appear. The inspector translates weekdays case-insensitively.
+
+### `bikelanes`, `routing`
+
+- Rename `parent_highway` → `parent_road`. Value is the TILDA `roads.road` class of the parent centerline (same classifier as `road`), not the raw OSM `highway`.
+- `adjoining_road`: on non-crossings a usable OSM `is_sidepath:of` wins over the sidepath CSV (mapper override). Unusable `:of` (typo, street name, trunk) falls through to the CSV. Crossings stay CSV-only. `:of` does not produce `residential_priority_road`; the coarser class is kept. CSV maxspeed is kept only when it belongs to the published class.
+- New `todos_lines` id `adjoining_of_vs_csv` when non-crossing `:of` and CSV differ. Table-only; crossings are not listed (the two sources name different roads).
+
+### `routing` (experimental)
+
+- New table: score-free road + bike edges for routing. **One row per source object**: one OSM way can become several rows (carriageway, left/right lanes), but never two rows for the same object. Direction lives in `oneway` / `oneway_motor` plus the geometry direction, like most routers expect (one edge + direction flags).
+- Edge type is the `source_table` tag: `roads` (carriageway, mixed traffic), `bikelanes` (left/right/self bike infra from OSM tags), `roadsPathClasses` (path-like highway without bike infra). `id` equals `source_id` (`way/{id}`, bikelane ids like `way/{id}/cycleway/left`). Exception: a Mittellage lane on the centerline gets `way/{id}/cycleway/self` so it does not clash with the carriageway `way/{id}`; its `source_id` is still `way/{id}`.
+- `oneway` is always `yes` or `no` (can a cyclist ride against the line?). With `yes` the geometry points in the legal direction (OSM `oneway=-1` → reversed). Bike infra edges map `bikelanes.oneway`: `implicit_yes` → `yes`; `assumed_no` and `car_not_bike` → `no`.
+- `oneway_motor=yes` (carriageway and self bike infra such as Fahrradstraße): cars are one-way, bikes ride both ways. Geometry points along the car direction, so riding against the line is contraflow.
+- Left/right bike lanes stay on the road centerline like `bikelanes`: left (`offset` > 0) runs against the OSM way, right runs with it.
+- Carriageway edges always use `mixedTrafficMotor` (assigned in processing, never a `bikelanes.category`). Path edges keep a non-infra self category id when present, else `mixedTrafficFoot`. Unclear / non-indexable `bikelanes.category` values are still emitted when cycling is allowed.
+- Self bike infra on the centerline (Fahrradstraße, Fußgängerzone Rad frei, shared path on a service road) replaces the carriageway edge. A Mittellage lane (`cyclewayOnHighwayBetweenLanes`, unclear Mittellage as `needsClarification`) is added next to the carriageway edge instead.
+- Dropped when cycling is not allowed (`bicycle` access `no`/`private`/…), when `informal=yes` and bicycle access is unresolved, when own or parent `highway` is `motorway`/`trunk` (including `_link`), or when a path edge would not enter `roadsPathClasses` (OSM sidewalk/sidepath, indoor, informal, destination/customers access — same helper as the roads writer).
+- Tags: `category`, `road`, `parent_road`, `maxspeed` (carriageway own speed), `adjoining_road`, `adjoining_maxspeed` (motor road beside the bike infra: on `side=self` same value as `bikelanes`, on `side=left|right` the parent road's class and speed from `bikelanes.parent_road` / `parent_maxspeed`), `access_bicycle` (resolved bicycle access, including `use_sidepath` and `dismount`; those edges stay in the graph; not set on left/right lanes, which do not inherit the carriageway's access), `prefix`, `offset` (left/right lanes only; same visual sideways shift as `bikelanes`), `side`, `oneway`, `oneway_motor`, plus `name`/`length`/`surface`/`smoothness`/`width` when present. Docs: `topic-docs/roads_bikelanes/routing.yaml`.
+- Join keys in `tags` (same `id`/`tags`/`meta`/`geom`/`minzoom` shape as other rendering tables; `parent_id` and `source_id` have expression indexes): `parent_id`, `source_table`, `source_id`. Path edges always join `roadsPathClasses`.
+- `minzoom`: major TILDA `road` classes → 8; minor roads → 10 if length ≥ 250 m else 12; paths/tracks/service/sidepaths → 12 if length ≥ 500 m else 13.
+- Export: can be enabled per region (`/api/export/{region}/routing`).
+- **Experimental:** schema, ids, direction rules, and categories may still change. Do not treat this table as a stable contract yet.
+
+### `todos_lines`
+
+- Rename column `table` → `source_table` (same values `bikelanes` / `roads`; unique `(id, source_table)`). Tile/inspector property follows the new name.
+
+### `bikelanes`
+
+- Rename `_parent_highway` → `parent_highway` (OSM `highway=*` of the parent centerline for mapped-on-road / derived segments). Inspector composit lookup follows the new key.
+- Add `parent_maxspeed` on those derived segments (same maxspeed derivation as the parent road).
+- Add `adjoining_road` and `adjoining_maxspeed` on path-like / sidepath features: indicator of danger from nearby motor traffic (class and maxspeed of the relevant road, not membership). Parallel accompanying street on sidepaths; the crossed street on crossings. Sources: sanitized OSM `is_sidepath:of` wins on non-crossings; otherwise the previous run’s sidepath estimation (`roads.road`); crossings use the estimation only. Also set on independently routed paths next to a motor road. Fahrradstraße / Fußgängerzone-Rad-frei do not get `adjoining_*`.
+- `oneway`: `oneway:bicycle=no` together with `oneway=-1` is now `car_not_bike` (same as `oneway=yes`), so contraflow cycling is recognized on reversed oneways.
+
+### `roadsPathClasses`
+
+- Add `adjoining_road` and `adjoining_maxspeed` (same nearby-motor-road meaning as `bikelanes`).
+
 ### `parkings`, `parkings_no`, `parkings_quantized`
 
 - `meta` (`updated_at`, `updated_by`, `changeset_id`) is filled again (was `{}`). A merged parking line keeps the meta of its most recently edited source way; quantized points inherit it.
@@ -34,7 +93,7 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 ### `bikelanes`
 
 - Geometry now stays on the road **centerline**. Bikelane geometries derived from the centerline are no longer shifted sideways in the database (removed the `ST_OffsetCurve` step in the former `2_move_bikelanes.sql`). This makes geometry-based analyses simpler: no artificial left/right displacement to account for, and the two sides of a street share the same reference line.
-- **Geometry direction** of derived bikelanes changed as a consequence: all `…/left` and `…/right` geometries now run in the **OSM way direction** (identical to the parent road, no `ST_Simplify` either). Previously the removed SQL step reversed `…/left` geometries so each side ran in its right-hand-traffic flow direction. Direction-relative attributes (`mapillary_forward`/`mapillary_backward`, `traffic_sign_forward`/`traffic_sign_backward`) were always relative to the OSM way direction, so for `…/left` lanes they now match the exported geometry direction where they did not before. Consumers that derived travel direction from left-side geometry direction need to use `oneway` and `offset` (sign = side) instead.
+- **Geometry direction** of derived bikelanes: `…/right` runs in the **OSM way direction**. `…/left` (`offset` > 0) runs against the OSM way, in right-hand-traffic flow. On `…/left` rows, `mapillary_forward`/`mapillary_backward` and `traffic_sign:forward`/`traffic_sign:backward` are swapped so they follow that line. Right and centerline rows keep OSM way direction.
 - The `offset` attribute is unchanged in meaning (signed meters, `+` left / `-` right, half the road width) but is now consumed **only by the map style** for a visual `line-offset`, not by the database geometry. It was added to the bikelanes tile `stylingKeys` so it is available at all rendered zoom levels.
 - Map-style note: the sideways separation is reproduced visually for **line** layers via a zoom-scaled `line-offset` derived from `offset`. The meter→pixel conversion is calibrated for ~52.5° latitude (center of Germany) and is off by roughly ±9% at the edges of Germany. **Symbol/text** layers placed along the line (width/surface/traffic-sign labels, `symbol-placement: line-center`) cannot be perpendicular-offset via the style and now render on the centerline.
 

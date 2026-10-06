@@ -4,6 +4,8 @@ local extract_public_tags = require('topics.helper.extract_public_tags')
 local default_id = require('topics.helper.default_id')
 local roads_bikelanes_tables = require('topics.roads_bikelanes.roads_bikelanes_tables')
 local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
+local orient_line_direction_tags = require('topics.roads_bikelanes.bikelanes.helper.orient_line_direction_tags')
+local reverse_linestring = require('topics.roads_bikelanes.routing_infra.reverse_linestring')
 
 local bikelanes_table = roads_bikelanes_tables.bikelanes_table
 local bikelanes_presence_table = roads_bikelanes_tables.bikelanes_presence_table
@@ -37,18 +39,29 @@ local function roads_bikelanes_bikelanes(context)
         description = SANITIZE_TAGS.safe_string(cycleway.description) or shared_result_tags.description,
         operator_type = shared_result_tags.operator_type,
         informal = shared_result_tags.informal,
+        lit = shared_result_tags.lit,
         covered = shared_result_tags.covered,
-        _parent_highway = cycleway._parent_highway,
+        parent_road = cycleway.parent_road,
         _is_sidepath = object_tags._is_sidepath,
         _in_settlement_area = object_tags._in_settlement_area,
       }
       local meta = object_meta
 
+      local tags = merge_table(extract_public_tags(cycleway), result_tags)
+      orient_line_direction_tags(tags, cycleway._side)
+
+      -- Geometry stays on the road centerline. Left-side lines run against the OSM way
+      -- (right-hand-traffic flow); right and self lines run with it.
+      local geom = object_geom
+      if cycleway._side == 'left' then
+        geom = reverse_linestring(object_geom)
+      end
+
       bikelanes_table:insert({
         id = cycleway._id,
-        tags = merge_table(extract_public_tags(cycleway), result_tags),
+        tags = tags,
         meta = meta,
-        geom = object_geom,
+        geom = geom,
         minzoom = bikelane_generalization(object_tags, result_tags)
       })
 
@@ -60,7 +73,7 @@ local function roads_bikelanes_bikelanes(context)
         }
         todo_lines_table:insert({
           id = cycleway._id,
-          table = 'bikelanes',
+          source_table = 'bikelanes',
           tags = cycleway._todo_list,
           meta = merge_table(todo_meta, meta),
           length = math.floor(result_tags.length),

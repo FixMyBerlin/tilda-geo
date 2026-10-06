@@ -7,6 +7,11 @@ return {
     instruction =
       'These tags have values that were not accepted by our sanitization. Please review the values, fix the data, or update the sanitization.',
   },
+  REWRITTEN_VALUE = {
+    key = 'REWRITTEN_VALUE',
+    instruction =
+      'These tags have values with a clear mistake that we corrected in our data (e.g. weekday spelling, a time without leading zero, a duration without unit). Please fix the values in OSM.',
+  },
   RELATION = {
     key = 'RELATION',
     instruction =

@@ -18,6 +18,30 @@ describe('sanitize_tags', function()
     end)
   end)
 
+  describe('tunnel', function()
+    it('keeps yes', function()
+      assert.are.equal(SANITIZE_TAGS.tunnel('yes'), 'yes')
+    end)
+
+    it('treats building passages as tunnels', function()
+      assert.are.equal(SANITIZE_TAGS.tunnel('building_passage'), 'yes')
+    end)
+
+    it('drops no', function()
+      assert.is_nil(SANITIZE_TAGS.tunnel('no'))
+    end)
+  end)
+
+  describe('covered_or_indoor', function()
+    it('treats arcades as covered', function()
+      assert.are.equal(SANITIZE_TAGS.covered_or_indoor({ covered = 'arcade' }), 'covered')
+    end)
+
+    it('keeps a full cover', function()
+      assert.are.equal(SANITIZE_TAGS.covered_or_indoor({ covered = 'yes' }), 'covered')
+    end)
+  end)
+
   describe('informal', function()
     it('drops unknown', function()
       assert.is_nil(SANITIZE_TAGS.informal('unknown'))

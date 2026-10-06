@@ -1,36 +1,38 @@
 import { featureCollection, point } from '@turf/turf'
 import { z } from 'zod'
-import { getAppSession } from '@/server/auth/session.server'
-import { checkRegionAuthorization } from '@/server/authorization/checkRegionAuthorization.server'
+import { getMemberSession, type MemberCaller } from '@/server/auth/memberCaller.server'
+import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
 import { zodInternalNotesFilterParam } from '@/shared/regionen/regionSearchZod'
+import { formatUserDisplayName } from '@/shared/userDisplayName'
 
 const Schema = z.object({
   regionSlug: z.string(),
+  folderId: z.number(),
   filter: zodInternalNotesFilterParam.nullish(),
 })
 
 export async function getNotesAndCommentsForRegion(
   input: z.infer<typeof Schema>,
-  headers: Headers,
+  caller: MemberCaller,
 ) {
-  const { regionSlug, filter } = Schema.parse(input)
+  const { regionSlug, folderId, filter } = Schema.parse(input)
 
-  // Check authorization using the helper
-  const session = await getAppSession(headers)
-  const { isAuthorized } = await checkRegionAuthorization(session, regionSlug)
+  // Internal notes are member/admin-only, also on PUBLIC regions (region status is not note access).
+  const session = await getMemberSession(caller)
+  const { isAuthorized } = await canAccessMemberModeForRegion(session, regionSlug)
   if (!isAuthorized) {
     return { featureCollection: featureCollection([]) }
   }
 
   const notes = await db.note.findMany({
-    where: { region: { slug: regionSlug } },
+    where: { folderId, folder: { regions: { some: { slug: regionSlug } } } },
     select: {
       id: true,
       resolvedAt: true,
       longitude: true,
       latitude: true,
-      regionId: true,
+      folderId: true,
       subject: true,
       body: true,
       author: { select: { id: true, osmName: true, firstName: true, lastName: true } },
@@ -48,13 +50,19 @@ export async function getNotesAndCommentsForRegion(
 
   const notePoints = notes.map((note) => {
     const coordinates = [note.longitude, note.latitude]
-    // We transform the properties for <SourcesLayersInternalNotes />
+    // Properties are shared by the map layer <SourcesLayersInternalNotes /> and the notes mode
+    // list panel; the latter additionally reads subject/comment preview.
     const properties = {
       id: note.id,
       status: note.resolvedAt ? 'closed' : 'open',
-      regionId: note.regionId,
+      folderId: note.folderId,
+      subject: note.subject,
       authorId: note.author.id,
+      authorName: formatUserDisplayName(note.author) ?? '',
       hasComments: note.noteComments.length > 0,
+      commentCount: note.noteComments.length,
+      // Newest comment first (orderBy desc) — used as a compact preview line in the list.
+      latestComment: note.noteComments[0]?.body ?? null,
       lastCommentFromUser:
         note.noteComments.length > 0 && note.noteComments[0]?.userId === session?.userId,
       isAuthor: note.author.id === session?.userId,

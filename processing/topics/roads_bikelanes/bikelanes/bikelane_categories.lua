@@ -152,6 +152,13 @@ local bicycleRoad = BikelaneCategory.new({
   end
 })
 
+-- Fahrradstraße / Fußgängerzone Rad frei: the way is the cycling facility itself, not a sidepath of another road.
+---@param tags OsmTags
+---@return boolean|nil
+local function is_own_cycling_facility(tags)
+  return bicycleRoad:is_active(tags) or pedestrianAreaBicycleYes:is_active(tags)
+end
+
 -- https://wiki.openstreetmap.org/wiki/DE:Key:bicycle%20road
 -- traffic_sign=DE:244,1020-30, https://wiki.openstreetmap.org/wiki/DE:Tag:traffic_sign=DE:244
 -- Also 'Kfz frei', https://commons.wikimedia.org/wiki/File:Zusatzzeichen_KFZ_frei.svg
@@ -399,7 +406,7 @@ local cyclewaySeparated = BikelaneCategory.new({
     -- CASE: Everything that has a traffic sign DE:237
     -- Sometimes users add a `traffic_sign=DE:237` right on the `highway=secondard` but it should be `cycleway:right:traffic_sign`
     -- We only allow the follow highway tags. This will still produce false positives but less so.
-    -- And looking at the _parent_highway and left|right|nil|both tags for this is way to complex.
+    -- And looking at the parent_road and left|right|nil|both tags for this is way to complex.
     local allowed_highways = SET.set({
       'living_street',
       'pedestrian',
@@ -567,11 +574,12 @@ local cyclewayOnHighway_exclusive = BikelaneCategory.new({
   end
 })
 
--- Case: Cycleway identified via 'shared_lane'-tagging ('Anteilig genutzten Fahrstreifen')
+-- Case: Marked shared lane only (`cycleway=shared_lane` — sharrows / anteilig genutzter Fahrstreifen).
+-- NOT general Mischverkehr on the carriageway; that is routing category `mixedTrafficMotor`.
 -- https://wiki.openstreetmap.org/wiki/DE:Tag:cycleway=shared_lane
 local sharedMotorVehicleLane = BikelaneCategory.new({
   id = 'sharedMotorVehicleLane',
-  desc = '', -- TODO desc; Wiki nochmal nachlesen und Conditions prüfen
+  desc = 'Marked shared motor-vehicle lane (DE: anteilig genutzter Fahrstreifen / Sharrows) via cycleway=shared_lane.',
   infrastructureExists = true,
   implicitOneWay = false, -- 'oneway=assumed_no' the whole road is shared (both lanes); Something like left|right would be `implicit_yes`
   implicitOneWayConfidence = 'high',
@@ -890,4 +898,5 @@ return {
   categorize_bikelane = categorize_bikelane,
   bikelane_category = BikelaneCategory,
   is_crossing_pattern = is_crossing_pattern,
+  is_own_cycling_facility = is_own_cycling_facility,
 }

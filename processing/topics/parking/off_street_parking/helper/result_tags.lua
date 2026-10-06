@@ -50,6 +50,7 @@ local function result_tags_off_street_parking(result, area)
 
     -- Parking properties
     condition_category = conditional_categories_result.condition_category,
+    condition_category_primary = conditional_categories_result.condition_category_primary,
     covered = SANITIZE_TAGS.covered(result.object.tags.covered),
     direction = SANITIZE_PARKING_TAGS.direction(result.object.tags.direction),
     informal = SANITIZE_TAGS.informal(result.object.tags.informal),
@@ -78,13 +79,16 @@ local function result_tags_off_street_parking(result, area)
   local result_meta = metadata(result.object)
 
   local cleaned_tags, replaced_tags = CLEANER.separate_tags(result_tags, result.object.tags)
+  for key, value in pairs(conditional_categories_result.dropped_tags or {}) do
+    replaced_tags[key] = value
+  end
 
   return {
     id = id,
     tags = cleaned_tags,
     meta = result_meta,
     minzoom = area_minzoom(area),
-  }, replaced_tags
+  }, replaced_tags, conditional_categories_result.rewritten_tags or {}
 end
 
 return result_tags_off_street_parking

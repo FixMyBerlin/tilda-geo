@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { requireAuth } from '@/server/auth/session.server'
+import { type MemberCaller, requireMemberSession } from '@/server/auth/memberCaller.server'
 import { authorizeRegionMemberByNoteId } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
 import { NoteAndCommentsSchema } from '../schemas'
@@ -10,8 +10,8 @@ export type NoteAndComments = Awaited<ReturnType<typeof getNoteAndComments>>
 export type NoteComment = NonNullable<NonNullable<NoteAndComments>['noteComments']>[number]
 
 /** Returns note with comments or null if not found. Caller (e.g. server function) should throw notFound() when null. */
-export async function getNoteAndComments(input: z.infer<typeof GetNote>, headers: Headers) {
-  const session = await requireAuth(headers)
+export async function getNoteAndComments(input: z.infer<typeof GetNote>, caller: MemberCaller) {
+  const session = await requireMemberSession(caller)
   const { id } = GetNote.parse(input)
 
   await authorizeRegionMemberByNoteId(session, id)

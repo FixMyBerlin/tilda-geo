@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "tilda-app",
+      "runtimeExecutable": "bun",
+      "runtimeArgs": ["--env-file=../.env", "run", "dev:vite"],
+      "port": 5173
+    }
+  ]
+}

@@ -4,7 +4,7 @@ import { mapProcessingRunListItem } from '@/server/processing/mapProcessingRunTi
 import { listProcessingRuns } from '@/server/processing/queries/listProcessingRuns.server'
 import { createOffsetSearchSchema } from '@/shared/pagination/offsetSearchSchema'
 
-const listQuerySchema = createOffsetSearchSchema({ maxTake: 200 })
+const listQuerySchema = createOffsetSearchSchema()
 
 export const Route = createFileRoute('/api/admin/processing')({
   ssr: false,

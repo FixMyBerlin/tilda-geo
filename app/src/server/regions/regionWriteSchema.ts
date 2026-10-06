@@ -11,7 +11,7 @@ import type {
 } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/tables.const'
 import { EN_DECIMAL_HELP, isValidEnDecimalInput } from '@/components/shared/form/enDecimalInput'
 import { slugSchema } from '@/lib/slugSchema'
-import { RegionNotesMode, RegionProduct, RegionStatus } from '@/prisma/generated/browser'
+import { RegionProduct, RegionStatus } from '@/prisma/generated/browser'
 import { SIMPLIFY_MAX_ZOOM, SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
 import {
   cacheWarmingSourceOptions,
@@ -35,7 +35,6 @@ const exportIdSet = new Set(exportConfigs.map((e) => e.id))
 const backgroundIdSet = new Set(sourcesBackgroundsRaster.map((s) => s.id))
 
 const RegionProductSchema = z.enum(RegionProduct)
-const RegionNotesModeSchema = z.enum(RegionNotesMode)
 const RegionStatusSchema = z.enum(RegionStatus)
 
 const catalogIdSchema = (label: string, allowed: Set<string>) =>
@@ -160,7 +159,8 @@ export const RegionWriteSchema = z
     promoted: z.boolean(),
     status: RegionStatusSchema,
     product: RegionProductSchema,
-    notes: RegionNotesModeSchema,
+    notesOsm: z.boolean(),
+    notesInternal: z.boolean(),
     showSearch: z.boolean(),
     mapLat: z.number(),
     mapLng: z.number(),
@@ -367,7 +367,8 @@ export const RegionFormRawSchema = z
     promoted: trueOrFalse,
     status: RegionStatusSchema,
     product: RegionProductSchema,
-    notes: RegionNotesModeSchema,
+    notesOsm: trueOrFalse,
+    notesInternal: trueOrFalse,
     showSearch: trueOrFalse,
     mapLat: enDecimalFormField,
     mapLng: enDecimalFormField,
@@ -509,7 +510,8 @@ export const RegionFormSchema = RegionFormRawSchema.transform((form): RegionWrit
     promoted: form.promoted,
     status: form.status,
     product: form.product,
-    notes: form.notes,
+    notesOsm: form.notesOsm,
+    notesInternal: form.notesInternal,
     showSearch: form.showSearch,
     mapLat: Number(form.mapLat),
     mapLng: Number(form.mapLng),
@@ -564,7 +566,8 @@ export function regionConfigToFormValues(config: RegionWriteInput) {
     promoted: toTrueFalseString(config.promoted),
     status: config.status,
     product: config.product,
-    notes: config.notes,
+    notesOsm: toTrueFalseString(config.notesOsm),
+    notesInternal: toTrueFalseString(config.notesInternal),
     showSearch: toTrueFalseString(config.showSearch),
     mapLat: String(config.mapLat),
     mapLng: String(config.mapLng),

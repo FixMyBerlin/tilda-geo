@@ -2,7 +2,7 @@ import { twJoin } from 'tailwind-merge'
 import { CopyButton } from '@/components/shared/CopyButton'
 
 const codeBlockClassName = twJoin(
-  'overflow-x-auto rounded-lg bg-white/90 p-3 text-xs text-gray-800 shadow-sm ring-1 ring-gray-900/10',
+  'overflow-x-auto rounded-lg bg-white p-3 text-xs text-gray-800 shadow-xs ring-1 ring-gray-900/10',
 )
 
 type McpCursorConfigPreviewProps = {
@@ -17,7 +17,7 @@ export function McpCursorConfigPreview({
   variant = 'default',
 }: McpCursorConfigPreviewProps) {
   const ringClassName =
-    variant === 'success' ? 'ring-green-300 bg-white' : 'ring-gray-900/10 bg-white/90'
+    variant === 'success' ? 'ring-green-300 bg-white' : 'ring-gray-900/10 bg-white'
 
   return (
     <div className="space-y-2">

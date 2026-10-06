@@ -1,10 +1,6 @@
 import { getRouteApi } from '@tanstack/react-router'
-import { AdminPageTitleNew, AdminPageTitleNewLabel } from '@/components/admin/adminPageTitle'
-import { Breadcrumb } from '@/components/admin/Breadcrumb'
-import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
-import { createQaConfigFn } from '@/server/qa-configs/qa-configs.functions'
-import { CreateQaConfigFormSchema } from '@/server/qa-configs/schemas'
-import { QaConfigForm, QaConfigFormInputSchema } from './pageQaConfigs/QaConfigForm'
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
+import { QaConfigForm, qaConfigFormEmptyDefaults } from './pageQaConfigs/QaConfigForm'
 
 const routeApi = getRouteApi('/admin/qa-configs/new')
 
@@ -13,39 +9,11 @@ export function PageQaConfigsNew() {
 
   return (
     <>
-      <HeaderWrapper>
-        <Breadcrumb
-          pages={[
-            { href: '/admin/qa-configs', name: 'QA Konfigurationen' },
-            {
-              href: '/admin/qa-configs/new',
-              name: <AdminPageTitleNewLabel label="Neue QA Konfiguration" variant="breadcrumb" />,
-            },
-          ]}
-        />
-      </HeaderWrapper>
-
-      <AdminPageTitleNew label="Neue QA Konfiguration" />
-
-      <QaConfigForm
-        schema={CreateQaConfigFormSchema}
-        defaultValues={{
-          slug: QaConfigFormInputSchema.slug,
-          label: QaConfigFormInputSchema.label,
-          isActive: QaConfigFormInputSchema.isActive,
-          mapTable: QaConfigFormInputSchema.mapTable,
-          mapAttribution: QaConfigFormInputSchema.mapAttribution,
-          goodThreshold: QaConfigFormInputSchema.goodThreshold,
-          needsReviewThreshold: QaConfigFormInputSchema.needsReviewThreshold,
-          absoluteDifferenceThreshold: QaConfigFormInputSchema.absoluteDifferenceThreshold,
-          regionId: QaConfigFormInputSchema.regionId,
-          trustedOsmUsernames: QaConfigFormInputSchema.trustedOsmUsernames,
-          referenceFrozenAt: QaConfigFormInputSchema.referenceFrozenAt,
-        }}
-        submitLabel="QA Konfiguration erstellen"
-        regions={regions}
-        onSubmit={async (values) => createQaConfigFn({ data: values })}
+      <AdminPageHeader
+        title="Neue QA-Konfiguration"
+        parent={{ label: 'QA-Konfigurationen', to: '/admin/qa-configs' }}
       />
+      <QaConfigForm mode="create" defaultValues={qaConfigFormEmptyDefaults} regions={regions} />
     </>
   )
 }

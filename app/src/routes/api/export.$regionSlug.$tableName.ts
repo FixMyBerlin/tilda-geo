@@ -5,9 +5,9 @@ import path from 'node:path'
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 import { exportApiIdentifier } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/export/exportIdentifier'
-import { formatDateBerlin } from '@/components/shared/date/formatDateBerlin'
 import { isDev } from '@/components/shared/utils/isEnv'
 import { getExportAttributeType } from '@/server/api/export/exportAttributeType'
+import { getExportDownloadFilename } from '@/server/api/export/getExportDownloadFilename'
 import { formats, ogrFormats } from '@/server/api/export/ogrFormats.const'
 import { resolveExportBbox } from '@/server/api/export/resolveExportBbox.server'
 import { badRequestJson, notFoundJson } from '@/server/api/util/apiJsonResponses.server'
@@ -411,9 +411,12 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
         })
 
         const metadata = await getProcessingMeta()
-        const filename = metadata?.osm_data_from
-          ? `${tableName}_${formatDateBerlin(metadata.osm_data_from, 'yyyy-MM-dd')}.${format}`
-          : `${tableName}.${format}`
+        const filename = getExportDownloadFilename({
+          regionSlug,
+          tableName,
+          format,
+          osmDataFrom: metadata?.osm_data_from,
+        })
 
         console.info(logPrefix, 'starting response stream', {
           filename,

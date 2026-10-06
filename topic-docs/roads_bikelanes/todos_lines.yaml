@@ -3,7 +3,7 @@ summary: Datenbasis für Kampagnen zur Qualitätssicherung. Angaben aus diesen T
 sourceIds:
   - atlas_todos_lines
 attributes:
-  - key: table
+  - key: source_table
     label: Quelle
     values:
       - value: roads

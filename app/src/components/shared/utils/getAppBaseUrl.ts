@@ -1,24 +1,35 @@
-import { z } from 'zod'
 import type { EnvironmentValues } from '@/server/envSchema'
-import { makeOriginFromParts, type UrlParts } from './urlParts'
+import {
+  type AppInstance,
+  appInstances,
+  currentAppInstance,
+  deployedHostSchema,
+} from './appInstances.const'
 
-const appBaseUrlParts: Record<EnvironmentValues, UrlParts> = {
-  development: { protocol: 'http', host: '127.0.0.1', port: 5173 },
-  staging: { protocol: 'https', host: 'staging.tilda-geo.de' },
-  production: { protocol: 'https', host: 'tilda-geo.de' },
-}
+/**
+ * Link target for "Open DEV" from a deployed app. The deploy cannot know which `DEV_PORT_SLOT`
+ * (5173, 5174, …) the viewer's local checkout runs on, so it assumes slot 0.
+ * Local dev never uses this; it links to its own `VITE_APP_ORIGIN`.
+ */
+const slotZeroDevOrigin = 'http://127.0.0.1:5173'
 
-export const appHostSchema = z.enum([
-  appBaseUrlParts.development.host,
-  appBaseUrlParts.staging.host,
-  appBaseUrlParts.production.host,
-])
+export const appHostSchema = deployedHostSchema('app', new URL(slotZeroDevOrigin).hostname)
 
-export const getAppBaseUrl = (path?: string, env?: EnvironmentValues) => {
-  const environment = env ?? import.meta.env.VITE_APP_ENV
-  const base = makeOriginFromParts(appBaseUrlParts[environment])
+/**
+ * App URL in `env` (default: this deployment's environment) of `instance` (default: this deployment's instance).
+ * This deployment itself always resolves to `VITE_APP_ORIGIN`.
+ */
+export const getAppBaseUrl = (
+  path?: string,
+  env: EnvironmentValues = import.meta.env.VITE_APP_ENV,
+  instance: AppInstance = currentAppInstance(),
+) => {
+  const base =
+    env === import.meta.env.VITE_APP_ENV && instance === currentAppInstance()
+      ? import.meta.env.VITE_APP_ORIGIN
+      : env === 'development'
+        ? slotZeroDevOrigin
+        : appInstances[instance][env].app
 
-  if (!path) return base
-  const cleanPath = path.startsWith('/') ? path.slice(1) : path
-  return `${base}/${cleanPath}`
+  return path ? `${base}/${path.replace(/^\//, '')}` : base
 }

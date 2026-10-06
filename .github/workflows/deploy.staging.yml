@@ -3,7 +3,6 @@ on:
   push:
     branches:
       - develop
-      - tinkering
 
 concurrency:
   group: deploy-staging

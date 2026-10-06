@@ -108,6 +108,7 @@ export function CalculatorDrawingToolbar({ drawMode, canEdit, onDrawModeChange, 
             <h4 className="font-semibold">Modus „Fläche zeichnen“</h4>
             <p>Jeder Klick in die Karte fügt einen Stützpunkt zur Fläche hinzu.</p>
             <p>Zum Abschließen der Fläche bitte doppelklicken.</p>
+            <p>Danach wechselt die Karte automatisch in den Modus „Verschieben &amp; Ändern“.</p>
             <p>
               <code>ESC</code> bricht das Zeichnen ab.
             </p>
@@ -118,8 +119,8 @@ export function CalculatorDrawingToolbar({ drawMode, canEdit, onDrawModeChange, 
             <p>Als erstes muss die Fläche angeklickt werden.</p>
             <p>Danach kann die ganze Fläche oder einzelne Stützpunkte verschoben werden.</p>
             <p>
-              Ein Klick auf einen kleinen Hilfs-Punkt erzeugt einen neuen Stützpunkt, der danach mit
-              einem zweiten Klick verschoben werden kann.
+              Die kleinen Hilfs-Punkte auf den Kanten lassen sich direkt ziehen; dabei entsteht ein
+              neuer Stützpunkt.
             </p>
           </section>
 

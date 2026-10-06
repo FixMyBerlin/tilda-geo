@@ -24,10 +24,11 @@ local function parking_separate_parking_areas(object)
 
   local result = categorize_separate_parking(object, separate_parking_area_categories)
   if result.object then
-    local row_data, replaced_tags = result_tags(result.category, result.object, area_sqm(result.object))
+    local row_data, replaced_tags, rewritten_tags = result_tags(result.category, result.object, area_sqm(result.object))
     local row = merge_table({ geom = result.object:as_multipolygon() }, row_data)
 
     LOG_ERROR.SANITIZED_VALUE(result.object, row.geom, replaced_tags, 'parking_separate_parking_areas')
+    LOG_ERROR.REWRITTEN_VALUE(result.object, row.geom, rewritten_tags, 'parking_separate_parking_areas')
     -- `:as_multipolygon()` will create a postgis-polygon or postgis-multipoligon.
     -- With `:num_geometries()` we filter to only allow polygons which is our table column data type.
     if row.geom:num_geometries() == 1 then

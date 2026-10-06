@@ -1,65 +1,85 @@
-import { twMerge } from 'tailwind-merge'
+import type { ReactNode } from 'react'
+import { twJoin, twMerge } from 'tailwind-merge'
+import { adminCardClassName } from '@/components/admin/adminClasses'
 
-export type AdminTableHeaderCell = string | { id: string; label: string }
+export type AdminTableHeaderCell =
+  | string
+  | {
+      id: string
+      label: string
+      /** Visually hidden header (e.g. “Aktionen” above row buttons). */
+      srOnly?: boolean
+      align?: 'left' | 'right'
+    }
 
-const cellPad = 'px-3 py-2'
+const cellPad = 'px-3 py-2.5 first:pl-4 last:pr-4 sm:first:pl-6 sm:last:pr-6'
 
-const td = twMerge(cellPad, 'text-sm text-gray-800')
+const td = twJoin(cellPad, 'align-middle text-sm text-gray-700')
 
-/** Class strings for admin tables — use as `adminTableClasses.table`, `adminTableClasses.td`, etc. */
+/** Class strings for admin tables — use as `adminTableClasses.td`, etc. Prefer `AdminTable` for the frame. */
 export const adminTableClasses = {
-  /** `<table>` — shell, rounded surface, divider under header. */
-  table: twMerge(
-    'relative min-w-full overflow-clip rounded-xl bg-white/90 shadow-sm ring-1 ring-gray-900/5',
-    'divide-y divide-gray-200',
-  ),
+  /** Card frame around a table (+ optional footer such as pagination); scrolls horizontally on narrow screens. */
+  shell: twJoin(adminCardClassName, 'overflow-hidden'),
+  /** `<table>` inside `shell`. */
+  table: 'min-w-full divide-y divide-gray-200 text-left',
   /** `<thead><tr>` */
-  headRow: 'bg-white/90',
-  /** `<tbody>` — row dividers + body surface */
-  body: 'divide-y divide-gray-200 bg-white/40',
+  headRow: 'bg-gray-50',
+  /** `<tbody>` */
+  body: 'divide-y divide-gray-200 bg-white',
   /** `<th scope="col">` */
-  th: twMerge(cellPad, 'text-left align-middle text-sm font-semibold text-gray-900'),
-  /** `<th scope="col">` — left-aligned (alias; prefer `th`). */
-  thLeft: twMerge(cellPad, 'text-left align-middle text-sm font-semibold text-gray-900'),
+  th: twJoin(
+    cellPad,
+    'text-left align-middle text-sm font-semibold whitespace-nowrap text-gray-900',
+  ),
   /** `<td>` */
   td,
   /** `<th scope="row">` in tbody — row title / first column. */
-  thRow: twMerge(td, 'text-left font-medium text-gray-900'),
-  /** Wrapper for `AdminTable` + `PaginationControls` (strips inner table shell). */
-  paginatedShell: twMerge(
-    'overflow-x-auto rounded-xl bg-white/90 shadow-sm ring-1 ring-gray-900/5',
-    '[&_table]:rounded-none [&_table]:bg-transparent [&_table]:shadow-none [&_table]:ring-0',
-  ),
+  thRow: twJoin(td, 'text-left font-medium text-gray-900'),
+  /** `<tr>` separating groups inside a table (e.g. regions by contract); pair with `groupHeader`. */
+  groupRow: 'border-t border-gray-200 bg-gray-50',
+  /** `<th scope="colgroup" colSpan={…}>` inside `groupRow`. */
+  groupHeader: twJoin(cellPad, 'py-2 text-left text-sm font-semibold text-gray-900'),
 } as const
 
-export const AdminTable = ({
-  header,
-  children,
-}: {
+type Props = {
   header: AdminTableHeaderCell[]
-  children: React.ReactNode
-}) => {
+  children: ReactNode
+  /** Rendered inside the card below the table (e.g. `AdminPagination`). */
+  footer?: ReactNode
+  className?: string
+}
+
+export const AdminTable = ({ header, children, footer, className }: Props) => {
   return (
-    <table className={adminTableClasses.table}>
-      <thead>
-        <tr className={adminTableClasses.headRow}>
-          {header.map((cell) => {
-            if (typeof cell === 'string') {
-              return (
-                <th key={cell} scope="col" className={adminTableClasses.th}>
-                  {cell}
-                </th>
-              )
-            }
-            return (
-              <th key={cell.id} scope="col" className={adminTableClasses.th}>
-                {cell.label}
-              </th>
-            )
-          })}
-        </tr>
-      </thead>
-      <tbody className={adminTableClasses.body}>{children}</tbody>
-    </table>
+    <div className={twMerge(adminTableClasses.shell, className)}>
+      <div className="overflow-x-auto">
+        <table className={adminTableClasses.table}>
+          <thead>
+            <tr className={adminTableClasses.headRow}>
+              {header.map((cell) => {
+                if (typeof cell === 'string') {
+                  return (
+                    <th key={cell} scope="col" className={adminTableClasses.th}>
+                      {cell}
+                    </th>
+                  )
+                }
+                return (
+                  <th
+                    key={cell.id}
+                    scope="col"
+                    className={twJoin(adminTableClasses.th, cell.align === 'right' && 'text-right')}
+                  >
+                    {cell.srOnly ? <span className="sr-only">{cell.label}</span> : cell.label}
+                  </th>
+                )
+              })}
+            </tr>
+          </thead>
+          <tbody className={adminTableClasses.body}>{children}</tbody>
+        </table>
+      </div>
+      {footer}
+    </div>
   )
 }

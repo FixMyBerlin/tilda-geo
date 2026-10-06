@@ -11,7 +11,7 @@ export type DevStackInfo = {
   state: 'running' | 'stopped'
 }
 
-type VolumeKind = 'dev-db' | 'dev-osm' | 'unknown'
+type VolumeKind = 'dev-db' | 'dev-osm' | 'processing-node-modules' | 'unknown'
 
 export type ClassifiedVolume = {
   name: string
@@ -134,7 +134,14 @@ export function formatStackLine(stack: DevStackInfo) {
 function classifyVolumeName(name: string): VolumeKind {
   if (name.endsWith('_db_postgres_17') || name === 'db_postgres_17') return 'dev-db'
   if (name.endsWith('_osmfiles') || name === 'osmfiles') return 'dev-osm'
+  if (name.endsWith('_processing_node_modules') || name === 'processing_node_modules') {
+    return 'processing-node-modules'
+  }
   return 'unknown'
+}
+
+export function isSafeCacheVolume(volume: ClassifiedVolume) {
+  return volume.kind === 'processing-node-modules'
 }
 
 export function classifyVolumes(names: string[]): ClassifiedVolume[] {
@@ -142,9 +149,16 @@ export function classifyVolumes(names: string[]): ClassifiedVolume[] {
 }
 
 export function formatVolumeClassification(volume: ClassifiedVolume) {
-  const tag =
-    volume.kind === 'dev-db' ? 'Postgres data' : volume.kind === 'dev-osm' ? 'OSM files' : 'unknown'
-  return `${volume.name} (${tag})`
+  switch (volume.kind) {
+    case 'dev-db':
+      return `${volume.name} (Postgres data — keep unless this stack is abandoned)`
+    case 'dev-osm':
+      return `${volume.name} (OSM download cache — keep unless this stack is abandoned)`
+    case 'processing-node-modules':
+      return `${volume.name} (processing node_modules cache — safe; next processing start refills it)`
+    case 'unknown':
+      return `${volume.name} (unknown — check before deleting)`
+  }
 }
 
 export function containerNamesForStoppedDevStacks(stacks: DevStackInfo[]) {

@@ -8,7 +8,7 @@ export const Route = createFileRoute('/admin/qa-configs/new')({
     return await getAdminQaConfigNewLoaderFn()
   },
   head: () => ({
-    meta: [{ title: 'Neue QA Konfiguration – ADMIN TILDA' }],
+    meta: [{ title: 'Neue QA-Konfiguration – ADMIN TILDA' }],
   }),
   component: PageQaConfigsNew,
 })

@@ -9,4 +9,5 @@ export const BBOX_PRESETS = {
   'neukoelln-nord': '13.41904861,52.467335,13.4616607,52.487559',
   // `bun run seed` geo-bootstrap (`app/scripts/geo-bootstrap/flags.ts`)
   'seed-herrfurthplatz': '13.4209256,52.4763157,13.4272212,52.4779464',
+  bibi: '9.0671,48.9229,9.1753,48.9838',
 } as const satisfies Record<string, string>

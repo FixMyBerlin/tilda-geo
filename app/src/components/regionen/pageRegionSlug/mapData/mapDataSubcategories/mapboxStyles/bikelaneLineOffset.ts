@@ -16,12 +16,12 @@ import type { MapboxStyleLayer } from './types'
  * plus the always-present `id` column (`way/…/left`, `way/…/right`, or `way/…` for
  * center-running `self`). Above it, full tags including `offset` are present.
  *
- * - **Below minzoom:** nudge left/right by half the layer's stroke width so the two sides
+ * - **Below minzoom:** nudge each side by half the layer's stroke width so the two sides
  *   sit flush against the centerline (no overlap, no road-width gap). Side comes from `id`.
  *   A meter-based gap would be sub-pixel at these zooms anyway.
- * - **At/above minzoom:** convert the `offset` attribute (meters, signed by side: `+` left /
- *   `-` right of the centerline; computed in processing as half the road width) to screen
- *   pixels so the two sides sit at the road edge.
+ * - **At/above minzoom:** convert the absolute `offset` attribute (meters; the sign is
+ *   `+` left / `-` right of the OSM way, computed in processing as half the road width)
+ *   to screen pixels so the two sides sit at the road edge.
  *
  * Meter → pixel conversion: MapLibre `line-offset` is in screen pixels, while `offset` is
  * in ground meters. Web Mercator ground resolution halves every zoom level, so
@@ -52,34 +52,38 @@ const metersPerPixelAtZoom0 =
   (EARTH_CIRCUMFERENCE_M / TILE_SIZE_PX) * Math.cos((REFERENCE_LATITUDE_DEG * Math.PI) / 180)
 
 /**
- * Signed pixels-per-meter at a given zoom. Negated because MapLibre `line-offset` is
- * positive to the RIGHT of the line direction, whereas our `offset` attribute is positive
- * to the LEFT of it (PostGIS `ST_OffsetCurve` convention).
+ * Pixels-per-meter at a given zoom. Positive: MapLibre `line-offset` is positive to the
+ * RIGHT of the feature direction. Left-side geometries are reversed in processing, so
+ * both sides are drawn to the right of their own line (right-hand-traffic flow). The
+ * `offset` attribute stays signed relative to the OSM way (`+` left / `-` right); only
+ * its magnitude is used here.
  */
-const signedPixelsPerMeterAtZoom = (zoom: number) => -(2 ** zoom) / metersPerPixelAtZoom0
+const pixelsPerMeterAtZoom = (zoom: number) => 2 ** zoom / metersPerPixelAtZoom0
 
 const MIN_ZOOM_STOP = 0
 const MAX_ZOOM_STOP = 24
 const INTERACTIVE_MINZOOM = interactivityConfiguration.bikelanes.minzoom
 
-/** Signed `offset` attribute in meters; missing (e.g. center-running `cycleway=self`) → `0`. */
-const offsetMeters = ['coalesce', ['get', 'offset'], 0] satisfies ExpressionSpecification
+/** `|offset|` in meters; missing (e.g. center-running `cycleway=self`) → `0`. */
+const offsetMetersAbs = [
+  'abs',
+  ['coalesce', ['get', 'offset'], 0],
+] satisfies ExpressionSpecification
 
 /** Always in the MVT (`SELECT id`); derived lanes contain `/left` or `/right`. */
 const featureId = ['to-string', ['coalesce', ['get', 'id'], '']] satisfies ExpressionSpecification
 
+const isDerivedSide = [
+  'any',
+  ['in', '/left', featureId],
+  ['in', '/right', featureId],
+] satisfies ExpressionSpecification
+
 const compactLineOffset = (halfWidthPx: number) =>
-  [
-    'case',
-    ['in', '/left', featureId],
-    -halfWidthPx,
-    ['in', '/right', featureId],
-    halfWidthPx,
-    0,
-  ] satisfies ExpressionSpecification
+  ['case', isDerivedSide, halfWidthPx, 0] satisfies ExpressionSpecification
 
 const meterLineOffsetAtZoom = (zoom: number) =>
-  ['*', offsetMeters, signedPixelsPerMeterAtZoom(zoom)] satisfies ExpressionSpecification
+  ['*', offsetMetersAbs, pixelsPerMeterAtZoom(zoom)] satisfies ExpressionSpecification
 
 /** Clamped stroke width at zooms below the layer's first interpolate/step stop. */
 export const lowZoomLineWidthPx = (lineWidth: unknown) => {
@@ -99,7 +103,7 @@ export const lowZoomLineWidthPx = (lineWidth: unknown) => {
  * `interpolate`/`step` ("zoom-and-property" expression), so feature-dependent values live
  * in the stop outputs. Equal compact stops at 0 and `minzoom-1` keep the nudge constant
  * through the non-interactive range; from `minzoom` to 24, base-2 interpolation of the
- * meter stops is identical to `offset × pixelsPerMeter(zoom)`.
+ * meter stops is identical to `|offset| × pixelsPerMeter(zoom)`.
  */
 export const bikelaneVisualLineOffset = (lineWidth: unknown) => {
   const compact = compactLineOffset(lowZoomLineWidthPx(lineWidth) / 2)

@@ -2,7 +2,7 @@
 
 TanStack Router layout components (`Layout*.tsx`) and shared chrome (Header, Footer, `global.css`). Each route file in `src/routes/` imports exactly one layout from here.
 
-Folder standard: [`.agents/skills/tanstack-start-app-structure/SKILL.md`](../../../../.agents/skills/tanstack-start-app-structure/SKILL.md) → `components/` folder standards.
+Folder standard: skill `tanstack-start-conventions` → [app-structure.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/app-structure.md) → `components/` folder standards.
 
 ## Hierarchy
 
@@ -12,7 +12,7 @@ LayoutRoot          __root__     document shell (html/body, providers, app heade
 ├── LayoutPages     _pages       prose content pages (legal, docs, settings, …)
 ├── LayoutAdmin     admin        admin area
 └── LayoutRegionen  regionen     pass-through
-    └── LayoutRegionSlug  regionen/$regionSlug   map page (NuqsAdapter)
+    └── LayoutRegionSlug  regionen/$regionSlug   map page (map + mode panel outlet)
 ```
 
 `LayoutRoot` hides app header/footer on full-bleed routes: `regionen/$regionSlug`, `preview/region-pending`, `preview/region-error`.

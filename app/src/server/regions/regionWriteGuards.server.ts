@@ -5,7 +5,7 @@
  * Unlike region-contract admin (`regions: { connect }` / `regions: { set }`), region writes set
  * `contractId` as a scalar FK on Region, so contract existence must be checked here (Zod cannot;
  * Prisma's FK error is opaque). Category/background/export/nav lists are child rows replaced via
- * nested deleteMany + create in `regionWriteInputToUpdateData`, not M2M connect/set.
+ * top-level deleteMany + create in `writeRegionChildRows`, not M2M connect/set.
  */
 import db from '@/server/db.server'
 import { RegionNotFoundError } from '@/server/regions/regionWriteErrors.server'
@@ -52,7 +52,7 @@ export async function assertRegionCanBeDeleted(slug: string) {
       _count: {
         select: {
           memberships: true,
-          noteRecords: true,
+          noteFolders: true,
           qaConfigs: true,
           // Exclude the region's own auto-generated mask (a systemLayer upload that
           // deleteRegionConfig cleans up); otherwise a region with an active mask can never be
@@ -67,7 +67,7 @@ export async function assertRegionCanBeDeleted(slug: string) {
   const blockers: string[] = []
   const { _count } = region
   if (_count.memberships > 0) blockers.push(`${_count.memberships} Mitgliedschaft(en)`)
-  if (_count.noteRecords > 0) blockers.push(`${_count.noteRecords} Notiz(en)`)
+  if (_count.noteFolders > 0) blockers.push(`${_count.noteFolders} Hinweis-Ordner`)
   if (_count.qaConfigs > 0) blockers.push(`${_count.qaConfigs} QA-Konfiguration(en)`)
   if (_count.mapDatasetUploads > 0) {
     blockers.push(`${_count.mapDatasetUploads} Map-Dataset-Upload(s)`)

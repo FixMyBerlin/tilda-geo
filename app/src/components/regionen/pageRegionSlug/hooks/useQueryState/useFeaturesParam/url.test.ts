@@ -1,4 +1,8 @@
 import { describe, expect, test } from 'vitest'
+import { reviewEntriesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/reviewEntriesLayers.const'
+import { internalNotesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersInternalNotes'
+import { osmNotesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersOsmNotes'
+import { qaSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersQa'
 import { sources } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
 import { additionalSourceKeys, numericSourceIds } from './url'
 
@@ -17,5 +21,13 @@ describe('Test data required for url decoding', () => {
       .forEach((numericSourceId) => {
         expect(sourceIds).toContain(numericSourceId)
       })
+  })
+  test('url.ts: additionalSourceKeys match the mode layer source ids', () => {
+    expect([...additionalSourceKeys]).toEqual([
+      osmNotesSourceId,
+      internalNotesSourceId,
+      reviewEntriesSourceId,
+      qaSourceId,
+    ])
   })
 })

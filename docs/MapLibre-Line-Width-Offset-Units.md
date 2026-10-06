@@ -268,16 +268,16 @@ Bikelane-Geometrien liegen in den Daten auf der **Straßen-Mittellinie**. Der se
 2. **Visueller Versatz (MapLibre Style):** [`app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/bikelaneLineOffset.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/bikelaneLineOffset.ts)
 
    ```typescript
-   // z < minzoom (aktuell 9): ± halbe Strichstärke anhand von id (`…/left` / `…/right`)
-   // z ≥ minzoom: offset (Meter) × zoom-skalierte px/m-Faktoren
+   // z < minzoom (aktuell 9): + halbe Strichstärke für `…/left` und `…/right`
+   // z ≥ minzoom: |offset| (Meter) × zoom-skalierte px/m-Faktoren
    // `['zoom']` darf laut Style-Spec nur Input eines Top-Level `interpolate`/`step` sein,
    // deshalb stecken Feature-Werte in den Stop-Outputs.
    'line-offset': [
      'interpolate', ['exponential', 2], ['zoom'],
      0, compactHalfStrokeFromId,
      8, compactHalfStrokeFromId,
-     9, ['*', ['coalesce', ['get', 'offset'], 0], pxPerMeterAtZoom9],
-     24, ['*', ['coalesce', ['get', 'offset'], 0], pxPerMeterAtZoom24],
+     9, ['*', ['abs', ['coalesce', ['get', 'offset'], 0]], pxPerMeterAtZoom9],
+     24, ['*', ['abs', ['coalesce', ['get', 'offset'], 0]], pxPerMeterAtZoom24],
    ]
    ```
 
@@ -285,7 +285,7 @@ Bikelane-Geometrien liegen in den Daten auf der **Straßen-Mittellinie**. Der se
 
    **Einschränkungen:**
    - Meter→Pixel-Kalibrierung bei Referenz-Breitengrad ~52,5° (Mitte Deutschland); Abweichung grob ±9 % an den Rändern Deutschlands.
-   - MapLibre `line-offset` ist positiv nach **rechts** relativ zur Linienrichtung; das Vorzeichen des `offset`-Attributs ist invertiert (PostGIS-`ST_OffsetCurve`-Konvention).
+   - MapLibre `line-offset` ist positiv nach **rechts** relativ zur Linienrichtung. Linke abgeleitete Geometrien sind gegen die OSM-Way-Richtung gedreht, rechte nicht. Beide Seiten werden deshalb um `|offset|` nach rechts ihrer eigenen Linie versetzt (Rechtsverkehr). Das Attribut `offset` selbst bleibt vorzeichenbehaftet (`+` links / `-` rechts der OSM-Way-Richtung).
    - Nur `line`-Layer können versetzt werden. Symbol-/Text-Layer mit `symbol-placement: line-center` (Breiten-, Oberflächen-, Verkehrszeichen-Beschriftungen) bleiben auf der Mittellinie.
 
    Mehr Kontext: Topic-Doc-Kapitel [`versetzte-geometrien`](../topic-docs/roads_bikelanes/chapters/versetzte-geometrien.md), [`processing/CHANGELOG.md`](../processing/CHANGELOG.md).

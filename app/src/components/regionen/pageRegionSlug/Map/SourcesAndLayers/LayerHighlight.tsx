@@ -30,22 +30,36 @@ const createMatchExpression = ({
   ] satisfies ExpressionSpecification
 }
 
-const opacity = createMatchExpression({
-  valueNone: 0,
-  valueHover: 0.5,
-  valueSelected: 0.8,
-  valueHoverSelected: 0.8,
-})
+/** Pointer hover on atlas categories and static datasets. Mode layers pass their own accent. */
+const HOVER_COLOR = '#ff9933'
+/** Selected atlas/static features. Unchanged by the active region mode. */
+const SELECTED_COLOR = '#ff0000'
 
-const color = createMatchExpression({
-  valueNone: 'black',
-  valueHover: '#ff9933',
-  valueSelected: '#ff0000',
-  valueHoverSelected: '#ff0000', // Same as selected when both hover and selected
-})
+type Props = LayerProps & {
+  /** Override pointer-hover color. Default orange; mode-owned layers pass their accent. */
+  hoverColor?: string
+  /** When false, skip feature-state selected paint (QA uses filtered highlight layers). */
+  includeSelected?: boolean
+}
 
-export const LayerHighlight = (props: LayerProps) => {
+export const LayerHighlight = ({
+  hoverColor = HOVER_COLOR,
+  includeSelected = true,
+  ...props
+}: Props) => {
   const mapLoaded = useMapLoaded()
+  const opacity = createMatchExpression({
+    valueNone: 0,
+    valueHover: 0.5,
+    valueSelected: includeSelected ? 0.8 : 0,
+    valueHoverSelected: includeSelected ? 0.8 : 0.5,
+  })
+  const color = createMatchExpression({
+    valueNone: 'black',
+    valueHover: hoverColor,
+    valueSelected: includeSelected ? SELECTED_COLOR : hoverColor,
+    valueHoverSelected: includeSelected ? SELECTED_COLOR : hoverColor,
+  })
   if (!mapLoaded) return null
 
   // Type guard: check if this is a standard layer (not custom layer)

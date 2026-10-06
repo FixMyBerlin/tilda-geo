@@ -7,6 +7,7 @@ import type { MapDataCategoryConfig } from '@/components/regionen/pageRegionSlug
 import { useCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/useCategoriesConfig'
 import type { MapDataCategoryId } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/MapDataCategoryId'
 import { MotionAutoHeight } from '@/components/shared/motion/MotionAutoHeight'
+import { mapOverlayMenuClassName } from '../../mapOverlayChrome.const'
 import { createSubcatStyleKey } from '../../utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
 import { Legend } from '../Legend/Legend'
 
@@ -102,7 +103,7 @@ export const SubcategoryDropdown = ({ categoryId, subcategory, disabled }: Props
 
             <MenuItems
               anchor="bottom start"
-              className="z-40 rounded-md bg-white py-1 shadow-lg outline-1 outline-black/5 [--anchor-gap:8px]"
+              className={twJoin('z-40 py-1 [--anchor-gap:8px]', mapOverlayMenuClassName)}
             >
               {Array.from(groupedStyles.entries()).map(([group, styles]) => {
                 const showHeadline = group !== 'fallback'
@@ -153,10 +154,8 @@ export const SubcategoryDropdown = ({ categoryId, subcategory, disabled }: Props
         )}
       </Menu>
 
-      {/* No left indent on mobile (flush with the dropdown above); keep it on the desktop sidebar.
-          The wrapper stays mounted while disabled so toggling the category morphs the height
-          instead of dropping the legend instantly. */}
-      <MotionAutoHeight className="sm:ml-6">
+      {/* Align with the dropdown; stay mounted while disabled so category toggle morphs height. */}
+      <MotionAutoHeight>
         {!disabled && <Legend subcategoryId={subcategory.id} styleConfig={activeStyleConfig} />}
       </MotionAutoHeight>
     </fieldset>

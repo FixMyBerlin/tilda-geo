@@ -4,12 +4,13 @@ import { prismaAdapter } from 'better-auth/adapters/prisma'
 import { customSession } from 'better-auth/plugins'
 import { genericOAuth } from 'better-auth/plugins/generic-oauth'
 import { tanstackStartCookies } from 'better-auth/tanstack-start'
-import { getOsmApiUrl, getOsmUrl } from '@/components/shared/utils/getOsmUrl'
+import { getOsmUrl } from '@/components/shared/utils/getOsmUrl'
 import { osmPlaceholderEmail } from '@/components/shared/utils/osmPlaceholderEmail'
 import { UserRoleEnum } from '@/prisma/generated/client'
 import { runWithAuditContextAsync } from '@/server/audit/auditContext.server'
 import db from '@/server/db.server'
 import { sendNewUserRegistration } from '@/server/notifications/sendNewUserRegistration.server'
+import { fetchOsmUserDetails } from './osmUserDetails.server'
 
 /**
  * Custom session plugin that adds role field to session
@@ -72,41 +73,22 @@ const options = {
           tokenUrl: getOsmUrl('/oauth2/token'),
           scopes: ['openid', 'read_prefs', 'write_prefs', 'write_notes'],
           getUserInfo: async ({ accessToken }) => {
-            const apiUrl = getOsmApiUrl('/user/details.json')
-            const response = await fetch(apiUrl, {
-              method: 'GET',
-              headers: {
-                Accept: 'application/json',
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${accessToken}`,
-              },
-            })
-
-            if (!response.ok) {
-              const errorText = await response.text()
+            if (!accessToken) throw new Error('No access token in OAuth response')
+            const details = await fetchOsmUserDetails(accessToken)
+            if (!details.ok) {
               throw new Error(
-                `Failed to fetch user info: ${response.status} ${response.statusText}. Response: ${errorText}`,
+                `Failed to fetch user info: ${details.status} ${details.statusText}. Response: ${details.errorText}`,
               )
             }
 
-            const json = await response.json()
-            if (!json.user) {
-              throw new Error('No user object in response')
-            }
-
-            const user = json.user
+            const { osmId, osmName, osmDescription, osmAvatar } = details.user
             const out = {
-              id: String(user.id),
-              name: user.display_name,
+              id: String(osmId),
+              name: osmName,
               email: null, // OSM doesn't provide email
               emailVerified: false,
-              image: user.img?.href || null,
-              raw: {
-                osmId: Number(user.id),
-                osmName: user.display_name,
-                osmDescription: user.description,
-                osmAvatar: user.img?.href || null,
-              },
+              image: osmAvatar ?? undefined,
+              raw: { osmId, osmName, osmDescription, osmAvatar },
             }
             return out
           },

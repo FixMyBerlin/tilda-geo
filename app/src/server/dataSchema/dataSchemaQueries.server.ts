@@ -151,7 +151,7 @@ export async function listDataSchemaImports(
     query: ({ skip, take }) =>
       db.dataSchemaImport.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
         skip,
         take,
         select: historySelect,

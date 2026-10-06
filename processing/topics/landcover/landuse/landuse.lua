@@ -39,7 +39,7 @@ end
 --- Area handler for the `landuse` table. The entrypoint routes area-eligible objects (closed
 --- ways, multipolygon relations) here; object:as_multipolygon() works for both (same pattern as
 --- barriers). The tag filter (exit_processing) decides which land use we keep.
----@param object table
+---@param object OsmObject
 local function landuse(object)
   if exit_processing(object) then
     return

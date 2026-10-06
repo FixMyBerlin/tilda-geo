@@ -11,6 +11,7 @@ local function result_tags_roads_bikelanes(object_tags)
   local road_result_tags = {
     name = SANITIZE_TAGS.safe_string(object_tags.name or object_tags.ref or object_tags['is_sidepath:of:name'] or object_tags['street:name']),
     length = object_tags._length,
+    area = object_tags._area,
     lifecycle = object_tags.lifecycle or SANITIZE_ROAD_TAGS.temporary(object_tags),
     mapillary_coverage = object_tags.mapillary_coverage,
     mapillary = object_tags.mapillary,

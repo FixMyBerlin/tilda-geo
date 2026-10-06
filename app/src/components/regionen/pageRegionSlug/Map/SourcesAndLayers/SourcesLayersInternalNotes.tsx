@@ -1,11 +1,20 @@
 import { useQuery } from '@tanstack/react-query'
 import { Layer, Source } from 'react-map-gl/maplibre'
-import { useMapInspectorFeatures } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
+import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import {
-  useInternalNotesFilterParam,
-  useShowInternalNotesParam,
-} from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useNotesAtlasParams'
-import { useAllowInternalNotes } from '@/components/regionen/pageRegionSlug/notes/InternalNotes/utils/useAllowInternalNotes'
+  useHoveredListItem,
+  useHoveredMapItemId,
+} from '@/components/regionen/pageRegionSlug/modes/mode-list-store'
+import {
+  noteHighlightCirclePaint,
+  noteHighlightFilter,
+} from '@/components/regionen/pageRegionSlug/modes/notes/noteSelectRingPaint'
+import { notesHighlightIds } from '@/components/regionen/pageRegionSlug/modes/notes/notesListHoverId'
+import { notesModeToServerFilter } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
+import { useNoteFolders } from '@/components/regionen/pageRegionSlug/modes/notes/useNoteFolders'
+import { useNotesModeValue } from '@/components/regionen/pageRegionSlug/modes/notes/useNotesModeParam'
+import { useNotesSelection } from '@/components/regionen/pageRegionSlug/modes/notes/useNotesSelection'
+import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { internalNotesQueryOptions } from '@/server/regions/regionQueryOptions'
 
@@ -13,23 +22,37 @@ export const internalNotesLayerId = 'internal-notes-layer'
 export const internalNotesSourceId = 'internal-notes-source'
 
 export const SourcesLayersInternalNotes = () => {
-  const { showInternalNotesParam } = useShowInternalNotesParam()
   const region = useRegion()
-  const allowInternalNotes = useAllowInternalNotes()
-  const inspectorFeatures = useMapInspectorFeatures()
-
-  const { internalNotesFilterParam } = useInternalNotesFilterParam()
-
+  const { featuresParam } = useFeaturesParam()
+  const currentMode = useCurrentMode()
+  const notesModeValue = useNotesModeValue()
+  const notesSelection = useNotesSelection()
+  const hoveredListItem = useHoveredListItem()
+  const hoveredMapItemId = useHoveredMapItemId()
+  const showLayers = currentMode.isNotes && notesSelection.kind === 'internal'
+  // Map markers always follow the active folder, same query as the panel list.
+  const { selectedFolderId } = useNoteFolders()
   const { data: result } = useQuery({
-    ...internalNotesQueryOptions(region.slug, internalNotesFilterParam),
-    enabled: allowInternalNotes,
+    ...internalNotesQueryOptions(
+      region.slug,
+      selectedFolderId,
+      notesModeToServerFilter(notesModeValue),
+    ),
+    enabled: showLayers && selectedFolderId !== undefined,
   })
-  if (result === undefined) return null
-  if (!allowInternalNotes) return null
 
-  const selectedFeatureIds = inspectorFeatures
-    .filter((feature) => feature.source === internalNotesSourceId)
-    .map((feature) => (feature?.properties?.id || 0) as number)
+  if (result === undefined) return null
+  if (!showLayers) return null
+
+  const selectedFeatureIds = featuresParam
+    .filter((feature) => feature.sourceId === internalNotesSourceId)
+    .map((feature) => Number(feature.id))
+  const highlightIds = notesHighlightIds(
+    selectedFeatureIds,
+    hoveredListItem?.id,
+    hoveredMapItemId,
+    internalNotesSourceId,
+  )
 
   return (
     <>
@@ -38,46 +61,38 @@ export const SourcesLayersInternalNotes = () => {
         key={internalNotesSourceId}
         type="geojson"
         data={result.featureCollection}
+        promoteId="id"
         // attribution="" Internal data / copyrighted
       />
-      {showInternalNotesParam && (
-        <>
-          {selectedFeatureIds.length > 0 && (
-            <Layer
-              id={`${internalNotesLayerId}-hover`}
-              key={`${internalNotesLayerId}-hover`}
-              source={internalNotesSourceId}
-              type="circle"
-              paint={{
-                'circle-radius': 12,
-                'circle-color': '#f9a8d4', // pink-300 https://tailwindcss.com/docs/customizing-colors
-              }}
-              filter={['in', 'id', ...selectedFeatureIds]}
-            />
-          )}
-          <Layer
-            id={internalNotesLayerId}
-            key={internalNotesLayerId}
-            source={internalNotesSourceId}
-            type="symbol"
-            layout={{
-              visibility: 'visible',
-              'icon-image': [
-                'match',
-                ['get', 'status'],
-                // The sprites from Mapbox https://studio.mapbox.com/styles/hejco/cl706a84j003v14o23n2r81w7/edit/ => "sprites-fuer-atlas-notes-layer"
-                'closed',
-                'note-closed-intern' /* Checkmark */,
-                'open',
-                'note-open-intern' /* Questionmark */,
-                'note-open-intern' /* fallback */,
-              ],
-              'icon-size': ['interpolate', ['linear'], ['zoom'], 0, 0.3, 10, 0.5, 22, 0.5],
-              'icon-allow-overlap': true,
-            }}
-          />
-        </>
-      )}
+      <Layer
+        id={`${internalNotesLayerId}-highlight`}
+        key={`${internalNotesLayerId}-highlight`}
+        source={internalNotesSourceId}
+        type="circle"
+        paint={noteHighlightCirclePaint}
+        filter={noteHighlightFilter(highlightIds)}
+      />
+      <Layer
+        id={internalNotesLayerId}
+        key={internalNotesLayerId}
+        source={internalNotesSourceId}
+        type="symbol"
+        layout={{
+          visibility: 'visible',
+          'icon-image': [
+            'match',
+            ['get', 'status'],
+            // The sprites from Mapbox https://studio.mapbox.com/styles/hejco/cl706a84j003v14o23n2r81w7/edit/ => "sprites-fuer-atlas-notes-layer"
+            'closed',
+            'note-closed-intern' /* Checkmark */,
+            'open',
+            'note-open-intern' /* Questionmark */,
+            'note-open-intern' /* fallback */,
+          ],
+          'icon-size': ['interpolate', ['linear'], ['zoom'], 0, 0.3, 10, 0.5, 22, 0.5],
+          'icon-allow-overlap': true,
+        }}
+      />
     </>
   )
 }

@@ -1,12 +1,10 @@
 import { getRouteApi } from '@tanstack/react-router'
-import { adminTableClasses } from '@/components/admin/AdminTable'
-import { Breadcrumb } from '@/components/admin/Breadcrumb'
-import { HeaderWrapper } from '@/components/admin/HeaderWrapper'
+import { AdminEmptyState } from '@/components/admin/AdminEmptyState'
+import { AdminPageHeader } from '@/components/admin/AdminPageHeader'
+import { AdminFirstPageLink, AdminPagination } from '@/components/admin/AdminPagination'
+import { AdminRegionFilter } from '@/components/admin/AdminRegionFilter'
+import { AdminSearchField } from '@/components/admin/AdminSearchField'
 import { FilterRow } from '@/components/shared/FilterRow/FilterRow'
-import { Link } from '@/components/shared/links/Link'
-import { PaginationControls } from '@/components/shared/pagination/PaginationControls'
-import { useAdminTablePagination } from '@/components/shared/pagination/useAdminTablePagination'
-import { Pill } from '@/components/shared/text/Pill'
 import { resolveUploadKind } from '@/lib/mapDatasetUploadsSearchSchema'
 import { buildMapDatasetUploadKindFilterItems } from './pageMapDatasetUploads/buildMapDatasetUploadKindFilterItems'
 import { buildUploadsListSearch } from './pageMapDatasetUploads/mapDatasetUploadsListSearch'
@@ -17,20 +15,21 @@ const routeApi = getRouteApi('/admin/map-dataset-uploads/')
 export function PageMapDatasetUploads() {
   const loaderData = routeApi.useLoaderData()
   const search = routeApi.useSearch()
-  const navigate = routeApi.useNavigate()
-  const { page, goToPage, result } = useAdminTablePagination(search, navigate, loaderData)
 
   const activeKind = resolveUploadKind(search.kind)
   const filterItems = buildMapDatasetUploadKindFilterItems(loaderData.kindCounts)
   const regionSlug = search.regionSlug?.trim() || undefined
+  const hasActiveFilter = activeKind === 'system' || Boolean(regionSlug) || Boolean(search.q)
 
   return (
     <>
-      <HeaderWrapper>
-        <Breadcrumb pages={[{ href: '/admin/map-dataset-uploads', name: 'Uploads' }]} />
-      </HeaderWrapper>
+      <AdminPageHeader title="Uploads" />
 
-      <div className="mb-4 flex flex-col gap-3">
+      <div className="mb-6 flex flex-col gap-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-6">
+          <AdminSearchField label="Uploads durchsuchen" placeholder="Slug oder Ansicht …" />
+          <AdminRegionFilter />
+        </div>
         <FilterRow
           items={filterItems}
           activeId={activeKind}
@@ -40,30 +39,29 @@ export function PageMapDatasetUploads() {
             buildUploadsListSearch({
               kind: id,
               regionSlug,
-              take: search.take,
+              q: search.q,
+              pageSize: search.pageSize,
             })
           }
           ariaLabel="Art"
         />
-        {regionSlug ? (
-          <div className="flex flex-wrap items-center gap-2 text-sm text-gray-700">
-            <span className="font-medium">Region:</span>
-            <Pill color="blue">{regionSlug}</Pill>
-            <Link
-              to="/admin/map-dataset-uploads"
-              search={buildUploadsListSearch({ kind: search.kind, take: search.take })}
-              className="text-sm"
-            >
-              Alle Regionen
-            </Link>
-          </div>
-        ) : null}
       </div>
 
-      <div className={adminTableClasses.paginatedShell}>
-        <MapDatasetUploadsTable uploads={loaderData.rows} listKind={search.kind} />
-        <PaginationControls page={page} result={result} onPageChange={goToPage} />
-      </div>
+      {loaderData.rows.length === 0 ? (
+        <AdminEmptyState action={search.page > 1 ? <AdminFirstPageLink /> : undefined}>
+          {regionSlug && !search.q && activeKind === 'datasets'
+            ? 'Keine Uploads für diese Region.'
+            : hasActiveFilter
+              ? 'Keine Uploads für diesen Filter.'
+              : 'Noch keine Uploads vorhanden.'}
+        </AdminEmptyState>
+      ) : (
+        <MapDatasetUploadsTable
+          uploads={loaderData.rows}
+          listKind={search.kind}
+          footer={<AdminPagination pagination={loaderData} />}
+        />
+      )}
     </>
   )
 }
