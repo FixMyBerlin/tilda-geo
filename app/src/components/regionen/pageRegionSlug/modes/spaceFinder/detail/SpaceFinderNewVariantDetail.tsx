@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { spaceFinderPanelTitleInputClass } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderPanelStyles'
 import { frenchQuote } from '@/components/shared/text/Quotes'
+import { toastSuccess } from '@/components/shared/toast/toastSuccess'
 import { createPlanningVariantFn } from '@/server/planning/planning.functions'
 import {
   planningAreasQueryOptions,
@@ -29,6 +30,9 @@ export const SpaceFinderNewVariantDetail = ({
     onSuccess: async (created) => {
       await queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
       await queryClient.invalidateQueries(planningVariantQueryOptions(created.id))
+      toastSuccess(
+        title.trim() ? `Variante ${frenchQuote(title.trim())} angelegt.` : 'Variante angelegt.',
+      )
       setSpaceFinderModeParam({ ...spaceFinderMode, key: created.id, new: undefined })
     },
   })

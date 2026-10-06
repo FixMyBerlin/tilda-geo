@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
 import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
+import { toastSuccess } from '@/components/shared/toast/toastSuccess'
 import {
   deletePlanningAreaFn,
   deletePlanningVariantFn,
@@ -84,6 +85,7 @@ export const useSpaceFinderCommands = ({
     onSuccess: async (created) => {
       await invalidateAreas()
       await queryClient.invalidateQueries(planningVariantQueryOptions(created.id))
+      toastSuccess('Variante dupliziert.')
       onSelect(created.id)
     },
   })

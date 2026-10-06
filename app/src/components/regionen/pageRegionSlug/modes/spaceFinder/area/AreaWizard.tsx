@@ -1,5 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
+import { frenchQuote } from '@/components/shared/text/Quotes'
+import { toastSuccess } from '@/components/shared/toast/toastSuccess'
 import { MAX_STUDY_AREA_KM2 } from '@/lib/planningStudyAreaLimit'
 import { createPlanningAreaFn } from '@/server/planning/planning.functions'
 import {
@@ -67,6 +69,7 @@ export const AreaWizard = ({
         queryClient.invalidateQueries(planningAreaQueryOptions(created.areaId)),
         queryClient.invalidateQueries(planningVariantQueryOptions(created.variantId)),
       ])
+      toastSuccess(`Planungsgebiet ${frenchQuote(title.trim())} angelegt.`)
       onCreated(created.areaId, created.variantId)
     },
   })
