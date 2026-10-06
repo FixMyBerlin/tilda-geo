@@ -23,6 +23,10 @@ updates:
           - version-update:semver-major
           - version-update:semver-minor
           - version-update:semver-patch
+      # oxlint 1.86 flags `new Date()` in render (react/purity) and fails `lint-check --deny-warnings`.
+      # Remove once the 4 call sites are fixed (ToolsLinksImagery, DownloadModal, DownloadModalUpdateDate, DebugMapDownload).
+      - dependency-name: oxlint
+      - dependency-name: oxlint-tsgolint
     groups:
       security-dev-tools:
         applies-to: security-updates
