@@ -3,9 +3,21 @@ import { getSafeSignInCallbackURL } from '@/shared/auth/safeSignInCallbackURL'
 
 describe('getSafeSignInCallbackURL', () => {
   test('keeps relative path and search', () => {
-    expect(getSafeSignInCallbackURL('/regionen/foo/qa?map=14/52.5/13.4')).toBe(
-      '/regionen/foo/qa?map=14/52.5/13.4',
+    expect(getSafeSignInCallbackURL('/regionen/foo/qa?v=3&config=a.b')).toBe(
+      '/regionen/foo/qa?v=3&config=a.b',
     )
+    expect(getSafeSignInCallbackURL('/regionen/foo')).toBe('/regionen/foo')
+  })
+
+  test('encodes what the Better Auth allowlist rejects', () => {
+    const betterAuthRelativeCallback = /^\/(?!\/|\\|%2f|%5c)[\w\-.+/@]*(?:\?[\w\-.+/=&%@]*)?$/
+    const safe = getSafeSignInCallbackURL(
+      '/regionen/foo?map=14/52.5/13.4&data=[]&f=1,2&draw=!(id~*03d2~coordinates~!!13.4~52.4)~',
+    )
+    expect(safe).toMatch(betterAuthRelativeCallback)
+    expect(safe).toContain('draw=%21%28id%7E%2A03d2')
+    // Encoding twice changes nothing, so the sign-in route can pass the value through again.
+    expect(getSafeSignInCallbackURL(safe)).toBe(safe)
   })
 
   test('reduces absolute URLs to path and search', () => {

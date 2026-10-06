@@ -5,7 +5,18 @@ const isBlockedCallbackPathname = (pathname: string) => {
   return blockedCallbackPathPrefixes.some((prefix) => normalized.startsWith(prefix))
 }
 
-/** Relative path+search for OSM `callbackURL`. Rejects protocol-relative, `/api/`, and `/oautherror`. */
+/**
+ * Better Auth only accepts a fixed set of characters in a relative `callbackURL`. Our search
+ * params use more: `[`/`]` (legacy `data=[]`), commas, and `*` in `draw=` ids, which
+ * `URLSearchParams` leaves as it is.
+ */
+const encodeSearchForAuthAllowlist = (search: string) =>
+  new URLSearchParams(search).toString().replaceAll('*', '%2A')
+
+/**
+ * Relative path+search for OSM `callbackURL`, encoded so Better Auth accepts it.
+ * Rejects protocol-relative, `/api/`, and `/oautherror`.
+ */
 export const getSafeSignInCallbackURL = (raw?: string) => {
   const trimmed = raw?.trim()
   if (!trimmed) return '/'
@@ -24,8 +35,11 @@ export const getSafeSignInCallbackURL = (raw?: string) => {
 
   if (!pathAndSearch.startsWith('/') || pathAndSearch.startsWith('//')) return '/'
 
-  const pathname = pathAndSearch.split('?')[0] ?? pathAndSearch
+  const searchStart = pathAndSearch.indexOf('?')
+  const pathname = searchStart === -1 ? pathAndSearch : pathAndSearch.slice(0, searchStart)
   if (isBlockedCallbackPathname(pathname)) return '/'
 
-  return pathAndSearch
+  const search =
+    searchStart === -1 ? '' : encodeSearchForAuthAllowlist(pathAndSearch.slice(searchStart + 1))
+  return search ? `${pathname}?${search}` : pathname
 }
