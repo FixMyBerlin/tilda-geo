@@ -20,7 +20,6 @@ import { UserObstaclesToggle } from './display/LayerToggles'
 import { FactorEditorPanel } from './factors/FactorEditorPanel'
 import { JobStatusBadge } from './run/JobStatusBadge'
 import type { PlanningVariantDetail } from './spaceFinderVariantDetail'
-import { useSpaceFinderModeParam } from './useSpaceFinderModeParam'
 
 /** Status line (D5): run state, outdated reason, progress while running. */
 const StatusSection = ({ variant }: { variant: PlanningVariantDetail }) => {
