@@ -2,7 +2,7 @@
 
 Short reference for how we organize the TILDA Geo codebase. For coding style (TypeScript, comments), see [AGENTS.md](../AGENTS.md).
 
-Portable summary (shared across FMC TanStack Start projects): install agent skill **`tanstack-start-app-structure`** from [fixmyskills](https://github.com/FixMyBerlin/fixmyskills) (`npx skills add FixMyBerlin/fixmyskills -s tanstack-start-app-structure -a cursor -y`). Installed copy: [`.agents/skills/tanstack-start-app-structure/SKILL.md`](../.agents/skills/tanstack-start-app-structure/SKILL.md).
+Portable summary (shared across FMC TanStack Start projects): skill **`tanstack-start-conventions`** → [app-structure.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/app-structure.md), installed globally from [fixmyskills](https://github.com/FixMyBerlin/fixmyskills) (`bunx skills add FixMyBerlin/fixmyskills -g -s tanstack-start-conventions -a cursor claude-code -y`).
 
 ## 1. Monorepo
 
@@ -40,7 +40,7 @@ Route files define the `Route` (config, `beforeLoad`, `loader`, `head`, `compone
 
 ## 6. Server folder — conventions and .server
 
-**Single source of truth:** skill **`tanstack-start-conventions`** → [references/client-server-boundaries.md](../.agents/skills/tanstack-start-conventions/references/client-server-boundaries.md). It defines:
+**Single source of truth:** skill **`tanstack-start-conventions`** → [references/client-server-boundaries.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/client-server-boundaries.md). It defines:
 
 - **`.server.ts`** — server-only modules; never imported by routes or components. Use `createServerOnlyFn` for callables.
 - **`.functions.ts`** — files that export `createServerFn`, importable by routes/components.
@@ -48,7 +48,7 @@ Route files define the `Route` (config, `beforeLoad`, `loader`, `head`, `compone
 
 **Per-domain layout** (e.g. [app/src/server/notes/](../app/src/server/notes/)): we use **queries/** and **mutations/** subfolders with `.server.ts` files, plus optional `schemas.ts` and `<domain>.functions.ts` that re-export or compose server functions. Example: `notes` has [queries/getNotesAndCommentsForRegion.server.ts](../app/src/server/notes/queries/getNotesAndCommentsForRegion.server.ts), [mutations/createNote.server.ts](../app/src/server/notes/mutations/createNote.server.ts), and [notes.functions.ts](../app/src/server/notes/notes.functions.ts).
 
-For server/client boundaries and loaders, see **`tanstack-start-conventions`**. For React Query + loaders, see the same skill → [router-and-query.md](../.agents/skills/tanstack-start-conventions/references/router-and-query.md).
+For server/client boundaries and loaders, see **`tanstack-start-conventions`**. For React Query + loaders, see the same skill → [router-and-query.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/router-and-query.md).
 
 ## 7. SSR and client boundaries (TanStack Start)
 
@@ -77,13 +77,13 @@ For server/client boundaries and loaders, see **`tanstack-start-conventions`**. 
 
 ## Related docs
 
-| Topic                                              | Where                                                                                                                                             |
-| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Router loaders + React Query                       | `tanstack-start-conventions` → [router-and-query.md](../.agents/skills/tanstack-start-conventions/references/router-and-query.md)                 |
-| Server/client boundaries, .server, loaders, errors | `tanstack-start-conventions` → [client-server-boundaries.md](../.agents/skills/tanstack-start-conventions/references/client-server-boundaries.md) |
-| Selective SSR                                      | `tanstack-start-conventions` → [selective-ssr.md](../.agents/skills/tanstack-start-conventions/references/selective-ssr.md)                       |
-| UI vs API params/search                            | `tanstack-start-conventions` → [params-search-ui-vs-api.md](../.agents/skills/tanstack-start-conventions/references/params-search-ui-vs-api.md)   |
-| Auth and route protection                          | `tanstack-start-auth` → [auth.md](../.agents/skills/tanstack-start-auth/references/auth.md)                                                       |
-| Portable app folder layout                         | `tanstack-start-app-structure` → [SKILL.md](../.agents/skills/tanstack-start-app-structure/SKILL.md)                                              |
-| Zustand patterns                                   | [zustand-state-management](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/zustand-state-management/SKILL.md)                         |
-| URL search (`validateSearch`)                      | `tanstack-start-conventions` → [params-search-ui-vs-api.md](../.agents/skills/tanstack-start-conventions/references/params-search-ui-vs-api.md)   |
+| Topic                                              | Where                                                                                                                                                                                       |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Router loaders + React Query                       | `tanstack-start-conventions` → [router-and-query.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/router-and-query.md)                 |
+| Server/client boundaries, .server, loaders, errors | `tanstack-start-conventions` → [client-server-boundaries.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/client-server-boundaries.md) |
+| Selective SSR                                      | `tanstack-start-conventions` → [selective-ssr.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/selective-ssr.md)                       |
+| UI vs API params/search                            | `tanstack-start-conventions` → [params-search-ui-vs-api.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/params-search-ui-vs-api.md)   |
+| Auth and route protection                          | `tanstack-start-auth` → [auth.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-auth/references/auth.md)                                                       |
+| Portable app folder layout                         | `tanstack-start-conventions` → [app-structure.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/app-structure.md)                       |
+| Zustand patterns                                   | [zustand-state-management](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/zustand-state-management/SKILL.md)                                                                   |
+| URL search (`validateSearch`)                      | `tanstack-start-conventions` → [params-search-ui-vs-api.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/params-search-ui-vs-api.md)   |

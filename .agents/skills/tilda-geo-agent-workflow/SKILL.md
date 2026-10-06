@@ -200,7 +200,7 @@ If a task needs to edit static dataset files, create a `tilda-static-data` workt
 
 **Prerequisite:** `bun run dev` running at **http://127.0.0.1:5173** (use `127.0.0.1`, not `localhost`).
 
-Use **agent-browser MCP** (`agent_browser_open` -> `agent_browser_snapshot` -> click/fill -> `agent_browser_console` / screenshots). Setup: [agent-browser-mcp.md](../../../.agents/skills/tech-stack/references/agent-browser-mcp.md).
+Use **agent-browser MCP** (`agent_browser_open` -> `agent_browser_snapshot` -> click/fill -> `agent_browser_console` / screenshots). Setup: [agent-browser-mcp.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tech-stack/references/agent-browser-mcp.md).
 
 **Playwright** (`bun run e2e`) is for committed regression tests, not interactive agent debugging.
 
@@ -208,7 +208,7 @@ Use **agent-browser MCP** (`agent_browser_open` -> `agent_browser_snapshot` -> c
 
 In dev and Playwright mode, `onLoad` exposes the MapLibre instance as `window.__mainMap` so agents and tests can inspect runtime map state via `agent_browser_eval` or Playwright `page.evaluate`.
 
-Wiring: skill `react-map-gl` → [map-debug-exposure.md](../../../.agents/skills/react-map-gl/references/map-debug-exposure.md). In `RegionMap.tsx`, `handleLoad` calls `exposeMainMapForDebugging(event.target)` — inside Map handlers, **`event.target` is the MapLibre map**; use it directly, not `useMap()` / `getMap()`.
+Wiring: skill `react-map-gl` → [map-debug-exposure.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/react-map-gl/references/map-debug-exposure.md). In `RegionMap.tsx`, `handleLoad` calls `exposeMainMapForDebugging(event.target)` — inside Map handlers, **`event.target` is the MapLibre map**; use it directly, not `useMap()` / `getMap()`.
 
 ```js
 window.__mainMap?.getZoom()
@@ -283,11 +283,11 @@ For adding datasets, follow skill `add-static-dataset`, but perform file edits i
 
 ### Finishing work
 
-Load [finish-work](../../../.claude/skills/finish-work/SKILL.md) when wrapping up. It covers `bun run check` (includes advisory knip), lint/format staging, and commit messages. **Default: commit** with a user-facing message; draft only when the user clearly did not want a commit ("don't commit", "draft only", review-only turns, etc.).
+Load [finish-work](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/finish-work/SKILL.md) when wrapping up. It covers `bun run check` (includes advisory knip), lint/format staging, and commit messages. **Default: commit** with a user-facing message; draft only when the user clearly did not want a commit ("don't commit", "draft only", review-only turns, etc.).
 
 ### Large multi-step tasks (orchestration)
 
-For multi-file features or parallel work, pick a premium orchestrator (Fable 5, Sonnet 5, or GPT-5.6 Sol) with **`@orchestrator-worker`** and Composer subagents (`/implementer`, `/verifier`). See [cursor-ide.md](../../../.agents/skills/agent-orchestration/references/cursor-ide.md). Skip for trivial one-file edits.
+For multi-file features or parallel work, pick a premium orchestrator (Fable 5, Sonnet 5, or GPT-5.6 Sol) with **`@orchestrator-worker`** and Composer subagents (`/implementer`, `/verifier`). See [cursor-ide.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/agent-orchestration/references/cursor-ide.md). Skip for trivial one-file edits.
 
 ### Command locations (common mistakes)
 
@@ -318,7 +318,7 @@ For multi-file features or parallel work, pick a premium orchestrator (Fable 5, 
 - [ ] Processing change? -> load [test-processing-diff](../test-processing-diff/SKILL.md)
 - [ ] Static dataset change? -> worktree `tilda-static-data`, relink `geojson`, then load [add-static-dataset](../add-static-dataset/SKILL.md)
 - [ ] Map/UI bug? -> use agent-browser MCP; inspect `window.__mainMap` when available
-- [ ] Large multi-step task? -> premium orchestrator + `@orchestrator-worker` (see [cursor-ide](../../../.agents/skills/agent-orchestration/references/cursor-ide.md))
+- [ ] Large multi-step task? -> premium orchestrator + `@orchestrator-worker` (see [cursor-ide](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/agent-orchestration/references/cursor-ide.md))
 - [ ] Private experiment? -> load [tilda-geo-private-repo](../tilda-geo-private-repo/SKILL.md)
-- [ ] Done? -> load [finish-work](../../../.claude/skills/finish-work/SKILL.md)
+- [ ] Done? -> load [finish-work](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/finish-work/SKILL.md)
 ```

@@ -28,7 +28,7 @@ One-off commands run directly — use kebab-case, no colon:
 | `check-ci`       | Read-only CI — `type-check lint-check format-check test-run`         |
 | `check-pre-push` | husky — `type-check-deploy lint format test-run knip build`          |
 
-Full scaffold: `.agents/skills/tech-stack/references/package-json-scripts.md`.
+Full scaffold: `https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tech-stack/references/package-json-scripts.md`.
 
 ## Prefer sequential groups over `&&`
 

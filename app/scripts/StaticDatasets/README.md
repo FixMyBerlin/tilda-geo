@@ -61,7 +61,7 @@ Use `--keep-tmp` to keep the files for debugging.
 - `bun run check` / `lint` runs `lint:static-datasets-code` — same two paths; `lint:main` alone skips gitignored `geojson/` like `oxlint .` does.
 - `format:main` / `format-check` walk the repo root with `oxfmt.config.mjs`, which ignores all of `scripts/StaticDatasets/geojson/**` (symlinked `tilda-static-data` repo).
 - GeoJSON / JSON data files: editor format-on-save or `format-static-datasets-geojson` with explicit paths. Named for geojson, but any passed file under `StaticDatasets` formats (e.g. a stray `.ts` is fine).
-- Agents adding datasets: `bun run format-static-datasets-geojson -- scripts/StaticDatasets/geojson/<group>/<dataset>/*.{geojson,json}` (see [add-static-dataset skill](../../../.cursor/skills/add-static-dataset/SKILL.md)).
+- Agents adding datasets: `bun run format-static-datasets-geojson -- scripts/StaticDatasets/geojson/<group>/<dataset>/*.{geojson,json}` (see [add-static-dataset skill](../../../.agents/skills/add-static-dataset/SKILL.md)).
 
 ## Delete existing database entries
 
