@@ -91,9 +91,6 @@ export const sourcesParkingLars: MapDataSource<SourcesParkingLarsId>[] = [
       enabled: true,
       sumKeys: { capacity: 'Stellplätze' },
       groupByKeys: ['parking'],
-      queryLayers: [
-        'source:lars_parking_points--subcat:parkingPoints--style:default--layer:circle',
-      ],
       highlightingKey: 'id',
     },
   },

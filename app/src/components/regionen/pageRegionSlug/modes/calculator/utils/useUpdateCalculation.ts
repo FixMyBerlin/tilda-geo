@@ -4,19 +4,15 @@ import type { LngLatLike } from 'maplibre-gl'
 import { useMap } from 'react-map-gl/maplibre'
 import type { StoreCalculator } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
-import type { MapDataSourceCalculator } from '@/components/regionen/pageRegionSlug/mapData/types'
 import type { DrawArea } from '../drawing/drawAreaTypes'
 
 export const useUpdateCalculation = () => {
   const { mainMap } = useMap()
   const { updateCalculatorAreasWithFeatures } = useMapActions()
 
-  // We store the Calculator Shapes as URL State `draw`
+  // We store the Calculator Shapes as URL State `sum.areas`
   // and read from there to do the calculation
-  const updateCalculation = (
-    queryLayers: MapDataSourceCalculator['queryLayers'],
-    drawParam: DrawArea[] | null,
-  ) => {
+  const updateCalculation = (queryLayers: string[], drawParam: DrawArea[] | null) => {
     // Usually we would check `mapLoaded` here because we cannot trust `mainMap` be ready for all calls
     // However, for some very weird reason this is false when used in here even when true inside the <Map>.
     if (!mainMap) return

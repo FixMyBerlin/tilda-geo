@@ -12,6 +12,7 @@ const { useCurrentMode, useListHoverMarkerPosition, currentModeFlags } = vi.hois
     isNotes: mode === 'notes',
     isQa: mode === 'qa',
     isReviewLists: mode === 'reviewLists',
+    isCalculator: mode === 'calculator',
   })
   return {
     currentModeFlags,

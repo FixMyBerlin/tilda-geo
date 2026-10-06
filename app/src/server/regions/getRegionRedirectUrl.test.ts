@@ -1,5 +1,6 @@
 import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { createFreshCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/createFreshCategoriesConfig'
+import { migrations } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/migrations'
 import type {
   MapDataCategoryConfig,
   MapDataCategoryParam,
@@ -95,6 +96,17 @@ vi.mock('@/server/regions/regionConfigTemplates.server', () => ({
     if (checksum === calcConfigChecksum(freshConfig)) {
       return simplifyConfigForParams(freshConfig)
     }
+    const { templateWithLegacyCalculatorSubcategories } =
+      await import('@/server/regions/migrateLegacyCalculatorSubcategories.server')
+    const legacyTemplate = templateWithLegacyCalculatorSubcategories(
+      simplifyConfigForParams(freshConfig),
+    )
+    if (
+      legacyTemplate &&
+      checksum === calcConfigChecksum(legacyTemplate as MapDataCategoryConfig[])
+    ) {
+      return legacyTemplate
+    }
     return mockGetRegionConfigTemplate(checksum)
   },
 }))
@@ -154,6 +166,8 @@ function parseCategoryFromResponse(
   return category
 }
 
+const currentUrlVersion = Math.max(...Object.keys(migrations).map(Number))
+
 describe('getRegionRedirectUrl()', () => {
   test('handles path-only URLs (e.g. from TanStack Router location.href)', async () => {
     const pathOnlyUrl = '/regionen/parkraum?map=13.5/52.4918/13.4261'
@@ -196,6 +210,84 @@ describe('getRegionRedirectUrl()', () => {
       const url = 'http://127.0.0.1:5173/regionen/unkownRegion'
       const redirectUrl = await redirectOnly(url, extractSlugFromUrl(url))
       expect(redirectUrl).toBe(null)
+    })
+  })
+
+  describe('Calculator: links with an old "Summieren: …" layer on open the Summieren mode', () => {
+    // `config` values were serialized before the subcategories left the categories, with the
+    // region's categories (`dgp49i`: parkingTilda + roads, `7yzzp6`: parkingLars).
+    const street = 'dgp49i.4qfrqd.8'
+    const offStreet = 'dgp49i.4r28th.8'
+    const untouched = 'dgp49i.4ptan8.8'
+
+    test('street parking on → /summieren with the default dataset and the drawn areas', async () => {
+      const draw =
+        '!(type~Feature~id~e5233090~geometry~(type~Polygon~coordinates~!!!13.4~52.5~~!13.41~52.5~~!13.41~52.51~~!13.4~52.5)properties~())~'
+      const url = `http://127.0.0.1:5173/regionen/parkraum-berlin-euvm?v=3&config=${street}&draw=${encodeURIComponent(draw)}`
+      const redirectUrl = await redirectOnly(url, 'parkraum-berlin-euvm')
+      const resultUrl = getUrl(redirectUrl)
+      expect(resultUrl.pathname).toBe('/regionen/parkraum-berlin-euvm/summieren')
+      expect(resultUrl.searchParams.has('draw')).toBe(false)
+      expect(JSON.parse(resultUrl.searchParams.get('sum')!)).toEqual({
+        areas: {
+          type: 'Polygon',
+          coordinates: [
+            [
+              [13.4, 52.5],
+              [13.41, 52.5],
+              [13.41, 52.51],
+              [13.4, 52.5],
+            ],
+          ],
+        },
+      })
+      // The link was decoded, not reset: the category that was switched on stays on.
+      expect(
+        parseCategoryFromResponse(
+          redirectUrl,
+          currentChecksum('parkraum-berlin-euvm'),
+          'parkingTilda',
+        ).active,
+      ).toBe(true)
+      expect(await redirectOnly(redirectUrl!, 'parkraum-berlin-euvm')).toBe(null)
+    })
+
+    test('off-street parking on → /summieren with that dataset', async () => {
+      const url = `http://127.0.0.1:5173/regionen/parkraum-berlin-euvm?v=3&config=${offStreet}`
+      const redirectUrl = await redirectOnly(url, 'parkraum-berlin-euvm')
+      const resultUrl = getUrl(redirectUrl)
+      expect(resultUrl.pathname).toBe('/regionen/parkraum-berlin-euvm/summieren')
+      expect(JSON.parse(resultUrl.searchParams.get('sum')!)).toEqual({
+        key: 'tilda_parkings_off_street_quantized',
+      })
+      expect(await redirectOnly(redirectUrl!, 'parkraum-berlin-euvm')).toBe(null)
+    })
+
+    test('"Parkplätze zählen" on → /summieren', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/parkraum?v=3&config=7yzzp6.2nkg5'
+      const resultUrl = getUrl(await redirectOnly(url, 'parkraum'))
+      expect(resultUrl.pathname).toBe('/regionen/parkraum/summieren')
+      expect(resultUrl.searchParams.has('sum')).toBe(false)
+    })
+
+    test('another mode path is kept', async () => {
+      const url = 'http://127.0.0.1:5173/regionen/parkraum/hinweise?v=3&config=7yzzp6.2nkg5'
+      const resultUrl = getUrl(await redirectOnly(url, 'parkraum'))
+      expect(resultUrl.pathname).toBe('/regionen/parkraum/hinweise')
+    })
+
+    test('a link of the current version is not read for old layers', async () => {
+      const url = `http://127.0.0.1:5173/regionen/parkraum-berlin-euvm?v=${currentUrlVersion}&config=${street}`
+      const resultUrl = getUrl(await redirectOnly(url, 'parkraum-berlin-euvm'))
+      expect(resultUrl.pathname).toBe('/regionen/parkraum-berlin-euvm')
+    })
+
+    test('layer off → stays on the map, and the old config is still decoded', async () => {
+      const url = `http://127.0.0.1:5173/regionen/parkraum-berlin-euvm?v=3&config=${untouched}`
+      const resultUrl = getUrl(await redirectOnly(url, 'parkraum-berlin-euvm'))
+      expect(resultUrl.pathname).toBe('/regionen/parkraum-berlin-euvm')
+      expect(resultUrl.searchParams.has('sum')).toBe(false)
+      expect(mockGetRegionConfigTemplate).not.toHaveBeenCalled()
     })
   })
 
@@ -257,7 +349,7 @@ describe('getRegionRedirectUrl()', () => {
       expect(JSON.parse(resultUrl.searchParams.get('qa')!)).toEqual({
         key: 'euvm-parkraum-2026',
       })
-      expect(resultUrl.searchParams.get('v')).toBe('3')
+      expect(resultUrl.searchParams.get('v')).toBe(String(currentUrlVersion))
       expect(resultUrl.searchParams.get('map')).toBe('13/52.4675/13.4419')
       expect(await redirectOnly(redirectUrl!, 'parkraum-berlin-euvm')).toBe(null)
     })
@@ -372,7 +464,7 @@ describe('getRegionRedirectUrl()', () => {
       expect(params.has('atlasNote')).toBe(false)
       expect(params.has('atlasNotesFilter')).toBe(false)
       expect(params.has('osmNotesFilter')).toBe(false)
-      expect(params.get('v')).toBe('3')
+      expect(params.get('v')).toBe(String(currentUrlVersion))
     })
 
     test('a v3 URL with notes JSON is stable (no redirect loop)', async () => {
@@ -572,7 +664,7 @@ describe('getRegionRedirectUrl()', () => {
       expect(redirectUrl).toBeTruthy()
       const resultUrl = getUrl(redirectUrl)
 
-      expect(resultUrl.searchParams.get('v')).toBe('3')
+      expect(resultUrl.searchParams.get('v')).toBe(String(currentUrlVersion))
       expect(resultUrl.searchParams.get('config')).toBe('1s8ehxg.ivb7ah.3mhc')
     })
 
@@ -583,7 +675,7 @@ describe('getRegionRedirectUrl()', () => {
       expect(redirectUrl).toBeTruthy()
       const resultUrl = getUrl(redirectUrl)
 
-      expect(resultUrl.searchParams.get('v')).toBe('3')
+      expect(resultUrl.searchParams.get('v')).toBe(String(currentUrlVersion))
 
       const parkingTildaCategory = parseCategoryFromResponse(redirectUrl, '', 'parkingTilda')
       expect(parkingTildaCategory.active).toBe(true)

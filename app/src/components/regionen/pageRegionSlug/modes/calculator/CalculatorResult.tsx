@@ -7,16 +7,16 @@ import {
   useMapBounds,
   useMapCalculatorAreasWithFeatures,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
-import { useDrawSession } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useDrawSession'
-import type { MapDataSourceCalculator } from '@/components/regionen/pageRegionSlug/mapData/types'
+import { useCalculatorAreas } from '@/components/regionen/pageRegionSlug/modes/calculator/useCalculatorAreas'
 import { translations } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/translations.const'
-import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
+import { modePanelMutedClassName } from '../modePanel.const'
 import {
   CalculatorBreakdown,
   type CalculatorBreakdownData,
   type CalculatorDisplayMode,
 } from './CalculatorBreakdown'
-import { CalculatorMobileSummary } from './CalculatorMobileSummary'
+import type { CalculatorFilter } from './calculatorModeParam'
+import type { useCalculatorDatasets } from './useCalculatorDatasets'
 import {
   calculateMetricSummaryForAreas,
   calculatorMetricOrder,
@@ -25,11 +25,9 @@ import { isDrawAreaFullyInViewport } from './utils/isDrawAreaFullyInViewport'
 import { useUpdateCalculation } from './utils/useUpdateCalculation'
 
 type Props = {
-  sumKeys: MapDataSourceCalculator['sumKeys']
-  sourceId?: string
-  groupByKeys: MapDataSourceCalculator['groupByKeys']
-  queryLayers: MapDataSourceCalculator['queryLayers']
-  subcategoryName?: string
+  dataset: NonNullable<ReturnType<typeof useCalculatorDatasets>['activeDataset']>
+  filter: CalculatorFilter
+  onToggleFilter: (key: string, value: string) => void
 }
 
 const numberFormatter = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 })
@@ -40,45 +38,29 @@ const percentFormatter = new Intl.NumberFormat('de-DE', {
 })
 
 /**
- * Calculator output: computes the per-area metric summary, then renders it either as the
- * desktop inline panel or — on mobile — as a compact total pill that opens the breakdown in
- * a bottom sheet. The table itself lives in <CalculatorBreakdown>; the mobile pill + sheet
- * in <CalculatorMobileSummary>.
+ * Body of the Summieren panel: computes the per-area metric summary from the features that
+ * `CalculatorMap` collected and renders it with <CalculatorBreakdown>.
  */
-export const CalculatorOutput = ({
-  sumKeys,
-  sourceId,
-  groupByKeys,
-  queryLayers,
-  subcategoryName,
-}: Props) => {
+export const CalculatorResult = ({ dataset, filter, onToggleFilter }: Props) => {
+  const { sumKeys, groupByKeys, queryLayers, sourceId } = dataset
   const { mainMap } = useMap()
   const calculatorAreasWithFeatures = useMapCalculatorAreasWithFeatures()
   const mapBounds = useMapBounds()
-  const displayName = subcategoryName?.replace(/^Summieren: /, '')
 
-  const { drawAreas, setDrawAreas } = useDrawSession()
+  const { drawAreas, setDrawAreas } = useCalculatorAreas()
   const { updateCalculation } = useUpdateCalculation()
   const [preferredMetric, setPreferredMetric] = useState<
     (typeof calculatorMetricOrder)[number] | null
   >(null)
   const [displayMode, setDisplayMode] = useState<CalculatorDisplayMode>('value')
-  const isDesktop = useBreakpoint('sm')
 
-  const configuredMetrics = new Set(
-    (sumKeys ? Object.keys(sumKeys) : []).map(
-      (metric) => metric as (typeof calculatorMetricOrder)[number],
-    ),
-  )
-  const orderedConfiguredMetrics = calculatorMetricOrder.filter((metric) =>
-    configuredMetrics.has(metric),
-  )
+  const orderedConfiguredMetrics = calculatorMetricOrder.filter((metric) => metric in sumKeys)
 
   const selectedMetric =
     preferredMetric && orderedConfiguredMetrics.includes(preferredMetric)
       ? preferredMetric
       : (orderedConfiguredMetrics[0] ?? null)
-  const selectedMetricLabel = selectedMetric ? (sumKeys?.[selectedMetric] ?? 'Anzahl') : 'Anzahl'
+  const selectedMetricLabel = selectedMetric ? (sumKeys[selectedMetric] ?? 'Anzahl') : 'Anzahl'
   const formatMetricValue = (sum: number, ratio: number) =>
     displayMode === 'percent' ? percentFormatter.format(ratio) : numberFormatter.format(sum)
 
@@ -86,7 +68,8 @@ export const CalculatorOutput = ({
     ? calculateMetricSummaryForAreas({
         areas: calculatorAreasWithFeatures,
         metric: selectedMetric,
-        groupByKeys: groupByKeys ?? [],
+        groupByKeys,
+        filter,
       })
     : null
 
@@ -105,19 +88,28 @@ export const CalculatorOutput = ({
     if (!mainMap || drawAreas.length === 0) return
 
     const [minLng, minLat, maxLng, maxLat] = bbox(featureCollection(drawAreas))
+    // The camera padding of the mode panel is already set on the map (`modeMapCameraPadding`).
     mainMap.fitBounds(
       [
         [minLng, minLat],
         [maxLng, maxLat],
       ],
-      { duration: 900, padding: { top: 110, right: 40, bottom: 40, left: 320 } },
+      { duration: 900, padding: 60 },
     )
   }
 
-  const hasAreas = calculatorAreasWithFeatures.length > 0
+  // Before the first area the drawing toolbar shows a hint on the map as well.
+  if (drawAreas.length === 0 || calculatorAreasWithFeatures.length === 0) {
+    return (
+      <p className={`px-4 py-3 ${modePanelMutedClassName}`}>
+        {drawAreas.length === 0
+          ? 'Zeichnen Sie eine Fläche auf der Karte. Die Werte in der Fläche werden hier summiert.'
+          : 'Die Werte werden summiert …'}
+      </p>
+    )
+  }
 
   const breakdownData: CalculatorBreakdownData = {
-    displayName,
     sumKeys,
     sourceId,
     metrics: orderedConfiguredMetrics,
@@ -130,38 +122,15 @@ export const CalculatorOutput = ({
     onSetDisplayMode: setDisplayMode,
     onShowArea: handleShowArea,
     onDeleteArea: handleDelete,
+    filter,
+    onToggleFilter,
     formatNumber: (value) => numberFormatter.format(value),
     formatMetricValue,
   }
-  // Before the first area the drawing toolbar shows a hint on the map instead.
-  if (!hasAreas) return null
-
-  const breakdown = <CalculatorBreakdown data={breakdownData} />
-
-  // Headline for the mobile pill: combined across areas, else the single area's total.
-  const total = summary
-    ? summary.byArea.length > 1
-      ? summary.combined.total
-      : (summary.byArea[0]?.summary.total ?? 0)
-    : null
 
   return (
     <IntlProvider messages={translations} locale="de" defaultLocale="de">
-      {isDesktop ? (
-        // Desktop: inline panel next to the sidebar.
-        <section className="absolute top-14.5 left-67.5 z-1000 flex max-w-65 min-w-0 rounded-md bg-fuchsia-800/90 px-2 py-2 text-white shadow-xl">
-          {breakdown}
-        </section>
-      ) : (
-        // Mobile: compact total pill that opens the breakdown in a bottom sheet.
-        <CalculatorMobileSummary
-          label={selectedMetricLabel}
-          total={total}
-          formatTotal={(value) => numberFormatter.format(value)}
-        >
-          {breakdown}
-        </CalculatorMobileSummary>
-      )}
+      <CalculatorBreakdown data={breakdownData} />
     </IntlProvider>
   )
 }

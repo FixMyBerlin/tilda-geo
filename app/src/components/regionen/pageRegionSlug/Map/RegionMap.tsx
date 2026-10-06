@@ -15,7 +15,6 @@ import type {
 import { AttributionControl, Map as MapGl, useMap } from 'react-map-gl/maplibre'
 import {
   useMapActions,
-  useMapCalculatorDrawActive,
   useMapInspectorFeatures,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useBg3dParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBg3dParam'
@@ -35,6 +34,8 @@ import {
 } from '@/components/shared/utils/playwright'
 import { MAP_STYLE_URL } from '@/server/api/map-style/mapStyleUrl.const'
 import { SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
+import { CalculatorMap } from '../modes/calculator/CalculatorMap'
+import { useCalculatorDraw } from '../modes/calculator/drawing/useCalculatorDraw'
 import { useModeListActions } from '../modes/mode-list-store'
 import { ModeListHoverEdgeMarker } from '../modes/ModeListHoverEdgeMarker'
 import { listItemIdFromMapFeatures } from '../modes/modeListItemId'
@@ -50,8 +51,6 @@ import {
   isStreetImageryFeature,
 } from '../streetImagery/streetImageryClick'
 import { useStreetImageryParam } from '../streetImagery/useStreetImageryParam'
-import { Calculator } from './Calculator/Calculator'
-import { useCalculatorDraw } from './Calculator/drawing/useCalculatorDraw'
 import { Map3dTouchRotation } from './Map3dTouchRotation'
 import { SearchResultLayers } from './Search/SearchResultLayers'
 import { MAPTERHORN_DEM_SOURCE_ID } from './SourcesAndLayers/mapterhornDem'
@@ -118,7 +117,6 @@ export const RegionMap = () => {
   }
 
   const inspectorFeatures = useMapInspectorFeatures()
-  const calculatorDrawActive = useMapCalculatorDrawActive()
   const calculatorDraw = useCalculatorDraw()
   const { draw: reviewDraw } = useReviewDraw()
   const notesComposeActive = useNotesComposeActive()
@@ -279,13 +277,13 @@ export const RegionMap = () => {
     updateMapBounds(mainMap?.getBounds() || null)
   }
 
-  // While the calculator draw tool or notes compose is active, no layers are interactive:
+  // In the Summieren mode, or while notes compose or review drawing is active, no layers are interactive:
   // clicking/hovering the data does nothing and the inspector can't open
   // (queryRenderedFeatures returns none). This replaces a special-case guard in the click
   // handler with the map's own interactivity mechanism.
   const computedInteractiveLayerIds = useInteractiveLayers()
   const interactiveLayerIds =
-    calculatorDrawActive || notesComposeActive || reviewDrawActive
+    currentMode.isCalculator || notesComposeActive || reviewDrawActive
       ? NO_INTERACTIVE_LAYERS
       : [
           ...computedInteractiveLayerIds,
@@ -372,7 +370,7 @@ export const RegionMap = () => {
       <ModeListHoverEdgeMarker />
       <AttributionControl compact={true} position="bottom-left" />
       <Map3dTouchRotation />
-      <Calculator />
+      {currentMode.isCalculator && <CalculatorMap />}
       {currentMode.isReviewLists && <ReviewMapDrawing />}
       {/* <GeolocateControl /> */}
       {/* <ScaleControl /> */}

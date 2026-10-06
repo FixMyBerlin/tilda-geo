@@ -7,8 +7,9 @@ const isBlockedCallbackPathname = (pathname: string) => {
 
 /**
  * Better Auth only accepts a fixed set of characters in a relative `callbackURL`. Our search
- * params use more: `[`/`]` (legacy `data=[]`), commas, and `*` in `draw=` ids, which
- * `URLSearchParams` leaves as it is.
+ * params use more: `[`/`]` (legacy `data=[]`), commas, and `*`, which
+ * `URLSearchParams` leaves as it is (e.g. in a list search like `notes.search`; old jsurl
+ * params such as `draw=` held it too).
  */
 const encodeSearchForAuthAllowlist = (search: string) =>
   new URLSearchParams(search).toString().replaceAll('*', '%2A')

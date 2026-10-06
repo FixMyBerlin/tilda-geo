@@ -42,10 +42,10 @@ export function CalculatorDrawingToolbar({
 
   return (
     <>
-      {/* Below the floating header buttons on mobile (icon-only to fit); next to the
-          desktop sidebar (with labels) on ≥ sm. */}
+      {/* Top center like the Prüflisten drawing toolbar. Below the floating header buttons on
+          mobile (icon-only to fit); with labels on ≥ sm. */}
       <div
-        className="pointer-events-auto absolute top-14 left-2 isolate z-1000 inline-flex rounded-md shadow-xs sm:top-2.5 sm:left-67.5"
+        className="pointer-events-auto absolute top-14 left-1/2 isolate z-1000 inline-flex -translate-x-1/2 rounded-md shadow-xs sm:top-2.5"
         role="group"
         aria-label="Fläche zeichnen"
       >

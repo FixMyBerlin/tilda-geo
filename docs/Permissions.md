@@ -91,7 +91,7 @@ Tests: `checkApiKey.server.test.ts` (`ATLAS_API_KEY`, incl. the development skip
 | Data                      | Read                                                                                                                                                  | Change                |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
 | Categories (map layers)   | Follows region access. No per-category access                                                                                                         | Admin (region config) |
-| Calculator ("Summieren")  | Shown whenever its category is active. No extra check                                                                                                 | n/a                   |
+| Calculator ("Summieren")  | Its own mode, see below. Offered when the region has a category with a dataset to sum                                                                 | n/a                   |
 | Static datasets / uploads | `public` flag per upload. Non-public files need member/admin, checked on the file route (`api/uploads.$slug.ts`). Non-public entries show a lock icon | Admin                 |
 | Exports                   | Region config decides **which** tables. Downloading **always** needs member/admin (or `ATLAS_API_KEY`), also on PUBLIC regions                        | Admin (region config) |
 
@@ -101,14 +101,15 @@ Tests: `docs-region-downloads.spec.ts` (export: guest denied on PUBLIC, admin al
 
 The mode routes (`app/src/routes/regionen/$regionSlug/*.tsx`) first require region access (parent layout), then redirect non-members of member-only modes to `/access-denied`. Navigation buttons follow `deriveAvailableModes` and `isMemberOnlyMode` in `availableModes.ts`. The server functions below enforce the same rules on their own.
 
-| Mode                        | Opens for                                                                      | Shown in navigation when                                                           |
-| --------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
-| Map (default)               | Everyone with region access                                                    | Always                                                                             |
-| Hinweise (`/hinweise`)      | Region access. Member-only when the region has internal notes and no OSM notes | Region has OSM or internal notes enabled. Otherwise the route redirects to the map |
-| Qualitätssicherung (`/qa`)  | Members and admins                                                             | Member/admin and at least one QA config                                            |
-| Prüflisten (`/prueflisten`) | Members and admins                                                             | Member/admin (also before the first list exists)                                   |
+| Mode                        | Opens for                                                                      | Shown in navigation when                                                              |
+| --------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
+| Map (default)               | Everyone with region access                                                    | Always                                                                                |
+| Hinweise (`/hinweise`)      | Region access. Member-only when the region has internal notes and no OSM notes | Region has OSM or internal notes enabled. Otherwise the route redirects to the map    |
+| Qualitätssicherung (`/qa`)  | Members and admins                                                             | Member/admin and at least one QA config                                               |
+| Prüflisten (`/prueflisten`) | Members and admins                                                             | Member/admin (also before the first list exists)                                      |
+| Summieren (`/summieren`)    | Everyone with region access. Nothing is stored; areas and dataset are URL only | Region has a category with a dataset to sum. Otherwise the route redirects to the map |
 
-Tests: `availableModes.test.ts`, `app/tests/smoke/region-modes.spec.ts` (guests denied), `app/tests/pages/modes-access.stubbed-auth.spec.ts` (signed-in non-member denied, plain member allowed), `canAccessMemberModeForRegion.server.test.ts`.
+Tests: `availableModes.test.ts`, `app/tests/smoke/region-modes.spec.ts` (guests denied; Summieren open to guests), `app/tests/pages/modes-access.stubbed-auth.spec.ts` (signed-in non-member denied, plain member allowed), `canAccessMemberModeForRegion.server.test.ts`.
 
 ### Hinweise: OSM notes
 

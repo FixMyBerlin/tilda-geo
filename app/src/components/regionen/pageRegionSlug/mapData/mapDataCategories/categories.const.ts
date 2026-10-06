@@ -17,7 +17,6 @@ import { subcat_parkingLars } from '../mapDataSubcategories/subcat_parkingLars.c
 import { subcat_parkingLarsAreas } from '../mapDataSubcategories/subcat_parkingLarsAreas.const'
 import { subcat_parkingLarsBoundaries } from '../mapDataSubcategories/subcat_parkingLarsBoundaries.const'
 import { subcat_parkingLarsDebug } from '../mapDataSubcategories/subcat_parkingLarsDebug.const'
-import { subcat_parkingLarsPoints } from '../mapDataSubcategories/subcat_parkingLarsPoints.const'
 import { subcat_parkingLarsStats } from '../mapDataSubcategories/subcat_parkingLarsStats.const'
 import { subcat_poi } from '../mapDataSubcategories/subcat_poi.const'
 import { subcat_poi_boundaries } from '../mapDataSubcategories/subcat_poi_boundaries.const'
@@ -132,7 +131,6 @@ export const categories: StaticMapDataCategory[] = [
     desc: 'Parken im Straßenraum – Community-Prozessierung',
     subcategories: [
       { ...subcat_parkingLars, defaultStyle: 'default' },
-      { ...subcat_parkingLarsPoints, defaultStyle: 'hidden' },
       { ...subcat_parkingLarsAreas, defaultStyle: 'default' },
       { ...subcat_parkingLarsDebug, defaultStyle: 'hidden' },
       { ...subcat_parkingLarsStats, defaultStyle: 'hidden' },

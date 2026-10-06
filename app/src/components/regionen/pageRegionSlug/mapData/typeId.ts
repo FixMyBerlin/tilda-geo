@@ -79,10 +79,6 @@ import type {
   SubcatParkingLarsDebugStyleIds,
 } from './mapDataSubcategories/subcat_parkingLarsDebug.const'
 import type {
-  SubcatParkingLarsPointsId,
-  SubcatParkingLarsPointsStyleIds,
-} from './mapDataSubcategories/subcat_parkingLarsPoints.const'
-import type {
   SubcatParkingLarsStatsId,
   SubcatParkingLarsStatsStyleIds,
 } from './mapDataSubcategories/subcat_parkingLarsStats.const'
@@ -94,10 +90,6 @@ import type {
   SubcatParkingTildaOffStreetId,
   SubcatParkingTildaOffStreetStyleIds,
 } from './mapDataSubcategories/subcat_parkingTilda_offStreet_public.const'
-import type {
-  SubcatParkingTildaQuantizedOffStreetId,
-  SubcatParkingTildaQuantizedOffStreetStyleIds,
-} from './mapDataSubcategories/subcat_parkingTilda_offStreet_quantized.const'
 import type {
   SubcatParkingTildaCompletenessId,
   SubcatParkingTildaCompletenessStyleIds,
@@ -118,10 +110,6 @@ import type {
   SubcatParkingTildaId,
   SubcatParkingTildaStyleIds,
 } from './mapDataSubcategories/subcat_parkingTilda_street_public.const'
-import type {
-  SubcatParkingTildaQuantizedId,
-  SubcatParkingTildaQuantizedStyleIds,
-} from './mapDataSubcategories/subcat_parkingTilda_street_quantized.const'
 import type { SubcatPoiId, SubcatPoiStyleIds } from './mapDataSubcategories/subcat_poi.const'
 import type {
   SubcatPoiBoundariesId,
@@ -200,7 +188,6 @@ export type SubcategoryId =
   | SubcatParkingLarsBoundariesId
   | SubcatParkingLarsDebugId
   | SubcatParkingLarsId
-  | SubcatParkingLarsPointsId
   | SubcatParkingLarsStatsId
   | SubcatParkingTildaCutoutsId
   | SubcatParkingTildaId
@@ -209,8 +196,6 @@ export type SubcategoryId =
   | SubcatParkingTildaOffStreetId
   | SubcatParkingTildaOffStreetPrivateId
   | SubcatParkingTildaPrivateId
-  | SubcatParkingTildaQuantizedId
-  | SubcatParkingTildaQuantizedOffStreetId
   | SubcatPoiBoundariesId
   | SubcatPoiId
   | SubcatPoiPlacesId
@@ -254,7 +239,6 @@ export type StyleId =
   | SubcatParkingLarsAreasStyleIds
   | SubcatParkingLarsBoundariesStyleIds
   | SubcatParkingLarsDebugStyleIds
-  | SubcatParkingLarsPointsStyleIds
   | SubcatParkingLarsStatsStyleIds
   | SubcatParkingLarsStyleIds
   | SubcatParkingTildaCutoutsStyleIds
@@ -263,8 +247,6 @@ export type StyleId =
   | SubcatParkingTildaOffStreetStyleIds
   | SubcatParkingTildaOffStreetPrivateStyleIds
   | SubcatParkingTildaPrivateStyleIds
-  | SubcatParkingTildaQuantizedStyleIds
-  | SubcatParkingTildaQuantizedOffStreetStyleIds
   | SubcatParkingTildaStyleIds
   | SubcatPoiBoundariesStyleIds
   | SubcatPoiPlacesStyleIds

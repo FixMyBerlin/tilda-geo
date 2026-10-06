@@ -41,7 +41,7 @@ export type MapDataCategoryConfig = Omit<StaticMapDataCategory, 'subcategories'>
 }
 
 type MergeSubcategory = StaticMapDataCategory['subcategories'][number]
-export type MapDataSubcategoryConfig = Omit<MergeSubcategory, 'styles'> & {
+type MapDataSubcategoryConfig = Omit<MergeSubcategory, 'styles'> & {
   styles: MapDataSubcategoryStyleConfig[]
 }
 

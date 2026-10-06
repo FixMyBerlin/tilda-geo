@@ -87,7 +87,59 @@ describe('calculateMetricSummaryForAreas', () => {
     })
 
     expect(result.combined.groups[0]?.values).toEqual([
-      expect.objectContaining({ value: '(Ohne Angabe)', sum: 15 }),
+      expect.objectContaining({ value: '(Ohne Angabe)', filterValue: '', sum: 15 }),
     ])
+  })
+
+  test('a filter narrows the total, but a group keeps the other values of its own tag', () => {
+    const areas = [
+      {
+        key: 'a1',
+        features: [
+          createFeature({ capacity: 20, operator_type: 'public', parking: 'lane' }),
+          createFeature({ capacity: 10, operator_type: 'private', parking: 'lane' }),
+          createFeature({ capacity: 5, operator_type: 'private' }),
+        ],
+      },
+    ]
+
+    const result = calculateMetricSummaryForAreas({
+      areas,
+      metric: 'capacity',
+      groupByKeys: ['operator_type', 'parking'],
+      filter: { operator_type: 'private' },
+    }).combined
+
+    expect(result.total).toBe(15)
+    expect(result.groups.find((group) => group.key === 'operator_type')?.values).toEqual([
+      { value: 'public', filterValue: 'public', sum: 20, ratio: 20 / 35 },
+      { value: 'private', filterValue: 'private', sum: 15, ratio: 15 / 35 },
+    ])
+    expect(result.groups.find((group) => group.key === 'parking')?.values).toEqual([
+      { value: 'lane', filterValue: 'lane', sum: 10, ratio: 10 / 15 },
+      { value: '(Ohne Angabe)', filterValue: '', sum: 5, ratio: 5 / 15 },
+    ])
+  })
+
+  test('a filter on a missing value matches missing and blank tags', () => {
+    const areas = [
+      {
+        key: 'a1',
+        features: [
+          createFeature({ area: 10, surface: ' ' }),
+          createFeature({ area: 5 }),
+          createFeature({ area: 3, surface: 'asphalt' }),
+        ],
+      },
+    ]
+
+    const result = calculateMetricSummaryForAreas({
+      areas,
+      metric: 'area',
+      groupByKeys: ['surface'],
+      filter: { surface: '' },
+    })
+
+    expect(result.combined.total).toBe(15)
   })
 })

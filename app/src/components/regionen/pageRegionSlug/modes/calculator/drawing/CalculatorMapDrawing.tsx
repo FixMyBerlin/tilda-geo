@@ -2,7 +2,7 @@ import { DrawLayers } from '@osm-editor-kit/react-map-gl-draw'
 import { pointOnFeature } from '@turf/turf'
 import type { LayerProps } from 'react-map-gl/maplibre'
 import { Layer, Source } from 'react-map-gl/maplibre'
-import { useDrawSession } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useDrawSession'
+import { useCalculatorAreas } from '@/components/regionen/pageRegionSlug/modes/calculator/useCalculatorAreas'
 import { CalculatorDrawingToolbar } from './CalculatorDrawingToolbar'
 import { CALCULATOR_DRAW_COLORS, calculatorDrawStyles } from './calculatorDrawStyles'
 import type { DrawArea } from './drawAreaTypes'
@@ -16,7 +16,7 @@ type Props = {
 
 export function CalculatorMapDrawing({ areas, getFeatureLabel }: Props) {
   const draw = useCalculatorDraw()
-  const { drawAreas, setDrawAreas } = useDrawSession()
+  const { drawAreas, setDrawAreas } = useCalculatorAreas()
 
   const labelFeatures = areas.flatMap((area, index) => {
     const label = getFeatureLabel?.({ area, index })

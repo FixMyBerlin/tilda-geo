@@ -16,10 +16,11 @@ The loader redirect is intentional: client-only param changes (panning, toggling
 
 ## Version param `v`
 
-- Current version: **2** (see [`migrations/`](./migrations/)).
+- Current version: **4** (see [`migrations/`](./migrations/)).
 - Missing `v` is treated as **0** and migrations run up to the current version.
 - After migration, `v` is set to the current version.
 - Migrations can touch any registered search param (e.g. v1 renames old `config` ids and merges `lat`/`lng`/`zoom` into `map`).
+- A migration that needs the **decoded** `config` cannot run there (the template lookup is async). Its numbered migration only covers the plain params (v4: `draw` → `sum.areas`); the config part is [`migrateRemovedConfigEntries.server.ts`](../../../../../../server/regions/migrateRemovedConfigEntries.server.ts), which `getRegionRedirectUrl` only calls for links older than that version (Mapillary category → `photos`, calculator subcategories → Summieren mode).
 
 Registry completeness is tested in [`migrations/index.test.ts`](./migrations/index.test.ts).
 

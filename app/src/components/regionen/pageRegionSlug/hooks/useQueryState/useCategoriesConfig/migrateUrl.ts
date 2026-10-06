@@ -3,7 +3,8 @@ import type { UrlMigrationContext } from './migrations/types'
 
 const currentVersion = Math.max(...Object.keys(migrations).map((key) => Number(key)))
 
-function getVersion(url: string) {
+/** The migration version a link was written with (`v`); 0 without one. */
+export function urlMigrationVersion(url: string) {
   const v = new URL(url).searchParams.get('v')
   if (v === null) return 0
   const version = Number(v)
@@ -13,7 +14,7 @@ function getVersion(url: string) {
 }
 
 export function migrateUrl(url: string, ctx: UrlMigrationContext) {
-  const searchParamsVersion = getVersion(url)
+  const searchParamsVersion = urlMigrationVersion(url)
   let migratedUrl = url
   for (let v = searchParamsVersion + 1; v <= currentVersion; v++) {
     const migrate = migrations[v as keyof typeof migrations]

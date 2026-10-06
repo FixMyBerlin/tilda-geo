@@ -5,15 +5,10 @@ import { twMerge } from 'tailwind-merge'
 import { SheetGrabHandle } from './SheetGrabHandle'
 
 /** Sheet color schemes — panel bg + grab capsule tint per use. */
-type SheetTone = 'default' | 'calculator' | 'debug'
+type SheetTone = 'default' | 'debug'
 
 const toneStyles: Record<SheetTone, { panel: string; grabber: string; grabIcon: string }> = {
   default: { panel: 'bg-white', grabber: 'bg-gray-300', grabIcon: 'text-gray-600' },
-  calculator: {
-    panel: 'bg-fuchsia-800 text-white',
-    grabber: 'bg-white/40',
-    grabIcon: 'text-white',
-  },
   debug: {
     panel: 'bg-pink-300 text-pink-950',
     grabber: 'bg-pink-500/50',

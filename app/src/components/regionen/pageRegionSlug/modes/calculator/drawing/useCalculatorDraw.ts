@@ -4,8 +4,9 @@ import {
   useDrawPreview,
   type DrawFeature,
 } from '@osm-editor-kit/react-map-gl-draw'
-import { useMapCalculatorDrawActive } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
-import { useDrawSession } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useDrawSession'
+import { useCalculatorAreas } from '@/components/regionen/pageRegionSlug/modes/calculator/useCalculatorAreas'
+import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
+import { CALCULATOR_AREA_PRECISION, calculatorAreaId } from '../calculatorModeParam'
 import type { DrawArea } from './drawAreaTypes'
 
 const calculatorDrawController = createDrawController()
@@ -14,12 +15,13 @@ const isDrawArea = (feature: DrawFeature): feature is DrawArea =>
   feature.geometry.type === 'Polygon'
 
 /**
- * The calculator's drawing surface. The areas live in the URL (`draw`); a change arrives here
+ * The calculator's drawing surface. The areas live in the URL (`sum.areas`); a change arrives here
  * once per finished edit, so every edit is one URL update.
  */
 export const useCalculatorDraw = () => {
-  const { drawAreas, setDrawAreas } = useDrawSession()
-  const enabled = useMapCalculatorDrawActive()
+  const { drawAreas, setDrawAreas } = useCalculatorAreas()
+  // In the Summieren mode pointer gestures on the map belong to drawing (see RegionMap).
+  const { isCalculator: enabled } = useCurrentMode()
 
   return useDraw(calculatorDrawController, {
     value: drawAreas,
@@ -29,13 +31,14 @@ export const useCalculatorDraw = () => {
     // One area is the normal case: the first click starts it, and it stays editable.
     emptyTool: 'polygon',
     selectSingle: true,
-    // 5 decimals keeps approx <= 2m precision in Berlin and the URL short.
-    precision: 5,
+    precision: CALCULATOR_AREA_PRECISION,
+    // Matches the id the new area gets when it is read back from the URL.
+    createId: () => calculatorAreaId(drawAreas.length),
   })
 }
 
 /** The areas as drawn right now, including a drag that is not in the URL yet. */
 export const useCalculatorLiveAreas = () => {
-  const { drawAreas } = useDrawSession()
+  const { drawAreas } = useCalculatorAreas()
   return useDrawPreview(calculatorDrawController, drawAreas).filter(isDrawArea)
 }

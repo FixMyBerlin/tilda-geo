@@ -7,6 +7,7 @@ import { simplifyConfigForParams } from '@/components/regionen/pageRegionSlug/ho
 import { calcConfigChecksum } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v2/lib'
 import type { MapDataCategoryId } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/MapDataCategoryId'
 import db from '@/server/db.server'
+import { templateWithLegacyCalculatorSubcategories } from '@/server/regions/migrateLegacyCalculatorSubcategories.server'
 
 type RegionConfigTemplateDb = Pick<typeof db, 'regionConfigTemplate'>
 
@@ -36,13 +37,27 @@ export async function upsertRegionConfigTemplate(
   return checksum
 }
 
-/** Tier 1 (current fresh) → tier 2 (DB); undefined if unknown. */
+/**
+ * Tier 1 (current fresh) → the fresh config as it was before a code change removed
+ * subcategories (no region save stored that template) → tier 2 (DB); undefined if unknown.
+ */
 export async function resolveConfigTemplate(
   checksum: string,
   freshConfig: MapDataCategoryConfig[],
 ) {
   if (checksum === calcConfigChecksum(freshConfig)) {
     return simplifyConfigForParams(freshConfig)
+  }
+
+  const legacyTemplate = templateWithLegacyCalculatorSubcategories(
+    simplifyConfigForParams(freshConfig),
+  )
+  // The checksum only reads ids, which `simplifyConfigForParams` keeps as they are.
+  if (
+    legacyTemplate &&
+    checksum === calcConfigChecksum(legacyTemplate as MapDataCategoryConfig[])
+  ) {
+    return legacyTemplate
   }
 
   return getRegionConfigTemplate(checksum)

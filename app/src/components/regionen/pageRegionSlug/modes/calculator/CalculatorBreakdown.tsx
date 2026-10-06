@@ -1,10 +1,12 @@
-import { TrashIcon } from '@heroicons/react/20/solid'
+import { FunnelIcon, TrashIcon } from '@heroicons/react/20/solid'
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { twJoin } from 'tailwind-merge'
 import type { MapDataSourceCalculator } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { ConditionalFormattedKey } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/ConditionalFormattedKey'
 import { ConditionalFormattedValue } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/ConditionalFormattedValue'
 import { AnimatedNumber } from '@/components/shared/motion/AnimatedNumber'
+import { modePanelTintHairlineTopClassName } from '../modePanel.const'
+import type { CalculatorFilter } from './calculatorModeParam'
 import {
   calculateMetricSummaryForAreas,
   calculatorMetricOrder,
@@ -16,14 +18,12 @@ type CalculatorSummary = ReturnType<typeof calculateMetricSummaryForAreas>
 type CalculatorAreaSummary = CalculatorSummary['byArea'][number]['summary']
 
 /**
- * Everything the breakdown UI needs, computed once in CalculatorOutput so the same data
- * backs both the desktop inline panel and the mobile bottom sheet (and the mobile total
- * button). Passed as one object to keep call sites tidy.
+ * Everything the breakdown UI needs, computed once in CalculatorResult. Passed as one object
+ * to keep call sites tidy.
  */
 export type CalculatorBreakdownData = {
-  displayName: string | undefined
-  sumKeys: MapDataSourceCalculator['sumKeys']
-  sourceId: string | undefined
+  sumKeys: NonNullable<MapDataSourceCalculator['sumKeys']>
+  sourceId: string
   metrics: CalculatorMetric[]
   selectedMetric: CalculatorMetric | null
   selectedMetricLabel: string
@@ -34,21 +34,24 @@ export type CalculatorBreakdownData = {
   onSetDisplayMode: (mode: CalculatorDisplayMode) => void
   onShowArea: () => void
   onDeleteArea: (key: string) => void
+  /** Tag values the sum is narrowed to (`sum.filter`). */
+  filter: CalculatorFilter
+  onToggleFilter: (key: string, value: string) => void
   formatNumber: (value: number) => string
   formatMetricValue: (sum: number, ratio: number) => string
 }
 
 const toggleClassName = (active: boolean) =>
   twJoin(
-    'px-1.5 py-0.5 text-xs leading-tight sm:text-[0.62rem]',
-    active ? 'bg-white text-fuchsia-900' : 'text-white/85 hover:bg-white/10',
+    'px-2 py-1 text-xs leading-tight',
+    active ? 'bg-fuchsia-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-50',
   )
 
 /** Warning that the calculation only covers what's currently in the viewport. */
 const ViewportWarning = ({ onShowArea }: { onShowArea: () => void }) => (
-  <div className="rounded border border-fuchsia-200 bg-white px-2 py-1.5 text-xs leading-tight text-fuchsia-800 sm:text-[0.66rem]">
+  <div className="rounded border border-fuchsia-200 bg-white px-2 py-1.5 text-xs leading-snug text-fuchsia-800">
     <div className="flex items-start gap-1.5">
-      <ExclamationTriangleIcon className="mt-0.5 size-3.5 shrink-0 text-fuchsia-700" />
+      <ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-fuchsia-700" />
       <p>
         Die Berechnung basiert auf sichtbaren Kartendaten. Bitte stellen Sie sicher, dass die
         gesamte Fläche sichtbar ist, um genaue Ergebnisse zu erhalten.
@@ -59,7 +62,7 @@ const ViewportWarning = ({ onShowArea }: { onShowArea: () => void }) => (
         type="button"
         onClick={onShowArea}
         aria-label="Gesamte Zeichenfläche in der Karte anzeigen"
-        className="rounded border border-fuchsia-300 px-1.5 py-0.5 text-xs font-semibold text-fuchsia-800 hover:bg-fuchsia-50 sm:text-[0.62rem]"
+        className="rounded border border-fuchsia-300 px-1.5 py-0.5 text-xs font-semibold text-fuchsia-800 hover:bg-fuchsia-50"
       >
         Fläche anzeigen
       </button>
@@ -89,28 +92,28 @@ const MetricControls = ({
       )}
     >
       {metrics.length > 1 && (
-        <div className="inline-flex overflow-hidden rounded border border-white/25">
+        <div className="inline-flex overflow-hidden rounded border border-gray-300">
           {metrics.map((metric) => (
             <button
               key={metric}
               type="button"
               onClick={() => onSelectMetric(metric)}
               className={twJoin(
-                'border-r border-white/25 last:border-r-0',
+                'border-r border-gray-300 last:border-r-0',
                 toggleClassName(selectedMetric === metric),
               )}
             >
-              {sumKeys?.[metric] ?? metric}
+              {sumKeys[metric] ?? metric}
             </button>
           ))}
         </div>
       )}
 
-      <div className="inline-flex overflow-hidden rounded border border-white/25">
+      <div className="inline-flex overflow-hidden rounded border border-gray-300">
         <button
           type="button"
           onClick={() => onSetDisplayMode('value')}
-          className={twJoin('border-r border-white/25', toggleClassName(displayMode === 'value'))}
+          className={twJoin('border-r border-gray-300', toggleClassName(displayMode === 'value'))}
           aria-label="Zahlenansicht"
         >
           #
@@ -134,98 +137,112 @@ const AreaSummary = ({
   label,
   sourceId,
   onDelete,
+  filter,
+  onToggleFilter,
   formatNumber,
   formatMetricValue,
 }: {
   areaSummary: CalculatorAreaSummary
   label: string
-  sourceId: string | undefined
+  sourceId: string
   onDelete: () => void
+  filter: CalculatorFilter
+  onToggleFilter: (key: string, value: string) => void
   formatNumber: (value: number) => string
   formatMetricValue: (sum: number, ratio: number) => string
 }) => (
-  <div className="group relative -mx-2 border-t border-white/40 px-2 pt-1.5">
-    <div className="mb-1 flex items-center justify-between gap-2">
+  <div className={twJoin('group px-4 py-3', modePanelTintHairlineTopClassName)}>
+    <div className="mb-2 flex items-center justify-between gap-2">
       <div className="flex items-center gap-1">
-        <strong className="text-sm sm:text-[0.7rem]">{label}</strong>
-        <button type="button" onClick={onDelete}>
-          <TrashIcon className="size-4 text-white/50 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 hover:text-white/90" />
+        <strong className="text-sm">{label}</strong>
+        <button type="button" onClick={onDelete} aria-label="Fläche löschen" title="Fläche löschen">
+          <TrashIcon className="size-4 text-gray-400 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 hover:text-gray-700 pointer-coarse:opacity-100" />
         </button>
       </div>
-      <strong className="text-sm tabular-nums sm:text-[0.7rem]">
+      <strong className="text-sm tabular-nums">
         <AnimatedNumber value={areaSummary.total} format={formatNumber} />
       </strong>
     </div>
 
     {areaSummary.groups.map((group) => (
-      <div key={group.key} className="mb-1 last:mb-0">
-        <div className="text-sm font-semibold sm:text-[0.68rem]">
-          {sourceId ? (
-            <ConditionalFormattedKey sourceId={sourceId} tagKey={group.key} />
-          ) : (
-            group.key
-          )}
+      <div key={group.key} className="mb-2 last:mb-0">
+        <div className="text-xs font-semibold text-gray-700">
+          <ConditionalFormattedKey sourceId={sourceId} tagKey={group.key} />
         </div>
-        {group.values.map((groupValue) => (
-          <div
-            key={`${group.key}::${groupValue.value}`}
-            className="-mr-1 flex min-w-0 justify-between gap-2 rounded-sm py-0.5 pr-1 pl-2 text-xs text-white/90 tabular-nums transition-colors hover:bg-white/10 sm:text-[0.64rem]"
-          >
-            <span
-              className="min-w-0 flex-1 truncate [&_span]:truncate"
-              title={groupValue.value.length > 20 ? groupValue.value : undefined}
-            >
-              {sourceId ? (
-                <ConditionalFormattedValue
-                  sourceId={sourceId}
-                  tagKey={group.key}
-                  tagValue={groupValue.value}
-                />
-              ) : (
-                groupValue.value
+        {group.values.map((groupValue) => {
+          const groupFilter = filter[group.key]
+          const selected = groupFilter === groupValue.filterValue
+          return (
+            <button
+              key={`${group.key}::${groupValue.filterValue}`}
+              type="button"
+              onClick={() => onToggleFilter(group.key, groupValue.filterValue)}
+              aria-pressed={selected}
+              title={selected ? 'Filter entfernen' : 'Nur diese Werte summieren'}
+              className={twJoin(
+                'group/row -mr-1 flex w-[calc(100%+0.25rem)] min-w-0 cursor-pointer justify-between gap-2 rounded-sm py-0.5 pr-1 pl-2 text-left text-xs tabular-nums transition-colors',
+                selected
+                  ? 'bg-white font-semibold text-fuchsia-800'
+                  : 'text-gray-600 hover:bg-white/60',
+                // The other values of a filtered tag are not part of the sum.
+                groupFilter !== undefined && !selected ? 'opacity-50 hover:opacity-100' : '',
               )}
-            </span>
-            <span>{formatMetricValue(groupValue.sum, groupValue.ratio)}</span>
-          </div>
-        ))}
+            >
+              <span className="flex min-w-0 flex-1 items-center gap-1.5">
+                <span
+                  className="min-w-0 truncate [&_span]:truncate"
+                  title={groupValue.value.length > 20 ? groupValue.value : undefined}
+                >
+                  <ConditionalFormattedValue
+                    sourceId={sourceId}
+                    tagKey={group.key}
+                    tagValue={groupValue.value}
+                  />
+                </span>
+                {/* What a click does: add or remove the filter. */}
+                <span
+                  aria-hidden
+                  className="hidden shrink-0 items-center font-semibold text-fuchsia-700 group-hover/row:inline-flex group-focus-visible/row:inline-flex"
+                >
+                  {selected ? '−' : '+'}
+                  <FunnelIcon className="size-3" />
+                </span>
+              </span>
+              <span>{formatMetricValue(groupValue.sum, groupValue.ratio)}</span>
+            </button>
+          )
+        })}
       </div>
     ))}
   </div>
 )
 
 /**
- * The calculator breakdown (header + viewport warning + metric controls + per-area
- * summaries + combined total). Only rendered once an area is drawn.
- * Presentational only — all data/handlers come from CalculatorOutput via `data`. Styled
- * white-on-fuchsia so it works in both the desktop panel and the mobile sheet.
+ * The calculator breakdown (viewport warning + metric controls + per-area summaries +
+ * combined total). Only rendered once an area is drawn.
+ * Presentational only — all data/handlers come from CalculatorResult via `data`. Styled for
+ * the tinted mode panel (desktop column and mobile dock).
  */
 export const CalculatorBreakdown = ({ data }: { data: CalculatorBreakdownData }) => {
   const { summary, selectedMetric, selectedMetricLabel, metrics } = data
 
   return (
-    <div className="min-w-0 space-y-2 text-sm leading-tight sm:text-xs">
-      <div className="min-w-0 text-white/70">
-        <div className="font-semibold text-white">SUMMIERUNG</div>
-        {data.displayName && (
-          <p className="w-full min-w-0 truncate text-xs leading-tight text-white/60 sm:text-[0.6rem]">
-            {data.displayName}
-          </p>
-        )}
+    <div className="min-w-0 text-sm leading-tight">
+      <div className="space-y-2 px-4 py-3">
+        {data.showViewportWarning && <ViewportWarning onShowArea={data.onShowArea} />}
+
+        <MetricControls
+          metrics={metrics}
+          selectedMetric={selectedMetric}
+          sumKeys={data.sumKeys}
+          displayMode={data.displayMode}
+          onSelectMetric={data.onSelectMetric}
+          onSetDisplayMode={data.onSetDisplayMode}
+        />
       </div>
 
-      {data.showViewportWarning && <ViewportWarning onShowArea={data.onShowArea} />}
-
-      <MetricControls
-        metrics={metrics}
-        selectedMetric={selectedMetric}
-        sumKeys={data.sumKeys}
-        displayMode={data.displayMode}
-        onSelectMetric={data.onSelectMetric}
-        onSetDisplayMode={data.onSetDisplayMode}
-      />
-
       {!selectedMetric || !summary ? (
-        <div className="text-sm text-white/90 sm:text-[0.7rem]">
+        <div className={twJoin('px-4 py-3 text-gray-600', modePanelTintHairlineTopClassName)}>
           Keine Werte für {metrics.join(' / ') || 'Metriken'} gefunden
         </div>
       ) : (
@@ -237,13 +254,20 @@ export const CalculatorBreakdown = ({ data }: { data: CalculatorBreakdownData })
               label={`${selectedMetricLabel}${summary.byArea.length > 1 ? ` Fläche ${index + 1}` : ''}`}
               sourceId={data.sourceId}
               onDelete={() => data.onDeleteArea(key)}
+              filter={data.filter}
+              onToggleFilter={data.onToggleFilter}
               formatNumber={data.formatNumber}
               formatMetricValue={data.formatMetricValue}
             />
           ))}
 
           {summary.byArea.length > 1 && (
-            <div className="-mx-2 mt-1 border-t border-white/70 px-2 pt-1.5 text-sm font-semibold sm:text-[0.72rem]">
+            <div
+              className={twJoin(
+                'px-4 py-3 text-sm font-semibold',
+                modePanelTintHairlineTopClassName,
+              )}
+            >
               <div className="flex items-center justify-between gap-2">
                 <span>{selectedMetricLabel} Kombiniert</span>
                 <span className="tabular-nums">
