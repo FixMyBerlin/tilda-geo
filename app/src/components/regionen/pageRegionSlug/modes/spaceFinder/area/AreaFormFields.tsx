@@ -3,6 +3,8 @@ import { bbox } from '@turf/turf'
 import { useEffect, useMemo } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
+import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
+import { radioButtonClass } from '@/components/shared/SegmentedChoice/radioButtonClass'
 import { MAX_STUDY_AREA_KM2, studyAreaSizeKm2 } from '@/lib/planningStudyAreaLimit'
 import { useSpaceFinderBoundaryState } from '../../../hooks/mapState/useSpaceFinderBoundaryState'
 import {
@@ -11,11 +13,9 @@ import {
   SHOW_PLANNING_USE_CASE_UI,
   type PlanningUseCase,
 } from '../factors/spaceFinderDefaults'
-import { InfoTooltip } from '../InfoTooltip'
 import {
   spaceFinderNumberInputClass,
   spaceFinderPanelTitleInputClass,
-  spaceFinderRadioButtonClass,
 } from '../spaceFinderPanelStyles'
 import { BoundaryPicker } from './BoundaryPicker'
 import type { StudyAreaGeometry } from './extractStudyAreaGeometry'
@@ -175,7 +175,7 @@ export const AreaFormFields = ({
                   const defaultAreaM2 = PLANNING_USE_CASES.find((u) => u.key === key)?.defaultAreaM2
                   if (defaultAreaM2 != null) onAreaSizeM2Change(defaultAreaM2)
                 }}
-                className={spaceFinderRadioButtonClass(state.useCase === key)}
+                className={radioButtonClass(state.useCase === key)}
               >
                 {label}
               </button>
@@ -239,7 +239,7 @@ export const AreaFormFields = ({
               onClick={toggleDrawing}
               className={twJoin(
                 'flex items-center justify-center gap-1.5',
-                spaceFinderRadioButtonClass(drawingActive),
+                radioButtonClass(drawingActive),
               )}
             >
               <PencilSquareIcon className="h-4 w-4" />

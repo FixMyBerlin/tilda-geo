@@ -3,6 +3,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { twJoin } from 'tailwind-merge'
+import { CollapsibleBoxChevron } from '@/components/shared/CollapsibleBox/CollapsibleBox'
+import {
+  collapsibleBoxClass,
+  collapsibleBoxHeaderClass,
+} from '@/components/shared/CollapsibleBox/collapsibleBoxStyles'
+import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
+import { SegmentedChoice } from '@/components/shared/SegmentedChoice/SegmentedChoice'
 import { toastError } from '@/components/shared/toast/toastError'
 import { factorFingerprint, factorsDiffer } from '@/server/planning/factorFingerprint'
 import type { FactorConfig, VariantFactorConfig } from '@/server/planning/planning.functions'
@@ -14,15 +21,7 @@ import {
 } from '@/server/planning/planningQueryOptions'
 import { useSpaceFinderBoundaryState } from '../../../hooks/mapState/useSpaceFinderBoundaryState'
 import { USER_GEOJSON_MODES, type UserGeojsonMode } from '../area/UserObstaclesField'
-import { DisclosureChevron } from '../CollapsibleBox'
-import { InfoTooltip } from '../InfoTooltip'
-import { SegmentedChoice } from '../SegmentedChoice'
-import {
-  spaceFinderDisclosureBoxClass,
-  spaceFinderDisclosureHeaderClass,
-  spaceFinderGroupStyle,
-  spaceFinderNumberInputClass,
-} from '../spaceFinderPanelStyles'
+import { spaceFinderGroupStyle, spaceFinderNumberInputClass } from '../spaceFinderPanelStyles'
 import { OepnvCategorySliders } from './OepnvCategorySliders'
 import { readOepnvShares, type OepnvShares } from './oepnvShares'
 import {
@@ -734,15 +733,15 @@ const FactorEditorPanelForm = ({
   }
 
   return (
-    <Disclosure as="div" className={spaceFinderDisclosureBoxClass(open)}>
+    <Disclosure as="div" className={collapsibleBoxClass(open)}>
       <DisclosureButton
         as="div"
         onClick={() => setOpen((v) => !v)}
-        className={spaceFinderDisclosureHeaderClass(open, !open)}
+        className={collapsibleBoxHeaderClass(open, !open)}
       >
         <div className="flex w-full items-center gap-2">
           <span className="flex-1">Faktoren</span>
-          <DisclosureChevron open={open} />
+          <CollapsibleBoxChevron open={open} />
         </div>
         {/* Zugeklappt ist nicht zu sehen, wie die Gewichte stehen — die zweite Zeile zeigt
             deshalb den Anteil beider Gruppen am Grundscore (wie die Gruppenüberschriften im

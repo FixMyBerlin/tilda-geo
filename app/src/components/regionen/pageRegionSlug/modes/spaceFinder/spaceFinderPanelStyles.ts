@@ -1,36 +1,9 @@
 import { twJoin } from 'tailwind-merge'
+import {
+  toggleButtonBase,
+  toggleButtonInactive,
+} from '@/components/shared/SegmentedChoice/radioButtonClass'
 import type { PlanningScoreMode } from '@/shared/regionen/planningScoreMode.const'
-
-const spaceFinderToggleButtonBase =
-  'rounded border px-2 py-1.5 text-xs font-medium transition-colors'
-const spaceFinderToggleButtonInactive = 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
-
-/** Radio-artige Auswahlbuttons (eine Option aktiv). Farbe bleibt pro Kontext. */
-export const spaceFinderRadioButtonClass = (active: boolean, accent: 'blue' | 'green' = 'blue') =>
-  twJoin(
-    spaceFinderToggleButtonBase,
-    active
-      ? accent === 'green'
-        ? 'border-green-700 bg-green-50 text-green-700'
-        : 'border-blue-600 bg-blue-50 text-blue-700'
-      : spaceFinderToggleButtonInactive,
-  )
-
-/**
- * Auf-/zuklappbare Box (Faktoren, Wizard-Schritte). Eingeklappt sieht sie sonst genauso aus wie
- * die flachen Info-/Schalterzeilen des Panels und wird als klickbar übersehen — deshalb bekommt
- * sie zugeklappt einen gefüllten Kopf. Der Rahmen bleibt auch aufgeklappt kräftig genug, um auf
- * dem getönten Panel sichtbar zu sein und die Box zusammenzuhalten.
- */
-export const spaceFinderDisclosureBoxClass = (open: boolean) =>
-  twJoin('rounded border', open ? 'border-gray-300' : 'border-gray-300 hover:border-gray-400')
-
-export const spaceFinderDisclosureHeaderClass = (open: boolean, twoLine = false) =>
-  twJoin(
-    'flex w-full cursor-pointer px-2.5 py-2 text-left text-sm font-semibold text-gray-800',
-    twoLine ? 'flex-col gap-1.5' : 'items-center gap-2',
-    open ? 'border-b border-gray-300 hover:bg-gray-50' : 'rounded bg-gray-100 hover:bg-gray-200',
-  )
 
 /**
  * Farbe der Faktorgruppen. Dient nur dazu, die Gruppen auf einen Blick auseinanderzuhalten —
@@ -98,12 +71,12 @@ export const spaceFinderGroupBarStyle: Record<
  */
 export const spaceFinderGroupButtonClass = (active: boolean, mode: PlanningScoreMode) =>
   twJoin(
-    spaceFinderToggleButtonBase,
+    toggleButtonBase,
     active
       ? mode === 'kombination'
         ? 'border-green-700 bg-green-50 text-green-700'
         : spaceFinderGroupStyle[mode].button
-      : spaceFinderToggleButtonInactive,
+      : toggleButtonInactive,
   )
 
 /** Kompakte Eingabefelder — eine Stufe kleiner als Panel-Fließtext (`text-sm`). */

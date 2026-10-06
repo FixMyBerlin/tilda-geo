@@ -10,7 +10,7 @@ import {
   useSpaceFinderCandidatesState,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useSpaceFinderCandidatesState'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
-import { CollapsibleBox } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/CollapsibleBox'
+import { CollapsibleBox } from '@/components/shared/CollapsibleBox/CollapsibleBox'
 import { ModeListItem } from '../ModeListItem'
 import {
   modePanelListMetaClassName,

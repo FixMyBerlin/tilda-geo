@@ -2,7 +2,9 @@ import { Switch } from '@headlessui/react'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { type ReactNode, useEffect, useRef, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
+import { CollapsibleBox } from '@/components/shared/CollapsibleBox/CollapsibleBox'
 import { formatDate } from '@/components/shared/date/formatDate'
+import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
 import {
   areaInputsDiffer,
   comparableRunSnapshot,
@@ -15,14 +17,12 @@ import { updatePlanningVariantFn } from '@/server/planning/planning.functions'
 import { planningVariantQueryOptions } from '@/server/planning/planningQueryOptions'
 import { useSpaceFinderBoundaryState } from '../../hooks/mapState/useSpaceFinderBoundaryState'
 import { modePanelMutedClassName } from '../modePanel.const'
-import { CollapsibleBox } from './CollapsibleBox'
 import { FactorEditorPanel } from './factors/FactorEditorPanel'
 import {
   DEFAULT_FACTOR_TEMPLATE,
   MIN_AREA_FILTER_LABEL,
   MIN_SCORE_THRESHOLD_LABEL,
 } from './factors/spaceFinderDefaults'
-import { InfoTooltip } from './InfoTooltip'
 import { JobStatusBadge } from './run/JobStatusBadge'
 import { ScoreModeSwitcher } from './ScoreModeSwitcher'
 import { SpaceFinderCandidatesSection } from './SpaceFinderCandidatesSection'

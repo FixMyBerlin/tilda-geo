@@ -1,6 +1,6 @@
 import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { twJoin } from 'tailwind-merge'
-import { InfoTooltip } from '../InfoTooltip'
+import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
 import {
   CATEGORY_SHARE_STEP,
   CATEGORY_SHARE_TOTAL,

@@ -1,7 +1,8 @@
 import { EyeSlashIcon } from '@heroicons/react/24/outline'
 import { twJoin } from 'tailwind-merge'
+import { radioButtonClass } from '@/components/shared/SegmentedChoice/radioButtonClass'
 import type { PlanningScoreMode } from '@/shared/regionen/planningScoreMode.const'
-import { spaceFinderGroupButtonClass, spaceFinderRadioButtonClass } from './spaceFinderPanelStyles'
+import { spaceFinderGroupButtonClass } from './spaceFinderPanelStyles'
 import { useSpaceFinderModeParam } from './useSpaceFinderModeParam'
 
 // Tab-like switcher for the three display modes (Issue #3415): the demand
@@ -63,7 +64,7 @@ export const ScoreModeSwitcher = ({ compact = false }: { compact?: boolean }) =>
           title="Hexagone ausblenden"
           aria-label="Hexagone ausblenden"
           aria-pressed={!visible}
-          className={spaceFinderRadioButtonClass(!visible, 'green')}
+          className={radioButtonClass(!visible, 'green')}
         >
           <EyeSlashIcon className="h-4 w-4" />
         </button>
