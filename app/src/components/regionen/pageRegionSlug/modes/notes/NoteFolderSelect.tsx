@@ -1,9 +1,10 @@
 import { Menu, MenuButton, MenuHeading, MenuItem, MenuItems, MenuSection } from '@headlessui/react'
-import { EllipsisHorizontalIcon, PlusIcon } from '@heroicons/react/24/outline'
+import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline'
 import { twJoin } from 'tailwind-merge'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import type { NoteFolderForRegion } from '@/server/notes/queries/getNoteFoldersForRegion.server'
 import { mapOverlayMenuClassName } from '../../mapOverlayChrome.const'
+import { ModeCollectionNewRow } from '../ModeCollectionNewRow'
 import { ModeCollectionSelect } from '../ModeCollectionSelect'
 import { modePanelHeaderIconButtonClassName } from '../modePanel.const'
 import { sharedWithRegionsSubtitle } from '../sharedWithRegions'
@@ -72,14 +73,9 @@ export const NoteFolderSelect = ({
         />
       ) : null}
       {canCreateFolder ? (
-        <button
-          type="button"
-          onClick={(event) => openNameModal('create', event.currentTarget)}
-          className="flex w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-white/90 select-none hover:bg-white/10"
-        >
-          <PlusIcon className="size-4 shrink-0" aria-hidden />
-          <span>Neuer Ordner…</span>
-        </button>
+        <ModeCollectionNewRow onClick={(event) => openNameModal('create', event.currentTarget)}>
+          Neuer Ordner…
+        </ModeCollectionNewRow>
       ) : null}
       <NoteFolderNameModal
         kind={nameModal}

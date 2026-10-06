@@ -1,8 +1,9 @@
 import { Menu, MenuButton, MenuHeading, MenuItem, MenuItems, MenuSection } from '@headlessui/react'
-import { EllipsisHorizontalIcon, PlusIcon } from '@heroicons/react/24/outline'
+import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline'
 import { twJoin } from 'tailwind-merge'
 import type { ReviewListForRegion } from '@/server/review-lists/queries/getReviewListsForRegion.server'
 import { mapOverlayMenuClassName } from '../../mapOverlayChrome.const'
+import { ModeCollectionNewRow } from '../ModeCollectionNewRow'
 import { ModeCollectionSelect } from '../ModeCollectionSelect'
 import { modePanelHeaderIconButtonClassName } from '../modePanel.const'
 import { sharedWithRegionsSubtitle } from '../sharedWithRegions'
@@ -51,14 +52,9 @@ export const ReviewListSelect = ({
           onChange={(next) => onSelect(Number(next))}
         />
       ) : null}
-      <button
-        type="button"
-        onClick={(event) => openNameModal('create', event.currentTarget)}
-        className="flex w-full cursor-pointer items-center gap-2 rounded px-2 py-1.5 text-left text-sm text-white/90 select-none hover:bg-white/10"
-      >
-        <PlusIcon className="size-4 shrink-0" aria-hidden />
-        <span>Neue Prüfliste…</span>
-      </button>
+      <ModeCollectionNewRow onClick={(event) => openNameModal('create', event.currentTarget)}>
+        Neue Prüfliste…
+      </ModeCollectionNewRow>
       {uploadError ? <p className="text-xs text-red-200">{uploadError}</p> : null}
       <ReviewListNameModal
         kind={nameModal}
