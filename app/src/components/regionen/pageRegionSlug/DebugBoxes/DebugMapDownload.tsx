@@ -1,5 +1,6 @@
 import { featureCollection } from '@turf/helpers'
 import type { LayerSpecification } from 'maplibre-gl'
+import { useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { useMapLoaded } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 
@@ -8,10 +9,10 @@ type Props = { layers: LayerSpecification[] }
 export const DebugMapDownload = ({ layers }: Props) => {
   const { mainMap } = useMap()
   const mapLoaded = useMapLoaded()
+  // Read the clock once, on mount: render has to give the same result each time.
+  const [dateToday] = useState(() => new Date().toISOString().split('T')[0])
 
   if (!mapLoaded || !mainMap || !layers || layers.length === 0) return null
-
-  const dateTody = new Date().toISOString().split('T')[0]
 
   const downloadLayers = layers.filter(
     (layer) =>
@@ -67,7 +68,7 @@ export const DebugMapDownload = ({ layers }: Props) => {
                 <td className="whitespace-nowrap">
                   <a
                     className="underline hover:decoration-2"
-                    download={`${dateTody}--${layer.id}.geojson`}
+                    download={`${dateToday}--${layer.id}.geojson`}
                     href={dataString}
                   >
                     Download {features.length.toLocaleString()}

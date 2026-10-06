@@ -1,10 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
-import { format, isBefore, subDays } from 'date-fns'
+import { format } from 'date-fns'
 import { de } from 'date-fns/locale'
 import { processingMetadataQueryOptions } from '@/server/regions/processingMetadataQueryOptions'
+import { isOsmDataOlderThanYesterday } from './isOsmDataOlderThanYesterday'
 
 export const DownloadModalUpdateDate = () => {
-  const { data: metadata } = useQuery(processingMetadataQueryOptions())
+  const { data: metadata, dataUpdatedAt } = useQuery(processingMetadataQueryOptions())
 
   if (!metadata?.status) return null
 
@@ -24,7 +25,7 @@ export const DownloadModalUpdateDate = () => {
   // Show OK when status is 'postprocessing' or 'processed' (app is ready to use)
   // osm_data_from is available for both postprocessing and processed status
   const osmDataDate = new Date(metadata.osm_data_from)
-  const isDataOlderThanYesterday = isBefore(osmDataDate, subDays(new Date(), 1))
+  const isDataOlderThanYesterday = isOsmDataOlderThanYesterday(osmDataDate, dataUpdatedAt)
 
   return (
     <div className="pb-5">

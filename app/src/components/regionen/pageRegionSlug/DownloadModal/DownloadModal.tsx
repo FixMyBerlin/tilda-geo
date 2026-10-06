@@ -1,6 +1,5 @@
 import { ArrowDownTrayIcon } from '@heroicons/react/24/outline'
 import { useQuery } from '@tanstack/react-query'
-import { isBefore, subDays } from 'date-fns'
 import { twMerge } from 'tailwind-merge'
 import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
 import { RegionMembershipCallout } from '@/components/regionen/pageRegionSlug/RegionMembershipCallout'
@@ -14,13 +13,14 @@ import {
 } from '../mobile/mobileControlButton.const'
 import { DownloadModalDatasetSections } from './DownloadModalDownloadList'
 import { DownloadModalUpdateDate } from './DownloadModalUpdateDate'
+import { isOsmDataOlderThanYesterday } from './isOsmDataOlderThanYesterday'
 import type { RegionModalAccess } from './regionModalAccess'
 
 // Square map-control button (matches the other floating controls); `relative` so the
 // ControlButtonDot anchors to the button corner.
 
 const DownloadModalTriggerIcon = () => {
-  const { data: metadata } = useQuery(processingMetadataQueryOptions())
+  const { data: metadata, dataUpdatedAt } = useQuery(processingMetadataQueryOptions())
 
   // Show icon without indicator if no data yet and not processing
   if (!metadata?.osm_data_from && metadata?.status !== 'processing') {
@@ -28,9 +28,8 @@ const DownloadModalTriggerIcon = () => {
   }
 
   // For postprocessing and processed, osm_data_from should be available
-  const osmDataDate = metadata.osm_data_from ? new Date(metadata.osm_data_from) : null
-  const isDataOlderThanYesterday = osmDataDate
-    ? isBefore(osmDataDate, subDays(new Date(), 1))
+  const isDataOlderThanYesterday = metadata.osm_data_from
+    ? isOsmDataOlderThanYesterday(metadata.osm_data_from, dataUpdatedAt)
     : false
   const isProcessing = metadata.status === 'processing'
 
