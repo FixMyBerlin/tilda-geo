@@ -20,7 +20,6 @@ export const categoriesParkingLars: StaticMapDataCategory[] = [
       { ...subcat_parkingLarsStats, defaultStyle: 'hidden' },
       { ...subcat_parkingLarsBoundaries, defaultStyle: 'hidden' },
       { ...subcat_signs, defaultStyle: 'hidden' },
-      // { id: 'mapillaryCoverage', defaultStyle: "hidden" },
       // { id: 'accidents', defaultStyle: "hidden" },
     ],
   },

@@ -3,6 +3,7 @@ import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { Categories } from '../SidebarLayerControls/Categories/Categories'
 import { LayerControlsOpenButton } from '../SidebarLayerControls/LayerControlsOpenButton'
 import { StaticDatasetCategories } from '../SidebarLayerControls/StaticDatasets/StaticDatasetCategories'
+import { StreetImageryControls } from '../SidebarLayerControls/StreetImagery/StreetImageryControls'
 import { MobileBottomSheet } from './MobileBottomSheet'
 
 /**
@@ -24,6 +25,7 @@ export const MobileLayerButton = () => {
       <MobileBottomSheet open={open} onClose={() => setOpen(false)} title="Kategorien">
         <Categories />
         <StaticDatasetCategories />
+        <StreetImageryControls />
       </MobileBottomSheet>
     </>
   )

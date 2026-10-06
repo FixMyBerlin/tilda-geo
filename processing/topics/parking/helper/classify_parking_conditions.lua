@@ -1,65 +1,19 @@
 local log = require('topics.helper.log')
 
+local condition_category_primary = require('topics.parking.helper.condition_category_primary')
+local DETAIL_TOKENS = require('topics.parking.helper.condition_detail_tokens')
+local CONDITION_SYNTAX = require('topics.parking.helper.condition_syntax')
 local invert_time_condition = require('topics.parking.helper.invert_time_condition')
-local is_valid_conditional_value = require('topics.parking.helper.is_valid_conditional_value')
 local parse_conditional_value = require('topics.parking.helper.parse_conditional_value')
+local sanitize_condition_tags = require('topics.parking.helper.sanitize_condition_tags')
+local sanitize_string = require('topics.helper.sanitize_string')
 local sort_condition_class = require('topics.parking.helper.sort_condition_class')
 local subtract_time_ranges = require('topics.parking.helper.subtract_time_ranges')
 
 local SEPARATOR = ';'
+local ACCESS_OTHER = sanitize_condition_tags.ACCESS_OTHER
 
--- vehicle access keys
-local vehicle_class_list = {
-  'motorcar', -- we understand this synonym to 'passenger_car', see https://wiki.openstreetmap.org/wiki/Key:motorcar#Controversy
-  'passenger_car', -- proposed explicit tagging for 'passenger cars only'
-  'disabled',
-  'car_sharing',
-  'motorcycle',
-  'goods',
-  'hgv',
-  'bus',
-  'tourist_bus',
-  'coach',
-  'psv',
-  'taxi',
-  'motorhome',
-  'emergency',
-  -- some access values that we can treat like vehicle types
-  'delivery',
-  'agricultural',
-  'forestry',
-}
-
--- Every `*:conditional` key read below; their values are syntax-checked before we classify.
-local CONDITIONAL_KEYS = {}
-for _, key in ipairs({ 'fee', 'motor_vehicle', 'access', 'maxstay', 'restriction', 'reason', 'restriction:reason', 'maxweight', 'maxweightrating' }) do
-  table.insert(CONDITIONAL_KEYS, key .. ':conditional')
-end
-for _, vehicle_class in ipairs(vehicle_class_list) do
-  table.insert(CONDITIONAL_KEYS, vehicle_class .. ':conditional')
-  table.insert(CONDITIONAL_KEYS, 'restriction:' .. vehicle_class .. ':conditional')
-end
-
--- Collect conditional values we can not interpret (see `is_valid_conditional_value`).
----@param tags table
----@return table<string, string>|nil
-local function collect_invalid_conditional_tags(tags)
-  local invalid = {}
-  local has_invalid = false
-  for _, key in ipairs(CONDITIONAL_KEYS) do
-    local value = tags[key]
-    if value and value ~= 'yes' and not is_valid_conditional_value(value) then
-      invalid[key] = value
-      has_invalid = true
-    end
-  end
-  -- `maxstay=1 hour @ (…)` is read like `maxstay:conditional` below
-  if tags.maxstay and string.find(tags.maxstay, '@') and not is_valid_conditional_value(tags.maxstay) then
-    invalid.maxstay = tags.maxstay
-    has_invalid = true
-  end
-  return has_invalid and invalid or nil
-end
+local vehicle_class_list = require('topics.parking.helper.vehicle_classes')
 
 ---@alias conditional_entry {value: string, condition: string}
 
@@ -166,18 +120,11 @@ end
 -- Classify parking conditions into merged categories
 -- Based on [street_parking.py](https://github.com/SupaplexOSM/street_parking.py/blob/main/street_parking.py) vehicle restrictions processing
 -- Uses only `tags` (e.g. unnested parking:left/right from the way, or full tags on a parking area). Highway-only tags must not be merged in here for road-derived parkings.
----@param tags OsmTags<string, string|nil> Parking-scoped OSM tags (unnested `parking:*` side tags or element tags)
+---@param tags OsmTags<string, string|nil> Parking-scoped OSM tags, already cleaned by `sanitize_condition_tags`
 ---@param default_category 'assumed_free'|'assumed_private' Default category to use when no condition is found
----@return {condition_category?: string, invalid_conditional_tags?: table<string, string>}
-function classify_parking_conditions(tags, default_category)
+---@return {condition_category: string, condition_category_primary: string}
+local function classify(tags, default_category)
   local function t(k) return tags[k] end
-
-  -- Strict: a malformed conditional value makes the category `invalid` (we can not tell the real restriction);
-  -- callers log `invalid_conditional_tags` to `parking_errors`.
-  local invalid_conditional_tags = collect_invalid_conditional_tags(tags)
-  if invalid_conditional_tags then
-    return { condition_category = 'invalid', invalid_conditional_tags = invalid_conditional_tags }
-  end
 
   -- Initialize categories
   ---@type string[]
@@ -192,6 +139,8 @@ function classify_parking_conditions(tags, default_category)
   local fee = t('fee')
   local fee_conditional = parse_conditional_value(t('fee:conditional'))
   local access = t('motor_vehicle') or t('access')
+  -- Unknown access values still count as an access restriction, but are not shown as detail
+  local access_detail = access ~= ACCESS_OTHER and access or nil
   local access_conditional = parse_conditional_value(t('motor_vehicle:conditional')) or parse_conditional_value(t('access:conditional'))
   local maxstay = t('maxstay')
   if is_empty_or_no(maxstay) and t('maxstay:conditional') == 'yes' then
@@ -497,9 +446,9 @@ function classify_parking_conditions(tags, default_category)
     if access == 'private' and not access_cond then
       condition_class = add_condition_class(condition_class, 'private')
     elseif access and access_cond then
-      condition_class = add_condition_class(condition_class, 'access_restriction', access .. ', ' .. access_cond)
+      condition_class = add_condition_class(condition_class, 'access_restriction', access_detail and (access_detail .. ', ' .. access_cond) or access_cond)
     elseif access then
-      condition_class = add_condition_class(condition_class, 'access_restriction', access)
+      condition_class = add_condition_class(condition_class, 'access_restriction', access_detail)
     elseif access_cond then
       condition_class = add_condition_class(condition_class, 'access_restriction', access_cond)
     end
@@ -511,7 +460,12 @@ function classify_parking_conditions(tags, default_category)
     local first_maxstay = maxstay_conditional[1]
     local maxstay_cond = first_maxstay and first_maxstay.value -- Different conditions at the same spot are very uncommon, so we just need the first value.
     if maxstay_cond and not is_empty_or_no(maxstay_cond) and maxstay_cond ~= 'unlimited' then
-      condition_class = add_condition_class(condition_class, 'time_limited', maxstay_cond .. ') (' .. maxstay_interval)
+      if maxstay_cond == 'yes' then
+        -- Unknown duration (see `sanitize_condition_tags`): keep the time limit and its interval
+        condition_class = add_condition_class(condition_class, 'time_limited', maxstay_interval)
+      else
+        condition_class = add_condition_class(condition_class, 'time_limited', maxstay_cond .. ') (' .. maxstay_interval)
+      end
     end
   elseif not is_empty_or_no(maxstay) and maxstay ~= 'unlimited' then
     if maxstay == 'yes' then
@@ -680,10 +634,41 @@ function classify_parking_conditions(tags, default_category)
 
   -- Concat condition classes (transform condition class list to semicolon separated string)
   local condition_category_str = #condition_class > 0 and table.concat(condition_class, SEPARATOR) or default_category
+  -- Safety net (no reporting here): this function glues details together, so make sure the final
+  -- string only holds processed data, whatever `sanitize_condition_tags` let through.
+  condition_category_str = condition_category_str:gsub('"([^"]*)"', function(comment)
+    return (DETAIL_TOKENS.comment_token(comment))
+  end)
+  condition_category_str = condition_category_str:gsub('"', '')
+  condition_category_str = condition_category_str:gsub('%(([^()]*)%)', function(detail)
+    return '(' .. CONDITION_SYNTAX.clean(detail) .. ')'
+  end)
+  -- HTML-like tags become `[…]`; the `(…)` of `sanitize_string` would break the `base (detail)` bracket syntax.
+  condition_category_str = condition_category_str:gsub('<(%s*/?%s*%a[^>]-)>', '[%1]')
+  condition_category_str = sanitize_string(condition_category_str) --[[@as string]]
 
   return {
     condition_category = condition_category_str,
+    condition_category_primary = condition_category_primary(condition_category_str),
   }
+end
+
+-- Classify parking conditions into merged categories.
+-- Two steps: `sanitize_condition_tags` cleans the tags and decides what to report (the only place that does),
+-- `classify` turns the clean tags into `condition_category`.
+-- Callers log `dropped_tags` (`SANITIZED_VALUE`) and `rewritten_tags` (`REWRITTEN_VALUE`) to `parking_errors`.
+---@param tags OsmTags<string, string|nil> Parking-scoped OSM tags (unnested `parking:*` side tags or element tags)
+---@param default_category 'assumed_free'|'assumed_private' Default category to use when no condition is found
+---@return {condition_category: string, condition_category_primary: string, dropped_tags?: table<string, string>, rewritten_tags?: table<string, string>}
+function classify_parking_conditions(tags, default_category)
+  local sanitized = sanitize_condition_tags.sanitize(tags)
+  -- Strict: a malformed conditional value makes the category `invalid` (we can not tell the real restriction).
+  local result = sanitized.invalid
+    and { condition_category = 'invalid', condition_category_primary = condition_category_primary('invalid') }
+    or classify(sanitized.tags, default_category)
+  result.dropped_tags = sanitized.dropped_tags
+  result.rewritten_tags = sanitized.rewritten_tags
+  return result
 end
 
 return classify_parking_conditions

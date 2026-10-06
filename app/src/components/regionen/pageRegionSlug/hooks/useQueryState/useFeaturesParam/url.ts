@@ -40,7 +40,7 @@ export const numericSourceIds: Record<number, SourceNames> = {
   18: 'atlas_landuse',
   19: 'atlas_bicycleParking',
   20: 'atlas_trafficSigns',
-  21: 'mapillary_coverage',
+  // 21: 'mapillary_coverage', // photos are not inspector features anymore, see `?photos=`
   22: 'atlas_bikelanesPresence',
   23: 'atlas_bikeSuitability',
   24: 'atlas_todos_lines',

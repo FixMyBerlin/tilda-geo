@@ -21,6 +21,7 @@ import {
 } from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
 import { zodReviewListsModeParam } from '@/components/regionen/pageRegionSlug/modes/reviewLists/reviewListsModeParam'
 import { zodSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderModeParam'
+import { zodStreetImageryParam } from '@/components/regionen/pageRegionSlug/streetImagery/streetImageryParam'
 import {
   optionalSearchJson,
   optionalSearchBoolean,
@@ -87,6 +88,7 @@ export const regionSearchSchema = z.object({
   [searchParamsRegistry.notes]: optionalSearchJson(zodNotesModeParam),
   [searchParamsRegistry.review]: optionalSearchJson(zodReviewListsModeParam),
   [searchParamsRegistry.ff]: optionalSearchJson(zodSpaceFinderModeParam),
+  [searchParamsRegistry.photos]: optionalSearchJson(zodStreetImageryParam),
 })
 
 export type RegionSearch = z.infer<typeof regionSearchSchema>

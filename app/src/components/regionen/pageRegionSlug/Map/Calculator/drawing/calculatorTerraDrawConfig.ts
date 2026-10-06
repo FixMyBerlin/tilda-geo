@@ -10,6 +10,14 @@ export const CALCULATOR_TERRA_COLORS = {
   midPoint: '#a855f7' as HexColor,
 }
 
+const SELECTION_POINT_WIDTH = 7
+const SELECTION_POINT_OUTLINE_WIDTH = 2
+// Hit area for corners and edge points: a bit larger than the drawn corner, so the cursor
+// reacts everywhere the point is visible.
+const SELECT_POINTER_DISTANCE = Math.ceil(
+  (SELECTION_POINT_WIDTH + SELECTION_POINT_OUTLINE_WIDTH) * 1.2,
+)
+
 const colorByDrawingState = (feature: GeoJSONStoreFeatures) =>
   feature.properties?.currentlyDrawing
     ? CALCULATOR_TERRA_COLORS.drawing
@@ -28,14 +36,15 @@ export const createCalculatorTerraDrawModes = () => [
     },
   }),
   new TerraDrawSelectMode({
-    pointerDistance: 6,
+    pointerDistance: SELECT_POINTER_DISTANCE,
     flags: {
       polygon: {
         feature: {
           draggable: true,
           coordinates: {
             draggable: true,
-            midpoints: true,
+            // Dragging a midpoint adds the corner and moves it in one gesture.
+            midpoints: { draggable: true },
           },
         },
       },
@@ -48,8 +57,8 @@ export const createCalculatorTerraDrawModes = () => [
       selectionPointOpacity: 0.95,
       selectionPointOutlineColor: CALCULATOR_TERRA_COLORS.selectionPoint,
       selectionPointOutlineOpacity: 0.95,
-      selectionPointOutlineWidth: 2,
-      selectionPointWidth: 7,
+      selectionPointOutlineWidth: SELECTION_POINT_OUTLINE_WIDTH,
+      selectionPointWidth: SELECTION_POINT_WIDTH,
       midPointColor: CALCULATOR_TERRA_COLORS.midPoint,
       midPointOpacity: 0.95,
       midPointOutlineColor: CALCULATOR_TERRA_COLORS.midPoint,

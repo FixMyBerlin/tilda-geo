@@ -40,13 +40,6 @@ export const Calculator = () => {
 
   return (
     <>
-      <style
-        // oxlint-disable-next-line react/no-danger -- static CSS for map control position
-        dangerouslySetInnerHTML={{
-          // Offset the top-left map controls past the desktop sidebar only (no sidebar on mobile).
-          __html: '@media (min-width: 640px) { .maplibregl-ctrl-top-left { left: 270px; } }',
-        }}
-      />
       <CalculatorControls queryLayers={queryLayers} />
       <CalculatorOutput
         sumKeys={sumKeys}

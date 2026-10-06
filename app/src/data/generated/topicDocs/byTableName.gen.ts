@@ -4422,7 +4422,7 @@ const data = {
         label: 'Primäre Parkbeschränkung',
         purpose: 'rendering',
         description:
-          'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
+          'Der für die Darstellung wichtigste Wert aus `condition_category`. Reihenfolge: Sonderparkplätze (Behinderte, Taxi, Ladezone, E-Laden, Carsharing) vor Park- und Haltverboten, dann private/eingeschränkte Flächen, dann Höchstparkdauer vor Bewirtschaftung. Nur zur Darstellung; fachlich gilt `condition_category`.',
         values: [
           {
             value: 'access_restriction',
@@ -5191,7 +5191,7 @@ const data = {
         label: 'Primäre Parkbeschränkung',
         purpose: 'rendering',
         description:
-          'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
+          'Der für die Darstellung wichtigste Wert aus `condition_category`. Reihenfolge: Sonderparkplätze (Behinderte, Taxi, Ladezone, E-Laden, Carsharing) vor Park- und Haltverboten, dann private/eingeschränkte Flächen, dann Höchstparkdauer vor Bewirtschaftung. Nur zur Darstellung; fachlich gilt `condition_category`.',
         values: [
           {
             value: 'access_restriction',
@@ -5940,7 +5940,7 @@ const data = {
         label: 'Primäre Parkbeschränkung',
         purpose: 'rendering',
         description:
-          'Erstes passendes Token aus `condition_category` in der Prioritätsliste der Kartenstile. Nur zur Darstellung; fachlich gilt `condition_category`.',
+          'Der für die Darstellung wichtigste Wert aus `condition_category`. Reihenfolge: Sonderparkplätze (Behinderte, Taxi, Ladezone, E-Laden, Carsharing) vor Park- und Haltverboten, dann private/eingeschränkte Flächen, dann Höchstparkdauer vor Bewirtschaftung. Nur zur Darstellung; fachlich gilt `condition_category`.',
         values: [
           {
             value: 'access_restriction',
@@ -8673,6 +8673,114 @@ const data = {
         ],
       },
       {
+        key: 'condition_category_primary',
+        type: 'string',
+        label: 'Primäre Parkbeschränkung',
+        purpose: 'rendering',
+        description:
+          'Der für die Darstellung wichtigste Wert aus `condition_category`. Reihenfolge: Sonderparkplätze (Behinderte, Taxi, Ladezone, E-Laden, Carsharing) vor Park- und Haltverboten, dann private/eingeschränkte Flächen, dann Höchstparkdauer vor Bewirtschaftung. Nur zur Darstellung; fachlich gilt `condition_category`.',
+        values: [
+          {
+            value: 'access_restriction',
+            label: 'Zugangsbeschränkung',
+          },
+          {
+            value: 'assumed_free',
+            label: 'Wahrscheinlich keine Parkbeschränkungen',
+          },
+          {
+            value: 'assumed_private',
+            label: 'Sehr wahrscheinlich privat',
+          },
+          {
+            value: 'bus_lane',
+            label: 'Bussonderfahrstreifen',
+          },
+          {
+            value: 'car_sharing',
+            label: 'Nur für Carsharing-Fahrzeuge',
+          },
+          {
+            value: 'charging',
+            label: 'Laden von Elektrofahrzeugen',
+          },
+          {
+            value: 'disabled',
+            label: 'Behindertenparkplatz',
+          },
+          {
+            value: 'disabled_private',
+            label: 'Personenbezogener Behindertenparkplatz',
+          },
+          {
+            value: 'free',
+            label: 'Keine Parkbeschränkungen',
+          },
+          {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
+          },
+          {
+            value: 'loading',
+            label: 'Ladezone',
+          },
+          {
+            value: 'maxweight',
+            label: 'Gewichtsbegrenzung',
+          },
+          {
+            value: 'mixed',
+            label: 'Nur mit Parkschein oder Bewohnerparkausweis',
+          },
+          {
+            value: 'no_parking',
+            label: 'Eingeschränktes Haltverbot',
+          },
+          {
+            value: 'no_standing',
+            label: 'Nur kurzes Halten erlaubt',
+          },
+          {
+            value: 'no_stopping',
+            label: 'Absolutes Haltverbot',
+          },
+          {
+            value: 'paid',
+            label: 'Nur mit Parkschein',
+          },
+          {
+            value: 'private',
+            label: 'Privat',
+          },
+          {
+            value: 'residents',
+            label: 'Nur mit Bewohnerparkausweis',
+          },
+          {
+            value: 'taxi',
+            label: 'Taxenstand',
+          },
+          {
+            value: 'time_limited',
+            label: 'Höchstparkdauer',
+          },
+          {
+            value: 'unspecified',
+            label: 'Unbestimmt',
+          },
+          {
+            value: 'vehicle_restriction',
+            label: 'Beschränkung auf Fahrzeugklassen',
+          },
+          {
+            value: 'default',
+            label: 'Keine Zuordnung',
+          },
+        ],
+      },
+      {
         key: 'capacity',
         type: 'number',
         label: 'Stellplatzanzahl',
@@ -9731,6 +9839,114 @@ const data = {
           {
             value: 'vehicle_restriction',
             label: 'Beschränkung auf Fahrzeugklassen',
+          },
+        ],
+      },
+      {
+        key: 'condition_category_primary',
+        type: 'string',
+        label: 'Primäre Parkbeschränkung',
+        purpose: 'rendering',
+        description:
+          'Der für die Darstellung wichtigste Wert aus `condition_category`. Reihenfolge: Sonderparkplätze (Behinderte, Taxi, Ladezone, E-Laden, Carsharing) vor Park- und Haltverboten, dann private/eingeschränkte Flächen, dann Höchstparkdauer vor Bewirtschaftung. Nur zur Darstellung; fachlich gilt `condition_category`.',
+        values: [
+          {
+            value: 'access_restriction',
+            label: 'Zugangsbeschränkung',
+          },
+          {
+            value: 'assumed_free',
+            label: 'Wahrscheinlich keine Parkbeschränkungen',
+          },
+          {
+            value: 'assumed_private',
+            label: 'Sehr wahrscheinlich privat',
+          },
+          {
+            value: 'bus_lane',
+            label: 'Bussonderfahrstreifen',
+          },
+          {
+            value: 'car_sharing',
+            label: 'Nur für Carsharing-Fahrzeuge',
+          },
+          {
+            value: 'charging',
+            label: 'Laden von Elektrofahrzeugen',
+          },
+          {
+            value: 'disabled',
+            label: 'Behindertenparkplatz',
+          },
+          {
+            value: 'disabled_private',
+            label: 'Personenbezogener Behindertenparkplatz',
+          },
+          {
+            value: 'free',
+            label: 'Keine Parkbeschränkungen',
+          },
+          {
+            value: 'invalid',
+            label: 'Ungültige Angabe in OSM',
+            description:
+              'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
+          },
+          {
+            value: 'loading',
+            label: 'Ladezone',
+          },
+          {
+            value: 'maxweight',
+            label: 'Gewichtsbegrenzung',
+          },
+          {
+            value: 'mixed',
+            label: 'Nur mit Parkschein oder Bewohnerparkausweis',
+          },
+          {
+            value: 'no_parking',
+            label: 'Eingeschränktes Haltverbot',
+          },
+          {
+            value: 'no_standing',
+            label: 'Nur kurzes Halten erlaubt',
+          },
+          {
+            value: 'no_stopping',
+            label: 'Absolutes Haltverbot',
+          },
+          {
+            value: 'paid',
+            label: 'Nur mit Parkschein',
+          },
+          {
+            value: 'private',
+            label: 'Privat',
+          },
+          {
+            value: 'residents',
+            label: 'Nur mit Bewohnerparkausweis',
+          },
+          {
+            value: 'taxi',
+            label: 'Taxenstand',
+          },
+          {
+            value: 'time_limited',
+            label: 'Höchstparkdauer',
+          },
+          {
+            value: 'unspecified',
+            label: 'Unbestimmt',
+          },
+          {
+            value: 'vehicle_restriction',
+            label: 'Beschränkung auf Fahrzeugklassen',
+          },
+          {
+            value: 'default',
+            label: 'Keine Zuordnung',
           },
         ],
       },

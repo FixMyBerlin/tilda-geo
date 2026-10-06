@@ -5,6 +5,8 @@ minimumReleaseAgeExcludes = [
   "typescript",
   "@typescript/typescript-*",
   "@osm-traffic-signs/converter",
+  "@osm-editor-kit/street-imagery",
+  "@osm-editor-kit/street-imagery-react",
 ]
 
 # Global virtual store — requires isolated linker. Reinstall after changing: rm -rf node_modules && bun install

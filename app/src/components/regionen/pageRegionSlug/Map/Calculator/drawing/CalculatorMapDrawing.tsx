@@ -20,6 +20,7 @@ type Props = {
   drawAreas: DrawArea[]
   drawMode: CalculatorUrlDrawMode
   onUserGeometryChange: (areas: DrawArea[]) => void
+  onUserGeometryCommit: (areas: DrawArea[]) => void
   onUserDrawModeChange: (mode: CalculatorUrlDrawMode) => void
   getFeatureLabel?: (args: { area: DrawArea; index: number }) => string | undefined
 }
@@ -54,6 +55,7 @@ export function CalculatorMapDrawing({
   drawAreas,
   drawMode,
   onUserGeometryChange,
+  onUserGeometryCommit,
   onUserDrawModeChange,
   getFeatureLabel,
 }: Props) {
@@ -62,12 +64,20 @@ export function CalculatorMapDrawing({
   const lastSyncedSerializedRef = useRef('')
   const drawAreasRef = useRef(drawAreas)
   const drawModeRef = useRef(drawMode)
-  const handlersRef = useRef({ onUserGeometryChange })
+  const handlersRef = useRef({
+    onUserGeometryChange,
+    onUserGeometryCommit,
+    onDrawModeChange: onUserDrawModeChange,
+  })
 
   useEffect(function syncCalculatorDrawingRefs() {
     drawAreasRef.current = drawAreas
     drawModeRef.current = drawMode
-    handlersRef.current = { onUserGeometryChange }
+    handlersRef.current = {
+      onUserGeometryChange,
+      onUserGeometryCommit,
+      onDrawModeChange: onUserDrawModeChange,
+    }
   })
 
   const control = useControl(

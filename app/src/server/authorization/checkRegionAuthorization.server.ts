@@ -1,7 +1,7 @@
-import type { AppSession } from '@/server/auth/types'
+import type { SessionActor } from '@/server/auth/types'
 import db from '@/server/db.server'
 
-export async function checkRegionAuthorization(session: AppSession | null, regionSlug: string) {
+export async function checkRegionAuthorization(session: SessionActor | null, regionSlug: string) {
   // Get the region
   const region = await db.region.findFirst({
     where: { slug: regionSlug },

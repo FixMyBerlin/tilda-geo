@@ -20,7 +20,9 @@ local function insert_topic_error_row(
   instruction
 )
 
-  if error_type == TOPIC_ERROR_INSTRUCTIONS.SANITIZED_VALUE.key and (not tags or next(tags) == nil) then
+  local is_tag_report = error_type == TOPIC_ERROR_INSTRUCTIONS.SANITIZED_VALUE.key
+    or error_type == TOPIC_ERROR_INSTRUCTIONS.REWRITTEN_VALUE.key
+  if is_tag_report and (not tags or next(tags) == nil) then
     return
   end
 

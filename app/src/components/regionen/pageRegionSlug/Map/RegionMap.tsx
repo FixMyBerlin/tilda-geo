@@ -1,3 +1,7 @@
+import {
+  streetImageryInteractiveLayerIds,
+  useArmedLocationOpenerId,
+} from '@osm-editor-kit/street-imagery-react'
 import { bbox, bboxPolygon, buffer } from '@turf/turf'
 import { differenceBy, uniqBy } from 'es-toolkit/compat'
 import 'maplibre-gl/dist/maplibre-gl.css'
@@ -45,6 +49,11 @@ import { SpaceFinderMapDrawing } from '../modes/spaceFinder/drawing/SpaceFinderM
 import { useSpaceFinderSelection } from '../modes/spaceFinder/useSpaceFinderSelection'
 import { useCurrentMode } from '../modes/useCurrentMode'
 import { useRegion } from '../regionUtils/useRegion'
+import {
+  clickedStreetImageryPhoto,
+  isStreetImageryFeature,
+} from '../streetImagery/streetImageryClick'
+import { useStreetImageryParam } from '../streetImagery/useStreetImageryParam'
 import { Calculator } from './Calculator/Calculator'
 import { Map3dTouchRotation } from './Map3dTouchRotation'
 import { SearchResultLayers } from './Search/SearchResultLayers'
@@ -62,6 +71,7 @@ import {
   SourcesLayersSpaceFinder,
 } from './SourcesAndLayers/SourcesLayersSpaceFinder'
 import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersStaticDatasets'
+import { SourcesLayersStreetImagery } from './SourcesAndLayers/SourcesLayersStreetImagery'
 import { SourcesLayersSystemDatasets } from './SourcesAndLayers/SourcesLayersSystemDatasets'
 import { TerrainProfileHoverMarkerLayer } from './SourcesAndLayers/TerrainProfileHoverMarkerLayer'
 import { UpdateFeatureState } from './UpdateFeatureState'
@@ -122,9 +132,14 @@ export const RegionMap = () => {
   const candidateSelectActive = useSpaceFinderCandidatesState((s) => s.selectActive)
   const toggleCandidate = useSpaceFinderCandidatesState((s) => s.toggleCandidate)
   const { runId: spaceFinderRunId } = useSpaceFinderSelection()
+  const { providers: streetImageryProviders, setPhoto: setStreetImageryPhoto } =
+    useStreetImageryParam()
+  // "Öffnen in …" is armed: the next click opens that place (<LocationPickOnMap>), nothing else.
+  const pickingLocation = useArmedLocationOpenerId() != null
 
   const handleClick = ({ features, ...event }: MapLayerMouseEvent) => {
     if (reviewDrawActive) return
+    if (pickingLocation) return
     if (containMaskFeature(features)) {
       return
     }
@@ -142,6 +157,11 @@ export const RegionMap = () => {
           properties: { ...hexagon.properties },
         })
       }
+      return
+    }
+    const photo = clickedStreetImageryPhoto(features)
+    if (photo) {
+      setStreetImageryPhoto(photo)
       return
     }
     if (!isProd) {
@@ -169,7 +189,10 @@ export const RegionMap = () => {
       // Allow multi select with Control (Windows) / Command (Mac) — inspector domain only
       multiselect: event.originalEvent.ctrlKey || event.originalEvent.metaKey,
     })
-    replaceInspectorFeatures(nextInspectorFeatures)
+    replaceInspectorFeatures({
+      features: nextInspectorFeatures,
+      clickLngLat: [event.lngLat.lng, event.lngLat.lat],
+    })
     setFeaturesParam(nextUrlFeatures.length > 0 ? nextUrlFeatures : null)
     clearHoveredListItem()
   }
@@ -217,8 +240,9 @@ export const RegionMap = () => {
   const handleMouseMove = ({ features }: MapLayerMouseEvent) => {
     features = extractInteractiveFeatures(mapParam, features)
     updateCursor(features)
-    updateHover(features)
-    updateMapListHover(features)
+    const tildaFeatures = features.filter((feature) => !isStreetImageryFeature(feature))
+    updateHover(tildaFeatures)
+    updateMapListHover(tildaFeatures)
   }
 
   const handleMouseLeave = (_e: MapLayerMouseEvent) => {
@@ -307,7 +331,10 @@ export const RegionMap = () => {
     reviewDrawActive ||
     (currentMode.isSpaceFinder && spaceFinderPolygonDrawing)
       ? NO_INTERACTIVE_LAYERS
-      : computedInteractiveLayerIds
+      : [
+          ...computedInteractiveLayerIds,
+          ...streetImageryInteractiveLayerIds(streetImageryProviders),
+        ]
 
   if (!mapParam) {
     return null
@@ -352,7 +379,7 @@ export const RegionMap = () => {
       interactiveLayerIds={interactiveLayerIds}
       // onMouseMove={}
       // onLoad={handleInspect}
-      cursor={cursorStyle}
+      cursor={pickingLocation ? 'crosshair' : cursorStyle}
       onMove={notifyMapViewChanged}
       onResize={notifyMapViewChanged}
       onMoveEnd={handleMoveEnd}
@@ -376,6 +403,7 @@ export const RegionMap = () => {
       <SourcesLayersSystemDatasets />
       <SourcesLayersAtlasGeo />
       <SourcesLayersStaticDatasets />
+      <SourcesLayersStreetImagery />
       <SourcesLayersOsmNotes />
       <SourcesLayersInternalNotes />
       <SourcesLayersQa />

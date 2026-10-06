@@ -75,6 +75,7 @@ import { Route as ApiPrivatePostProcessingHookRouteImport } from './routes/api/p
 import { Route as ApiPrivateGenerateMaprouletteTasksRouteImport } from './routes/api/private/generate-maproulette-tasks'
 import { Route as ApiOsmNotesRssRouteImport } from './routes/api/osm-notes.rss'
 import { Route as ApiNotesRegionSlugRouteImport } from './routes/api/notes.$regionSlug'
+import { Route as ApiAuthOsmTokenRouteImport } from './routes/api/auth.osm-token'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as ApiAdminRegionsRouteImport } from './routes/api/admin/regions'
 import { Route as ApiAdminRegionUploadsRouteImport } from './routes/api/admin/region-uploads'
@@ -95,6 +96,7 @@ import { Route as PagesDocsTableNameRouteImport } from './routes/_pages/docs.$ta
 import { Route as ApiRegionsRegionSlugUploadsCsvRouteImport } from './routes/api/regions.$regionSlug.uploads-csv'
 import { Route as ApiRegionUploadsIdFilenameRouteImport } from './routes/api/region-uploads.$id.$filename'
 import { Route as ApiNotesRegionSlugDownloadRouteImport } from './routes/api/notes.$regionSlug.download'
+import { Route as ApiNotesRegionSlugFolderIdRouteImport } from './routes/api/notes.$regionSlug.$folderId'
 import { Route as ApiMaprouletteStatisticProxyChallengeIdRouteImport } from './routes/api/maproulette.statistic-proxy.$challengeId'
 import { Route as ApiMaprouletteDataTest_tag_fix_twoRouteImport } from './routes/api/maproulette.data.test_tag_fix_two'
 import { Route as ApiMaprouletteDataTest_tag_fix_cyclewaySharedRouteImport } from './routes/api/maproulette.data.test_tag_fix_cycleway-shared'
@@ -112,7 +114,9 @@ import { Route as AdminRegionsRegionSlugEditRouteImport } from './routes/admin/r
 import { Route as AdminRegionContractsSlugEditRouteImport } from './routes/admin/region-contracts/$slug.edit'
 import { Route as AdminQaConfigsIdEditRouteImport } from './routes/admin/qa-configs/$id.edit'
 import { Route as AdminNoteFoldersIdEditRouteImport } from './routes/admin/note-folders/$id.edit'
+import { Route as ApiNotesRegionSlugFolderIdNoteIdRouteImport } from './routes/api/notes.$regionSlug.$folderId.$noteId'
 import { Route as ApiAdminQaConfigsIdExportCsvRouteImport } from './routes/api/admin.qa-configs.$id.export-csv'
+import { Route as ApiNotesRegionSlugFolderIdNoteIdCommentsRouteImport } from './routes/api/notes.$regionSlug.$folderId.$noteId.comments'
 
 const RegionenRoute = RegionenRouteImport.update({
   id: '/regionen',
@@ -455,6 +459,11 @@ const ApiNotesRegionSlugRoute = ApiNotesRegionSlugRouteImport.update({
   path: '/api/notes/$regionSlug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthOsmTokenRoute = ApiAuthOsmTokenRouteImport.update({
+  id: '/api/auth/osm-token',
+  path: '/api/auth/osm-token',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -562,6 +571,12 @@ const ApiNotesRegionSlugDownloadRoute =
     path: '/download',
     getParentRoute: () => ApiNotesRegionSlugRoute,
   } as any)
+const ApiNotesRegionSlugFolderIdRoute =
+  ApiNotesRegionSlugFolderIdRouteImport.update({
+    id: '/$folderId',
+    path: '/$folderId',
+    getParentRoute: () => ApiNotesRegionSlugRoute,
+  } as any)
 const ApiMaprouletteStatisticProxyChallengeIdRoute =
   ApiMaprouletteStatisticProxyChallengeIdRouteImport.update({
     id: '/api/maproulette/statistic-proxy/$challengeId',
@@ -659,11 +674,23 @@ const AdminNoteFoldersIdEditRoute = AdminNoteFoldersIdEditRouteImport.update({
   path: '/$id/edit',
   getParentRoute: () => AdminNoteFoldersRoute,
 } as any)
+const ApiNotesRegionSlugFolderIdNoteIdRoute =
+  ApiNotesRegionSlugFolderIdNoteIdRouteImport.update({
+    id: '/$noteId',
+    path: '/$noteId',
+    getParentRoute: () => ApiNotesRegionSlugFolderIdRoute,
+  } as any)
 const ApiAdminQaConfigsIdExportCsvRoute =
   ApiAdminQaConfigsIdExportCsvRouteImport.update({
     id: '/api/admin/qa-configs/$id/export-csv',
     path: '/api/admin/qa-configs/$id/export-csv',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiNotesRegionSlugFolderIdNoteIdCommentsRoute =
+  ApiNotesRegionSlugFolderIdNoteIdCommentsRouteImport.update({
+    id: '/comments',
+    path: '/comments',
+    getParentRoute: () => ApiNotesRegionSlugFolderIdNoteIdRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -723,6 +750,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/region-uploads': typeof ApiAdminRegionUploadsRouteWithChildren
   '/api/admin/regions': typeof ApiAdminRegionsRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/auth/osm-token': typeof ApiAuthOsmTokenRoute
   '/api/notes/$regionSlug': typeof ApiNotesRegionSlugRouteWithChildren
   '/api/osm-notes/rss': typeof ApiOsmNotesRssRoute
   '/api/private/generate-maproulette-tasks': typeof ApiPrivateGenerateMaprouletteTasksRoute
@@ -766,10 +794,13 @@ export interface FileRoutesByFullPath {
   '/api/maproulette/data/test_tag_fix_cycleway-shared': typeof ApiMaprouletteDataTest_tag_fix_cyclewaySharedRoute
   '/api/maproulette/data/test_tag_fix_two': typeof ApiMaprouletteDataTest_tag_fix_twoRoute
   '/api/maproulette/statistic-proxy/$challengeId': typeof ApiMaprouletteStatisticProxyChallengeIdRoute
+  '/api/notes/$regionSlug/$folderId': typeof ApiNotesRegionSlugFolderIdRouteWithChildren
   '/api/notes/$regionSlug/download': typeof ApiNotesRegionSlugDownloadRoute
   '/api/region-uploads/$id/$filename': typeof ApiRegionUploadsIdFilenameRoute
   '/api/regions/$regionSlug/uploads-csv': typeof ApiRegionsRegionSlugUploadsCsvRoute
   '/api/admin/qa-configs/$id/export-csv': typeof ApiAdminQaConfigsIdExportCsvRoute
+  '/api/notes/$regionSlug/$folderId/$noteId': typeof ApiNotesRegionSlugFolderIdNoteIdRouteWithChildren
+  '/api/notes/$regionSlug/$folderId/$noteId/comments': typeof ApiNotesRegionSlugFolderIdNoteIdCommentsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -816,6 +847,7 @@ export interface FileRoutesByTo {
   '/api/admin/region-uploads': typeof ApiAdminRegionUploadsRouteWithChildren
   '/api/admin/regions': typeof ApiAdminRegionsRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/auth/osm-token': typeof ApiAuthOsmTokenRoute
   '/api/notes/$regionSlug': typeof ApiNotesRegionSlugRouteWithChildren
   '/api/osm-notes/rss': typeof ApiOsmNotesRssRoute
   '/api/private/generate-maproulette-tasks': typeof ApiPrivateGenerateMaprouletteTasksRoute
@@ -859,10 +891,13 @@ export interface FileRoutesByTo {
   '/api/maproulette/data/test_tag_fix_cycleway-shared': typeof ApiMaprouletteDataTest_tag_fix_cyclewaySharedRoute
   '/api/maproulette/data/test_tag_fix_two': typeof ApiMaprouletteDataTest_tag_fix_twoRoute
   '/api/maproulette/statistic-proxy/$challengeId': typeof ApiMaprouletteStatisticProxyChallengeIdRoute
+  '/api/notes/$regionSlug/$folderId': typeof ApiNotesRegionSlugFolderIdRouteWithChildren
   '/api/notes/$regionSlug/download': typeof ApiNotesRegionSlugDownloadRoute
   '/api/region-uploads/$id/$filename': typeof ApiRegionUploadsIdFilenameRoute
   '/api/regions/$regionSlug/uploads-csv': typeof ApiRegionsRegionSlugUploadsCsvRoute
   '/api/admin/qa-configs/$id/export-csv': typeof ApiAdminQaConfigsIdExportCsvRoute
+  '/api/notes/$regionSlug/$folderId/$noteId': typeof ApiNotesRegionSlugFolderIdNoteIdRouteWithChildren
+  '/api/notes/$regionSlug/$folderId/$noteId/comments': typeof ApiNotesRegionSlugFolderIdNoteIdCommentsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -923,6 +958,7 @@ export interface FileRoutesById {
   '/api/admin/region-uploads': typeof ApiAdminRegionUploadsRouteWithChildren
   '/api/admin/regions': typeof ApiAdminRegionsRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/auth/osm-token': typeof ApiAuthOsmTokenRoute
   '/api/notes/$regionSlug': typeof ApiNotesRegionSlugRouteWithChildren
   '/api/osm-notes/rss': typeof ApiOsmNotesRssRoute
   '/api/private/generate-maproulette-tasks': typeof ApiPrivateGenerateMaprouletteTasksRoute
@@ -966,10 +1002,13 @@ export interface FileRoutesById {
   '/api/maproulette/data/test_tag_fix_cycleway-shared': typeof ApiMaprouletteDataTest_tag_fix_cyclewaySharedRoute
   '/api/maproulette/data/test_tag_fix_two': typeof ApiMaprouletteDataTest_tag_fix_twoRoute
   '/api/maproulette/statistic-proxy/$challengeId': typeof ApiMaprouletteStatisticProxyChallengeIdRoute
+  '/api/notes/$regionSlug/$folderId': typeof ApiNotesRegionSlugFolderIdRouteWithChildren
   '/api/notes/$regionSlug/download': typeof ApiNotesRegionSlugDownloadRoute
   '/api/region-uploads/$id/$filename': typeof ApiRegionUploadsIdFilenameRoute
   '/api/regions/$regionSlug/uploads-csv': typeof ApiRegionsRegionSlugUploadsCsvRoute
   '/api/admin/qa-configs/$id/export-csv': typeof ApiAdminQaConfigsIdExportCsvRoute
+  '/api/notes/$regionSlug/$folderId/$noteId': typeof ApiNotesRegionSlugFolderIdNoteIdRouteWithChildren
+  '/api/notes/$regionSlug/$folderId/$noteId/comments': typeof ApiNotesRegionSlugFolderIdNoteIdCommentsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1030,6 +1069,7 @@ export interface FileRouteTypes {
     | '/api/admin/region-uploads'
     | '/api/admin/regions'
     | '/api/auth/$'
+    | '/api/auth/osm-token'
     | '/api/notes/$regionSlug'
     | '/api/osm-notes/rss'
     | '/api/private/generate-maproulette-tasks'
@@ -1073,10 +1113,13 @@ export interface FileRouteTypes {
     | '/api/maproulette/data/test_tag_fix_cycleway-shared'
     | '/api/maproulette/data/test_tag_fix_two'
     | '/api/maproulette/statistic-proxy/$challengeId'
+    | '/api/notes/$regionSlug/$folderId'
     | '/api/notes/$regionSlug/download'
     | '/api/region-uploads/$id/$filename'
     | '/api/regions/$regionSlug/uploads-csv'
     | '/api/admin/qa-configs/$id/export-csv'
+    | '/api/notes/$regionSlug/$folderId/$noteId'
+    | '/api/notes/$regionSlug/$folderId/$noteId/comments'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1123,6 +1166,7 @@ export interface FileRouteTypes {
     | '/api/admin/region-uploads'
     | '/api/admin/regions'
     | '/api/auth/$'
+    | '/api/auth/osm-token'
     | '/api/notes/$regionSlug'
     | '/api/osm-notes/rss'
     | '/api/private/generate-maproulette-tasks'
@@ -1166,10 +1210,13 @@ export interface FileRouteTypes {
     | '/api/maproulette/data/test_tag_fix_cycleway-shared'
     | '/api/maproulette/data/test_tag_fix_two'
     | '/api/maproulette/statistic-proxy/$challengeId'
+    | '/api/notes/$regionSlug/$folderId'
     | '/api/notes/$regionSlug/download'
     | '/api/region-uploads/$id/$filename'
     | '/api/regions/$regionSlug/uploads-csv'
     | '/api/admin/qa-configs/$id/export-csv'
+    | '/api/notes/$regionSlug/$folderId/$noteId'
+    | '/api/notes/$regionSlug/$folderId/$noteId/comments'
   id:
     | '__root__'
     | '/'
@@ -1229,6 +1276,7 @@ export interface FileRouteTypes {
     | '/api/admin/region-uploads'
     | '/api/admin/regions'
     | '/api/auth/$'
+    | '/api/auth/osm-token'
     | '/api/notes/$regionSlug'
     | '/api/osm-notes/rss'
     | '/api/private/generate-maproulette-tasks'
@@ -1272,10 +1320,13 @@ export interface FileRouteTypes {
     | '/api/maproulette/data/test_tag_fix_cycleway-shared'
     | '/api/maproulette/data/test_tag_fix_two'
     | '/api/maproulette/statistic-proxy/$challengeId'
+    | '/api/notes/$regionSlug/$folderId'
     | '/api/notes/$regionSlug/download'
     | '/api/region-uploads/$id/$filename'
     | '/api/regions/$regionSlug/uploads-csv'
     | '/api/admin/qa-configs/$id/export-csv'
+    | '/api/notes/$regionSlug/$folderId/$noteId'
+    | '/api/notes/$regionSlug/$folderId/$noteId/comments'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1298,6 +1349,7 @@ export interface RootRouteChildren {
   ApiAdminRegionUploadsRoute: typeof ApiAdminRegionUploadsRouteWithChildren
   ApiAdminRegionsRoute: typeof ApiAdminRegionsRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiAuthOsmTokenRoute: typeof ApiAuthOsmTokenRoute
   ApiNotesRegionSlugRoute: typeof ApiNotesRegionSlugRouteWithChildren
   ApiOsmNotesRssRoute: typeof ApiOsmNotesRssRoute
   ApiPrivateGenerateMaprouletteTasksRoute: typeof ApiPrivateGenerateMaprouletteTasksRoute
@@ -1784,6 +1836,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiNotesRegionSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/osm-token': {
+      id: '/api/auth/osm-token'
+      path: '/api/auth/osm-token'
+      fullPath: '/api/auth/osm-token'
+      preLoaderRoute: typeof ApiAuthOsmTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/auth/$': {
       id: '/api/auth/$'
       path: '/api/auth/$'
@@ -1924,6 +1983,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiNotesRegionSlugDownloadRouteImport
       parentRoute: typeof ApiNotesRegionSlugRoute
     }
+    '/api/notes/$regionSlug/$folderId': {
+      id: '/api/notes/$regionSlug/$folderId'
+      path: '/$folderId'
+      fullPath: '/api/notes/$regionSlug/$folderId'
+      preLoaderRoute: typeof ApiNotesRegionSlugFolderIdRouteImport
+      parentRoute: typeof ApiNotesRegionSlugRoute
+    }
     '/api/maproulette/statistic-proxy/$challengeId': {
       id: '/api/maproulette/statistic-proxy/$challengeId'
       path: '/api/maproulette/statistic-proxy/$challengeId'
@@ -2043,12 +2109,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminNoteFoldersIdEditRouteImport
       parentRoute: typeof AdminNoteFoldersRoute
     }
+    '/api/notes/$regionSlug/$folderId/$noteId': {
+      id: '/api/notes/$regionSlug/$folderId/$noteId'
+      path: '/$noteId'
+      fullPath: '/api/notes/$regionSlug/$folderId/$noteId'
+      preLoaderRoute: typeof ApiNotesRegionSlugFolderIdNoteIdRouteImport
+      parentRoute: typeof ApiNotesRegionSlugFolderIdRoute
+    }
     '/api/admin/qa-configs/$id/export-csv': {
       id: '/api/admin/qa-configs/$id/export-csv'
       path: '/api/admin/qa-configs/$id/export-csv'
       fullPath: '/api/admin/qa-configs/$id/export-csv'
       preLoaderRoute: typeof ApiAdminQaConfigsIdExportCsvRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/notes/$regionSlug/$folderId/$noteId/comments': {
+      id: '/api/notes/$regionSlug/$folderId/$noteId/comments'
+      path: '/comments'
+      fullPath: '/api/notes/$regionSlug/$folderId/$noteId/comments'
+      preLoaderRoute: typeof ApiNotesRegionSlugFolderIdNoteIdCommentsRouteImport
+      parentRoute: typeof ApiNotesRegionSlugFolderIdNoteIdRoute
     }
   }
 }
@@ -2371,11 +2451,43 @@ const ApiAdminRegionsRouteWithChildren = ApiAdminRegionsRoute._addFileChildren(
   ApiAdminRegionsRouteChildren,
 )
 
+interface ApiNotesRegionSlugFolderIdNoteIdRouteChildren {
+  ApiNotesRegionSlugFolderIdNoteIdCommentsRoute: typeof ApiNotesRegionSlugFolderIdNoteIdCommentsRoute
+}
+
+const ApiNotesRegionSlugFolderIdNoteIdRouteChildren: ApiNotesRegionSlugFolderIdNoteIdRouteChildren =
+  {
+    ApiNotesRegionSlugFolderIdNoteIdCommentsRoute:
+      ApiNotesRegionSlugFolderIdNoteIdCommentsRoute,
+  }
+
+const ApiNotesRegionSlugFolderIdNoteIdRouteWithChildren =
+  ApiNotesRegionSlugFolderIdNoteIdRoute._addFileChildren(
+    ApiNotesRegionSlugFolderIdNoteIdRouteChildren,
+  )
+
+interface ApiNotesRegionSlugFolderIdRouteChildren {
+  ApiNotesRegionSlugFolderIdNoteIdRoute: typeof ApiNotesRegionSlugFolderIdNoteIdRouteWithChildren
+}
+
+const ApiNotesRegionSlugFolderIdRouteChildren: ApiNotesRegionSlugFolderIdRouteChildren =
+  {
+    ApiNotesRegionSlugFolderIdNoteIdRoute:
+      ApiNotesRegionSlugFolderIdNoteIdRouteWithChildren,
+  }
+
+const ApiNotesRegionSlugFolderIdRouteWithChildren =
+  ApiNotesRegionSlugFolderIdRoute._addFileChildren(
+    ApiNotesRegionSlugFolderIdRouteChildren,
+  )
+
 interface ApiNotesRegionSlugRouteChildren {
+  ApiNotesRegionSlugFolderIdRoute: typeof ApiNotesRegionSlugFolderIdRouteWithChildren
   ApiNotesRegionSlugDownloadRoute: typeof ApiNotesRegionSlugDownloadRoute
 }
 
 const ApiNotesRegionSlugRouteChildren: ApiNotesRegionSlugRouteChildren = {
+  ApiNotesRegionSlugFolderIdRoute: ApiNotesRegionSlugFolderIdRouteWithChildren,
   ApiNotesRegionSlugDownloadRoute: ApiNotesRegionSlugDownloadRoute,
 }
 
@@ -2402,6 +2514,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminRegionUploadsRoute: ApiAdminRegionUploadsRouteWithChildren,
   ApiAdminRegionsRoute: ApiAdminRegionsRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiAuthOsmTokenRoute: ApiAuthOsmTokenRoute,
   ApiNotesRegionSlugRoute: ApiNotesRegionSlugRouteWithChildren,
   ApiOsmNotesRssRoute: ApiOsmNotesRssRoute,
   ApiPrivateGenerateMaprouletteTasksRoute:

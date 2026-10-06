@@ -1,11 +1,11 @@
 import { UserRoleEnum } from '@/prisma/generated/client'
 import { apiJsonMessages } from '@/server/api/util/apiJsonResponses.server'
 import { AuthorizationError } from '@/server/auth/errors'
-import type { AppSession } from '@/server/auth/types'
+import type { SessionActor } from '@/server/auth/types'
 import db from '@/server/db.server'
 import { getRegionIdBySlug } from '@/server/regions/queries/getRegionIdBySlug.server'
 
-async function authorizeRegionMemberByRegionId(session: AppSession, regionId: number) {
+async function authorizeRegionMemberByRegionId(session: SessionActor, regionId: number) {
   const membership = await db.membership.findFirst({
     where: {
       userId: session.userId,
@@ -18,7 +18,7 @@ async function authorizeRegionMemberByRegionId(session: AppSession, regionId: nu
   }
 }
 
-export async function authorizeRegionMemberByRegionSlug(session: AppSession, slug: string) {
+export async function authorizeRegionMemberByRegionSlug(session: SessionActor, slug: string) {
   if (!session.userId || !session.role) {
     throw new AuthorizationError(apiJsonMessages.notAuthenticated)
   }
@@ -30,7 +30,7 @@ export async function authorizeRegionMemberByRegionSlug(session: AppSession, slu
 }
 
 /** A note's regions are its folder's regions (`Note.regionId` was removed); membership in any of them is enough. */
-export async function authorizeRegionMemberByNoteId(session: AppSession, noteId: number) {
+export async function authorizeRegionMemberByNoteId(session: SessionActor, noteId: number) {
   if (!session.userId || !session.role) {
     throw new AuthorizationError(apiJsonMessages.notAuthenticated)
   }

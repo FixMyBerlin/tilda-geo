@@ -1,8 +1,8 @@
 // Legacy RegionConfigTemplate fixture for getRegionRedirectUrl migration tests.
-import type { MapDataCategoryParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
+import type { LegacyMapDataCategoryParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
 
 // For regions parkraum
-export const _12nl2cs: MapDataCategoryParam[] = [
+export const _12nl2cs: LegacyMapDataCategoryParam[] = [
   {
     id: 'parkingLars',
     active: false,

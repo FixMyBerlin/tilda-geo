@@ -49,6 +49,7 @@ local function result_tags_separate_parking(category, object, area)
 
     -- Parking properties
     condition_category = conditional_categories_result.condition_category,
+    condition_category_primary = conditional_categories_result.condition_category_primary,
     covered = SANITIZE_TAGS.covered(object.tags.covered),
     direction = SANITIZE_PARKING_TAGS.direction(object.tags.direction),
     informal = SANITIZE_TAGS.informal(object.tags.informal),
@@ -71,7 +72,7 @@ local function result_tags_separate_parking(category, object, area)
   }
 
   local cleaned_tags, replaced_tags = CLEANER.separate_tags(result_tags, object.tags)
-  for key, value in pairs(conditional_categories_result.invalid_conditional_tags or {}) do
+  for key, value in pairs(conditional_categories_result.dropped_tags or {}) do
     replaced_tags[key] = value
   end
 
@@ -79,7 +80,7 @@ local function result_tags_separate_parking(category, object, area)
     id = id,
     tags = cleaned_tags,
     meta = metadata(object),
-  }, replaced_tags
+  }, replaced_tags, conditional_categories_result.rewritten_tags or {}
 end
 
 return result_tags_separate_parking

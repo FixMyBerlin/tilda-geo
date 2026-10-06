@@ -9,3 +9,9 @@ export type AppSession = {
   user: Session['user']
   role: UserRoleEnum
 }
+
+/**
+ * What the authorization checks read from a session. Also built from an external API token
+ * (external notes API), which has no Better Auth session behind it.
+ */
+export type SessionActor = Pick<AppSession, 'userId' | 'role'>

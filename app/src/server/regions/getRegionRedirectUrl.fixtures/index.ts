@@ -1,4 +1,7 @@
-import type { MapDataCategoryParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
+import type {
+  LegacyMapDataCategoryParam,
+  MapDataCategoryParam,
+} from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
 import { _1qldklk } from './_1qldklk'
 import { _1r6doko } from './_1r6doko'
 import { _12nl2cs } from './_12nl2cs'
@@ -16,8 +19,11 @@ const legacyConfigTemplates = {
   '1qldklk': _1qldklk,
   '1r6doko': _1r6doko,
   gzvfwv: _gzvfwv,
-} as const satisfies Record<string, MapDataCategoryParam[]>
+} as const satisfies Record<string, LegacyMapDataCategoryParam[]>
 
 export function getLegacyConfigTemplate(checksum: string) {
-  return legacyConfigTemplates[checksum as keyof typeof legacyConfigTemplates]
+  // As in `getRegionConfigTemplate`: a stored template is read as the current param type.
+  return legacyConfigTemplates[checksum as keyof typeof legacyConfigTemplates] as
+    | MapDataCategoryParam[]
+    | undefined
 }

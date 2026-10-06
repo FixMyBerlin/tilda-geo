@@ -58,8 +58,8 @@ export function createSourceKeyAtlasGeo(
 }
 
 export function parseSourceKeyAtlasGeo(sourceKey: string) {
-  // source: "cat:mapillary--source:mapillary_coverage--subcat:mapillaryCoverage"
-  // returns: { categoryId: 'mapillary', sourceId: 'mapillary_coverage', subcategoryId: 'mapillaryCoverage' }
+  // source: "cat:bikelanes--source:atlas_bikelanes--subcat:bikelanes"
+  // returns: { categoryId: 'bikelanes', sourceId: 'atlas_bikelanes', subcategoryId: 'bikelanes' }
   return parseKey(sourceKey, {
     cat: 'categoryId',
     source: 'sourceId',

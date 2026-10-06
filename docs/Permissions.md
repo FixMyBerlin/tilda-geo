@@ -67,21 +67,24 @@ Tests: `app/tests/pages/admin.stubbed-auth.spec.ts` (non-admin and guest are tur
 
 ## HTTP API (`app/src/routes/api`)
 
-| Location            | Guard                                                                                                                                                                                                                                                                                    |
-| ------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `api/admin/*`       | `guardAdminApi`: Bearer `AdminApiToken` (minted by an admin). A few routes use the admin session instead                                                                                                                                                                                 |
-| `/mcp`              | `guardAdminApi` (Bearer `AdminApiToken`)                                                                                                                                                                                                                                                 |
-| `api/private/*`     | `ATLAS_API_KEY` (system hooks)                                                                                                                                                                                                                                                           |
-| `api/*` (top level) | Mixed, per route: none for public data (boundaries, map style, stats, campaigns, OSM notes RSS), member/admin for region data (`uploads.$slug`, `notes.$regionSlug.download`, `regions.$regionSlug.uploads-csv`, `export.*`), `ATLAS_API_KEY` for `regions`, `uploads`, `uploads.create` |
+| Location                                                  | Guard                                                                                                                                                                                                                                                                                    |
+| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `api/admin/*`                                             | `guardAdminApi`: Bearer `AdminApiToken` (minted by an admin). A few routes use the admin session instead                                                                                                                                                                                 |
+| `/mcp`                                                    | `guardAdminApi` (Bearer `AdminApiToken`)                                                                                                                                                                                                                                                 |
+| `api/private/*`                                           | `ATLAS_API_KEY` (system hooks)                                                                                                                                                                                                                                                           |
+| `api/auth/osm-token`, `api/notes/$regionSlug/$folderId/*` | `ExternalApiToken` (Bearer, 1 hour, scope `notes`), issued by `api/auth/osm-token` for a verified OSM access token. Then the same member/admin checks as the UI. CORS allow-list `externalApiOrigins`. See [External-Notes-API.md](External-Notes-API.md)                                |
+| `api/*` (top level)                                       | Mixed, per route: none for public data (boundaries, map style, stats, campaigns, OSM notes RSS), member/admin for region data (`uploads.$slug`, `notes.$regionSlug.download`, `regions.$regionSlug.uploads-csv`, `export.*`), `ATLAS_API_KEY` for `regions`, `uploads`, `uploads.create` |
 
-Two kinds of keys:
+Three kinds of keys:
 
 - **`AdminApiToken`**: per admin, revocable, admin-equivalent for `api/admin/*` and `/mcp`.
 - **`ATLAS_API_KEY`**: one shared secret passed as `?apiKey=`. On `export.*` and `notes.$regionSlug.download` it replaces the member/admin check (including for DEACTIVATED regions). Treat it as admin-equivalent for those routes.
 
+- **`ExternalApiToken`**: per user, short-lived, only for the external notes API. It carries who the user is, not what they may do: role and region membership are read on every request, so it never gives more access than the user's own login. Only an OSM user who already has a TILDA account gets one (no account is created by the exchange). Not accepted by `requireAuth`, server functions, `api/admin/*` or `/mcp`.
+
 `checkApiKey` accepts every request when `NODE_ENV=development`. Never set that on a reachable deployment.
 
-Tests: `checkApiKey.server.test.ts` (`ATLAS_API_KEY`, incl. the development skip), `guardAdminApi.server.test.ts` (`/mcp` and `api/admin/*` tokens: missing, unknown, revoked, demoted owner), `authGuards.server.test.ts` (`guardRegionMembership`). Export membership: `app/tests/pages/docs-region-downloads.spec.ts`.
+Tests: `checkApiKey.server.test.ts` (`ATLAS_API_KEY`, incl. the development skip), `guardAdminApi.server.test.ts` (`/mcp` and `api/admin/*` tokens: missing, unknown, revoked, demoted owner), `authGuards.server.test.ts` (`guardRegionMembership`). `osmToken.server.test.ts` (token exchange: OSM rejects the token, no TILDA account, only the hash stored) and `externalNotes.server.test.ts` (expired / unknown / wrong-scope token, wrong origin and preflight). Export membership: `app/tests/pages/docs-region-downloads.spec.ts`.
 
 ## Region data
 
@@ -130,7 +133,9 @@ Internal notes are always member-only, including on PUBLIC regions.
 
 Folders (`NoteFolder`) are assigned to regions in `/admin/note-folders` (admin-only). OSM as a virtual folder in the Hinweise dropdown is not a `NoteFolder` row. Member writes bind the note/comment/folder to the acting region (`assertNoteInRegion` / `assertFolderInRegion`, or the same constraint in the lookup `where`).
 
-Tests: `getNotesAndCommentsForRegion.server.test.ts` (non-member gets nothing). `notesAuthorOnly.server.test.ts` (edit/delete of notes and comments: author only, another member and admin rejected; lookups scoped to the acting region). `notesMutationsRegion.server.test.ts` (resolve/comment reject notes outside the acting region). `deleteNoteFolder.server.test.ts` (non-empty and shared folders blocked). `moveNoteToFolder.server.test.ts` (target folder must belong to the region).
+The same list / read / create / comment / resolve actions are available to external clients (the iD editor fork) under `api/notes/$regionSlug/$folderId`. They call the functions above with a session built from an `ExternalApiToken` instead of the cookie (`notesCaller.server.ts`), so the member checks are the same. Writes are audited with the user and `changeSource: EXTERNAL_API`. Edit, delete and folder actions are not offered there.
+
+Tests: `getNotesAndCommentsForRegion.server.test.ts` (non-member gets nothing). `externalNotes.server.test.ts` (external API: member vs non-member incl. PUBLIC region, folder not linked to the region, note of another folder). `notesAuthorOnly.server.test.ts` (edit/delete of notes and comments: author only, another member and admin rejected; lookups scoped to the acting region). `notesMutationsRegion.server.test.ts` (resolve/comment reject notes outside the acting region). `deleteNoteFolder.server.test.ts` (non-empty and shared folders blocked). `moveNoteToFolder.server.test.ts` (target folder must belong to the region).
 
 ### Qualitätssicherung
 

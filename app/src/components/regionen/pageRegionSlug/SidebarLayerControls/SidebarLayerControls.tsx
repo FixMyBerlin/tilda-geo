@@ -15,6 +15,7 @@ import { Categories } from './Categories/Categories'
 import { useLayerControlsActions, useLayerControlsOpen } from './layer-controls-store'
 import { LayerControlsOpenButton } from './LayerControlsOpenButton'
 import { StaticDatasetCategories } from './StaticDatasets/StaticDatasetCategories'
+import { StreetImageryControls } from './StreetImagery/StreetImageryControls'
 
 const PANEL_ID = 'sidebar-layer-controls'
 
@@ -97,6 +98,7 @@ export const SidebarLayerControls = () => {
         <div className="min-h-0 overflow-x-visible overflow-y-auto pb-px">
           <Categories />
           <StaticDatasetCategories />
+          <StreetImageryControls />
         </div>
         <button
           type="button"

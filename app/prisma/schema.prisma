@@ -44,6 +44,7 @@ model User {
   noteComments             NoteComment[]
   qaEvaluations            QaEvaluation[]
   adminApiTokens           AdminApiToken[]
+  externalApiTokens        ExternalApiToken[]
   dataSchemaImportsCreated DataSchemaImport[]   @relation("DataSchemaImportCreatedBy")
   dataSchemaImportsUpdated DataSchemaImport[]   @relation("DataSchemaImportUpdatedBy")
   reviewEntryComments      ReviewEntryComment[]
@@ -352,6 +353,24 @@ model AdminApiToken {
   createdBy   User      @relation(fields: [createdById], references: [id], onDelete: Cascade)
 
   @@map("AdminApiToken")
+  @@schema("prisma")
+}
+
+// Short-lived Bearer tokens for the external notes API, issued in exchange for a
+// verified OSM access token. Not audited: create/expire noise like Better Auth's `Verification`.
+model ExternalApiToken {
+  id          String    @id @default(cuid())
+  createdAt   DateTime  @default(now())
+  hashedToken String    @unique
+  scope       String // see ExternalApiTokenScope
+  expiresAt   DateTime
+  lastUsedAt  DateTime?
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([expiresAt])
+  @@map("ExternalApiToken")
   @@schema("prisma")
 }
 

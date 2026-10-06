@@ -55,7 +55,7 @@ const regionalNetworkExports = [
   'bicycleParking_points',
 ] satisfies ExportId[]
 
-const minimalCategories = ['roads', 'mapillary'] satisfies MapDataCategoryId[]
+const minimalCategories = ['roads'] satisfies MapDataCategoryId[]
 
 const baseRegionConfig = {
   product: RegionProduct.radverkehr,
@@ -181,7 +181,7 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       mapLat: 52.35,
       mapLng: 13.61,
       mapZoom: 12,
-      categories: ['poi', 'bikelanes', 'roads', 'mapillary'],
+      categories: ['poi', 'bikelanes', 'roads'],
       ...withDownloads(13.3579, 52.2095, 13.825, 52.4784, [...regionalNetworkExports]),
     },
   },
@@ -224,7 +224,6 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
         'radinfra_trafficSigns',
         'radinfra_currentness',
         'radinfra_campagins',
-        'radinfra_mapillary',
       ],
       cacheWarming: {
         minZoom: 5,
@@ -261,7 +260,7 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       mapLng: 13.367,
       mapZoom: 11.8,
       backgroundSources: [...cityParkraumBackgroundSources],
-      categories: ['parkingTilda', 'parkingLars', 'mapillary'],
+      categories: ['parkingTilda', 'parkingLars'],
       ...withDownloads(13.0883, 52.3382, 13.7611, 52.6755, [
         'parkings',
         'parkings_edges',
@@ -287,7 +286,7 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       mapLng: 13.61,
       mapZoom: 12,
       backgroundSources: [...regionalNetworkBackgroundSources],
-      categories: ['poi', 'bikelanes', 'roads', 'surface', 'lit', 'bicycleParking', 'mapillary'],
+      categories: ['poi', 'bikelanes', 'roads', 'surface', 'lit', 'bicycleParking'],
       ...withDownloads(13.3579, 52.2095, 13.825, 52.4784, [...regionalNetworkExports]),
     },
     mask: {
@@ -334,7 +333,6 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
         'radinfra_trafficSigns',
         'radinfra_currentness',
         'radinfra_campagins',
-        'radinfra_mapillary',
       ],
       cacheWarming: {
         minZoom: 5,
@@ -373,7 +371,7 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       mapLng: 13.0342,
       mapZoom: 11,
       logoWhiteBackgroundRequired: true,
-      categories: ['bikelanes', 'roads', 'surface', 'boundaries', 'mapillary'],
+      categories: ['bikelanes', 'roads', 'surface', 'boundaries'],
       backgroundSources: [...regionalNetworkBackgroundSources],
       // Welcome copy on create; hero image attached later (needs regionId).
       welcome: regionWelcomeDemoSpecToWriteInput(regionWelcomeDemoSpecs['bb-kampagne'], null),
@@ -399,7 +397,7 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       // `poi` added for the Flächenfinder dev seeds (`prisma/seeds/planning.ts`): its bus-stop +
       // bike-sharing sub-layer (one of the Flächenfinder's scoring inputs) only shows up when the
       // region has the `poi` category assigned.
-      categories: ['parkingLars', 'mapillary', 'poi'],
+      categories: ['parkingLars', 'poi'],
       backgroundSources: [...cityParkraumBackgroundSources],
       // Text-only welcome (no hero image).
       welcome: regionWelcomeDemoSpecToWriteInput(regionWelcomeDemoSpecs.parkraum, null),
@@ -418,7 +416,7 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       mapLat: 52.507,
       mapLng: 13.367,
       mapZoom: 11.8,
-      categories: ['parkingTilda', 'parkingLars', 'mapillary'],
+      categories: ['parkingTilda', 'parkingLars'],
       backgroundSources: [...cityParkraumBackgroundSources],
     },
     mask: {
@@ -442,7 +440,7 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       mapZoom: 11.8,
       notesOsm: false,
       notesInternal: true,
-      categories: ['parkingTilda', 'roads', 'mapillary'],
+      categories: ['parkingTilda', 'roads'],
       backgroundSources: [...cityParkraumBackgroundSources],
       ...withDownloads(13.0883, 52.3382, 13.7611, 52.6755, [
         'parkings',

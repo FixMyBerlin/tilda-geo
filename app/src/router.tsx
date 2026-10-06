@@ -1,3 +1,4 @@
+import '@/lib/streetImageryConfig'
 import '@/lib/zodDeLocale'
 import { createRouter, type LinkProps } from '@tanstack/react-router'
 import { setupRouterSsrQueryIntegration } from '@tanstack/react-router-ssr-query'

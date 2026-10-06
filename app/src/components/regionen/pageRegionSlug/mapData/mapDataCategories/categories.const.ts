@@ -12,7 +12,6 @@ import { subcat_lit_bikelanes } from '../mapDataSubcategories/subcat_lit_bikelan
 import { subcat_lit_highway_areas } from '../mapDataSubcategories/subcat_lit_highway_areas.const'
 import { subcat_lit_path_classes } from '../mapDataSubcategories/subcat_lit_path_classes.const'
 import { subcat_lit_roads } from '../mapDataSubcategories/subcat_lit_roads.const'
-import { subcat_mapillaryCoverage } from '../mapDataSubcategories/subcat_mapillaryCoverage.const'
 import { subcat_maxspeed } from '../mapDataSubcategories/subcat_maxspeed.const'
 import { subcat_parkingLars } from '../mapDataSubcategories/subcat_parkingLars.const'
 import { subcat_parkingLarsAreas } from '../mapDataSubcategories/subcat_parkingLarsAreas.const'
@@ -141,7 +140,6 @@ export const categories: StaticMapDataCategory[] = [
       { ...subcat_parkingLarsStats, defaultStyle: 'hidden' },
       { ...subcat_parkingLarsBoundaries, defaultStyle: 'hidden' },
       { ...subcat_signs, defaultStyle: 'hidden' },
-      // { id: 'mapillaryCoverage', defaultStyle: "hidden" },
       // { id: 'accidents', defaultStyle: "hidden" },
     ],
   },
@@ -159,12 +157,6 @@ export const categories: StaticMapDataCategory[] = [
       { ...subcat_bikelanesStatistics, defaultStyle: 'default' },
       { ...subcat_poi_boundaries, defaultStyle: 'default' },
     ],
-  },
-  {
-    id: 'mapillary',
-    name: 'Mapillary',
-    desc: 'Straßenfotos',
-    subcategories: [{ ...subcat_mapillaryCoverage, defaultStyle: 'default' }],
   },
   {
     id: 'accidents',

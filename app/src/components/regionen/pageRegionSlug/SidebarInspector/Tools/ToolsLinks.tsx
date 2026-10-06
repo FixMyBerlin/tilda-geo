@@ -1,25 +1,16 @@
 import { Fragment } from 'react'
-import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
 import type {
   MapDataOsmIdConfig,
   MapDataSourceInspectorEditor,
 } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { Link } from '@/components/shared/links/Link'
-import { isProd } from '@/components/shared/utils/isEnv'
 import type { InspectorFeature } from '../Inspector'
 import { editorUrl } from './osmUrls/editorUrl'
 import { extractOsmTypeIdByConfig } from './osmUrls/extractOsmTypeIdByConfig'
-import {
-  historyUrl,
-  mapillaryUrl,
-  osmEditIdUrl,
-  osmEditJosmUrl,
-  osmEditKyleKiwiIdUrl,
-  osmEditRapidUrl,
-  osmOrgUrl,
-} from './osmUrls/osmUrls'
+import { historyUrl, osmEditIdUrl, osmEditJosmUrl, osmOrgUrl } from './osmUrls/osmUrls'
 import { ToolsLinkNewInternalNote } from './ToolsLinkNewInternalNote'
 import { ToolsLinkNewOsmNote } from './ToolsLinkNewOsmNote'
+import { ToolsLinksImagery } from './ToolsLinksImagery'
 
 type ToolsLinksProps = {
   feature: InspectorFeature['feature']
@@ -28,15 +19,13 @@ type ToolsLinksProps = {
 }
 
 export const ToolsLinks = ({ feature, editors, osmIdConfig }: ToolsLinksProps) => {
-  const { mapParam } = useMapParam()
   const osmTypeId = extractOsmTypeIdByConfig(feature.properties, osmIdConfig)
 
   const osmUrlHref = osmOrgUrl(osmTypeId)
   const osmEditIdUrlHref = osmEditIdUrl(osmTypeId)
   const osmEditJosmUrlHref = osmEditJosmUrl(osmTypeId)
-  const osmEditKyleKiwiIdUrlHref = osmEditKyleKiwiIdUrl(osmTypeId)
-  const osmEditRapidUrlHref = osmEditRapidUrl(osmTypeId)
-  const mapillaryUrlHref = mapillaryUrl(feature.geometry, { zoom: mapParam.zoom })
+  // const osmEditKyleKiwiIdUrlHref = osmEditKyleKiwiIdUrl(osmTypeId)
+  // const osmEditRapidUrlHref = osmEditRapidUrl(osmTypeId)
 
   const changesetLinks = [
     {
@@ -89,22 +78,17 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: ToolsLinksProps) =
             JOSM
           </Link>
         )}
-        {osmEditKyleKiwiIdUrlHref && (
+        {/* {osmEditKyleKiwiIdUrlHref && (
           <Link blank button href={osmEditKyleKiwiIdUrlHref}>
             kiwiD
           </Link>
-        )}
-        {/* Just for testing for now… */}
-        {!isProd && osmEditRapidUrlHref && (
+        )} */}
+        {/* {!isProd && osmEditRapidUrlHref && (
           <Link blank button href={osmEditRapidUrlHref}>
             Bearbeiten (Rapid) (Staging only)
           </Link>
-        )}
-        {mapillaryUrlHref && (
-          <Link blank button href={mapillaryUrlHref}>
-            Mapillary
-          </Link>
-        )}
+        )} */}
+        <ToolsLinksImagery geometry={feature.geometry} />
         <ToolsLinkNewOsmNote
           properties={feature.properties}
           geometry={feature.geometry}

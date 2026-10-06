@@ -857,7 +857,7 @@ WITH
         END
         ELSE c.side
       END AS side,
-      tilda_condition_category_primary (m.tags ->> 'condition_category') AS category,
+      m.tags ->> 'condition_category_primary' AS category,
       m.tags ->> 'parking' AS parking,
       m.tags ->> 'surface' AS surface,
       m.tags ->> 'operator_type' AS operator_type,
@@ -928,8 +928,12 @@ SELECT
   pieces.category,
   pieces.parking,
   pieces.surface,
-  (
-    pieces.parking_capacity * pieces.piece_len / NULLIF(tot.total_len, 0)
+  -- NUMERIC so per-side sums are exact and do not depend on summation order (float noise flipped winners and rounding between runs).
+  ROUND(
+    (
+      pieces.parking_capacity * pieces.piece_len / NULLIF(tot.total_len, 0)
+    )::NUMERIC,
+    6
   ) AS capacity
 FROM
   pieces
@@ -1070,7 +1074,7 @@ ORDER BY
 
 CREATE INDEX _parking_edges_side_winner_idx ON _parking_edges_side_winner (edge_id, side, operator_type);
 
--- Winner-subset paint: most capacity, then `tilda_condition_category_priority()` (same order as the map style).
+-- Winner-subset paint: most capacity (rounded, so near-ties are real ties), then `tilda_condition_category_priority()` (same order as `helper/condition_category_primary.lua`).
 DROP TABLE IF EXISTS _parking_edges_side_category;
 
 CREATE TEMP TABLE _parking_edges_side_category AS
@@ -1099,7 +1103,7 @@ FROM
 ORDER BY
   x.edge_id,
   x.side,
-  x.capacity DESC,
+  ROUND(x.capacity, 2) DESC,
   COALESCE(pri.pri, 1000);
 
 CREATE INDEX _parking_edges_side_category_idx ON _parking_edges_side_category (edge_id, side);
@@ -1132,7 +1136,7 @@ FROM
 ORDER BY
   x.edge_id,
   x.side,
-  x.capacity DESC,
+  ROUND(x.capacity, 2) DESC,
   x.parking;
 
 CREATE INDEX _parking_edges_side_parking_idx ON _parking_edges_side_parking (edge_id, side);
@@ -1166,7 +1170,7 @@ FROM
 ORDER BY
   x.edge_id,
   x.side,
-  x.capacity DESC,
+  ROUND(x.capacity, 2) DESC,
   x.surface;
 
 CREATE INDEX _parking_edges_side_surface_idx ON _parking_edges_side_surface (edge_id, side);

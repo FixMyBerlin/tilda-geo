@@ -40,11 +40,12 @@ export const osmEditIdUrl = ({ osmType, osmId, comment, hashtags, source }: OsmE
   return `${url.toString()}#${hashParams.toString()}`
 }
 
-export const osmEditRapidUrl = ({ osmType, osmId }: OsmTypeId) => {
-  if (!osmType || !osmId) return undefined
-
-  return `https://rapideditor.org/edit#id=${shortOsmType[osmType]}${osmId}&disable_features=boundaries&locale=de&hashtags=TILDA`
-}
+// Unused while the Rapid links in `ToolsLinks` and `NoticeMaprouletteTask` are commented out.
+// export const osmEditRapidUrl = ({ osmType, osmId }: OsmTypeId) => {
+//   if (!osmType || !osmId) return undefined
+//
+//   return `https://rapideditor.org/edit#id=${shortOsmType[osmType]}${osmId}&disable_features=boundaries&locale=de&hashtags=TILDA`
+// }
 
 export const osmEditJosmUrl = ({ osmType, osmId }: OsmTypeId) => {
   if (!osmType || !osmId) return undefined
@@ -53,11 +54,12 @@ export const osmEditJosmUrl = ({ osmType, osmId }: OsmTypeId) => {
   return `http://127.0.0.1:8111/load_object?objects=${shortOsmType[osmType]}${osmId}&changeset_hashtags=TILDA`
 }
 
-export const osmEditKyleKiwiIdUrl = ({ osmType, osmId }: OsmTypeId) => {
-  if (!osmType || !osmId) return undefined
-
-  return `https://kyle.kiwi/iD/#id=${shortOsmType[osmType]}${osmId}&locale=en&disable_features=boundaries&hashtags=TILDA`
-}
+// Unused while the kiwiD links in `ToolsLinks` and `NoticeMaprouletteTask` are commented out.
+// export const osmEditKyleKiwiIdUrl = ({ osmType, osmId }: OsmTypeId) => {
+//   if (!osmType || !osmId) return undefined
+//
+//   return `https://kyle.kiwi/iD/#id=${shortOsmType[osmType]}${osmId}&locale=en&disable_features=boundaries&hashtags=TILDA`
+// }
 
 export const historyUrl = ({ osmType, osmId }: OsmTypeId) => {
   if (!osmType || !osmId) return undefined

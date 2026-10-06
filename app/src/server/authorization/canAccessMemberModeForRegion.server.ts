@@ -1,4 +1,4 @@
-import type { AppSession } from '@/server/auth/types'
+import type { SessionActor } from '@/server/auth/types'
 import { checkRegionAuthorization } from '@/server/authorization/checkRegionAuthorization.server'
 import { getRegionHasPermissions } from '@/server/authorization/getRegionHasPermissions.server'
 
@@ -6,7 +6,10 @@ import { getRegionHasPermissions } from '@/server/authorization/getRegionHasPerm
  * Member/admin-only modes (QA, Prüflisten). {@link checkRegionAuthorization} allows anyone on
  * PUBLIC regions; these modes still require membership (or admin) on those regions.
  */
-export async function canAccessMemberModeForRegion(session: AppSession | null, regionSlug: string) {
+export async function canAccessMemberModeForRegion(
+  session: SessionActor | null,
+  regionSlug: string,
+) {
   const base = await checkRegionAuthorization(session, regionSlug)
 
   if (!base.isAuthorized || base.regionId == null) {

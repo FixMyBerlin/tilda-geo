@@ -1,10 +1,10 @@
 import { featureCollection, point } from '@turf/turf'
 import { z } from 'zod'
-import { getAppSession } from '@/server/auth/session.server'
 import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
 import { zodInternalNotesFilterParam } from '@/shared/regionen/regionSearchZod'
 import { formatUserDisplayName } from '@/shared/userDisplayName'
+import { getNotesSession, type NotesCaller } from '../notesCaller.server'
 
 const Schema = z.object({
   regionSlug: z.string(),
@@ -14,12 +14,12 @@ const Schema = z.object({
 
 export async function getNotesAndCommentsForRegion(
   input: z.infer<typeof Schema>,
-  headers: Headers,
+  caller: NotesCaller,
 ) {
   const { regionSlug, folderId, filter } = Schema.parse(input)
 
   // Internal notes are member/admin-only, also on PUBLIC regions (region status is not note access).
-  const session = await getAppSession(headers)
+  const session = await getNotesSession(caller)
   const { isAuthorized } = await canAccessMemberModeForRegion(session, regionSlug)
   if (!isAuthorized) {
     return { featureCollection: featureCollection([]) }

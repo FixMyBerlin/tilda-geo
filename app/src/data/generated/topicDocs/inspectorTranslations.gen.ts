@@ -2124,6 +2124,37 @@ const data = {
   'tilda_parkings_no--capacity_source=tag_redistributed':
     'Explizite Angabe aus OSM, dann anteilig aufgeteilt nach Stanzung.',
   'tilda_parkings_no--capacity--key': 'Stellplatzanzahl',
+  'tilda_parkings_no--condition_category_primary--key': 'Primäre Parkbeschränkung',
+  'tilda_parkings_no--condition_category_primary=access_restriction': 'Zugangsbeschränkung',
+  'tilda_parkings_no--condition_category_primary=assumed_free':
+    'Wahrscheinlich keine Parkbeschränkungen',
+  'tilda_parkings_no--condition_category_primary=assumed_private': 'Sehr wahrscheinlich privat',
+  'tilda_parkings_no--condition_category_primary=bus_lane': 'Bussonderfahrstreifen',
+  'tilda_parkings_no--condition_category_primary=car_sharing': 'Nur für Carsharing-Fahrzeuge',
+  'tilda_parkings_no--condition_category_primary=charging': 'Laden von Elektrofahrzeugen',
+  'tilda_parkings_no--condition_category_primary=default': 'Keine Zuordnung',
+  'tilda_parkings_no--condition_category_primary=disabled': 'Behindertenparkplatz',
+  'tilda_parkings_no--condition_category_primary=disabled_private':
+    'Personenbezogener Behindertenparkplatz',
+  'tilda_parkings_no--condition_category_primary=free': 'Keine Parkbeschränkungen',
+  'tilda_parkings_no--condition_category_primary=invalid': 'Ungültige Angabe in OSM',
+  'tilda_parkings_no--condition_category_primary=invalid--description':
+    'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
+  'tilda_parkings_no--condition_category_primary=loading': 'Ladezone',
+  'tilda_parkings_no--condition_category_primary=maxweight': 'Gewichtsbegrenzung',
+  'tilda_parkings_no--condition_category_primary=mixed':
+    'Nur mit Parkschein oder Bewohnerparkausweis',
+  'tilda_parkings_no--condition_category_primary=no_parking': 'Eingeschränktes Haltverbot',
+  'tilda_parkings_no--condition_category_primary=no_standing': 'Nur kurzes Halten erlaubt',
+  'tilda_parkings_no--condition_category_primary=no_stopping': 'Absolutes Haltverbot',
+  'tilda_parkings_no--condition_category_primary=paid': 'Nur mit Parkschein',
+  'tilda_parkings_no--condition_category_primary=private': 'Privat',
+  'tilda_parkings_no--condition_category_primary=residents': 'Nur mit Bewohnerparkausweis',
+  'tilda_parkings_no--condition_category_primary=taxi': 'Taxenstand',
+  'tilda_parkings_no--condition_category_primary=time_limited': 'Höchstparkdauer',
+  'tilda_parkings_no--condition_category_primary=unspecified': 'Unbestimmt',
+  'tilda_parkings_no--condition_category_primary=vehicle_restriction':
+    'Beschränkung auf Fahrzeugklassen',
   'tilda_parkings_no--condition_category--key': 'Parkbeschränkung',
   'tilda_parkings_no--condition_category=access_restriction': 'Zugangsbeschränkung',
   'tilda_parkings_no--condition_category=assumed_free': 'Wahrscheinlich keine Parkbeschränkungen',
@@ -2734,6 +2765,39 @@ const data = {
   'tilda_parkings_quantized--category=bus_stop': 'Bushaltestelle',
   'tilda_parkings_quantized--category=crossing_marked': 'Markierter Überweg',
   'tilda_parkings_quantized--category=tree': 'Baum',
+  'tilda_parkings_quantized--condition_category_primary--key': 'Primäre Parkbeschränkung',
+  'tilda_parkings_quantized--condition_category_primary=access_restriction': 'Zugangsbeschränkung',
+  'tilda_parkings_quantized--condition_category_primary=assumed_free':
+    'Wahrscheinlich keine Parkbeschränkungen',
+  'tilda_parkings_quantized--condition_category_primary=assumed_private':
+    'Sehr wahrscheinlich privat',
+  'tilda_parkings_quantized--condition_category_primary=bus_lane': 'Bussonderfahrstreifen',
+  'tilda_parkings_quantized--condition_category_primary=car_sharing':
+    'Nur für Carsharing-Fahrzeuge',
+  'tilda_parkings_quantized--condition_category_primary=charging': 'Laden von Elektrofahrzeugen',
+  'tilda_parkings_quantized--condition_category_primary=default': 'Keine Zuordnung',
+  'tilda_parkings_quantized--condition_category_primary=disabled': 'Behindertenparkplatz',
+  'tilda_parkings_quantized--condition_category_primary=disabled_private':
+    'Personenbezogener Behindertenparkplatz',
+  'tilda_parkings_quantized--condition_category_primary=free': 'Keine Parkbeschränkungen',
+  'tilda_parkings_quantized--condition_category_primary=invalid': 'Ungültige Angabe in OSM',
+  'tilda_parkings_quantized--condition_category_primary=invalid--description':
+    'Mindestens ein `*:conditional`-Tag ist syntaktisch fehlerhaft (z. B. unvollständige Klammern). Die tatsächliche Beschränkung ist daher unbekannt; der Tag ist in `parking_errors` gelistet und sollte in OSM korrigiert werden.',
+  'tilda_parkings_quantized--condition_category_primary=loading': 'Ladezone',
+  'tilda_parkings_quantized--condition_category_primary=maxweight': 'Gewichtsbegrenzung',
+  'tilda_parkings_quantized--condition_category_primary=mixed':
+    'Nur mit Parkschein oder Bewohnerparkausweis',
+  'tilda_parkings_quantized--condition_category_primary=no_parking': 'Eingeschränktes Haltverbot',
+  'tilda_parkings_quantized--condition_category_primary=no_standing': 'Nur kurzes Halten erlaubt',
+  'tilda_parkings_quantized--condition_category_primary=no_stopping': 'Absolutes Haltverbot',
+  'tilda_parkings_quantized--condition_category_primary=paid': 'Nur mit Parkschein',
+  'tilda_parkings_quantized--condition_category_primary=private': 'Privat',
+  'tilda_parkings_quantized--condition_category_primary=residents': 'Nur mit Bewohnerparkausweis',
+  'tilda_parkings_quantized--condition_category_primary=taxi': 'Taxenstand',
+  'tilda_parkings_quantized--condition_category_primary=time_limited': 'Höchstparkdauer',
+  'tilda_parkings_quantized--condition_category_primary=unspecified': 'Unbestimmt',
+  'tilda_parkings_quantized--condition_category_primary=vehicle_restriction':
+    'Beschränkung auf Fahrzeugklassen',
   'tilda_parkings_quantized--condition_category--key': 'Parkbeschränkung',
   'tilda_parkings_quantized--condition_category=access_restriction': 'Zugangsbeschränkung',
   'tilda_parkings_quantized--condition_category=assumed_free':

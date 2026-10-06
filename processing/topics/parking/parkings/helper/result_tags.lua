@@ -78,6 +78,7 @@ local function result_tags_parkings(object)
 
     -- Parking properties
     condition_category = conditional_categories_result.condition_category,
+    condition_category_primary = conditional_categories_result.condition_category_primary,
     covered = SANITIZE_TAGS.covered(object.tags.covered),
     direction = SANITIZE_PARKING_TAGS.direction(object.tags.direction),
     informal = SANITIZE_TAGS.informal(object.tags.informal),
@@ -100,7 +101,7 @@ local function result_tags_parkings(object)
   }
 
   local cleaned_tags, unnested_replaced_tags = CLEANER.separate_tags(result_tags, object.tags)
-  for key, value in pairs(conditional_categories_result.invalid_conditional_tags or {}) do
+  for key, value in pairs(conditional_categories_result.dropped_tags or {}) do
     unnested_replaced_tags[key] = value
   end
   -- Log with the original OSM keys (`parking:left:orientation`), not the unnested ones
@@ -108,13 +109,17 @@ local function result_tags_parkings(object)
   for key, value in pairs(unnested_replaced_tags) do
     replaced_tags[nested_parking_key(object._parent_tags, object.tags.side, key, value)] = value
   end
+  local rewritten_tags = {}
+  for key, value in pairs(conditional_categories_result.rewritten_tags or {}) do
+    rewritten_tags[nested_parking_key(object._parent_tags, object.tags.side, key, value)] = value
+  end
 
   return {
     id = id,
     side = object.tags.side,
     tags = cleaned_tags,
     meta = metadata(object),
-  }, replaced_tags
+  }, replaced_tags, rewritten_tags
 end
 
 return result_tags_parkings
