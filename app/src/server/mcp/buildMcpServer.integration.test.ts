@@ -11,6 +11,8 @@ const ADMIN_USER_ID = 'vitest-mcp-admin'
 const CATEGORY_GROUP = 'vitest-mcp-group'
 const CONTRACT_SLUG = 'vitest-mcp-contract'
 const REGION_SLUG = 'vitest-mcp-region'
+const SECOND_REGION_SLUG = 'vitest-mcp-region-2'
+const OTHER_USER_ID = 'vitest-mcp-other'
 
 async function connectClient() {
   const server = buildMcpServer({
@@ -36,10 +38,14 @@ async function callTool(client: Client, name: string, args: Record<string, unkno
 }
 
 async function cleanup() {
+  const inRegion = { regions: { some: { slug: REGION_SLUG } } }
+  await db.note.deleteMany({ where: { folder: inRegion } })
+  await db.noteFolder.deleteMany({ where: inRegion })
+  await db.reviewList.deleteMany({ where: inRegion })
   await db.mapDatasetCategory.deleteMany({ where: { groupKey: CATEGORY_GROUP } })
-  await db.region.deleteMany({ where: { slug: REGION_SLUG } })
+  await db.region.deleteMany({ where: { slug: { in: [REGION_SLUG, SECOND_REGION_SLUG] } } })
   await db.regionContract.deleteMany({ where: { slug: CONTRACT_SLUG } })
-  await db.user.deleteMany({ where: { id: ADMIN_USER_ID } })
+  await db.user.deleteMany({ where: { id: { in: [ADMIN_USER_ID, OTHER_USER_ID] } } })
 }
 
 describe.skipIf(!integrationDb)('admin MCP tools (integration)', () => {
@@ -56,14 +62,25 @@ describe.skipIf(!integrationDb)('admin MCP tools (integration)', () => {
         role: 'ADMIN',
       },
     })
-    await db.region.create({
+    await db.user.create({
       data: {
-        slug: REGION_SLUG,
-        name: REGION_SLUG,
-        fullName: REGION_SLUG,
-        categoryAssignments: { create: { categoryId: 'poi', sortOrder: 0 } },
+        id: OTHER_USER_ID,
+        email: 'vitest-mcp-other@users.openstreetmap.invalid',
+        osmId: 1_900_000_011,
+        osmName: 'vitest-mcp-other',
+        role: 'USER',
       },
     })
+    for (const slug of [REGION_SLUG, SECOND_REGION_SLUG]) {
+      await db.region.create({
+        data: {
+          slug,
+          name: slug,
+          fullName: slug,
+          categoryAssignments: { create: { categoryId: 'poi', sortOrder: 0 } },
+        },
+      })
+    }
     client = await connectClient()
   })
 
@@ -154,5 +171,290 @@ describe.skipIf(!integrationDb)('admin MCP tools (integration)', () => {
 
     const deleted = await callTool(client, 'region_contracts_delete', { slug: CONTRACT_SLUG })
     expect(deleted.isError).toBe(false)
+  })
+  test('note_folders_* / notes_* / note_comments_* round-trip', async () => {
+    const folder = await callTool(client, 'note_folders_create', {
+      regionSlug: REGION_SLUG,
+      name: 'MCP folder',
+    })
+    expect(folder.isError).toBe(false)
+    const folderId = folder.json().id as number
+
+    const linked = await callTool(client, 'note_folders_update', {
+      id: folderId,
+      name: 'MCP folder renamed',
+      regionSlugs: [REGION_SLUG, SECOND_REGION_SLUG],
+    })
+    expect(linked.isError).toBe(false)
+    const inSecondRegion = await callTool(client, 'note_folders_list', {
+      regionSlug: SECOND_REGION_SLUG,
+    })
+    expect(JSON.parse(inSecondRegion.text)).toEqual([
+      expect.objectContaining({ id: folderId, name: 'MCP folder renamed' }),
+    ])
+    const sharedDelete = await callTool(client, 'note_folders_delete', {
+      regionSlug: REGION_SLUG,
+      id: folderId,
+    })
+    expect(sharedDelete.text).toContain('mehreren Regionen')
+
+    const unknownRegion = await callTool(client, 'note_folders_update', {
+      id: folderId,
+      name: 'MCP folder renamed',
+      regionSlugs: ['vitest-mcp-missing'],
+    })
+    expect(unknownRegion.isError).toBe(true)
+    expect(unknownRegion.text).toMatch(
+      /^Error: An operation failed because .* check that the id and every region slug exist/,
+    )
+    const unlinked = await callTool(client, 'note_folders_update', {
+      id: folderId,
+      name: 'MCP folder renamed',
+      regionSlugs: [REGION_SLUG],
+    })
+    expect(unlinked.json()).toMatchObject({ id: folderId, regionSlugs: [REGION_SLUG] })
+
+    const created = await callTool(client, 'notes_create', {
+      regionSlug: REGION_SLUG,
+      folderId,
+      subject: 'MCP note',
+      body: 'Body',
+      latitude: 52.5,
+      longitude: 13.4,
+    })
+    expect(created.isError).toBe(false)
+    const noteId = created.json().id as number
+
+    const audit = await db.auditLog.findFirst({
+      where: { model: 'Note', recordId: String(noteId) },
+    })
+    expect(audit).toMatchObject({
+      userId: ADMIN_USER_ID,
+      metadata: { changeSource: 'API', adminTokenId: 'vitest-mcp-token' },
+    })
+
+    const comment = await callTool(client, 'note_comments_create', {
+      regionSlug: REGION_SLUG,
+      noteId,
+      body: 'Comment',
+    })
+    const commentId = comment.json().id as number
+    const editedComment = await callTool(client, 'note_comments_update', {
+      regionSlug: REGION_SLUG,
+      commentId,
+      body: 'Comment edited',
+    })
+    expect(editedComment.isError).toBe(false)
+
+    const updated = await callTool(client, 'notes_update', {
+      regionSlug: REGION_SLUG,
+      noteId,
+      subject: 'MCP note edited',
+      body: 'Body edited',
+      resolved: true,
+    })
+    expect(updated.isError).toBe(false)
+
+    const got = await callTool(client, 'notes_get', { regionSlug: REGION_SLUG, noteId })
+    expect(got.json()).toMatchObject({
+      subject: 'MCP note edited',
+      noteComments: [{ body: 'Comment edited' }],
+    })
+    expect(got.json().resolvedAt).not.toBeNull()
+
+    const closed = await callTool(client, 'notes_list', {
+      regionSlug: REGION_SLUG,
+      folderId,
+      status: 'closed',
+    })
+    expect(closed.text).toContain('MCP note edited')
+    const open = await callTool(client, 'notes_list', {
+      regionSlug: REGION_SLUG,
+      folderId,
+      status: 'open',
+    })
+    expect(open.text).not.toContain('MCP note edited')
+
+    const blockedFolderDelete = await callTool(client, 'note_folders_delete', {
+      regionSlug: REGION_SLUG,
+      id: folderId,
+    })
+    expect(blockedFolderDelete.text).toContain('Nur leere Ordner')
+
+    const second = await callTool(client, 'note_folders_create', {
+      regionSlug: REGION_SLUG,
+      name: 'MCP second folder',
+    })
+    const secondFolderId = second.json().id as number
+    const moved = await callTool(client, 'notes_move', {
+      regionSlug: REGION_SLUG,
+      noteId,
+      folderId: secondFolderId,
+    })
+    expect(moved.json()).toMatchObject({ folderId: secondFolderId })
+
+    const folders = await callTool(client, 'note_folders_list', { regionSlug: REGION_SLUG })
+    expect(JSON.parse(folders.text)).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ id: folderId, noteCount: 0 }),
+        expect.objectContaining({ id: secondFolderId, noteCount: 1 }),
+      ]),
+    )
+
+    const deletedComment = await callTool(client, 'note_comments_delete', {
+      regionSlug: REGION_SLUG,
+      commentId,
+    })
+    expect(deletedComment.isError).toBe(false)
+    const deletedNote = await callTool(client, 'notes_delete', { regionSlug: REGION_SLUG, noteId })
+    expect(deletedNote.isError).toBe(false)
+    for (const id of [folderId, secondFolderId]) {
+      const deleted = await callTool(client, 'note_folders_delete', { regionSlug: REGION_SLUG, id })
+      expect(deleted.isError).toBe(false)
+    }
+  })
+
+  test('notes of another author: resolve works, edit and delete are rejected', async () => {
+    const folder = await db.noteFolder.create({
+      data: { name: 'MCP foreign', regions: { connect: { slug: REGION_SLUG } } },
+    })
+    const note = await db.note.create({
+      data: {
+        folderId: folder.id,
+        userId: OTHER_USER_ID,
+        subject: 'Foreign',
+        latitude: 52.5,
+        longitude: 13.4,
+      },
+    })
+    const target = { regionSlug: REGION_SLUG, noteId: note.id }
+
+    const resolved = await callTool(client, 'notes_set_resolved', { ...target, resolved: true })
+    expect(resolved.isError).toBe(false)
+
+    const edited = await callTool(client, 'notes_update', {
+      ...target,
+      subject: 'Hijacked',
+      body: '',
+      resolved: false,
+    })
+    expect(edited.isError).toBe(true)
+    expect(edited.text).toContain('Not allowed: Only the author can update this note')
+    expect(edited.text).toContain('admins get no bypass')
+    const deleted = await callTool(client, 'notes_delete', target)
+    expect(deleted.text).toContain('Not allowed: Only the author can delete this note')
+    expect(await db.note.count({ where: { id: note.id, subject: 'Foreign' } })).toBe(1)
+
+    const wrongRegion = { ...target, regionSlug: SECOND_REGION_SLUG }
+    const getWrongRegion = await callTool(client, 'notes_get', wrongRegion)
+    expect(getWrongRegion.text).toContain('Not allowed: Note does not belong to this region')
+    const deleteWrongRegion = await callTool(client, 'notes_delete', wrongRegion)
+    expect(deleteWrongRegion.text).toBe(
+      'Error: Not found in this region (check the id and regionSlug)',
+    )
+  })
+
+  test('review_lists_* / review_entries_* / review_entry_comments_* round-trip', async () => {
+    const list = await callTool(client, 'review_lists_create', {
+      regionSlug: REGION_SLUG,
+      name: 'MCP list',
+    })
+    expect(list.isError).toBe(false)
+    const listId = list.json().id as number
+
+    const linked = await callTool(client, 'review_lists_update', {
+      id: listId,
+      name: 'MCP list renamed',
+      regionSlugs: [REGION_SLUG, SECOND_REGION_SLUG],
+    })
+    expect(linked.json()).toMatchObject({ name: 'MCP list renamed' })
+    const inSecondRegion = await callTool(client, 'review_lists_list', {
+      regionSlug: SECOND_REGION_SLUG,
+    })
+    expect(JSON.parse(inSecondRegion.text)).toEqual([
+      expect.objectContaining({ id: listId, name: 'MCP list renamed' }),
+    ])
+    await callTool(client, 'review_lists_update', {
+      id: listId,
+      name: 'MCP list renamed',
+      regionSlugs: [REGION_SLUG],
+    })
+
+    const invalid = await callTool(client, 'review_entries_create', {
+      regionSlug: REGION_SLUG,
+      listId,
+      geometry: { type: 'GeometryCollection', coordinates: [] },
+    })
+    expect(invalid.isError).toBe(true)
+
+    const created = await callTool(client, 'review_entries_create', {
+      regionSlug: REGION_SLUG,
+      listId,
+      geometry: { type: 'Point', coordinates: [13.4, 52.5] },
+      properties: { name: 'Spot' },
+    })
+    expect(created.isError).toBe(false)
+    const entryId = created.json().id as number
+
+    const updated = await callTool(client, 'review_entries_update', {
+      regionSlug: REGION_SLUG,
+      entryId,
+      status: 'PROBLEM',
+    })
+    expect(updated.json()).toMatchObject({ id: entryId, status: 'PROBLEM' })
+
+    const comment = await callTool(client, 'review_entry_comments_create', {
+      regionSlug: REGION_SLUG,
+      entryId,
+      body: 'Comment',
+    })
+    const editedComment = await callTool(client, 'review_entry_comments_update', {
+      regionSlug: REGION_SLUG,
+      commentId: comment.json().id,
+      body: 'Comment edited',
+    })
+    expect(editedComment.isError).toBe(false)
+
+    const got = await callTool(client, 'review_entries_get', { regionSlug: REGION_SLUG, entryId })
+    expect(got.json()).toMatchObject({
+      status: 'PROBLEM',
+      properties: { name: 'Spot' },
+      comments: [{ body: 'Comment edited' }],
+    })
+
+    const entries = await callTool(client, 'review_entries_list', {
+      regionSlug: REGION_SLUG,
+      listId,
+    })
+    expect(entries.json()).toMatchObject({
+      featureCollection: {
+        features: [{ geometry: { type: 'Point' }, properties: { id: entryId, commentCount: 1 } }],
+      },
+    })
+
+    const blockedListDelete = await callTool(client, 'review_lists_delete', {
+      regionSlug: REGION_SLUG,
+      id: listId,
+    })
+    expect(blockedListDelete.isError).toBe(true)
+
+    const deletedEntry = await callTool(client, 'review_entries_delete', {
+      regionSlug: REGION_SLUG,
+      entryId,
+    })
+    expect(deletedEntry.isError).toBe(false)
+    const missing = await callTool(client, 'review_entries_get', {
+      regionSlug: REGION_SLUG,
+      entryId,
+    })
+    expect(missing.text).toBe('Error: Not found')
+
+    const deletedList = await callTool(client, 'review_lists_delete', {
+      regionSlug: REGION_SLUG,
+      id: listId,
+    })
+    expect(deletedList.isError).toBe(false)
+    const lists = await callTool(client, 'review_lists_list', { regionSlug: REGION_SLUG })
+    expect(JSON.parse(lists.text)).toEqual([])
   })
 })

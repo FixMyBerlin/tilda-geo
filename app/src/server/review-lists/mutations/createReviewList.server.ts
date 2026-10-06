@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { requireAuth } from '@/server/auth/session.server'
+import { type MemberCaller, requireMemberSession } from '@/server/auth/memberCaller.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
 import { getRegionIdBySlug } from '@/server/regions/queries/getRegionIdBySlug.server'
@@ -10,8 +10,8 @@ const Schema = z.object({
 })
 
 /** Create a review list linked to the acting region. */
-export async function createReviewList(input: z.infer<typeof Schema>, headers: Headers) {
-  const session = await requireAuth(headers)
+export async function createReviewList(input: z.infer<typeof Schema>, caller: MemberCaller) {
+  const session = await requireMemberSession(caller)
   const { regionSlug, name } = Schema.parse(input)
 
   await authorizeRegionMemberByRegionSlug(session, regionSlug)

@@ -1,7 +1,7 @@
 import { feature, featureCollection } from '@turf/turf'
 import type { Geometry } from 'geojson'
 import { z } from 'zod'
-import { getAppSession } from '@/server/auth/session.server'
+import { type MemberCaller, getMemberSession } from '@/server/auth/memberCaller.server'
 import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
 import { formatUserDisplayName } from '@/shared/userDisplayName'
@@ -16,10 +16,10 @@ const Schema = z.object({
  * Entries of a review list as a GeoJSON FeatureCollection for the map + list panel. The list must
  * be linked to the region the user is acting from.
  */
-export async function getReviewEntriesForList(input: z.infer<typeof Schema>, headers: Headers) {
+export async function getReviewEntriesForList(input: z.infer<typeof Schema>, caller: MemberCaller) {
   const { regionSlug, listId } = Schema.parse(input)
 
-  const session = await getAppSession(headers)
+  const session = await getMemberSession(caller)
   const { isAuthorized } = await canAccessMemberModeForRegion(session, regionSlug)
 
   const list = isAuthorized

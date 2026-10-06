@@ -1,10 +1,11 @@
 import { z } from 'zod'
-import {
-  memberFormAuditContext,
-  runWithAuditContextAsync,
-} from '@/server/audit/auditContext.server'
+import { runWithAuditContextAsync } from '@/server/audit/auditContext.server'
 import { AuthorizationError } from '@/server/auth/errors'
-import { requireAuth } from '@/server/auth/session.server'
+import {
+  type MemberCaller,
+  memberAuditContext,
+  requireMemberSession,
+} from '@/server/auth/memberCaller.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
 
@@ -16,8 +17,8 @@ const Schema = z.object({
   regionSlug: z.string(),
 })
 
-export async function updateNote(input: z.infer<typeof Schema>, headers: Headers) {
-  const session = await requireAuth(headers)
+export async function updateNote(input: z.infer<typeof Schema>, caller: MemberCaller) {
+  const session = await requireMemberSession(caller)
   const parsed = Schema.parse(input)
 
   await authorizeRegionMemberByRegionSlug(session, parsed.regionSlug)
@@ -35,17 +36,15 @@ export async function updateNote(input: z.infer<typeof Schema>, headers: Headers
     throw new AuthorizationError('Only the author can update this note')
   }
 
-  const result = await runWithAuditContextAsync(
-    memberFormAuditContext(headers, session.userId),
-    () =>
-      db.note.update({
-        where: { id: parsed.noteId },
-        data: {
-          subject: parsed.subject,
-          body: parsed.body,
-          resolvedAt: parsed.resolved ? new Date() : null,
-        },
-      }),
+  const result = await runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
+    db.note.update({
+      where: { id: parsed.noteId },
+      data: {
+        subject: parsed.subject,
+        body: parsed.body,
+        resolvedAt: parsed.resolved ? new Date() : null,
+      },
+    }),
   )
   return result
 }

@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { getAppSession } from '@/server/auth/session.server'
+import { type MemberCaller, getMemberSession } from '@/server/auth/memberCaller.server'
 import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
 
@@ -19,10 +19,10 @@ export type ReviewListForRegion = {
 }
 
 /** Review lists linked to a region, with entry counts + shared-region info. */
-export async function getReviewListsForRegion(input: z.infer<typeof Schema>, headers: Headers) {
+export async function getReviewListsForRegion(input: z.infer<typeof Schema>, caller: MemberCaller) {
   const { regionSlug } = Schema.parse(input)
 
-  const session = await getAppSession(headers)
+  const session = await getMemberSession(caller)
   const { isAuthorized } = await canAccessMemberModeForRegion(session, regionSlug)
   if (!isAuthorized) return { lists: [] as ReviewListForRegion[] }
 

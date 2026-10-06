@@ -1,6 +1,10 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
-import { adminApiAuditContext, type AdminApiAuth } from '@/server/api/admin/guardAdminApi.server'
+import {
+  adminApiAuditContext,
+  adminApiMemberCaller,
+  type AdminApiAuth,
+} from '@/server/api/admin/guardAdminApi.server'
 import { AUDITED_MODELS } from '@/server/audit/auditAuditedModels.const'
 import { auditChangeSourceFilterLabel } from '@/server/audit/auditChangeSources.const'
 import { auditLogFilterWireFields, auditLogListSchema } from '@/server/audit/auditLogFilters.schema'
@@ -23,6 +27,9 @@ import {
   UpdateMapDatasetCategoryInput,
 } from '@/server/map-dataset-categories/mapDatasetCategoryWriteService.server'
 import { mcpEnvLabel } from '@/server/mcp/mcpCursorConfig'
+import { ok, run } from '@/server/mcp/mcpToolResult'
+import { registerNotesTools } from '@/server/mcp/tools/registerNotesTools'
+import { registerReviewListsTools } from '@/server/mcp/tools/registerReviewListsTools'
 import {
   mapProcessingRunDetail,
   mapProcessingRunListItem,
@@ -48,33 +55,6 @@ import { createRegionUploadFromBytes } from '@/server/regions/uploads/createRegi
 import { regionUploadFromBytesInputSchema } from '@/server/regions/uploads/regionUploadFromBytes.schema'
 import { joinCommaList } from '@/shared/orderedList/commaList'
 import { offsetSearchFields } from '@/shared/pagination/offsetSearchSchema'
-
-const ok = (data: unknown) => ({
-  content: [
-    {
-      type: 'text' as const,
-      text: typeof data === 'string' ? data : JSON.stringify(data, null, 2),
-    },
-  ],
-})
-
-const fail = (error: unknown) => ({
-  content: [
-    {
-      type: 'text' as const,
-      text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-    },
-  ],
-  isError: true,
-})
-
-const run = async (fn: () => Promise<unknown>) => {
-  try {
-    return ok(await fn())
-  } catch (error) {
-    return fail(error)
-  }
-}
 
 const regionConfigDescription =
   'the full RegionWriteInput (slug, name, fullName, product, status, mapLat/Lng/Zoom, categories, ' +
@@ -110,7 +90,9 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
         `data_schema_list / data_schema_imports_list show S3 dumps, Postgres data.* tables, and Import runs on this environment. ` +
         `region_contracts_* manage contracts (Aufträge) and which regions belong to them. ` +
         `map_dataset_categories_* manage the categories that map dataset uploads (static datasets) are grouped under. ` +
-        `processing_runs_list / processing_runs_get read nightly processing timings from public.meta (same data as /admin/processing).`,
+        `processing_runs_list / processing_runs_get read nightly processing timings from public.meta (same data as /admin/processing). ` +
+        `note_folders_* / notes_* / note_comments_* manage internal notes (Hinweise) and review_lists_* / review_entries_* / review_entry_comments_* manage review lists (Prüflisten) of one region (regionSlug). ` +
+        `They act as the API token owner with the same rules as the region UI: notes and comments can only be edited or deleted by their author (the tool answers "Not allowed: …" otherwise), and only empty folders and lists can be deleted. note_folders_update / review_lists_update also set which regions a folder or list is linked to.`,
     },
   )
 
@@ -121,7 +103,8 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
         'Report which TILDA environment (DEV/STG/PRD) and origin this MCP server is bound to. ' +
         'Call this first to confirm the target environment before any write. ' +
         'Tools include regions_*, region_uploads_create, region_contracts_*, map_dataset_categories_*, ' +
-        'data_schema_*, processing_runs_*, and audit_list.',
+        'data_schema_*, processing_runs_*, audit_list, note_folders_*, notes_*, note_comments_*, ' +
+        'review_lists_*, review_entries_* and review_entry_comments_*.',
     },
     () => ok({ environment: envLabel, origin, viteAppEnv: process.env.VITE_APP_ENV }),
   )
@@ -405,6 +388,10 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
     },
     (args) => run(() => listAuditLog(auditLogListSchema.parse(args))),
   )
+
+  const memberCaller = adminApiMemberCaller(auth, request)
+  registerNotesTools(server, memberCaller)
+  registerReviewListsTools(server, memberCaller)
 
   return server
 }
