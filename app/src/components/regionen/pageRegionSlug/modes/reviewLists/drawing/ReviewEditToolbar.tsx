@@ -1,5 +1,6 @@
 import { PlusIcon, TrashIcon } from '@heroicons/react/24/outline'
-import { reviewToolbarButtonClassName, reviewToolbarClassName } from './ReviewDrawingToolbar'
+import { ModeMapToolbar } from '../../ModeMapHint'
+import { reviewToolbarButtonClassName } from './ReviewDrawingToolbar'
 
 type Props = {
   isDrawing: boolean
@@ -29,7 +30,7 @@ export const ReviewEditToolbar = ({
   onFinish,
   onCancel,
 }: Props) => (
-  <div className={reviewToolbarClassName} role="group" aria-label="Geometrie bearbeiten">
+  <ModeMapToolbar aria-label="Geometrie bearbeiten">
     <button
       type="button"
       aria-pressed={isAddingPart}
@@ -61,5 +62,5 @@ export const ReviewEditToolbar = ({
         Teil löschen
       </button>
     )}
-  </div>
+  </ModeMapToolbar>
 )

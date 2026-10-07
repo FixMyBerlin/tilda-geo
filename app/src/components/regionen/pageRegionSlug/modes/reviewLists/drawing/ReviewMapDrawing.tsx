@@ -1,10 +1,22 @@
 import { DrawLayers } from '@osm-editor-kit/react-map-gl-draw'
 import { useEffect } from 'react'
-import { useReviewComposeType, useReviewDrawActions } from './review-draw-store'
+import { ModeMapHint } from '../../ModeMapHint'
+import {
+  type ReviewComposeType,
+  useReviewComposeFeatures,
+  useReviewComposeType,
+  useReviewDrawActions,
+} from './review-draw-store'
 import { ReviewDrawingToolbar } from './ReviewDrawingToolbar'
 import { reviewDrawStyles } from './reviewDrawStyles'
 import { ReviewEditToolbar } from './ReviewEditToolbar'
 import { useReviewDraw } from './useReviewDraw'
+
+const composeHints = {
+  point: 'In die Karte klicken, um den Punkt für den Eintrag zu setzen.',
+  line: 'In die Karte klicken, um die Linie für den Eintrag zu zeichnen.',
+  polygon: 'In die Karte klicken, um die Fläche für den Eintrag zu zeichnen.',
+} satisfies Record<ReviewComposeType, string>
 
 /**
  * Map drawing for Prüflisten: compose toolbar (`rl.new`) or geometry-edit (`rl.move`)
@@ -16,6 +28,7 @@ import { useReviewDraw } from './useReviewDraw'
 export const ReviewMapDrawing = () => {
   const { draw, session, sessionKey, editType } = useReviewDraw()
   const composeType = useReviewComposeType()
+  const composeIsEmpty = useReviewComposeFeatures().length === 0
   const { setComposeType, resetCompose } = useReviewDrawActions()
 
   useEffect(
@@ -36,6 +49,10 @@ export const ReviewMapDrawing = () => {
         id="review-draw"
         styles={reviewDrawStyles[session]}
       />
+      {/* Gone with the first click. */}
+      {session === 'compose' && !draw.isDrawing && composeIsEmpty && (
+        <ModeMapHint>{composeHints[composeType]}</ModeMapHint>
+      )}
       {session === 'compose' ? (
         <ReviewDrawingToolbar
           type={composeType}

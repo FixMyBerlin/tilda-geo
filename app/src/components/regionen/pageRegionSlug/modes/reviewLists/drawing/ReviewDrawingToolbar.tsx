@@ -1,4 +1,5 @@
 import { twJoin } from 'tailwind-merge'
+import { ModeMapToolbar } from '../../ModeMapHint'
 import type { ReviewComposeType } from './review-draw-store'
 
 type Props = {
@@ -14,9 +15,6 @@ const OPTIONS: { type: ReviewComposeType; label: string }[] = [
   { type: 'line', label: 'Linie' },
   { type: 'polygon', label: 'Fläche' },
 ]
-
-export const reviewToolbarClassName =
-  'pointer-events-auto absolute top-14 left-1/2 isolate z-1000 inline-flex -translate-x-1/2 rounded-md shadow-xs sm:top-[10px]'
 
 export const reviewToolbarButtonClassName = ({
   active = false,
@@ -39,7 +37,7 @@ export const ReviewDrawingToolbar = ({
   onFinish,
   onCancel,
 }: Props) => (
-  <div className={reviewToolbarClassName} role="group" aria-label="Neuen Eintrag zeichnen">
+  <ModeMapToolbar aria-label="Neuen Eintrag zeichnen">
     {OPTIONS.map((option) => (
       <button
         key={option.type}
@@ -62,5 +60,5 @@ export const ReviewDrawingToolbar = ({
         </button>
       </>
     )}
-  </div>
+  </ModeMapToolbar>
 )

@@ -7,6 +7,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { useState } from 'react'
 import { twJoin } from 'tailwind-merge'
+import { ModeMapHint, ModeMapToolbar } from '@/components/regionen/pageRegionSlug/modes/ModeMapHint'
 import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
 import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
 
@@ -42,13 +43,8 @@ export function CalculatorDrawingToolbar({
 
   return (
     <>
-      {/* Top center like the Prüflisten drawing toolbar. Below the floating header buttons on
-          mobile (icon-only to fit); with labels on ≥ sm. */}
-      <div
-        className="pointer-events-auto absolute top-14 left-1/2 isolate z-1000 inline-flex -translate-x-1/2 rounded-md shadow-xs sm:top-2.5"
-        role="group"
-        aria-label="Fläche zeichnen"
-      >
+      {/* Icon-only on a phone to fit; with labels on ≥ sm. */}
+      <ModeMapToolbar aria-label="Fläche zeichnen">
         {isDrawing ? (
           <>
             <button
@@ -104,15 +100,13 @@ export function CalculatorDrawingToolbar({
           <QuestionMarkCircleIcon className="size-5 shrink-0 sm:hidden" aria-hidden />
           <span className="hidden sm:inline">Hilfe</span>
         </button>
-      </div>
+      </ModeMapToolbar>
 
-      {/* Mid-map like the hint of a new note; gone with the first click. */}
+      {/* Gone with the first click. */}
       {!isDrawing && !hasAreas && (
-        <div className="pointer-events-none absolute inset-x-4 top-1/2 z-10 flex justify-center">
-          <div className="rounded-sm bg-fuchsia-800 px-3 py-1.5 text-center text-sm text-white shadow-md">
-            In die Karte klicken, um eine Fläche zu zeichnen und ihre Werte zu summieren.
-          </div>
-        </div>
+        <ModeMapHint>
+          In die Karte klicken, um eine Fläche zu zeichnen und ihre Werte zu summieren.
+        </ModeMapHint>
       )}
 
       <ModalDialog
