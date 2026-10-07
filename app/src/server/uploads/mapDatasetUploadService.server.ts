@@ -1,4 +1,5 @@
 import { runWithAuditContextAsync, type AuditContext } from '@/server/audit/auditContext.server'
+import { auditRegionLinksChange } from '@/server/audit/auditRegionLinks.server'
 import db from '@/server/db.server'
 import { optionalTrimmed } from '@/server/utils/searchString'
 
@@ -65,9 +66,15 @@ async function getMapDatasetUploadOrThrow(slug: string) {
  */
 export async function deleteMapDatasetUpload(slug: string, auditContext: AuditContext = {}) {
   const upload = await getMapDatasetUploadOrThrow(slug)
-  await runWithAuditContextAsync(auditContext, () =>
-    db.mapDatasetUpload.delete({ where: { slug } }),
-  )
+  await runWithAuditContextAsync(auditContext, async () => {
+    await db.mapDatasetUpload.delete({ where: { slug } })
+    await auditRegionLinksChange({
+      model: 'MapDatasetUpload',
+      recordId: upload.id,
+      oldRegionSlugs: upload.regionSlugs,
+      newRegionSlugs: [],
+    })
+  })
   return upload
 }
 
@@ -87,18 +94,15 @@ export async function removeMapDatasetUploadRegion(
     where: { slug: uploadSlug },
     data: { regions: { disconnect: { slug: regionSlug } } },
   })
-  // The audit extension only diffs scalar columns, so a relation-only update leaves no row.
-  await db.auditLog.create({
-    data: {
-      ...auditContext,
-      action: 'UPDATE',
+  await auditRegionLinksChange(
+    {
       model: 'MapDatasetUpload',
-      recordId: String(upload.id),
-      oldData: { regionSlugs: upload.regionSlugs },
-      newData: { regionSlugs },
-      changedFields: ['regions'],
+      recordId: upload.id,
+      oldRegionSlugs: upload.regionSlugs,
+      newRegionSlugs: regionSlugs,
     },
-  })
+    auditContext,
+  )
 
   return { slug: uploadSlug, regionSlugs }
 }

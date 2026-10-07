@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { runWithAuditContextAsync } from '@/server/audit/auditContext.server'
+import { auditRegionLinksChange } from '@/server/audit/auditRegionLinks.server'
 import {
   type MemberCaller,
   memberAuditContext,
@@ -22,8 +23,8 @@ export async function createNoteFolder(input: z.infer<typeof Schema>, caller: Me
   await authorizeRegionMemberByRegionSlug(session, regionSlug)
   const regionId = await getRegionIdBySlug(regionSlug)
 
-  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
-    db.noteFolder.create({
+  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), async () => {
+    const created = await db.noteFolder.create({
       data: {
         name,
         createdById: session.userId,
@@ -31,6 +32,13 @@ export async function createNoteFolder(input: z.infer<typeof Schema>, caller: Me
         regions: { connect: { id: regionId } },
       },
       select: { id: true, name: true },
-    }),
-  )
+    })
+    await auditRegionLinksChange({
+      model: 'NoteFolder',
+      recordId: created.id,
+      oldRegionSlugs: [],
+      newRegionSlugs: [regionSlug],
+    })
+    return created
+  })
 }

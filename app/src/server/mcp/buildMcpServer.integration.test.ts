@@ -248,11 +248,21 @@ describe.skipIf(!integrationDb)('admin MCP tools (integration)', () => {
     expect(await db.mapDatasetUpload.findUnique({ where: { slug: UPLOAD_SLUG } })).toBeNull()
     expect(await db.mapDatasetUpload.count({ where: { slug: SECOND_UPLOAD_SLUG } })).toBe(1)
     expect(await db.region.count({ where: { slug: SECOND_REGION_SLUG } })).toBe(1)
-    const deletedAudit = await db.auditLog.findFirst({
-      where: { model: 'MapDatasetUpload', userId: ADMIN_USER_ID },
-      orderBy: { createdAt: 'desc' },
+    const deletedAudit = await db.auditLog.findMany({
+      where: { model: 'MapDatasetUpload', recordId: String(got.json().id), userId: ADMIN_USER_ID },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: 2,
     })
-    expect(deletedAudit).toMatchObject({ action: 'DELETE', metadata: { changeSource: 'API' } })
+    // The DELETE row has columns only, so the dropped region links get their own row.
+    expect(deletedAudit).toMatchObject([
+      {
+        action: 'UPDATE',
+        oldData: { regionSlugs: [SECOND_REGION_SLUG] },
+        newData: { regionSlugs: [] },
+        metadata: { changeSource: 'API' },
+      },
+      { action: 'DELETE', metadata: { changeSource: 'API' } },
+    ])
 
     const deletedAgain = await callTool(client, 'map_dataset_uploads_delete', { slug: UPLOAD_SLUG })
     expect(deletedAgain.isError).toBe(true)
