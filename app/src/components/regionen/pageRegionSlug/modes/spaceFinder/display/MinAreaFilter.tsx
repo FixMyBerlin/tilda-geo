@@ -33,20 +33,21 @@ const MinAreaFilterForm = ({
   // Checkbox an, aber noch keine Zahl > 0: `ff.minArea` bleibt leer (Filter wirkt noch nicht),
   // das Feld muss trotzdem freigegeben sein — sonst kommt man ohne gespeicherten Wert nie hinein
   // und das Feld sperrt sich, sobald man die Zahl zum Neueintippen löscht.
-  const [awaitingValue, setAwaitingValue] = useState(false)
+  const [awaitingValue, setAwaitingValue] = useState(() => filterOn && savedMinArea <= 0)
   const checked = filterOn || awaitingValue
   const lastSaved = useRef(savedMinArea)
 
-  // Beim Öffnen einer Variante deren gespeicherten Wert einmalig in die Karte übernehmen
-  // (die Komponente ist je Variante gekeyed); spätere Tipp-Eingaben bleiben unangetastet.
+  // Der Filter startet aus; der gespeicherte Wert steht nur im (gesperrten) Feld. Ist er beim
+  // Öffnen einer Variante schon an (Variantenwechsel, Lesezeichen), einmalig deren gespeicherten
+  // Wert in die Karte übernehmen (die Komponente ist je Variante gekeyed).
   const initialized = useRef(false)
   useEffect(() => {
     if (initialized.current) return
     initialized.current = true
-    if (savedMinArea !== urlMinArea) {
+    if (filterOn && savedMinArea !== urlMinArea) {
       setSpaceFinderModeParam({ ...spaceFinderMode, minArea: savedMinArea || undefined })
     }
-  }, [savedMinArea, urlMinArea, spaceFinderMode, setSpaceFinderModeParam])
+  }, [filterOn, savedMinArea, urlMinArea, spaceFinderMode, setSpaceFinderModeParam])
 
   const mutation = useMutation({
     mutationFn: (value: number) =>
