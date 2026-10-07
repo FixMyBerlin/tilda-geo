@@ -40,6 +40,17 @@ test.describe('Smoke – region mode pages (unauthenticated)', () => {
     expect(decoded).toContain('map=14/52.5/13.4')
   })
 
+  test('Flächenfinder mode redirects guests to access-denied, preserving the intended URL in from', async ({
+    page,
+  }) => {
+    await page.goto('/regionen/parkraum/flaechenfinder?map=14/52.5/13.4')
+    await page.waitForURL((url) => new URL(url).pathname === '/access-denied')
+    const from = new URL(page.url()).searchParams.get('from')
+    expect(from).toContain('/regionen/parkraum/flaechenfinder')
+    expect(from).toContain('map=14/52.5/13.4')
+    await expect(page.getByRole('heading', { name: 'Anmeldung erforderlich' })).toBeVisible()
+  })
+
   test('notes mode renders panel and map side by side', async ({ page }) => {
     await page.goto(TEST_REGION_NOTES_MODE_URL)
 

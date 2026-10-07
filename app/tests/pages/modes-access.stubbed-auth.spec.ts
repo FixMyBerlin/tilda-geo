@@ -7,6 +7,8 @@ import { cleanupStubbedSessionData, createStubbedUserSession } from '../fixtures
 const PUBLIC_REGION = 'radinfra'
 // PUBLIC region with internal notes only, so Hinweise is member-only.
 const INTERNAL_NOTES_REGION = 'woldegk'
+// Seed region with `spaceFinderEnabled` on (`seedPlanning`). `PUBLIC_REGION` has it off (default).
+const SPACE_FINDER_REGION = 'parkraum'
 const REAL_EMAIL_PREFIX = 'e2e-modes-access-'
 
 const withStubbedUser = async (
@@ -39,6 +41,7 @@ test.describe('Region modes – non-admin access (stubbed user login)', () => {
     `/regionen/${PUBLIC_REGION}/qa`,
     `/regionen/${PUBLIC_REGION}/prueflisten`,
     `/regionen/${INTERNAL_NOTES_REGION}/hinweise`,
+    `/regionen/${SPACE_FINDER_REGION}/flaechenfinder`,
   ]) {
     test(`logged-in non-member is denied ${path}`, async ({ page }, testInfo) => {
       // Distinct identity per test: they run in parallel and the stub user is keyed by it.
@@ -49,7 +52,11 @@ test.describe('Region modes – non-admin access (stubbed user login)', () => {
         async () => {
           await page.goto(path)
           await page.waitForURL((url) => new URL(url).pathname === '/access-denied')
-          await expect(page.getByRole('heading', { name: 'Zugriff verweigert' })).toBeVisible()
+          // The page shows "Anmeldung erforderlich" until the client has loaded the current user,
+          // which can take a while on a cold dev server.
+          await expect(page.getByRole('heading', { name: 'Zugriff verweigert' })).toBeVisible({
+            timeout: 30_000,
+          })
         },
       )
     })
@@ -69,6 +76,27 @@ test.describe('Region modes – non-admin access (stubbed user login)', () => {
       await expect(page.getByRole('heading', { name: 'Prüflisten' })).toBeVisible({
         timeout: 30_000,
       })
+    })
+  })
+
+  test('member of a region with the Flächenfinder switched off is sent to the region map', async ({
+    page,
+  }, testInfo) => {
+    await withStubbedUser(page, testInfo, 'modes-access-ff-flag-off', async (user) => {
+      const region = await db.region.findUniqueOrThrow({
+        where: { slug: PUBLIC_REGION },
+        select: { id: true, spaceFinderEnabled: true },
+      })
+      expect(region.spaceFinderEnabled).toBe(false)
+      await db.membership.create({ data: { userId: user.id, regionId: region.id } })
+
+      await page.goto(`/regionen/${PUBLIC_REGION}/flaechenfinder`)
+      await page.waitForURL((url) => new URL(url).pathname === `/regionen/${PUBLIC_REGION}`)
+      await expect(
+        page
+          .getByRole('navigation', { name: 'Modus' })
+          .getByRole('link', { name: 'Flächenfinder' }),
+      ).toHaveCount(0)
     })
   })
 })
