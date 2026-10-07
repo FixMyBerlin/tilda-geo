@@ -246,5 +246,3 @@ export type StyleId =
   | SubcatSurfaceBikelaneStyleIds
   | SubcatSurfaceRoadsStyleIds
   | 'lit' // LEGACY style id kept for decoding old ?config= URLs
-
-export type LegendId = string // TODO: We can make this more precise later

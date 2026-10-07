@@ -1,14 +1,13 @@
-import { ArrowDownTrayIcon, CheckIcon, LockClosedIcon } from '@heroicons/react/20/solid'
+import { ArrowDownTrayIcon, LockClosedIcon } from '@heroicons/react/20/solid'
 import { twJoin } from 'tailwind-merge'
 import { useDataParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useDataParam'
 import { useIsAdmin } from '@/components/shared/hooks/useIsAdmin'
 import { Link } from '@/components/shared/links/Link'
-import { Markdown } from '@/components/shared/text/Markdown'
 import { getStaticDatasetUrl } from '@/components/shared/utils/getStaticDatasetUrl'
 import type { RegionDataset } from '@/server/uploads/queries/getUploadsForRegion.server'
 import { createSourceKeyStaticDatasets } from '../../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
-import { iconFromLegend } from '../Legend/Legend'
-import { LegendNameDesc } from '../Legend/LegendNameDesc'
+import { LegendItems } from '../Legend/Legend'
+import { ReadMore } from './ReadMore'
 
 export const SelectDataset = ({ dataset }: { dataset: RegionDataset }) => {
   const {
@@ -44,74 +43,54 @@ export const SelectDataset = ({ dataset }: { dataset: RegionDataset }) => {
       <button
         type="button"
         className={twJoin(
-          'relative w-full cursor-pointer py-2 pr-2 pl-1.5 text-left leading-tight text-gray-900 select-none',
+          'relative w-full cursor-pointer p-2 text-left leading-tight text-gray-900 select-none',
           selected ? 'bg-yellow-400' : 'hover:bg-yellow-50',
         )}
         onClick={handleClick}
+        aria-pressed={selected}
       >
-        <div className="justify-left relative flex items-center gap-1">
-          <CheckIcon
-            className={twJoin('size-5 flex-none', selected ? 'text-yellow-900' : 'text-gray-100')}
-            aria-hidden="true"
-          />
-          <div className="flex grow justify-between gap-1 font-medium">
-            <span>{name}</span>
-            {!dataset.public && (
-              <LockClosedIcon
-                className="size-4 flex-none text-gray-400"
-                title="Datensatz nur für angemeldete Nutzer:innen mit Rechten für die Region sichtbar."
-              />
-            )}
-          </div>
+        <div className="flex justify-between gap-1 font-medium">
+          <span>{name}</span>
+          {!dataset.public && (
+            <LockClosedIcon
+              className="size-4 flex-none text-gray-400"
+              title="Datensatz nur für angemeldete Nutzer:innen mit Rechten für die Region sichtbar."
+            />
+          )}
         </div>
-        {selected && description && (
-          <p className={twJoin('mt-1', description?.includes('(!)') ? 'text-red-400' : '')}>
-            {description}
-          </p>
-        )}
       </button>
       {selected && (
-        <div className="flex flex-col gap-3 border-2 border-t-0 border-yellow-400 bg-yellow-100 px-1.5 pt-1 pb-1.5 text-xs leading-4 prose-a:underline-offset-1">
-          {(dataUpdatedNote || dataSourceMarkdown || attributionHtml) && (
+        <div className="flex flex-col gap-3 border-2 border-t-0 border-yellow-400 bg-yellow-100 px-1.5 pt-1.5 pb-1.5 text-xs leading-4 prose-a:underline-offset-1">
+          {description && (
+            <p className={description.includes('(!)') ? 'text-red-500' : undefined}>
+              {description}
+            </p>
+          )}
+          {(dataUpdatedNote || dataSourceMarkdown) && (
             <div className="flex flex-col gap-1">
               {dataUpdatedNote && <p>{dataUpdatedNote}</p>}
               {dataSourceMarkdown && (
-                <Markdown markdown={dataSourceMarkdown} className="text-xs leading-4" />
-              )}
-              {attributionHtml && (
-                <>
-                  <p
-                    // oxlint-disable-next-line react/no-danger -- attribution from dataset config
-                    dangerouslySetInnerHTML={{ __html: attributionHtml }}
-                  />
-                  {licence && (
-                    <p>
-                      Lizenz: {licence}
-                      {licenceOsmCompatible === 'licence' && ' (OSM-kompatibel)'}
-                      {licenceOsmCompatible === 'waiver' && ' (OSM kompatible Zusatzvereinbarung)'}
-                      {licenceOsmCompatible === 'no' && ' (nicht OSM kompatibel)'}
-                    </p>
-                  )}
-                </>
+                <ReadMore markdown={dataSourceMarkdown} fadeFromClassName="from-yellow-100" />
               )}
             </div>
           )}
-          {legends && Boolean(legends?.length) && (
-            <ul className="space-y-1.5">
-              {legends.map((legend) => {
-                return (
-                  <li
-                    className="group relative flex items-start gap-1.5 leading-tight font-normal"
-                    key={legend.id}
-                  >
-                    <div className="size-3.5 flex-none shrink-0">{iconFromLegend(legend)}</div>
-                    <LegendNameDesc name={legend.name} desc={legend.desc} />
-                  </li>
-                )
-              })}
-            </ul>
+          {attributionHtml && (
+            <div>
+              <p
+                // oxlint-disable-next-line react/no-danger -- attribution from dataset config
+                dangerouslySetInnerHTML={{ __html: attributionHtml }}
+              />
+              {licence && (
+                <p>
+                  Lizenz: {licence}
+                  {licenceOsmCompatible === 'licence' && ' (OSM-kompatibel)'}
+                  {licenceOsmCompatible === 'waiver' && ' (OSM kompatible Zusatzvereinbarung)'}
+                  {licenceOsmCompatible === 'no' && ' (nicht OSM kompatibel)'}
+                </p>
+              )}
+            </div>
           )}
-
+          {legends && Boolean(legends?.length) && <LegendItems legendKey={key} legends={legends} />}
           {dataset.hideDownloadLink === false && geojsonUrl && (
             <Link
               href={getStaticDatasetUrl(id, 'geojson')}
