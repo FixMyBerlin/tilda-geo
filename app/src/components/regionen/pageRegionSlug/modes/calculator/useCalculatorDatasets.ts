@@ -6,7 +6,7 @@ import { useCalculatorModeParam } from './useCalculatorModeParam'
 
 /**
  * The datasets the region offers, the one that is summed right now (`sum.key`, else the first)
- * and the filter on it (`sum.filter`).
+ * the filter on it (`sum.filter`) and how its points are colored (`sum.style`).
  */
 export const useCalculatorDatasets = () => {
   const region = useRegion()
@@ -36,7 +36,16 @@ export const useCalculatorDatasets = () => {
     ),
   ) satisfies CalculatorFilter
 
-  // Another dataset has other tags, so the filter does not carry over. The areas do.
+  // Like the filter: only a key the dataset groups by.
+  const style =
+    calculatorMode.style && activeDataset?.groupByKeys.includes(calculatorMode.style)
+      ? calculatorMode.style
+      : undefined
+
+  const setStyle = (key: string | undefined) =>
+    setCalculatorModeParam({ ...calculatorMode, style: key })
+
+  // Another dataset has other tags, so filter and style do not carry over. The areas do.
   const selectDataset = (sourceId: string) =>
     setCalculatorModeParam({
       key: sourceId === datasets[0]?.sourceId ? undefined : sourceId,
@@ -54,5 +63,14 @@ export const useCalculatorDatasets = () => {
 
   const clearFilter = () => setCalculatorModeParam({ ...calculatorMode, filter: undefined })
 
-  return { datasets, activeDataset, selectDataset, filter, toggleFilter, clearFilter }
+  return {
+    datasets,
+    activeDataset,
+    selectDataset,
+    filter,
+    toggleFilter,
+    clearFilter,
+    style,
+    setStyle,
+  }
 }

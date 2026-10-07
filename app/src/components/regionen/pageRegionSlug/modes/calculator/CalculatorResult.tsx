@@ -21,6 +21,7 @@ import {
   calculateMetricSummaryForAreas,
   calculatorMetricOrder,
 } from './utils/calculateMetricSummaries'
+import { useCalculatorStyleColors } from './utils/calculatorStyleColors'
 import { isDrawAreaFullyInViewport } from './utils/isDrawAreaFullyInViewport'
 import { useUpdateCalculation } from './utils/useUpdateCalculation'
 
@@ -46,6 +47,7 @@ export const CalculatorResult = ({ dataset, filter, onToggleFilter }: Props) => 
   const { mainMap } = useMap()
   const calculatorAreasWithFeatures = useMapCalculatorAreasWithFeatures()
   const mapBounds = useMapBounds()
+  const styleColors = useCalculatorStyleColors()
 
   const { drawAreas, setDrawAreas } = useCalculatorAreas()
   const { updateCalculation } = useUpdateCalculation()
@@ -124,6 +126,7 @@ export const CalculatorResult = ({ dataset, filter, onToggleFilter }: Props) => 
     onDeleteArea: handleDelete,
     filter,
     onToggleFilter,
+    styleColors,
     formatNumber: (value) => numberFormatter.format(value),
     formatMetricValue,
   }

@@ -10,6 +10,8 @@ import type { DrawArea } from './drawing/drawAreaTypes'
  *   for the region's first dataset.
  * - `filter` narrows the sum to points with these tag values, e.g. `{ operator_type: 'public' }`.
  *   The keys are the group-by keys of the dataset; `''` stands for a missing value.
+ * - `style` colors the points by the values of one tag (a group-by key of the dataset).
+ *   Without it all points have the color of the dataset.
  * - `areas` are the drawn areas as one GeoJSON geometry: a `Polygon`, or a `MultiPolygon` for
  *   several areas. That is how Prüfeinträge store their geometry. Unlike `notes.new` /
  *   `review.new` the areas stay in the URL in other modes, so a look at the map does not
@@ -29,6 +31,7 @@ const zodPolygonCoordinates = z.array(z.array(z.tuple([z.number(), z.number()]))
 export const zodCalculatorModeParam = z.object({
   key: z.string().optional().catch(undefined),
   filter: z.record(z.string(), z.string()).optional().catch(undefined),
+  style: z.string().optional().catch(undefined),
   areas: z
     .union([
       z.object({ type: z.literal('Polygon'), coordinates: zodPolygonCoordinates }),
@@ -49,6 +52,7 @@ export const compactCalculatorModeParam = (param: CalculatorModeParam) => {
   const next: CalculatorModeParam = {}
   if (param.key) next.key = param.key
   if (param.filter && Object.keys(param.filter).length > 0) next.filter = param.filter
+  if (param.style) next.style = param.style
   if (param.areas) next.areas = param.areas
   return Object.keys(next).length > 0 ? next : undefined
 }

@@ -64,11 +64,6 @@ type Props = {
   /** Keep the collection picker visible and non-collapsible (e.g. no Prüfliste exists yet). */
   collectionAlwaysOpen?: boolean
   filter?: ReactNode
-  /**
-   * For a filter line that is only there at times (Summieren: the active filters): `false`
-   * collapses it with an animation instead of the list jumping. Leave out for a permanent line.
-   */
-  filterOpen?: boolean
   actions?: ReactNode
   detail?: ModePanelDetail
   children: ReactNode
@@ -86,7 +81,6 @@ export const ModePanel = ({
   collection,
   collectionAlwaysOpen = false,
   filter,
-  filterOpen,
   actions,
   detail,
   children,
@@ -211,15 +205,7 @@ export const ModePanel = ({
           </div>
         )}
       </header>
-      {!isDetail &&
-        filter &&
-        (filterOpen === undefined ? (
-          <div className={modePanelSectionClassName}>{filter}</div>
-        ) : (
-          <MotionCollapse open={filterOpen} className="shrink-0">
-            <div className={modePanelSectionClassName}>{filter}</div>
-          </MotionCollapse>
-        ))}
+      {!isDetail && filter && <div className={modePanelSectionClassName}>{filter}</div>}
       <div className={modePanelScrollClassName}>{isDetail ? detail.children : children}</div>
       {showOutsideFooter ? (
         <footer className={modePanelFooterClassName} aria-live="polite">

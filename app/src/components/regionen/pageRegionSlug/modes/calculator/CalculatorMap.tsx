@@ -4,11 +4,13 @@ import {
   useMapLoaded,
   useShowMapLoadingIndicator,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
+import { calculatorAreasToParam } from './calculatorModeParam'
 import { CalculatorMapDrawing } from './drawing/CalculatorMapDrawing'
 import type { DrawArea } from './drawing/drawAreaTypes'
 import { useCalculatorLiveAreas } from './drawing/useCalculatorDraw'
 import { SourcesLayersCalculator } from './SourcesLayersCalculator'
 import { useCalculatorDatasets } from './useCalculatorDatasets'
+import { useCalculatorStyleColors } from './utils/calculatorStyleColors'
 import { useUpdateCalculation } from './utils/useUpdateCalculation'
 
 const buildCalculationSignature = (
@@ -29,6 +31,7 @@ const buildCalculationSignature = (
  */
 export const CalculatorMap = () => {
   const { activeDataset, filter } = useCalculatorDatasets()
+  const styleColors = useCalculatorStyleColors()
   // Includes a drag in progress, so the result follows the pointer.
   const liveAreas = useCalculatorLiveAreas()
   const { updateCalculation } = useUpdateCalculation()
@@ -61,7 +64,12 @@ export const CalculatorMap = () => {
 
   return (
     <>
-      <SourcesLayersCalculator dataset={activeDataset} filter={filter} />
+      <SourcesLayersCalculator
+        dataset={activeDataset}
+        filter={filter}
+        areas={calculatorAreasToParam(liveAreas)}
+        styleColors={styleColors}
+      />
       <CalculatorMapDrawing
         areas={liveAreas}
         getFeatureLabel={({ index }) => (liveAreas.length > 1 ? `Fläche ${index + 1}` : undefined)}

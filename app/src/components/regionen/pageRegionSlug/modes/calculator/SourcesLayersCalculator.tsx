@@ -18,31 +18,48 @@ import {
   calculatorLayerId,
   calculatorSourceKey,
 } from './calculatorDatasets.const'
-import type { CalculatorFilter } from './calculatorModeParam'
+import type { CalculatorFilter, CalculatorModeParam } from './calculatorModeParam'
+import {
+  calculatorStyleColorExpression,
+  type CalculatorStyleColors,
+} from './utils/calculatorStyleColors'
 
-type Props = { dataset: (typeof calculatorDatasets)[number]; filter: CalculatorFilter }
+type Props = {
+  dataset: (typeof calculatorDatasets)[number]
+  filter: CalculatorFilter
+  /** The drawn areas, including a drag in progress. */
+  areas: CalculatorModeParam['areas']
+  /** Colors of the active style (`sum.style`), if any. */
+  styleColors: CalculatorStyleColors | undefined
+}
 
-/** Matches what `toFilterValue` compares: a missing or empty tag is `''`. */
-const filterExpression = (filter: CalculatorFilter) =>
-  [
-    'all',
+/**
+ * True for the points that are part of the sum: inside a drawn area and matching the filter
+ * (`toFilterValue`: a missing or empty tag is `''`). `undefined` while neither narrows anything.
+ */
+const summedExpression = (areas: Props['areas'], filter: CalculatorFilter) => {
+  const conditions = [
+    ...(areas ? [['within', areas]] : []),
     ...Object.entries(filter).map(([key, value]) => [
       '==',
       ['to-string', ['coalesce', ['get', key], '']],
       value,
     ]),
-  ] as ExpressionSpecification
+  ]
+  return conditions.length > 0 ? (['all', ...conditions] as ExpressionSpecification) : undefined
+}
 
 /**
  * The points of the dataset that is summed. They are not a category: the mode owns them, so
  * they are only on the map while the dataset is selected in the Summieren mode.
  */
-export const SourcesLayersCalculator = ({ dataset, filter }: Props) => {
+export const SourcesLayersCalculator = ({ dataset, filter, areas, styleColors }: Props) => {
   const debugLayerStyles = useMapDebugDebugLayerStyles()
   const useDebugCachelessTiles = useMapDebugUseDebugCachelessTiles()
   const { backgroundParam } = useBackgroundParam()
 
-  const hasFilter = Object.keys(filter).length > 0
+  const summed = summedExpression(areas, filter)
+  const styleColor = styleColors ? calculatorStyleColorExpression(styleColors) : undefined
   const sourceData = getSourceData(dataset.sourceId)
   const sourceKey = calculatorSourceKey(dataset.sourceId)
   const tileUrl = getCachelessTilesUrl({
@@ -73,18 +90,19 @@ export const SourcesLayersCalculator = ({ dataset, filter }: Props) => {
           backgroundId: backgroundParam,
           subcategoryBeforeId: undefined,
         })
-        // Points outside the filter are dimmed, not removed: the calculation reads the rendered
-        // points, and the panel needs the filtered-out ones to offer their values.
-        if (layerProps.type === 'circle' && hasFilter) {
-          const dimmed = ['case', filterExpression(filter), 1, 0.15] as ExpressionSpecification
+        // Points that are not summed are dimmed, not removed: the calculation reads the rendered
+        // points, and the panel needs the filtered-out ones to offer their values. Only the
+        // opacity says "summed or not"; the color is free for the style.
+        if (layerProps.type === 'circle' && (summed || styleColor)) {
+          const dimmed = summed ? (['case', summed, 1, 0.25] as ExpressionSpecification) : undefined
           return (
             <Layer
               key={layerId}
               {...layerProps}
               paint={{
                 ...layerProps.paint,
-                'circle-opacity': dimmed,
-                'circle-stroke-opacity': dimmed,
+                ...(dimmed ? { 'circle-opacity': dimmed, 'circle-stroke-opacity': dimmed } : {}),
+                ...(styleColor ? { 'circle-color': styleColor } : {}),
               }}
             />
           )

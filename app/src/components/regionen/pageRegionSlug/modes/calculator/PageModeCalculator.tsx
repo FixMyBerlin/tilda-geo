@@ -1,19 +1,27 @@
 import { ModeCollectionSelect } from '../ModeCollectionSelect'
 import { ModePanel } from '../ModePanel'
-import { CalculatorFilterChips } from './CalculatorFilterChips'
+import { CalculatorFilterBar } from './CalculatorFilterBar'
 import { CalculatorResult } from './CalculatorResult'
 import { useCalculatorDatasets } from './useCalculatorDatasets'
 
 /**
  * Summieren mode: draw areas on the map (`CalculatorMap`) and read the totals of the selected
- * dataset here. A click on a value of the breakdown narrows the sum to it. Nothing is stored;
+ * dataset here. A click on a value of the breakdown narrows the sum to it; the
+ * filter line also sets how the points are colored. Nothing is stored;
  * areas, dataset and filter live in the URL (`sum`), so a calculation is shared by
  * its link.
  */
 export const PageModeCalculator = () => {
-  const { datasets, activeDataset, selectDataset, filter, toggleFilter, clearFilter } =
-    useCalculatorDatasets()
-  const hasFilter = Object.keys(filter).length > 0
+  const {
+    datasets,
+    activeDataset,
+    selectDataset,
+    filter,
+    toggleFilter,
+    clearFilter,
+    style,
+    setStyle,
+  } = useCalculatorDatasets()
 
   return (
     <ModePanel
@@ -34,15 +42,17 @@ export const PageModeCalculator = () => {
       }
       filter={
         activeDataset ? (
-          <CalculatorFilterChips
+          <CalculatorFilterBar
             sourceId={activeDataset.sourceId}
+            groupByKeys={activeDataset.groupByKeys}
+            style={style}
+            onStyleChange={setStyle}
             filter={filter}
             onToggleFilter={toggleFilter}
-            onClear={clearFilter}
+            onClearFilter={clearFilter}
           />
         ) : undefined
       }
-      filterOpen={hasFilter}
     >
       {activeDataset ? (
         <CalculatorResult dataset={activeDataset} filter={filter} onToggleFilter={toggleFilter} />

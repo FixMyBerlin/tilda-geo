@@ -11,6 +11,10 @@ import {
   calculateMetricSummaryForAreas,
   calculatorMetricOrder,
 } from './utils/calculateMetricSummaries'
+import {
+  calculatorStyleOtherColor,
+  type CalculatorStyleColors,
+} from './utils/calculatorStyleColors'
 
 export type CalculatorDisplayMode = 'value' | 'percent'
 type CalculatorMetric = (typeof calculatorMetricOrder)[number]
@@ -37,6 +41,8 @@ export type CalculatorBreakdownData = {
   /** Tag values the sum is narrowed to (`sum.filter`). */
   filter: CalculatorFilter
   onToggleFilter: (key: string, value: string) => void
+  /** Colors of the active style: its group shows them as dots, which is the legend of the map. */
+  styleColors: CalculatorStyleColors | undefined
   formatNumber: (value: number) => string
   formatMetricValue: (sum: number, ratio: number) => string
 }
@@ -139,6 +145,7 @@ const AreaSummary = ({
   onDelete,
   filter,
   onToggleFilter,
+  styleColors,
   formatNumber,
   formatMetricValue,
 }: {
@@ -148,6 +155,7 @@ const AreaSummary = ({
   onDelete: () => void
   filter: CalculatorFilter
   onToggleFilter: (key: string, value: string) => void
+  styleColors: CalculatorStyleColors | undefined
   formatNumber: (value: number) => string
   formatMetricValue: (sum: number, ratio: number) => string
 }) => (
@@ -189,6 +197,16 @@ const AreaSummary = ({
               )}
             >
               <span className="flex min-w-0 flex-1 items-center gap-1.5">
+                {styleColors?.key === group.key && (
+                  <span
+                    aria-hidden
+                    className="size-2 shrink-0 rounded-full"
+                    style={{
+                      backgroundColor:
+                        styleColors.colors[groupValue.filterValue] ?? calculatorStyleOtherColor,
+                    }}
+                  />
+                )}
                 <span
                   className="min-w-0 truncate [&_span]:truncate"
                   title={groupValue.value.length > 20 ? groupValue.value : undefined}
@@ -255,6 +273,7 @@ export const CalculatorBreakdown = ({ data }: { data: CalculatorBreakdownData })
               sourceId={data.sourceId}
               onDelete={() => data.onDeleteArea(key)}
               filter={data.filter}
+              styleColors={data.styleColors}
               onToggleFilter={data.onToggleFilter}
               formatNumber={data.formatNumber}
               formatMetricValue={data.formatMetricValue}
