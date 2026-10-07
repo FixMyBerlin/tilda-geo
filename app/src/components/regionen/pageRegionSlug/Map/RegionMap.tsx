@@ -325,6 +325,9 @@ export const RegionMap = () => {
       // hash // we cannot use the hash prop because it interfiers with our URL based states; we recreate the same behavior manually
       style={{ width: '100%', height: '100%' }}
       mapStyle={MAP_STYLE_URL}
+      // MapLibre v6 defaults to 4, which re-cuts overzoomed vector tiles (> maxzoom) and draws the
+      // cut edges of polygon PMTiles (static datasets rendered as line layers) as a grid.
+      zoomLevelsToOverscale={undefined}
       interactiveLayerIds={interactiveLayerIds}
       // onMouseMove={}
       // onLoad={handleInspect}
