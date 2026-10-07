@@ -30,7 +30,8 @@ const pageSectionLabels = {
 } satisfies Record<string, string>
 
 export function PageRegionEdit() {
-  const { region, formConfig, formValues, contracts, linkCounts } = routeApi.useLoaderData()
+  const { region, formConfig, formValues, contracts, linkCounts, privateBackgrounds } =
+    routeApi.useLoaderData()
   const regionSearch = { regionSlug: region.slug }
   const navigate = useNavigate()
   const queryClient = useQueryClient()
@@ -59,6 +60,7 @@ export function PageRegionEdit() {
         formValues={formValues}
         contracts={contracts}
         regionId={region.id}
+        privateBackgrounds={privateBackgrounds}
         pageExtras={{
           sections: toAdminAsideSections(pageSectionLabels),
           content: (

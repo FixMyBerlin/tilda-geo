@@ -105,6 +105,7 @@ export const Route = createFileRoute('/regionen/$regionSlug')({
       authorized: pageData.authorized,
       region,
       hasPermissions: pageData.hasPermissions,
+      privateBackgrounds: pageData.privateBackgrounds,
       availableModes,
     }
   },

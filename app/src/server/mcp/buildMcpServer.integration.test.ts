@@ -10,6 +10,7 @@ const integrationDb = await isIntegrationDbAvailable()
 const ADMIN_USER_ID = 'vitest-mcp-admin'
 const CATEGORY_GROUP = 'vitest-mcp-group'
 const CONTRACT_SLUG = 'vitest-mcp-contract'
+const PRIVATE_BACKGROUND_SLUG = 'vitest-mcp-private-background'
 const REGION_SLUG = 'vitest-mcp-region'
 const SECOND_REGION_SLUG = 'vitest-mcp-region-2'
 const OTHER_USER_ID = 'vitest-mcp-other'
@@ -50,6 +51,7 @@ async function cleanup() {
   await db.mapDatasetCategory.deleteMany({ where: { groupKey: CATEGORY_GROUP } })
   await db.region.deleteMany({ where: { slug: { in: [REGION_SLUG, SECOND_REGION_SLUG] } } })
   await db.regionContract.deleteMany({ where: { slug: CONTRACT_SLUG } })
+  await db.privateBackgroundSource.deleteMany({ where: { slug: PRIVATE_BACKGROUND_SLUG } })
   await db.user.deleteMany({ where: { id: { in: [ADMIN_USER_ID, OTHER_USER_ID] } } })
 }
 
@@ -299,6 +301,80 @@ describe.skipIf(!integrationDb)('admin MCP tools (integration)', () => {
     const deleted = await callTool(client, 'region_contracts_delete', { slug: CONTRACT_SLUG })
     expect(deleted.isError).toBe(false)
   })
+
+  test('private_backgrounds_* round-trip never returns or audits the tile URL', async () => {
+    const tilesUrl = 'https://tiles.example.com/{z}/{x}/{y}.jpg?token=VITEST_SECRET'
+    const created = await callTool(client, 'private_backgrounds_create', {
+      slug: PRIVATE_BACKGROUND_SLUG,
+      name: 'Vitest MCP background',
+      tilesUrl,
+      regionSlugs: [REGION_SLUG],
+    })
+    expect(created.isError).toBe(false)
+    expect(created.json()).toMatchObject({ tileSize: 256, regionSlugs: [REGION_SLUG] })
+
+    const invalid = await callTool(client, 'private_backgrounds_create', {
+      slug: `${PRIVATE_BACKGROUND_SLUG}-2`,
+      name: 'No placeholders',
+      tilesUrl: 'https://tiles.example.com/tile.jpg',
+    })
+    expect(invalid.isError).toBe(true)
+    const zooms = await callTool(client, 'private_backgrounds_update', {
+      slug: PRIVATE_BACKGROUND_SLUG,
+      name: 'Zooms',
+      minzoom: 18,
+      maxzoom: 10,
+    })
+    expect(zooms.isError).toBe(true)
+
+    // Without tilesUrl the stored URL stays; everything else is replaced.
+    const updated = await callTool(client, 'private_backgrounds_update', {
+      slug: PRIVATE_BACKGROUND_SLUG,
+      name: 'Vitest MCP background renamed',
+      maxzoom: 21,
+      regionSlugs: [],
+    })
+    expect(updated.json()).toMatchObject({ name: 'Vitest MCP background renamed', regionSlugs: [] })
+    const stored = await db.privateBackgroundSource.findUniqueOrThrow({
+      where: { slug: PRIVATE_BACKGROUND_SLUG },
+    })
+    expect(stored).toMatchObject({ tilesUrl, maxzoom: 21 })
+
+    // Rotating the token shows up in the audit log as a changed marker, never as the URL.
+    await callTool(client, 'private_backgrounds_update', {
+      slug: PRIVATE_BACKGROUND_SLUG,
+      name: 'Vitest MCP background renamed',
+      tilesUrl: `${tilesUrl}_ROTATED`,
+    })
+    const rotated = await db.privateBackgroundSource.findUniqueOrThrow({
+      where: { slug: PRIVATE_BACKGROUND_SLUG },
+    })
+    expect(rotated.tilesUrlChangedAt.getTime()).toBeGreaterThan(stored.tilesUrlChangedAt.getTime())
+
+    const list = await callTool(client, 'private_backgrounds_list')
+    expect(list.text).toContain(PRIVATE_BACKGROUND_SLUG)
+    const audit = await db.auditLog.findMany({
+      where: { model: 'PrivateBackgroundSource', recordId: String(stored.id) },
+    })
+    expect(audit.length).toBeGreaterThan(0)
+    // Unlinking the region is recorded: the regions decide who may load the tiles.
+    const regionLinkRows = audit.filter((row) =>
+      JSON.stringify(row.newData).includes('regionSlugs'),
+    )
+    expect(regionLinkRows.map((row) => row.newData)).toEqual(
+      expect.arrayContaining([{ regionSlugs: [REGION_SLUG] }, { regionSlugs: [] }]),
+    )
+    expect(regionLinkRows).toHaveLength(2)
+    expect([created.text, updated.text, list.text, JSON.stringify(audit)].join()).not.toContain(
+      'VITEST_SECRET',
+    )
+
+    const deleted = await callTool(client, 'private_backgrounds_delete', {
+      slug: PRIVATE_BACKGROUND_SLUG,
+    })
+    expect(deleted.isError).toBe(false)
+  })
+
   test('note_folders_* / notes_* / note_comments_* round-trip', async () => {
     const folder = await callTool(client, 'note_folders_create', {
       regionSlug: REGION_SLUG,

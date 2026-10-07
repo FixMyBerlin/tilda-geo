@@ -24,6 +24,10 @@ import {
   searchBoolean,
   searchStringArray,
 } from '@/lib/searchParamsSchema'
+import {
+  isPrivateBackgroundParam,
+  type PrivateBackgroundParam,
+} from '@/server/private-backgrounds/privateBackgroundParam'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 
 export const defaultMapSearchValue = serializeMapParam(mapParamFallback)
@@ -44,7 +48,14 @@ const mapSearchParam = (defaultValue: string) =>
 const backgroundSearchParam = () =>
   optionalSearchString()
     .transform((s) => s ?? defaultBackgroundParam)
-    .pipe(z.enum(validBackgroundParams).catch(defaultBackgroundParam))
+    .pipe(
+      z
+        .union([
+          z.enum(validBackgroundParams),
+          z.custom<PrivateBackgroundParam>(isPrivateBackgroundParam),
+        ])
+        .catch(defaultBackgroundParam),
+    )
 
 export const regionDialogParamSchema = z.enum(['welcome', 'download', 'docs'])
 

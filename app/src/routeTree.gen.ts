@@ -38,6 +38,7 @@ import { Route as AdminRegionsRouteImport } from './routes/admin/regions'
 import { Route as AdminRegionContractsRouteImport } from './routes/admin/region-contracts'
 import { Route as AdminQaConfigsRouteImport } from './routes/admin/qa-configs'
 import { Route as AdminProcessingRouteImport } from './routes/admin/processing'
+import { Route as AdminPrivateBackgroundsRouteImport } from './routes/admin/private-backgrounds'
 import { Route as AdminNoteFoldersRouteImport } from './routes/admin/note-folders'
 import { Route as AdminMapDatasetUploadsRouteImport } from './routes/admin/map-dataset-uploads'
 import { Route as AdminMapDatasetCategoriesRouteImport } from './routes/admin/map-dataset-categories'
@@ -56,6 +57,7 @@ import { Route as AdminRegionsIndexRouteImport } from './routes/admin/regions/in
 import { Route as AdminRegionContractsIndexRouteImport } from './routes/admin/region-contracts/index'
 import { Route as AdminQaConfigsIndexRouteImport } from './routes/admin/qa-configs/index'
 import { Route as AdminProcessingIndexRouteImport } from './routes/admin/processing/index'
+import { Route as AdminPrivateBackgroundsIndexRouteImport } from './routes/admin/private-backgrounds/index'
 import { Route as AdminNoteFoldersIndexRouteImport } from './routes/admin/note-folders/index'
 import { Route as AdminMapDatasetUploadsIndexRouteImport } from './routes/admin/map-dataset-uploads/index'
 import { Route as AdminMapDatasetCategoriesIndexRouteImport } from './routes/admin/map-dataset-categories/index'
@@ -116,6 +118,7 @@ import { Route as AdminQaConfigsIdEditRouteImport } from './routes/admin/qa-conf
 import { Route as AdminNoteFoldersIdEditRouteImport } from './routes/admin/note-folders/$id.edit'
 import { Route as ApiNotesRegionSlugFolderIdNoteIdRouteImport } from './routes/api/notes.$regionSlug.$folderId.$noteId'
 import { Route as ApiAdminQaConfigsIdExportCsvRouteImport } from './routes/api/admin.qa-configs.$id.export-csv'
+import { Route as ApiPrivateBackgroundsSlugZXYRouteImport } from './routes/api/private-backgrounds.$slug.$z.$x.$y'
 import { Route as ApiNotesRegionSlugFolderIdNoteIdCommentsRouteImport } from './routes/api/notes.$regionSlug.$folderId.$noteId.comments'
 
 const RegionenRoute = RegionenRouteImport.update({
@@ -263,6 +266,11 @@ const AdminProcessingRoute = AdminProcessingRouteImport.update({
   path: '/processing',
   getParentRoute: () => AdminRoute,
 } as any)
+const AdminPrivateBackgroundsRoute = AdminPrivateBackgroundsRouteImport.update({
+  id: '/private-backgrounds',
+  path: '/private-backgrounds',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminNoteFoldersRoute = AdminNoteFoldersRouteImport.update({
   id: '/note-folders',
   path: '/note-folders',
@@ -355,6 +363,12 @@ const AdminProcessingIndexRoute = AdminProcessingIndexRouteImport.update({
   path: '/',
   getParentRoute: () => AdminProcessingRoute,
 } as any)
+const AdminPrivateBackgroundsIndexRoute =
+  AdminPrivateBackgroundsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AdminPrivateBackgroundsRoute,
+  } as any)
 const AdminNoteFoldersIndexRoute = AdminNoteFoldersIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -686,6 +700,12 @@ const ApiAdminQaConfigsIdExportCsvRoute =
     path: '/api/admin/qa-configs/$id/export-csv',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiPrivateBackgroundsSlugZXYRoute =
+  ApiPrivateBackgroundsSlugZXYRouteImport.update({
+    id: '/api/private-backgrounds/$slug/$z/$x/$y',
+    path: '/api/private-backgrounds/$slug/$z/$x/$y',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiNotesRegionSlugFolderIdNoteIdCommentsRoute =
   ApiNotesRegionSlugFolderIdNoteIdCommentsRouteImport.update({
     id: '/comments',
@@ -710,6 +730,7 @@ export interface FileRoutesByFullPath {
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesRouteWithChildren
   '/admin/map-dataset-uploads': typeof AdminMapDatasetUploadsRouteWithChildren
   '/admin/note-folders': typeof AdminNoteFoldersRouteWithChildren
+  '/admin/private-backgrounds': typeof AdminPrivateBackgroundsRouteWithChildren
   '/admin/processing': typeof AdminProcessingRouteWithChildren
   '/admin/qa-configs': typeof AdminQaConfigsRouteWithChildren
   '/admin/region-contracts': typeof AdminRegionContractsRouteWithChildren
@@ -770,6 +791,7 @@ export interface FileRoutesByFullPath {
   '/admin/map-dataset-categories/': typeof AdminMapDatasetCategoriesIndexRoute
   '/admin/map-dataset-uploads/': typeof AdminMapDatasetUploadsIndexRoute
   '/admin/note-folders/': typeof AdminNoteFoldersIndexRoute
+  '/admin/private-backgrounds/': typeof AdminPrivateBackgroundsIndexRoute
   '/admin/processing/': typeof AdminProcessingIndexRoute
   '/admin/qa-configs/': typeof AdminQaConfigsIndexRoute
   '/admin/region-contracts/': typeof AdminRegionContractsIndexRoute
@@ -801,6 +823,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/qa-configs/$id/export-csv': typeof ApiAdminQaConfigsIdExportCsvRoute
   '/api/notes/$regionSlug/$folderId/$noteId': typeof ApiNotesRegionSlugFolderIdNoteIdRouteWithChildren
   '/api/notes/$regionSlug/$folderId/$noteId/comments': typeof ApiNotesRegionSlugFolderIdNoteIdCommentsRoute
+  '/api/private-backgrounds/$slug/$z/$x/$y': typeof ApiPrivateBackgroundsSlugZXYRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -867,6 +890,7 @@ export interface FileRoutesByTo {
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesIndexRoute
   '/admin/map-dataset-uploads': typeof AdminMapDatasetUploadsIndexRoute
   '/admin/note-folders': typeof AdminNoteFoldersIndexRoute
+  '/admin/private-backgrounds': typeof AdminPrivateBackgroundsIndexRoute
   '/admin/processing': typeof AdminProcessingIndexRoute
   '/admin/qa-configs': typeof AdminQaConfigsIndexRoute
   '/admin/region-contracts': typeof AdminRegionContractsIndexRoute
@@ -898,6 +922,7 @@ export interface FileRoutesByTo {
   '/api/admin/qa-configs/$id/export-csv': typeof ApiAdminQaConfigsIdExportCsvRoute
   '/api/notes/$regionSlug/$folderId/$noteId': typeof ApiNotesRegionSlugFolderIdNoteIdRouteWithChildren
   '/api/notes/$regionSlug/$folderId/$noteId/comments': typeof ApiNotesRegionSlugFolderIdNoteIdCommentsRoute
+  '/api/private-backgrounds/$slug/$z/$x/$y': typeof ApiPrivateBackgroundsSlugZXYRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -918,6 +943,7 @@ export interface FileRoutesById {
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesRouteWithChildren
   '/admin/map-dataset-uploads': typeof AdminMapDatasetUploadsRouteWithChildren
   '/admin/note-folders': typeof AdminNoteFoldersRouteWithChildren
+  '/admin/private-backgrounds': typeof AdminPrivateBackgroundsRouteWithChildren
   '/admin/processing': typeof AdminProcessingRouteWithChildren
   '/admin/qa-configs': typeof AdminQaConfigsRouteWithChildren
   '/admin/region-contracts': typeof AdminRegionContractsRouteWithChildren
@@ -978,6 +1004,7 @@ export interface FileRoutesById {
   '/admin/map-dataset-categories/': typeof AdminMapDatasetCategoriesIndexRoute
   '/admin/map-dataset-uploads/': typeof AdminMapDatasetUploadsIndexRoute
   '/admin/note-folders/': typeof AdminNoteFoldersIndexRoute
+  '/admin/private-backgrounds/': typeof AdminPrivateBackgroundsIndexRoute
   '/admin/processing/': typeof AdminProcessingIndexRoute
   '/admin/qa-configs/': typeof AdminQaConfigsIndexRoute
   '/admin/region-contracts/': typeof AdminRegionContractsIndexRoute
@@ -1009,6 +1036,7 @@ export interface FileRoutesById {
   '/api/admin/qa-configs/$id/export-csv': typeof ApiAdminQaConfigsIdExportCsvRoute
   '/api/notes/$regionSlug/$folderId/$noteId': typeof ApiNotesRegionSlugFolderIdNoteIdRouteWithChildren
   '/api/notes/$regionSlug/$folderId/$noteId/comments': typeof ApiNotesRegionSlugFolderIdNoteIdCommentsRoute
+  '/api/private-backgrounds/$slug/$z/$x/$y': typeof ApiPrivateBackgroundsSlugZXYRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1029,6 +1057,7 @@ export interface FileRouteTypes {
     | '/admin/map-dataset-categories'
     | '/admin/map-dataset-uploads'
     | '/admin/note-folders'
+    | '/admin/private-backgrounds'
     | '/admin/processing'
     | '/admin/qa-configs'
     | '/admin/region-contracts'
@@ -1089,6 +1118,7 @@ export interface FileRouteTypes {
     | '/admin/map-dataset-categories/'
     | '/admin/map-dataset-uploads/'
     | '/admin/note-folders/'
+    | '/admin/private-backgrounds/'
     | '/admin/processing/'
     | '/admin/qa-configs/'
     | '/admin/region-contracts/'
@@ -1120,6 +1150,7 @@ export interface FileRouteTypes {
     | '/api/admin/qa-configs/$id/export-csv'
     | '/api/notes/$regionSlug/$folderId/$noteId'
     | '/api/notes/$regionSlug/$folderId/$noteId/comments'
+    | '/api/private-backgrounds/$slug/$z/$x/$y'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1186,6 +1217,7 @@ export interface FileRouteTypes {
     | '/admin/map-dataset-categories'
     | '/admin/map-dataset-uploads'
     | '/admin/note-folders'
+    | '/admin/private-backgrounds'
     | '/admin/processing'
     | '/admin/qa-configs'
     | '/admin/region-contracts'
@@ -1217,6 +1249,7 @@ export interface FileRouteTypes {
     | '/api/admin/qa-configs/$id/export-csv'
     | '/api/notes/$regionSlug/$folderId/$noteId'
     | '/api/notes/$regionSlug/$folderId/$noteId/comments'
+    | '/api/private-backgrounds/$slug/$z/$x/$y'
   id:
     | '__root__'
     | '/'
@@ -1236,6 +1269,7 @@ export interface FileRouteTypes {
     | '/admin/map-dataset-categories'
     | '/admin/map-dataset-uploads'
     | '/admin/note-folders'
+    | '/admin/private-backgrounds'
     | '/admin/processing'
     | '/admin/qa-configs'
     | '/admin/region-contracts'
@@ -1296,6 +1330,7 @@ export interface FileRouteTypes {
     | '/admin/map-dataset-categories/'
     | '/admin/map-dataset-uploads/'
     | '/admin/note-folders/'
+    | '/admin/private-backgrounds/'
     | '/admin/processing/'
     | '/admin/qa-configs/'
     | '/admin/region-contracts/'
@@ -1327,6 +1362,7 @@ export interface FileRouteTypes {
     | '/api/admin/qa-configs/$id/export-csv'
     | '/api/notes/$regionSlug/$folderId/$noteId'
     | '/api/notes/$regionSlug/$folderId/$noteId/comments'
+    | '/api/private-backgrounds/$slug/$z/$x/$y'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -1370,6 +1406,7 @@ export interface RootRouteChildren {
   ApiMaprouletteStatisticProxyChallengeIdRoute: typeof ApiMaprouletteStatisticProxyChallengeIdRoute
   ApiRegionUploadsIdFilenameRoute: typeof ApiRegionUploadsIdFilenameRoute
   ApiAdminQaConfigsIdExportCsvRoute: typeof ApiAdminQaConfigsIdExportCsvRoute
+  ApiPrivateBackgroundsSlugZXYRoute: typeof ApiPrivateBackgroundsSlugZXYRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1577,6 +1614,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminProcessingRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/private-backgrounds': {
+      id: '/admin/private-backgrounds'
+      path: '/private-backgrounds'
+      fullPath: '/admin/private-backgrounds'
+      preLoaderRoute: typeof AdminPrivateBackgroundsRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/note-folders': {
       id: '/admin/note-folders'
       path: '/note-folders'
@@ -1702,6 +1746,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/processing/'
       preLoaderRoute: typeof AdminProcessingIndexRouteImport
       parentRoute: typeof AdminProcessingRoute
+    }
+    '/admin/private-backgrounds/': {
+      id: '/admin/private-backgrounds/'
+      path: '/'
+      fullPath: '/admin/private-backgrounds/'
+      preLoaderRoute: typeof AdminPrivateBackgroundsIndexRouteImport
+      parentRoute: typeof AdminPrivateBackgroundsRoute
     }
     '/admin/note-folders/': {
       id: '/admin/note-folders/'
@@ -2123,6 +2174,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminQaConfigsIdExportCsvRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/private-backgrounds/$slug/$z/$x/$y': {
+      id: '/api/private-backgrounds/$slug/$z/$x/$y'
+      path: '/api/private-backgrounds/$slug/$z/$x/$y'
+      fullPath: '/api/private-backgrounds/$slug/$z/$x/$y'
+      preLoaderRoute: typeof ApiPrivateBackgroundsSlugZXYRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/api/notes/$regionSlug/$folderId/$noteId/comments': {
       id: '/api/notes/$regionSlug/$folderId/$noteId/comments'
       path: '/comments'
@@ -2202,6 +2260,20 @@ const AdminNoteFoldersRouteChildren: AdminNoteFoldersRouteChildren = {
 
 const AdminNoteFoldersRouteWithChildren =
   AdminNoteFoldersRoute._addFileChildren(AdminNoteFoldersRouteChildren)
+
+interface AdminPrivateBackgroundsRouteChildren {
+  AdminPrivateBackgroundsIndexRoute: typeof AdminPrivateBackgroundsIndexRoute
+}
+
+const AdminPrivateBackgroundsRouteChildren: AdminPrivateBackgroundsRouteChildren =
+  {
+    AdminPrivateBackgroundsIndexRoute: AdminPrivateBackgroundsIndexRoute,
+  }
+
+const AdminPrivateBackgroundsRouteWithChildren =
+  AdminPrivateBackgroundsRoute._addFileChildren(
+    AdminPrivateBackgroundsRouteChildren,
+  )
 
 interface AdminProcessingRouteChildren {
   AdminProcessingMetaIdRoute: typeof AdminProcessingMetaIdRoute
@@ -2300,6 +2372,7 @@ interface AdminRouteChildren {
   AdminMapDatasetCategoriesRoute: typeof AdminMapDatasetCategoriesRouteWithChildren
   AdminMapDatasetUploadsRoute: typeof AdminMapDatasetUploadsRouteWithChildren
   AdminNoteFoldersRoute: typeof AdminNoteFoldersRouteWithChildren
+  AdminPrivateBackgroundsRoute: typeof AdminPrivateBackgroundsRouteWithChildren
   AdminProcessingRoute: typeof AdminProcessingRouteWithChildren
   AdminQaConfigsRoute: typeof AdminQaConfigsRouteWithChildren
   AdminRegionContractsRoute: typeof AdminRegionContractsRouteWithChildren
@@ -2317,6 +2390,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminMapDatasetCategoriesRoute: AdminMapDatasetCategoriesRouteWithChildren,
   AdminMapDatasetUploadsRoute: AdminMapDatasetUploadsRouteWithChildren,
   AdminNoteFoldersRoute: AdminNoteFoldersRouteWithChildren,
+  AdminPrivateBackgroundsRoute: AdminPrivateBackgroundsRouteWithChildren,
   AdminProcessingRoute: AdminProcessingRouteWithChildren,
   AdminQaConfigsRoute: AdminQaConfigsRouteWithChildren,
   AdminRegionContractsRoute: AdminRegionContractsRouteWithChildren,
@@ -2538,6 +2612,7 @@ const rootRouteChildren: RootRouteChildren = {
     ApiMaprouletteStatisticProxyChallengeIdRoute,
   ApiRegionUploadsIdFilenameRoute: ApiRegionUploadsIdFilenameRoute,
   ApiAdminQaConfigsIdExportCsvRoute: ApiAdminQaConfigsIdExportCsvRoute,
+  ApiPrivateBackgroundsSlugZXYRoute: ApiPrivateBackgroundsSlugZXYRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
