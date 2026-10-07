@@ -18,7 +18,7 @@
         "@modelcontextprotocol/sdk": "1.31.0",
         "@osm-editor-kit/react-map-gl-draw": "0.0.2",
         "@osm-editor-kit/street-imagery": "0.1.0-alpha.8",
-        "@osm-editor-kit/street-imagery-react": "0.1.0-alpha.10",
+        "@osm-editor-kit/street-imagery-react": "0.1.0-alpha.11",
         "@osm-traffic-signs/converter": "0.6.0",
         "@prisma/adapter-pg": "7.8.0",
         "@prisma/client": "7.8.0",
@@ -526,7 +526,7 @@
 
     "@osm-editor-kit/street-imagery": ["@osm-editor-kit/street-imagery@0.1.0-alpha.8", "", { "dependencies": { "@mapbox/vector-tile": "^3.0.0", "date-fns": "^4.4.0", "pbf": "^5.1.0" } }, "sha512-6u/IGZSKZuMVae7BsjVX9CtrF0vSo/cg5oRHZSr2xTxM+mdx4qIaAM0kVZFeN6locnjkD/SiIbYUCBwHpDySkw=="],
 
-    "@osm-editor-kit/street-imagery-react": ["@osm-editor-kit/street-imagery-react@0.1.0-alpha.10", "", { "peerDependencies": { "@osm-editor-kit/street-imagery": "^0.1.0-alpha.8", "@panoramax/web-viewer": "^5", "@tanstack/react-query": "^5", "mapillary-js": "^4", "maplibre-gl": "^6", "react": "^19", "react-dom": "^19", "react-map-gl": "^8", "zustand": "^5" }, "optionalPeers": ["@panoramax/web-viewer"] }, "sha512-i4gMo4siiKuqm8RPqH1xdFRbzl9g6wEeufCEqM6ByHAIHq/S+0JzVyDIVwrPNeQZ3bChcZKSDCzpREesDPdE8w=="],
+    "@osm-editor-kit/street-imagery-react": ["@osm-editor-kit/street-imagery-react@0.1.0-alpha.11", "", { "peerDependencies": { "@osm-editor-kit/street-imagery": "^0.1.0-alpha.8", "@panoramax/web-viewer": "^5", "@tanstack/react-query": "^5", "mapillary-js": "^4", "maplibre-gl": "^6", "react": "^19", "react-dom": "^19", "react-map-gl": "^8", "zustand": "^5" }, "optionalPeers": ["@panoramax/web-viewer"] }, "sha512-2nvr3KoKvw1ZhIK/vL7tWzNXBBADwVcCRHZjSdOCVRA6oRhp+h190GV3YywAT8qwz1CNGalOhYQWx+lGmNklUw=="],
 
     "@osm-traffic-signs/converter": ["@osm-traffic-signs/converter@0.6.0", "", { "dependencies": { "opening_hours": "^3.12.0" } }, "sha512-KjMOEv3qsnC5lzMK1CS9sdA3xTjEnabVshWxgAan0envgyvpVYeZIIvhv6aUNUT9mlg/LLdZs7aEKcnXG5Lgmw=="],
 
