@@ -9,10 +9,10 @@ import {
 } from '@/lib/planningUserGeojson'
 import { Prisma } from '@/prisma/generated/client'
 import { requireAuth } from '@/server/auth/session.server'
-import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
 import { getRegionIdBySlug } from '@/server/regions/queries/getRegionIdBySlug.server'
 import { parseRegionGeoJsonBBox } from '@/server/regions/regionGeoJson'
+import { authorizePlanningRegion } from './authorizePlanningRegion.server'
 import { ensureAreaCensusStats, refreshAreaCensusStats } from './censusSaettigung.server'
 import { factorsDiffer } from './factorFingerprint'
 import {
@@ -105,7 +105,7 @@ async function authorizeByArea(headers: Headers, areaId: number) {
     where: { id: areaId },
     select: { id: true, region: { select: { slug: true } } },
   })
-  await authorizeRegionMemberByRegionSlug(session, area.region.slug)
+  await authorizePlanningRegion(session, area.region.slug)
   return session
 }
 
@@ -115,7 +115,7 @@ async function authorizeByVariant(headers: Headers, variantId: number) {
     where: { id: variantId },
     select: { id: true, area: { select: { region: { select: { slug: true } } } } },
   })
-  await authorizeRegionMemberByRegionSlug(session, variant.area.region.slug)
+  await authorizePlanningRegion(session, variant.area.region.slug)
   return session
 }
 
@@ -164,7 +164,7 @@ export const getPlanningAreasFn = createServerFn({ method: 'GET' })
   .validator((data: z.infer<typeof RegionSlugInput>) => RegionSlugInput.parse(data))
   .handler(async ({ data }) => {
     const session = await requireAuth(getRequestHeaders())
-    await authorizeRegionMemberByRegionSlug(session, data.regionSlug)
+    await authorizePlanningRegion(session, data.regionSlug)
     const regionId = await getRegionIdBySlug(data.regionSlug)
     return db.planningArea.findMany({
       where: { regionId },
@@ -338,7 +338,7 @@ export const getPlanningJobFn = createServerFn({ method: 'GET' })
       },
     })
     const session = await requireAuth(getRequestHeaders())
-    await authorizeRegionMemberByRegionSlug(session, job.variant.area.region.slug)
+    await authorizePlanningRegion(session, job.variant.area.region.slug)
     const fc = mergeFactorConfig(
       areaInputFromRow(job.variant.area),
       job.variant.factorConfig as VariantFactorConfig,
@@ -370,7 +370,7 @@ export const getAdminBoundariesFn = createServerFn({ method: 'GET' })
   .validator((data: z.infer<typeof BoundarySearchInput>) => BoundarySearchInput.parse(data))
   .handler(async ({ data }) => {
     const session = await requireAuth(getRequestHeaders())
-    await authorizeRegionMemberByRegionSlug(session, data.regionSlug)
+    await authorizePlanningRegion(session, data.regionSlug)
 
     const region = await db.region.findFirst({
       where: { slug: data.regionSlug },
@@ -442,7 +442,7 @@ export const getBoundaryGeomFn = createServerFn({ method: 'GET' })
   .validator((data: z.infer<typeof BoundaryGeomInput>) => BoundaryGeomInput.parse(data))
   .handler(async ({ data }) => {
     const session = await requireAuth(getRequestHeaders())
-    await authorizeRegionMemberByRegionSlug(session, data.regionSlug)
+    await authorizePlanningRegion(session, data.regionSlug)
 
     const rows = await db.$queryRaw<{ geom: object }[]>`
       SELECT ST_AsGeoJSON(ST_Transform(b.geom, 4326))::json AS geom
@@ -471,7 +471,7 @@ export const createPlanningAreaFn = createServerFn({ method: 'POST' })
   .validator((data: z.infer<typeof CreateAreaInput>) => CreateAreaInput.parse(data))
   .handler(async ({ data }) => {
     const session = await requireAuth(getRequestHeaders())
-    await authorizeRegionMemberByRegionSlug(session, data.regionSlug)
+    await authorizePlanningRegion(session, data.regionSlug)
     const regionId = await getRegionIdBySlug(data.regionSlug)
     const area = await db.planningArea.create({
       data: {
