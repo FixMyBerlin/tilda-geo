@@ -19,10 +19,6 @@ import {
   tableKeyHighway,
 } from './compositTableRows/TagsTableRowCompositParentHighway'
 import {
-  TagsTableRowCompositRadinfraDeStatistics,
-  tableKeyRadinfraDeStatistics,
-} from './compositTableRows/TagsTableRowCompositRadinfraDeStatistics'
-import {
   TagsTableRowCompositRoadBikelanes,
   tableKeyRoadBikelanes,
 } from './compositTableRows/TagsTableRowCompositRoadBikelanes'
@@ -59,11 +55,6 @@ type Props = {
 
 export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props) => {
   const keys = sourceDocumentedKeys === false ? Object.keys(properties) : sourceDocumentedKeys
-
-  // Switch based on the sourceId
-  if (sourceId === tableKeyRadinfraDeStatistics) {
-    return <TagsTableRowCompositRadinfraDeStatistics properties={properties} />
-  }
 
   return (
     <div className={tagsTableContainerClass}>

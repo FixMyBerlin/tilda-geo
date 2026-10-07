@@ -131,10 +131,6 @@ import type {
   SubcatRadinfraLitBikelanesId,
   SubcatRadinfraLitBikelanesStyleIds,
 } from './mapDataSubcategories/subcat_radinfra_lit_bikelanes.const'
-import type {
-  SubcatRadinfraStatsId,
-  SubcatRadinfraStatsStyleIds,
-} from './mapDataSubcategories/subcat_radinfra_stats'
 import type { SubcatRoadsId, SubcatRoadsStyleIds } from './mapDataSubcategories/subcat_roads.const'
 import type {
   SubcatRoadsPlusFootwaysId,
@@ -194,8 +190,6 @@ export type SubcategoryId =
   | SubcatPoiPlusPublicTransportId
   | SubcatRadinfraCampaignId
   | SubcatRadinfraLitBikelanesId
-  | SubcatRadinfraStatsId
-  | SubcatRadinfraStatsId
   | SubcatRoadsId
   | SubcatRoadsPlusFootwaysId
   | SubcatRoadsPlusLabelId
@@ -244,8 +238,6 @@ export type StyleId =
   | SubcatPoiStyleIds
   | SubcatRadinfraCampaignStyleIds
   | SubcatRadinfraLitBikelanesStyleIds
-  | SubcatRadinfraStatsStyleIds
-  | SubcatRadinfraStatsStyleIds
   | SubcatRoadsPlusFootwaysStyleIds
   | SubcatRoadsPlusLabelStyleIds
   | SubcatRoadsPlusOnewayStyleIds

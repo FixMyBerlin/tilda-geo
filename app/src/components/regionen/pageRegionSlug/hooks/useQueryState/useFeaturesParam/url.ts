@@ -44,7 +44,7 @@ export const numericSourceIds: Record<number, SourceNames> = {
   22: 'atlas_bikelanesPresence',
   23: 'atlas_bikeSuitability',
   24: 'atlas_todos_lines',
-  25: 'atlas_aggregated_lengths',
+  // 25: 'atlas_aggregated_lengths', // the radinfra Statistik category was removed; the table stays for /api/stats
   26: 'tilda_parkings',
   27: 'tilda_parkings_cutouts',
   28: 'tilda_parkings_quantized',
