@@ -9,7 +9,7 @@ import { getAppBaseUrl } from '@/components/shared/utils/getAppBaseUrl'
  * delivered by the region loader, tiles served by our proxy route) followed by the region's
  * selection from the code catalog.
  */
-export const useRegionBackgrounds = () => {
+export const useRegionBackgrounds = (): MapDataBackgroundSource<BackgroundParam>[] => {
   const { region, privateBackgrounds } = useRegionLoaderData()
 
   const privateSources = privateBackgrounds.map(
@@ -29,5 +29,5 @@ export const useRegionBackgrounds = () => {
     region.backgroundSources.includes(source.id),
   )
 
-  return [...privateSources, ...catalogSources] satisfies MapDataBackgroundSource<BackgroundParam>[]
+  return [...privateSources, ...catalogSources]
 }

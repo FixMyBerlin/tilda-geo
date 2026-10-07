@@ -25,6 +25,23 @@ export type MapDataBackgroundSource<TIds> = {
   maxzoom?: RasterSourceSpecification['maxzoom']
   minzoom?: RasterSourceSpecification['minzoom']
   tileSize?: RasterSourceSpecification['tileSize']
+  scheme?: RasterSourceSpecification['scheme']
+  /** @desc `photo` marks an aerial image; the Messen mode picks its background from those. */
+  category?:
+    | 'photo'
+    | 'map'
+    | 'historicmap'
+    | 'osmbasedmap'
+    | 'historicphoto'
+    | 'qa'
+    | 'elevation'
+    | 'other'
+  /** @desc The Editor Layer Index recommends this layer for its area. */
+  best?: boolean
+  /** @desc When the image was taken, e.g. `2025` or `2025-04` (Editor Layer Index `end_date`). */
+  endDate?: string
+  /** @desc Coverage as `[west, south, east, north]`; missing for worldwide layers. */
+  bbox?: [number, number, number, number]
 }
 
 export type MapDataSourceInspectorEditor = {

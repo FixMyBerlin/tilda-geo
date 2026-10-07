@@ -41,6 +41,9 @@ const tokenMapboxTilesets =
 // Has Domain restrictions
 const tokenMaptilerTilesets = 'wo0y3tqo53envRHnz2Bl'
 
+// Coverage of the Berlin aerial images, for picking an aerial by place (`pickAerialBackground`).
+const BERLIN_BBOX = [13.0736, 52.3332, 13.7645, 52.6826] satisfies [number, number, number, number]
+
 export const sourcesBackgroundsRasterTilda: MapDataBackgroundSource<SourcesRasterIdsTILDA>[] = [
   {
     id: 'strassenbefahrung',
@@ -73,6 +76,7 @@ export const sourcesBackgroundsRasterTilda: MapDataBackgroundSource<SourcesRaste
   },
   {
     id: 'esri',
+    category: 'photo',
     name: 'Luftbild Esri',
     tilesUrl:
       'https://clarity.maptiles.arcgis.com/arcgis/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
@@ -85,6 +89,7 @@ export const sourcesBackgroundsRasterTilda: MapDataBackgroundSource<SourcesRaste
     // https://cloud.maptiler.com/tiles/satellite/
     // V1 is deprecated
     id: 'maptiler-satellite-v1',
+    category: 'photo',
     name: 'Luftbild Maptiler v1',
     tilesUrl: `https://api.maptiler.com/tiles/satellite/{z}/{x}/{y}.jpg?key=${tokenMaptilerTilesets}`,
     tileSize: 512,
@@ -96,6 +101,7 @@ export const sourcesBackgroundsRasterTilda: MapDataBackgroundSource<SourcesRaste
   {
     // https://cloud.maptiler.com/tiles/satellite-v2/
     id: 'maptiler-satellite',
+    category: 'photo',
     name: 'Luftbild Maptiler v2',
     tilesUrl: `https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=${tokenMaptilerTilesets}`,
     tileSize: 512,
@@ -109,6 +115,7 @@ export const sourcesBackgroundsRasterTilda: MapDataBackgroundSource<SourcesRaste
   // Tileset https://studio.mapbox.com/tilesets/mapbox.satellite/
   {
     id: 'mapbox-satellite',
+    category: 'photo',
     name: 'Luftbild Mapbox',
     tilesUrl: `https://api.mapbox.com/v4/mapbox.satellite/{z}/{x}/{y}@2x.webp?access_token=${tokenMapboxTilesets}`,
     tileSize: 512,
@@ -132,6 +139,9 @@ export const sourcesBackgroundsRasterTilda: MapDataBackgroundSource<SourcesRaste
   // },
   {
     id: 'areal2025',
+    category: 'photo',
+    endDate: '2025',
+    bbox: BERLIN_BBOX,
     name: 'Berlin: Luftbilder 2025',
     tilesUrl: 'https://tiles.codefor.de/berlin/geoportal/luftbilder/2025-dop20rgb/{z}/{x}/{y}.png',
     tileSize: 256,
@@ -142,6 +152,9 @@ export const sourcesBackgroundsRasterTilda: MapDataBackgroundSource<SourcesRaste
   },
   {
     id: 'areal2025-summer',
+    category: 'photo',
+    endDate: '2025',
+    bbox: BERLIN_BBOX,
     name: 'Berlin: Luftbilder 2025 Summer',
     tilesUrl:
       'https://tiles.codefor.de/berlin/geoportal/luftbilder/2025-truedop20rgb/{z}/{x}/{y}.png',
@@ -152,6 +165,9 @@ export const sourcesBackgroundsRasterTilda: MapDataBackgroundSource<SourcesRaste
   },
   {
     id: 'areal2024',
+    category: 'photo',
+    endDate: '2024',
+    bbox: BERLIN_BBOX,
     name: 'Berlin: Luftbilder 2024',
     tilesUrl: 'https://tiles.codefor.de/berlin-2024-dop20rgbi/{z}/{x}/{y}.png',
     tileSize: 256,
@@ -162,6 +178,9 @@ export const sourcesBackgroundsRasterTilda: MapDataBackgroundSource<SourcesRaste
   },
   {
     id: 'areal2023',
+    category: 'photo',
+    endDate: '2023',
+    bbox: BERLIN_BBOX,
     name: 'Berlin: Luftbilder 2023',
     tilesUrl: 'https://tiles.codefor.de/berlin-2023-dop20rgbi/{z}/{x}/{y}.png',
     tileSize: 256,
@@ -172,6 +191,9 @@ export const sourcesBackgroundsRasterTilda: MapDataBackgroundSource<SourcesRaste
   },
   {
     id: 'areal2022',
+    category: 'photo',
+    endDate: '2022',
+    bbox: BERLIN_BBOX,
     name: 'Berlin: Luftbilder 2022',
     tilesUrl: 'https://tiles.codefor.de/berlin-2022-dop20rgbi/{z}/{x}/{y}.png',
     tileSize: 256,
@@ -183,6 +205,9 @@ export const sourcesBackgroundsRasterTilda: MapDataBackgroundSource<SourcesRaste
   },
   {
     id: 'areal2021',
+    category: 'photo',
+    endDate: '2021',
+    bbox: BERLIN_BBOX,
     name: 'Berlin: Luftbilder 2021',
     tilesUrl: 'https://tiles.codefor.de/berlin-2021-dop20rgbi/{z}/{x}/{y}.png',
     tileSize: 256,
@@ -193,6 +218,9 @@ export const sourcesBackgroundsRasterTilda: MapDataBackgroundSource<SourcesRaste
   },
   {
     id: 'areal2020',
+    category: 'photo',
+    endDate: '2020',
+    bbox: BERLIN_BBOX,
     name: 'Berlin: Luftbilder 2020',
     tilesUrl: 'https://tiles.codefor.de/berlin-2020-dop20rgb/{z}/{x}/{y}.png',
     tileSize: 256,
@@ -203,6 +231,9 @@ export const sourcesBackgroundsRasterTilda: MapDataBackgroundSource<SourcesRaste
   },
   {
     id: 'areal2019',
+    category: 'photo',
+    endDate: '2019',
+    bbox: BERLIN_BBOX,
     name: 'Berlin: Luftbilder 2019',
     tilesUrl: 'https://tiles.codefor.de/berlin-2019-dop20rgb/{z}/{x}/{y}.png',
     tileSize: 256,

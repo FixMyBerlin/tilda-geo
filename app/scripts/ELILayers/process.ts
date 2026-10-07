@@ -1,207 +1,99 @@
 // We use bun.sh to run this file
 
-import fs from 'node:fs'
 import path from 'node:path'
 import { styleText } from 'node:util'
+import {
+  ensureDetailsForContinents,
+  getLayers,
+  getManifest,
+  hydrateLayers,
+  type EliLayer,
+} from '@osm-editor-kit/maplibre-editor-layer-index'
+import { getRasterSourceSpec } from '@osm-editor-kit/maplibre-editor-layer-index/maplibre'
 import { $ } from 'bun'
-import { z } from 'zod'
 import type { MapDataBackgroundSource } from '@/components/regionen/pageRegionSlug/mapData/types'
-import { convertTileUrl } from './convertTileUrl'
+import legacyIds from './legacyIds.json'
+import legacyLayers from './legacyLayers.json'
 import { log, warn } from './util'
 
 console.log(styleText(['inverse', 'bold'], 'START'), __filename)
 
-const ELI_BASE_URL = 'https://raw.githubusercontent.com/osmlab/editor-layer-index/gh-pages'
-const ELI_DE_DIR = 'sources/europe/de'
-const GITHUB_API_URL =
-  'https://api.github.com/repos/osmlab/editor-layer-index/contents/sources/europe/de?ref=gh-pages'
-
 const appDir = path.resolve(import.meta.dir, '../..')
-const rawDir = path.join(import.meta.dir, 'raw')
 const outputFile = path.join(
   import.meta.dir,
   '../../src/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundRasterELI.const.ts',
 )
 
-const ELIFeatureSchema = z.object({
-  type: z.literal('Feature'),
-  properties: z.object({
-    id: z.string(),
-    name: z.string(),
-    type: z.string(),
-    category: z.string().optional(),
-    url: z.string(),
-    attribution: z
-      .object({
-        text: z.string(),
-        required: z.boolean().optional(),
-      })
-      .optional(),
-    min_zoom: z.number().optional(),
-    max_zoom: z.number().optional(),
-    tile_size: z.number().optional(),
-  }),
-})
+/**
+ * Ids are stored in the region configs, so they must not change. Layers that this file had
+ * before it was built from the package keep the id they had (`legacyIds.json`, matched once
+ * by tile URL); new layers are named after their ELI id.
+ */
+const tildaId = (eliId: string) =>
+  (legacyIds as Record<string, string>)[eliId] ??
+  `ELI_${eliId
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-+|-+$/g, '')}`
 
-type ELIFeature = z.infer<typeof ELIFeatureSchema>
+const roundBbox = (bbox: EliLayer['bbox']) =>
+  bbox.map((value) => Math.round(value * 1e4) / 1e4) as EliLayer['bbox']
 
-async function fetchFileList() {
-  log('Fetching file list from GitHub')
-  const response = await fetch(GITHUB_API_URL)
-  if (!response.ok) {
-    throw new Error(`Failed to fetch file list: ${response.statusText}`)
-  }
-  const files = await response.json()
-
-  return files.filter((file: { name: string }) => file.name.endsWith('.geojson'))
-}
-
-async function downloadFile(filename: string) {
-  const url = `${ELI_BASE_URL}/${ELI_DE_DIR}/${filename}`
-  const filePath = path.join(rawDir, filename)
-
-  log(`Downloading ${filename}`)
-  const response = await fetch(url)
-  if (!response.ok) {
-    warn(`Failed to download ${filename}: ${response.statusText}`)
-    return false
-  }
-
-  const content = await response.text()
-  await Bun.write(filePath, content)
-  return true
-}
-
-function sanitizeId(filename: string): string {
-  // Remove .geojson extension
-  let id = filename.replace(/\.geojson$/i, '')
-  // Convert to lowercase
-  id = id.toLowerCase()
-  // Replace spaces and special chars with hyphens
-  id = id.replace(/[^a-z0-9]+/g, '-')
-  // Remove leading/trailing hyphens
-  id = id.replace(/^-+|-+$/g, '')
-  return `ELI_${id}`
-}
-
-async function parseELIFile(filePath: string): Promise<ELIFeature | null> {
-  try {
-    const file = Bun.file(filePath)
-    const json = await file.json()
-    const result = ELIFeatureSchema.safeParse(json)
-
-    if (!result.success) {
-      warn(
-        `Invalid ELI data in ${path.basename(filePath)}: ${result.error.issues.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ')}`,
-      )
-      return null
-    }
-
-    return result.data
-  } catch (error) {
-    warn(`Failed to parse ${path.basename(filePath)}: ${error}`)
+function toBackgroundSource(layer: EliLayer) {
+  // WMS images at twice the tile size, so they stay sharp on high-density screens.
+  const spec = getRasterSourceSpec(layer, { pixelRatio: 2 })
+  const [tilesUrl] = spec.tiles
+  if (!tilesUrl) {
+    warn(`No tile URL for: ${layer.name}`)
     return null
   }
-}
+  if (!layer.attributionText) warn(`Missing attribution for: ${layer.name}, using empty string`)
 
-function convertELIToMapDataBackgroundSource(feature: ELIFeature, fileId: string) {
-  const props = feature.properties
-
-  // Check if it's a raster type (TMS or WMS)
-  // We don't filter by category since many valid raster layers have categories like "other" or "map"
-  if (props.type !== 'tms' && props.type !== 'wms') {
-    warn(`Skipping unsupported layer type: ${props.name} (type: ${props.type})`)
-    return null
-  }
-
-  // Convert tile URL
-  const converted = convertTileUrl(props.url, props.type)
-  if (!converted) {
-    warn(`Cannot convert tile URL for: ${props.name} (type: ${props.type})`)
-    return null
-  }
-
-  // Handle attribution
-  let attributionHtml = ''
-  if (props.attribution?.text) {
-    attributionHtml = props.attribution.text
-  } else {
-    warn(`Missing attribution for: ${props.name}, using empty string`)
-  }
-
-  // Build result object, only including optional fields if they exist
   const result: MapDataBackgroundSource<string> = {
-    id: fileId,
-    name: props.name,
-    tilesUrl: converted.tiles,
-    attributionHtml,
+    id: tildaId(layer.id),
+    name: layer.name,
+    tilesUrl,
+    // The plain text, as before; the HTML variant of the package wraps it in a link.
+    attributionHtml: layer.attributionText ?? '',
+    tileSize: spec.tileSize,
+    bbox: roundBbox(layer.bbox),
   }
-
-  // Only include optional fields if they exist
-  if (props.min_zoom !== undefined) {
-    result.minzoom = props.min_zoom
-  }
-
-  if (props.max_zoom !== undefined) {
-    result.maxzoom = props.max_zoom
-  }
-
-  if (converted.tileSize !== undefined || props.tile_size !== undefined) {
-    result.tileSize = converted.tileSize || props.tile_size
-  }
-
+  if (spec.minzoom !== undefined) result.minzoom = spec.minzoom
+  if (spec.maxzoom !== undefined) result.maxzoom = spec.maxzoom
+  if (spec.scheme === 'tms') result.scheme = 'tms'
+  if (layer.category) result.category = layer.category
+  if (layer.best) result.best = true
+  if (layer.endDate) result.endDate = layer.endDate
   return result
 }
 
 async function main() {
-  // Ensure raw directory exists (recursive: true won't error if it already exists)
-  await fs.promises.mkdir(rawDir, { recursive: true })
+  const manifest = getManifest()
+  log(`Editor Layer Index as of ${manifest.generatedAt} (${manifest.sourceCommit})`)
 
-  // Fetch and download files
-  const files = await fetchFileList()
-  log(`Found ${files.length} GeoJSON files`)
+  await ensureDetailsForContinents(['europe', 'world'])
+  // Layers whose coverage touches Germany, including those of neighbours that reach across
+  // the border. Worldwide layers are not part of this list; TILDA keeps its own.
+  const layers = hydrateLayers(getLayers().filter((layer) => layer.countryCodes.includes('DE')))
+  log(`Found ${layers.length} layers for Germany`)
 
-  for (const file of files) {
-    await downloadFile(file.name)
-  }
-
-  // Parse and convert files
-  log('Parsing and converting files')
-  const convertedLayers: Array<{
-    id: string
-    name: string
-    tilesUrl: string
-    attributionHtml: string
-    maxzoom?: number
-    minzoom?: number
-    tileSize?: number
-    legendUrl?: string
-  }> = []
-
-  const rawFiles = fs.readdirSync(rawDir).filter((f) => f.endsWith('.geojson'))
-  for (const filename of rawFiles) {
-    const filePath = path.join(rawDir, filename)
-    const feature = await parseELIFile(filePath)
-
-    if (!feature) {
-      continue
+  const converted = layers.flatMap((layer) => {
+    if (layer.requiresKeys.length > 0) {
+      warn(`Skipping layer that needs an API key: ${layer.name}`)
+      return []
     }
+    return toBackgroundSource(layer) ?? []
+  })
 
-    const fileId = sanitizeId(filename)
-    const converted = convertELIToMapDataBackgroundSource(feature, fileId)
+  // Layers that left the index but may still be selected in a region config.
+  const known = new Set(converted.map((layer) => layer.id))
+  const retired = (legacyLayers as MapDataBackgroundSource<string>[]).filter(
+    (layer) => !known.has(layer.id),
+  )
+  if (retired.length > 0) log(`Keeping ${retired.length} layers that left the index`)
 
-    if (converted) {
-      convertedLayers.push(converted)
-    }
-  }
-
-  log(`Converted ${convertedLayers.length} layers`)
-
-  // Sort by ID for consistent output
-  convertedLayers.sort((a, b) => a.id.localeCompare(b.id))
-
-  // Generate TypeScript file
-  const typeIds = convertedLayers.map((layer) => `  | '${layer.id}'`).join('\n')
+  const sources = [...converted, ...retired].sort((a, b) => a.id.localeCompare(b.id))
+  const typeIds = sources.map((layer) => `  | '${layer.id}'`).join('\n')
 
   const typeScriptContent = `// DO NOT EDIT MANUALLY
 // This file was automatically generated by \`scripts/ELILayers/process.ts\`
@@ -212,14 +104,14 @@ export type SourcesRasterIdsELI =
 ${typeIds}
 
 export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterIdsELI>[] = ${JSON.stringify(
-    convertedLayers,
+    sources,
     null,
     2,
   )}
 `
 
   await Bun.write(outputFile, typeScriptContent)
-  log(`Generated ${outputFile}`)
+  log(`Generated ${outputFile} with ${sources.length} layers`)
 
   log('bun run format')
   await $`bun run format`.cwd(appDir)
