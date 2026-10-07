@@ -175,7 +175,7 @@ export const getPlanningAreasFn = createServerFn({ method: 'GET' })
         inputUpdatedAt: true,
         createdAt: true,
         updatedAt: true,
-        creator: { select: { id: true, osmName: true } },
+        createdBy: { select: { id: true, osmName: true } },
         variants: {
           orderBy: { createdAt: 'asc' },
           select: {
@@ -184,7 +184,7 @@ export const getPlanningAreasFn = createServerFn({ method: 'GET' })
             currentRunId: true,
             createdAt: true,
             updatedAt: true,
-            creator: { select: { id: true, osmName: true } },
+            createdBy: { select: { id: true, osmName: true } },
             jobs: {
               orderBy: { createdAt: 'desc' },
               take: 1,
@@ -222,7 +222,7 @@ export const getPlanningAreaFn = createServerFn({ method: 'GET' })
         inputUpdatedAt: true,
         createdAt: true,
         updatedAt: true,
-        creator: { select: { id: true, osmName: true } },
+        createdBy: { select: { id: true, osmName: true } },
         variants: {
           orderBy: { createdAt: 'asc' },
           select: {
@@ -268,7 +268,7 @@ export const getPlanningVariantFn = createServerFn({ method: 'GET' })
             inputUpdatedAt: true,
           },
         },
-        creator: { select: { id: true, osmName: true } },
+        createdBy: { select: { id: true, osmName: true } },
         runs: {
           orderBy: { createdAt: 'desc' },
           select: {
@@ -476,7 +476,7 @@ export const createPlanningAreaFn = createServerFn({ method: 'POST' })
     const area = await db.planningArea.create({
       data: {
         regionId,
-        creatorId: session.userId,
+        createdById: session.userId,
         title: data.title,
         studyArea: data.studyArea as Prisma.InputJsonValue,
         userGeojson: data.userGeojson as Prisma.InputJsonValue | undefined,
@@ -485,7 +485,7 @@ export const createPlanningAreaFn = createServerFn({ method: 'POST' })
         areaSizeM2: data.areaSizeM2 ?? null,
         variants: {
           create: {
-            creatorId: session.userId,
+            createdById: session.userId,
             title: data.variantTitle ?? 'Variante 1',
             factorConfig: stripAutoSaettigung(data.factorConfig ?? {}) as Prisma.InputJsonValue,
           },
@@ -631,7 +631,7 @@ export const duplicatePlanningVariantFn = createServerFn({ method: 'POST' })
     const created = await db.planningVariant.create({
       data: {
         areaId: source.areaId,
-        creatorId: session.userId,
+        createdById: session.userId,
         parentId: data.variantId,
         title: `${source.title} (Kopie)`,
         factorConfig: source.factorConfig as Prisma.InputJsonValue,
@@ -656,7 +656,7 @@ export const createPlanningVariantFn = createServerFn({ method: 'POST' })
     return db.planningVariant.create({
       data: {
         areaId: data.areaId,
-        creatorId: session.userId,
+        createdById: session.userId,
         title: data.title ?? `Variante ${variantCount + 1}`,
         factorConfig: stripAutoSaettigung(data.factorConfig ?? {}) as Prisma.InputJsonValue,
       },

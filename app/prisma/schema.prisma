@@ -56,8 +56,8 @@ model User {
   noteFoldersUpdated       NoteFolder[]         @relation("NoteFolderUpdatedBy")
   //
   // Planning module: areas/variants this user created (any region member may still edit them).
-  planningAreas            PlanningArea[]
-  planningVariants         PlanningVariant[]
+  planningAreasCreated     PlanningArea[]       @relation("PlanningAreaCreatedBy")
+  planningVariantsCreated  PlanningVariant[]    @relation("PlanningVariantCreatedBy")
 
   @@map("User")
   @@schema("prisma")
@@ -769,7 +769,7 @@ enum QaEvaluatorType {
 // factorConfigSnapshot; PostGIS-Ergebnisse hängen an PlanningRun.id.
 //
 // Permissions: any region member may edit/run any area/variant of that region;
-// the creator is tracked for attribution only. Variants duplicate via `parentId`.
+// createdBy is tracked for attribution only (and is cleared when the user is deleted). Variants duplicate via `parentId`.
 
 model PlanningArea {
   id                 Int               @id @default(autoincrement())
@@ -781,8 +781,8 @@ model PlanningArea {
   region             Region            @relation(fields: [regionId], references: [id])
   regionId           Int
   //
-  creator            User              @relation(fields: [creatorId], references: [id])
-  creatorId          String
+  createdBy          User?             @relation("PlanningAreaCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdById        String?
   //
   // GeoJSON geometry (EPSG:4326) and optional user-upload obstacles.
   studyArea          Json
@@ -821,8 +821,8 @@ model PlanningVariant {
   area         PlanningArea      @relation(fields: [areaId], references: [id], onDelete: Cascade)
   areaId       Int
   //
-  creator      User              @relation(fields: [creatorId], references: [id])
-  creatorId    String
+  createdBy    User?             @relation("PlanningVariantCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdById  String?
   //
   // Lineage: duplicate creates a child variant seeded from the parent's config.
   parent       PlanningVariant?  @relation("Lineage", fields: [parentId], references: [id], onDelete: SetNull)

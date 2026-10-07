@@ -202,7 +202,7 @@ const seedPlanning = async () => {
   const schillerkiez = await db.planningArea.create({
     data: {
       regionId: region.id,
-      creatorId: creator.id,
+      createdById: creator.id,
       title: 'Schillerkiez',
       studyArea: SCHILLERKIEZ_STUDY_AREA as unknown as Prisma.InputJsonValue,
       useCase: 'fahrradbox',
@@ -210,7 +210,7 @@ const seedPlanning = async () => {
       variants: {
         create: [
           {
-            creatorId: creator.id,
+            createdById: creator.id,
             title: 'Standard',
             factorConfig: standardFactorConfig as Prisma.InputJsonValue,
           },
@@ -224,7 +224,7 @@ const seedPlanning = async () => {
   await db.planningVariant.create({
     data: {
       areaId: schillerkiez.id,
-      creatorId: creator.id,
+      createdById: creator.id,
       parentId: schillerkiezStandardVariantId,
       title: 'Nur ÖPNV-nah',
       factorConfig: oepnvNahFactorConfig as Prisma.InputJsonValue,
@@ -233,7 +233,7 @@ const seedPlanning = async () => {
   await db.planningVariant.create({
     data: {
       areaId: schillerkiez.id,
-      creatorId: creator.id,
+      createdById: creator.id,
       parentId: schillerkiezStandardVariantId,
       title: 'Ohne Hangneigung',
       factorConfig: ohneHangneigungFactorConfig as Prisma.InputJsonValue,
@@ -244,7 +244,7 @@ const seedPlanning = async () => {
   const rixdorf = await db.planningArea.create({
     data: {
       regionId: region.id,
-      creatorId: creator.id,
+      createdById: creator.id,
       title: 'Rixdorf',
       studyArea: RIXDORF_STUDY_AREA as unknown as Prisma.InputJsonValue,
       userGeojson: RIXDORF_USER_GEOJSON as unknown as Prisma.InputJsonValue,
@@ -254,7 +254,7 @@ const seedPlanning = async () => {
       variants: {
         create: [
           {
-            creatorId: creator.id,
+            createdById: creator.id,
             title: 'Standard',
             factorConfig: rixdorfFactorConfig as Prisma.InputJsonValue,
           },
@@ -267,7 +267,7 @@ const seedPlanning = async () => {
   const staleDemoVariant = await db.planningVariant.create({
     data: {
       areaId: rixdorf.id,
-      creatorId: creator.id,
+      createdById: creator.id,
       title: 'Alte Berechnung (veraltet)',
       factorConfig: staleDemoCurrentFactorConfig as Prisma.InputJsonValue,
     },
