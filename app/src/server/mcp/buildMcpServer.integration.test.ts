@@ -13,6 +13,8 @@ const CONTRACT_SLUG = 'vitest-mcp-contract'
 const REGION_SLUG = 'vitest-mcp-region'
 const SECOND_REGION_SLUG = 'vitest-mcp-region-2'
 const OTHER_USER_ID = 'vitest-mcp-other'
+const UPLOAD_SLUG = 'vitest-mcp-upload'
+const SECOND_UPLOAD_SLUG = 'vitest-mcp-upload-2'
 
 async function connectClient() {
   const server = buildMcpServer({
@@ -42,6 +44,9 @@ async function cleanup() {
   await db.note.deleteMany({ where: { folder: inRegion } })
   await db.noteFolder.deleteMany({ where: inRegion })
   await db.reviewList.deleteMany({ where: inRegion })
+  await db.mapDatasetUpload.deleteMany({
+    where: { slug: { in: [UPLOAD_SLUG, SECOND_UPLOAD_SLUG] } },
+  })
   await db.mapDatasetCategory.deleteMany({ where: { groupKey: CATEGORY_GROUP } })
   await db.region.deleteMany({ where: { slug: { in: [REGION_SLUG, SECOND_REGION_SLUG] } } })
   await db.regionContract.deleteMany({ where: { slug: CONTRACT_SLUG } })
@@ -140,6 +145,118 @@ describe.skipIf(!integrationDb)('admin MCP tools (integration)', () => {
       orderBy: { createdAt: 'desc' },
     })
     expect(audit).not.toBeNull()
+  })
+
+  test('map_dataset_uploads_* list, get, remove region, delete', async () => {
+    const categoryKey = `${CATEGORY_GROUP}/uploads`
+    const config = {
+      name: 'Vitest view',
+      categoryKey,
+      layers: [{ id: 'vitest-layer', type: 'line' }],
+      inspector: { enabled: false },
+    }
+    const uploadData = {
+      configs: [config],
+      mapRenderFormat: 'geojson' as const,
+      mapRenderUrl: 'https://example.com/vitest.geojson',
+      githubUrl: 'https://example.com/vitest',
+      dataUpdatedNote: '2026-01-01',
+    }
+    await db.mapDatasetUpload.create({
+      data: {
+        ...uploadData,
+        slug: UPLOAD_SLUG,
+        regions: { connect: [{ slug: REGION_SLUG }, { slug: SECOND_REGION_SLUG }] },
+        layerConfigs: { create: [config] },
+      },
+    })
+    await db.mapDatasetUpload.create({
+      data: {
+        ...uploadData,
+        slug: SECOND_UPLOAD_SLUG,
+        configs: [{ ...config, categoryKey: null }],
+        regions: { connect: [{ slug: SECOND_REGION_SLUG }] },
+        layerConfigs: { create: [{ ...config, categoryKey: null }] },
+      },
+    })
+
+    const slugsOf = (result: Awaited<ReturnType<typeof callTool>>) =>
+      (JSON.parse(result.text) as { slug: string }[]).map((upload) => upload.slug)
+
+    const list = await callTool(client, 'map_dataset_uploads_list')
+    expect(slugsOf(list)).toEqual(expect.arrayContaining([UPLOAD_SLUG, SECOND_UPLOAD_SLUG]))
+    expect(JSON.parse(list.text)).toContainEqual({
+      slug: UPLOAD_SLUG,
+      public: false,
+      createdBy: 'SCRIPT',
+      updatedAt: expect.any(String),
+      dataUpdatedNote: '2026-01-01',
+      regionSlugs: [REGION_SLUG, SECOND_REGION_SLUG],
+      configs: [{ name: 'Vitest view', categoryKey }],
+    })
+
+    const byRegion = await callTool(client, 'map_dataset_uploads_list', { regionSlug: REGION_SLUG })
+    expect(slugsOf(byRegion)).toEqual([UPLOAD_SLUG])
+    const byCategory = await callTool(client, 'map_dataset_uploads_list', { categoryKey })
+    expect(slugsOf(byCategory)).toEqual([UPLOAD_SLUG])
+
+    const got = await callTool(client, 'map_dataset_uploads_get', { slug: UPLOAD_SLUG })
+    expect(got.json()).toMatchObject({
+      slug: UPLOAD_SLUG,
+      configs: [config],
+      regionSlugs: [REGION_SLUG, SECOND_REGION_SLUG],
+    })
+    const missing = await callTool(client, 'map_dataset_uploads_get', { slug: 'vitest-mcp-nope' })
+    expect(missing.text).toBe('Error: Map dataset upload not found: vitest-mcp-nope')
+
+    const unlinked = await callTool(client, 'map_dataset_uploads_remove_region', {
+      uploadSlug: UPLOAD_SLUG,
+      regionSlug: REGION_SLUG,
+    })
+    expect(unlinked.json()).toEqual({ slug: UPLOAD_SLUG, regionSlugs: [SECOND_REGION_SLUG] })
+    const unlinkedAudit = await db.auditLog.findFirst({
+      where: { model: 'MapDatasetUpload', userId: ADMIN_USER_ID },
+      orderBy: { createdAt: 'desc' },
+    })
+    expect(unlinkedAudit).toMatchObject({
+      action: 'UPDATE',
+      recordId: String(got.json().id),
+      oldData: { regionSlugs: [REGION_SLUG, SECOND_REGION_SLUG] },
+      newData: { regionSlugs: [SECOND_REGION_SLUG] },
+      metadata: { changeSource: 'API' },
+    })
+
+    const unlinkedAgain = await callTool(client, 'map_dataset_uploads_remove_region', {
+      uploadSlug: UPLOAD_SLUG,
+      regionSlug: REGION_SLUG,
+    })
+    expect(unlinkedAgain.isError).toBe(true)
+    expect(unlinkedAgain.text).toContain('is not linked to region')
+    const unlinkUnknown = await callTool(client, 'map_dataset_uploads_remove_region', {
+      uploadSlug: 'vitest-mcp-nope',
+      regionSlug: REGION_SLUG,
+    })
+    expect(unlinkUnknown.text).toBe('Error: Map dataset upload not found: vitest-mcp-nope')
+
+    const deleted = await callTool(client, 'map_dataset_uploads_delete', { slug: UPLOAD_SLUG })
+    expect(deleted.isError).toBe(false)
+    expect(deleted.json()).toMatchObject({
+      slug: UPLOAD_SLUG,
+      configs: [config],
+      regionSlugs: [SECOND_REGION_SLUG],
+    })
+    expect(await db.mapDatasetUpload.findUnique({ where: { slug: UPLOAD_SLUG } })).toBeNull()
+    expect(await db.mapDatasetUpload.count({ where: { slug: SECOND_UPLOAD_SLUG } })).toBe(1)
+    expect(await db.region.count({ where: { slug: SECOND_REGION_SLUG } })).toBe(1)
+    const deletedAudit = await db.auditLog.findFirst({
+      where: { model: 'MapDatasetUpload', userId: ADMIN_USER_ID },
+      orderBy: { createdAt: 'desc' },
+    })
+    expect(deletedAudit).toMatchObject({ action: 'DELETE', metadata: { changeSource: 'API' } })
+
+    const deletedAgain = await callTool(client, 'map_dataset_uploads_delete', { slug: UPLOAD_SLUG })
+    expect(deletedAgain.isError).toBe(true)
+    expect(deletedAgain.text).toBe(`Error: Map dataset upload not found: ${UPLOAD_SLUG}`)
   })
 
   test('region_contracts_* round-trip', async () => {
