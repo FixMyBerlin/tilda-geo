@@ -294,10 +294,9 @@ export const RegionMap = () => {
     return null
   }
 
-  type MapMaxBoundsProps = {
-    maxBounds: [number, number, number, number]
-    padding: { top: number; bottom: number; left: number; right: number }
-  }
+  // No `padding` prop here: it would be re-applied on every render and undo the camera padding
+  // that the mobile mode dock sets on the map (`modeMapCameraPadding.ts`).
+  type MapMaxBoundsProps = { maxBounds: [number, number, number, number] }
   let mapMaxBoundsSettings: MapMaxBoundsProps | Record<string, never> = {}
   if (region?.bbox) {
     const maxBounds = region.bbox
@@ -307,11 +306,7 @@ export const RegionMap = () => {
     if (buffered) {
       // turf bbox() returns 4 numbers for 2D; we have no elevation data
       const b = bbox(buffered) as [number, number, number, number]
-      mapMaxBoundsSettings = {
-        maxBounds: b,
-        // Reminder: We have to check fitBounds when changing those padding values.
-        padding: { top: 0, bottom: 0, left: 0, right: 0 },
-      }
+      mapMaxBoundsSettings = { maxBounds: b }
     }
   }
 
