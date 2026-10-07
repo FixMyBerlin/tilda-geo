@@ -1,4 +1,3 @@
-import { subcat_accidents } from '../mapDataSubcategories/subcat_accidents.const'
 import { subcat_bicycleParking } from '../mapDataSubcategories/subcat_bicycleParking'
 import { subcat_bikelanes } from '../mapDataSubcategories/subcat_bikelanes.const'
 import { subcat_bikelanes_plus_bikesuitability } from '../mapDataSubcategories/subcat_bikelanes_plus_bikeSuitability'
@@ -133,12 +132,6 @@ export const categories: StaticMapDataCategory[] = [
       { ...subcat_bikelanesStatistics, defaultStyle: 'default' },
       { ...subcat_poi_boundaries, defaultStyle: 'default' },
     ],
-  },
-  {
-    id: 'accidents',
-    name: 'Unfallatlas',
-    desc: 'Unfalldaten',
-    subcategories: [{ ...subcat_accidents, defaultStyle: 'default' }],
   },
   ...categoriesRadinfra,
   ...categoriesParkingTilda,

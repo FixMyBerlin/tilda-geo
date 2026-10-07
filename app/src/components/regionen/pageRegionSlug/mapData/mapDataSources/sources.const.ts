@@ -1,7 +1,6 @@
 import { getTilesUrl } from '@/components/shared/utils/getTilesUrl'
 import { SIMPLIFY_MAX_ZOOM, SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
 import type { MapDataSource } from '../types'
-import { apiKeyMapbox } from './apiKeys.const'
 import type { SourcesParkingLarsId } from './sourcesParkingLars.const'
 import { sourcesParkingLars } from './sourcesParkingLars.const'
 import type { SourcesParkingTildaId } from './sourcesParkingTilda.const'
@@ -28,11 +27,7 @@ type TildaSourceId =
   | 'tilda_highwayAreas'
 
 // TODO type MapDataConfigSourcesIds = typeof sources[number]['id']
-export type SourcesId =
-  | SourcesParkingLarsId
-  | SourcesParkingTildaId
-  | TildaSourceId
-  | 'accidents_unfallatlas'
+export type SourcesId = SourcesParkingLarsId | SourcesParkingTildaId | TildaSourceId
 
 export const sources: MapDataSource<SourcesId>[] = [
   ...sourcesParkingLars,
@@ -84,24 +79,6 @@ export const sources: MapDataSource<SourcesId>[] = [
         'cyclewayOnHighway_advisoryOrExclusive_km',
         'footAndCyclewayShared_adjoiningOrIsolated_km',
       ],
-    },
-    // presence: { enabled: false },
-    calculator: { enabled: false },
-  },
-  {
-    id: 'accidents_unfallatlas',
-    tileTables: null,
-    // TODO Migrieren auf Maptiler
-    tilesUrl: `https://api.mapbox.com/v4/hejco.5oexnrgf/{z}/{x}/{y}.vector.pbf?sku=101bSz70Afq22&access_token=${apiKeyMapbox}`,
-    minzoom: SIMPLIFY_MIN_ZOOM,
-    maxzoom: 16, // https://studio.mapbox.com/tilesets/hejco.5oexnrgf/
-    attributionHtml: 'Unfallatlas', // TODO
-    licence: undefined, // TODO
-    promoteId: undefined,
-    osmIdConfig: { osmTypeId: 'id' },
-    inspector: {
-      enabled: true,
-      highlightingKey: 'unfall_id',
     },
     // presence: { enabled: false },
     calculator: { enabled: false },

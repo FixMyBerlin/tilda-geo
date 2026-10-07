@@ -6,7 +6,7 @@ import { hasExplicitTilesUrl } from '@/components/regionen/pageRegionSlug/mapDat
 describe('getMapDataSourceTilesUrl', () => {
   test('narrows processing vs explicit tilesUrl sources', () => {
     const processing = sources.find((source) => source.id === 'atlas_bikelanes')
-    const explicitTilesUrl = sources.find((source) => source.id === 'accidents_unfallatlas')
+    const explicitTilesUrl = sources.find((source) => source.id === 'atlas_aggregated_lengths')
 
     if (!processing || !explicitTilesUrl) throw new Error('fixture sources missing')
     if (!hasExplicitTilesUrl(explicitTilesUrl)) throw new Error('expected explicit tilesUrl source')

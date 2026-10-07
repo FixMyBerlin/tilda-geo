@@ -17,7 +17,6 @@ export type MapDataCategoryId =
   // bicycleParking Atlas
   | 'bicycleParking'
   // Special only:
-  | 'accidents'
   | 'trafficSigns'
   // Special radinfra.de categories
   | 'radinfra_currentness'
