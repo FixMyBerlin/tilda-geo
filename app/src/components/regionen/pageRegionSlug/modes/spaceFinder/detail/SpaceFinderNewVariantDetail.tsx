@@ -8,6 +8,7 @@ import {
   planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
+import { DEFAULT_FACTOR_TEMPLATE } from '../factors/spaceFinderDefaults'
 import { useSpaceFinderModeParam } from '../useSpaceFinderModeParam'
 
 /** ModePanel detail view for »Neue Variante in diesem Gebiet« (`ff.new === 'variant'`). */
@@ -26,7 +27,9 @@ export const SpaceFinderNewVariantDetail = ({
 
   const mutation = useMutation({
     mutationFn: () =>
-      createPlanningVariantFn({ data: { areaId, title: title.trim() || undefined } }),
+      createPlanningVariantFn({
+        data: { areaId, title: title.trim() || undefined, factorConfig: DEFAULT_FACTOR_TEMPLATE },
+      }),
     onSuccess: async (created) => {
       await queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
       await queryClient.invalidateQueries(planningVariantQueryOptions(created.id))
