@@ -113,7 +113,7 @@
     "@headlessui/react": "2.2.10",
     "@json2csv/plainjs": "7.0.7",
     "@modelcontextprotocol/sdk": "1.31.0",
-    "@osm-editor-kit/react-map-gl-draw": "0.1.0",
+    "@osm-editor-kit/react-map-gl-draw": "0.2.0",
     "@osm-editor-kit/street-imagery": "0.1.0-alpha.8",
     "@osm-editor-kit/street-imagery-react": "0.1.0-alpha.11",
     "@osm-traffic-signs/converter": "0.6.0",

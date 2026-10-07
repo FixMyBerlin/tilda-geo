@@ -11,6 +11,7 @@ type AvailableModes = Record<Exclude<RegionMode, 'map'>, boolean>
  * - qa: at least one active QA config the current user may see
  * - reviewLists: at least one assigned list, or the user is a region member/admin (can create the first)
  * - calculator: the region has a category with a dataset that can be summed
+ * - measure: every region
  */
 export const deriveAvailableModes = ({
   region,
@@ -29,18 +30,19 @@ export const deriveAvailableModes = ({
     qa: qaConfigsCount > 0,
     reviewLists: reviewListsCount > 0 || canManage,
     calculator: calculatorDatasetsForCategories(region.categories).length > 0,
+    measure: true,
   } satisfies AvailableModes
 }
 
 /**
  * QA and Prüflisten are always member-only. Hinweise is when the region has only internal notes.
- * Summieren is open to everyone who can see the region.
+ * Summieren and Messen are open to everyone who can see the region.
  */
 export const isMemberOnlyMode = (
   mode: Exclude<RegionMode, 'map'>,
   region: Pick<TRegion, 'notesOsm' | 'notesInternal'>,
 ) => {
   if (mode === 'qa' || mode === 'reviewLists') return true
-  if (mode === 'calculator') return false
+  if (mode === 'calculator' || mode === 'measure') return false
   return Boolean(region.notesInternal && !region.notesOsm)
 }

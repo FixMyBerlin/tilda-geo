@@ -65,6 +65,7 @@ import { Route as AdminMapDatasetCategoriesIndexRouteImport } from './routes/adm
 import { Route as RegionenRegionSlugSummierenRouteImport } from './routes/regionen/$regionSlug/summieren'
 import { Route as RegionenRegionSlugQaRouteImport } from './routes/regionen/$regionSlug/qa'
 import { Route as RegionenRegionSlugPrueflistenRouteImport } from './routes/regionen/$regionSlug/prueflisten'
+import { Route as RegionenRegionSlugMessenRouteImport } from './routes/regionen/$regionSlug/messen'
 import { Route as RegionenRegionSlugHinweiseRouteImport } from './routes/regionen/$regionSlug/hinweise'
 import { Route as ApiUploadsCreateRouteImport } from './routes/api/uploads.create'
 import { Route as ApiUploadsSlugRouteImport } from './routes/api/uploads.$slug'
@@ -407,6 +408,12 @@ const RegionenRegionSlugPrueflistenRoute =
   RegionenRegionSlugPrueflistenRouteImport.update({
     id: '/prueflisten',
     path: '/prueflisten',
+    getParentRoute: () => RegionenRegionSlugRouteRoute,
+  } as any)
+const RegionenRegionSlugMessenRoute =
+  RegionenRegionSlugMessenRouteImport.update({
+    id: '/messen',
+    path: '/messen',
     getParentRoute: () => RegionenRegionSlugRouteRoute,
   } as any)
 const RegionenRegionSlugHinweiseRoute =
@@ -792,6 +799,7 @@ export interface FileRoutesByFullPath {
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
   '/regionen/$regionSlug/hinweise': typeof RegionenRegionSlugHinweiseRoute
+  '/regionen/$regionSlug/messen': typeof RegionenRegionSlugMessenRoute
   '/regionen/$regionSlug/prueflisten': typeof RegionenRegionSlugPrueflistenRoute
   '/regionen/$regionSlug/qa': typeof RegionenRegionSlugQaRoute
   '/regionen/$regionSlug/summieren': typeof RegionenRegionSlugSummierenRoute
@@ -892,6 +900,7 @@ export interface FileRoutesByTo {
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
   '/regionen/$regionSlug/hinweise': typeof RegionenRegionSlugHinweiseRoute
+  '/regionen/$regionSlug/messen': typeof RegionenRegionSlugMessenRoute
   '/regionen/$regionSlug/prueflisten': typeof RegionenRegionSlugPrueflistenRoute
   '/regionen/$regionSlug/qa': typeof RegionenRegionSlugQaRoute
   '/regionen/$regionSlug/summieren': typeof RegionenRegionSlugSummierenRoute
@@ -1007,6 +1016,7 @@ export interface FileRoutesById {
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
   '/regionen/$regionSlug/hinweise': typeof RegionenRegionSlugHinweiseRoute
+  '/regionen/$regionSlug/messen': typeof RegionenRegionSlugMessenRoute
   '/regionen/$regionSlug/prueflisten': typeof RegionenRegionSlugPrueflistenRoute
   '/regionen/$regionSlug/qa': typeof RegionenRegionSlugQaRoute
   '/regionen/$regionSlug/summieren': typeof RegionenRegionSlugSummierenRoute
@@ -1122,6 +1132,7 @@ export interface FileRouteTypes {
     | '/api/uploads/$slug'
     | '/api/uploads/create'
     | '/regionen/$regionSlug/hinweise'
+    | '/regionen/$regionSlug/messen'
     | '/regionen/$regionSlug/prueflisten'
     | '/regionen/$regionSlug/qa'
     | '/regionen/$regionSlug/summieren'
@@ -1222,6 +1233,7 @@ export interface FileRouteTypes {
     | '/api/uploads/$slug'
     | '/api/uploads/create'
     | '/regionen/$regionSlug/hinweise'
+    | '/regionen/$regionSlug/messen'
     | '/regionen/$regionSlug/prueflisten'
     | '/regionen/$regionSlug/qa'
     | '/regionen/$regionSlug/summieren'
@@ -1336,6 +1348,7 @@ export interface FileRouteTypes {
     | '/api/uploads/$slug'
     | '/api/uploads/create'
     | '/regionen/$regionSlug/hinweise'
+    | '/regionen/$regionSlug/messen'
     | '/regionen/$regionSlug/prueflisten'
     | '/regionen/$regionSlug/qa'
     | '/regionen/$regionSlug/summieren'
@@ -1814,6 +1827,13 @@ declare module '@tanstack/react-router' {
       path: '/prueflisten'
       fullPath: '/regionen/$regionSlug/prueflisten'
       preLoaderRoute: typeof RegionenRegionSlugPrueflistenRouteImport
+      parentRoute: typeof RegionenRegionSlugRouteRoute
+    }
+    '/regionen/$regionSlug/messen': {
+      id: '/regionen/$regionSlug/messen'
+      path: '/messen'
+      fullPath: '/regionen/$regionSlug/messen'
+      preLoaderRoute: typeof RegionenRegionSlugMessenRouteImport
       parentRoute: typeof RegionenRegionSlugRouteRoute
     }
     '/regionen/$regionSlug/hinweise': {
@@ -2446,6 +2466,7 @@ const PreviewRouteWithChildren =
 
 interface RegionenRegionSlugRouteRouteChildren {
   RegionenRegionSlugHinweiseRoute: typeof RegionenRegionSlugHinweiseRoute
+  RegionenRegionSlugMessenRoute: typeof RegionenRegionSlugMessenRoute
   RegionenRegionSlugPrueflistenRoute: typeof RegionenRegionSlugPrueflistenRoute
   RegionenRegionSlugQaRoute: typeof RegionenRegionSlugQaRoute
   RegionenRegionSlugSummierenRoute: typeof RegionenRegionSlugSummierenRoute
@@ -2455,6 +2476,7 @@ interface RegionenRegionSlugRouteRouteChildren {
 const RegionenRegionSlugRouteRouteChildren: RegionenRegionSlugRouteRouteChildren =
   {
     RegionenRegionSlugHinweiseRoute: RegionenRegionSlugHinweiseRoute,
+    RegionenRegionSlugMessenRoute: RegionenRegionSlugMessenRoute,
     RegionenRegionSlugPrueflistenRoute: RegionenRegionSlugPrueflistenRoute,
     RegionenRegionSlugQaRoute: RegionenRegionSlugQaRoute,
     RegionenRegionSlugSummierenRoute: RegionenRegionSlugSummierenRoute,

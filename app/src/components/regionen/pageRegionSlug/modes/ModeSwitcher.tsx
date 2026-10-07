@@ -100,6 +100,7 @@ const ModeSwitcherNav = () => {
       availableModes.qa,
       availableModes.reviewLists,
       availableModes.calculator,
+      availableModes.measure,
     ],
   )
 

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { areasParamOfPolygons, polygonsOfAreasParam, zodAreasParam } from '../drawAreasParam'
 import type { DrawArea } from './drawing/drawAreaTypes'
 
 /**
@@ -24,24 +25,13 @@ import type { DrawArea } from './drawing/drawAreaTypes'
  */
 export const CALCULATOR_AREA_PRECISION = 5
 
-const zodPolygonCoordinates = z.array(z.array(z.tuple([z.number(), z.number()])).min(4)).min(1)
-
 // Per-field `.catch` keeps stale bookmarks usable: `optionalSearchJson` drops the whole object
 // as soon as one field fails.
 export const zodCalculatorModeParam = z.object({
   key: z.string().optional().catch(undefined),
   filter: z.record(z.string(), z.string()).optional().catch(undefined),
   style: z.string().optional().catch(undefined),
-  areas: z
-    .union([
-      z.object({ type: z.literal('Polygon'), coordinates: zodPolygonCoordinates }),
-      z.object({
-        type: z.literal('MultiPolygon'),
-        coordinates: z.array(zodPolygonCoordinates).min(1),
-      }),
-    ])
-    .optional()
-    .catch(undefined),
+  areas: zodAreasParam.optional().catch(undefined),
 })
 
 export type CalculatorModeParam = z.infer<typeof zodCalculatorModeParam>
@@ -58,27 +48,15 @@ export const compactCalculatorModeParam = (param: CalculatorModeParam) => {
 }
 
 /** The drawn areas as one geometry; `undefined` without areas. */
-export const calculatorAreasToParam = (areas: DrawArea[]) => {
-  const polygons = areas.map(
-    (area) => area.geometry.coordinates as z.infer<typeof zodPolygonCoordinates>,
-  )
-  const [first] = polygons
-  if (!first) return undefined
-  return (
-    polygons.length === 1
-      ? { type: 'Polygon', coordinates: first }
-      : { type: 'MultiPolygon', coordinates: polygons }
-  ) satisfies CalculatorModeParam['areas']
-}
+export const calculatorAreasToParam = (areas: DrawArea[]) =>
+  areasParamOfPolygons(areas.map((area) => area.geometry.coordinates))
 
 /**
  * One area per polygon. The ids follow the position, like `featuresFromGeometry` of the drawing
  * package names the parts of a Prüfeintrag (`useCalculatorDraw` creates matching ids).
  */
 export const calculatorAreasFromParam = (areas: CalculatorModeParam['areas']) => {
-  if (!areas) return []
-  const polygons = areas.type === 'Polygon' ? [areas.coordinates] : areas.coordinates
-  return polygons.map(
+  return polygonsOfAreasParam(areas).map(
     (coordinates, index) =>
       ({
         type: 'Feature',

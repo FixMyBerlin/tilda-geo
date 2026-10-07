@@ -1,6 +1,6 @@
 # Region modes
 
-A region has a shared map and extra pages that reconfigure the UI around it. The default map stays `/regionen/<region>`. Hinweise, Qualitätssicherung, Prüflisten, and Summieren are their own routes. They show up in the main navigation when the region has the matching data (notes flags, at least one QA config, review lists, a category with a dataset to sum). Members can open Prüflisten before the first list exists so they can create one.
+A region has a shared map and extra pages that reconfigure the UI around it. The default map stays `/regionen/<region>`. Hinweise, Qualitätssicherung, Prüflisten, Summieren, and Messen are their own routes. They show up in the main navigation when the region has the matching data (notes flags, at least one QA config, review lists, a category with a dataset to sum); Messen is in every region. Members can open Prüflisten before the first list exists so they can create one.
 
 Who may open and change what per mode: [Permissions.md](./Permissions.md).
 
@@ -13,8 +13,9 @@ URL keys and filters: [Modes-URL-State-Contract-And-Optimizations.md](./Modes-UR
 | Qualitätssicherung | `/regionen/<region>/qa`          |
 | Prüflisten         | `/regionen/<region>/prueflisten` |
 | Summieren          | `/regionen/<region>/summieren`   |
+| Messen             | `/regionen/<region>/messen`      |
 
-Switching modes keeps map position and layer configuration. Each mode stores its filters in one JSON search object (`notes`, `qa`, `review`, `sum`) and restores them when you come back.
+Switching modes keeps map position and layer configuration. Each mode stores its filters in one JSON search object (`notes`, `qa`, `review`, `sum`, `measure`) and restores them when you come back.
 
 ## Shared panel
 
@@ -28,6 +29,7 @@ The inspector still shows the selected feature. Hovering a list row draws a mode
 | Qualitätssicherung          | No                                                                                     | Yes only                                                 |
 | Prüflisten                  | No                                                                                     | Yes only                                                 |
 | Summieren (area calculator) | No. The former "Summieren: …" layers are gone from the category UI.                    | Yes only                                                 |
+| Messen (lengths and areas)  | No                                                                                     | Yes only                                                 |
 
 ## Hinweise
 
@@ -87,6 +89,17 @@ The area calculator. Draw one or more areas on the map; the panel sums the value
 - **Undo and redo** on the map (buttons, Cmd/Ctrl+Z) cover drawing, changing and deleting areas. The steps are kept in memory for this mode only and are gone after a reload.
 
 Old links keep working: `draw` becomes `sum.areas`, and a "Summieren: …" layer switched on in `config` opens this mode with the matching filter ([`migrateLegacyCalculatorSubcategories.server.ts`](../app/src/server/regions/migrateLegacyCalculatorSubcategories.server.ts)).
+
+## Messen
+
+Measure lengths and areas on the map. Open to everyone who can see the region, in every region. Details: [`modes/measure/README.md`](../app/src/components/regionen/pageRegionSlug/modes/measure/README.md).
+
+- **Shapes:** any number of lines and areas. "+ Linie" and "+ Fläche" in the panel start one; the first click on the map starts a line. The panel lists every measurement with its value (areas with their perimeter) and the totals; the map labels each shape, and every side of the selected one.
+- **Aerial image:** the mode shows the best aerial image for the place by itself and brings the previous background back when it is left. Another background can be picked while measuring.
+- **Loupe:** while a corner is placed or dragged, a loupe in the corner of the map shows the spot enlarged, with a crosshair on the point that is measured.
+- **Nothing is stored.** The measurements live in the URL in one param (`measure`) and stay there in other modes.
+- **Summieren:** when the mode is opened from Summieren (or the other way round) and has no areas yet, the areas are copied over once. After that both modes change their areas independently.
+- While the mode is open, map clicks belong to drawing: the inspector does not open.
 
 ## Prüflisten
 

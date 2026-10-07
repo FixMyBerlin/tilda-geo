@@ -2,15 +2,18 @@ import type { BackgroundParam } from '@/components/regionen/pageRegionSlug/hooks
 import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
 import { sourcesBackgroundsRaster } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
 import type { MapDataBackgroundSource } from '@/components/regionen/pageRegionSlug/mapData/types'
+import { useMeasureAutomaticBackground } from '@/components/regionen/pageRegionSlug/modes/measure/useMeasureAutomaticBackground'
 import { getAppBaseUrl } from '@/components/shared/utils/getAppBaseUrl'
 
 /**
  * The background maps this viewer can select in the region: the private sources (members only,
  * delivered by the region loader, tiles served by our proxy route) followed by the region's
- * selection from the code catalog.
+ * selection from the code catalog. In the Messen mode also the aerial that mode picked by itself.
  */
 export const useRegionBackgrounds = (): MapDataBackgroundSource<BackgroundParam>[] => {
   const { region, privateBackgrounds } = useRegionLoaderData()
+  // The Messen mode may show an aerial the region does not list.
+  const automaticBackground = useMeasureAutomaticBackground()
 
   const privateSources = privateBackgrounds.map(
     ({ id, name, attributionHtml, minzoom, maxzoom, tileSize, tilesPath }) => ({
@@ -25,8 +28,8 @@ export const useRegionBackgrounds = (): MapDataBackgroundSource<BackgroundParam>
     }),
   )
 
-  const catalogSources = sourcesBackgroundsRaster.filter((source) =>
-    region.backgroundSources.includes(source.id),
+  const catalogSources = sourcesBackgroundsRaster.filter(
+    (source) => region.backgroundSources.includes(source.id) || source.id === automaticBackground,
   )
 
   return [...privateSources, ...catalogSources]
