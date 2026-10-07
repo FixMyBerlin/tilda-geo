@@ -166,6 +166,14 @@ function parseCategoryFromResponse(
   return category
 }
 
+// Which lighting datasets are switched on; old lit configs fall back to the region's fresh defaults.
+const activeDefaultStyles = (category: MapDataCategoryConfig | undefined) =>
+  category?.subcategories.map(
+    (subcategory) => subcategory.styles.find((style) => style.id === 'default')?.active,
+  )
+const litDefaultStyles = (freshConfig: MapDataCategoryConfig[]) =>
+  activeDefaultStyles(freshConfig.find((category) => category.id === 'lit'))
+
 const currentUrlVersion = Math.max(...Object.keys(migrations).map(Number))
 
 describe('getRegionRedirectUrl()', () => {
@@ -665,7 +673,7 @@ describe('getRegionRedirectUrl()', () => {
       const resultUrl = getUrl(redirectUrl)
 
       expect(resultUrl.searchParams.get('v')).toBe(String(currentUrlVersion))
-      expect(resultUrl.searchParams.get('config')).toBe('1s8ehxg.ivb7ah.3mhc')
+      expect(resultUrl.searchParams.get('config')).toBe('1jp11g0.ivb7ah.6f6hc')
     })
 
     test('MIGRATION: Preserve already-short config when version is missing', async () => {
@@ -829,7 +837,7 @@ describe('getRegionRedirectUrl()', () => {
       )
     })
 
-    test('MIGRATION: Old lit config activates Beleuchtung with all dataset checkboxes on (12nu7if completeness on)', async () => {
+    test('MIGRATION: Old lit config activates Beleuchtung with the default dataset checkboxes (12nu7if completeness on)', async () => {
       const url =
         'http://127.0.0.1:5173/regionen/bibi?map=13/48.95793/9.1395&config=12nu7if.l.0&v=2'
       const redirectUrl = await redirectOnly(url, extractSlugFromUrl(url))
@@ -852,12 +860,10 @@ describe('getRegionRedirectUrl()', () => {
         litCategory!.subcategories.some((subcategory) => subcategory.id === 'lit-completeness'),
       ).toBe(false)
 
-      for (const subcategory of litCategory!.subcategories) {
-        expect(subcategory.styles.find((style) => style.id === 'default')?.active).toBe(true)
-      }
+      expect(activeDefaultStyles(litCategory)).toEqual(litDefaultStyles(bibiFresh))
     })
 
-    test('MIGRATION: Old lit config activates Beleuchtung with all dataset checkboxes on (12nu7if completeness off)', async () => {
+    test('MIGRATION: Old lit config activates Beleuchtung with the default dataset checkboxes (12nu7if completeness off)', async () => {
       const url =
         'http://127.0.0.1:5173/regionen/bibi?map=13/48.95793/9.1395&config=12nu7if.5.0&v=2'
       const redirectUrl = await redirectOnly(url, extractSlugFromUrl(url))
@@ -876,12 +882,10 @@ describe('getRegionRedirectUrl()', () => {
         litCategory!.subcategories.some((subcategory) => subcategory.id === 'lit-completeness'),
       ).toBe(false)
 
-      for (const subcategory of litCategory!.subcategories) {
-        expect(subcategory.styles.find((style) => style.id === 'default')?.active).toBe(true)
-      }
+      expect(activeDefaultStyles(litCategory)).toEqual(litDefaultStyles(bibiFresh))
     })
 
-    test('MIGRATION: Old hidden lighting dataset still activates all checkboxes', async () => {
+    test('MIGRATION: Old hidden lighting dataset still activates the default checkboxes', async () => {
       const oldHiddenLitConfig = [
         {
           id: 'lit',
@@ -925,9 +929,7 @@ describe('getRegionRedirectUrl()', () => {
       )
       const litCategory = parsed.find((category) => category.id === 'lit')
       expect(litCategory?.active).toBe(true)
-      for (const subcategory of litCategory!.subcategories) {
-        expect(subcategory.styles.find((style) => style.id === 'default')?.active).toBe(true)
-      }
+      expect(activeDefaultStyles(litCategory)).toEqual(litDefaultStyles(bibiFresh))
     })
 
     test('MIGRATION: Ensure hidden is active when checkbox was off and no style is active after merge (14ltyea.a099j9.0 to 1qldklk)', async () => {

@@ -150,6 +150,14 @@ import type {
   SubcatSurfaceBikelaneStyleIds,
 } from './mapDataSubcategories/subcat_surface_bikelane'
 import type {
+  SubcatSurfaceHighwayAreasId,
+  SubcatSurfaceHighwayAreasStyleIds,
+} from './mapDataSubcategories/subcat_surface_highway_areas.const'
+import type {
+  SubcatSurfacePathClassesId,
+  SubcatSurfacePathClassesStyleIds,
+} from './mapDataSubcategories/subcat_surface_path_classes.const'
+import type {
   SubcatSurfaceRoadsId,
   SubcatSurfaceRoadsStyleIds,
 } from './mapDataSubcategories/subcat_surface_roads.const'
@@ -196,6 +204,8 @@ export type SubcategoryId =
   | SubcatRoadsPlusOnewayId
   | SubcatSignsId
   | SubcatSurfaceBikelaneId
+  | SubcatSurfaceHighwayAreasId
+  | SubcatSurfacePathClassesId
   | SubcatSurfaceRoadsId
   | 'lit-completeness' // LEGACY id kept for decoding old ?config= URLs
   | 'parking' // LEGACY id kept for decoding old ?config= URLs stored in RegionConfigTemplate
@@ -244,5 +254,7 @@ export type StyleId =
   | SubcatRoadsStyleIds
   | SubcatSignsStyleIds
   | SubcatSurfaceBikelaneStyleIds
+  | SubcatSurfaceHighwayAreasStyleIds
+  | SubcatSurfacePathClassesStyleIds
   | SubcatSurfaceRoadsStyleIds
   | 'lit' // LEGACY style id kept for decoding old ?config= URLs

@@ -22,6 +22,8 @@ import { subcat_roads_plus_footways } from '../mapDataSubcategories/subcat_roads
 import { subcat_roads_plus_label } from '../mapDataSubcategories/subcat_roads_plus_label.const'
 import { subcat_roads_plus_oneway } from '../mapDataSubcategories/subcat_roads_plus_oneway.const'
 import { subcat_surface_bikelane } from '../mapDataSubcategories/subcat_surface_bikelane'
+import { subcat_surface_highway_areas } from '../mapDataSubcategories/subcat_surface_highway_areas.const'
+import { subcat_surface_path_classes } from '../mapDataSubcategories/subcat_surface_path_classes.const'
 import { subcat_surface_roads } from '../mapDataSubcategories/subcat_surface_roads.const'
 import type { StaticMapDataCategory } from '../types'
 import { categoriesParkingLars } from './categoriesParkingLars.const'
@@ -103,8 +105,8 @@ export const categories: StaticMapDataCategory[] = [
     subcategories: [
       { ...subcat_lit_roads, defaultStyle: 'default' },
       { ...subcat_lit_bikelanes, defaultStyle: 'default' },
-      { ...subcat_lit_path_classes, defaultStyle: 'default' },
-      { ...subcat_lit_highway_areas, defaultStyle: 'default' },
+      { ...subcat_lit_path_classes, defaultStyle: 'hidden' },
+      { ...subcat_lit_highway_areas, defaultStyle: 'hidden' },
     ],
   },
   {
@@ -114,7 +116,9 @@ export const categories: StaticMapDataCategory[] = [
     desc: 'Fahrbahn & Radinfrastruktur',
     subcategories: [
       { ...subcat_surface_roads, defaultStyle: 'default' },
-      { ...subcat_surface_bikelane, defaultStyle: 'hidden' },
+      { ...subcat_surface_bikelane, defaultStyle: 'default' },
+      { ...subcat_surface_path_classes, defaultStyle: 'hidden' },
+      { ...subcat_surface_highway_areas, defaultStyle: 'hidden' },
     ],
   },
   {
