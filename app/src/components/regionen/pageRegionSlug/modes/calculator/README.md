@@ -13,7 +13,7 @@ Route `/regionen/<region>/summieren`. Product description: [docs/Modes-Concept-S
 
 - `sum` URL param — `{ key?, filter?, style?, areas? }` (`calculatorModeParam.ts`), the shape of the other modes: `key` is the dataset (omitted for the region's first; the ids are those of the matching sidebar layers), `filter` the tag values the sum is narrowed to, `style` the tag the points are colored by (`utils/calculatorStyleColors.ts`; the breakdown is the legend). A group of the breakdown ignores the filter on its own tag, so its other values stay there to pick; points that are not summed (outside the areas or the filter) are dimmed on the map, not removed, because the engine reads rendered points. Opacity only ever means "summed or not", color only ever the style.
 - `sum.areas` — the drawn areas as one GeoJSON geometry, `Polygon` or `MultiPolygon`, like the geometry of a Prüfeintrag (`useCalculatorAreas.ts`). An area's id is its position (`part-0`, …). Updated once per finished edit. They stay in the URL in other modes.
-- Tool, selection and a drag in progress live in the drawing package's own store. `useCalculatorLiveAreas()` returns the areas including a running drag, so the result follows the pointer.
+- Tool, selection and a drag in progress live in the drawing package's own store. `useCalculatorLiveAreas()` returns the areas including a running drag; only the area labels use it. The calculation and the dimming of the points follow `sum.areas`, so they update when an edit is finished, not on every frame of a drag.
 - Nothing is stored on the server.
 
 ## Drawing

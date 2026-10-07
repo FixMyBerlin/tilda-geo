@@ -9,6 +9,7 @@ import { CalculatorMapDrawing } from './drawing/CalculatorMapDrawing'
 import type { DrawArea } from './drawing/drawAreaTypes'
 import { useCalculatorLiveAreas } from './drawing/useCalculatorDraw'
 import { SourcesLayersCalculator } from './SourcesLayersCalculator'
+import { useCalculatorAreas } from './useCalculatorAreas'
 import { useCalculatorDatasets } from './useCalculatorDatasets'
 import { useCalculatorStyleColors } from './utils/calculatorStyleColors'
 import { useUpdateCalculation } from './utils/useUpdateCalculation'
@@ -32,7 +33,10 @@ const buildCalculationSignature = (
 export const CalculatorMap = () => {
   const { activeDataset, filter } = useCalculatorDatasets()
   const styleColors = useCalculatorStyleColors()
-  // Includes a drag in progress, so the result follows the pointer.
+  // The areas of the URL change once per finished edit. The calculation and the dimming of the
+  // points follow them, not the pointer: both are too heavy to run on every frame of a drag.
+  const { drawAreas } = useCalculatorAreas()
+  // Includes a drag in progress; only the labels follow it.
   const liveAreas = useCalculatorLiveAreas()
   const { updateCalculation } = useUpdateCalculation()
   const mapBounds = useMapBounds()
@@ -51,13 +55,13 @@ export const CalculatorMap = () => {
         return
       }
 
-      const calculationSignature = buildCalculationSignature(queryLayers, liveAreas, mapBounds)
+      const calculationSignature = buildCalculationSignature(queryLayers, drawAreas, mapBounds)
       if (lastCalculationSignatureRef.current === calculationSignature) return
 
-      updateCalculation(queryLayers, liveAreas)
+      updateCalculation(queryLayers, drawAreas)
       lastCalculationSignatureRef.current = calculationSignature
     },
-    [mapLoaded, showMapLoadingIndicator, queryLayers, liveAreas, mapBounds, updateCalculation],
+    [mapLoaded, showMapLoadingIndicator, queryLayers, drawAreas, mapBounds, updateCalculation],
   )
 
   if (!activeDataset) return null
@@ -67,7 +71,7 @@ export const CalculatorMap = () => {
       <SourcesLayersCalculator
         dataset={activeDataset}
         filter={filter}
-        areas={calculatorAreasToParam(liveAreas)}
+        areas={calculatorAreasToParam(drawAreas)}
         styleColors={styleColors}
       />
       <CalculatorMapDrawing

@@ -4,7 +4,6 @@ import { twJoin } from 'tailwind-merge'
 import type { MapDataSourceCalculator } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { ConditionalFormattedKey } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/ConditionalFormattedKey'
 import { ConditionalFormattedValue } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/ConditionalFormattedValue'
-import { AnimatedNumber } from '@/components/shared/motion/AnimatedNumber'
 import { modePanelTintHairlineTopClassName } from '../modePanel.const'
 import type { CalculatorFilter } from './calculatorModeParam'
 import {
@@ -167,9 +166,7 @@ const AreaSummary = ({
           <TrashIcon className="size-4 text-gray-400 hover:text-gray-700" />
         </button>
       </div>
-      <strong className="text-sm tabular-nums">
-        <AnimatedNumber value={areaSummary.total} format={formatNumber} />
-      </strong>
+      <strong className="text-sm tabular-nums">{formatNumber(areaSummary.total)}</strong>
     </div>
 
     {areaSummary.groups.map((group) => (
@@ -289,9 +286,7 @@ export const CalculatorBreakdown = ({ data }: { data: CalculatorBreakdownData })
             >
               <div className="flex items-center justify-between gap-2">
                 <span>{selectedMetricLabel} Kombiniert</span>
-                <span className="tabular-nums">
-                  <AnimatedNumber value={summary.combined.total} format={data.formatNumber} />
-                </span>
+                <span className="tabular-nums">{data.formatNumber(summary.combined.total)}</span>
               </div>
             </div>
           )}

@@ -27,7 +27,7 @@ import {
 type Props = {
   dataset: (typeof calculatorDatasets)[number]
   filter: CalculatorFilter
-  /** The drawn areas, including a drag in progress. */
+  /** The drawn areas as of the last finished edit. */
   areas: CalculatorModeParam['areas']
   /** Colors of the active style (`sum.style`), if any. */
   styleColors: CalculatorStyleColors | undefined

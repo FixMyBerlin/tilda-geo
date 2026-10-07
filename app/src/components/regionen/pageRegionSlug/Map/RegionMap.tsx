@@ -5,7 +5,12 @@ import {
 import { bbox, bboxPolygon, buffer } from '@turf/turf'
 import { differenceBy, uniqBy } from 'es-toolkit/compat'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import type { MapLibreEvent, MapStyleImageMissingEvent } from 'maplibre-gl'
+import type {
+  MapLibreEvent,
+  MapSourceDataEvent,
+  MapStyleDataEvent,
+  MapStyleImageMissingEvent,
+} from 'maplibre-gl'
 import { useEffect, useRef, useState } from 'react'
 import type {
   MapGeoJSONFeature,
@@ -233,6 +238,19 @@ export const RegionMap = () => {
     updateMapListHover([])
   }
 
+  const handleData = (event: MapStyleDataEvent | MapSourceDataEvent) => {
+    // GeoJSON that is passed in as data is not fetched, so there is nothing to wait for. The
+    // drawing layers set theirs on every pointer move, which would keep the indicator spinning.
+    if (
+      event.dataType === 'source' &&
+      event.source.type === 'geojson' &&
+      typeof event.source.data !== 'string'
+    ) {
+      return
+    }
+    startMapDataLoading()
+  }
+
   const handleLoad = (event: MapLibreEvent) => {
     // Only when `loaded` all `Map` feature are actually usable (https://github.com/visgl/react-map-gl/issues/2123)
     // Rotate/pitch handlers: Map3dTouchRotation (runs once mapLoaded is set).
@@ -337,7 +355,7 @@ export const RegionMap = () => {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onLoad={handleLoad}
-      onData={startMapDataLoading}
+      onData={handleData}
       onIdle={finishMapDataLoading}
       doubleClickZoom={true}
       {...drawMapProps}

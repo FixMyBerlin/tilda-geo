@@ -38,7 +38,7 @@ export const CalculatorFilterBar = ({
 }: Props) => {
   const entries = Object.entries(filter)
   const styleOptions = [
-    { value: defaultStyleValue, label: 'Standard' },
+    { value: defaultStyleValue, label: 'Einfarbig' },
     ...groupByKeys.map((key) => ({
       value: key,
       label: `Nach ${translations[`${sourceId}--${key}--key`] ?? key}`,
@@ -51,7 +51,8 @@ export const CalculatorFilterBar = ({
       <MotionAutoHeight>
         <div className="flex flex-wrap items-center gap-1.5">
           <ModeFilterSelect
-            label="Darstellung der Punkte"
+            label="Punkte einfärben"
+            triggerPrefix="Farbe"
             icon={SwatchIcon}
             value={style ?? defaultStyleValue}
             options={styleOptions}
