@@ -7,8 +7,6 @@ import {
   type DrawFeature,
 } from '@osm-editor-kit/react-map-gl-draw'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
-import { useModeDetailSelection } from '@/components/regionen/pageRegionSlug/modes/useModeDetailSelection'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { toastError } from '@/components/shared/toast/toastError'
 import {
@@ -19,7 +17,7 @@ import {
   createReviewEntryFn,
   updateReviewEntryFn,
 } from '@/server/review-lists/review-lists.functions'
-import { reviewEditingEntryId } from '../useReviewDrawActive'
+import { useReviewDrawSession } from '../useReviewDrawActive'
 import { useReviewListsModeParam } from '../useReviewListsModeParam'
 import {
   useReviewComposeFeatures,
@@ -43,32 +41,13 @@ const UPDATE_GEOMETRY_KEY = ['review-lists', 'updateEntryGeometry'] as const
  *   finished edit is written to the query cache at once and saved in the background.
  */
 export const useReviewDraw = () => {
-  const currentMode = useCurrentMode()
   const regionSlug = useRegionSlug()
   const queryClient = useQueryClient()
-  const { selected } = useModeDetailSelection()
+  const { session, editingEntryId, activeListId } = useReviewDrawSession()
   const { reviewListsMode, setReviewListsModeParam } = useReviewListsModeParam()
-  const { key, new: isComposing, move: isMoveArmed } = reviewListsMode
   const composeType = useReviewComposeType()
   const composeFeatures = useReviewComposeFeatures()
   const { setComposeFeatures, resetCompose } = useReviewDrawActions()
-
-  const { data: lists } = useQuery({
-    ...reviewListsQueryOptions(regionSlug),
-    enabled: currentMode.isReviewLists,
-  })
-  const activeListId = key ?? lists?.lists[0]?.id
-
-  const editingEntryId = reviewEditingEntryId(selected, isComposing === true, isMoveArmed === true)
-  const isEditing = !Number.isNaN(editingEntryId)
-  const session =
-    !currentMode.isReviewLists || activeListId === undefined
-      ? ('idle' as const)
-      : isComposing
-        ? ('compose' as const)
-        : isEditing
-          ? ('edit' as const)
-          : ('idle' as const)
 
   const entriesQueryKey = reviewEntriesQueryOptions(regionSlug, activeListId).queryKey
   const { data: entriesData } = useQuery({
