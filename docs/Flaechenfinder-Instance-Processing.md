@@ -92,3 +92,7 @@ FROM public._buildings;
 ```
 
 Weitere Hinweise: `processing/topics/landcover/README.md`, `planning-worker/ALKIS.md`.
+
+## Flächenfinder pro Region einschalten
+
+`spaceFinderEnabled` steht für neue Regionen standardmäßig auf `false` (Admin: "Flächenfinder aktiv"). Die Migration `region_space_finder_default_off` schaltet beim Deploy alle Regionen ohne Planungsgebiet aus. Soll eine solche Region auf der Instanz den Flächenfinder nutzen, danach im Admin wieder einschalten.

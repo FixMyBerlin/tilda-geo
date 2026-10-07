@@ -101,12 +101,13 @@ Tests: `docs-region-downloads.spec.ts` (export: guest denied on PUBLIC, admin al
 
 The mode routes (`app/src/routes/regionen/$regionSlug/*.tsx`) first require region access (parent layout), then redirect non-members of member-only modes to `/access-denied`. Navigation buttons follow `deriveAvailableModes` and `isMemberOnlyMode` in `availableModes.ts`. The server functions below enforce the same rules on their own.
 
-| Mode                        | Opens for                                                                      | Shown in navigation when                                                           |
-| --------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
-| Map (default)               | Everyone with region access                                                    | Always                                                                             |
-| Hinweise (`/hinweise`)      | Region access. Member-only when the region has internal notes and no OSM notes | Region has OSM or internal notes enabled. Otherwise the route redirects to the map |
-| Qualitätssicherung (`/qa`)  | Members and admins                                                             | Member/admin and at least one QA config                                            |
-| Prüflisten (`/prueflisten`) | Members and admins                                                             | Member/admin (also before the first list exists)                                   |
+| Mode                              | Opens for                                                                                                       | Shown in navigation when                                                           |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| Map (default)                     | Everyone with region access                                                                                     | Always                                                                             |
+| Hinweise (`/hinweise`)            | Region access. Member-only when the region has internal notes and no OSM notes                                  | Region has OSM or internal notes enabled. Otherwise the route redirects to the map |
+| Qualitätssicherung (`/qa`)        | Members and admins                                                                                              | Member/admin and at least one QA config                                            |
+| Prüflisten (`/prueflisten`)       | Members and admins                                                                                              | Member/admin (also before the first list exists)                                   |
+| Flächenfinder (`/flaechenfinder`) | Members and admins, only when the region has `spaceFinderEnabled` (default off). The flag applies to admins too | Member/admin and `spaceFinderEnabled`. Otherwise the route redirects to the map    |
 
 Tests: `availableModes.test.ts`, `app/tests/smoke/region-modes.spec.ts` (guests denied), `app/tests/pages/modes-access.stubbed-auth.spec.ts` (signed-in non-member denied, plain member allowed), `canAccessMemberModeForRegion.server.test.ts`.
 
@@ -163,6 +164,12 @@ Everything is member/admin-only. A list can be linked to several regions; the ac
 | Create, edit, delete entries; upload GeoJSON; comment | Member, admin. Author edits own comment (`updateReviewEntryComment`); no delete                               |
 
 Tests: `reviewListMutationsAuth.server.test.ts` (every member mutation rejects non-members before DB access; rename cannot change region links; shared lists cannot be deleted by members), `getReviewEntry.server.test.ts`, `app/tests/pages/review-lists-mode.stubbed-auth.spec.ts`.
+
+### Flächenfinder
+
+Every function in `planning.functions.ts` goes through `authorizePlanningRegion`: member or admin of the region, **and** `spaceFinderEnabled`. Without the flag the call throws, so the mode is closed for direct requests as well, not just in the navigation. Any member may edit and run any Gebiet or Variante of the region. `createdBy` on Gebiet and Variante is attribution only and can be null (the user was deleted).
+
+Tests: `authorizePlanningRegion.server.test.ts` (flag off rejects members and admins), `availableModes.test.ts`.
 
 ## Comments
 

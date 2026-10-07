@@ -1,19 +1,20 @@
 # Region modes
 
-A region has a shared map and extra pages that reconfigure the UI around it. The default map stays `/regionen/<region>`. Hinweise, Qualitätssicherung, and Prüflisten are their own routes. They show up in the main navigation when the region has the matching data (notes flags, at least one QA config, review lists). Members can open Prüflisten before the first list exists so they can create one.
+A region has a shared map and extra pages that reconfigure the UI around it. The default map stays `/regionen/<region>`. Hinweise, Qualitätssicherung, Prüflisten, and the Flächenfinder are their own routes. They show up in the main navigation when the region has the matching data (notes flags, at least one QA config, review lists) or, for the Flächenfinder, the region flag. Members can open Prüflisten before the first list exists so they can create one.
 
 Who may open and change what per mode: [Permissions.md](./Permissions.md).
 
 URL keys and filters: [Modes-URL-State-Contract-And-Optimizations.md](./Modes-URL-State-Contract-And-Optimizations.md). Selection `f`: [Features-Parameter-Deeplinks.md](./Features-Parameter-Deeplinks.md).
 
-| Mode               | URL                              |
-| ------------------ | -------------------------------- |
-| Map (default)      | `/regionen/<region>`             |
-| Hinweise           | `/regionen/<region>/hinweise`    |
-| Qualitätssicherung | `/regionen/<region>/qa`          |
-| Prüflisten         | `/regionen/<region>/prueflisten` |
+| Mode               | URL                                 |
+| ------------------ | ----------------------------------- |
+| Map (default)      | `/regionen/<region>`                |
+| Hinweise           | `/regionen/<region>/hinweise`       |
+| Qualitätssicherung | `/regionen/<region>/qa`             |
+| Prüflisten         | `/regionen/<region>/prueflisten`    |
+| Flächenfinder      | `/regionen/<region>/flaechenfinder` |
 
-Switching modes keeps map position and layer configuration. Each mode stores its filters in one JSON search object (`notes`, `qa`, `review`) and restores them when you come back.
+Switching modes keeps map position and layer configuration. Each mode stores its filters in one JSON search object (`notes`, `qa`, `review`, `ff`) and restores them when you come back.
 
 ## Shared panel
 
@@ -77,3 +78,13 @@ New configs are created in admin. The source table needs a string `id`, comparis
 GeoJSON lists of candidates (points, lines, polygons, including Multi\*). Pick a list, set status, comment. Lists live in the database, can be assigned to several regions, and support upload/download. Members can draw new entries and edit geometry. Source is upload or manual.
 
 UI names: **Prüfliste** / **Prüfeintrag**. Status and comments exist. A richer evaluation workflow is still placeholder-level. Admin: `/admin/review-lists`.
+
+## Flächenfinder
+
+Scores hexagons of a Planungsgebiet to find candidate areas for new bike parking (Abstellanlagen). It is always member-only, and only available when the region has the flag `spaceFinderEnabled` switched on (D8). The flag defaults to `false`; admins switch it on per region in the region form ("Flächenfinder aktiv"). Unlike the other modes it cannot be derived from data, because the worker that produces the results only runs on some instances. The flag also applies to admins and to the server functions, not just to the route.
+
+- **Collection:** Planungsgebiete (areas) with their Varianten. A Variante is a copy of a Gebiet's factor weights and thresholds that can be calculated on its own. Duplicating a Variante seeds the copy from its parent. Creating or duplicating shows a confirmation toast.
+- **Result layer:** the hexagons of the active Variante's latest run, coloured by score (`score`), with an opacity (`opacity`; 0 hides the layer) and a "Gesuchte Fläche" filter (`minArea`).
+- **Candidates:** with the selection tool on, clicking a hexagon adds it to a candidate list that can be exported as GeoJSON. Selections are stored per run in `sessionStorage` (`useSpaceFinderCandidatesState`), so they survive reloads of the tab but not a new session.
+
+The creator of a Gebiet or Variante is kept for attribution only. It is cleared when the user is deleted. A region with Planungsgebieten cannot be deleted.
