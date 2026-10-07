@@ -61,14 +61,17 @@ describe('calculatorModeFromLegacySubcategories()', () => {
     expect(calculatorModeFromLegacySubcategories(decode('usbee5.i2ir6t.6pw', both), both)).toEqual({
       param: { key: 'tilda_parkings_off_street_quantized' },
     })
-    expect(calculatorModeFromLegacySubcategories(decode('usbee5.mjl7hg.6pw', both), both)).toEqual({
-      param: { key: 'lars_parking_points' },
-    })
+  })
+
+  test('the discontinued community count ("Parkplätze zählen") opens nothing', () => {
+    expect(
+      calculatorModeFromLegacySubcategories(decode('usbee5.mjl7hg.6pw', both), both),
+    ).toBeUndefined()
   })
 
   test('a dataset the region no longer has is ignored', () => {
     expect(
-      calculatorModeFromLegacySubcategories(decode('usbee5.mjl7hg.6pw', both), ['parkingTilda']),
+      calculatorModeFromLegacySubcategories(decode('usbee5.i2ir6t.6pw', both), ['parkingLars']),
     ).toBeUndefined()
   })
 })

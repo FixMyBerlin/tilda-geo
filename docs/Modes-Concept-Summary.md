@@ -77,7 +77,7 @@ New configs are created in admin. The source table needs a string `id`, comparis
 
 The area calculator. Draw one or more areas on the map; the panel sums the values of the selected dataset inside them (e.g. parking spaces, area) and breaks them down by property. Tools are shown icon-only in the header switcher until they are active.
 
-- **Datasets** are a list owned by the mode ([`calculatorDatasets.const.ts`](../app/src/components/regionen/pageRegionSlug/modes/calculator/calculatorDatasets.const.ts)), not categories. A region offers a dataset when it has the dataset's category (today: `parkingTilda`, `parkingLars`). The points of the selected dataset are only on the map in this mode.
+- **Datasets** are a list owned by the mode ([`calculatorDatasets.const.ts`](../app/src/components/regionen/pageRegionSlug/modes/calculator/calculatorDatasets.const.ts)), not categories. A region offers a dataset when it has the dataset's category (today: `parkingTilda`). The points of the selected dataset are only on the map in this mode.
 - **Filter:** a click on a value of the breakdown narrows the sum to points with that value (several tags combine); the other points are dimmed on the map.
 - **Nothing is stored.** Dataset, filter and areas live in the URL in one param (`sum`), so a calculation is shared by its link. The areas stay in the URL when switching to another mode and are back when returning.
 - **Open to everyone** who can see the region.

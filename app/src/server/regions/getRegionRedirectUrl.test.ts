@@ -263,17 +263,17 @@ describe('getRegionRedirectUrl()', () => {
       expect(await redirectOnly(redirectUrl!, 'parkraum-berlin-euvm')).toBe(null)
     })
 
-    test('"Parkplätze zählen" on → /summieren', async () => {
+    test('"Parkplätze zählen" (discontinued) on → stays on the map', async () => {
       const url = 'http://127.0.0.1:5173/regionen/parkraum?v=3&config=7yzzp6.2nkg5'
       const resultUrl = getUrl(await redirectOnly(url, 'parkraum'))
-      expect(resultUrl.pathname).toBe('/regionen/parkraum/summieren')
+      expect(resultUrl.pathname).toBe('/regionen/parkraum')
       expect(resultUrl.searchParams.has('sum')).toBe(false)
     })
 
     test('another mode path is kept', async () => {
-      const url = 'http://127.0.0.1:5173/regionen/parkraum/hinweise?v=3&config=7yzzp6.2nkg5'
-      const resultUrl = getUrl(await redirectOnly(url, 'parkraum'))
-      expect(resultUrl.pathname).toBe('/regionen/parkraum/hinweise')
+      const url = `http://127.0.0.1:5173/regionen/parkraum-berlin-euvm/hinweise?v=3&config=${street}`
+      const resultUrl = getUrl(await redirectOnly(url, 'parkraum-berlin-euvm'))
+      expect(resultUrl.pathname).toBe('/regionen/parkraum-berlin-euvm/hinweise')
     })
 
     test('a link of the current version is not read for old layers', async () => {

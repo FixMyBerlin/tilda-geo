@@ -11,7 +11,7 @@ import {
 
 /**
  * The area calculator used to be switched on by a subcategory in the category list ("Summieren:
- * Öffentliches Straßenparken", "Parkplätze zählen", …). It is the Summieren mode now
+ * Öffentliches Straßenparken", …). It is the Summieren mode now
  * (`/summieren`, `?sum=`), and those subcategories are gone from the categories.
  *
  * `index` is where the subcategory sat in its category, which a `?config=` template depends on.
@@ -30,12 +30,9 @@ const legacyCalculatorSubcategories = [
     subcategoryId: 'parkingTildaQuantizedOffStreet',
     dataset: 'tilda_parkings_off_street_quantized',
   },
-  {
-    categoryId: 'parkingLars',
-    index: 1,
-    subcategoryId: 'parkingPoints',
-    dataset: 'lars_parking_points',
-  },
+  // "Parkplätze zählen" of the community data: discontinued without a replacement (its tiles
+  // are gone). Still listed because old `?config=` templates hold it; such links stay on the map.
+  { categoryId: 'parkingLars', index: 1, subcategoryId: 'parkingPoints', dataset: undefined },
 ] as const
 
 /**
@@ -86,7 +83,7 @@ export function calculatorModeFromLegacySubcategories(
       const legacy = legacyCalculatorSubcategories.find(
         (l) => l.categoryId === category.id && l.subcategoryId === String(subcategory.id),
       )
-      if (!legacy) continue
+      if (!legacy?.dataset) continue
       if (!subcategory.styles.some((style) => style.active && style.id !== 'hidden')) continue
       if (!regionDatasets.some((dataset) => dataset.sourceId === legacy.dataset)) continue
 

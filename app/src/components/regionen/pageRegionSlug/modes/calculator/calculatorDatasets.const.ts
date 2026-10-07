@@ -1,6 +1,5 @@
 import type { MapDataCategoryId } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/MapDataCategoryId'
 import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
-import { mapboxStyleGroupLayers_parking_calculator } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/parking_calculator'
 import { mapboxStyleLayers } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/mapboxStyleLayers'
 import type { MapboxStyleLayer } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/types'
 import type { FileMapDataSubcategoryStyleLayer } from '@/components/regionen/pageRegionSlug/mapData/types'
@@ -52,16 +51,6 @@ export const calculatorDatasets: CalculatorDataset[] = [
       layers: [quantizedPointsLayer('#a21caf')],
       source: 'tilda_parkings_off_street_quantized',
       sourceLayer: 'off_street_parking_quantized',
-    }),
-  },
-  {
-    sourceId: 'lars_parking_points',
-    name: 'Parkraum (Community)',
-    categoryId: 'parkingLars',
-    layers: mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_parking_calculator,
-      source: 'lars_parking_points',
-      sourceLayer: 'processing.parking_spaces',
     }),
   },
 ]

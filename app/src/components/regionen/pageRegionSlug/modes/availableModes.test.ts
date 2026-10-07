@@ -53,7 +53,7 @@ describe('deriveAvailableModes()', () => {
     expect(calculator([])).toBe(false)
     expect(calculator(['bikelanes', 'roads'])).toBe(false)
     expect(calculator(['bikelanes', 'parkingTilda'])).toBe(true)
-    expect(calculator(['parkingLars'])).toBe(true)
+    expect(calculator(['parkingLars'])).toBe(false)
   })
 })
 

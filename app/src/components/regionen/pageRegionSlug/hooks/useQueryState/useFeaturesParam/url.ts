@@ -23,7 +23,7 @@ export const numericSourceIds: Record<number, SourceNames> = {
   1: 'osm-notes-source',
   2: 'lars_parking',
   3: 'lars_parking_debug',
-  4: 'lars_parking_points',
+  // 4: 'lars_parking_points', // the community points were only summed; discontinued
   5: 'lars_parking_areas',
   6: 'lars_parking_stats',
   7: 'atlas_boundaries',
