@@ -59,7 +59,7 @@ describe('calculatorModeFromLegacySubcategories()', () => {
 
   test('other datasets are named', () => {
     expect(calculatorModeFromLegacySubcategories(decode('usbee5.i2ir6t.6pw', both), both)).toEqual({
-      param: { key: 'tilda_parkings_off_street_quantized' },
+      param: { key: 'parkingTildaOffStreet' },
     })
   })
 

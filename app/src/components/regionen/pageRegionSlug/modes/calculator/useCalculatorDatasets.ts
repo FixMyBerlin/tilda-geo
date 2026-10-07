@@ -13,8 +13,7 @@ export const useCalculatorDatasets = () => {
   const { calculatorMode, setCalculatorModeParam } = useCalculatorModeParam()
 
   const datasets = calculatorDatasetsForCategories(region.categories)
-  const selected =
-    datasets.find((dataset) => dataset.sourceId === calculatorMode.key) ?? datasets[0]
+  const selected = datasets.find((dataset) => dataset.id === calculatorMode.key) ?? datasets[0]
   const calculator = selected ? getSourceData(selected.sourceId).calculator : undefined
 
   const activeDataset =
@@ -22,10 +21,8 @@ export const useCalculatorDatasets = () => {
       ? {
           ...selected,
           sumKeys: calculator.sumKeys,
-          groupByKeys: calculator.groupByKeys,
-          queryLayers: selected.layers.map((layer) =>
-            calculatorLayerId(selected.sourceId, layer.id),
-          ),
+          groupByKeys: calculator.groupByKeys.filter((key) => !(key in selected.where)),
+          queryLayers: selected.layers.map((layer) => calculatorLayerId(selected.id, layer.id)),
         }
       : undefined
 
@@ -46,9 +43,9 @@ export const useCalculatorDatasets = () => {
     setCalculatorModeParam({ ...calculatorMode, style: key })
 
   // Another dataset has other tags, so filter and style do not carry over. The areas do.
-  const selectDataset = (sourceId: string) =>
+  const selectDataset = (id: string) =>
     setCalculatorModeParam({
-      key: sourceId === datasets[0]?.sourceId ? undefined : sourceId,
+      key: id === datasets[0]?.id ? undefined : id,
       areas: calculatorMode.areas,
     })
 

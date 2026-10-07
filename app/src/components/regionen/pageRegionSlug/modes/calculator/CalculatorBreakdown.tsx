@@ -164,7 +164,7 @@ const AreaSummary = ({
       <div className="flex items-center gap-1">
         <strong className="text-sm">{label}</strong>
         <button type="button" onClick={onDelete} aria-label="Fläche löschen" title="Fläche löschen">
-          <TrashIcon className="size-4 text-gray-400 opacity-0 transition-opacity group-focus-within:opacity-100 group-hover:opacity-100 hover:text-gray-700 pointer-coarse:opacity-100" />
+          <TrashIcon className="size-4 text-gray-400 hover:text-gray-700" />
         </button>
       </div>
       <strong className="text-sm tabular-nums">

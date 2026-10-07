@@ -1,6 +1,7 @@
 import { ModeCollectionSelect } from '../ModeCollectionSelect'
 import { ModePanel } from '../ModePanel'
 import { CalculatorFilterBar } from './CalculatorFilterBar'
+import { CalculatorPanelActions } from './CalculatorPanelActions'
 import { CalculatorResult } from './CalculatorResult'
 import { useCalculatorDatasets } from './useCalculatorDatasets'
 
@@ -27,13 +28,14 @@ export const PageModeCalculator = () => {
     <ModePanel
       title="Summieren"
       subtitle={activeDataset?.name}
+      actions={activeDataset ? <CalculatorPanelActions /> : undefined}
       collection={
         datasets.length > 1 && activeDataset ? (
           <ModeCollectionSelect
             aria-label="Datensatz wählen"
-            value={activeDataset.sourceId}
+            value={activeDataset.id}
             options={datasets.map((dataset) => ({
-              value: dataset.sourceId,
+              value: dataset.id,
               label: dataset.name,
             }))}
             onChange={selectDataset}

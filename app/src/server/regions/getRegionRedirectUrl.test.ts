@@ -258,7 +258,7 @@ describe('getRegionRedirectUrl()', () => {
       const resultUrl = getUrl(redirectUrl)
       expect(resultUrl.pathname).toBe('/regionen/parkraum-berlin-euvm/summieren')
       expect(JSON.parse(resultUrl.searchParams.get('sum')!)).toEqual({
-        key: 'tilda_parkings_off_street_quantized',
+        key: 'parkingTildaOffStreet',
       })
       expect(await redirectOnly(redirectUrl!, 'parkraum-berlin-euvm')).toBe(null)
     })

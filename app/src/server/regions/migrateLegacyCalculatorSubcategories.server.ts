@@ -22,13 +22,14 @@ const legacyCalculatorSubcategories = [
     categoryId: 'parkingTilda',
     index: 7,
     subcategoryId: 'parkingTildaQuantized',
-    dataset: 'tilda_parkings_quantized',
+    dataset: 'parkingTilda',
   },
   {
     categoryId: 'parkingTilda',
     index: 8,
     subcategoryId: 'parkingTildaQuantizedOffStreet',
-    dataset: 'tilda_parkings_off_street_quantized',
+    // Summed public and private together and was marked unfinished: a best guess.
+    dataset: 'parkingTildaOffStreet',
   },
   // "Parkplätze zählen" of the community data: discontinued without a replacement (its tiles
   // are gone). Still listed because old `?config=` templates hold it; such links stay on the map.
@@ -85,10 +86,10 @@ export function calculatorModeFromLegacySubcategories(
       )
       if (!legacy?.dataset) continue
       if (!subcategory.styles.some((style) => style.active && style.id !== 'hidden')) continue
-      if (!regionDatasets.some((dataset) => dataset.sourceId === legacy.dataset)) continue
+      if (!regionDatasets.some((dataset) => dataset.id === legacy.dataset)) continue
 
       const param: CalculatorModeParam = {
-        key: legacy.dataset === regionDatasets[0]?.sourceId ? undefined : legacy.dataset,
+        key: legacy.dataset === regionDatasets[0]?.id ? undefined : legacy.dataset,
       }
       return { param: compactCalculatorModeParam(param) }
     }

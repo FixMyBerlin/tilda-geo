@@ -56,12 +56,13 @@ test.describe('Smoke – region mode pages (unauthenticated)', () => {
     await expectNoConsoleErrors(page)
   })
 
-  test('Summieren mode is open to guests and shows the drawing toolbar', async ({ page }) => {
+  test('Summieren mode is open to guests and shows the drawing hint', async ({ page }) => {
     await page.goto('/regionen/parkraum-berlin-euvm/summieren?map=14/52.5/13.4')
     expect(new URL(page.url()).pathname).toBe('/regionen/parkraum-berlin-euvm/summieren')
 
     await expect(page.getByRole('heading', { name: 'Summieren' })).toBeVisible({ timeout: 30_000 })
-    await expect(page.getByRole('group', { name: 'Fläche zeichnen' })).toBeVisible()
+    await expect(page.getByText('In die Karte klicken, um eine Fläche zu zeichnen')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Hilfe zum Zeichnen' })).toBeVisible()
     // The datasets are no longer layers of the category list.
     await expect(page.getByText('Summieren:')).toHaveCount(0)
     await waitForMapLoad(page)
@@ -71,7 +72,7 @@ test.describe('Smoke – region mode pages (unauthenticated)', () => {
     const switcher = page.getByRole('navigation', { name: 'Modus' })
     await switcher.getByRole('link', { name: 'Karte' }).click()
     await page.waitForURL((url) => new URL(url).pathname === '/regionen/parkraum-berlin-euvm')
-    await expect(page.getByRole('group', { name: 'Fläche zeichnen' })).toHaveCount(0)
+    await expect(page.getByText('In die Karte klicken, um eine Fläche zu zeichnen')).toHaveCount(0)
     await expect(switcher.getByRole('link', { name: 'Summieren' })).toHaveAttribute(
       'title',
       'Summieren',

@@ -77,9 +77,10 @@ New configs are created in admin. The source table needs a string `id`, comparis
 
 The area calculator. Draw one or more areas on the map; the panel sums the values of the selected dataset inside them (e.g. parking spaces, area) and breaks them down by property. Tools are shown icon-only in the header switcher until they are active.
 
-- **Datasets** are a list owned by the mode ([`calculatorDatasets.const.ts`](../app/src/components/regionen/pageRegionSlug/modes/calculator/calculatorDatasets.const.ts)), not categories. A region offers a dataset when it has the dataset's category (today: `parkingTilda`). The points of the selected dataset are only on the map in this mode.
+- **Datasets** are a list owned by the mode ([`calculatorDatasets.const.ts`](../app/src/components/regionen/pageRegionSlug/modes/calculator/calculatorDatasets.const.ts)), not categories. Today they are the four parking layers of the sidebar (public / private, street / off-street), with the same names and ids, for regions with the category `parkingTilda`. The points of the selected dataset are only on the map in this mode; those that are part of the sum are shown in full color, the others faded.
 - **Filter:** a click on a value of the breakdown narrows the sum to points with that value (several tags combine); the other points are dimmed on the map.
-- **Nothing is stored.** Dataset, filter and areas live in the URL in one param (`sum`), so a calculation is shared by its link. The areas stay in the URL when switching to another mode and are back when returning.
+- **Darstellung:** the points can be colored by one of the properties of the breakdown; the values in the panel then carry the color and are the legend.
+- **Nothing is stored.** Dataset, filter, coloring and areas live in the URL in one param (`sum`), so a calculation is shared by its link. The areas stay in the URL when switching to another mode and are back when returning.
 - **Open to everyone** who can see the region.
 - The sum is computed in the browser from the points rendered on the map, so the whole area has to be in view (the panel warns otherwise).
 - While the mode is open, map clicks belong to drawing: the inspector does not open.

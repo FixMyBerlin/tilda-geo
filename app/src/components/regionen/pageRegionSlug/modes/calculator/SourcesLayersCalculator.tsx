@@ -61,7 +61,7 @@ export const SourcesLayersCalculator = ({ dataset, filter, areas, styleColors }:
   const summed = summedExpression(areas, filter)
   const styleColor = styleColors ? calculatorStyleColorExpression(styleColors) : undefined
   const sourceData = getSourceData(dataset.sourceId)
-  const sourceKey = calculatorSourceKey(dataset.sourceId)
+  const sourceKey = calculatorSourceKey(dataset.id)
   const tileUrl = getCachelessTilesUrl({
     url: getMapDataSourceTilesUrl(sourceData),
     cacheless: useDebugCachelessTiles,
@@ -80,7 +80,7 @@ export const SourcesLayersCalculator = ({ dataset, filter, areas, styleColors }:
         minzoom={sourceData.minzoom}
       />
       {dataset.layers.filter(isAtlasStyleLayer).map((layer) => {
-        const layerId = calculatorLayerId(dataset.sourceId, layer.id)
+        const layerId = calculatorLayerId(dataset.id, layer.id)
         const layerProps = buildAtlasLayerProps({
           layer,
           layerId,

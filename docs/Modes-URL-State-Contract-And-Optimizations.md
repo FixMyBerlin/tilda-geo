@@ -15,7 +15,7 @@ Mode filters sit on that shared layout search (not on child `validateSearch`) so
 | `qa`     | `zodQaParam`              | `{ key, status?, users?, search?, extent? }`                                                                             |
 | `notes`  | `zodNotesModeParam`       | `{ key?, search?, extent?, completed?, commented?, notReacted?, user?, new? }` (`new` is a map-param string compose pin) |
 | `review` | `zodReviewListsModeParam` | `{ key?, search?, extent?, status?, source?, new?, move? }`                                                              |
-| `sum`    | `zodCalculatorModeParam`  | `{ key?, filter?, areas? }` (`key`: dataset by source id; `filter`: tag values; `areas`: GeoJSON Polygon/MultiPolygon)   |
+| `sum`    | `zodCalculatorModeParam`  | `{ key?, filter?, style?, areas? }` (`key`: dataset; `filter`: tag values; `style`: tag to color by; `areas`: GeoJSON)   |
 
 `optionalSearchJson` drops the whole object if the Zod object fails. Each field therefore uses `.catch` so a stale bookmark field (retired status, bad chip) does not wipe the rest. QA `key` stays strict — without it there is nothing to show.
 

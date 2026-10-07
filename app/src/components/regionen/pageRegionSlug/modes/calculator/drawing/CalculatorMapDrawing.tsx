@@ -16,7 +16,7 @@ type Props = {
 
 export function CalculatorMapDrawing({ areas, getFeatureLabel }: Props) {
   const draw = useCalculatorDraw()
-  const { drawAreas, setDrawAreas } = useCalculatorAreas()
+  const { drawAreas } = useCalculatorAreas()
 
   const labelFeatures = areas.flatMap((area, index) => {
     const label = getFeatureLabel?.({ area, index })
@@ -65,12 +65,9 @@ export function CalculatorMapDrawing({ areas, getFeatureLabel }: Props) {
       <CalculatorDrawingToolbar
         isDrawing={draw.isDrawing}
         hasAreas={drawAreas.length > 0}
-        canAddArea={draw.tool === 'select' && draw.canAdd('polygon')}
-        onAddArea={() => draw.setTool('polygon')}
+        isAddingArea={draw.tool === 'polygon'}
         onFinish={draw.finish}
         onCancel={draw.cancel}
-        // The selected area, or all areas when none is selected.
-        onDelete={() => (draw.canDeleteSelected ? draw.deleteSelected() : setDrawAreas([]))}
       />
     </>
   )

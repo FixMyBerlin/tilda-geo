@@ -6,8 +6,8 @@ import type { DrawArea } from './drawing/drawAreaTypes'
  * (`notes`, `qa`, `review`): `key` picks the collection, `filter` narrows it, and the mode's
  * own geometry lives here too, so one param is the whole state of the mode.
  *
- * - `key` is the dataset, by the id of its source (`calculatorDatasets.const.ts`). Omitted
- *   for the region's first dataset.
+ * - `key` is the dataset (`calculatorDatasets.const.ts`), named like the sidebar layer that
+ *   shows the same parking. Omitted for the region's first dataset.
  * - `filter` narrows the sum to points with these tag values, e.g. `{ operator_type: 'public' }`.
  *   The keys are the group-by keys of the dataset; `''` stands for a missing value.
  * - `style` colors the points by the values of one tag (a group-by key of the dataset).
