@@ -23,6 +23,8 @@ WORKDIR /app
 # Do not copy app/bunfig.toml here: it enables globalStore for local/dev only.
 # That layout symlinks into /root/.bun, which USER bun cannot read at runtime.
 COPY app/package.json app/bun.lock ./
+# `patchedDependencies` in package.json reads these files during install.
+COPY app/patches ./patches
 # Install without lifecycle scripts `postinstall`.
 RUN bun install --frozen-lockfile --ignore-scripts
 
