@@ -180,8 +180,8 @@ model Region {
   notesInternal Boolean       @default(false)
   showSearch    Boolean       @default(false)
 
-  /// Flächenfinder (Planungsmodus). Default an; Regionen können ihn im Admin abschalten.
-  spaceFinderEnabled Boolean @default(true)
+  /// Flächenfinder (Planungsmodus). Default aus; Regionen schalten ihn im Admin ein.
+  spaceFinderEnabled Boolean @default(false)
 
   mapLat  Float @default(0)
   mapLng  Float @default(0)

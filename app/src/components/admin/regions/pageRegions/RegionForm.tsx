@@ -65,7 +65,7 @@ export const regionFormEmptyDefaults = {
   notesOsm: 'true' as const,
   notesInternal: 'false' as const,
   showSearch: 'false' as const,
-  spaceFinderEnabled: 'true' as const,
+  spaceFinderEnabled: 'false' as const,
   mapLat: '52.5',
   mapLng: '13.4',
   mapZoom: '10',

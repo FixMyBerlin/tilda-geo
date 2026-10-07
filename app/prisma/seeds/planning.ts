@@ -16,8 +16,8 @@ import db from '../../src/server/db.server'
  *
  * Region: `parkraum` (see `regionSeedCatalog.ts`) — its map already centers on Neukölln
  * (`mapLat`/`mapLng` sit inside the Schillerkiez) and its backgrounds include
- * `parkraumkarte_neukoelln`. `spaceFinderEnabled` is `true` by default for every seed region
- * (`baseRegionConfig`), forced here again defensively.
+ * `parkraumkarte_neukoelln`. `spaceFinderEnabled` is `false` for every seed region
+ * (`baseRegionConfig`), so it is switched on for this region here.
  *
  * Geometry: local OSM processing data (bun run seed's geo-bootstrap) only exists inside the tiny
  * bbox `seed-herrfurthplatz` (`app/scripts/processing-generate-command/bboxPresets.ts`,
@@ -185,8 +185,8 @@ const seedPlanning = async () => {
     return
   }
 
-  // `spaceFinderEnabled` already defaults to `true` for every seeded region (`baseRegionConfig`
-  // in `regionSeedCatalog.ts`); this is a defensive belt-and-braces in case that ever changes.
+  // `spaceFinderEnabled` is `false` for every seeded region (`baseRegionConfig`); only this one
+  // gets it switched on.
   // FMC admins (ADMIN role, e.g. `creator`) and the region's own seeded admins/all-regions user
   // (`memberships.ts`) already have access to this member-only mode — no extra membership rows
   // needed here (`hasPermissions = role === 'ADMIN' || membership` in `regions.functions.ts`).
