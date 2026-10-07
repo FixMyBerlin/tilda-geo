@@ -13,11 +13,6 @@ import { subcat_lit_highway_areas } from '../mapDataSubcategories/subcat_lit_hig
 import { subcat_lit_path_classes } from '../mapDataSubcategories/subcat_lit_path_classes.const'
 import { subcat_lit_roads } from '../mapDataSubcategories/subcat_lit_roads.const'
 import { subcat_maxspeed } from '../mapDataSubcategories/subcat_maxspeed.const'
-import { subcat_parkingLars } from '../mapDataSubcategories/subcat_parkingLars.const'
-import { subcat_parkingLarsAreas } from '../mapDataSubcategories/subcat_parkingLarsAreas.const'
-import { subcat_parkingLarsBoundaries } from '../mapDataSubcategories/subcat_parkingLarsBoundaries.const'
-import { subcat_parkingLarsDebug } from '../mapDataSubcategories/subcat_parkingLarsDebug.const'
-import { subcat_parkingLarsStats } from '../mapDataSubcategories/subcat_parkingLarsStats.const'
 import { subcat_poi } from '../mapDataSubcategories/subcat_poi.const'
 import { subcat_poi_boundaries } from '../mapDataSubcategories/subcat_poi_boundaries.const'
 import { subcat_poi_places } from '../mapDataSubcategories/subcat_poi_places.const'
@@ -28,7 +23,6 @@ import { subcat_roads } from '../mapDataSubcategories/subcat_roads.const'
 import { subcat_roads_plus_footways } from '../mapDataSubcategories/subcat_roads_plus_footways.const'
 import { subcat_roads_plus_label } from '../mapDataSubcategories/subcat_roads_plus_label.const'
 import { subcat_roads_plus_oneway } from '../mapDataSubcategories/subcat_roads_plus_oneway.const'
-import { subcat_signs } from '../mapDataSubcategories/subcat_signs.const'
 import { subcat_surface_bikelane } from '../mapDataSubcategories/subcat_surface_bikelane'
 import { subcat_surface_roads } from '../mapDataSubcategories/subcat_surface_roads.const'
 import type { StaticMapDataCategory } from '../types'
@@ -123,20 +117,6 @@ export const categories: StaticMapDataCategory[] = [
     subcategories: [
       { ...subcat_surface_roads, defaultStyle: 'default' },
       { ...subcat_surface_bikelane, defaultStyle: 'hidden' },
-    ],
-  },
-  {
-    id: 'parkingLars',
-    name: 'Parkraum (Community)',
-    desc: 'Parken im Straßenraum – Community-Prozessierung',
-    subcategories: [
-      { ...subcat_parkingLars, defaultStyle: 'default' },
-      { ...subcat_parkingLarsAreas, defaultStyle: 'default' },
-      { ...subcat_parkingLarsDebug, defaultStyle: 'hidden' },
-      { ...subcat_parkingLarsStats, defaultStyle: 'hidden' },
-      { ...subcat_parkingLarsBoundaries, defaultStyle: 'hidden' },
-      { ...subcat_signs, defaultStyle: 'hidden' },
-      // { id: 'accidents', defaultStyle: "hidden" },
     ],
   },
   {
