@@ -30,7 +30,6 @@ describe('atlas map data sources', () => {
         'lars_parking_areas',
         'lars_parking_debug',
         'lars_parking_stats',
-        'atlas_presenceStats',
         'atlas_aggregated_lengths',
       ].sort(),
     )

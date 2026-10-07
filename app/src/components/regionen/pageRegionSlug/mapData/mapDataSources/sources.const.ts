@@ -12,7 +12,6 @@ type TildaSourceId =
   | 'atlas_bikelanes'
   | 'atlas_bikeroutes'
   | 'atlas_boundaries'
-  | 'atlas_presenceStats'
   | 'atlas_landuse'
   | 'atlas_places'
   | 'atlas_poiClassification'
@@ -45,40 +44,6 @@ export const sources: MapDataSource<SourcesId>[] = [
       enabled: true,
       highlightingKey: 'id',
       documentedKeys: ['name', 'admin_level'],
-    },
-    // presence: { enabled: false },
-    calculator: { enabled: false },
-  },
-  {
-    id: 'atlas_presenceStats',
-    tileTables: null,
-    tilesUrl: getTilesUrl('/presenceStats/{z}/{x}/{y}'),
-    minzoom: SIMPLIFY_MIN_ZOOM,
-    maxzoom: SIMPLIFY_MAX_ZOOM,
-    attributionHtml: '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>',
-    licence: 'ODbL',
-    promoteId: 'id',
-    osmIdConfig: { osmTypeId: 'id' },
-    inspector: {
-      enabled: true,
-      highlightingKey: 'id',
-      documentedKeys: [
-        'name_prefix',
-        'name',
-        'admin_level',
-        'category_municipality__if_present',
-        'category_district__if_present',
-        //
-        'missing_km',
-        //
-        'data_no_km',
-        'assumed_no_km',
-        'not_expected_km',
-        'separate_geometry_km',
-        'cycleway_adjoining_km',
-        'cyclewayOnHighway_advisoryOrExclusive_km',
-        'footAndCyclewayShared_adjoiningOrIsolated_km',
-      ],
     },
     // presence: { enabled: false },
     calculator: { enabled: false },

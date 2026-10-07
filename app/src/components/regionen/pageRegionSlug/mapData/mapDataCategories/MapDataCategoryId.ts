@@ -8,7 +8,6 @@ export type MapDataCategoryId =
   | 'lit'
   | 'poi'
   | 'roads'
-  | 'statistics'
   | 'surface'
   // TILDA Parkraum
   | 'parking' // LEGACY id kept for decoding old ?config= URLs stored in RegionConfigTemplate

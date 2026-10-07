@@ -27,7 +27,7 @@ export const numericSourceIds: Record<number, SourceNames> = {
   5: 'lars_parking_areas',
   6: 'lars_parking_stats',
   7: 'atlas_boundaries',
-  8: 'atlas_presenceStats',
+  // 8: 'atlas_presenceStats', // the old Statistik category was removed; processing no longer builds this table
   // 9: 'accidents_unfallatlas', // the Unfallatlas category was removed; discontinued
   10: 'atlas_bikelanes',
   11: 'atlas_bikeroutes',

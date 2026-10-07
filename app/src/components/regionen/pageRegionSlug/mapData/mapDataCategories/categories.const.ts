@@ -6,7 +6,6 @@ import { subcat_bikelanes_plus_routes } from '../mapDataSubcategories/subcat_bik
 import { subcat_bikelanes_plus_signs } from '../mapDataSubcategories/subcat_bikelanes_plus_signs.const'
 import { subcat_bikelanes_plus_surface_text } from '../mapDataSubcategories/subcat_bikelanes_plus_surface_text.const'
 import { subcat_bikelanes_plus_width_text } from '../mapDataSubcategories/subcat_bikelanes_plus_width_text.const'
-import { subcat_bikelanesStatistics } from '../mapDataSubcategories/subcat_bikelanesStatistics.const'
 import { subcat_lit_bikelanes } from '../mapDataSubcategories/subcat_lit_bikelanes.const'
 import { subcat_lit_highway_areas } from '../mapDataSubcategories/subcat_lit_highway_areas.const'
 import { subcat_lit_path_classes } from '../mapDataSubcategories/subcat_lit_path_classes.const'
@@ -123,15 +122,6 @@ export const categories: StaticMapDataCategory[] = [
     name: 'Fahrradstellplätze (Beta)',
     desc: '',
     subcategories: [{ ...subcat_bicycleParking, defaultStyle: 'default' }],
-  },
-  {
-    id: 'statistics',
-    name: 'Statistik',
-    desc: '',
-    subcategories: [
-      { ...subcat_bikelanesStatistics, defaultStyle: 'default' },
-      { ...subcat_poi_boundaries, defaultStyle: 'default' },
-    ],
   },
   ...categoriesRadinfra,
   ...categoriesParkingTilda,
