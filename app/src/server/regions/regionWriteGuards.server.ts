@@ -54,6 +54,7 @@ export async function assertRegionCanBeDeleted(slug: string) {
           memberships: true,
           noteFolders: true,
           qaConfigs: true,
+          planningAreas: true,
           // Exclude the region's own auto-generated mask (a systemLayer upload that
           // deleteRegionConfig cleans up); otherwise a region with an active mask can never be
           // deleted. Only user-facing datasets should block deletion.
@@ -69,6 +70,7 @@ export async function assertRegionCanBeDeleted(slug: string) {
   if (_count.memberships > 0) blockers.push(`${_count.memberships} Mitgliedschaft(en)`)
   if (_count.noteFolders > 0) blockers.push(`${_count.noteFolders} Hinweis-Ordner`)
   if (_count.qaConfigs > 0) blockers.push(`${_count.qaConfigs} QA-Konfiguration(en)`)
+  if (_count.planningAreas > 0) blockers.push(`${_count.planningAreas} Planungsgebiet(e)`)
   if (_count.mapDatasetUploads > 0) {
     blockers.push(`${_count.mapDatasetUploads} Map-Dataset-Upload(s)`)
   }

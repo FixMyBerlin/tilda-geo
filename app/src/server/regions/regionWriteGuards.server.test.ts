@@ -108,15 +108,41 @@ describe('assertRegionCanBeDeleted', () => {
   test('throws when region has memberships', async () => {
     regionFindUnique.mockResolvedValueOnce({
       slug: 'berlin',
-      _count: { memberships: 2, noteFolders: 0, qaConfigs: 0, mapDatasetUploads: 0 },
+      _count: {
+        memberships: 2,
+        noteFolders: 0,
+        qaConfigs: 0,
+        planningAreas: 0,
+        mapDatasetUploads: 0,
+      },
     })
     await expect(assertRegionCanBeDeleted('berlin')).rejects.toThrow('2 Mitgliedschaft(en)')
+  })
+
+  test('throws when region has planningAreas', async () => {
+    regionFindUnique.mockResolvedValueOnce({
+      slug: 'berlin',
+      _count: {
+        memberships: 0,
+        noteFolders: 0,
+        qaConfigs: 0,
+        planningAreas: 3,
+        mapDatasetUploads: 0,
+      },
+    })
+    await expect(assertRegionCanBeDeleted('berlin')).rejects.toThrow('3 Planungsgebiet(e)')
   })
 
   test('throws when region has mapDatasetUploads', async () => {
     regionFindUnique.mockResolvedValueOnce({
       slug: 'berlin',
-      _count: { memberships: 0, noteFolders: 0, qaConfigs: 0, mapDatasetUploads: 1 },
+      _count: {
+        memberships: 0,
+        noteFolders: 0,
+        qaConfigs: 0,
+        planningAreas: 0,
+        mapDatasetUploads: 1,
+      },
     })
     await expect(assertRegionCanBeDeleted('berlin')).rejects.toThrow('Map-Dataset-Upload')
   })
@@ -124,7 +150,13 @@ describe('assertRegionCanBeDeleted', () => {
   test('allows delete when no blockers', async () => {
     regionFindUnique.mockResolvedValueOnce({
       slug: 'test',
-      _count: { memberships: 0, noteFolders: 0, qaConfigs: 0, mapDatasetUploads: 0 },
+      _count: {
+        memberships: 0,
+        noteFolders: 0,
+        qaConfigs: 0,
+        planningAreas: 0,
+        mapDatasetUploads: 0,
+      },
     })
     await expect(assertRegionCanBeDeleted('test')).resolves.toBeUndefined()
   })
