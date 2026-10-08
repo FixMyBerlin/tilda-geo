@@ -65,13 +65,14 @@ const HEXAGON_LABEL_MIN_ZOOM = 18
 // vielen knapp über 0 liegenden Werten ein löchriges Muster aus abrupt
 // wechselnden transparenten und undurchsichtigen Nachbar-Hexagonen. Der Farbton
 // hängt vom aktiven Anzeigemodus ab — dieselben Farben wie `spaceFinderGroupStyle`
-// (Bedarf blau, Bebauung lila); Kombination bleibt beim ursprünglichen Rot, da sie
-// keine Faktorgruppe mit eigener Farbe ist.
+// (Bedarf blau, Bebauung lila); Kombination ist keine Faktorgruppe und bekommt ein
+// positives Smaragdgrün (Rot wirkt negativ, gute Flächen sollen positiv wirken). Das
+// bläuliche Grün hebt sich vom Waldgrün des Vegetations-Layers ab.
 const HEXAGON_FADE_IN_THRESHOLD = 10
 const HEXAGON_SCORE_RAMP: Record<PlanningScoreMode, { fadeFrom: string; stops: string[] }> = {
   kombination: {
-    fadeFrom: 'rgba(255,245,240,0)',
-    stops: ['#fff5f0', '#fc9272', '#de2d26', '#67000d'],
+    fadeFrom: 'rgba(236,253,245,0)',
+    stops: ['#ecfdf5', '#6ee7b7', '#10b981', '#065f46'],
   },
   bedarf: {
     fadeFrom: 'rgba(239,246,255,0)',
