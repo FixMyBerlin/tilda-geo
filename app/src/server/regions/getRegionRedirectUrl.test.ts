@@ -260,13 +260,13 @@ describe('getRegionRedirectUrl()', () => {
       expect(await redirectOnly(redirectUrl!, 'parkraum-berlin-euvm')).toBe(null)
     })
 
-    test('off-street parking on → /summieren with that dataset', async () => {
+    test('off-street parking on → /summieren with that filter', async () => {
       const url = `http://127.0.0.1:5173/regionen/parkraum-berlin-euvm?v=3&config=${offStreet}`
       const redirectUrl = await redirectOnly(url, 'parkraum-berlin-euvm')
       const resultUrl = getUrl(redirectUrl)
       expect(resultUrl.pathname).toBe('/regionen/parkraum-berlin-euvm/summieren')
       expect(JSON.parse(resultUrl.searchParams.get('sum')!)).toEqual({
-        key: 'parkingTildaOffStreet',
+        filter: { part: 'off_street' },
       })
       expect(await redirectOnly(redirectUrl!, 'parkraum-berlin-euvm')).toBe(null)
     })

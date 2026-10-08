@@ -6,10 +6,10 @@ import type { DrawArea } from './drawing/drawAreaTypes'
  * (`notes`, `qa`, `review`): `key` picks the collection, `filter` narrows it, and the mode's
  * own geometry lives here too, so one param is the whole state of the mode.
  *
- * - `key` is the dataset (`calculatorDatasets.const.ts`), named like the sidebar layer that
- *   shows the same parking. Omitted for the region's first dataset.
+ * - `key` is the dataset (`calculatorDatasets.const.ts`). Omitted for the region's first dataset.
  * - `filter` narrows the sum to points with these tag values, e.g. `{ operator_type: 'public' }`.
- *   The keys are the group-by keys of the dataset; `''` stands for a missing value.
+ *   The keys are the group-by keys of the dataset; `''` stands for a missing value. Omitted for
+ *   the default filter of the dataset, so `{}` is "no filter" where a dataset has one.
  * - `style` colors the points by the values of one tag (a group-by key of the dataset).
  *   Without it all points have the color of the dataset.
  * - `areas` are the drawn areas as one GeoJSON geometry: a `Polygon`, or a `MultiPolygon` for
@@ -51,7 +51,7 @@ export type CalculatorFilter = NonNullable<CalculatorModeParam['filter']>
 export const compactCalculatorModeParam = (param: CalculatorModeParam) => {
   const next: CalculatorModeParam = {}
   if (param.key) next.key = param.key
-  if (param.filter && Object.keys(param.filter).length > 0) next.filter = param.filter
+  if (param.filter) next.filter = param.filter
   if (param.style) next.style = param.style
   if (param.areas) next.areas = param.areas
   return Object.keys(next).length > 0 ? next : undefined

@@ -51,15 +51,15 @@ describe('calculatorModeFromLegacySubcategories()', () => {
     ).toBeUndefined()
   })
 
-  test('street parking is the default dataset of the region', () => {
+  test('street parking is what the mode opens with', () => {
     expect(calculatorModeFromLegacySubcategories(decode('usbee5.i1wa3p.6pw', both), both)).toEqual({
       param: undefined,
     })
   })
 
-  test('other datasets are named', () => {
+  test('off-street parking is a filter', () => {
     expect(calculatorModeFromLegacySubcategories(decode('usbee5.i2ir6t.6pw', both), both)).toEqual({
-      param: { key: 'parkingTildaOffStreet' },
+      param: { filter: { part: 'off_street' } },
     })
   })
 
@@ -69,7 +69,7 @@ describe('calculatorModeFromLegacySubcategories()', () => {
     ).toBeUndefined()
   })
 
-  test('a dataset the region no longer has is ignored', () => {
+  test('a region without a dataset to sum is ignored', () => {
     expect(
       calculatorModeFromLegacySubcategories(decode('usbee5.i2ir6t.6pw', both), ['parkingLars']),
     ).toBeUndefined()

@@ -43,7 +43,7 @@ const percentFormatter = new Intl.NumberFormat('de-DE', {
  * `CalculatorMap` collected and renders it with <CalculatorBreakdown>.
  */
 export const CalculatorResult = ({ dataset, filter, onToggleFilter }: Props) => {
-  const { sumKeys, groupByKeys, queryLayers, sourceId } = dataset
+  const { sumKeys, groupByKeys, queryLayers, parts } = dataset
   const { mainMap } = useMap()
   const calculatorAreasWithFeatures = useMapCalculatorAreasWithFeatures()
   const mapBounds = useMapBounds()
@@ -113,7 +113,7 @@ export const CalculatorResult = ({ dataset, filter, onToggleFilter }: Props) => 
 
   const breakdownData: CalculatorBreakdownData = {
     sumKeys,
-    sourceId,
+    parts,
     metrics: orderedConfiguredMetrics,
     selectedMetric,
     selectedMetricLabel,

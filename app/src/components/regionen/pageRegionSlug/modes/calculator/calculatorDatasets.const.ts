@@ -2,33 +2,36 @@ import type { MapDataCategoryId } from '@/components/regionen/pageRegionSlug/map
 import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
 import { mapboxStyleLayers } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/mapboxStyleLayers'
 import type { MapboxStyleLayer } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/types'
-import { subcat_parkingTilda_offStreet_private } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/subcat_parkingTilda_offStreet_private.const'
-import { subcat_parkingTilda_offStreet_public } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/subcat_parkingTilda_offStreet_public.const'
-import { subcat_parkingTilda_street_private } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/subcat_parkingTilda_street_private.const'
-import { subcat_parkingTilda_street_public } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/subcat_parkingTilda_street_public.const'
-import type {
-  FileMapDataSubcategory,
-  FileMapDataSubcategoryStyleLayer,
-} from '@/components/regionen/pageRegionSlug/mapData/types'
+import type { FileMapDataSubcategoryStyleLayer } from '@/components/regionen/pageRegionSlug/mapData/types'
+import { translations } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/translations.const'
+import type { CalculatorFilter } from './calculatorModeParam'
 
-type CalculatorDataset = {
-  /**
-   * The URL value (`sum.key`). The id of the sidebar subcategory that shows the same parking,
-   * so a dataset reads like its layer in the category list.
-   */
+/**
+ * The tag that says which part of a dataset a point is from. The points do not have it: the
+ * engine adds it (`useUpdateCalculation`), and the map resolves it per layer. It is broken down,
+ * filtered and colored like any other tag.
+ */
+export const calculatorPartKey = 'part'
+
+type CalculatorDatasetPart = {
+  /** The value of `calculatorPartKey`; translated in `translationsSources.const.ts`. */
   id: string
-  name: string
   /** The summed source; its `calculator` config holds the sum and group-by keys. */
   sourceId: SourcesId
-  /** A region offers the dataset when it has this category. */
-  categoryId: MapDataCategoryId
-  /**
-   * The part of the source this dataset is, as tag values. Its keys are fixed here, so they are
-   * neither broken down in the panel nor offered as filter.
-   */
-  where: Record<string, string>
   /** The summed points. Only on the map while the dataset is selected in the mode. */
   layers: FileMapDataSubcategoryStyleLayer[]
+}
+
+export type CalculatorDataset = {
+  /** The URL value (`sum.key`). */
+  id: string
+  name: string
+  /** A region offers the dataset when it has this category. */
+  categoryId: MapDataCategoryId
+  /** The sources that are summed together. */
+  parts: CalculatorDatasetPart[]
+  /** The filter of a link without `sum.filter`: what the dataset opens with. */
+  defaultFilter: CalculatorFilter
 }
 
 const quantizedPointsLayer = (color: string) =>
@@ -44,55 +47,59 @@ const quantizedPointsLayer = (color: string) =>
     },
   }) satisfies MapboxStyleLayer
 
-const street = {
-  source: 'tilda_parkings_quantized',
-  sourceLayer: 'parkings_quantized',
-  color: '#6d28d9',
-} as const
-
-const offStreet = {
-  source: 'tilda_parkings_off_street_quantized',
-  sourceLayer: 'off_street_parking_quantized',
-  color: '#a21caf',
-} as const
-
-/** One dataset per sidebar subcategory: the same split by `operator_type`, the same name. */
-const parkingDataset = (
-  subcategory: Pick<FileMapDataSubcategory, 'id' | 'name'>,
-  { source, sourceLayer, color }: typeof street | typeof offStreet,
-  operatorType: 'public' | 'private',
-) =>
+const parkingPart = (id: string, source: SourcesId, sourceLayer: string, color: string) =>
   ({
-    id: subcategory.id,
-    name: subcategory.name,
+    id,
     sourceId: source,
-    categoryId: 'parkingTilda',
-    where: { operator_type: operatorType },
-    layers: mapboxStyleLayers({
-      layers: [quantizedPointsLayer(color)],
-      source,
-      sourceLayer,
-      additionalFilter: ['match', ['get', 'operator_type'], [operatorType], true, false],
-    }),
-  }) satisfies CalculatorDataset
+    layers: mapboxStyleLayers({ layers: [quantizedPointsLayer(color)], source, sourceLayer }),
+  }) satisfies CalculatorDatasetPart
 
 /**
  * What the Summieren mode can sum. The order is the order in the panel; the first dataset of a
- * region is its default. The parking datasets mirror the four parking layers of the sidebar.
- * They used to be two "Summieren: …" subcategories (see
- * `migrateLegacyCalculatorSubcategories.server.ts` for old links).
+ * region is its default.
+ *
+ * Parking is one dataset of two sources, the points along the streets and those of the parking
+ * areas off the street. It opens with the public parking along the streets; a click in the panel
+ * adds the rest. Public and private parking are the tag `operator_type` of both sources.
  */
-export const calculatorDatasets: CalculatorDataset[] = [
-  parkingDataset(subcat_parkingTilda_street_public, street, 'public'),
-  parkingDataset(subcat_parkingTilda_street_private, street, 'private'),
-  parkingDataset(subcat_parkingTilda_offStreet_public, offStreet, 'public'),
-  parkingDataset(subcat_parkingTilda_offStreet_private, offStreet, 'private'),
+const calculatorDatasets: CalculatorDataset[] = [
+  {
+    id: 'parking',
+    name: 'Parkraum',
+    categoryId: 'parkingTilda',
+    parts: [
+      parkingPart('street', 'tilda_parkings_quantized', 'parkings_quantized', '#6d28d9'),
+      parkingPart(
+        'off_street',
+        'tilda_parkings_off_street_quantized',
+        'off_street_parking_quantized',
+        '#a21caf',
+      ),
+    ],
+    defaultFilter: { [calculatorPartKey]: 'street', operator_type: 'public' },
+  },
 ]
 
 export const calculatorDatasetsForCategories = (categoryIds: MapDataCategoryId[]) =>
   calculatorDatasets.filter((dataset) => categoryIds.includes(dataset.categoryId))
 
-export const calculatorSourceKey = (datasetId: string) => `calculator--${datasetId}`
+export const calculatorSourceKey = (datasetId: string, partId: string) =>
+  `calculator--${datasetId}--${partId}`
 
-export const calculatorLayerId = (datasetId: string, layerId: string) =>
-  `calculator--${datasetId}--${layerId}`
+export const calculatorLayerId = (datasetId: string, partId: string, layerId: string) =>
+  `calculator--${datasetId}--${partId}--${layerId}`
+
+/**
+ * The source whose translations name a tag, or one of its values: the parts share most tags,
+ * but each has values the other does not know (`parking=lane`, `parking=underground`).
+ */
+export const calculatorTranslationSourceId = (
+  parts: Pick<CalculatorDatasetPart, 'sourceId'>[],
+  key: string,
+  value?: string,
+) => {
+  const translationKey = (sourceId: string) =>
+    value === undefined ? `${sourceId}--${key}--key` : `${sourceId}--${key}=${value}`
+  const match = parts.find((part) => translations[translationKey(part.sourceId)])
+  return (match ?? parts[0])?.sourceId ?? ''
+}

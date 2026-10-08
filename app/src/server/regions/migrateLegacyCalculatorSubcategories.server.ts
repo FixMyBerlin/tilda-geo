@@ -3,7 +3,10 @@ import type {
   MapDataCategoryParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
 import type { MapDataCategoryId } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/MapDataCategoryId'
-import { calculatorDatasetsForCategories } from '@/components/regionen/pageRegionSlug/modes/calculator/calculatorDatasets.const'
+import {
+  calculatorDatasetsForCategories,
+  calculatorPartKey,
+} from '@/components/regionen/pageRegionSlug/modes/calculator/calculatorDatasets.const'
 import {
   compactCalculatorModeParam,
   type CalculatorModeParam,
@@ -15,26 +18,33 @@ import {
  * (`/summieren`, `?sum=`), and those subcategories are gone from the categories.
  *
  * `index` is where the subcategory sat in its category, which a `?config=` template depends on.
- * All of them had the one style `default` (checkbox).
+ * All of them had the one style `default` (checkbox). `sum` is the mode param that sums what the
+ * subcategory summed; `undefined` when nothing does.
  */
 const legacyCalculatorSubcategories = [
   {
     categoryId: 'parkingTilda',
     index: 7,
     subcategoryId: 'parkingTildaQuantized',
-    dataset: 'parkingTilda',
+    // Public street parking, which is what the mode opens with.
+    sum: {},
   },
   {
     categoryId: 'parkingTilda',
     index: 8,
     subcategoryId: 'parkingTildaQuantizedOffStreet',
-    // Summed public and private together and was marked unfinished: a best guess.
-    dataset: 'parkingTildaOffStreet',
+    // Summed public and private together.
+    sum: { filter: { [calculatorPartKey]: 'off_street' } },
   },
   // "Parkplätze zählen" of the community data: discontinued without a replacement (its tiles
   // are gone). Still listed because old `?config=` templates hold it; such links stay on the map.
-  { categoryId: 'parkingLars', index: 1, subcategoryId: 'parkingPoints', dataset: undefined },
-] as const
+  { categoryId: 'parkingLars', index: 1, subcategoryId: 'parkingPoints', sum: undefined },
+] satisfies {
+  categoryId: MapDataCategoryId
+  index: number
+  subcategoryId: string
+  sum: CalculatorModeParam | undefined
+}[]
 
 /**
  * The template that `?config=` links were encoded with right before the subcategories were
@@ -67,15 +77,15 @@ export function templateWithLegacyCalculatorSubcategories(template: MapDataCateg
 }
 
 /**
- * An old `?config=` with a calculator subcategory on opens the Summieren mode with that dataset.
- * The subcategory itself is gone from the fresh config, so the merge drops it. `param` is
- * `undefined` for the region's default dataset.
+ * An old `?config=` with a calculator subcategory on opens the Summieren mode with what it
+ * summed. The subcategory itself is gone from the fresh config, so the merge drops it. `param`
+ * is `undefined` for what the mode opens with anyway.
  */
 export function calculatorModeFromLegacySubcategories(
   urlConfig: MapDataCategoryParam[],
   regionCategoryIds: MapDataCategoryId[],
 ) {
-  const regionDatasets = calculatorDatasetsForCategories(regionCategoryIds)
+  if (calculatorDatasetsForCategories(regionCategoryIds).length === 0) return undefined
 
   // The old calculator took the first calculator subcategory that was on, in category order.
   for (const category of urlConfig) {
@@ -84,14 +94,10 @@ export function calculatorModeFromLegacySubcategories(
       const legacy = legacyCalculatorSubcategories.find(
         (l) => l.categoryId === category.id && l.subcategoryId === String(subcategory.id),
       )
-      if (!legacy?.dataset) continue
+      if (!legacy?.sum) continue
       if (!subcategory.styles.some((style) => style.active && style.id !== 'hidden')) continue
-      if (!regionDatasets.some((dataset) => dataset.id === legacy.dataset)) continue
 
-      const param: CalculatorModeParam = {
-        key: legacy.dataset === regionDatasets[0]?.id ? undefined : legacy.dataset,
-      }
-      return { param: compactCalculatorModeParam(param) }
+      return { param: compactCalculatorModeParam(legacy.sum) }
     }
   }
   return undefined

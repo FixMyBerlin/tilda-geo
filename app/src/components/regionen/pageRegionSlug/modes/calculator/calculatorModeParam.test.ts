@@ -18,10 +18,13 @@ describe('zodCalculatorModeParam', () => {
 })
 
 describe('compactCalculatorModeParam', () => {
-  test('drops defaults and empty filters', () => {
+  test('drops what is not set', () => {
     expect(compactCalculatorModeParam({})).toBeUndefined()
-    expect(compactCalculatorModeParam({ filter: {} })).toBeUndefined()
-    expect(compactCalculatorModeParam({ key: 'a', filter: {} })).toEqual({ key: 'a' })
+    expect(compactCalculatorModeParam({ key: 'a', filter: undefined })).toEqual({ key: 'a' })
+  })
+
+  test('keeps an empty filter: it is "no filter" where the dataset has a default filter', () => {
+    expect(compactCalculatorModeParam({ filter: {} })).toEqual({ filter: {} })
   })
 
   test('keeps a filter on a missing value', () => {

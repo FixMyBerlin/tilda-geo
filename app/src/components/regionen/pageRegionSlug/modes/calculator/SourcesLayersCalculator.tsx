@@ -14,18 +14,22 @@ import { getMapDataSourceTilesUrl } from '@/components/regionen/pageRegionSlug/m
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
 import { getCachelessTilesUrl } from '@/components/shared/utils/getCachelessTilesUrl'
 import {
-  type calculatorDatasets,
+  type CalculatorDataset,
   calculatorLayerId,
+  calculatorPartKey,
   calculatorSourceKey,
 } from './calculatorDatasets.const'
 import type { CalculatorFilter, CalculatorModeParam } from './calculatorModeParam'
 import {
   calculatorStyleColorExpression,
+  calculatorStyleOtherColor,
   type CalculatorStyleColors,
 } from './utils/calculatorStyleColors'
 
 type Props = {
-  dataset: (typeof calculatorDatasets)[number]
+  datasetId: string
+  /** One source of the dataset; the dataset renders this once per part. */
+  part: CalculatorDataset['parts'][number]
   filter: CalculatorFilter
   /** The drawn areas as of the last finished edit. */
   areas: CalculatorModeParam['areas']
@@ -36,32 +40,37 @@ type Props = {
 /**
  * True for the points that are part of the sum: inside a drawn area and matching the filter
  * (`toFilterValue`: a missing or empty tag is `''`). `undefined` while neither narrows anything.
+ * A filter on the part is the same for all points of the layer.
  */
-const summedExpression = (areas: Props['areas'], filter: CalculatorFilter) => {
+const summedExpression = (areas: Props['areas'], filter: CalculatorFilter, partId: string) => {
   const conditions = [
     ...(areas ? [['within', areas]] : []),
-    ...Object.entries(filter).map(([key, value]) => [
-      '==',
-      ['to-string', ['coalesce', ['get', key], '']],
-      value,
-    ]),
+    ...Object.entries(filter).map(([key, value]) =>
+      key === calculatorPartKey
+        ? value === partId
+        : ['==', ['to-string', ['coalesce', ['get', key], '']], value],
+    ),
   ]
   return conditions.length > 0 ? (['all', ...conditions] as ExpressionSpecification) : undefined
 }
 
 /**
- * The points of the dataset that is summed. They are not a category: the mode owns them, so
- * they are only on the map while the dataset is selected in the Summieren mode.
+ * The points of one part of the dataset that is summed. They are not a category: the mode owns
+ * them, so they are only on the map while the dataset is selected in the Summieren mode.
  */
-export const SourcesLayersCalculator = ({ dataset, filter, areas, styleColors }: Props) => {
+export const SourcesLayersCalculator = ({ datasetId, part, filter, areas, styleColors }: Props) => {
   const debugLayerStyles = useMapDebugDebugLayerStyles()
   const useDebugCachelessTiles = useMapDebugUseDebugCachelessTiles()
   const { backgroundParam } = useBackgroundParam()
 
-  const summed = summedExpression(areas, filter)
-  const styleColor = styleColors ? calculatorStyleColorExpression(styleColors) : undefined
-  const sourceData = getSourceData(dataset.sourceId)
-  const sourceKey = calculatorSourceKey(dataset.id)
+  const summed = summedExpression(areas, filter, part.id)
+  // Colored by part, all points of the layer have the one color of their part.
+  const styleColor =
+    styleColors?.key === calculatorPartKey
+      ? (styleColors.colors[part.id] ?? calculatorStyleOtherColor)
+      : styleColors && calculatorStyleColorExpression(styleColors)
+  const sourceData = getSourceData(part.sourceId)
+  const sourceKey = calculatorSourceKey(datasetId, part.id)
   const tileUrl = getCachelessTilesUrl({
     url: getMapDataSourceTilesUrl(sourceData),
     cacheless: useDebugCachelessTiles,
@@ -79,8 +88,8 @@ export const SourcesLayersCalculator = ({ dataset, filter, areas, styleColors }:
         maxzoom={sourceData.maxzoom}
         minzoom={sourceData.minzoom}
       />
-      {dataset.layers.filter(isAtlasStyleLayer).map((layer) => {
-        const layerId = calculatorLayerId(dataset.id, layer.id)
+      {part.layers.filter(isAtlasStyleLayer).map((layer) => {
+        const layerId = calculatorLayerId(datasetId, part.id, layer.id)
         const layerProps = buildAtlasLayerProps({
           layer,
           layerId,

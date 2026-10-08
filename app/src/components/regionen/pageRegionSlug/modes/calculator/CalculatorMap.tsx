@@ -12,10 +12,10 @@ import { SourcesLayersCalculator } from './SourcesLayersCalculator'
 import { useCalculatorAreas } from './useCalculatorAreas'
 import { useCalculatorDatasets } from './useCalculatorDatasets'
 import { useCalculatorStyleColors } from './utils/calculatorStyleColors'
-import { useUpdateCalculation } from './utils/useUpdateCalculation'
+import { type CalculatorQueryLayer, useUpdateCalculation } from './utils/useUpdateCalculation'
 
 const buildCalculationSignature = (
-  queryLayers: string[],
+  queryLayers: CalculatorQueryLayer[],
   drawAreas: DrawArea[],
   mapBounds: ReturnType<typeof useMapBounds>,
 ) =>
@@ -26,7 +26,7 @@ const buildCalculationSignature = (
   })
 
 /**
- * The map side of the Summieren mode: the points of the selected dataset, the drawing surface
+ * The map side of the Summieren mode: the points of the selected dataset (all its parts), the drawing surface
  * and the calculation that follows both. Mounted by `RegionMap` only in this mode; the result is
  * shown in the mode panel (`CalculatorResult`).
  */
@@ -68,12 +68,16 @@ export const CalculatorMap = () => {
 
   return (
     <>
-      <SourcesLayersCalculator
-        dataset={activeDataset}
-        filter={filter}
-        areas={calculatorAreasToParam(drawAreas)}
-        styleColors={styleColors}
-      />
+      {activeDataset.parts.map((part) => (
+        <SourcesLayersCalculator
+          key={part.id}
+          datasetId={activeDataset.id}
+          part={part}
+          filter={filter}
+          areas={calculatorAreasToParam(drawAreas)}
+          styleColors={styleColors}
+        />
+      ))}
       <CalculatorMapDrawing
         areas={liveAreas}
         getFeatureLabel={({ index }) => (liveAreas.length > 1 ? `Fläche ${index + 1}` : undefined)}
