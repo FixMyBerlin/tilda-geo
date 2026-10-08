@@ -2,6 +2,7 @@ import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
 import { AnimatePresence, motion, useDragControls } from 'motion/react'
 import type { ReactNode } from 'react'
 import { twMerge } from 'tailwind-merge'
+import { UI_SPRING } from '@/components/shared/motion/spring.const'
 import { SheetGrabHandle } from './SheetGrabHandle'
 
 /** Sheet color schemes — panel bg + grab capsule tint per use. */
@@ -93,7 +94,7 @@ export const MobileBottomSheet = ({
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 32, stiffness: 320 }}
+              transition={UI_SPRING}
               drag="y"
               dragControls={dragControls}
               dragListener={false}

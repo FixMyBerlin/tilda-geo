@@ -7,7 +7,9 @@ export const MapLayoutResizeSync = ({ children }: { children: ReactNode }) => {
   const { mainMap } = useMap()
 
   const ref = useElementSize(() => {
-    mainMap?.resize()
+    // `resize()` clears the canvas and only repaints on the next frame, which shows as a blank
+    // map frame per step of the spring. `redraw()` paints before the browser does.
+    mainMap?.resize().redraw()
   })
 
   return (
