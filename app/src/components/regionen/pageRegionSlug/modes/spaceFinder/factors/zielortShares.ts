@@ -17,15 +17,14 @@ export type ZielortShares = CategoryShares<ZielortCategory>
  * Zielort-Kategorien — siehe dort für die Rechenlogik. */
 export const ZIELORT_SHARE_TOTAL = CATEGORY_SHARE_TOTAL
 
-export const readZielortShares = (
-  stored: Partial<Record<string, number>> | undefined | null,
-): ZielortShares => readCategoryShares(ZIELORT_CATEGORY_KEYS, DEFAULT_ZIELORT_SHARES, stored)
+export const readZielortShares = (stored: Partial<Record<string, number>> | undefined | null) =>
+  readCategoryShares(ZIELORT_CATEGORY_KEYS, DEFAULT_ZIELORT_SHARES, stored)
 
 export const rebalanceZielortShares = (
   shares: ZielortShares,
   changed: ZielortCategory,
   nextValue: number,
-): ZielortShares => rebalanceCategoryShares(ZIELORT_CATEGORY_KEYS, shares, changed, nextValue)
+) => rebalanceCategoryShares(ZIELORT_CATEGORY_KEYS, shares, changed, nextValue)
 
 export const zielortCategoryEffect = (shares: ZielortShares, category: ZielortCategory) =>
   categoryEffect(ZIELORT_CATEGORY_KEYS, shares, category)

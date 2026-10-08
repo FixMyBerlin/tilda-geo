@@ -96,10 +96,10 @@ UI names: **Prüfliste** / **Prüfeintrag**. Status and comments exist. A richer
 
 ## Flächenfinder
 
-Scores hexagons of a Planungsgebiet to find candidate areas for new bike parking (Abstellanlagen). It is always member-only, and only available when the region has the flag `spaceFinderEnabled` switched on (D8). The flag defaults to `false`; admins switch it on per region in the region form ("Flächenfinder aktiv"). Unlike the other modes it cannot be derived from data, because the worker that produces the results only runs on some instances. The flag also applies to admins and to the server functions, not just to the route.
+Scores hexagons of a Planungsgebiet to find candidate areas for new bike parking (Abstellanlagen). It is always member-only, and only available when the region has the flag `spaceFinderEnabled` switched on (D8). The flag defaults to `false`; admins switch it on per region in the region form ("Flächenfinder aktiv"). Unlike the other modes it cannot be derived from data, because the worker that produces the results only runs on some instances. The flag also applies to admins and to the server functions, not only to the route.
 
 - **Collection:** Planungsgebiete (areas) with their Varianten. A Variante is a copy of a Gebiet's factor weights and thresholds that can be calculated on its own. Duplicating a Variante seeds the copy from its parent. Creating or duplicating shows a confirmation toast.
 - **Result layer:** the hexagons of the active Variante's latest run, coloured by score (`score`), with an opacity (`opacity`; 0 hides the layer) and a "Gesuchte Fläche" filter (`minArea`).
-- **Candidates:** with the selection tool on, clicking a hexagon adds it to a candidate list that can be exported as GeoJSON. Selections are stored per run in `sessionStorage` (`useSpaceFinderCandidatesState`), so they survive reloads of the tab but not a new session.
+- **Candidates:** with the selection tool on, clicking a hexagon adds it to a candidate list that can be exported as GeoJSON. Selections are stored per run in `sessionStorage` ([`space-finder-candidates-store.ts`](../app/src/components/regionen/pageRegionSlug/hooks/mapState/space-finder-candidates-store.ts)), so they survive reloads of the tab but not a new session.
 
 The creator of a Gebiet or Variante is kept for attribution only. It is cleared when the user is deleted. A region with Planungsgebieten cannot be deleted.

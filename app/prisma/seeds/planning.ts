@@ -82,13 +82,8 @@ const RIXDORF_USER_GEOJSON = sanitizeUserGeojson({
   ],
 })
 
-function squareFeature(
-  lng: number,
-  lat: number,
-  halfLng = 0.00015,
-  halfLat = 0.00008,
-): GeoJSON.Feature<GeoJSON.Polygon> {
-  return {
+function squareFeature(lng: number, lat: number, halfLng = 0.00015, halfLat = 0.00008) {
+  const feature: GeoJSON.Feature<GeoJSON.Polygon> = {
     type: 'Feature',
     properties: {},
     geometry: {
@@ -104,6 +99,7 @@ function squareFeature(
       ],
     },
   }
+  return feature
 }
 
 // ── Variant factorConfigs (all derived from DEFAULT_FACTOR_TEMPLATE) ───────────

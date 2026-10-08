@@ -14,7 +14,7 @@ import { unwrapGeometry } from './censusSaettigung.server'
  * überhaupt Daten", nicht um exakte Geometrie. Schlägt die Abfrage fehl, gilt der Faktor als
  * verfügbar (fail open): ein Infrastrukturfehler soll keinen Faktor stumm blockieren.
  */
-export async function checkParkingDataAvailable(studyArea: unknown): Promise<boolean> {
+export async function checkParkingDataAvailable(studyArea: unknown) {
   const geometry = unwrapGeometry(studyArea)
   if (geometry == null) return true
 

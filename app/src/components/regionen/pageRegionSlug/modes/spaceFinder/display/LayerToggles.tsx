@@ -2,7 +2,13 @@ import { Switch } from '@headlessui/react'
 import type { ReactNode } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
-import { useSpaceFinderBoundaryState } from '../../../hooks/mapState/useSpaceFinderBoundaryState'
+import {
+  useSpaceFinderBoundaryActions,
+  useSpaceFinderCarriagewaysVisible,
+  useSpaceFinderCensusVisible,
+  useSpaceFinderUserObstaclesVisible,
+  useSpaceFinderVegetationVisible,
+} from '../../../hooks/mapState/space-finder-boundary-store'
 
 /**
  * Ein/Aus-Schalter für einen der Kontroll-Layer der Karte (Vegetation, Fahrbahnen,
@@ -46,8 +52,8 @@ const LayerToggle = ({
 )
 
 export const VegetationToggle = () => {
-  const vegetationOn = useSpaceFinderBoundaryState((s) => s.vegetationVisible)
-  const setVegetationOn = useSpaceFinderBoundaryState((s) => s.setVegetationVisible)
+  const vegetationOn = useSpaceFinderVegetationVisible()
+  const { setVegetationVisible: setVegetationOn } = useSpaceFinderBoundaryActions()
   return (
     <LayerToggle
       label="Vegetationsflächen"
@@ -59,8 +65,8 @@ export const VegetationToggle = () => {
 }
 
 export const CarriagewaysToggle = () => {
-  const carriagewaysOn = useSpaceFinderBoundaryState((s) => s.carriagewaysVisible)
-  const setCarriagewaysOn = useSpaceFinderBoundaryState((s) => s.setCarriagewaysVisible)
+  const carriagewaysOn = useSpaceFinderCarriagewaysVisible()
+  const { setCarriagewaysVisible: setCarriagewaysOn } = useSpaceFinderBoundaryActions()
   return (
     <LayerToggle
       label="Fahrbahnen"
@@ -73,8 +79,8 @@ export const CarriagewaysToggle = () => {
 }
 
 export const CensusToggle = () => {
-  const censusOn = useSpaceFinderBoundaryState((s) => s.censusVisible)
-  const setCensusOn = useSpaceFinderBoundaryState((s) => s.setCensusVisible)
+  const censusOn = useSpaceFinderCensusVisible()
+  const { setCensusVisible: setCensusOn } = useSpaceFinderBoundaryActions()
   return (
     <LayerToggle
       label="Zensus-Einwohner"
@@ -87,8 +93,8 @@ export const CensusToggle = () => {
 }
 
 export const UserObstaclesToggle = () => {
-  const userObstaclesOn = useSpaceFinderBoundaryState((s) => s.userObstaclesVisible)
-  const setUserObstaclesOn = useSpaceFinderBoundaryState((s) => s.setUserObstaclesVisible)
+  const userObstaclesOn = useSpaceFinderUserObstaclesVisible()
+  const { setUserObstaclesVisible: setUserObstaclesOn } = useSpaceFinderBoundaryActions()
   return (
     <LayerToggle
       label="Eigene Daten"

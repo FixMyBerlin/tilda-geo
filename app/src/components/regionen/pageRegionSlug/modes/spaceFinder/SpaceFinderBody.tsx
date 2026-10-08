@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { CollapsibleBox } from '@/components/shared/CollapsibleBox/CollapsibleBox'
@@ -10,9 +9,7 @@ import {
   outdatedBannerReason,
 } from '@/server/planning/factorFingerprint'
 import { areaInputFromRow } from '@/server/planning/mergeFactorConfig'
-import type { FactorConfig } from '@/server/planning/planning.functions'
-import { planningVariantQueryOptions } from '@/server/planning/planningQueryOptions'
-import { useSpaceFinderBoundaryState } from '../../hooks/mapState/useSpaceFinderBoundaryState'
+import { useSpaceFinderBoundaryActions } from '../../hooks/mapState/space-finder-boundary-store'
 import { modePanelMutedClassName } from '../modePanel.const'
 import { SpaceFinderCandidatesSection } from './candidates/SpaceFinderCandidatesSection'
 import { DisplaySection } from './display/DisplaySection'
@@ -21,15 +18,26 @@ import { FactorEditorPanel } from './factors/FactorEditorPanel'
 import { JobStatusBadge } from './run/JobStatusBadge'
 import type { PlanningVariantDetail } from './spaceFinderVariantDetail'
 
+type LatestJob = PlanningVariantDetail['jobs'][number] | null
+type LatestRun = PlanningVariantDetail['runs'][number] | null
+
 /** Status line (D5): run state, outdated reason, progress while running. */
-const StatusSection = ({ variant }: { variant: PlanningVariantDetail }) => {
-  const latestJob = variant.jobs[0] ?? null
-  const latestRun = variant.runs[0] ?? null
-  const isLocked = latestJob?.status === 'QUEUED' || latestJob?.status === 'RUNNING'
-  const hasCompleteRun = latestRun?.status === 'COMPLETE'
-  const lastRunConfig = (latestRun?.factorConfigSnapshot as FactorConfig | undefined) ?? null
+const StatusSection = ({
+  variant,
+  latestJob,
+  latestRun,
+  isLocked,
+  hasCompleteRun,
+}: {
+  variant: PlanningVariantDetail
+  latestJob: LatestJob
+  latestRun: LatestRun
+  isLocked: boolean
+  hasCompleteRun: boolean
+}) => {
+  const lastRunConfig = latestRun?.factorConfigSnapshot ?? null
   const comparableSnapshot = comparableRunSnapshot(lastRunConfig, areaInputFromRow(variant.area))
-  const currentConfig = variant.factorConfig as FactorConfig
+  const currentConfig = variant.factorConfig
   const outdatedReason =
     hasCompleteRun && !isLocked
       ? outdatedBannerReason(
@@ -46,7 +54,7 @@ const StatusSection = ({ variant }: { variant: PlanningVariantDetail }) => {
         </p>
       )}
       {latestJob != null && <JobStatusBadge jobId={latestJob.id} variantId={variant.id} />}
-      {latestJob == null && hasCompleteRun && !outdatedReason && (
+      {latestJob == null && latestRun != null && hasCompleteRun && !outdatedReason && (
         <p className="text-xs text-green-700">✓ Ergebnis vom {formatDate(latestRun.createdAt)}</p>
       )}
       {latestJob == null && !hasCompleteRun && (
@@ -57,19 +65,18 @@ const StatusSection = ({ variant }: { variant: PlanningVariantDetail }) => {
 }
 
 /**
- * Flächenfinder panel body (D5): status line, Faktoren, Anzeige (only with
- * a complete run) and Auswahl — collapsible sections, no list, replacing the former
- * `SpaceFinderPanelBody`/`VariantDetail`. The Eigene-Daten layer toggle is independent of
- * `hasCompleteRun` (uploaded data shows on the map before the first run) and therefore lives
- * outside `DisplaySection`, same as before.
+ * Flächenfinder panel body (D5): status line, Faktoren, Anzeige (only with a complete run)
+ * and Auswahl as collapsible sections, not a list. The Eigene-Daten layer toggle is
+ * independent of `hasCompleteRun` (uploaded data shows on the map before the first run)
+ * and therefore lives outside `DisplaySection`.
  */
 export const SpaceFinderBody = ({
   regionSlug,
-  variantId,
+  variant,
   editable = true,
 }: {
   regionSlug: string
-  variantId: number
+  variant: PlanningVariantDetail | undefined
   /**
    * Desktop only (D10): hides Faktoren editing, the run button (footer, handled by the caller)
    * and candidate selection behind a short notice. Status and Anzeige
@@ -77,9 +84,7 @@ export const SpaceFinderBody = ({
    */
   editable?: boolean
 }) => {
-  const setVegetationAttribution = useSpaceFinderBoundaryState((s) => s.setVegetationAttribution)
-  const setUserObstaclesGeom = useSpaceFinderBoundaryState((s) => s.setUserObstaclesGeom)
-  const { data: variant } = useQuery(planningVariantQueryOptions(variantId))
+  const { setVegetationAttribution, setUserObstaclesGeom } = useSpaceFinderBoundaryActions()
 
   useEffect(() => {
     if (!variant) return
@@ -87,7 +92,7 @@ export const SpaceFinderBody = ({
     return () => setVegetationAttribution(null)
   }, [variant, setVegetationAttribution])
 
-  const userGeojson = (variant?.factorConfig as FactorConfig | undefined)?.user_geojson
+  const userGeojson = variant?.factorConfig.user_geojson
   useEffect(() => {
     setUserObstaclesGeom((userGeojson as object | undefined) ?? null)
     return () => setUserObstaclesGeom(null)
@@ -102,16 +107,22 @@ export const SpaceFinderBody = ({
 
   return (
     <div className="flex flex-col">
-      <StatusSection variant={variant} />
+      <StatusSection
+        variant={variant}
+        latestJob={latestJob}
+        latestRun={latestRun}
+        isLocked={isLocked}
+        hasCompleteRun={hasCompleteRun}
+      />
       <div className="flex flex-col gap-3 p-3">
         {editable ? (
           <FactorEditorPanel
             variantId={variant.id}
             areaId={variant.area.id}
             regionSlug={regionSlug}
-            factorConfig={variant.factorConfig as FactorConfig}
+            factorConfig={variant.factorConfig}
             lastRunConfig={comparableRunSnapshot(
-              (latestRun?.factorConfigSnapshot as FactorConfig | undefined) ?? null,
+              latestRun?.factorConfigSnapshot ?? null,
               areaInputFromRow(variant.area),
             )}
             readOnly={isLocked}
@@ -135,7 +146,7 @@ export const SpaceFinderBody = ({
           </CollapsibleBox>
         )}
         {editable && variant.currentRunId != null && (
-          <SpaceFinderCandidatesSection variantId={variant.id} />
+          <SpaceFinderCandidatesSection variantId={variant.id} runId={variant.currentRunId} />
         )}
       </div>
     </div>

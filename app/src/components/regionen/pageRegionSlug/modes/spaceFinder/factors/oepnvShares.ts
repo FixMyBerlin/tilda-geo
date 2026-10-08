@@ -13,15 +13,14 @@ export type OepnvShares = CategoryShares<OepnvCategory>
  * ÖPNV/Bikesharing-Gruppen — siehe dort für die Rechenlogik. */
 export const OEPNV_SHARE_TOTAL = CATEGORY_SHARE_TOTAL
 
-export const readOepnvShares = (
-  stored: Partial<Record<string, number>> | undefined | null,
-): OepnvShares => readCategoryShares(OEPNV_CATEGORY_KEYS, DEFAULT_OEPNV_SHARES, stored)
+export const readOepnvShares = (stored: Partial<Record<string, number>> | undefined | null) =>
+  readCategoryShares(OEPNV_CATEGORY_KEYS, DEFAULT_OEPNV_SHARES, stored)
 
 export const rebalanceOepnvShares = (
   shares: OepnvShares,
   changed: OepnvCategory,
   nextValue: number,
-): OepnvShares => rebalanceCategoryShares(OEPNV_CATEGORY_KEYS, shares, changed, nextValue)
+) => rebalanceCategoryShares(OEPNV_CATEGORY_KEYS, shares, changed, nextValue)
 
 export const oepnvCategoryEffect = (shares: OepnvShares, category: OepnvCategory) =>
   categoryEffect(OEPNV_CATEGORY_KEYS, shares, category)

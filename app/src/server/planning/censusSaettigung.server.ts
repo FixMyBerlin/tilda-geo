@@ -57,7 +57,7 @@ type CensusStats = { saettigungEw: number; ewPerHa: number }
  * analog zu den graceful Fallbacks der Worker-Loader. Der Aufrufer speichert dann NULL, und der
  * Worker-Default (30) greift.
  */
-async function computeCensusStats(studyArea: unknown): Promise<CensusStats | null> {
+async function computeCensusStats(studyArea: unknown) {
   const geometry = unwrapGeometry(studyArea)
   if (geometry == null) return null
 
@@ -135,10 +135,11 @@ async function computeCensusStats(studyArea: unknown): Promise<CensusStats | nul
         const p90 = rows[0]?.p90
         const ewPerHa = rows[0]?.ew_pro_ha
         if (p90 == null || !Number.isFinite(p90) || p90 <= 0) return null
-        return {
+        const stats: CensusStats = {
           saettigungEw: Math.min(MAX_SUGGESTION, Math.max(MIN_SUGGESTION, roundSuggestion(p90))),
           ewPerHa: ewPerHa != null && Number.isFinite(ewPerHa) ? Math.round(ewPerHa * 10) / 10 : 0,
         }
+        return stats
       },
       { timeout: TRANSACTION_TIMEOUT_MS },
     )

@@ -24,7 +24,7 @@ export const sortedSpaceFinderAreas = (areas: readonly PlanningAreasRow[]) =>
 export const spaceFinderSelectedVariant = (
   areas: readonly PlanningAreasRow[],
   variantId: number | null | undefined,
-): SpaceFinderSelectedVariant | undefined => {
+) => {
   if (variantId == null) return undefined
   for (const area of areas) {
     const variant = area.variants.find((v) => v.id === variantId)
@@ -50,7 +50,7 @@ export type SpaceFinderVariantStatus = 'running' | 'stale' | 'complete' | 'none'
 /** Run state of a variant for the Varianten dropdown; mirrors the status line in the panel body. */
 export const spaceFinderVariantStatus = (
   variant: Pick<PlanningAreaVariantRow, 'currentRunId' | 'jobs' | 'runs'>,
-): SpaceFinderVariantStatus => {
+) => {
   const jobStatus = variant.jobs[0]?.status
   if (jobStatus === 'QUEUED' || jobStatus === 'RUNNING') return 'running'
   const latestRun = variant.runs[0]

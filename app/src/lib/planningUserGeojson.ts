@@ -28,14 +28,14 @@ const isAllowed = (geom: GeoJSON.Geometry | null | undefined): geom is UserGeome
   geom != null && ALLOWED_GEOMETRY_TYPES.has(geom.type)
 
 /** Byte-Größe des serialisierten Werts (für das 5-MB-Limit auf Server-Seite). */
-export function userGeojsonByteSize(value: unknown): number {
+export function userGeojsonByteSize(value: unknown) {
   return new TextEncoder().encode(JSON.stringify(value)).length
 }
 
 // Läuft rekursiv durch die verschachtelten Koordinaten-Arrays, prüft jede
 // Position auf endliche, plausible Lon/Lat-Werte und zählt die Positionen (DoS-
 // Schutz gegen riesige Geometrien).
-function validatePositions(coords: unknown, counter: { n: number }): void {
+function validatePositions(coords: unknown, counter: { n: number }) {
   if (!Array.isArray(coords)) throw new Error('Ungültige Koordinaten im GeoJSON.')
   if (typeof coords[0] === 'number') {
     const lon = coords[0] as number
@@ -65,15 +65,26 @@ function validatePositions(coords: unknown, counter: { n: number }): void {
  * Wirft eine nutzerlesbare (deutsche) Fehlermeldung bei ungültigem Input.
  * Von Client (Upload) und Server (harte Durchsetzung) gleichermaßen genutzt.
  */
-export function sanitizeUserGeojson(input: GeoJSON.GeoJSON): GeoJSON.FeatureCollection {
+export function sanitizeUserGeojson(input: GeoJSON.GeoJSON) {
   const geometries: UserGeometry[] = []
 
-  if (input.type === 'FeatureCollection') {
-    for (const f of input.features) if (isAllowed(f.geometry)) geometries.push(f.geometry)
-  } else if (input.type === 'Feature') {
-    if (isAllowed(input.geometry)) geometries.push(input.geometry)
-  } else if (isAllowed(input)) {
-    geometries.push(input)
+  switch (input.type) {
+    case 'FeatureCollection':
+      for (const f of input.features) if (isAllowed(f.geometry)) geometries.push(f.geometry)
+      break
+    case 'Feature':
+      if (isAllowed(input.geometry)) geometries.push(input.geometry)
+      break
+    case 'Point':
+    case 'MultiPoint':
+    case 'LineString':
+    case 'MultiLineString':
+    case 'Polygon':
+    case 'MultiPolygon':
+      geometries.push(input)
+      break
+    case 'GeometryCollection':
+      break
   }
 
   if (geometries.length === 0)
@@ -88,14 +99,15 @@ export function sanitizeUserGeojson(input: GeoJSON.GeoJSON): GeoJSON.FeatureColl
       throw new Error(`Zu viele Koordinatenpunkte (max. ${MAX_USER_GEOJSON_COORDS}).`)
   }
 
-  return {
+  const collection: GeoJSON.FeatureCollection = {
     type: 'FeatureCollection',
     features: geometries.map((geometry) => ({ type: 'Feature', geometry, properties: {} })),
   }
+  return collection
 }
 
 /** Parse a raw uploaded GeoJSON string and return the sanitized FeatureCollection. */
-export function parseUserGeojson(jsonStr: string): GeoJSON.FeatureCollection {
+export function parseUserGeojson(jsonStr: string) {
   if (new TextEncoder().encode(jsonStr).length > MAX_USER_GEOJSON_BYTES)
     throw new Error(`Datei zu groß (max. ${MAX_USER_GEOJSON_BYTES / 1024 / 1024} MB).`)
   let parsed: GeoJSON.GeoJSON

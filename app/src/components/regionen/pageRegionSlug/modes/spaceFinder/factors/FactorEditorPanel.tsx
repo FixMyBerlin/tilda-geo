@@ -1,6 +1,6 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from '@headlessui/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useState } from 'react'
 import { toast } from 'sonner'
 import { twJoin } from 'tailwind-merge'
 import { CollapsibleBoxChevron } from '@/components/shared/CollapsibleBox/CollapsibleBox'
@@ -12,14 +12,15 @@ import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
 import { SegmentedChoice } from '@/components/shared/SegmentedChoice/SegmentedChoice'
 import { toastError } from '@/components/shared/toast/toastError'
 import { factorFingerprint, factorsDiffer } from '@/server/planning/factorFingerprint'
-import type { FactorConfig, VariantFactorConfig } from '@/server/planning/planning.functions'
+import type { VariantFactorConfig } from '@/server/planning/mergeFactorConfig'
+import type { FactorConfig } from '@/server/planning/planning.functions'
 import { updatePlanningAreaFn, updatePlanningVariantFn } from '@/server/planning/planning.functions'
 import {
   planningAreaQueryOptions,
   planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
-import { useSpaceFinderBoundaryState } from '../../../hooks/mapState/useSpaceFinderBoundaryState'
+import { useSpaceFinderBoundaryActions } from '../../../hooks/mapState/space-finder-boundary-store'
 import { USER_GEOJSON_MODES, type UserGeojsonMode } from '../area/UserObstaclesField'
 import { spaceFinderGroupStyle, spaceFinderNumberInputClass } from '../spaceFinderPanelStyles'
 import { OepnvCategorySliders } from './OepnvCategorySliders'
@@ -574,19 +575,18 @@ const FactorEditorPanelForm = ({
   const queryClient = useQueryClient()
   const [config, setConfig] = useState<FactorConfig>(factorConfig)
   const [open, setOpen] = useState(defaultOpen)
-  const prevReadOnly = useRef(readOnly)
-  const setFactorSavePending = useSpaceFinderBoundaryState((s) => s.setFactorSavePending)
+  const [prevReadOnly, setPrevReadOnly] = useState(readOnly)
+  const { setFactorSavePending } = useSpaceFinderBoundaryActions()
   // Fingerprint des Stands, der zuletzt an den Server geschickt wurde — der Vergleich mit dem
   // aktuellen Entwurf steuert Auto-Save, Verwerfen-Button und die Sperre von „Neu berechnen".
   const [savedFingerprint, setSavedFingerprint] = useState(() => factorFingerprint(factorConfig))
 
-  useEffect(() => {
-    if (!prevReadOnly.current && readOnly) setOpen(false)
-    else if (prevReadOnly.current && !readOnly) setOpen(true)
-    prevReadOnly.current = readOnly
-  }, [readOnly])
+  if (readOnly !== prevReadOnly) {
+    setPrevReadOnly(readOnly)
+    setOpen(!readOnly)
+  }
 
-  const toVariantConfig = (c: FactorConfig): VariantFactorConfig => {
+  const toVariantConfig = (c: FactorConfig) => {
     const {
       study_area: _sa,
       user_geojson: _ug,
@@ -595,7 +595,8 @@ const FactorEditorPanelForm = ({
       area_size_m2: _as,
       ...rest
     } = c
-    return rest
+    const stripped: VariantFactorConfig = rest
+    return stripped
   }
 
   const mutation = useMutation({
@@ -623,29 +624,39 @@ const FactorEditorPanelForm = ({
   })
 
   const { mutate } = mutation
-  const save = useCallback(
-    (next: FactorConfig) => {
-      setSavedFingerprint(factorFingerprint(next))
-      mutate(next)
-    },
-    [mutate],
-  )
+  const save = (next: FactorConfig) => {
+    setSavedFingerprint(factorFingerprint(next))
+    mutate(next)
+  }
+  const saveDraft = useEffectEvent((next: FactorConfig) => {
+    save(next)
+  })
 
   const unsavedFactors = factorFingerprint(config) !== savedFingerprint
 
   // Auto-Save: jede Faktorenänderung speichert sich nach kurzer Ruhepause von selbst. Der Timer
   // fasst das Ziehen eines Reglers zu einem einzigen Schreibvorgang zusammen.
-  useEffect(() => {
-    if (readOnly || !unsavedFactors) return
-    const timeout = setTimeout(() => save(config), AUTOSAVE_DELAY_MS)
-    return () => clearTimeout(timeout)
-  }, [config, readOnly, unsavedFactors, save])
+  useEffect(
+    function autosaveUnsavedFactors() {
+      if (readOnly || !unsavedFactors) return
+      const timeout = setTimeout(() => saveDraft(config), AUTOSAVE_DELAY_MS)
+      return function cancelAutosave() {
+        clearTimeout(timeout)
+      }
+    },
+    [config, readOnly, unsavedFactors],
+  )
 
   // Solange etwas ungespeichert ist oder gerade geschrieben wird, darf keine Berechnung starten.
-  useEffect(() => {
-    setFactorSavePending(unsavedFactors || mutation.isPending)
-    return () => setFactorSavePending(false)
-  }, [unsavedFactors, mutation.isPending, setFactorSavePending])
+  useEffect(
+    function syncFactorSavePendingToMapStore() {
+      setFactorSavePending(unsavedFactors || mutation.isPending)
+      return function clearFactorSavePending() {
+        setFactorSavePending(false)
+      }
+    },
+    [unsavedFactors, mutation.isPending, setFactorSavePending],
+  )
 
   const setWeights = (weights: Record<string, number>) => setConfig((c) => ({ ...c, weights }))
 
@@ -735,7 +746,6 @@ const FactorEditorPanelForm = ({
   return (
     <Disclosure as="div" className={collapsibleBoxClass(open)}>
       <DisclosureButton
-        as="div"
         onClick={() => setOpen((v) => !v)}
         className={collapsibleBoxHeaderClass(open, !open)}
       >

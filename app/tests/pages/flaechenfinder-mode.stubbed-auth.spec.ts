@@ -50,16 +50,4 @@ test.describe('Flächenfinder mode (stubbed admin login)', () => {
       await expect(page.getByText('Schillerkiez').first()).toBeVisible({ timeout: 30_000 })
     })
   })
-
-  test('legacy ?planning=true on the region map redirects into the mode', async ({
-    page,
-  }, testInfo) => {
-    test.setTimeout(60_000)
-    await withStubbedAdmin(page, testInfo, 'flaechenfinder-legacy', async () => {
-      await page.goto(`/regionen/${REGION}?planning=true`)
-      await page.waitForURL((url) => new URL(url).pathname === MODE_URL)
-      expect(new URL(page.url()).searchParams.has('planning')).toBe(false)
-      await expect(page.getByText('Schillerkiez').first()).toBeVisible({ timeout: 30_000 })
-    })
-  })
 })

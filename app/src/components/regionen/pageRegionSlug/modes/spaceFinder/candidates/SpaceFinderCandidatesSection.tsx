@@ -3,12 +3,13 @@ import { bbox, centroid } from '@turf/turf'
 import { useEffect } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
-import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import {
   type SpaceFinderCandidate,
+  useSpaceFinderCandidateSelectActive,
   useSpaceFinderCandidates,
-  useSpaceFinderCandidatesState,
-} from '@/components/regionen/pageRegionSlug/hooks/mapState/useSpaceFinderCandidatesState'
+  useSpaceFinderCandidatesActions,
+} from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-candidates-store'
+import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { CollapsibleBox } from '@/components/shared/CollapsibleBox/CollapsibleBox'
 import { ModeListItem } from '../../ModeListItem'
@@ -31,13 +32,13 @@ const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
 /**
  * Turns the candidate-selection tool off whenever the shown run changes and on unmount (leaving
  * the Flächenfinder mode unmounts `PageModeSpaceFinder`, and with it this component). The
- * candidates themselves are kept per run (`useSpaceFinderCandidatesState`) and come back with
+ * candidates themselves are kept per run (`space-finder-candidates-store`) and come back with
  * their run. Kept separate from the toggle button below: this must keep running even while the
  * »Auswahl« section itself is collapsed or not rendered (no complete run yet).
  */
 export const SpaceFinderCandidateSelectionReset = () => {
   const { runId } = useSpaceFinderSelection()
-  const setSelectActive = useSpaceFinderCandidatesState((s) => s.setSelectActive)
+  const { setSelectActive } = useSpaceFinderCandidatesActions()
 
   useEffect(
     function stopCandidateSelectionOnRunChange() {
@@ -73,7 +74,10 @@ const CandidateRow = ({
   onRemove: () => void
 }) => {
   const score = candidate.properties.mce_gesamtscore
-  const eignungsklasse: string | null = candidate.properties.eignungsklasse ?? null
+  const eignungsklasse =
+    typeof candidate.properties.eignungsklasse === 'string'
+      ? candidate.properties.eignungsklasse
+      : null
 
   return (
     <ModeListItem
@@ -116,18 +120,21 @@ const CandidateRow = ({
 }
 
 /**
- * »Auswahl« section (D6, phase 4): candidate selection moved out of the `SidebarInspector`
- * takeover into the panel. The toggle switches map clicks on result hexagons between
+ * »Auswahl« section (D6): candidate selection lives in the panel, not as a
+ * `SidebarInspector` takeover. The toggle switches map clicks on result hexagons between
  * add/remove-candidate and the normal inspector (`RegionMap` `handleClick`, already mode-gated).
- * The only output is the GeoJSON download — no Prüflisten handover.
+ * The only output is the GeoJSON download. There is no Prüflisten handover.
  */
-export const SpaceFinderCandidatesSection = ({ variantId }: { variantId: number }) => {
-  const { runId } = useSpaceFinderSelection()
+export const SpaceFinderCandidatesSection = ({
+  variantId,
+  runId,
+}: {
+  variantId: number
+  runId: number
+}) => {
   const candidates = useSpaceFinderCandidates(runId)
-  const selectActive = useSpaceFinderCandidatesState((s) => s.selectActive)
-  const setSelectActive = useSpaceFinderCandidatesState((s) => s.setSelectActive)
-  const removeCandidate = useSpaceFinderCandidatesState((s) => s.removeCandidate)
-  const clearCandidates = useSpaceFinderCandidatesState((s) => s.clearCandidates)
+  const selectActive = useSpaceFinderCandidateSelectActive()
+  const { setSelectActive, removeCandidate, clearCandidates } = useSpaceFinderCandidatesActions()
   const { clearInspectorFeatures } = useMapActions()
   const { setFeaturesParam } = useFeaturesParam()
   const { mainMap: map } = useMap()

@@ -1,5 +1,4 @@
 import { CollapsibleBox } from '@/components/shared/CollapsibleBox/CollapsibleBox'
-import type { FactorConfig } from '@/server/planning/planning.functions'
 import { DEFAULT_FACTOR_TEMPLATE } from '../factors/spaceFinderDefaults'
 import type { PlanningVariantDetail } from '../spaceFinderVariantDetail'
 import { CarriagewaysToggle, CensusToggle, VegetationToggle } from './LayerToggles'
@@ -9,8 +8,8 @@ import { ScoreModeSwitcher } from './ScoreModeSwitcher'
 /** »Anzeige« (only with a complete run): score mode, opacity, Gesuchte-Fläche filter, layer toggles. */
 export const DisplaySection = ({ variant }: { variant: PlanningVariantDetail }) => {
   const latestRun = variant.runs[0] ?? null
-  const lastRunConfig = (latestRun?.factorConfigSnapshot as FactorConfig | undefined) ?? null
-  const factorConfig = variant.factorConfig as FactorConfig
+  const lastRunConfig = latestRun?.factorConfigSnapshot ?? null
+  const factorConfig = variant.factorConfig
 
   return (
     <CollapsibleBox title="Anzeige">

@@ -4,7 +4,7 @@ import {
   planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
-import { useSpaceFinderBoundaryState } from '../../../hooks/mapState/useSpaceFinderBoundaryState'
+import { useSpaceFinderFactorSavePending } from '../../../hooks/mapState/space-finder-boundary-store'
 import { JobStatusBadge } from './JobStatusBadge'
 
 type LatestJob = { id: number; status: string }
@@ -37,7 +37,7 @@ export const RunButton = ({
   const hasFinishedRun = latestJob?.status === 'DONE' || latestJob?.status === 'FAILED'
   // Faktoren speichern sich automatisch; bis das durch ist, würde der Lauf serverseitig noch
   // mit dem alten Stand rechnen (siehe FactorEditorPanel).
-  const factorSavePending = useSpaceFinderBoundaryState((s) => s.factorSavePending)
+  const factorSavePending = useSpaceFinderFactorSavePending()
 
   const label = mutation.isPending
     ? 'Wird gestartet…'

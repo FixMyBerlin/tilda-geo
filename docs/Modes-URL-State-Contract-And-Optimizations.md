@@ -30,7 +30,7 @@ Other encodings stay as they are: `map` (`zoom/lat/lng`), `config` (v2 compresse
 
 Geometry in the URL: a point is a `zoom/lat/lng` string (`map`, `notes.new`), a selected feature is the pipe-delimited `f`. Shapes are GeoJSON geometry, as in the database (`ReviewEntry.geometry`): `sum.areas`.
 
-`migrateUrl` writes `v` (today `5`) so the layout loader does not re-run category-config migrations on every client navigation. Old in-map QA query shapes are folded into `qa` on first load. Migration `0004_calculator_mode` moves the old calculator `draw` areas into `sum.areas`. Migration `0005_planning_params` folds the ten legacy `planning*` keys into `ff`: `planningVariant` (or the deprecated `planningScenario`) becomes `key`, `planningArea` and `planningRun` are dropped because both are derived from the Variante, `planningHexagons=false` becomes `opacity: 0`, and `planningAreaFilter` off clears `minArea`. Details: [`migrateUrl.ts`](../app/src/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/migrateUrl.ts).
+`migrateUrl` writes `v` (today `4`) so the layout loader does not re-run category-config migrations on every client navigation. Old in-map QA query shapes are folded into `qa` on first load. Migration `0004_calculator_mode` moves the old calculator `draw` areas into `sum.areas`. Details: [`migrateUrl.ts`](../app/src/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/migrateUrl.ts).
 
 ## Child mode routes
 
@@ -40,4 +40,3 @@ Geometry in the URL: a point is a `zoom/lat/lng` string (`map`, `notes.new`), a 
 - `qa.tsx` also redirects to the first config when `qa.key` is absent (`replace: true`).
 - Prüflisten does not hard-redirect on empty lists: members/admins need the page to create the first list. Guests are stopped by the parent loader.
 - `flaechenfinder.tsx` is member-only and also needs `spaceFinderEnabled`. Without the flag it redirects to the region root.
-- A legacy `?planning=true` on the region root redirects to `/flaechenfinder` when the region has the flag (`getRegionRedirectUrl`). Without the flag the link stays on the root.

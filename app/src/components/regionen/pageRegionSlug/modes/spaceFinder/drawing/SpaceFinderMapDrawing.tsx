@@ -1,6 +1,9 @@
 import { useEffect, useRef } from 'react'
 import { useControl } from 'react-map-gl/maplibre'
-import { useSpaceFinderBoundaryState } from '../../../hooks/mapState/useSpaceFinderBoundaryState'
+import {
+  useSpaceFinderBoundaryActions,
+  useSpaceFinderDrawingActive,
+} from '../../../hooks/mapState/space-finder-boundary-store'
 import { SpaceFinderMapDrawingControl } from './SpaceFinderMapDrawingControl'
 
 /**
@@ -9,20 +12,32 @@ import { SpaceFinderMapDrawingControl } from './SpaceFinderMapDrawingControl'
  * boundary store, which the create form reads as the study_area.
  */
 function SpaceFinderMapDrawingControlMount() {
-  const setDrawnGeometry = useSpaceFinderBoundaryState((s) => s.setDrawnGeometry)
-  const setPolygonDrawInProgress = useSpaceFinderBoundaryState((s) => s.setPolygonDrawInProgress)
+  const { setDrawnGeometry, setPolygonDrawInProgress } = useSpaceFinderBoundaryActions()
   const handlersRef = useRef({
     onGeometryChange: setDrawnGeometry,
     onDrawingStateChange: setPolygonDrawInProgress,
   })
-  useEffect(() => {
-    handlersRef.current.onGeometryChange = setDrawnGeometry
-    handlersRef.current.onDrawingStateChange = setPolygonDrawInProgress
-  })
+
+  useEffect(
+    function keepDrawingHandlersRefCurrent() {
+      handlersRef.current = {
+        onGeometryChange: setDrawnGeometry,
+        onDrawingStateChange: setPolygonDrawInProgress,
+      }
+    },
+    [setDrawnGeometry, setPolygonDrawInProgress],
+  )
 
   // Reset the flag when the control unmounts (e.g. "Zeichnen beenden" pressed before the
   // polygon was ever finished), so data-layer clicks are re-enabled.
-  useEffect(() => () => setPolygonDrawInProgress(false), [setPolygonDrawInProgress])
+  useEffect(
+    function resetPolygonDrawInProgressOnUnmount() {
+      return function clearPolygonDrawInProgress() {
+        setPolygonDrawInProgress(false)
+      }
+    },
+    [setPolygonDrawInProgress],
+  )
 
   useControl(
     () =>
@@ -37,7 +52,7 @@ function SpaceFinderMapDrawingControlMount() {
 
 /** Mounts the drawing control only while the user is actively drawing a study area. */
 export function SpaceFinderMapDrawing() {
-  const drawingActive = useSpaceFinderBoundaryState((s) => s.drawingActive)
+  const drawingActive = useSpaceFinderDrawingActive()
   if (!drawingActive) return null
   return <SpaceFinderMapDrawingControlMount />
 }

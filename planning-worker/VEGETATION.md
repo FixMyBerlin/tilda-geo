@@ -90,7 +90,7 @@ einzelner WMS-Ausfall alle Folgeläufe derselben Variante leer halten.
 ## Frontend
 
 - **Layer-Toggle** „Vegetationsflächen" im Planungs-Panel (transienter View-State im
-  Zustand-Store `useSpaceFinderBoundaryState.vegetationVisible`, bewusst **nicht** in der URL).
+  Zustand-Store `vegetationVisible` in [`space-finder-boundary-store.ts`](../app/src/components/regionen/pageRegionSlug/hooks/mapState/space-finder-boundary-store.ts), bewusst **nicht** in der URL).
 - **Faktor-Editor**: Gewicht „Vegetation" + Richtungs-Umschalter (Grün schützen / bevorzugen).
 - **Sidebar-Inspektion**: `score_vegetation` als Teilscore beim Gesamtscore.
 

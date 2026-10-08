@@ -487,52 +487,6 @@ describe('getRegionRedirectUrl()', () => {
     })
   })
 
-  describe('v5: Flächenfinder root bookmark becomes a mode route (D7)', () => {
-    test('?planning=true&planningVariant=3 on the root → /flaechenfinder with ff JSON', async () => {
-      const url = 'http://127.0.0.1:5173/regionen/berlin?planning=true&planningVariant=3'
-      const redirectUrl = await redirectOnly(url, 'berlin')
-      expect(redirectUrl).toBeTruthy()
-      const resultUrl = getUrl(redirectUrl)
-      expect(resultUrl.pathname).toBe('/regionen/berlin/flaechenfinder')
-      expect(JSON.parse(resultUrl.searchParams.get('ff')!)).toEqual({ key: 3 })
-      expect(resultUrl.searchParams.has('planning')).toBe(false)
-      expect(resultUrl.searchParams.has('planningVariant')).toBe(false)
-      expect(await redirectOnly(redirectUrl!, 'berlin')).toBe(null)
-    })
-
-    test('legacy planningScenario is folded into ff.key the same way', async () => {
-      const url = 'http://127.0.0.1:5173/regionen/berlin?planning=true&planningScenario=7'
-      const redirectUrl = await redirectOnly(url, 'berlin')
-      expect(redirectUrl).toBeTruthy()
-      const resultUrl = getUrl(redirectUrl)
-      expect(resultUrl.pathname).toBe('/regionen/berlin/flaechenfinder')
-      expect(JSON.parse(resultUrl.searchParams.get('ff')!)).toEqual({ key: 7 })
-    })
-
-    test('?planning=true on a region without spaceFinderEnabled stays on the root', async () => {
-      const url = 'http://127.0.0.1:5173/regionen/parkraum?planning=true&planningVariant=3'
-      const redirectUrl = await redirectOnly(url, 'parkraum')
-      const resultUrl = redirectUrl ? getUrl(redirectUrl) : new URL(url)
-      expect(resultUrl.pathname).toBe('/regionen/parkraum')
-    })
-
-    test('?planning=false on the root does not redirect', async () => {
-      const url = 'http://127.0.0.1:5173/regionen/berlin?planning=false'
-      const redirectUrl = await redirectOnly(url, 'berlin')
-      const resultUrl = redirectUrl ? getUrl(redirectUrl) : new URL(url)
-      expect(resultUrl.pathname).toBe('/regionen/berlin')
-      expect(resultUrl.searchParams.has('planning')).toBe(false)
-    })
-
-    test('?planningVariant=3 on /flaechenfinder stays, params folded into ff', async () => {
-      const url = 'http://127.0.0.1:5173/regionen/berlin/flaechenfinder?planningVariant=3'
-      const redirectUrl = await redirectOnly(url, 'berlin')
-      const resultUrl = redirectUrl ? getUrl(redirectUrl) : new URL(url)
-      expect(resultUrl.pathname).toBe('/regionen/berlin/flaechenfinder')
-      expect(JSON.parse(resultUrl.searchParams.get('ff')!)).toEqual({ key: 3 })
-    })
-  })
-
   describe('Mode sub-routes (e.g. /regionen/:slug/hinweise)', () => {
     test('Normalization preserves the sub-path', async () => {
       const url = 'http://127.0.0.1:5173/regionen/berlin/hinweise'

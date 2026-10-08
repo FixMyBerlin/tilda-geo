@@ -20,7 +20,7 @@ export const readCategoryShares = <K extends string>(
   keys: readonly K[],
   defaults: CategoryShares<K>,
   stored: Partial<Record<string, number>> | undefined | null,
-): CategoryShares<K> => {
+) => {
   if (!stored) return { ...defaults }
   const values: number[] = []
   for (const key of keys) {
@@ -43,7 +43,7 @@ export const readCategoryShares = <K extends string>(
  * Rundet Roh-Anteile so auf ganze Prozent, dass ihre Summe exakt 100 ergibt (Largest-Remainder:
  * die Kategorien mit dem größten abgeschnittenen Rest bekommen den Rest).
  */
-const distribute = <K extends string>(keys: readonly K[], raw: number[]): CategoryShares<K> => {
+const distribute = <K extends string>(keys: readonly K[], raw: number[]) => {
   const floors = raw.map((value) => Math.floor(value))
   let remainder = CATEGORY_SHARE_TOTAL - floors.reduce((sum, value) => sum + value, 0)
   const order = raw
@@ -69,7 +69,7 @@ export const rebalanceCategoryShares = <K extends string>(
   shares: CategoryShares<K>,
   changed: K,
   nextValue: number,
-): CategoryShares<K> => {
+) => {
   const value = Math.min(CATEGORY_SHARE_TOTAL, Math.max(0, Math.round(nextValue)))
   const others = keys.filter((key) => key !== changed)
   const othersTotal = others.reduce((sum, key) => sum + shares[key], 0)

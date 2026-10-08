@@ -23,8 +23,8 @@ function scopeKey(regionSlug: string, kind: GeojsonHistoryKind) {
   return `${regionSlug}${SCOPE_SEPARATOR}${kind}`
 }
 
-function openDb(): Promise<IDBDatabase> {
-  return new Promise((resolve, reject) => {
+function openDb() {
+  return new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION)
     request.onupgradeneeded = (event) => {
       const db = request.result
@@ -60,7 +60,7 @@ export async function saveGeojsonHistoryEntry(
   kind: GeojsonHistoryKind,
   fileName: string,
   data: unknown,
-): Promise<void> {
+) {
   const db = await openDb()
   await new Promise<void>((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readwrite')
@@ -77,10 +77,7 @@ export async function saveGeojsonHistoryEntry(
 }
 
 /** Lists the uploads of one kind that were made in this region, newest first. */
-export async function listGeojsonHistoryEntries(
-  regionSlug: string,
-  kind: GeojsonHistoryKind,
-): Promise<GeojsonHistoryEntry[]> {
+export async function listGeojsonHistoryEntries(regionSlug: string, kind: GeojsonHistoryKind) {
   const db = await openDb()
   const entries = await new Promise<GeojsonHistoryEntry[]>((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readonly')
@@ -92,7 +89,7 @@ export async function listGeojsonHistoryEntries(
   return entries.sort((a, b) => b.savedAt - a.savedAt)
 }
 
-export async function deleteGeojsonHistoryEntry(id: number): Promise<void> {
+export async function deleteGeojsonHistoryEntry(id: number) {
   const db = await openDb()
   await new Promise<void>((resolve, reject) => {
     const tx = db.transaction(STORE_NAME, 'readwrite')

@@ -13,7 +13,6 @@ import {
 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderPanelStyles'
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
-import type { VariantFactorConfig } from '@/server/planning/mergeFactorConfig'
 import { Disclosure } from './Disclosure/Disclosure'
 
 type Props = {
@@ -185,7 +184,7 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
   // (womöglich seither ohne Neuberechnung veränderten) aktuellen Variantengewichte. Sonst würden
   // Balkenmaximum und Prozentanteile einer nicht mehr aktuellen Faktor-Konfiguration entsprechen.
   const run = variant?.runs?.find((r) => r.id === runId)
-  const snapshot = run?.factorConfigSnapshot as VariantFactorConfig | undefined
+  const snapshot = run?.factorConfigSnapshot
   const weights = snapshot?.weights
   const shares = weights ? criterionShares(weights) : undefined
   const modifierMax = (scoreKey: string) => {

@@ -15,7 +15,7 @@ const isPolygonal = (geom: GeoJSON.Geometry | null | undefined): geom is StudyAr
   geom?.type === 'Polygon' || geom?.type === 'MultiPolygon'
 
 /** Parse a GeoJSON string (e.g. an uploaded file) and extract the single study-area geometry. */
-export function parseStudyAreaGeometry(jsonStr: string): StudyAreaGeometry {
+export function parseStudyAreaGeometry(jsonStr: string) {
   let parsed: GeoJSON.GeoJSON
   try {
     parsed = check(jsonStr)
@@ -26,16 +26,24 @@ export function parseStudyAreaGeometry(jsonStr: string): StudyAreaGeometry {
 }
 
 /** Extract the single study-area geometry from an already-parsed GeoJSON object. */
-function extractStudyAreaGeometry(input: GeoJSON.GeoJSON): StudyAreaGeometry {
-  if (input.type === 'FeatureCollection') {
-    const polygonal = input.features.filter((f) => isPolygonal(f.geometry))
-    if (polygonal.length !== 1) throw new Error(ONLY_POLYGON_MSG)
-    return polygonal[0]!.geometry as StudyAreaGeometry
+export function extractStudyAreaGeometry(input: GeoJSON.GeoJSON) {
+  switch (input.type) {
+    case 'FeatureCollection': {
+      const polygonal = input.features.filter((f) => isPolygonal(f.geometry))
+      if (polygonal.length !== 1) throw new Error(ONLY_POLYGON_MSG)
+      return polygonal[0]!.geometry as StudyAreaGeometry
+    }
+    case 'Feature':
+      if (!isPolygonal(input.geometry)) throw new Error(ONLY_POLYGON_MSG)
+      return input.geometry
+    case 'Polygon':
+    case 'MultiPolygon':
+      return input
+    case 'Point':
+    case 'MultiPoint':
+    case 'LineString':
+    case 'MultiLineString':
+    case 'GeometryCollection':
+      throw new Error(ONLY_POLYGON_MSG)
   }
-  if (input.type === 'Feature') {
-    if (!isPolygonal(input.geometry)) throw new Error(ONLY_POLYGON_MSG)
-    return input.geometry
-  }
-  if (isPolygonal(input)) return input
-  throw new Error(ONLY_POLYGON_MSG)
 }

@@ -79,10 +79,7 @@ export type MergedFactorConfig = VariantFactorConfig & {
 }
 
 /** Spiegel von `merge_factor_config` in `planning-worker/merge_factor_config.py` (Fallback 30). */
-export const mergeFactorConfig = (
-  area: PlanningAreaInput,
-  variantConfig: VariantFactorConfig,
-): MergedFactorConfig => {
+export const mergeFactorConfig = (area: PlanningAreaInput, variantConfig: VariantFactorConfig) => {
   // Die Sättigung steht nur dann in der Varianten-Config, wenn sie von Hand gesetzt wurde. Fehlt
   // sie, gilt der Zensus-Vorschlag des Planungsgebiets — so starten alle Varianten eines Gebiets
   // auf demselben Wert, und der Wert bleibt trotzdem als feste Zahl im Lauf-Snapshot stehen.
@@ -110,7 +107,7 @@ export const mergeFactorConfig = (
  * Sättigung selbst — nur so bleibt „automatisch" ein Zustand und wird nicht beim ersten Speichern
  * einer beliebigen anderen Änderung zum eingefrorenen Nutzerwert.
  */
-export const stripAutoSaettigung = (config: MergedFactorConfig): VariantFactorConfig => {
+export const stripAutoSaettigung = (config: MergedFactorConfig) => {
   const rest = { ...config } as Record<string, unknown>
   const wasAuto = rest.bewohnerbedarf_saettigung_auto === true
   for (const key of AUTO_SAETTIGUNG_KEYS) delete rest[key]
@@ -126,7 +123,7 @@ export const areaInputFromRow = (row: {
   areaSizeM2: number | null
   censusSaettigungEw?: number | null
   censusEwPerHa?: number | null
-}): PlanningAreaInput => ({
+}) => ({
   studyArea: row.studyArea,
   userGeojson: row.userGeojson ?? undefined,
   userGeojsonMode: row.userGeojsonMode,

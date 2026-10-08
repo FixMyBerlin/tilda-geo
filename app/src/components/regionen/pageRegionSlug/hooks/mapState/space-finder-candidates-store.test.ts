@@ -1,8 +1,9 @@
 import { beforeEach, describe, expect, test } from 'vitest'
 import {
   type SpaceFinderCandidate,
-  useSpaceFinderCandidatesState,
-} from './useSpaceFinderCandidatesState'
+  getSpaceFinderCandidatesSnapshot,
+  resetSpaceFinderCandidatesState,
+} from './space-finder-candidates-store'
 
 const candidate = (h3Id: string): SpaceFinderCandidate => ({
   h3Id,
@@ -11,15 +12,15 @@ const candidate = (h3Id: string): SpaceFinderCandidate => ({
 })
 
 const ids = (runId: number) =>
-  (useSpaceFinderCandidatesState.getState().candidatesByRun[runId] ?? []).map((c) => c.h3Id)
+  (getSpaceFinderCandidatesSnapshot().candidatesByRun[runId] ?? []).map((c) => c.h3Id)
 
-describe('useSpaceFinderCandidatesState', () => {
+describe('space-finder-candidates-store', () => {
   beforeEach(() => {
-    useSpaceFinderCandidatesState.setState({ selectActive: false, candidatesByRun: {} })
+    resetSpaceFinderCandidatesState()
   })
 
   test('toggleCandidate adds in selection order and removes on second toggle', () => {
-    const { toggleCandidate } = useSpaceFinderCandidatesState.getState()
+    const { toggleCandidate } = getSpaceFinderCandidatesSnapshot().actions
     expect(toggleCandidate(1, candidate('a'))).toBe(true)
     expect(toggleCandidate(1, candidate('b'))).toBe(true)
     expect(ids(1)).toEqual(['a', 'b'])
@@ -29,7 +30,7 @@ describe('useSpaceFinderCandidatesState', () => {
   })
 
   test('setCandidateGeometry replaces only the geometry of that candidate', () => {
-    const { toggleCandidate, setCandidateGeometry } = useSpaceFinderCandidatesState.getState()
+    const { toggleCandidate, setCandidateGeometry } = getSpaceFinderCandidatesSnapshot().actions
     toggleCandidate(1, candidate('a'))
     toggleCandidate(1, candidate('b'))
     const full: GeoJSON.Polygon = {
@@ -45,7 +46,7 @@ describe('useSpaceFinderCandidatesState', () => {
     }
     setCandidateGeometry(1, 'a', full)
 
-    const [a, b] = useSpaceFinderCandidatesState.getState().candidatesByRun[1] ?? []
+    const [a, b] = getSpaceFinderCandidatesSnapshot().candidatesByRun[1] ?? []
     expect(a?.geometry).toEqual(full)
     expect(a?.properties).toEqual({ mce_gesamtscore: 80 })
     expect(b?.geometry).toEqual(candidate('b').geometry)
@@ -53,7 +54,7 @@ describe('useSpaceFinderCandidatesState', () => {
 
   test('selections of different runs stay separate', () => {
     const { toggleCandidate, removeCandidate, clearCandidates } =
-      useSpaceFinderCandidatesState.getState()
+      getSpaceFinderCandidatesSnapshot().actions
     toggleCandidate(1, candidate('a'))
     toggleCandidate(2, candidate('a'))
     toggleCandidate(2, candidate('b'))

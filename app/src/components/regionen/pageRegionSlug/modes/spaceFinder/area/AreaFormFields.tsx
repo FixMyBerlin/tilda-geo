@@ -1,12 +1,16 @@
 import { PencilSquareIcon } from '@heroicons/react/24/outline'
 import { bbox } from '@turf/turf'
-import { useEffect, useMemo } from 'react'
+import { useEffect } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
 import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
 import { radioButtonClass } from '@/components/shared/SegmentedChoice/radioButtonClass'
 import { MAX_STUDY_AREA_KM2, studyAreaSizeKm2 } from '@/lib/planningStudyAreaLimit'
-import { useSpaceFinderBoundaryState } from '../../../hooks/mapState/useSpaceFinderBoundaryState'
+import {
+  useSpaceFinderBoundaryActions,
+  useSpaceFinderDrawnGeometry,
+  useSpaceFinderDrawingActive,
+} from '../../../hooks/mapState/space-finder-boundary-store'
 import {
   GROUP_HELP,
   PLANNING_USE_CASES,
@@ -77,27 +81,28 @@ export const AreaFormFields = ({
   geometryStepTitle = 'Gebiet auswählen',
 }: AreaFormFieldsProps) => {
   const { mainMap: map } = useMap()
-  const setBoundaryHighlightGeom = useSpaceFinderBoundaryState((s) => s.setBoundaryHighlightGeom)
-  const setDrawingActive = useSpaceFinderBoundaryState((s) => s.setDrawingActive)
-  const drawingActive = useSpaceFinderBoundaryState((s) => s.drawingActive)
-  const drawnGeometry = useSpaceFinderBoundaryState((s) => s.drawnGeometry)
-  const setDrawnGeometry = useSpaceFinderBoundaryState((s) => s.setDrawnGeometry)
+  const { setBoundaryHighlightGeom, setDrawingActive, setDrawnGeometry } =
+    useSpaceFinderBoundaryActions()
+  const drawingActive = useSpaceFinderDrawingActive()
+  const drawnGeometry = useSpaceFinderDrawnGeometry()
 
   const effectiveStudyArea = state.studyArea ?? drawnGeometry
 
-  const areaKm2 = useMemo(
-    () => (effectiveStudyArea ? studyAreaSizeKm2(effectiveStudyArea as GeoJSON.Geometry) : null),
-    [effectiveStudyArea],
-  )
+  const areaKm2 = effectiveStudyArea
+    ? studyAreaSizeKm2(effectiveStudyArea as GeoJSON.Geometry)
+    : null
   const areaTooLarge = areaKm2 != null && areaKm2 > MAX_STUDY_AREA_KM2
 
-  useEffect(() => {
-    return () => {
-      setDrawingActive(false)
-      setDrawnGeometry(null)
-      setBoundaryHighlightGeom(null)
-    }
-  }, [setDrawingActive, setDrawnGeometry, setBoundaryHighlightGeom])
+  useEffect(
+    function resetDrawingStoreOnUnmount() {
+      return function clearDrawingStore() {
+        setDrawingActive(false)
+        setDrawnGeometry(null)
+        setBoundaryHighlightGeom(null)
+      }
+    },
+    [setDrawingActive, setDrawnGeometry, setBoundaryHighlightGeom],
+  )
 
   const fitToGeometry = (geom: object) => {
     if (!map) return
@@ -290,9 +295,9 @@ export const AreaFormFields = ({
 }
 
 export const useEffectiveStudyArea = (studyArea: unknown) => {
-  const drawnGeometry = useSpaceFinderBoundaryState((s) => s.drawnGeometry)
+  const drawnGeometry = useSpaceFinderDrawnGeometry()
   return studyArea ?? drawnGeometry
 }
 
 export const useStudyAreaKm2 = (studyArea: unknown) =>
-  useMemo(() => (studyArea ? studyAreaSizeKm2(studyArea as GeoJSON.Geometry) : null), [studyArea])
+  studyArea ? studyAreaSizeKm2(studyArea as GeoJSON.Geometry) : null

@@ -30,5 +30,6 @@ export const useSpaceFinderSelection = () => {
     areaId: variant?.area.id ?? null,
     runId: areaFormOpen ? null : (variant?.currentRunId ?? null),
     variant,
+    areaFormOpen,
   }
 }

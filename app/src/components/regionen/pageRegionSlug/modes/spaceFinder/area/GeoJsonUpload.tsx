@@ -22,7 +22,7 @@ import {
  * dynamically import their (WASM-backed) dependency, so a plain WGS84 GeoJSON upload —
  * the common case — never pays for either.
  */
-async function readAsGeoJsonText(file: File): Promise<string> {
+async function readAsGeoJsonText(file: File) {
   if (isGeopackageFile(file)) {
     const featureCollection = await convertGeopackageToGeoJson(file)
     return JSON.stringify(featureCollection)
@@ -80,7 +80,18 @@ export function GeoJsonUploadField<T>({
     void listGeojsonHistoryEntries(regionSlug, historyScope).then(setHistory)
   }
 
-  useEffect(refreshHistory, [historyScope, regionSlug])
+  useEffect(
+    function loadGeojsonUploadHistory() {
+      let cancelled = false
+      void listGeojsonHistoryEntries(regionSlug, historyScope).then((entries) => {
+        if (!cancelled) setHistory(entries)
+      })
+      return function ignoreStaleGeojsonHistory() {
+        cancelled = true
+      }
+    },
+    [historyScope, regionSlug],
+  )
 
   const handleFile = async (file: File) => {
     setError(null)
@@ -107,8 +118,14 @@ export function GeoJsonUploadField<T>({
 
   const selectHistoryEntry = (entry: GeojsonHistoryEntry) => {
     setError(null)
-    setFileName(entry.fileName)
-    onResult(entry.data as T, entry.fileName)
+    try {
+      const result = parse(JSON.stringify(entry.data))
+      setFileName(entry.fileName)
+      onResult(result, entry.fileName)
+    } catch (e) {
+      setFileName(null)
+      setError((e as Error).message)
+    }
   }
 
   const deleteHistoryEntry = async (id: number, e: React.MouseEvent) => {

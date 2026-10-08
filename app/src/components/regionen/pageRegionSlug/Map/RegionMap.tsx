@@ -18,12 +18,15 @@ import type {
   ViewStateChangeEvent,
 } from 'react-map-gl/maplibre'
 import { AttributionControl, Map as MapGl, useMap } from 'react-map-gl/maplibre'
+import { useSpaceFinderPolygonDrawInProgress } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-boundary-store'
+import {
+  useSpaceFinderCandidateSelectActive,
+  useSpaceFinderCandidatesActions,
+} from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-candidates-store'
 import {
   useMapActions,
   useMapInspectorFeatures,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
-import { useSpaceFinderBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/useSpaceFinderBoundaryState'
-import { useSpaceFinderCandidatesState } from '@/components/regionen/pageRegionSlug/hooks/mapState/useSpaceFinderCandidatesState'
 import { useBg3dParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBg3dParam'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
@@ -136,10 +139,9 @@ export const RegionMap = () => {
   const { draw: reviewDraw } = useReviewDraw()
   const notesComposeActive = useNotesComposeActive()
   const reviewDrawActive = useReviewDrawActive()
-  const spaceFinderPolygonDrawing = useSpaceFinderBoundaryState((s) => s.polygonDrawInProgress)
-  const candidateSelectActive = useSpaceFinderCandidatesState((s) => s.selectActive)
-  const toggleCandidate = useSpaceFinderCandidatesState((s) => s.toggleCandidate)
-  const setCandidateGeometry = useSpaceFinderCandidatesState((s) => s.setCandidateGeometry)
+  const spaceFinderPolygonDrawing = useSpaceFinderPolygonDrawInProgress()
+  const candidateSelectActive = useSpaceFinderCandidateSelectActive()
+  const { toggleCandidate, setCandidateGeometry } = useSpaceFinderCandidatesActions()
   const { runId: spaceFinderRunId } = useSpaceFinderSelection()
   const { providers: streetImageryProviders, setPhoto: setStreetImageryPhoto } =
     useStreetImageryParam()
@@ -153,9 +155,9 @@ export const RegionMap = () => {
       return
     }
 
-    // Kandidaten-Auswahlwerkzeug des Planungsmoduls (PlanningCandidateToggle): solange
-    // es aktiv ist, sammelt ein Klick auf ein Ergebnis-Hexagon Kandidaten, statt den
-    // Inspector zu öffnen – auch ein Klick ins Leere lässt die Auswahl unangetastet.
+    // Flächenfinder-Auswahlwerkzeug (`SpaceFinderCandidatesSection`): solange es aktiv ist,
+    // sammelt ein Klick auf ein Ergebnis-Hexagon Kandidaten, statt den Inspector zu öffnen.
+    // Ein Klick ins Leere lässt die Auswahl unangetastet.
     if (currentMode.isSpaceFinder && candidateSelectActive) {
       const hexagon = features?.find((f) => f.sourceLayer === planningHexagonsSourceLayer)
       const h3Id = hexagon?.properties?.h3_id

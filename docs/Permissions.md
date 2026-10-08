@@ -172,7 +172,7 @@ Tests: `reviewListMutationsAuth.server.test.ts` (every member mutation rejects n
 
 ### Flächenfinder
 
-Every function in `planning.functions.ts` goes through `authorizePlanningRegion`: member or admin of the region, **and** `spaceFinderEnabled`. Without the flag the call throws, so the mode is closed for direct requests as well, not just in the navigation. Any member may edit and run any Gebiet or Variante of the region. `createdBy` on Gebiet and Variante is attribution only and can be null (the user was deleted).
+Every function in `planning.functions.ts` goes through `authorizePlanningRegion`: member or admin of the region, **and** `spaceFinderEnabled`. Without the flag the call throws, so the mode is closed for direct requests as well as in the navigation. Any member may edit and run any Gebiet or Variante of the region. `createdBy` on Gebiet and Variante is attribution only and can be null (the user was deleted).
 
 Tests: `authorizePlanningRegion.server.test.ts` (flag off rejects members and admins), `availableModes.test.ts`.
 

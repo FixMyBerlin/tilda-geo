@@ -73,7 +73,7 @@ export function deriveScoringStep(
   status: string,
   progress: number | null | undefined,
   progressLabel: string | null | undefined,
-): number {
+) {
   if (status === 'DONE') return SCORING_STEPS.length
   const match = progressLabel?.match(/^(\d+)\/\d+/)
   if (match?.[1]) return Number.parseInt(match[1], 10)
@@ -86,7 +86,7 @@ function stepDisplay(
   currentStep: number,
   weights: Record<string, number> | undefined,
   userObstacles?: UserObstaclesInfo,
-): StepDisplay {
+) {
   const step = i + 1
   const keys = STEP_WEIGHT_KEYS[i] ?? []
   const structural = keys.length === 0

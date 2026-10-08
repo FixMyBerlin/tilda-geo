@@ -1,10 +1,20 @@
+import { feature, featureCollection } from '@turf/helpers'
 import { useEffect } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
-import { useSpaceFinderBoundaryState } from '@/components/regionen/pageRegionSlug/hooks/mapState/useSpaceFinderBoundaryState'
 import {
+  useSpaceFinderBoundaryHighlightFilled,
+  useSpaceFinderBoundaryHighlightGeom,
+  useSpaceFinderCarriagewaysVisible,
+  useSpaceFinderCensusVisible,
+  useSpaceFinderUserObstaclesGeom,
+  useSpaceFinderUserObstaclesVisible,
+  useSpaceFinderVegetationAttribution,
+  useSpaceFinderVegetationVisible,
+} from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-boundary-store'
+import {
+  useSpaceFinderCandidateSelectActive,
   useSpaceFinderCandidates,
-  useSpaceFinderCandidatesState,
-} from '@/components/regionen/pageRegionSlug/hooks/mapState/useSpaceFinderCandidatesState'
+} from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-candidates-store'
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
 import { getTilesUrl } from '@/components/shared/utils/getTilesUrl'
@@ -83,7 +93,7 @@ const HEXAGON_SCORE_RAMP: Record<PlanningScoreMode, { fadeFrom: string; stops: s
     stops: ['#faf5ff', '#c084fc', '#9333ea', '#581c87'],
   },
 }
-const scoreColor = (property: string, mode: PlanningScoreMode): any => {
+const scoreColor = (property: string, mode: PlanningScoreMode) => {
   const { fadeFrom, stops } = HEXAGON_SCORE_RAMP[mode]
   return [
     'interpolate',
@@ -119,7 +129,7 @@ const DIMMED_RATIO = 0.1 / 0.7
 // angehören, also NULL sind), stark abgedunkelt statt ausgeblendet – so bleibt
 // die Score-Einfärbung als Kontext sichtbar. Checkbox aus → wie vor Einführung
 // des Filters, alle Hexagone mit der eingestellten Deckkraft eingefärbt.
-const clusterOpacity = (filterOn: boolean, minArea: number, maxOpacity: number): any =>
+const clusterOpacity = (filterOn: boolean, minArea: number, maxOpacity: number) =>
   filterOn && minArea > 0
     ? [
         'case',
@@ -141,8 +151,8 @@ const hexagonFillLayerProps = (
   'source-layer': planningHexagonsSourceLayer,
   type: 'fill' as const,
   paint: {
-    'fill-color': scoreColor(property, mode),
-    'fill-opacity': clusterOpacity(filterOn, minArea, (opacityPct / 100) * MAX_FILL_OPACITY),
+    'fill-color': scoreColor(property, mode) as any,
+    'fill-opacity': clusterOpacity(filterOn, minArea, (opacityPct / 100) * MAX_FILL_OPACITY) as any,
     'fill-outline-color': 'rgba(0,0,0,0.15)',
   },
 })
@@ -236,14 +246,14 @@ const censusLabelLayerProps = {
 }
 
 const BoundaryHighlightLayer = () => {
-  const geom = useSpaceFinderBoundaryState((s) => s.boundaryHighlightGeom)
-  const filled = useSpaceFinderBoundaryState((s) => s.boundaryHighlightFilled)
+  const geom = useSpaceFinderBoundaryHighlightGeom()
+  const filled = useSpaceFinderBoundaryHighlightFilled()
   if (!geom) return null
   return (
     <Source
       id="planning-boundary-highlight"
       type="geojson"
-      data={{ type: 'Feature', geometry: geom as any, properties: {} }}
+      data={feature(geom as GeoJSON.Geometry)}
     >
       {filled && (
         <Layer
@@ -262,12 +272,12 @@ const BoundaryHighlightLayer = () => {
 }
 
 // Kontroll-Layer für die hochgeladenen „Eigene Daten" (factorConfig.user_geojson).
-// Die Geometrie liegt clientseitig im Store (von ScenarioDetail gesetzt); Punkte,
+// Die Geometrie liegt clientseitig im Store (von `SpaceFinderBody` gesetzt); Punkte,
 // Linien und Flächen werden mit eigenen Layern dargestellt. Über den Schalter im
 // Panel (userObstaclesVisible) ein- und ausblendbar wie Vegetation/Fahrbahnen.
 const UserObstaclesLayer = () => {
-  const geom = useSpaceFinderBoundaryState((s) => s.userObstaclesGeom)
-  const visible = useSpaceFinderBoundaryState((s) => s.userObstaclesVisible)
+  const geom = useSpaceFinderUserObstaclesGeom()
+  const visible = useSpaceFinderUserObstaclesVisible()
   if (!geom || !visible) return null
   return (
     <Source id="planning-user-obstacles" type="geojson" data={geom as any}>
@@ -299,17 +309,16 @@ const UserObstaclesLayer = () => {
 }
 
 // Gelbe Umrandung der als Kandidaten ausgewählten Hexagone (Auswahl-Werkzeug,
-// siehe PlanningCandidateToggle). Die Geometrien liegen beim Klick bereits im
+// siehe `SpaceFinderCandidatesSection`). Die Geometrien liegen beim Klick bereits im
 // Store, deshalb eine eigene GeoJSON-Source statt eines Filter-Ausdrucks auf der
-// Vektor-Source – so bleibt die Markierung auch sichtbar, wenn ein Hexagon gerade
+// Vektor-Source. So bleibt die Markierung auch sichtbar, wenn ein Hexagon gerade
 // nicht in den gerenderten Kacheln liegt.
 //
-// Nur sichtbar, während das Auswahl-Werkzeug aktiv ist (selectActive): Toggle-Knopf
-// oder Schließen der Kandidaten-Sidebar setzen selectActive auf false und blenden die
-// Markierung damit aus, ohne die Auswahl selbst zu löschen (siehe PlanningCandidateToggle,
-// SidebarInspector handleClose).
+// Nur sichtbar, während das Auswahl-Werkzeug aktiv ist (`selectActive`). Ausschalten
+// des Toggles oder Zuklappen von »Auswahl« setzt `selectActive` auf false und blendet
+// die Markierung aus, ohne die Auswahl selbst zu löschen.
 const CandidateHighlightLayer = ({ runId }: { runId: number | null }) => {
-  const selectActive = useSpaceFinderCandidatesState((s) => s.selectActive)
+  const selectActive = useSpaceFinderCandidateSelectActive()
   const candidates = useSpaceFinderCandidates(runId)
   if (!selectActive || !candidates.length) return null
 
@@ -317,15 +326,9 @@ const CandidateHighlightLayer = ({ runId }: { runId: number | null }) => {
     <Source
       id="planning-candidates"
       type="geojson"
-      data={{
-        type: 'FeatureCollection',
-        features: candidates.map((candidate) => ({
-          type: 'Feature' as const,
-          id: candidate.h3Id,
-          geometry: candidate.geometry as any,
-          properties: {},
-        })),
-      }}
+      data={featureCollection(
+        candidates.map((candidate) => feature(candidate.geometry, {}, { id: candidate.h3Id })),
+      )}
     >
       <Layer
         id="planning-candidates-outline"
@@ -343,10 +346,10 @@ export const SourcesLayersSpaceFinder = () => {
   const hexagonsOpacityPct = spaceFinderMode.opacity ?? 100
   const minArea = spaceFinderMode.minArea ?? 0
   const areaFilterOn = minArea > 0
-  const vegetationOn = useSpaceFinderBoundaryState((s) => s.vegetationVisible)
-  const vegetationAttribution = useSpaceFinderBoundaryState((s) => s.vegetationAttribution)
-  const carriagewaysOn = useSpaceFinderBoundaryState((s) => s.carriagewaysVisible)
-  const censusOn = useSpaceFinderBoundaryState((s) => s.censusVisible)
+  const vegetationOn = useSpaceFinderVegetationVisible()
+  const vegetationAttribution = useSpaceFinderVegetationAttribution()
+  const carriagewaysOn = useSpaceFinderCarriagewaysVisible()
+  const censusOn = useSpaceFinderCensusVisible()
 
   useEffect(() => {
     if (runId != null) {

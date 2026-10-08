@@ -93,7 +93,7 @@ export class SpaceFinderMapDrawingControl {
     })
   }
 
-  private currentGeometry(): GeoJSON.Polygon | null {
+  private currentGeometry() {
     if (!this.draw) return null
     const feature = this.draw.getSnapshot().find((f) => f.geometry.type === 'Polygon')
     return (feature?.geometry as GeoJSON.Polygon | undefined) ?? null

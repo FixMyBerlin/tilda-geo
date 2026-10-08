@@ -1,4 +1,5 @@
-import type { SpaceFinderCandidate } from '@/components/regionen/pageRegionSlug/hooks/mapState/useSpaceFinderCandidatesState'
+import { feature, featureCollection } from '@turf/helpers'
+import type { SpaceFinderCandidate } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-candidates-store'
 
 /**
  * Die ausgewählten Hexagone als GeoJSON-FeatureCollection: potentielle Standorte
@@ -6,19 +7,20 @@ import type { SpaceFinderCandidate } from '@/components/regionen/pageRegionSlug/
  * Ausschluss-Flags) werden unverändert übernommen und um die Position in der
  * Auswahlliste ergänzt, damit die Reihenfolge aus der Sidebar erhalten bleibt.
  */
-const candidatesToGeojson = (candidates: SpaceFinderCandidate[]) => ({
-  type: 'FeatureCollection' as const,
-  features: candidates.map((candidate, index) => ({
-    type: 'Feature' as const,
-    id: candidate.h3Id,
-    geometry: candidate.geometry,
-    properties: {
-      ...candidate.properties,
-      h3_id: candidate.h3Id,
-      auswahl_nr: index + 1,
-    },
-  })),
-})
+const candidatesToGeojson = (candidates: SpaceFinderCandidate[]) =>
+  featureCollection(
+    candidates.map((candidate, index) =>
+      feature(
+        candidate.geometry,
+        {
+          ...candidate.properties,
+          h3_id: candidate.h3Id,
+          auswahl_nr: index + 1,
+        },
+        { id: candidate.h3Id },
+      ),
+    ),
+  )
 
 export const candidateExportFileName = (variantId: number | null | undefined) => {
   const date = new Date().toISOString().slice(0, 10)
@@ -28,10 +30,7 @@ export const candidateExportFileName = (variantId: number | null | undefined) =>
 }
 
 /** Triggert den Browser-Download der Auswahl (Blob statt data-URL wegen der Größe). */
-export const downloadCandidatesGeojson = (
-  candidates: SpaceFinderCandidate[],
-  fileName: string,
-): void => {
+export const downloadCandidatesGeojson = (candidates: SpaceFinderCandidate[], fileName: string) => {
   const blob = new Blob([JSON.stringify(candidatesToGeojson(candidates), null, 2)], {
     type: 'application/geo+json',
   })

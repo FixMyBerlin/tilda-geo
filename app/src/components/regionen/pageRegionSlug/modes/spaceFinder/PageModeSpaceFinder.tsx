@@ -11,8 +11,11 @@ import { frenchQuote } from '@/components/shared/text/Quotes'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 import { planningAreasQueryOptions } from '@/server/planning/planningQueryOptions'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
+import {
+  getLastFittedBoundaryKey,
+  useSpaceFinderBoundaryActions,
+} from '../../hooks/mapState/space-finder-boundary-store'
 import { useMapActions } from '../../hooks/mapState/useMapState'
-import { useSpaceFinderBoundaryState } from '../../hooks/mapState/useSpaceFinderBoundaryState'
 import { useRegionSearchNavigation } from '../../hooks/useQueryState/useRegionSearchNavigation'
 import { ModePanel } from '../ModePanel'
 import { modePanelHeaderIconButtonClassName, modePanelMutedClassName } from '../modePanel.const'
@@ -31,7 +34,7 @@ import { SpaceFinderEditAreaDetail } from './detail/SpaceFinderEditAreaDetail'
 import { SpaceFinderNewAreaDetail } from './detail/SpaceFinderNewAreaDetail'
 import { SpaceFinderNewVariantDetail } from './detail/SpaceFinderNewVariantDetail'
 import { SpaceFinderBody } from './SpaceFinderBody'
-import { compactSpaceFinderModeParam, isSpaceFinderAreaFormOpen } from './spaceFinderModeParam'
+import { compactSpaceFinderModeParam } from './spaceFinderModeParam'
 import { useSpaceFinderModeParam } from './useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from './useSpaceFinderSelection'
 
@@ -61,18 +64,16 @@ const SpaceFinderEmptyState = ({ onCreate }: { onCreate: () => void }) => (
 )
 
 /**
- * Flächenfinder mode page (D4/D5/D6): the Planungsgebiete are the header collection (like Ordner
- * in Hinweise), their Varianten a second dropdown bar directly below it, then panel body sections
- * instead of a list (status, Faktoren, Anzeige, Auswahl), and a
- * sticky footer for the primary »Berechnen«/»Neu berechnen« action. Desktop-first (D10) — on
- * mobile the mode is reachable but read-only.
+ * Flächenfinder mode page (D4/D5/D6): Planungsgebiete are the header collection (like Ordner
+ * in Hinweise), Varianten a second dropdown bar below it, then panel body sections instead
+ * of a list (status, Faktoren, Anzeige, Auswahl) and a sticky footer for
+ * »Berechnen«/»Neu berechnen«. Desktop-first (D10). On mobile the mode is reachable but read-only.
  */
 export const PageModeSpaceFinder = () => {
   const { regionSlug } = routeApi.useParams()
   const isDesktop = useBreakpoint('sm')
   const { mainMap: map } = useMap()
-  const setBoundaryHighlightGeom = useSpaceFinderBoundaryState((s) => s.setBoundaryHighlightGeom)
-  const setLastFittedBoundaryKey = useSpaceFinderBoundaryState((s) => s.setLastFittedBoundaryKey)
+  const { setBoundaryHighlightGeom, setLastFittedBoundaryKey } = useSpaceFinderBoundaryActions()
 
   // Primed by the route loader (ensureQueryData).
   const { data: areas } = useSuspenseQuery(planningAreasQueryOptions(regionSlug))
@@ -82,7 +83,12 @@ export const PageModeSpaceFinder = () => {
   const { clearInspectorFeatures } = useMapActions()
   const { updateSearch } = useRegionSearchNavigation()
   // Area id and shown run are always derived from the active variant (D7).
-  const { variantId: activeVariant, areaId: activeArea, variant } = useSpaceFinderSelection()
+  const {
+    variantId: activeVariant,
+    areaId: activeArea,
+    variant,
+    areaFormOpen,
+  } = useSpaceFinderSelection()
   const selectedOption = spaceFinderSelectedVariant(areas, activeVariant)
   const selectedArea = sortedAreas.find((area) => area.id === selectedOption?.areaId)
 
@@ -117,14 +123,12 @@ export const PageModeSpaceFinder = () => {
   const commands = useSpaceFinderCommands({ regionSlug, areas, selectedOption, onSelect })
 
   const studyArea = variant?.area.studyArea as GeoJSON.Geometry | undefined
-  const creatingOrEditingArea = isSpaceFinderAreaFormOpen(spaceFinderMode)
-
   // Outline lives on the page (not the body) so it stays on the map while switching variants of
   // the same planungsgebiet, and while a detail view replaces the body.
   useEffect(
     function syncStudyAreaOutline() {
       // While creating/editing the Gebiet, the wizard/editor's own form fields own the highlight.
-      if (creatingOrEditingArea) return
+      if (areaFormOpen) return
       if (activeArea == null) {
         setBoundaryHighlightGeom(null)
         return
@@ -138,20 +142,13 @@ export const PageModeSpaceFinder = () => {
           properties: {},
         })
         const boundaryKey = [minLng, minLat, maxLng, maxLat].map((v) => v.toFixed(6)).join(',')
-        if (useSpaceFinderBoundaryState.getState().lastFittedBoundaryKey !== boundaryKey) {
+        if (getLastFittedBoundaryKey() !== boundaryKey) {
           setLastFittedBoundaryKey(boundaryKey)
           map.fitBounds([minLng, minLat, maxLng, maxLat], { padding: 60, duration: 800 })
         }
       }
     },
-    [
-      creatingOrEditingArea,
-      activeArea,
-      studyArea,
-      map,
-      setBoundaryHighlightGeom,
-      setLastFittedBoundaryKey,
-    ],
+    [areaFormOpen, activeArea, studyArea, map, setBoundaryHighlightGeom, setLastFittedBoundaryKey],
   )
 
   // Clear the outline when leaving the mode — the component unmounts with the route.
@@ -159,15 +156,25 @@ export const PageModeSpaceFinder = () => {
 
   const closeNew = () => setSpaceFinderModeParam({ ...spaceFinderMode, new: undefined })
   const closeEdit = () => setSpaceFinderModeParam({ ...spaceFinderMode, edit: undefined })
+  const onAreaCreated = (_areaId: number, variantId: number) =>
+    setSpaceFinderModeParam({ ...spaceFinderMode, key: variantId, new: undefined })
+  const onVariantCreated = (variantId: number) =>
+    setSpaceFinderModeParam({ ...spaceFinderMode, key: variantId, new: undefined })
 
-  // Detail views are desktop-only (D10) — create/edit affordances that open them are already
-  // hidden there, but guard here too in case a bookmark still carries `ff.new`/`ff.edit`.
+  // Detail views are desktop-only (D10). Create/edit affordances that open them are already
+  // hidden on mobile, but guard here too in case a bookmark still carries `ff.new`/`ff.edit`.
   const newAreaDetail =
     isDesktop && spaceFinderMode.new === 'area'
       ? {
           title: 'Neues Planungsgebiet',
           onBack: closeNew,
-          children: <SpaceFinderNewAreaDetail regionSlug={regionSlug} />,
+          children: (
+            <SpaceFinderNewAreaDetail
+              regionSlug={regionSlug}
+              onCreated={onAreaCreated}
+              onClose={closeNew}
+            />
+          ),
         }
       : undefined
   const newVariantDetail =
@@ -181,6 +188,8 @@ export const PageModeSpaceFinder = () => {
               areaId={selectedOption.areaId}
               areaTitle={selectedOption.areaTitle}
               regionSlug={regionSlug}
+              onCreated={onVariantCreated}
+              onClose={closeNew}
             />
           ),
         }
@@ -190,7 +199,13 @@ export const PageModeSpaceFinder = () => {
       ? {
           title: 'Planungsgebiet bearbeiten',
           onBack: closeEdit,
-          children: <SpaceFinderEditAreaDetail areaId={activeArea} regionSlug={regionSlug} />,
+          children: (
+            <SpaceFinderEditAreaDetail
+              areaId={activeArea}
+              regionSlug={regionSlug}
+              onClose={closeEdit}
+            />
+          ),
         }
       : undefined
   const panelDetail = newAreaDetail ?? newVariantDetail ?? editAreaDetail
@@ -209,11 +224,11 @@ export const PageModeSpaceFinder = () => {
     )
   }
 
-  // Header ➕/⋯ menus: hidden in a detail view and on mobile (D10 — creating/editing needs desktop).
+  // Header ➕/⋯ menus: hidden in a detail view and on mobile (D10, creating/editing needs desktop).
   const openNewArea = () => openAreaForm({ new: 'area' })
 
   // Header actions belong to the Planungsgebiet (the collection); variant actions live in the
-  // Varianten bar. Without any Gebiet, ➕ creates the first one — like Prüflisten with zero lists.
+  // Varianten bar. Without any Gebiet, ➕ creates the first one, like Prüflisten with zero lists.
   const showHeaderActions = !panelDetail && isDesktop
   const actions = !showHeaderActions ? undefined : selectedOption ? (
     <SpaceFinderAreaManageMenu
@@ -278,7 +293,7 @@ export const PageModeSpaceFinder = () => {
     >
       <SpaceFinderCandidateSelectionReset />
       {activeVariant != null ? (
-        <SpaceFinderBody regionSlug={regionSlug} variantId={activeVariant} editable={isDesktop} />
+        <SpaceFinderBody regionSlug={regionSlug} variant={variant} editable={isDesktop} />
       ) : sortedAreas.length === 0 ? (
         isDesktop ? (
           <SpaceFinderEmptyState onCreate={openNewArea} />

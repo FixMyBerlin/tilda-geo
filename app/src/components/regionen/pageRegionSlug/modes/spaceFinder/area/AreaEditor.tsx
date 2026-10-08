@@ -9,7 +9,7 @@ import {
   planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
-import { useSpaceFinderBoundaryState } from '../../../hooks/mapState/useSpaceFinderBoundaryState'
+import { useSpaceFinderBoundaryActions } from '../../../hooks/mapState/space-finder-boundary-store'
 import type { PlanningUseCase } from '../factors/spaceFinderDefaults'
 import { useSpaceFinderModeParam } from '../useSpaceFinderModeParam'
 import { AreaFormFields, useEffectiveStudyArea, useStudyAreaKm2 } from './AreaFormFields'
@@ -33,7 +33,7 @@ const AreaEditorForm = ({
   onDeleted?: () => void
 }) => {
   const queryClient = useQueryClient()
-  const setBoundaryHighlightGeom = useSpaceFinderBoundaryState((s) => s.setBoundaryHighlightGeom)
+  const { setBoundaryHighlightGeom } = useSpaceFinderBoundaryActions()
   const { spaceFinderMode, setSpaceFinderModeParam } = useSpaceFinderModeParam()
 
   const [title, setTitle] = useState(area.title)

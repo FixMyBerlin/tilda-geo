@@ -10,12 +10,12 @@ import wasmUrl from '@ngageoint/geopackage/dist/sql-wasm.wasm?url'
 const CRS_MEMBER_RE = /"crs"\s*:/
 
 /** True when the file name suggests a GeoPackage that needs conversion to GeoJSON first. */
-export function isGeopackageFile(file: File): boolean {
+export function isGeopackageFile(file: File) {
   return file.name.toLowerCase().endsWith('.gpkg')
 }
 
 /** Cheap textual pre-check so callers can skip the reproject/epsg import for the common case. */
-export function mightNeedReprojection(rawText: string): boolean {
+export function mightNeedReprojection(rawText: string) {
   return CRS_MEMBER_RE.test(rawText)
 }
 
@@ -25,7 +25,7 @@ export function mightNeedReprojection(rawText: string): boolean {
  * CRS stored in the GeoPackage's own `gpkg_spatial_ref_sys` table — no separate reprojection
  * step needed here. Dynamically imports `@ngageoint/geopackage` (SQLite-WASM, ~1-2 MB).
  */
-export async function convertGeopackageToGeoJson(file: File): Promise<GeoJSON.FeatureCollection> {
+export async function convertGeopackageToGeoJson(file: File) {
   const { GeoPackageAPI, setSqljsWasmLocateFile } = await import('@ngageoint/geopackage')
   setSqljsWasmLocateFile(() => wasmUrl)
   const geoPackage = await GeoPackageAPI.open(new Uint8Array(await file.arrayBuffer()))
@@ -50,7 +50,7 @@ export async function convertGeopackageToGeoJson(file: File): Promise<GeoJSON.Fe
  * present — the common case, where the file is assumed to already be WGS84 per RFC 7946.
  * Dynamically imports `reproject` + the `epsg` definition table (~500 KB total).
  */
-export async function reprojectToWgs84<T extends GeoJSON.GeoJSON>(geojson: T): Promise<T> {
+export async function reprojectToWgs84<T extends GeoJSON.GeoJSON>(geojson: T) {
   if (!('crs' in geojson) || geojson.crs == null) return geojson
   const [{ toWgs84 }, { default: epsgDefs }] = await Promise.all([
     import('reproject'),

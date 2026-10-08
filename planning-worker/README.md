@@ -8,7 +8,7 @@ Flächenfinder-MCE-Scoring und schreibt die Ergebnisse nach PostGIS `planning.*`
 
 - **Inputs aus tildas `public`-Schema** statt OSM-PBF: Radwege aus `public.bikelanes`
   (siehe `flaechenfinder/postgis_loader.py`). Weitere Layer (ÖPNV/POI) sind
-  der Erweiterungspunkt und liefern im MVP leere Mengen (der Scorer ist robust dagegen).
+  der Erweiterungspunkt und liefern im MVP leere Mengen (der Scorer behandelt leere Inputs als 0).
 - **Outputs nach `planning.scenario_hexagons`**, getaggt mit
   `run_id` (= `PlanningRun.id`). Ein abgeschlossener Lauf ist unveränderlich.
 - **Job-Loop** (`worker.py`): `LISTEN planning_jobs` + 15s-Poll-Fallback, Claiming via

@@ -1,6 +1,8 @@
+import { check } from '@placemarkio/check-geojson'
 import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { z } from 'zod'
+import { extractStudyAreaGeometry } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/area/extractStudyAreaGeometry'
 import { MAX_STUDY_AREA_KM2, studyAreaSizeKm2 } from '@/lib/planningStudyAreaLimit'
 import {
   MAX_USER_GEOJSON_BYTES,
@@ -23,8 +25,6 @@ import {
   type VariantFactorConfig,
 } from './mergeFactorConfig'
 import { checkParkingDataAvailable } from './parkingDataAvailability.server'
-
-export type { VariantFactorConfig }
 
 // ── factorConfig schemas ───────────────────────────────────────────────────────
 // Variant config: weights and thresholds — no geometry, use-case, or size.
@@ -52,6 +52,12 @@ const VariantFactorConfigSchema = z
   })
   .passthrough()
 
+const parseVariantFactorConfig = (value: unknown) =>
+  VariantFactorConfigSchema.parse(value) as VariantFactorConfig
+
+const parseFactorConfigSnapshot = (value: unknown) =>
+  VariantFactorConfigSchema.parse(value) as FactorConfig
+
 const PlanningUseCaseSchema = z.enum([
   'fahrradbox',
   'fahrradabstellanlage',
@@ -62,12 +68,39 @@ const PlanningUseCaseSchema = z.enum([
 // Merged config (variant + area) — used by UI for map layers and worker payload.
 export type FactorConfig = MergedFactorConfig
 
-const StudyAreaSchema = z
-  .any()
-  .refine(
-    (geom) => geom != null && studyAreaSizeKm2(geom as GeoJSON.Geometry) <= MAX_STUDY_AREA_KM2,
-    { message: `Das Berechnungsgebiet darf maximal ${MAX_STUDY_AREA_KM2} km² groß sein.` },
-  )
+const StudyAreaSchema = z.unknown().transform((val, ctx) => {
+  if (val == null) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Bitte genau ein Polygon oder MultiPolygon hochladen.',
+    })
+    return z.NEVER
+  }
+  let parsed: GeoJSON.GeoJSON
+  try {
+    parsed = check(JSON.stringify(val))
+  } catch (error) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: `Ungültiges GeoJSON: ${(error as Error).message}`,
+    })
+    return z.NEVER
+  }
+  try {
+    const geom = extractStudyAreaGeometry(parsed)
+    if (studyAreaSizeKm2(geom) > MAX_STUDY_AREA_KM2) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: `Das Berechnungsgebiet darf maximal ${MAX_STUDY_AREA_KM2} km² groß sein.`,
+      })
+      return z.NEVER
+    }
+    return geom
+  } catch (e) {
+    ctx.addIssue({ code: z.ZodIssueCode.custom, message: (e as Error).message })
+    return z.NEVER
+  }
+})
 
 const UserGeojsonSchema = z
   .any()
@@ -297,10 +330,19 @@ export const getPlanningVariantFn = createServerFn({ method: 'GET' })
       : variant.area
     const factorConfig = mergeFactorConfig(
       areaInputFromRow(area),
-      variant.factorConfig as VariantFactorConfig,
+      parseVariantFactorConfig(variant.factorConfig),
     )
     const parkingDataAvailable = await checkParkingDataAvailable(area.studyArea)
-    return { ...variant, area, factorConfig: factorConfig as FactorConfig, parkingDataAvailable }
+    return {
+      ...variant,
+      area,
+      factorConfig,
+      parkingDataAvailable,
+      runs: variant.runs.map((run) => ({
+        ...run,
+        factorConfigSnapshot: parseFactorConfigSnapshot(run.factorConfigSnapshot),
+      })),
+    }
   })
 
 const JobIdInput = z.object({ jobId: z.number().int() })
@@ -341,7 +383,7 @@ export const getPlanningJobFn = createServerFn({ method: 'GET' })
     await authorizePlanningRegion(session, job.variant.area.region.slug)
     const fc = mergeFactorConfig(
       areaInputFromRow(job.variant.area),
-      job.variant.factorConfig as VariantFactorConfig,
+      parseVariantFactorConfig(job.variant.factorConfig),
     )
     return {
       id: job.id,
@@ -496,7 +538,7 @@ const CreateAreaInput = z.object({
 
 /** Creates a planning area and its first variant (no auto-run). */
 export const createPlanningAreaFn = createServerFn({ method: 'POST' })
-  .validator((data: z.infer<typeof CreateAreaInput>) => CreateAreaInput.parse(data))
+  .validator((data: z.input<typeof CreateAreaInput>) => CreateAreaInput.parse(data))
   .handler(async ({ data }) => {
     const session = await requireAuth(getRequestHeaders())
     await authorizePlanningRegion(session, data.regionSlug)
@@ -506,7 +548,7 @@ export const createPlanningAreaFn = createServerFn({ method: 'POST' })
         regionId,
         createdById: session.userId,
         title: data.title,
-        studyArea: data.studyArea as Prisma.InputJsonValue,
+        studyArea: data.studyArea as unknown as Prisma.InputJsonValue,
         userGeojson: data.userGeojson as Prisma.InputJsonValue | undefined,
         userGeojsonMode: data.userGeojsonMode,
         useCase: data.useCase ?? 'fahrradbox',
@@ -540,7 +582,7 @@ const UpdateAreaInput = z.object({
 })
 
 export const updatePlanningAreaFn = createServerFn({ method: 'POST' })
-  .validator((data: z.infer<typeof UpdateAreaInput>) => UpdateAreaInput.parse(data))
+  .validator((data: z.input<typeof UpdateAreaInput>) => UpdateAreaInput.parse(data))
   .handler(async ({ data }) => {
     await authorizeByArea(getRequestHeaders(), data.areaId)
     const existing = await db.planningArea.findFirstOrThrow({
@@ -565,7 +607,9 @@ export const updatePlanningAreaFn = createServerFn({ method: 'POST' })
       where: { id: data.areaId },
       data: {
         ...(data.title !== undefined && { title: data.title }),
-        ...(data.studyArea !== undefined && { studyArea: data.studyArea as Prisma.InputJsonValue }),
+        ...(data.studyArea !== undefined && {
+          studyArea: data.studyArea as unknown as Prisma.InputJsonValue,
+        }),
         ...(data.userGeojson !== undefined && {
           userGeojson:
             data.userGeojson == null
@@ -621,7 +665,7 @@ export const updatePlanningVariantFn = createServerFn({ method: 'POST' })
     let factorConfig = data.factorConfig
     if (data.minAreaM2 !== undefined) {
       factorConfig = {
-        ...((factorConfig ?? existing.factorConfig) as VariantFactorConfig),
+        ...parseVariantFactorConfig(factorConfig ?? existing.factorConfig),
         min_area_m2: data.minAreaM2,
       }
     }
@@ -641,7 +685,7 @@ export const updatePlanningVariantFn = createServerFn({ method: 'POST' })
     // `factorsDiffer` ignoriert `min_area_m2`, deshalb reicht der Vergleich der gespeicherten Config.
     if (
       stored !== undefined &&
-      factorsDiffer(existing.factorConfig as VariantFactorConfig, stored)
+      factorsDiffer(parseVariantFactorConfig(existing.factorConfig), stored)
     ) {
       await markRunsStaleForVariant(data.variantId)
     }

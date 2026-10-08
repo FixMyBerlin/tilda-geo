@@ -48,9 +48,8 @@ type Props = {
   actions?: ReactNode
   detail?: ModePanelDetail
   /**
-   * Sticky primary-action bar below the scroll area (e.g. Flächenfinder »Berechnen«). Only
-   * Flächenfinder uses this today; other modes simply omit it. The caller decides when it applies
-   * (e.g. not while a detail view is open).
+   * Sticky primary-action bar below the scroll area (e.g. Flächenfinder »Berechnen«).
+   * Optional. The caller decides when it applies (e.g. not while a detail view is open).
    */
   footer?: ReactNode
   children: ReactNode

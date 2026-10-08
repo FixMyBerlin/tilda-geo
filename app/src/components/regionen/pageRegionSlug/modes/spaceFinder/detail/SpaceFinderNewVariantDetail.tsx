@@ -9,20 +9,22 @@ import {
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
 import { DEFAULT_FACTOR_TEMPLATE } from '../factors/spaceFinderDefaults'
-import { useSpaceFinderModeParam } from '../useSpaceFinderModeParam'
 
 /** ModePanel detail view for »Neue Variante in diesem Gebiet« (`ff.new === 'variant'`). */
 export const SpaceFinderNewVariantDetail = ({
   areaId,
   areaTitle,
   regionSlug,
+  onCreated,
+  onClose,
 }: {
   areaId: number
   areaTitle: string
   regionSlug: string
+  onCreated: (variantId: number) => void
+  onClose: () => void
 }) => {
   const queryClient = useQueryClient()
-  const { spaceFinderMode, setSpaceFinderModeParam } = useSpaceFinderModeParam()
   const [title, setTitle] = useState('')
 
   const mutation = useMutation({
@@ -36,11 +38,9 @@ export const SpaceFinderNewVariantDetail = ({
       toastSuccess(
         title.trim() ? `Variante ${frenchQuote(title.trim())} angelegt.` : 'Variante angelegt.',
       )
-      setSpaceFinderModeParam({ ...spaceFinderMode, key: created.id, new: undefined })
+      onCreated(created.id)
     },
   })
-
-  const closeNew = () => setSpaceFinderModeParam({ ...spaceFinderMode, new: undefined })
 
   return (
     <div className="flex flex-col gap-2 px-4 py-3">
@@ -73,7 +73,7 @@ export const SpaceFinderNewVariantDetail = ({
         </button>
         <button
           type="button"
-          onClick={closeNew}
+          onClick={onClose}
           className="text-xs text-gray-500 hover:text-gray-700"
         >
           Abbrechen
