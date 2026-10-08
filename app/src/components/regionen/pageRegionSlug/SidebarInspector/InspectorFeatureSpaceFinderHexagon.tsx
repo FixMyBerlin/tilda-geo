@@ -15,25 +15,11 @@ import {
 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderPanelStyles'
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
+import { PLANNING_SCORE_LABELS as SCORE_LABELS } from '@/shared/regionen/planningScoreLabels.const'
 import { Disclosure } from './Disclosure/Disclosure'
 
 type Props = {
   feature: StoreFeaturesInspector['inspectorFeatures'][number]
-}
-
-const SCORE_LABELS: Record<string, string> = {
-  score_radweg: 'Radweg',
-  score_hangneigung: 'Hangneigung',
-  score_oepnv: 'ÖPNV + Bikesharing',
-  score_zielorte: 'Zielorte',
-  score_vegetation: 'Vegetation',
-  score_kreuzung: 'Kreuzungen',
-  score_parken: 'Parken',
-  score_platz: 'Plätze',
-  score_fussgaengerzone: 'Fußgängerzonen',
-  score_bestand: 'Bestandsanlagen',
-  score_eigendaten: 'Eigene Daten',
-  score_bewohnerbedarf: 'Bewohnerbedarf (Zensus)',
 }
 
 // Per-hexagon factor breakdown grouped by the two probabilities (Issue #3415).

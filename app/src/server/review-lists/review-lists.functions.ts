@@ -4,6 +4,7 @@ import { z } from 'zod'
 import { ReviewEntryStatus } from '@/prisma/generated/enums'
 import { reviewEntryGeometrySchema } from './geojson'
 import { createReviewEntriesFromGeojson } from './mutations/createReviewEntriesFromGeojson.server'
+import { createReviewEntriesFromSpaceFinder } from './mutations/createReviewEntriesFromSpaceFinder.server'
 import { createReviewEntry } from './mutations/createReviewEntry.server'
 import { createReviewEntryComment } from './mutations/createReviewEntryComment.server'
 import { createReviewList } from './mutations/createReviewList.server'
@@ -84,6 +85,29 @@ export const createReviewEntriesFromGeojsonFn = createServerFn({ method: 'POST' 
     CreateEntriesFromGeojsonInput.parse(data),
   )
   .handler(async ({ data }) => createReviewEntriesFromGeojson(data, getRequestHeaders()))
+
+const CreateEntriesFromSpaceFinderInput = RegionSlug.extend({
+  runId: z.number(),
+  target: z.union([
+    z.object({ listId: z.number() }),
+    z.object({ newListName: z.string().trim().min(1) }),
+  ]),
+  candidates: z.array(
+    z.object({
+      h3Id: z.string(),
+      geometry: z.object({
+        type: z.enum(['Polygon', 'MultiPolygon']),
+        coordinates: z.array(z.any()),
+      }),
+      properties: z.record(z.string(), z.unknown()),
+    }),
+  ),
+})
+export const createReviewEntriesFromSpaceFinderFn = createServerFn({ method: 'POST' })
+  .validator((data: z.infer<typeof CreateEntriesFromSpaceFinderInput>) =>
+    CreateEntriesFromSpaceFinderInput.parse(data),
+  )
+  .handler(async ({ data }) => createReviewEntriesFromSpaceFinder(data, getRequestHeaders()))
 
 const CreateEntryInput = ListInRegion.extend({
   geometry: GeometryInput,

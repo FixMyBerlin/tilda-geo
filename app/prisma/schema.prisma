@@ -629,9 +629,9 @@ model ReviewEntry {
   // to `properties` and can use @@index([listId, importId]) instead of a JSON scan.
   importId     String?
   //
-  // Provenance: uploaded (from a GeoJSON file) vs. manually drawn in the app.
+  // Provenance: uploaded (from a GeoJSON file), manually drawn in the app, or taken over from the Flächenfinder.
   source       ReviewEntrySource       @default(UPLOAD)
-  sourceMeta   Json? // e.g. { filename } for uploads, { date } for manual entries
+  sourceMeta   Json? // e.g. { filename } for uploads, { date } for manual entries, { areaTitle, variantTitle, variantId, runId, h3Id } for SPACE_FINDER
   // Author of a manually drawn entry is createdBy; uploaded entries carry the importer as createdBy.
   createdById  String?
   createdBy    User?                   @relation("ReviewEntryCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
@@ -681,6 +681,7 @@ enum ReviewEntryGeometryType {
 enum ReviewEntrySource {
   UPLOAD
   MANUAL
+  SPACE_FINDER
 
   @@schema("prisma")
 }

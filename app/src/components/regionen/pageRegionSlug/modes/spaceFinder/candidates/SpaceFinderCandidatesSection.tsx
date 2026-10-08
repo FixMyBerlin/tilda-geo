@@ -1,6 +1,11 @@
-import { ArrowDownTrayIcon, SquaresPlusIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import {
+  ArrowDownTrayIcon,
+  ClipboardDocumentCheckIcon,
+  SquaresPlusIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline'
 import { bbox, centroid } from '@turf/turf'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
 import {
@@ -11,7 +16,9 @@ import {
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-candidates-store'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
+import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { CollapsibleBox } from '@/components/shared/CollapsibleBox/CollapsibleBox'
+import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
 import { ModeListItem } from '../../ModeListItem'
 import {
   modePanelListMetaClassName,
@@ -20,6 +27,7 @@ import {
 } from '../../modePanel.const'
 import { useSpaceFinderSelection } from '../useSpaceFinderSelection'
 import { candidateExportFileName, downloadCandidatesGeojson } from './spaceFinderCandidateExport'
+import { SpaceFinderReviewListModal } from './SpaceFinderReviewListModal'
 
 const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
   ausgeschlossen: 'bg-gray-200 text-gray-700',
@@ -123,7 +131,7 @@ const CandidateRow = ({
  * »Auswahl« section (D6): candidate selection lives in the panel, not as a
  * `SidebarInspector` takeover. The toggle switches map clicks on result hexagons between
  * add/remove-candidate and the normal inspector (`RegionMap` `handleClick`, already mode-gated).
- * The only output is the GeoJSON download. There is no Prüflisten handover.
+ * Outputs: the GeoJSON download and the take-over into a Prüfliste (»In Prüfliste übernehmen«).
  */
 export const SpaceFinderCandidatesSection = ({
   variantId,
@@ -132,6 +140,9 @@ export const SpaceFinderCandidatesSection = ({
   variantId: number
   runId: number
 }) => {
+  const regionSlug = useRegion().slug
+  const { variant } = useSpaceFinderSelection()
+  const [reviewListModalOpen, setReviewListModalOpen] = useState(false)
   const candidates = useSpaceFinderCandidates(runId)
   const selectActive = useSpaceFinderCandidateSelectActive()
   const { setSelectActive, removeCandidate, clearCandidates } = useSpaceFinderCandidatesActions()
@@ -212,6 +223,18 @@ export const SpaceFinderCandidatesSection = ({
           <ArrowDownTrayIcon className="size-4" />
           Als GeoJSON herunterladen
         </button>
+        <button
+          type="button"
+          disabled={candidates.length === 0}
+          onClick={(event) => {
+            captureModalOpenOrigin(event.currentTarget)
+            setReviewListModalOpen(true)
+          }}
+          className="flex items-center justify-center gap-2 rounded border border-blue-600 bg-white px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50 disabled:opacity-50"
+        >
+          <ClipboardDocumentCheckIcon className="size-4" />
+          In Prüfliste übernehmen
+        </button>
         {candidates.length > 0 && (
           <button
             type="button"
@@ -222,6 +245,16 @@ export const SpaceFinderCandidatesSection = ({
           </button>
         )}
       </div>
+      {variant && (
+        <SpaceFinderReviewListModal
+          open={reviewListModalOpen}
+          onClose={() => setReviewListModalOpen(false)}
+          regionSlug={regionSlug}
+          runId={runId}
+          candidates={candidates}
+          defaultListName={`Flächenfinder: ${variant.area.title} – ${variant.title}`}
+        />
+      )}
     </CollapsibleBox>
   )
 }

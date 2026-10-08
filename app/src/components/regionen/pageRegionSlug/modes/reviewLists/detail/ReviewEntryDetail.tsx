@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link } from '@tanstack/react-router'
 import { twMerge } from 'tailwind-merge'
+import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { TimeWithRelativeTooltip } from '@/components/shared/date/TimeWithRelativeTooltip'
 import { buttonStyles, buttonStylesOnYellow } from '@/components/shared/links/styles'
@@ -9,11 +11,14 @@ import {
   getReviewEntryFn,
   updateReviewEntryFn,
 } from '@/server/review-lists/review-lists.functions'
+import { parseSpaceFinderSourceMeta } from '@/shared/reviewLists/spaceFinderReviewEntry'
 import { formatUserDisplayName } from '@/shared/userDisplayName'
 import { reviewCommentDraftId } from '../../composerDrafts/composerDraftIds'
 import { ModeCommentComposer } from '../../ModeCommentComposer'
 import { modePanelMutedClassName, modePanelTintHairlineTopClassName } from '../../modePanel.const'
+import { modeRoutePaths } from '../../useCurrentMode'
 import { REVIEW_ENTRY_MOVE_COLOR, REVIEW_ENTRY_MOVE_COLOR_LABEL } from '../reviewEntryMapColors'
+import { REVIEW_ENTRY_SOURCE_DETAIL_LABEL } from '../reviewEntrySourceLabel'
 import { STATUS_LABEL } from '../reviewListsModeFilters'
 import { useReviewListsModeValue } from '../useReviewListsModeParam'
 import { ReviewEntryComment } from './ReviewEntryComment'
@@ -23,6 +28,8 @@ type Props = { entryId: number }
 
 export const ReviewEntryDetail = ({ entryId }: Props) => {
   const regionSlug = useRegionSlug()
+  const region = useRegion()
+  const canOpenInSpaceFinder = region.spaceFinderEnabled
   const { move: isMoveArmed } = useReviewListsModeValue()
   const queryClient = useQueryClient()
 
@@ -61,6 +68,9 @@ export const ReviewEntryDetail = ({ entryId }: Props) => {
 
   const createdByName = formatUserDisplayName(entry.createdBy)
   const updatedByName = formatUserDisplayName(entry.updatedBy)
+  const spaceFinderOrigin =
+    entry.source === 'SPACE_FINDER' ? parseSpaceFinderSourceMeta(entry.sourceMeta) : null
+  const spaceFinderVariant = entry.spaceFinderVariant
   const wasUpdated = new Date(entry.updatedAt).getTime() !== new Date(entry.createdAt).getTime()
 
   return (
@@ -68,10 +78,35 @@ export const ReviewEntryDetail = ({ entryId }: Props) => {
       <div className="space-y-3 px-4 pt-4 pb-4">
         <div className="min-w-0 text-xs text-gray-500">
           <p className="truncate">
-            {entry.source === 'MANUAL' ? 'Manuell erstellt' : 'Importiert'}{' '}
+            {REVIEW_ENTRY_SOURCE_DETAIL_LABEL[entry.source]}{' '}
             <TimeWithRelativeTooltip date={entry.createdAt} timeClassName="text-inherit" />
             {createdByName ? ` von ${createdByName}` : null}
           </p>
+          {spaceFinderOrigin ? (
+            <p className="flex flex-wrap items-center gap-x-2">
+              <span className="truncate">
+                {[spaceFinderOrigin.areaTitle, spaceFinderOrigin.variantTitle]
+                  .filter(Boolean)
+                  .join(' · ')}
+              </span>
+              {spaceFinderVariant && canOpenInSpaceFinder ? (
+                <Link
+                  from="/regionen/$regionSlug"
+                  to={modeRoutePaths.spaceFinder}
+                  params={{ regionSlug }}
+                  search={(prev) => ({ ...prev, space: { key: spaceFinderVariant.id } })}
+                  className="font-medium text-gray-700 underline"
+                >
+                  Im Flächenfinder öffnen
+                </Link>
+              ) : null}
+              {spaceFinderVariant &&
+              spaceFinderOrigin.runId != null &&
+              spaceFinderVariant.currentRunId !== spaceFinderOrigin.runId ? (
+                <span>(Variante wurde seitdem neu berechnet)</span>
+              ) : null}
+            </p>
+          ) : null}
           {wasUpdated ? (
             <p className="truncate">
               Zuletzt aktualisiert{' '}

@@ -1,5 +1,6 @@
 import type { VariantFactorConfig } from '@/server/planning/mergeFactorConfig'
 import type { FactorConfig } from '@/server/planning/planning.functions'
+import { PLANNING_USE_CASE_LABELS } from '@/shared/regionen/planningScoreLabels.const'
 import { DEFAULT_OEPNV_SHARES } from './oepnvCategories'
 import { DEFAULT_ZIELORT_SHARES } from './zielortCategories'
 
@@ -70,10 +71,18 @@ export const PLANNING_USE_CASES: {
   label: string
   defaultAreaM2: number | null
 }[] = [
-  { key: 'fahrradbox', label: 'Fahrradboxen', defaultAreaM2: 2 },
-  { key: 'fahrradabstellanlage', label: 'Fahrradabstellanlage', defaultAreaM2: 20 },
-  { key: 'mobilitaetsstation', label: 'Mobilitätsstationen', defaultAreaM2: 50 },
-  { key: 'sonstiges', label: 'Sonstiges', defaultAreaM2: null },
+  { key: 'fahrradbox', label: PLANNING_USE_CASE_LABELS.fahrradbox!, defaultAreaM2: 2 },
+  {
+    key: 'fahrradabstellanlage',
+    label: PLANNING_USE_CASE_LABELS.fahrradabstellanlage!,
+    defaultAreaM2: 20,
+  },
+  {
+    key: 'mobilitaetsstation',
+    label: PLANNING_USE_CASE_LABELS.mobilitaetsstation!,
+    defaultAreaM2: 50,
+  },
+  { key: 'sonstiges', label: PLANNING_USE_CASE_LABELS.sonstiges!, defaultAreaM2: null },
 ]
 
 export const GROUP_HELP: Record<'bedarf' | 'bebauung' | 'eigendaten', string> = {
