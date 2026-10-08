@@ -1,5 +1,10 @@
 import { z } from 'zod'
-import { requireAuth } from '@/server/auth/session.server'
+import { runWithAuditContextAsync } from '@/server/audit/auditContext.server'
+import {
+  type MemberCaller,
+  memberAuditContext,
+  requireMemberSession,
+} from '@/server/auth/memberCaller.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
 
@@ -13,8 +18,8 @@ const Schema = z.object({
  * Member rename of a review list linked to the acting region. Region links are admin-only
  * (`updateReviewListForAdmin`).
  */
-export async function updateReviewList(input: z.infer<typeof Schema>, headers: Headers) {
-  const session = await requireAuth(headers)
+export async function updateReviewList(input: z.infer<typeof Schema>, caller: MemberCaller) {
+  const session = await requireMemberSession(caller)
   const { regionSlug, listId, name } = Schema.parse(input)
 
   await authorizeRegionMemberByRegionSlug(session, regionSlug)
@@ -24,9 +29,11 @@ export async function updateReviewList(input: z.infer<typeof Schema>, headers: H
     select: { id: true },
   })
 
-  return db.reviewList.update({
-    where: { id: list.id },
-    data: { updatedById: session.userId, name },
-    select: { id: true, name: true },
-  })
+  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
+    db.reviewList.update({
+      where: { id: list.id },
+      data: { updatedById: session.userId, name },
+      select: { id: true, name: true },
+    }),
+  )
 }

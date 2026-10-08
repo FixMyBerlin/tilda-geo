@@ -1,5 +1,5 @@
 /** @type {import('knip').KnipConfig} */
-// @see .agents/skills/tech-stack/references/knip.md
+// @see https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tech-stack/references/knip.md
 const strict = process.env.KNIP_STRICT === '1'
 
 export default {

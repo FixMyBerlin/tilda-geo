@@ -29,7 +29,7 @@ export const legendSurfaceBad = [
 
 export const subcat_surface_roads: FileMapDataSubcategory = {
   id: subcatId,
-  name: 'Fahrbahn',
+  name: 'Straßen',
   ui: 'dropdown',
   sourceId: source,
   styles: [
@@ -46,7 +46,7 @@ export const subcat_surface_roads: FileMapDataSubcategory = {
     },
     {
       id: 'bad',
-      name: 'Schlechte Oberflächen auf Nebenstraßen',
+      name: 'Nur schlechte Oberflächen',
       layers: mapboxStyleLayers({
         layers: mapboxStyleGroupLayers_atlas_roads_smooth_bad,
         source,

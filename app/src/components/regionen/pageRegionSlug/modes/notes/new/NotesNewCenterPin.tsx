@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
 import { modeIdentity } from '../../modeIdentity'
+import { ModeMapHint } from '../../ModeMapHint'
 import { useNotesComposeActive } from '../useNotesComposeActive'
 
 /**
@@ -53,15 +54,9 @@ const NotesNewCenterPinSession = () => {
         </div>
       </div>
       {showHint ? (
-        <div
-          className={twJoin(
-            'absolute inset-x-4 top-[calc(50%+2.5rem)] z-50 rounded-sm p-1.5 text-center text-sm text-white shadow-sm sm:inset-x-20 sm:p-2',
-            accent.className,
-          )}
-        >
-          Bewegen Sie die Karte, um das Kreuz dort zu positionieren, wo Sie Ihren Hinweis eintragen
-          möchten.
-        </div>
+        <ModeMapHint anchor="pin">
+          Karte verschieben, bis das Kreuz an der Stelle für den Hinweis liegt.
+        </ModeMapHint>
       ) : null}
     </div>
   )

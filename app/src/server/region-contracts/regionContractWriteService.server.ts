@@ -1,4 +1,5 @@
 import { runWithAuditContextAsync, type AuditContext } from '@/server/audit/auditContext.server'
+import { auditRegionLinksChange } from '@/server/audit/auditRegionLinks.server'
 import db from '@/server/db.server'
 import {
   regionContractConfigToCreateData,
@@ -35,12 +36,21 @@ export async function createRegionContract(
   auditContext: AuditContext = {},
 ) {
   const data = RegionContractConfigSchema.parse(config)
-  const created = await runWithAuditContextAsync(auditContext, () =>
-    db.regionContract.create({
-      data: regionContractConfigToCreateData(data),
+  const created = await runWithAuditContextAsync(auditContext, async () => {
+    // No `include` on the write: the audit extension would log the included relations as columns.
+    const { id } = await db.regionContract.create({ data: regionContractConfigToCreateData(data) })
+    const contract = await db.regionContract.findUniqueOrThrow({
+      where: { id },
       include: regionContractDetailInclude,
-    }),
-  )
+    })
+    await auditRegionLinksChange({
+      model: 'RegionContract',
+      recordId: id,
+      oldRegionSlugs: [],
+      newRegionSlugs: contract.regions.map((region) => region.slug),
+    })
+    return contract
+  })
   return regionContractRowToDetail(created)
 }
 
@@ -50,16 +60,30 @@ export async function updateRegionContract(
   auditContext: AuditContext = {},
 ) {
   const data = RegionContractConfigSchema.parse(config)
-  const existing = await db.regionContract.findUnique({ where: { slug } })
+  const existing = await db.regionContract.findUnique({
+    where: { slug },
+    include: regionContractDetailInclude,
+  })
   if (!existing) throw new Error(`Auftrag nicht gefunden: ${slug}`)
 
-  const updated = await runWithAuditContextAsync(auditContext, () =>
-    db.regionContract.update({
+  const updated = await runWithAuditContextAsync(auditContext, async () => {
+    // No `include` on the write: the audit extension would log the included relations as columns.
+    await db.regionContract.update({
       where: { slug },
       data: regionContractConfigToUpdateData(data),
+    })
+    const contract = await db.regionContract.findUniqueOrThrow({
+      where: { id: existing.id },
       include: regionContractDetailInclude,
-    }),
-  )
+    })
+    await auditRegionLinksChange({
+      model: 'RegionContract',
+      recordId: existing.id,
+      oldRegionSlugs: existing.regions.map((region) => region.slug),
+      newRegionSlugs: contract.regions.map((region) => region.slug),
+    })
+    return contract
+  })
   return regionContractRowToDetail(updated)
 }
 

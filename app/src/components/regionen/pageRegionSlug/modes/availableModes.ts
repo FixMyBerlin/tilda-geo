@@ -1,4 +1,5 @@
 import type { TRegion } from '@/server/regions/regionConfigMapper.server'
+import { calculatorDatasetsForCategories } from './calculator/calculatorDatasets.const'
 import type { RegionMode } from './useCurrentMode'
 
 /** Which mode pages a region offers. The default `map` mode is always available. */
@@ -11,6 +12,7 @@ type AvailableModes = Record<Exclude<RegionMode, 'map'>, boolean>
  * - notes: OSM notes or TILDA internal notes enabled
  * - qa: at least one active QA config the current user may see
  * - reviewLists: at least one assigned list, or the user is a region member/admin (can create the first)
+ * - calculator: the region has a category with a dataset that can be summed
  * - spaceFinder: `region.spaceFinderEnabled` and the user is a region member/admin (always member-only)
  */
 export const deriveAvailableModes = ({
@@ -19,7 +21,7 @@ export const deriveAvailableModes = ({
   reviewListsCount = 0,
   canManage = false,
 }: {
-  region: Pick<TRegion, 'notesOsm' | 'notesInternal' | 'spaceFinderEnabled'>
+  region: Pick<TRegion, 'notesOsm' | 'notesInternal' | 'categories' | 'spaceFinderEnabled'>
   qaConfigsCount: number
   reviewListsCount?: number
   /** Region member/admin. Can open Prüflisten before any list exists. */
@@ -29,6 +31,7 @@ export const deriveAvailableModes = ({
     notes: region.notesOsm || region.notesInternal,
     qa: qaConfigsCount > 0,
     reviewLists: reviewListsCount > 0 || canManage,
+    calculator: calculatorDatasetsForCategories(region.categories).length > 0,
     spaceFinder: region.spaceFinderEnabled && canManage,
   } satisfies AvailableModes
 }
@@ -36,11 +39,13 @@ export const deriveAvailableModes = ({
 /**
  * QA, Prüflisten and Flächenfinder are always member-only (every planning server function already
  * requires membership). Hinweise is member-only when the region has only internal notes.
+ * Summieren is open to everyone who can see the region.
  */
 export const isMemberOnlyMode = (
   mode: Exclude<RegionMode, 'map'>,
   region: Pick<TRegion, 'notesOsm' | 'notesInternal'>,
 ) => {
   if (mode === 'qa' || mode === 'reviewLists' || mode === 'spaceFinder') return true
+  if (mode === 'calculator') return false
   return Boolean(region.notesInternal && !region.notesOsm)
 }

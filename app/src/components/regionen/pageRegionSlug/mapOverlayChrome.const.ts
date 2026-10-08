@@ -6,6 +6,13 @@ const mapOverlayRadiusClassName = 'rounded'
 /** Desktop category / layer-controls sheet. Fits subcategory dropdowns (`w-50` + `px-2`). */
 export const mapOverlayLayerControlsWidthClassName = 'w-54'
 
+/**
+ * Left edge for map overlays that are centered in the visible map while the layer-controls
+ * sheet is open: inset + sheet width (`w-54`) + a gap.
+ */
+export const mapOverlayBesideLayerControlsClassName =
+  'sm:left-[calc(var(--map-overlay-inset)+13.5rem+0.75rem)]'
+
 /** Map-column cap for floating sheets: inset on top and bottom, height otherwise content-sized. */
 export const mapOverlayMaxHeightClassName = 'max-h-[calc(100%-2*var(--map-overlay-inset))]'
 

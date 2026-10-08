@@ -34,7 +34,7 @@ Helpers in [`tests/utils/maps.ts`](utils/maps.ts):
 - `getMapLayerIds` — reads `window.__mainMap.getStyle().layers` (requires prior `waitForMapLoad`)
 - `verifyMapRendered`, `checkMapTilesLoaded`
 
-App wiring: `exposeMainMapForDebugging` / `firePlaywrightMapLoadedEvent` in `src/components/shared/utils/playwright.ts` (called from `RegionMap` `onLoad`). Skills: [playwright-skill](../../.agents/skills/playwright-skill/SKILL.md), [react-map-gl map-debug-exposure](../../.agents/skills/react-map-gl/references/map-debug-exposure.md).
+App wiring: `exposeMainMapForDebugging` / `firePlaywrightMapLoadedEvent` in `src/components/shared/utils/playwright.ts` (called from `RegionMap` `onLoad`). Skills: [playwright-skill](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/playwright-skill/SKILL.md), [react-map-gl map-debug-exposure](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/react-map-gl/references/map-debug-exposure.md).
 
 ## LLM Usage
 

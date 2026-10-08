@@ -1,4 +1,5 @@
 import {
+  CalculatorIcon,
   ChatBubbleLeftRightIcon,
   CheckBadgeIcon,
   ClipboardDocumentCheckIcon,
@@ -21,12 +22,16 @@ type ModeAccent = {
   tintEmphasisClassName: string
 }
 
-/** Compact `shortLabel` is for the mobile header control (QA is too long for that slot). */
+/**
+ * Compact `shortLabel` is for the mobile header control (QA is too long for that slot).
+ * `compact` modes are tools: the desktop switcher shows only their icon until they are active.
+ */
 export const modeIdentity = {
   map: {
     label: 'Karte',
     shortLabel: 'Karte',
     icon: MapIcon,
+    compact: false,
     accent: {
       className: 'bg-brand',
       textClassName: 'text-brand',
@@ -42,6 +47,7 @@ export const modeIdentity = {
     label: 'Hinweise',
     shortLabel: 'Hinweise',
     icon: ChatBubbleLeftRightIcon,
+    compact: false,
     accent: {
       className: 'bg-sky-700',
       textClassName: 'text-sky-700',
@@ -57,6 +63,7 @@ export const modeIdentity = {
     label: 'Qualitätssicherung',
     shortLabel: 'QA',
     icon: CheckBadgeIcon,
+    compact: false,
     accent: {
       className: 'bg-violet-600',
       textClassName: 'text-violet-600',
@@ -72,6 +79,7 @@ export const modeIdentity = {
     label: 'Prüflisten',
     shortLabel: 'Prüflisten',
     icon: ClipboardDocumentCheckIcon,
+    compact: false,
     accent: {
       className: 'bg-teal-600',
       textClassName: 'text-teal-600',
@@ -87,6 +95,7 @@ export const modeIdentity = {
     label: 'Flächenfinder',
     shortLabel: 'Flächen',
     icon: Squares2X2Icon,
+    compact: false,
     accent: {
       className: 'bg-emerald-700',
       textClassName: 'text-emerald-700',
@@ -98,9 +107,25 @@ export const modeIdentity = {
       tintEmphasisClassName: 'bg-emerald-700/20',
     },
   },
+  calculator: {
+    label: 'Summieren',
+    shortLabel: 'Summieren',
+    icon: CalculatorIcon,
+    compact: true,
+    accent: {
+      className: 'bg-fuchsia-700',
+      textClassName: 'text-fuchsia-700',
+      hex: '#a21caf',
+      rgb: [162, 28, 175],
+      invertedFgClassName: 'text-white',
+      invertedMutedClassName: 'text-white/80',
+      tintClassName: 'bg-fuchsia-700/10',
+      tintEmphasisClassName: 'bg-fuchsia-700/20',
+    },
+  },
 } as const satisfies Record<
   RegionMode,
-  { label: string; shortLabel: string; accent: ModeAccent; icon: ModeIcon }
+  { label: string; shortLabel: string; accent: ModeAccent; icon: ModeIcon; compact: boolean }
 >
 
 /** Modes that own inspector / map chrome (not the default map). */

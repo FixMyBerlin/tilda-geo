@@ -7,6 +7,10 @@ import type { MapRef } from 'react-map-gl/maplibre'
  * lifts zoom/search above it (`--mode-mobile-dock-height`). This file is the camera side:
  * `flyTo` / `fitBounds` treat “center” as the remaining visible canvas, so a pin is not
  * hidden under the sheet. `ModeMobileDock` measures its height and passes it in as px.
+ *
+ * The padding only stays on the map because `<Map>` gets no `padding` prop (`RegionMap.tsx`).
+ * The stored map bounds (`useMapBounds`) are always the whole canvas, including the part under
+ * the dock; lists that filter by "current view" use `useMapViewportBbox`, which leaves it out.
  */
 export const MODE_MAP_CAMERA_EDGE_INSET_PX = 16
 

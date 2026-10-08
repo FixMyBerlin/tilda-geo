@@ -13,6 +13,7 @@ const regionModeRouteIds = {
   qa: '/regionen/$regionSlug/qa',
   reviewLists: '/regionen/$regionSlug/prueflisten',
   spaceFinder: '/regionen/$regionSlug/flaechenfinder',
+  calculator: '/regionen/$regionSlug/summieren',
 } as const
 
 /** Link `to` paths. Map omits the trailing slash that `regionModeRouteIds` uses for committed matching. */
@@ -22,9 +23,17 @@ export const modeRoutePaths = {
   qa: '/regionen/$regionSlug/qa',
   reviewLists: '/regionen/$regionSlug/prueflisten',
   spaceFinder: '/regionen/$regionSlug/flaechenfinder',
+  calculator: '/regionen/$regionSlug/summieren',
 } as const
 
-export const regionModeOrder = ['map', 'notes', 'qa', 'reviewLists', 'spaceFinder'] as const
+export const regionModeOrder = [
+  'map',
+  'notes',
+  'qa',
+  'reviewLists',
+  'spaceFinder',
+  'calculator',
+] as const
 
 export type RegionMode = keyof typeof regionModeRouteIds
 
@@ -36,6 +45,7 @@ const regionModeFlags = (mode: RegionMode) =>
     isQa: mode === 'qa',
     isReviewLists: mode === 'reviewLists',
     isSpaceFinder: mode === 'spaceFinder',
+    isCalculator: mode === 'calculator',
   }) satisfies {
     mode: RegionMode
     isMap: boolean
@@ -43,6 +53,7 @@ const regionModeFlags = (mode: RegionMode) =>
     isQa: boolean
     isReviewLists: boolean
     isSpaceFinder: boolean
+    isCalculator: boolean
   }
 
 /**
@@ -57,6 +68,7 @@ export const useCurrentMode = () => {
   if (deepestRouteId === regionModeRouteIds.qa) return regionModeFlags('qa')
   if (deepestRouteId === regionModeRouteIds.reviewLists) return regionModeFlags('reviewLists')
   if (deepestRouteId === regionModeRouteIds.spaceFinder) return regionModeFlags('spaceFinder')
+  if (deepestRouteId === regionModeRouteIds.calculator) return regionModeFlags('calculator')
   return regionModeFlags('map')
 }
 

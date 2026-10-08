@@ -10,7 +10,7 @@ function hasOldLitConfig(category: MapDataCategoryParam) {
 
 // Old Beleuchtung URLs used dropdown styles (`hidden` / `default` / `lit` / `completeness`)
 // and/or a `lit-completeness` checkbox. Do not preserve those choices: turn the category on
-// and drop subcategory state so merge applies current defaults (all dataset checkboxes on).
+// and drop subcategory state so merge applies current defaults.
 export function migrateOldLitCategory(category: MapDataCategoryParam) {
   if (category.id !== 'lit' || !hasOldLitConfig(category)) return category
 

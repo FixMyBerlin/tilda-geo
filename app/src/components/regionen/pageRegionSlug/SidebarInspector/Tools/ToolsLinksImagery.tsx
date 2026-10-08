@@ -27,12 +27,10 @@ export const ToolsLinksImagery = ({ geometry }: Props) => {
   const openers = getLocationOpenersAt(lngLat).filter((opener) =>
     imageryOpenerIds.includes(opener.id),
   )
+  // Read the clock once, when the links first show: render has to give the same result each time.
+  const [dateFrom] = useState(() => format(subYears(new Date(), imageryMaxAgeYears), 'yyyy-MM-dd'))
 
-  const target: OpenTarget = {
-    lngLat,
-    zoom: mapParam.zoom,
-    dateFrom: format(subYears(new Date(), imageryMaxAgeYears), 'yyyy-MM-dd'),
-  }
+  const target: OpenTarget = { lngLat, zoom: mapParam.zoom, dateFrom }
 
   return openers.map((opener) => (
     <ToolsLinkImagery key={opener.id} opener={opener} target={target} />

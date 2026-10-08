@@ -31,7 +31,7 @@ export const subcat_surface_bikelane: FileMapDataSubcategory = {
     },
     {
       id: 'bad',
-      name: 'Schlechte Oberflächenqualität',
+      name: 'Nur schlechte Oberflächen',
       layers: mapboxStyleLayers({
         layers: withBikelaneVisualLineOffset(mapboxStyleGroupLayers_atlas_bikelanes_smooth_bad),
         source,

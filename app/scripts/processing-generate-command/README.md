@@ -2,7 +2,7 @@
 
 [`processing`](../../package.json) builds **one shell command** that runs `docker compose up … processing` from the **git repo root** with per-run env overrides (same idea as the **test-processing-diff** Cursor skill and [`processing/README.md`](../../../processing/README.md) § diffing).
 
-- Skill: `.cursor/skills/test-processing-diff/SKILL.md`.
+- Skill: `.agents/skills/test-processing-diff/SKILL.md`.
 - **Interactive (TTY):** after prompts, choose **Show command** (copy-paste) or **Run command** (executes in this terminal with live logs).
 - **Non-interactive:** prints one line to stdout only (CI/agents). Paste from **`app/` or any cwd**: it cds to the absolute repo root inside a subshell, runs compose there, then returns—your shell’s directory does not change.
 - Ensure Postgres is up first, e.g. `docker compose up -d db` from the repo root; `processing` waits on a healthy `db`.

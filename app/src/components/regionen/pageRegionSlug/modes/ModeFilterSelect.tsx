@@ -35,10 +35,15 @@ type Props<T extends string> = {
   value: T
   options: readonly ModeFilterSelectOption<T>[]
   onChange: (value: T) => void
+  /**
+   * Shown before the value in the closed state (`{icon} {triggerPrefix}: {value}`), for a select
+   * whose values do not say what they are about.
+   */
+  triggerPrefix?: string
 }
 
 /**
- * Compact filter Listbox. Closed: `{icon} {value}` (truncated). Open: the same icon plus
+ * Compact filter Listbox. Closed: `{icon} {value}` (truncated; see `triggerPrefix`). Open: the same icon plus
  * `{label}` as a header so the chip and the menu stay correlated.
  */
 export const ModeFilterSelect = <T extends string>({
@@ -47,12 +52,18 @@ export const ModeFilterSelect = <T extends string>({
   value,
   options,
   onChange,
+  triggerPrefix,
 }: Props<T>) => {
   const selected = options.find((option) => option.value === value) ?? options[0]
   if (!selected) return null
 
   return (
-    <Listbox as="div" className="max-w-28 min-w-0" value={selected.value} onChange={onChange}>
+    <Listbox
+      as="div"
+      className={twJoin('min-w-0', triggerPrefix ? 'max-w-52' : 'max-w-28')}
+      value={selected.value}
+      onChange={onChange}
+    >
       <ListboxButton
         aria-label={`${label}: ${selected.label}`}
         title={label}
@@ -60,7 +71,10 @@ export const ModeFilterSelect = <T extends string>({
       >
         <span className="flex min-w-0 items-center gap-1">
           <Icon className="size-3.5 shrink-0 text-gray-500" aria-hidden="true" />
-          <span className="truncate">{selected.label}</span>
+          <span className="truncate">
+            {triggerPrefix && <span className="text-gray-500">{triggerPrefix}: </span>}
+            {selected.label}
+          </span>
         </span>
         <ChevronDownIcon className="size-3.5 shrink-0" aria-hidden="true" />
       </ListboxButton>

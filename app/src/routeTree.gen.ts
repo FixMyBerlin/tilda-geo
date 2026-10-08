@@ -59,6 +59,7 @@ import { Route as AdminProcessingIndexRouteImport } from './routes/admin/process
 import { Route as AdminNoteFoldersIndexRouteImport } from './routes/admin/note-folders/index'
 import { Route as AdminMapDatasetUploadsIndexRouteImport } from './routes/admin/map-dataset-uploads/index'
 import { Route as AdminMapDatasetCategoriesIndexRouteImport } from './routes/admin/map-dataset-categories/index'
+import { Route as RegionenRegionSlugSummierenRouteImport } from './routes/regionen/$regionSlug/summieren'
 import { Route as RegionenRegionSlugQaRouteImport } from './routes/regionen/$regionSlug/qa'
 import { Route as RegionenRegionSlugPrueflistenRouteImport } from './routes/regionen/$regionSlug/prueflisten'
 import { Route as RegionenRegionSlugHinweiseRouteImport } from './routes/regionen/$regionSlug/hinweise'
@@ -371,6 +372,12 @@ const AdminMapDatasetCategoriesIndexRoute =
     id: '/',
     path: '/',
     getParentRoute: () => AdminMapDatasetCategoriesRoute,
+  } as any)
+const RegionenRegionSlugSummierenRoute =
+  RegionenRegionSlugSummierenRouteImport.update({
+    id: '/summieren',
+    path: '/summieren',
+    getParentRoute: () => RegionenRegionSlugRouteRoute,
   } as any)
 const RegionenRegionSlugQaRoute = RegionenRegionSlugQaRouteImport.update({
   id: '/qa',
@@ -767,6 +774,7 @@ export interface FileRoutesByFullPath {
   '/regionen/$regionSlug/hinweise': typeof RegionenRegionSlugHinweiseRoute
   '/regionen/$regionSlug/prueflisten': typeof RegionenRegionSlugPrueflistenRoute
   '/regionen/$regionSlug/qa': typeof RegionenRegionSlugQaRoute
+  '/regionen/$regionSlug/summieren': typeof RegionenRegionSlugSummierenRoute
   '/admin/map-dataset-categories/': typeof AdminMapDatasetCategoriesIndexRoute
   '/admin/map-dataset-uploads/': typeof AdminMapDatasetUploadsIndexRoute
   '/admin/note-folders/': typeof AdminNoteFoldersIndexRoute
@@ -864,6 +872,7 @@ export interface FileRoutesByTo {
   '/regionen/$regionSlug/hinweise': typeof RegionenRegionSlugHinweiseRoute
   '/regionen/$regionSlug/prueflisten': typeof RegionenRegionSlugPrueflistenRoute
   '/regionen/$regionSlug/qa': typeof RegionenRegionSlugQaRoute
+  '/regionen/$regionSlug/summieren': typeof RegionenRegionSlugSummierenRoute
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesIndexRoute
   '/admin/map-dataset-uploads': typeof AdminMapDatasetUploadsIndexRoute
   '/admin/note-folders': typeof AdminNoteFoldersIndexRoute
@@ -975,6 +984,7 @@ export interface FileRoutesById {
   '/regionen/$regionSlug/hinweise': typeof RegionenRegionSlugHinweiseRoute
   '/regionen/$regionSlug/prueflisten': typeof RegionenRegionSlugPrueflistenRoute
   '/regionen/$regionSlug/qa': typeof RegionenRegionSlugQaRoute
+  '/regionen/$regionSlug/summieren': typeof RegionenRegionSlugSummierenRoute
   '/admin/map-dataset-categories/': typeof AdminMapDatasetCategoriesIndexRoute
   '/admin/map-dataset-uploads/': typeof AdminMapDatasetUploadsIndexRoute
   '/admin/note-folders/': typeof AdminNoteFoldersIndexRoute
@@ -1086,6 +1096,7 @@ export interface FileRouteTypes {
     | '/regionen/$regionSlug/hinweise'
     | '/regionen/$regionSlug/prueflisten'
     | '/regionen/$regionSlug/qa'
+    | '/regionen/$regionSlug/summieren'
     | '/admin/map-dataset-categories/'
     | '/admin/map-dataset-uploads/'
     | '/admin/note-folders/'
@@ -1183,6 +1194,7 @@ export interface FileRouteTypes {
     | '/regionen/$regionSlug/hinweise'
     | '/regionen/$regionSlug/prueflisten'
     | '/regionen/$regionSlug/qa'
+    | '/regionen/$regionSlug/summieren'
     | '/admin/map-dataset-categories'
     | '/admin/map-dataset-uploads'
     | '/admin/note-folders'
@@ -1293,6 +1305,7 @@ export interface FileRouteTypes {
     | '/regionen/$regionSlug/hinweise'
     | '/regionen/$regionSlug/prueflisten'
     | '/regionen/$regionSlug/qa'
+    | '/regionen/$regionSlug/summieren'
     | '/admin/map-dataset-categories/'
     | '/admin/map-dataset-uploads/'
     | '/admin/note-folders/'
@@ -1723,6 +1736,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/map-dataset-categories/'
       preLoaderRoute: typeof AdminMapDatasetCategoriesIndexRouteImport
       parentRoute: typeof AdminMapDatasetCategoriesRoute
+    }
+    '/regionen/$regionSlug/summieren': {
+      id: '/regionen/$regionSlug/summieren'
+      path: '/summieren'
+      fullPath: '/regionen/$regionSlug/summieren'
+      preLoaderRoute: typeof RegionenRegionSlugSummierenRouteImport
+      parentRoute: typeof RegionenRegionSlugRouteRoute
     }
     '/regionen/$regionSlug/qa': {
       id: '/regionen/$regionSlug/qa'
@@ -2355,6 +2375,7 @@ interface RegionenRegionSlugRouteRouteChildren {
   RegionenRegionSlugHinweiseRoute: typeof RegionenRegionSlugHinweiseRoute
   RegionenRegionSlugPrueflistenRoute: typeof RegionenRegionSlugPrueflistenRoute
   RegionenRegionSlugQaRoute: typeof RegionenRegionSlugQaRoute
+  RegionenRegionSlugSummierenRoute: typeof RegionenRegionSlugSummierenRoute
   RegionenRegionSlugIndexRoute: typeof RegionenRegionSlugIndexRoute
 }
 
@@ -2365,6 +2386,7 @@ const RegionenRegionSlugRouteRouteChildren: RegionenRegionSlugRouteRouteChildren
     RegionenRegionSlugHinweiseRoute: RegionenRegionSlugHinweiseRoute,
     RegionenRegionSlugPrueflistenRoute: RegionenRegionSlugPrueflistenRoute,
     RegionenRegionSlugQaRoute: RegionenRegionSlugQaRoute,
+    RegionenRegionSlugSummierenRoute: RegionenRegionSlugSummierenRoute,
     RegionenRegionSlugIndexRoute: RegionenRegionSlugIndexRoute,
   }
 

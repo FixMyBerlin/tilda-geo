@@ -7,7 +7,6 @@ import { subcat_radinfra_currentness } from '../mapDataSubcategories/subcat_radi
 import { subcat_radinfra_lit_bikelanes } from '../mapDataSubcategories/subcat_radinfra_lit_bikelanes.const'
 import { subcat_radinfra_oneway } from '../mapDataSubcategories/subcat_radinfra_oneway.const'
 import { subcat_radinfra_smoothness } from '../mapDataSubcategories/subcat_radinfra_smoothness.const'
-import { subcat_radinfra_stats } from '../mapDataSubcategories/subcat_radinfra_stats'
 import { subcat_radinfra_trafficSigns } from '../mapDataSubcategories/subcat_radinfra_trafficSigns.const'
 import { subcat_radinfra_width } from '../mapDataSubcategories/subcat_radinfra_width.const'
 import type { StaticMapDataCategory } from '../types'
@@ -81,14 +80,5 @@ export const categoriesRadinfra: StaticMapDataCategory[] = [
     name: 'Kampagnen',
     desc: 'Hier gibt es etwas zu tun…',
     subcategories: [{ ...subcat_radinfra_campaigns, defaultStyle: 'default' }],
-  },
-  {
-    id: 'radinfra_statistics',
-    name: 'Statistik',
-    desc: 'Regionale Auswertung',
-    subcategories: [
-      { ...subcat_radinfra_stats, defaultStyle: 'default' },
-      // { ...subcat_poi_boundaries, defaultStyle: 'default' },
-    ],
   },
 ]

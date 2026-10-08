@@ -4,7 +4,7 @@ Processing SQL sometimes needs datasets that are not OpenStreetMap — a city’
 
 This is **not** how layers get onto the map. Map GeoJSON and tiles are static datasets. Use this when `processing/` should read from Postgres.
 
-How to write the spec is in the [`add-db-data-table` skill](../.cursor/skills/add-db-data-table/SKILL.md). CLI commands run from `app/` (each has `--help`).
+How to write the spec is in the [`add-db-data-table` skill](../.agents/skills/add-db-data-table/SKILL.md). CLI commands run from `app/` (each has `--help`).
 
 ## Get data onto every environment
 
@@ -25,7 +25,7 @@ If processing SQL reads this table for map layers, run processing afterwards to 
 On your local machine:
 
 1. Always `bun run data-schema-pull` so local `spec.yaml` matches S3.
-2. Use skill [add-db-data-table](../.cursor/skills/add-db-data-table/SKILL.md) to write or update `data-schema/<table>/spec.yaml`.
+2. Use skill [add-db-data-table](../.agents/skills/add-db-data-table/SKILL.md) to write or update `data-schema/<table>/spec.yaml`.
 3. Place the GeoJSON/GPKG/SQL next to `spec.yaml`. Use a `.sql` dump when the exact DDL must be preserved (text primary keys, production-generated baselines such as the QA voronoi tables) — omit the `import` block in that case.
 4. Run `bun run data-schema-load` to import that source into local `data.<table>`.
 5. Run `bun run data-schema-publish` to dump the local table and upload spec + dump to S3.

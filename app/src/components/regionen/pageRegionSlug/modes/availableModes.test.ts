@@ -2,15 +2,19 @@ import { describe, expect, test } from 'vitest'
 import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { deriveAvailableModes, isMemberOnlyMode } from './availableModes'
 
-const region = (
-  overrides: Partial<Pick<TRegion, 'notesOsm' | 'notesInternal' | 'spaceFinderEnabled'>>,
-) => {
+type RegionFields = Pick<
+  TRegion,
+  'notesOsm' | 'notesInternal' | 'categories' | 'spaceFinderEnabled'
+>
+
+const region = (overrides: Partial<RegionFields>) => {
   return {
     notesOsm: false,
     notesInternal: false,
+    categories: [],
     spaceFinderEnabled: false,
     ...overrides,
-  } satisfies Pick<TRegion, 'notesOsm' | 'notesInternal' | 'spaceFinderEnabled'>
+  } satisfies RegionFields
 }
 
 describe('deriveAvailableModes()', () => {
@@ -66,6 +70,15 @@ describe('deriveAvailableModes()', () => {
       }).spaceFinder,
     ).toBe(true)
   })
+
+  test('calculator mode requires a category with a dataset that can be summed', () => {
+    const calculator = (categories: RegionFields['categories']) =>
+      deriveAvailableModes({ region: region({ categories }), qaConfigsCount: 0 }).calculator
+    expect(calculator([])).toBe(false)
+    expect(calculator(['bikelanes', 'roads'])).toBe(false)
+    expect(calculator(['bikelanes', 'parkingTilda'])).toBe(true)
+    expect(calculator(['parkingLars'])).toBe(false)
+  })
 })
 
 describe('isMemberOnlyMode()', () => {
@@ -75,9 +88,13 @@ describe('isMemberOnlyMode()', () => {
     expect(isMemberOnlyMode('spaceFinder', region({}))).toBe(true)
   })
 
+  test('Summieren is open to everyone who can see the region', () => {
+    expect(isMemberOnlyMode('calculator', region({ notesInternal: true }))).toBe(false)
+  })
+
   test('Hinweise is member-only only when the region has internal notes and no OSM notes', () => {
     expect(isMemberOnlyMode('notes', region({ notesInternal: true }))).toBe(true)
-    expect(isMemberOnlyMode('notes', { notesOsm: true, notesInternal: true })).toBe(false)
+    expect(isMemberOnlyMode('notes', region({ notesOsm: true, notesInternal: true }))).toBe(false)
     expect(isMemberOnlyMode('notes', region({ notesOsm: true }))).toBe(false)
     expect(isMemberOnlyMode('notes', region({}))).toBe(false)
   })

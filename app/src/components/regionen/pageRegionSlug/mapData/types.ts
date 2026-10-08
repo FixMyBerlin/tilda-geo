@@ -56,7 +56,6 @@ export type MapDataSourceCalculator =
       enabled: true
       sumKeys: Partial<Record<'capacity' | 'area' | 'length', string>>
       groupByKeys: string[]
-      queryLayers: string[]
       /** @desc The key used by the highlighting LayerHighlight component to change the appearance of the selected element */
       highlightingKey: string
     }
@@ -64,7 +63,6 @@ export type MapDataSourceCalculator =
       enabled: false
       sumKeys?: undefined
       groupByKeys?: undefined
-      queryLayers?: undefined
       highlightingKey?: undefined
     }
 

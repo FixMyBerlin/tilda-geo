@@ -1,6 +1,6 @@
 # Docker local development
 
-Agent workflow source of truth: [TILDA Geo agent workflow](../.cursor/skills/tilda-geo-agent-workflow/SKILL.md).
+Agent workflow source of truth: [TILDA Geo agent workflow](../.agents/skills/tilda-geo-agent-workflow/SKILL.md).
 
 This page is a human landing page only. Keep operational rules for worktrees, predev, `.env.local`, ports, and Docker stack behavior in the agent workflow skill so agents do not have competing sources of truth.
 

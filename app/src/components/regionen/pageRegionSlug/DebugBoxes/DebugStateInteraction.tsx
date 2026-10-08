@@ -3,7 +3,7 @@ import { useMapDebugShowDebugInfo } from '@/components/regionen/pageRegionSlug/h
 import { useMapDebugSnapshot } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/useCategoriesConfig'
 import { simplifyConfigForParams } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/utils/simplifyConfigForParams'
-import { useDrawParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useDrawParam'
+import { useCalculatorAreas } from '@/components/regionen/pageRegionSlug/modes/calculator/useCalculatorAreas'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { Link } from '@/components/shared/links/Link'
 import { getOsmUrl } from '@/components/shared/utils/getOsmUrl'
@@ -31,7 +31,7 @@ export const DebugStateInteraction = () => {
   const zustandValues = useMapDebugSnapshot()
   const showDebugInfo = useMapDebugShowDebugInfo()
   const { categoriesConfig } = useCategoriesConfig()
-  const { drawParam } = useDrawParam()
+  const { drawAreas: drawParam } = useCalculatorAreas()
   // const { config: configCategories, draw: drawAreasStore } = useSearch<LocationGenerics>()
 
   const keyValue = (object: Record<string, unknown> | object | null) => {

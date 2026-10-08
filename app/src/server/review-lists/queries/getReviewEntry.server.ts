@@ -1,6 +1,6 @@
 import { notFound } from '@tanstack/react-router'
 import { z } from 'zod'
-import { getAppSession } from '@/server/auth/session.server'
+import { type MemberCaller, getMemberSession } from '@/server/auth/memberCaller.server'
 import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
 
@@ -10,10 +10,10 @@ const Schema = z.object({
 })
 
 /** A single review entry with its comments (for the right inspector). */
-export async function getReviewEntry(input: z.infer<typeof Schema>, headers: Headers) {
+export async function getReviewEntry(input: z.infer<typeof Schema>, caller: MemberCaller) {
   const { regionSlug, entryId } = Schema.parse(input)
 
-  const session = await getAppSession(headers)
+  const session = await getMemberSession(caller)
   const { isAuthorized } = await canAccessMemberModeForRegion(session, regionSlug)
   if (!isAuthorized) throw notFound()
 

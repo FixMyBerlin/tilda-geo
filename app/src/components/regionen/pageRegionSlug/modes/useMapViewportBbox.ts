@@ -60,6 +60,32 @@ export const paddedViewportBbox = ({
   ] satisfies [number, number, number, number]
 }
 
+type ViewportInsets = { top: number; right: number; bottom: number; left: number }
+
+/**
+ * Pixel insets of the part of the canvas that counts as "the current view": the small list
+ * padding, or the map's camera padding where that is larger (the mobile mode dock covers the
+ * bottom of the map, see `modeMapCameraPadding.ts`). Falls back to the list padding when the
+ * camera padding leaves nothing visible.
+ */
+export const viewportInsets = (
+  width: number,
+  height: number,
+  cameraPadding: Partial<ViewportInsets>,
+) => {
+  const pad = clampViewportPadding(width, height)
+  const insets = {
+    top: Math.max(pad, cameraPadding.top ?? 0),
+    right: Math.max(pad, cameraPadding.right ?? 0),
+    bottom: Math.max(pad, cameraPadding.bottom ?? 0),
+    left: Math.max(pad, cameraPadding.left ?? 0),
+  } satisfies ViewportInsets
+  if (insets.left + insets.right >= width || insets.top + insets.bottom >= height) {
+    return { top: pad, right: pad, bottom: pad, left: pad } satisfies ViewportInsets
+  }
+  return insets
+}
+
 export const useMapViewportBbox = () => {
   const mapBounds = useMapBounds()
   const { mainMap } = useMap()
@@ -68,14 +94,14 @@ export const useMapViewportBbox = () => {
   const canvas = mainMap.getCanvas()
   const width = canvas.offsetWidth
   const height = canvas.offsetHeight
-  const pad = clampViewportPadding(width, height)
+  const { top, right, bottom, left } = viewportInsets(width, height, mainMap.getPadding())
 
   // All four corners: two opposite corners under-cover a rotated view.
   const corners = [
-    mainMap.unproject([pad, pad]),
-    mainMap.unproject([width - pad, pad]),
-    mainMap.unproject([width - pad, height - pad]),
-    mainMap.unproject([pad, height - pad]),
+    mainMap.unproject([left, top]),
+    mainMap.unproject([width - right, top]),
+    mainMap.unproject([width - right, height - bottom]),
+    mainMap.unproject([left, height - bottom]),
   ]
 
   // Clamping to mapBounds keeps pitched unprojections (horizon) from exploding;

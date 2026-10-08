@@ -1,15 +1,12 @@
-import type { StyleId, SubcategoryId } from '@/components/regionen/pageRegionSlug/mapData/typeId'
+import type { SubcategoryId } from '@/components/regionen/pageRegionSlug/mapData/typeId'
 import type {
   FileMapDataSubcategoryHiddenStyle,
   FileMapDataSubcategoryStyle,
   FileMapDataSubcategoryStyleLegend,
 } from '@/components/regionen/pageRegionSlug/mapData/types'
-import { DisclosureChevron } from '@/components/shared/DisclosureChevron/DisclosureChevron'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
-import {
-  createSubcatStyleKey,
-  createSubcatStyleLegendKey,
-} from '../../utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
+import { createSubcatStyleKey } from '../../utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
+import { DetailToggle } from '../DetailToggle'
 import { useLegendExpanded, useLegendExpandedActions } from './legend-expanded-store'
 import { LegendIconArea } from './LegendIcons/LegendIconArea'
 import { LegendIconCircle } from './LegendIcons/LegendIconCircle'
@@ -27,7 +24,7 @@ type Props = {
   styleConfig: FileMapDataSubcategoryStyle | FileMapDataSubcategoryHiddenStyle | undefined
 }
 
-export const iconFromLegend = (legend: FileMapDataSubcategoryStyleLegend) => {
+const iconFromLegend = (legend: FileMapDataSubcategoryStyleLegend) => {
   if (!legend?.style?.type && !legend?.style?.color) {
     console.warn('pickIconFromLegend: missing data', {
       type: legend?.style?.type,
@@ -87,44 +84,11 @@ const iconByStyle = ({
 const legendLabelPlain = (name: string) =>
   new DOMParser().parseFromString(name, 'text/html').body.textContent?.trim() ?? ''
 
-/** Disclosure-styled toggle (chevron + label); still a plain button, not native details. */
-const LegendDetailToggle = ({
-  expanded,
-  onToggle,
-}: {
-  expanded: boolean
-  onToggle: () => void
-}) => (
-  <button
-    type="button"
-    onClick={onToggle}
-    className="group flex cursor-pointer items-center gap-0.5 text-left text-xs leading-tight text-gray-500 hover:text-gray-800"
-    aria-expanded={expanded}
-  >
-    <DisclosureChevron
-      open={expanded}
-      side="leading"
-      className="size-3.5 text-gray-400 group-hover:text-gray-700"
-    />
-    <span>{expanded ? 'Kompakte Legende' : 'Detaillierte Legende'}</span>
-  </button>
-)
-
-const LegendList = ({
-  subcategoryId,
-  styleId,
-  legends,
-}: {
-  subcategoryId: SubcategoryId
-  styleId: StyleId
-  legends: FileMapDataSubcategoryStyleLegend[]
-}) => (
+const LegendList = ({ legends }: { legends: FileMapDataSubcategoryStyleLegend[] }) => (
   <div className="grid grid-cols-1 gap-x-4 gap-y-1.5 @[17rem]:grid-cols-2">
     {legends.map((legendData) => {
-      const key = createSubcatStyleLegendKey(subcategoryId, styleId, legendData.id)
-
       return (
-        <div className="group relative flex items-start gap-1.5" key={key}>
+        <div className="group relative flex items-start gap-1.5" key={legendData.id}>
           <div className="size-3.5 flex-none">{iconFromLegend(legendData)}</div>
           <LegendNameDesc name={legendData.name} desc={legendData.desc} />
         </div>
@@ -133,22 +97,15 @@ const LegendList = ({
   </div>
 )
 
-const LegendCompactGrid = ({
-  subcategoryId,
-  styleId,
-  legends,
-}: {
-  subcategoryId: SubcategoryId
-  styleId: StyleId
-  legends: FileMapDataSubcategoryStyleLegend[]
-}) => (
-  <div className="grid w-full grid-cols-[repeat(auto-fill,minmax(1.25rem,1.25rem))]">
+const LegendCompactGrid = ({ legends }: { legends: FileMapDataSubcategoryStyleLegend[] }) => (
+  // Negative margin: cells pad the swatch for the hover target; without it the swatches sit
+  // further from the toggle and the left edge than the icons of the detailed list.
+  <div className="-m-0.75 grid w-full grid-cols-[repeat(auto-fill,minmax(1.25rem,1.25rem))]">
     {legends.map((legendData) => {
-      const key = createSubcatStyleLegendKey(subcategoryId, styleId, legendData.id)
       const label = legendLabelPlain(legendData.name)
 
       return (
-        <Tooltip key={key} text={label} placement="left" className="size-5">
+        <Tooltip key={legendData.id} text={label} placement="left" className="size-5">
           <div className="flex size-5 cursor-help items-center justify-center hover:bg-black/5">
             <div className="size-3.5">{iconFromLegend(legendData)}</div>
           </div>
@@ -158,42 +115,58 @@ const LegendCompactGrid = ({
   </div>
 )
 
-export const Legend = ({ subcategoryId, styleConfig }: Props) => {
-  const legends = styleConfig?.legends
-  const legendKey = styleConfig ? createSubcatStyleKey(subcategoryId, styleConfig.id) : ''
+/**
+ * Legend entries with the compact ⇄ detailed toggle; shared by TILDA layers and static datasets.
+ * `legendKey` identifies the legend in the session store that remembers the expanded state.
+ */
+export const LegendItems = ({
+  legendKey,
+  legends,
+}: {
+  legendKey: string
+  legends: FileMapDataSubcategoryStyleLegend[]
+}) => {
   const expanded = useLegendExpanded(legendKey)
   const { expand, collapse } = useLegendExpandedActions()
+
+  const canToggle = legends.length > LEGEND_COMPACT_THRESHOLD
+  const useCompact = canToggle && !expanded
+
+  return (
+    <div className="@container space-y-1.5">
+      {canToggle && (
+        <DetailToggle
+          expanded={expanded}
+          onToggle={() => (expanded ? collapse(legendKey) : expand(legendKey))}
+          label={expanded ? 'Kompakte Legende' : 'Detaillierte Legende'}
+        />
+      )}
+      {useCompact ? (
+        <LegendCompactGrid legends={legends} />
+      ) : (
+        /* Container query: two columns once the legend has room (e.g. the mobile layer
+            sheet); the narrower desktop sidebar stays a single column. */
+        <LegendList legends={legends} />
+      )}
+    </div>
+  )
+}
+
+export const Legend = ({ subcategoryId, styleConfig }: Props) => {
+  const legends = styleConfig?.legends
 
   // Guard: Hide UI when no legends present for active style
   if (!styleConfig || !legends?.length) {
     return null
   }
 
-  const canToggle = legends.length > LEGEND_COMPACT_THRESHOLD
-  const useCompact = canToggle && !expanded
-
   return (
-    <section className="@container relative mt-2 mb-1">
+    <section className="relative mt-2 mb-1">
       <header className="sr-only">Legende</header>
-      <div className="space-y-1.5">
-        {canToggle && (
-          <LegendDetailToggle
-            expanded={expanded}
-            onToggle={() => (expanded ? collapse(legendKey) : expand(legendKey))}
-          />
-        )}
-        {useCompact ? (
-          <LegendCompactGrid
-            subcategoryId={subcategoryId}
-            styleId={styleConfig.id}
-            legends={legends}
-          />
-        ) : (
-          /* Container query: two columns once the legend has room (e.g. the mobile layer
-              sheet); the narrower desktop sidebar stays a single column. */
-          <LegendList subcategoryId={subcategoryId} styleId={styleConfig.id} legends={legends} />
-        )}
-      </div>
+      <LegendItems
+        legendKey={createSubcatStyleKey(subcategoryId, styleConfig.id)}
+        legends={legends}
+      />
     </section>
   )
 }

@@ -21,7 +21,8 @@ export const findGeojson = (datasetFolderPath: string) => {
   const first = filenames[0]
   if (!first) return null
   const fullFilename = path.join(datasetFolderPath, first)
-  if (!fs.lstatSync(fullFilename).isFile()) {
+  // `statSync` follows symlinks: datasets may link to generated files in a sibling repo
+  if (!fs.statSync(fullFilename).isFile()) {
     yellow(`  Path "${fullFilename}" is not a file.`)
     return null
   }

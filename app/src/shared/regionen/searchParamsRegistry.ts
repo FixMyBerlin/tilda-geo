@@ -7,7 +7,6 @@ export const searchParamsRegistry = {
   f: 'f', // selected features
   bg: 'bg',
   bg3d: 'bg3d',
-  draw: 'draw',
   debugMap: 'debugMap',
   qa: 'qa', // QA mode JSON: key, status, users, search
   dialog: 'dialog',
@@ -16,4 +15,5 @@ export const searchParamsRegistry = {
   photos: 'photos', // JSON: street imagery providers, style, date, shown photo (`streetImageryParam.ts`)
   review: 'review', // JSON: key, search, extent, status, source, new, move (`reviewListsModeParam.ts`)
   ff: 'ff', // Flächenfinder mode JSON: key (variant id), score, opacity, minArea, new, edit (`spaceFinderModeParam.ts`)
+  sum: 'sum', // JSON: key (dataset), filter, areas (`calculatorModeParam.ts`)
 } as const

@@ -2,7 +2,7 @@
 
 TanStack Router layout components (`Layout*.tsx`) and shared chrome (Header, Footer, `global.css`). Each route file in `src/routes/` imports exactly one layout from here.
 
-Folder standard: [`.agents/skills/tanstack-start-app-structure/SKILL.md`](../../../../.agents/skills/tanstack-start-app-structure/SKILL.md) → `components/` folder standards.
+Folder standard: skill `tanstack-start-conventions` → [app-structure.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tanstack-start-conventions/references/app-structure.md) → `components/` folder standards.
 
 ## Hierarchy
 

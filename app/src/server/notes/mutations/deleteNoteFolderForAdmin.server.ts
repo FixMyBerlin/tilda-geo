@@ -1,4 +1,5 @@
 import { adminFormAuditContext, runWithAuditContextAsync } from '@/server/audit/auditContext.server'
+import { auditRegionLinksChange } from '@/server/audit/auditRegionLinks.server'
 import { requireAdmin } from '@/server/auth/session.server'
 import db from '@/server/db.server'
 import { DeleteNoteFolderSchema } from '../schemas'
@@ -21,7 +22,18 @@ export async function deleteNoteFolderForAdmin(input: { id: number }, headers: H
     throw new Error('Nur leere Ordner können gelöscht werden.')
   }
 
-  return runWithAuditContextAsync(adminFormAuditContext(headers, admin.userId), () =>
-    db.noteFolder.delete({ where: { id } }),
-  )
+  return runWithAuditContextAsync(adminFormAuditContext(headers, admin.userId), async () => {
+    const before = await db.noteFolder.findUnique({
+      where: { id },
+      select: { regions: { select: { slug: true } } },
+    })
+    const deleted = await db.noteFolder.delete({ where: { id } })
+    await auditRegionLinksChange({
+      model: 'NoteFolder',
+      recordId: id,
+      oldRegionSlugs: before?.regions.map((region) => region.slug) ?? [],
+      newRegionSlugs: [],
+    })
+    return deleted
+  })
 }

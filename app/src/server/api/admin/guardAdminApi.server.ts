@@ -1,3 +1,4 @@
+import { UserRoleEnum } from '@/prisma/generated/client'
 import { verifyAdminApiToken } from '@/server/admin/adminApiTokens.server'
 import {
   getClientIp,
@@ -5,6 +6,7 @@ import {
   recordFailedAdminApiAuth,
 } from '@/server/api/admin/adminApiAuthRateLimit.server'
 import type { AuditChangeSource } from '@/server/audit/auditChangeSources.const'
+import type { AdminApiCaller } from '@/server/auth/memberCaller.server'
 
 export type AdminApiAuth = {
   tokenId: string
@@ -71,4 +73,16 @@ export function adminApiAuditContext(auth: AdminApiAuth, request: Request) {
     userAgent: request.headers.get('user-agent'),
     metadata: { changeSource: auth.changeSource, adminTokenId: auth.tokenId },
   }
+}
+
+/**
+ * The token owner as caller of member functions (notes, Prüflisten). `verifyAdminApiToken` only
+ * accepts tokens whose owner is still an ADMIN, so the role is known without another lookup.
+ */
+export function adminApiMemberCaller(auth: AdminApiAuth, request: Request) {
+  return {
+    headers: request.headers,
+    session: { userId: auth.createdById, role: UserRoleEnum.ADMIN },
+    adminTokenId: auth.tokenId,
+  } satisfies AdminApiCaller
 }

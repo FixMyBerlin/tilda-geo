@@ -1,5 +1,11 @@
 import { z } from 'zod'
-import { requireAuth } from '@/server/auth/session.server'
+import { runWithAuditContextAsync } from '@/server/audit/auditContext.server'
+import { auditRegionLinksChange } from '@/server/audit/auditRegionLinks.server'
+import {
+  type MemberCaller,
+  memberAuditContext,
+  requireMemberSession,
+} from '@/server/auth/memberCaller.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
 
@@ -12,8 +18,8 @@ const Schema = z.object({
  * Member delete of a review list — only when it is empty and linked to the acting region only.
  * Region links are admin-only, so a shared list must be unlinked in admin first.
  */
-export async function deleteReviewList(input: z.infer<typeof Schema>, headers: Headers) {
-  const session = await requireAuth(headers)
+export async function deleteReviewList(input: z.infer<typeof Schema>, caller: MemberCaller) {
+  const session = await requireMemberSession(caller)
   const { regionSlug, listId } = Schema.parse(input)
 
   await authorizeRegionMemberByRegionSlug(session, regionSlug)
@@ -32,5 +38,14 @@ export async function deleteReviewList(input: z.infer<typeof Schema>, headers: H
     )
   }
 
-  return db.reviewList.delete({ where: { id: list.id } })
+  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), async () => {
+    const deleted = await db.reviewList.delete({ where: { id: list.id } })
+    await auditRegionLinksChange({
+      model: 'ReviewList',
+      recordId: list.id,
+      oldRegionSlugs: [regionSlug],
+      newRegionSlugs: [],
+    })
+    return deleted
+  })
 }

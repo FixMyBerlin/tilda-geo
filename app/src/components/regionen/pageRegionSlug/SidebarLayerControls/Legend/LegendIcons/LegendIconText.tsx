@@ -5,8 +5,9 @@ type Props = {
 export const LegendIconText = ({ color = 'black', ...props }: Props) => {
   return (
     <div
-      style={{ color, fontSize: '9px', fontFamily: 'monospace', textAlign: 'center' }}
-      className="flex size-5 items-center justify-center"
+      // Sized to fill the legend's icon box (14px) like the other icons; a wider box overlaps the name.
+      style={{ color, fontSize: '8px', fontFamily: 'monospace', letterSpacing: '-0.5px' }}
+      className="flex size-full items-center justify-center leading-none"
       {...props}
       aria-hidden={true}
     >

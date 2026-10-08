@@ -156,13 +156,6 @@ export default defineConfig({
         'src/server/instrumentation/nitro-sql-registration.plugin.server.ts',
       ],
       sourcemap: true,
-      // Workaround: Nitro's server build doesn't set Rolldown `platform: "node"`, causing CJS interop
-      // crashes for modules like tslib (used by @aws-crypto). Can be removed once on nf3 >= 0.3.11
-      // (which auto-externalizes tslib), or once Nitro properly sets `platform: "node"`.
-      // Reproduction: https://github.com/FixMyBerlin/_reproduction-tanstack-start-nitro-esm-error
-      rolldownConfig: {
-        external: ['@aws-sdk/client-s3', /^@aws-crypto\//, /^@smithy\//],
-      },
     } as Parameters<typeof nitro>[0]),
     tailwindcss(),
     tanstackStart({}),

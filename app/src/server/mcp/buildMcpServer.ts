@@ -1,6 +1,10 @@
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
-import { adminApiAuditContext, type AdminApiAuth } from '@/server/api/admin/guardAdminApi.server'
+import {
+  adminApiAuditContext,
+  adminApiMemberCaller,
+  type AdminApiAuth,
+} from '@/server/api/admin/guardAdminApi.server'
 import { AUDITED_MODELS } from '@/server/audit/auditAuditedModels.const'
 import { auditChangeSourceFilterLabel } from '@/server/audit/auditChangeSources.const'
 import { auditLogFilterWireFields, auditLogListSchema } from '@/server/audit/auditLogFilters.schema'
@@ -23,6 +27,9 @@ import {
   UpdateMapDatasetCategoryInput,
 } from '@/server/map-dataset-categories/mapDatasetCategoryWriteService.server'
 import { mcpEnvLabel } from '@/server/mcp/mcpCursorConfig'
+import { ok, run } from '@/server/mcp/mcpToolResult'
+import { registerNotesTools } from '@/server/mcp/tools/registerNotesTools'
+import { registerReviewListsTools } from '@/server/mcp/tools/registerReviewListsTools'
 import {
   mapProcessingRunDetail,
   mapProcessingRunListItem,
@@ -46,35 +53,14 @@ import {
 } from '@/server/regions/regionWriteService.server'
 import { createRegionUploadFromBytes } from '@/server/regions/uploads/createRegionUploadFromBytes.server'
 import { regionUploadFromBytesInputSchema } from '@/server/regions/uploads/regionUploadFromBytes.schema'
+import {
+  deleteMapDatasetUpload,
+  getMapDatasetUpload,
+  listMapDatasetUploads,
+  removeMapDatasetUploadRegion,
+} from '@/server/uploads/mapDatasetUploadService.server'
 import { joinCommaList } from '@/shared/orderedList/commaList'
 import { offsetSearchFields } from '@/shared/pagination/offsetSearchSchema'
-
-const ok = (data: unknown) => ({
-  content: [
-    {
-      type: 'text' as const,
-      text: typeof data === 'string' ? data : JSON.stringify(data, null, 2),
-    },
-  ],
-})
-
-const fail = (error: unknown) => ({
-  content: [
-    {
-      type: 'text' as const,
-      text: `Error: ${error instanceof Error ? error.message : String(error)}`,
-    },
-  ],
-  isError: true,
-})
-
-const run = async (fn: () => Promise<unknown>) => {
-  try {
-    return ok(await fn())
-  } catch (error) {
-    return fail(error)
-  }
-}
 
 const regionConfigDescription =
   'the full RegionWriteInput (slug, name, fullName, product, status, mapLat/Lng/Zoom, categories, ' +
@@ -102,7 +88,7 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
     {
       instructions:
         `TILDA admin tools bound to the ${envLabel} environment (${origin}). ` +
-        `Writes (regions_*, region_uploads_create, region_contracts_*, map_dataset_categories_*, data_schema_import) mutate the ${envLabel} database — ` +
+        `Writes (regions_*, region_uploads_create, region_contracts_*, map_dataset_categories_*, map_dataset_uploads_delete, map_dataset_uploads_remove_region, data_schema_import) mutate the ${envLabel} database — ` +
         `call env_info first and confirm you are on the intended environment before any write. ` +
         `Writes are attributed in the audit log to the API token owner. ` +
         `regions_get / regions_list return { region, config }; use config for regions_update. ` +
@@ -110,7 +96,10 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
         `data_schema_list / data_schema_imports_list show S3 dumps, Postgres data.* tables, and Import runs on this environment. ` +
         `region_contracts_* manage contracts (Aufträge) and which regions belong to them. ` +
         `map_dataset_categories_* manage the categories that map dataset uploads (static datasets) are grouped under. ` +
-        `processing_runs_list / processing_runs_get read nightly processing timings from public.meta (same data as /admin/processing).`,
+        `map_dataset_uploads_* list, read and remove those uploads; the static datasets script only creates and replaces them, so a retired dataset stays until it is deleted here or in the admin UI. Deleting removes the database row only, the files on S3 stay. ` +
+        `processing_runs_list / processing_runs_get read nightly processing timings from public.meta (same data as /admin/processing). ` +
+        `note_folders_* / notes_* / note_comments_* manage internal notes (Hinweise) and review_lists_* / review_entries_* / review_entry_comments_* manage review lists (Prüflisten) of one region (regionSlug). ` +
+        `They act as the API token owner with the same rules as the region UI: notes and comments can only be edited or deleted by their author (the tool answers "Not allowed: …" otherwise), and only empty folders and lists can be deleted. note_folders_update / review_lists_update also set which regions a folder or list is linked to.`,
     },
   )
 
@@ -121,7 +110,8 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
         'Report which TILDA environment (DEV/STG/PRD) and origin this MCP server is bound to. ' +
         'Call this first to confirm the target environment before any write. ' +
         'Tools include regions_*, region_uploads_create, region_contracts_*, map_dataset_categories_*, ' +
-        'data_schema_*, processing_runs_*, and audit_list.',
+        'map_dataset_uploads_*, data_schema_*, processing_runs_*, audit_list, note_folders_*, notes_*, note_comments_*, ' +
+        'review_lists_*, review_entries_* and review_entry_comments_*.',
     },
     () => ok({ environment: envLabel, origin, viteAppEnv: process.env.VITE_APP_ENV }),
   )
@@ -304,6 +294,66 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
   )
 
   server.registerTool(
+    'map_dataset_uploads_list',
+    {
+      description:
+        'List map dataset uploads (static datasets), ordered by slug. Each item has slug, public, ' +
+        'createdBy, updatedAt, dataUpdatedNote, regionSlugs and configs [{ name, categoryKey }] — ' +
+        'no layers. Optional filters: regionSlug (uploads linked to that region) and categoryKey ' +
+        '(uploads with a config in that category, see map_dataset_categories_list). ' +
+        'Use map_dataset_uploads_get for the full configs.',
+      inputSchema: {
+        regionSlug: z.string().optional(),
+        categoryKey: z.string().optional(),
+      },
+    },
+    (args) => run(() => listMapDatasetUploads(args)),
+  )
+
+  server.registerTool(
+    'map_dataset_uploads_get',
+    {
+      description:
+        'Get one map dataset upload by slug: the full row with its configs (layers, inspector, ' +
+        'legends, …) and regionSlugs.',
+      inputSchema: { slug: z.string().min(1) },
+    },
+    ({ slug }) =>
+      run(async () => {
+        const upload = await getMapDatasetUpload(slug)
+        if (!upload) throw new Error(`Map dataset upload not found: ${slug}`)
+        return upload
+      }),
+  )
+
+  server.registerTool(
+    'map_dataset_uploads_delete',
+    {
+      description:
+        'Delete one map dataset upload by slug, same as the delete button in the admin UI: the ' +
+        'database row, its configs and its region links are removed, so the dataset disappears ' +
+        'from every region. The files on S3 (GeoJSON, PMTiles) are NOT deleted. Returns the ' +
+        'deleted row with configs and regionSlugs — keep it for a rollback. To restore, run the ' +
+        'static datasets script for that dataset again; there is no MCP tool to re-create an ' +
+        'upload. Fails with an error when the slug does not exist.',
+      inputSchema: { slug: z.string().min(1) },
+    },
+    ({ slug }) => run(() => deleteMapDatasetUpload(slug, auditContext())),
+  )
+
+  server.registerTool(
+    'map_dataset_uploads_remove_region',
+    {
+      description:
+        'Unlink one region from a map dataset upload without deleting the upload; other regions ' +
+        'keep it. Returns { slug, regionSlugs } with the remaining regions. Fails when the upload ' +
+        'does not exist or is not linked to that region.',
+      inputSchema: { uploadSlug: z.string().min(1), regionSlug: z.string().min(1) },
+    },
+    (args) => run(() => removeMapDatasetUploadRegion(args, auditContext())),
+  )
+
+  server.registerTool(
     'data_schema_list',
     {
       description:
@@ -405,6 +455,10 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
     },
     (args) => run(() => listAuditLog(auditLogListSchema.parse(args))),
   )
+
+  const memberCaller = adminApiMemberCaller(auth, request)
+  registerNotesTools(server, memberCaller)
+  registerReviewListsTools(server, memberCaller)
 
   return server
 }

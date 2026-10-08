@@ -2,7 +2,7 @@
 
 ## External cutouts
 
-Processing can punch parking with extra geometries that are not OSM. Those tables live in Postgres as `data.*` and are loaded with the [data-schema](../../../../data-schema/README.md) pipeline ([add-db-data-table skill](../../../../.cursor/skills/add-db-data-table/SKILL.md)).
+Processing can punch parking with extra geometries that are not OSM. Those tables live in Postgres as `data.*` and are loaded with the [data-schema](../../../../data-schema/README.md) pipeline ([add-db-data-table skill](../../../../.agents/skills/add-db-data-table/SKILL.md)).
 
 ### eUVM Berlin
 

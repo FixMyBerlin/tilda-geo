@@ -25,16 +25,7 @@ describe('atlas map data sources', () => {
     const explicitTilesUrlSources = sources.filter(hasExplicitTilesUrl)
 
     expect(explicitTilesUrlSources.map((source) => source.id).sort()).toEqual(
-      [
-        'lars_parking',
-        'lars_parking_areas',
-        'lars_parking_debug',
-        'lars_parking_points',
-        'lars_parking_stats',
-        'atlas_presenceStats',
-        'accidents_unfallatlas',
-        'atlas_aggregated_lengths',
-      ].sort(),
+      ['lars_parking', 'lars_parking_areas', 'lars_parking_debug', 'lars_parking_stats'].sort(),
     )
 
     for (const source of explicitTilesUrlSources) {
