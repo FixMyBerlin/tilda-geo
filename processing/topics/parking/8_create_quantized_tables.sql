@@ -106,15 +106,20 @@ WITH
       AND (tags ->> 'capacity')::INTEGER > 0
   ),
   -- STEP 2: Generate 2m grid of candidate points within polygon
+  -- Only id and capacity travel through the grid steps; tags and meta are joined back in STEP 5
+  -- (carrying the JSON on every grid point made the sorts spill to disk).
   dense_grid AS (
     SELECT
       a.id,
       a.capacity,
-      a.tags,
-      a.meta,
       ST_Centroid (gc.geom) as point_geom,
       gc.i,
-      gc.j
+      gc.j,
+      -- Point count per area (needed for clustering)
+      COUNT(*) OVER (
+        PARTITION BY
+          a.id
+      ) as point_count
     FROM
       areas a
       CROSS JOIN LATERAL ST_SquareGrid (2.0, a.geom) gc
@@ -122,46 +127,28 @@ WITH
       ST_Centroid (gc.geom) && a.geom
       AND ST_Within (ST_Centroid (gc.geom), a.geom)
   ),
-  -- STEP 2.5: Calculate point count per area (needed for clustering)
-  grid_counts AS (
-    SELECT
-      id,
-      COUNT(*) as point_count
-    FROM
-      dense_grid
-    GROUP BY
-      id
-  ),
   -- STEP 3: Cluster candidate points into exactly `capacity` clusters
   -- Use LEAST to prevent error when capacity exceeds grid points
   clustered AS (
     SELECT
-      dg.id,
-      dg.capacity,
-      dg.tags,
-      dg.meta,
-      dg.point_geom,
-      ST_ClusterKMeans (
-        dg.point_geom,
-        LEAST(dg.capacity, gc.point_count)::INTEGER
-      ) OVER (
+      id,
+      capacity,
+      point_geom,
+      ST_ClusterKMeans (point_geom, LEAST(capacity, point_count)::INTEGER) OVER (
         PARTITION BY
-          dg.id
+          id
         ORDER BY
-          dg.i,
-          dg.j
+          i,
+          j
       ) as cluster_id
     FROM
-      dense_grid dg
-      JOIN grid_counts gc ON dg.id = gc.id
+      dense_grid
   ),
   -- STEP 4: Get centroid of each cluster
   cluster_centroids AS (
     SELECT
       id,
       capacity,
-      tags,
-      meta,
       cluster_id,
       ST_Centroid (ST_Collect (point_geom)) as centroid_geom,
       COUNT(*) OVER (
@@ -173,8 +160,6 @@ WITH
     GROUP BY
       id,
       capacity,
-      tags,
-      meta,
       cluster_id
   ),
   -- STEP 5: Expand to exact capacity with unique geometries
@@ -183,8 +168,8 @@ WITH
     SELECT
       cc.id,
       cc.capacity,
-      cc.tags,
-      cc.meta,
+      a.tags,
+      a.meta,
       -- Apply offset only to duplicates (not the first instance for this cluster)
       -- First instance: target_point = cluster_id + 1
       CASE
@@ -202,11 +187,12 @@ WITH
         ELSE cc.centroid_geom
       END as centroid_geom,
       target_point AS point_nr,
-      (cc.tags ->> 'area')::NUMERIC AS area,
+      (a.tags ->> 'area')::NUMERIC AS area,
       -- Area share per point, rounded like `area` on the source table
-      ROUND((cc.tags ->> 'area')::NUMERIC / cc.capacity, 2) AS area_share
+      ROUND((a.tags ->> 'area')::NUMERIC / cc.capacity, 2) AS area_share
     FROM
       cluster_centroids cc
+      JOIN areas a ON a.id = cc.id
       CROSS JOIN LATERAL generate_series(1, cc.capacity) AS target_point
     WHERE
       (target_point - 1) % cc.cluster_count = cc.cluster_id
