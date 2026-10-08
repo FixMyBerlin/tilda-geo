@@ -1,6 +1,6 @@
 import { feature, featureCollection } from '@turf/helpers'
 import { useEffect } from 'react'
-import { Layer, Source } from 'react-map-gl/maplibre'
+import { Layer, Source, useMap } from 'react-map-gl/maplibre'
 import {
   useSpaceFinderBoundaryHighlightFilled,
   useSpaceFinderBoundaryHighlightGeom,
@@ -247,6 +247,46 @@ const censusLabelLayerProps = {
   },
 }
 
+// Vegetation als Punktmuster (kartografische Konvention: unregelmäßige grüne Punkte) auf
+// leichter hellgrüner Fläche, damit sie sich nicht nur über die Farbe vom grünen
+// Hexagon-Verlauf abhebt. Das Muster wird zur Laufzeit gezeichnet, weil das Sprite nur
+// einfarbige Muster hat.
+const VEGETATION_PATTERN_ID = 'planning-vegetation-dots'
+const VEGETATION_PATTERN_DOTS = [
+  [4, 5, 1.6],
+  [13, 3, 1.2],
+  [22, 8, 1.8],
+  [9, 14, 1.3],
+  [18, 19, 1.6],
+  [28, 15, 1.2],
+  [5, 24, 1.4],
+  [14, 28, 1.8],
+  [26, 26, 1.3],
+] as const
+
+const useVegetationPattern = () => {
+  const { current: map } = useMap()
+  useEffect(
+    function registerVegetationPattern() {
+      if (!map || map.hasImage(VEGETATION_PATTERN_ID)) return
+      const size = 32
+      const canvas = document.createElement('canvas')
+      canvas.width = size
+      canvas.height = size
+      const ctx = canvas.getContext('2d')
+      if (!ctx) return
+      ctx.fillStyle = '#2d6a4f'
+      for (const [x, y, r] of VEGETATION_PATTERN_DOTS) {
+        ctx.beginPath()
+        ctx.arc(x, y, r, 0, Math.PI * 2)
+        ctx.fill()
+      }
+      map.addImage(VEGETATION_PATTERN_ID, ctx.getImageData(0, 0, size, size), { pixelRatio: 2 })
+    },
+    [map],
+  )
+}
+
 const BoundaryHighlightLayer = () => {
   const geom = useSpaceFinderBoundaryHighlightGeom()
   const filled = useSpaceFinderBoundaryHighlightFilled()
@@ -354,6 +394,7 @@ export const SourcesLayersSpaceFinder = () => {
   )
   const areaFilterOn = minArea > 0
   const vegetationOn = useSpaceFinderVegetationVisible()
+  useVegetationPattern()
   const vegetationAttribution = useSpaceFinderVegetationAttribution()
   const carriagewaysOn = useSpaceFinderCarriagewaysVisible()
   const censusOn = useSpaceFinderCensusVisible()
@@ -434,7 +475,14 @@ export const SourcesLayersSpaceFinder = () => {
             source="planning-vegetation-source"
             source-layer="planning_vegetation"
             type="fill"
-            paint={{ 'fill-color': '#2d6a4f', 'fill-opacity': 0.45 }}
+            paint={{ 'fill-color': '#a3d977', 'fill-opacity': 0.2 }}
+          />
+          <Layer
+            id="planning-vegetation-pattern"
+            source="planning-vegetation-source"
+            source-layer="planning_vegetation"
+            type="fill"
+            paint={{ 'fill-pattern': VEGETATION_PATTERN_ID, 'fill-opacity': 0.8 }}
           />
           <Layer
             id="planning-vegetation-outline"
