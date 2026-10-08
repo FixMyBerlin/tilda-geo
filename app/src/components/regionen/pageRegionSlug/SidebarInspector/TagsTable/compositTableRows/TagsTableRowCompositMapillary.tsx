@@ -10,6 +10,7 @@ import { mapillaryKeyUrl } from '@/lib/mapillaryPKeyUrl'
 import { useStreetImageryParam } from '../../../streetImagery/useStreetImageryParam'
 import {
   tagsTableLabelCellClass,
+  tagsTableLabelContentClass,
   tagsTableRowClass,
   tagsTableValueCellClass,
 } from '../tagsTableLayout'
@@ -54,7 +55,9 @@ export const TagsTableRowCompositMapillary = ({ sourceId, properties }: Composit
   return (
     <tr className={tagsTableRowClass}>
       <td className={twJoin(tagsTableLabelCellClass, 'text-gray-900')}>
-        <ConditionalFormattedKey sourceId={sourceId} tagKey="mapillary" />
+        <span className={tagsTableLabelContentClass}>
+          <ConditionalFormattedKey sourceId={sourceId} tagKey="mapillary" />
+        </span>
       </td>
       <td className={twJoin(tagsTableValueCellClass, 'text-gray-500')}>
         <ul className="space-y-1">
