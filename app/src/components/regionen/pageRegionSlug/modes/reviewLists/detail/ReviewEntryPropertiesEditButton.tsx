@@ -113,7 +113,9 @@ export const ReviewEntryPropertiesEditButton = ({ entryId, listId }: Props) => {
           <form id={formId} onSubmit={handleSubmit} className="space-y-3">
             <p className="text-sm text-gray-600">
               Leere Werte werden beim Speichern entfernt. Eine neue Zeile erscheint, sobald ein
-              Schlüssel eingetragen wird.
+              Schlüssel eingetragen wird. Werte von Schlüsseln, die auf{' '}
+              <code className="rounded-sm bg-gray-100 px-0.5 text-[0.925em]">_markdown</code> enden,
+              werden als Markdown dargestellt, zum Beispiel mit anklickbaren Links.
             </p>
             <div className="grid grid-cols-2 gap-x-2 gap-y-2">
               <span className={labelClass}>Schlüssel</span>
