@@ -6,13 +6,28 @@ DO $$ BEGIN RAISE NOTICE 'START creating quantized tables at %', clock_timestamp
 -- WHAT IT DOES:
 -- Explode parkings (linestring) into quantized points for calculator feature.
 -- * Uses `tilda_explode_parkings` to create evenly spaced points along linestring (1 per capacity)
--- * Each point gets capacity: 1 in tags
+-- * Each point gets capacity: 1 and its share of the area (area / capacity) in tags;
+--   the last point of a feature takes the rounding remainder so the sum equals the source area
 -- INPUT: parkings (linestring)
 -- OUTPUT: parkings_quantized (point)
 --
 INSERT INTO
   parkings_quantized (id, tags, meta, geom, minzoom)
 WITH
+  -- Area share per point, rounded like `area` on the source table
+  source AS (
+    SELECT
+      tags,
+      meta,
+      geom,
+      (tags ->> 'capacity')::INTEGER AS capacity,
+      (tags ->> 'area')::NUMERIC AS area,
+      ROUND((tags ->> 'area')::NUMERIC / (tags ->> 'capacity')::INTEGER, 2) AS area_share
+    FROM
+      parkings
+    WHERE
+      (tags ->> 'capacity')::INTEGER > 0
+  ),
   sum_points AS (
     SELECT
       (
@@ -26,11 +41,22 @@ WITH
           'surface_confidence',
           'surface_source'
         ]
-      ) || '{"capacity": 1}'::JSONB as tags,
+      ) || jsonb_strip_nulls(
+        jsonb_build_object(
+          'capacity', 1,
+          -- The last point takes the rounding remainder so the sum equals the source area
+          'area', CASE
+            WHEN point_nr < capacity THEN area_share
+            ELSE area - area_share * (capacity - 1)
+          END
+        )
+      ) as tags,
       meta,
-      tilda_explode_parkings (geom, capacity := (tags ->> 'capacity')::INTEGER) as geom
+      point_geom as geom
     FROM
-      parkings
+      source
+      CROSS JOIN LATERAL tilda_explode_parkings (geom, capacity := capacity)
+      WITH ORDINALITY AS exploded (point_geom, point_nr)
   )
 SELECT
   ROW_NUMBER() OVER (
@@ -57,7 +83,8 @@ CREATE UNIQUE INDEX unique_parkings_quantized_id_idx ON parkings_quantized (id);
 -- * Generate 2m grid of candidate points within polygon
 -- * Cluster into exactly `capacity` clusters using ST_ClusterKMeans
 -- * If grid generates fewer points than capacity, duplicate centroids with small offsets
--- * Each point gets capacity: 1 in tags
+-- * Each point gets capacity: 1 and its share of the area (area / capacity) in tags;
+--   the last point of a feature takes the rounding remainder so the sum equals the source area
 -- INPUT: off_street_parking_areas (polygon)
 -- OUTPUT: off_street_parking_quantized (point)
 --
@@ -173,7 +200,11 @@ WITH
           )
         )
         ELSE cc.centroid_geom
-      END as centroid_geom
+      END as centroid_geom,
+      target_point AS point_nr,
+      (cc.tags ->> 'area')::NUMERIC AS area,
+      -- Area share per point, rounded like `area` on the source table
+      ROUND((cc.tags ->> 'area')::NUMERIC / cc.capacity, 2) AS area_share
     FROM
       cluster_centroids cc
       CROSS JOIN LATERAL generate_series(1, cc.capacity) AS target_point
@@ -198,7 +229,16 @@ SELECT
       'surface_confidence',
       'surface_source'
     ]
-  ) || '{"capacity": 1}'::JSONB as tags,
+  ) || jsonb_strip_nulls(
+    jsonb_build_object(
+      'capacity', 1,
+      -- The last point takes the rounding remainder so the sum equals the source area
+      'area', CASE
+        WHEN point_nr < capacity THEN area_share
+        ELSE area - area_share * (capacity - 1)
+      END
+    )
+  ) as tags,
   meta,
   ST_Transform (centroid_geom, 3857) as geom,
   0 as minzoom

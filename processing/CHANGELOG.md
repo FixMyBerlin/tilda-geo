@@ -2,6 +2,12 @@
 
 Manual and incomplete list of changes to processing output. Attribute documentation for all datasets lives in `topic-docs/` YAML (built into in-app docs via `topic-docs-build`); this file tracks schema and value-contract changes over time.
 
+## 2026-10
+
+### `parkings_quantized`, `off_street_parking_quantized`
+
+- `area` is now the share of one parking space (`area` / `capacity` of the source feature, 2 decimals) instead of the area of the whole source feature. Before, summing `area` over the points overcounted by roughly the capacity of each feature. The last point of a feature takes the rounding remainder, so the points of a feature sum up exactly to `area` on `parkings` / `off_street_parking_areas`.
+
 ## 2026-09
 
 ### `roads`, `roadsPathClasses`, `bikelanes`, `bikelanesPresence`, `bikeSuitability`, `routing`
