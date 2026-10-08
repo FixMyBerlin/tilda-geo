@@ -454,6 +454,34 @@ export const getBoundaryGeomFn = createServerFn({ method: 'GET' })
     return geom
   })
 
+const HexagonGeomInput = z.object({ runId: z.number().int(), h3Id: z.string() })
+
+/**
+ * Full outline of one result hexagon (lng/lat). The vector tiles clip each hexagon to its
+ * tile (`ST_AsMVTGeom`), so a candidate picked at a tile border would otherwise be stored
+ * as a fragment.
+ */
+export const getPlanningHexagonGeomFn = createServerFn({ method: 'GET' })
+  .validator((data: z.infer<typeof HexagonGeomInput>) => HexagonGeomInput.parse(data))
+  .handler(async ({ data }) => {
+    const session = await requireAuth(getRequestHeaders())
+    const run = await db.planningRun.findFirstOrThrow({
+      where: { id: data.runId },
+      select: { variant: { select: { area: { select: { region: { select: { slug: true } } } } } } },
+    })
+    await authorizePlanningRegion(session, run.variant.area.region.slug)
+
+    const rows = await db.$queryRaw<{ geom: GeoJSON.Polygon }[]>`
+      SELECT ST_AsGeoJSON(ST_Transform(geom, 4326))::json AS geom
+      FROM planning.scenario_hexagons
+      WHERE run_id = ${data.runId} AND h3_id = ${data.h3Id}
+      LIMIT 1
+    `
+    const geom = rows[0]?.geom
+    if (!geom) throw new Error(`Hexagon ${data.h3Id} nicht gefunden`)
+    return geom
+  })
+
 // ── Mutations: Area ───────────────────────────────────────────────────────────
 
 const CreateAreaInput = z.object({

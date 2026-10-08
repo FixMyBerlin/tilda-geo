@@ -5,7 +5,9 @@ import { createJSONStorage, persist } from 'zustand/middleware'
  * One hexagon the user picked as a candidate for a future Abstellanlage.
  * Everything the sidebar list and the GeoJSON export need is captured at click
  * time from the rendered tile feature — the selection therefore survives panning
- * away from the hexagon (no re-query of the vector source needed).
+ * away from the hexagon (no re-query of the vector source needed). Only the geometry is
+ * replaced right after the click: tiles clip hexagons at tile borders, so the full outline
+ * is loaded from the server (`getPlanningHexagonGeomFn`).
  */
 export type SpaceFinderCandidate = {
   /** `h3_id` of the hexagon (the tile source's `promoteId`); identity of a candidate. */
@@ -31,8 +33,10 @@ type Store = {
    * recalculated variant starts with an empty list and switching variants never mixes lists.
    */
   candidatesByRun: Record<number, SpaceFinderCandidate[]>
-  /** Adds the hexagon or – when it is already selected – removes it again. */
-  toggleCandidate: (runId: number, candidate: SpaceFinderCandidate) => void
+  /** Adds the hexagon or – when it is already selected – removes it again. Returns `true` when added. */
+  toggleCandidate: (runId: number, candidate: SpaceFinderCandidate) => boolean
+  /** Swaps in the full hexagon outline once it is loaded (the tile geometry may be clipped). */
+  setCandidateGeometry: (runId: number, h3Id: string, geometry: GeoJSON.Geometry) => void
   removeCandidate: (runId: number, h3Id: string) => void
   clearCandidates: (runId: number) => void
 }
@@ -48,23 +52,33 @@ type Store = {
  */
 export const useSpaceFinderCandidatesState = create<Store>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       selectActive: false,
       setSelectActive: (active) => set({ selectActive: active }),
 
       candidatesByRun: {},
-      toggleCandidate: (runId, candidate) =>
-        set((state) => {
-          const candidates = state.candidatesByRun[runId] ?? []
-          return {
-            candidatesByRun: {
-              ...state.candidatesByRun,
-              [runId]: candidates.some((c) => c.h3Id === candidate.h3Id)
-                ? candidates.filter((c) => c.h3Id !== candidate.h3Id)
-                : [...candidates, candidate],
-            },
-          }
-        }),
+      toggleCandidate: (runId, candidate) => {
+        const candidates = get().candidatesByRun[runId] ?? []
+        const selected = candidates.some((c) => c.h3Id === candidate.h3Id)
+        set((state) => ({
+          candidatesByRun: {
+            ...state.candidatesByRun,
+            [runId]: selected
+              ? candidates.filter((c) => c.h3Id !== candidate.h3Id)
+              : [...candidates, candidate],
+          },
+        }))
+        return !selected
+      },
+      setCandidateGeometry: (runId, h3Id, geometry) =>
+        set((state) => ({
+          candidatesByRun: {
+            ...state.candidatesByRun,
+            [runId]: (state.candidatesByRun[runId] ?? []).map((c) =>
+              c.h3Id === h3Id ? { ...c, geometry } : c,
+            ),
+          },
+        })),
       removeCandidate: (runId, h3Id) =>
         set((state) => ({
           candidatesByRun: {

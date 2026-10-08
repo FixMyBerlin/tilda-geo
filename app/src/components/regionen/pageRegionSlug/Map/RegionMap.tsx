@@ -42,6 +42,7 @@ import {
 } from '@/components/shared/utils/playwright'
 import { MAP_STYLE_URL } from '@/server/api/map-style/mapStyleUrl.const'
 import { SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
+import { getPlanningHexagonGeomFn } from '@/server/planning/planning.functions'
 import { CalculatorMap } from '../modes/calculator/CalculatorMap'
 import { useCalculatorDraw } from '../modes/calculator/drawing/useCalculatorDraw'
 import { useModeListActions } from '../modes/mode-list-store'
@@ -138,6 +139,7 @@ export const RegionMap = () => {
   const spaceFinderPolygonDrawing = useSpaceFinderBoundaryState((s) => s.polygonDrawInProgress)
   const candidateSelectActive = useSpaceFinderCandidatesState((s) => s.selectActive)
   const toggleCandidate = useSpaceFinderCandidatesState((s) => s.toggleCandidate)
+  const setCandidateGeometry = useSpaceFinderCandidatesState((s) => s.setCandidateGeometry)
   const { runId: spaceFinderRunId } = useSpaceFinderSelection()
   const { providers: streetImageryProviders, setPhoto: setStreetImageryPhoto } =
     useStreetImageryParam()
@@ -158,11 +160,19 @@ export const RegionMap = () => {
       const hexagon = features?.find((f) => f.sourceLayer === planningHexagonsSourceLayer)
       const h3Id = hexagon?.properties?.h3_id
       if (hexagon && h3Id && spaceFinderRunId != null) {
-        toggleCandidate(spaceFinderRunId, {
-          h3Id: String(h3Id),
+        const runId = spaceFinderRunId
+        const candidateId = String(h3Id)
+        const added = toggleCandidate(runId, {
+          h3Id: candidateId,
           geometry: hexagon.geometry,
           properties: { ...hexagon.properties },
         })
+        // The tile geometry is clipped at tile borders; replace it with the full hexagon.
+        if (added) {
+          getPlanningHexagonGeomFn({ data: { runId, h3Id: candidateId } })
+            .then((geometry) => setCandidateGeometry(runId, candidateId, geometry))
+            .catch((error) => console.error('Kandidaten-Geometrie nicht geladen', error))
+        }
       }
       return
     }
