@@ -19,7 +19,7 @@ import { useStreetImageryParam } from '../../streetImagery/useStreetImageryParam
 export const SourcesLayersStreetImagery = () => {
   const { providers, style, date, photo: selected } = useStreetImageryParam()
   const { mapParam } = useMapParam()
-  const bbox = useMapViewportBbox('mainMap', mapParam)
+  const bbox = useMapViewportBbox('mainMap')
   const { photo } = useShownStreetImageryPhoto()
   const bearing = useViewerBearing()
   const hfov = useViewerHfov()
