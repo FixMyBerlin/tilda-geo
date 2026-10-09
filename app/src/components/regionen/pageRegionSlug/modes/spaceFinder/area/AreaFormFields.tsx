@@ -149,11 +149,21 @@ export const AreaFormFields = ({
     setDrawingActive(true)
   }
 
-  // Something to take back: a running or finished drawing, or a picked area that is not the saved one.
-  const hasGeometryToDiscard =
-    drawingActive ||
-    drawnGeometry != null ||
-    JSON.stringify(state.studyArea ?? null) !== JSON.stringify(originalStudyArea)
+  // Throws the whole drawing away and starts a new one; undo can bring it back during the session.
+  const discardAndRedraw = () => {
+    draw.cancel()
+    draw.replace([])
+    setDrawnGeometry(null)
+    onStudyAreaChange(null)
+    setBoundaryHighlightGeom(null)
+    setDrawingActive(true)
+  }
+
+  const canDiscardArea = effectiveStudyArea != null || draw.isDrawing
+  // Editing only: the area differs from the saved one, so "back to the saved area" means something.
+  const canRestoreOriginal =
+    originalStudyArea != null &&
+    JSON.stringify(effectiveStudyArea ?? null) !== JSON.stringify(originalStudyArea)
 
   const handleStudyUpload = (geometry: StudyAreaGeometry, fileName: string) => {
     draw.cancel()
@@ -275,14 +285,27 @@ export const AreaFormFields = ({
                   ? 'Gebiet bearbeiten'
                   : 'Gebiet zeichnen'}
             </button>
-            {hasGeometryToDiscard && (
-              <button
-                type="button"
-                onClick={resetToOriginal}
-                className="text-xs text-gray-500 underline hover:text-gray-700"
-              >
-                {originalStudyArea ? 'Änderungen am Gebiet verwerfen' : 'Gebiet verwerfen'}
-              </button>
+            {(canDiscardArea || canRestoreOriginal) && (
+              <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                {canDiscardArea && (
+                  <button
+                    type="button"
+                    onClick={discardAndRedraw}
+                    className="text-gray-500 underline hover:text-gray-700"
+                  >
+                    Gebiet verwerfen
+                  </button>
+                )}
+                {canRestoreOriginal && (
+                  <button
+                    type="button"
+                    onClick={resetToOriginal}
+                    className="text-gray-500 underline hover:text-gray-700"
+                  >
+                    Änderungen am Gebiet verwerfen
+                  </button>
+                )}
+              </div>
             )}
             {drawingActive && (
               <p key="drawing-hint" className="text-xs text-gray-500">
