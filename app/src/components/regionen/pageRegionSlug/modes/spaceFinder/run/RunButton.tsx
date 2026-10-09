@@ -5,6 +5,7 @@ import {
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
 import { useSpaceFinderFactorSavePending } from '../../../hooks/mapState/space-finder-boundary-store'
+import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import {
   type SpaceFinderVariantStatus,
   spaceFinderRunNeedsRerun,
@@ -16,19 +17,18 @@ type LatestJob = { id: number; status: string }
 /** Enqueues a background run for a variant. */
 export const RunButton = ({
   variantId,
-  regionSlug,
   status,
   latestJob,
   showJobStatus = true,
 }: {
   variantId: number
-  regionSlug: string
   status: SpaceFinderVariantStatus
   latestJob?: LatestJob | null
   /** Set false when the caller shows `JobStatusBadge` itself elsewhere (Flächenfinder: the
    * sticky footer only holds the button; progress/outdated status lives in its own section). */
   showJobStatus?: boolean
 }) => {
+  const regionSlug = useRegionSlug()
   const queryClient = useQueryClient()
 
   const mutation = useMutation({

@@ -1,6 +1,7 @@
 import { ArrowUpTrayIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { useEffect, useRef, useState } from 'react'
 import { Spinner } from '@/components/shared/Spinner/Spinner'
+import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import { type StudyAreaGeometry, parseStudyAreaGeometry } from './extractStudyAreaGeometry'
 import {
   convertGeopackageToGeoJson,
@@ -56,7 +57,6 @@ export function GeoJsonUploadField<T>({
   maxBytes,
   label,
   historyScope,
-  regionSlug,
 }: {
   parse: (text: string) => T
   onResult: (result: T, fileName: string) => void
@@ -66,9 +66,8 @@ export function GeoJsonUploadField<T>({
   label?: React.ReactNode
   /** Namespace for the IndexedDB upload history, e.g. `study_area` or `user_geojson`. */
   historyScope: GeojsonHistoryKind
-  /** Uploads are only listed again in the region they were made for. */
-  regionSlug: string
 }) {
+  const regionSlug = useRegionSlug()
   const inputRef = useRef<HTMLInputElement>(null)
   const historyRequest = useRef(0)
   const [error, setError] = useState<string | null>(null)
@@ -232,15 +231,12 @@ export function GeoJsonUploadField<T>({
 /** Study-area upload: a single Polygon/MultiPolygon. Thin wrapper over the generic field. */
 export const GeoJsonUpload = ({
   onGeometry,
-  regionSlug,
 }: {
   onGeometry: (geometry: StudyAreaGeometry, fileName: string) => void
-  regionSlug: string
 }) => (
   <GeoJsonUploadField
     parse={parseStudyAreaGeometry}
     onResult={onGeometry}
     historyScope="study_area"
-    regionSlug={regionSlug}
   />
 )

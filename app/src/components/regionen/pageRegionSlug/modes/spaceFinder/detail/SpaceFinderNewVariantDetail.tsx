@@ -8,22 +8,22 @@ import {
   planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
+import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import { DEFAULT_FACTOR_TEMPLATE } from '../factors/spaceFinderDefaults'
 
 /** ModePanel detail view for »Neue Variante in diesem Gebiet« (`space.new === 'variant'`). */
 export const SpaceFinderNewVariantDetail = ({
   areaId,
   areaTitle,
-  regionSlug,
   onCreated,
   onClose,
 }: {
   areaId: number
   areaTitle: string
-  regionSlug: string
   onCreated: (variantId: number) => void
   onClose: () => void
 }) => {
+  const regionSlug = useRegionSlug()
   const queryClient = useQueryClient()
   const [title, setTitle] = useState('')
 

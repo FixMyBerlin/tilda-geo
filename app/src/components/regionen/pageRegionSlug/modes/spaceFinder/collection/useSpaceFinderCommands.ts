@@ -14,6 +14,7 @@ import {
   planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
+import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import {
   firstSpaceFinderVariantId,
   type PlanningAreasRow,
@@ -21,7 +22,6 @@ import {
 } from './spaceFinderCollectionOptions'
 
 type UseSpaceFinderCommandsInput = {
-  regionSlug: string
   areas: readonly PlanningAreasRow[]
   selectedOption: SpaceFinderSelectedVariant | undefined
   /** Writes `space.key`. `undefined` clears the selection (e.g. the last Gebiet was deleted). */
@@ -36,11 +36,11 @@ type UseSpaceFinderCommandsInput = {
  * view (`space.new`) with their own forms/wizard.
  */
 export const useSpaceFinderCommands = ({
-  regionSlug,
   areas,
   selectedOption,
   onSelect,
 }: UseSpaceFinderCommandsInput) => {
+  const regionSlug = useRegionSlug()
   const queryClient = useQueryClient()
   const [nameModal, setNameModal] = useState<'renameVariant' | 'renameArea' | null>(null)
 

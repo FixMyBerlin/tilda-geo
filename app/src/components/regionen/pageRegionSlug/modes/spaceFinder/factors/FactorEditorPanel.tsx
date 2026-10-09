@@ -21,6 +21,7 @@ import {
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
 import { useSpaceFinderBoundaryActions } from '../../../hooks/mapState/space-finder-boundary-store'
+import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import { USER_GEOJSON_MODES, type UserGeojsonMode } from '../area/UserObstaclesField'
 import { spaceFinderGroupStyle, spaceFinderNumberInputClass } from '../spaceFinderPanelStyles'
 import { OepnvCategorySliders } from './OepnvCategorySliders'
@@ -545,7 +546,6 @@ const AUTOSAVE_DELAY_MS = 700
 export const FactorEditorPanel = (props: {
   variantId: number
   areaId: number
-  regionSlug: string
   factorConfig: FactorConfig
   lastRunConfig?: FactorConfig | null
   readOnly?: boolean
@@ -556,7 +556,6 @@ export const FactorEditorPanel = (props: {
 const FactorEditorPanelForm = ({
   variantId,
   areaId,
-  regionSlug,
   factorConfig,
   lastRunConfig,
   readOnly = false,
@@ -565,13 +564,13 @@ const FactorEditorPanelForm = ({
 }: {
   variantId: number
   areaId: number
-  regionSlug: string
   factorConfig: FactorConfig
   lastRunConfig?: FactorConfig | null
   readOnly?: boolean
   defaultOpen?: boolean
   parkingDataAvailable?: boolean
 }) => {
+  const regionSlug = useRegionSlug()
   const queryClient = useQueryClient()
   const [config, setConfig] = useState<FactorConfig>(factorConfig)
   const [open, setOpen] = useState(defaultOpen)

@@ -4,6 +4,7 @@ import { bbox } from '@turf/turf'
 import { useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { useSpaceFinderBoundaryActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-boundary-store'
+import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { useDebouncedValue } from '@/components/shared/hooks/useDebouncedValue'
 import {
   adminBoundariesQueryOptions,
@@ -30,12 +31,11 @@ const displayName = (b: Boundary | null) =>
 export const BoundaryPicker = ({
   value,
   onChange,
-  regionSlug,
 }: {
   value: string | null
   onChange: (boundaryId: string, geom: unknown, name: string) => void
-  regionSlug: string
 }) => {
+  const regionSlug = useRegionSlug()
   const { mainMap: map } = useMap()
   const queryClient = useQueryClient()
   const { setBoundaryHighlightGeom } = useSpaceFinderBoundaryActions()

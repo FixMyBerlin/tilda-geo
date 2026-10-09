@@ -9,6 +9,7 @@ import {
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
 import { useSpaceFinderBoundaryActions } from '../../../hooks/mapState/space-finder-boundary-store'
+import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import type { PlanningAreaVariantRow } from '../collection/spaceFinderCollectionOptions'
 import type { PlanningUseCase } from '../factors/spaceFinderDefaults'
 import type { PlanningVariantDetail } from '../spaceFinderVariantDetail'
@@ -23,17 +24,16 @@ const jsonEqual = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringi
 const AreaEditorForm = ({
   area,
   variants,
-  regionSlug,
   onClose,
   onDeleted,
 }: {
   /** Full Gebiet from the open variant. The areas list does not carry geometry or own data. */
   area: EditorArea
   variants: PlanningAreaVariantRow[]
-  regionSlug: string
   onClose: () => void
   onDeleted?: () => void
 }) => {
+  const regionSlug = useRegionSlug()
   const queryClient = useQueryClient()
   const { setBoundaryHighlightGeom } = useSpaceFinderBoundaryActions()
   const { spaceFinderMode, setSpaceFinderModeParam } = useSpaceFinderModeParam()
@@ -134,7 +134,6 @@ const AreaEditorForm = ({
       )}
 
       <AreaFormFields
-        regionSlug={regionSlug}
         state={{
           title,
           boundaryId,
@@ -198,13 +197,11 @@ const AreaEditorForm = ({
 export const AreaEditor = ({
   area,
   variants,
-  regionSlug,
   onClose,
   onDeleted,
 }: {
   area: EditorArea
   variants: PlanningAreaVariantRow[]
-  regionSlug: string
   onClose: () => void
   onDeleted?: () => void
 }) => (
@@ -212,7 +209,6 @@ export const AreaEditor = ({
     key={area.id}
     area={area}
     variants={variants}
-    regionSlug={regionSlug}
     onClose={onClose}
     onDeleted={onDeleted}
   />

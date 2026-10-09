@@ -49,7 +49,6 @@ type AreaFormState = {
 }
 
 type AreaFormFieldsProps = {
-  regionSlug: string
   state: AreaFormState
   onTitleChange: (title: string) => void
   onBoundaryIdChange: (id: string | null) => void
@@ -66,7 +65,6 @@ type AreaFormFieldsProps = {
 
 /** Shared fields for creating or editing a planungsgebiet. */
 export const AreaFormFields = ({
-  regionSlug,
   state,
   onTitleChange,
   onBoundaryIdChange,
@@ -233,7 +231,6 @@ export const AreaFormFields = ({
               onStudyAreaChange(geom)
               onTitleChange(name)
             }}
-            regionSlug={regionSlug}
           />
         )}
 
@@ -256,11 +253,7 @@ export const AreaFormFields = ({
               </p>
             )}
             {/* Stable key: hiding the drawing hint must not remount the field and drop its state. */}
-            <GeoJsonUpload
-              key="study-area-geojson"
-              onGeometry={handleStudyUpload}
-              regionSlug={regionSlug}
-            />
+            <GeoJsonUpload key="study-area-geojson" onGeometry={handleStudyUpload} />
           </div>
         )}
 
@@ -282,7 +275,6 @@ export const AreaFormFields = ({
           </div>
           <div className="mt-1">
             <UserObstaclesField
-              regionSlug={regionSlug}
               config={{
                 user_geojson: state.userGeojson,
                 user_geojson_mode: state.userGeojsonMode,

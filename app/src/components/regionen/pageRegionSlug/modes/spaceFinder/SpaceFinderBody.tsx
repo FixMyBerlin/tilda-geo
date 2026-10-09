@@ -41,11 +41,9 @@ const StatusSection = ({ variant }: { variant: PlanningVariantDetail }) => {
  * Eigene Daten are uploaded (that layer toggle alone); the rest needs a complete run.
  */
 export const SpaceFinderBody = ({
-  regionSlug,
   variant,
   editable = true,
 }: {
-  regionSlug: string
   variant: PlanningVariantDetail | undefined
   /**
    * Desktop only (D10): hides Faktoren editing, the run button (footer, handled by the caller)
@@ -81,7 +79,6 @@ export const SpaceFinderBody = ({
           <FactorEditorPanel
             variantId={variant.id}
             areaId={variant.area.id}
-            regionSlug={regionSlug}
             factorConfig={variant.factorConfig}
             lastRunConfig={comparableRunSnapshot(
               latestRun?.factorConfigSnapshot ?? null,

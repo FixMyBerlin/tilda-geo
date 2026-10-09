@@ -1,6 +1,5 @@
 import { PlusIcon } from '@heroicons/react/24/outline'
 import { useSuspenseQuery } from '@tanstack/react-query'
-import { getRouteApi } from '@tanstack/react-router'
 import { bbox } from '@turf/turf'
 import { useEffect, useEffectEvent } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
@@ -17,6 +16,7 @@ import {
 } from '../../hooks/mapState/space-finder-boundary-store'
 import { useMapActions } from '../../hooks/mapState/useMapState'
 import { useRegionSearchNavigation } from '../../hooks/useQueryState/useRegionSearchNavigation'
+import { useRegion } from '../../regionUtils/useRegion'
 import { ModePanel } from '../ModePanel'
 import { modePanelHeaderIconButtonClassName, modePanelMutedClassName } from '../modePanel.const'
 import { SpaceFinderCandidateSelectionReset } from './candidates/SpaceFinderCandidatesSection'
@@ -39,8 +39,6 @@ import { compactSpaceFinderModeParam } from './spaceFinderModeParam'
 import { spaceFinderOpenRunStatus } from './spaceFinderRunStatus'
 import { useSpaceFinderModeParam } from './useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from './useSpaceFinderSelection'
-
-const routeApi = getRouteApi('/regionen/$regionSlug')
 
 /** D10: mobile shows the mode read-only; editing/creating/running/selection needs a desktop. */
 const MobileEditingNotice = () => (
@@ -72,7 +70,7 @@ const SpaceFinderEmptyState = ({ onCreate }: { onCreate: () => void }) => (
  * »Berechnen«/»Neu berechnen«. Desktop-first (D10). On mobile the mode is reachable but read-only.
  */
 export const PageModeSpaceFinder = () => {
-  const { regionSlug } = routeApi.useParams()
+  const regionSlug = useRegion().slug
   const isDesktop = useBreakpoint('sm')
   const { mainMap: map } = useMap()
   const { setBoundaryHighlightGeom, setLastFittedBoundaryKey } = useSpaceFinderBoundaryActions()
@@ -124,7 +122,6 @@ export const PageModeSpaceFinder = () => {
   )
 
   const commands = useSpaceFinderCommands({
-    regionSlug,
     areas,
     selectedOption: selection,
     onSelect,
@@ -176,13 +173,7 @@ export const PageModeSpaceFinder = () => {
       ? {
           title: 'Neues Planungsgebiet',
           onBack: closeNew,
-          children: (
-            <SpaceFinderNewAreaDetail
-              regionSlug={regionSlug}
-              onCreated={onAreaCreated}
-              onClose={closeNew}
-            />
-          ),
+          children: <SpaceFinderNewAreaDetail onCreated={onAreaCreated} onClose={closeNew} />,
         }
       : undefined
   const newVariantDetail =
@@ -195,7 +186,6 @@ export const PageModeSpaceFinder = () => {
             <SpaceFinderNewVariantDetail
               areaId={selection.areaId}
               areaTitle={selection.areaTitle}
-              regionSlug={regionSlug}
               onCreated={onVariantCreated}
               onClose={closeNew}
             />
@@ -211,7 +201,6 @@ export const PageModeSpaceFinder = () => {
             <SpaceFinderEditAreaDetail
               area={variant.area}
               variants={selection.area.variants}
-              regionSlug={regionSlug}
               onClose={closeEdit}
             />
           ),
@@ -276,7 +265,6 @@ export const PageModeSpaceFinder = () => {
     !panelDetail && isDesktop && activeVariant != null && variant != null ? (
       <RunButton
         variantId={activeVariant}
-        regionSlug={regionSlug}
         status={run?.status ?? 'none'}
         latestJob={run?.latestJob}
         showJobStatus={false}
@@ -302,7 +290,7 @@ export const PageModeSpaceFinder = () => {
     >
       <SpaceFinderCandidateSelectionReset />
       {activeVariant != null ? (
-        <SpaceFinderBody regionSlug={regionSlug} variant={variant} editable={isDesktop} />
+        <SpaceFinderBody variant={variant} editable={isDesktop} />
       ) : sortedAreas.length === 0 ? (
         isDesktop ? (
           <SpaceFinderEmptyState onCreate={openNewArea} />

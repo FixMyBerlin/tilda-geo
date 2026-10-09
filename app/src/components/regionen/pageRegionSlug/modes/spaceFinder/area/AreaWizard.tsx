@@ -9,20 +9,20 @@ import {
   planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
+import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import { DEFAULT_FACTOR_TEMPLATE, type PlanningUseCase } from '../factors/spaceFinderDefaults'
 import { AreaFormFields, useEffectiveStudyArea, useStudyAreaKm2 } from './AreaFormFields'
 import type { UserGeojsonMode } from './UserObstaclesField'
 
 /** Reduced wizard: name + geometry + eigene Daten. Creates area + first variant (no auto-run). */
 export const AreaWizard = ({
-  regionSlug,
   onCreated,
   onCancel,
 }: {
-  regionSlug: string
   onCreated: (areaId: number, variantId: number) => void
   onCancel: () => void
 }) => {
+  const regionSlug = useRegionSlug()
   const queryClient = useQueryClient()
   const [title, setTitle] = useState('')
   const [submitAttempted, setSubmitAttempted] = useState(false)
@@ -83,7 +83,6 @@ export const AreaWizard = ({
   return (
     <div className="flex flex-col gap-2">
       <AreaFormFields
-        regionSlug={regionSlug}
         state={{
           title,
           boundaryId,
