@@ -29,6 +29,7 @@ import { Route as ApiStatsRouteImport } from './routes/api/stats'
 import { Route as ApiRegionsRouteImport } from './routes/api/regions'
 import { Route as ApiProcessingDatesMapillaryRouteImport } from './routes/api/processing-dates-mapillary'
 import { Route as ApiProcessingDatesRouteImport } from './routes/api/processing-dates'
+import { Route as ApiOsmcha2RssRewriteRouteImport } from './routes/api/osmcha2-rss-rewrite'
 import { Route as ApiMapStyleRouteImport } from './routes/api/map-style'
 import { Route as ApiCampaignsRouteImport } from './routes/api/campaigns'
 import { Route as ApiBoundaryRouteImport } from './routes/api/boundary'
@@ -219,6 +220,11 @@ const ApiProcessingDatesMapillaryRoute =
 const ApiProcessingDatesRoute = ApiProcessingDatesRouteImport.update({
   id: '/api/processing-dates',
   path: '/api/processing-dates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOsmcha2RssRewriteRoute = ApiOsmcha2RssRewriteRouteImport.update({
+  id: '/api/osmcha2-rss-rewrite',
+  path: '/api/osmcha2-rss-rewrite',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiMapStyleRoute = ApiMapStyleRouteImport.update({
@@ -740,6 +746,7 @@ export interface FileRoutesByFullPath {
   '/api/boundary': typeof ApiBoundaryRoute
   '/api/campaigns': typeof ApiCampaignsRoute
   '/api/map-style': typeof ApiMapStyleRoute
+  '/api/osmcha2-rss-rewrite': typeof ApiOsmcha2RssRewriteRoute
   '/api/processing-dates': typeof ApiProcessingDatesRoute
   '/api/processing-dates-mapillary': typeof ApiProcessingDatesMapillaryRoute
   '/api/regions': typeof ApiRegionsRouteWithChildren
@@ -839,6 +846,7 @@ export interface FileRoutesByTo {
   '/api/boundary': typeof ApiBoundaryRoute
   '/api/campaigns': typeof ApiCampaignsRoute
   '/api/map-style': typeof ApiMapStyleRoute
+  '/api/osmcha2-rss-rewrite': typeof ApiOsmcha2RssRewriteRoute
   '/api/processing-dates': typeof ApiProcessingDatesRoute
   '/api/processing-dates-mapillary': typeof ApiProcessingDatesMapillaryRoute
   '/api/regions': typeof ApiRegionsRouteWithChildren
@@ -953,6 +961,7 @@ export interface FileRoutesById {
   '/api/boundary': typeof ApiBoundaryRoute
   '/api/campaigns': typeof ApiCampaignsRoute
   '/api/map-style': typeof ApiMapStyleRoute
+  '/api/osmcha2-rss-rewrite': typeof ApiOsmcha2RssRewriteRoute
   '/api/processing-dates': typeof ApiProcessingDatesRoute
   '/api/processing-dates-mapillary': typeof ApiProcessingDatesMapillaryRoute
   '/api/regions': typeof ApiRegionsRouteWithChildren
@@ -1067,6 +1076,7 @@ export interface FileRouteTypes {
     | '/api/boundary'
     | '/api/campaigns'
     | '/api/map-style'
+    | '/api/osmcha2-rss-rewrite'
     | '/api/processing-dates'
     | '/api/processing-dates-mapillary'
     | '/api/regions'
@@ -1166,6 +1176,7 @@ export interface FileRouteTypes {
     | '/api/boundary'
     | '/api/campaigns'
     | '/api/map-style'
+    | '/api/osmcha2-rss-rewrite'
     | '/api/processing-dates'
     | '/api/processing-dates-mapillary'
     | '/api/regions'
@@ -1279,6 +1290,7 @@ export interface FileRouteTypes {
     | '/api/boundary'
     | '/api/campaigns'
     | '/api/map-style'
+    | '/api/osmcha2-rss-rewrite'
     | '/api/processing-dates'
     | '/api/processing-dates-mapillary'
     | '/api/regions'
@@ -1375,6 +1387,7 @@ export interface RootRouteChildren {
   ApiBoundaryRoute: typeof ApiBoundaryRoute
   ApiCampaignsRoute: typeof ApiCampaignsRoute
   ApiMapStyleRoute: typeof ApiMapStyleRoute
+  ApiOsmcha2RssRewriteRoute: typeof ApiOsmcha2RssRewriteRoute
   ApiProcessingDatesRoute: typeof ApiProcessingDatesRoute
   ApiProcessingDatesMapillaryRoute: typeof ApiProcessingDatesMapillaryRoute
   ApiRegionsRoute: typeof ApiRegionsRouteWithChildren
@@ -1549,6 +1562,13 @@ declare module '@tanstack/react-router' {
       path: '/api/processing-dates'
       fullPath: '/api/processing-dates'
       preLoaderRoute: typeof ApiProcessingDatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/osmcha2-rss-rewrite': {
+      id: '/api/osmcha2-rss-rewrite'
+      path: '/api/osmcha2-rss-rewrite'
+      fullPath: '/api/osmcha2-rss-rewrite'
+      preLoaderRoute: typeof ApiOsmcha2RssRewriteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/map-style': {
@@ -2577,6 +2597,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiBoundaryRoute: ApiBoundaryRoute,
   ApiCampaignsRoute: ApiCampaignsRoute,
   ApiMapStyleRoute: ApiMapStyleRoute,
+  ApiOsmcha2RssRewriteRoute: ApiOsmcha2RssRewriteRoute,
   ApiProcessingDatesRoute: ApiProcessingDatesRoute,
   ApiProcessingDatesMapillaryRoute: ApiProcessingDatesMapillaryRoute,
   ApiRegionsRoute: ApiRegionsRouteWithChildren,
