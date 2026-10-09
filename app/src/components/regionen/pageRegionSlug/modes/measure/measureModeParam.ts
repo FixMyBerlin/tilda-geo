@@ -1,3 +1,4 @@
+import { lineString, polygon } from '@turf/helpers'
 import { z } from 'zod'
 import { validBackgroundParams } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/backgroundParam.const'
 import {
@@ -21,7 +22,7 @@ import {
  * - `areas` are the measured areas (`Polygon` / `MultiPolygon`), in the same shape as
  *   `sum.areas`, so areas can be taken over between Summieren and Messen.
  * - `bg` is a background picked by hand while measuring. Without it the mode shows the best
- *   aerial image for the place (`useEffectiveBackground`); the global `bg` is left alone.
+ *   aerial image for the place (`useBackgroundParam`); the global `bg` is left alone.
  *
  * Like `sum.areas` the shapes stay in the URL in other modes.
  */
@@ -72,21 +73,11 @@ export const measureAreaId = (index: number) => `area-${index}`
 export const measureShapesFromParam = (param: Pick<MeasureModeParam, 'lines' | 'areas'>) => [
   ...linesOfLinesParam(param.lines).map(
     (coordinates, index) =>
-      ({
-        type: 'Feature',
-        id: measureLineId(index),
-        properties: {},
-        geometry: { type: 'LineString', coordinates },
-      }) satisfies MeasureLine,
+      ({ ...lineString(coordinates), id: measureLineId(index) }) satisfies MeasureLine,
   ),
   ...polygonsOfAreasParam(param.areas).map(
     (coordinates, index) =>
-      ({
-        type: 'Feature',
-        id: measureAreaId(index),
-        properties: {},
-        geometry: { type: 'Polygon', coordinates },
-      }) satisfies MeasureArea,
+      ({ ...polygon(coordinates), id: measureAreaId(index) }) satisfies MeasureArea,
   ),
 ]
 

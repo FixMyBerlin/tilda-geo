@@ -15,7 +15,7 @@ import { useMeasureDraw, useMeasureLiveShapes } from './drawing/useMeasureDraw'
 import { isMeasureArea, isMeasureLine, type MeasureShape } from './measureModeParam'
 import { MeasurePanelActions } from './MeasurePanelActions'
 import { useMeasureShapes } from './useMeasureShapes'
-import { formatArea, formatLength, measureGeometry } from './utils/measureMath'
+import { areaM2, formatArea, formatLength, lineLengthM, perimeterM } from './utils/measureMath'
 
 const BackgroundLine = () => {
   const { backgroundParam, automaticBackground, setBackgroundParam } = useBackgroundParam()
@@ -55,16 +55,25 @@ export const PageModeMeasure = () => {
   // Includes a drag in progress, so the values follow the pointer.
   const liveShapes = useMeasureLiveShapes()
 
-  const lines = liveShapes.filter(isMeasureLine)
-  const areas = liveShapes.filter(isMeasureArea)
-  const totalLengthM = lines.reduce((sum, line) => {
-    const measurement = measureGeometry(line.geometry)
-    return sum + (measurement.kind === 'line' ? measurement.lengthM : 0)
-  }, 0)
-  const totalAreaM2 = areas.reduce((sum, area) => {
-    const measurement = measureGeometry(area.geometry)
-    return sum + (measurement.kind === 'area' ? measurement.areaM2 : 0)
-  }, 0)
+  const lines = liveShapes.filter(isMeasureLine).map((shape, index) => {
+    const lengthM = lineLengthM(shape.geometry)
+    return { shape, label: `Linie ${index + 1}`, value: formatLength(lengthM), total: lengthM }
+  })
+  const areas = liveShapes.filter(isMeasureArea).map((shape, index) => {
+    const squareMetres = areaM2(shape.geometry)
+    return {
+      shape,
+      label: `Fläche ${index + 1}`,
+      value: formatArea(squareMetres),
+      total: squareMetres,
+      detail: `Umfang ${formatLength(perimeterM(shape.geometry))}`,
+    }
+  })
+  const rows: { shape: MeasureShape; label: string; value: string; detail?: string }[] = [
+    ...lines,
+    ...areas,
+  ]
+  const sum = (items: { total: number }[]) => items.reduce((total, item) => total + item.total, 0)
 
   const showShape = (shape: MeasureShape) => {
     draw.select(shape.id)
@@ -80,11 +89,6 @@ export const PageModeMeasure = () => {
     )
   }
 
-  const rows = [
-    ...lines.map((shape, index) => ({ shape, label: `Linie ${index + 1}` })),
-    ...areas.map((shape, index) => ({ shape, label: `Fläche ${index + 1}` })),
-  ]
-
   return (
     <ModePanel title="Messen" actions={<MeasurePanelActions />}>
       {rows.length === 0 ? (
@@ -93,8 +97,7 @@ export const PageModeMeasure = () => {
         </p>
       ) : (
         <ul>
-          {rows.map(({ shape, label }) => {
-            const measurement = measureGeometry(shape.geometry)
+          {rows.map(({ shape, label, value, detail }) => {
             const selected = draw.selectedId === shape.id
             return (
               <li
@@ -125,16 +128,8 @@ export const PageModeMeasure = () => {
                   </button>
                 </div>
                 <div className="text-right tabular-nums">
-                  <strong className="text-sm">
-                    {measurement.kind === 'line'
-                      ? formatLength(measurement.lengthM)
-                      : formatArea(measurement.areaM2)}
-                  </strong>
-                  {measurement.kind === 'area' && (
-                    <div className={modePanelListMetaClassName}>
-                      Umfang {formatLength(measurement.perimeterM)}
-                    </div>
-                  )}
+                  <strong className="text-sm">{value}</strong>
+                  {detail && <div className={modePanelListMetaClassName}>{detail}</div>}
                 </div>
               </li>
             )
@@ -149,13 +144,13 @@ export const PageModeMeasure = () => {
               {lines.length > 1 && (
                 <div className="flex justify-between gap-2">
                   <span>Alle Linien</span>
-                  <strong>{formatLength(totalLengthM)}</strong>
+                  <strong>{formatLength(sum(lines))}</strong>
                 </div>
               )}
               {areas.length > 1 && (
                 <div className="flex justify-between gap-2">
                   <span>Alle Flächen</span>
-                  <strong>{formatArea(totalAreaM2)}</strong>
+                  <strong>{formatArea(sum(areas))}</strong>
                 </div>
               )}
             </li>

@@ -25,12 +25,14 @@ To get newer data, update the package first. It is rebuilt from the index every 
 
 ## Stable ids
 
-The ids are stored in the region configs and must not change.
+The ids are stored in the region configs, so the id of a layer that a region uses must not change.
 
-- `legacyIds.json`: ELI id → the id TILDA used before this script was built on the package
-  (then derived from the file name in the index). Do not edit.
-- `legacyLayers.json`: layers that have left the index but may still be selected in a region.
-- New layers are named `ELI_<eli id in lower case>`.
+- Layers are named `ELI_<eli id in lower case>`.
+- `legacyIds.json` maps an ELI id to the older id that regions selected it under (then derived
+  from the file name in the index). It only lists layers that a region in production uses; add
+  nothing new here.
+- A layer that leaves the index disappears from the list. A region that still selects it shows
+  its other backgrounds, and has to drop the id the next time it is saved.
 
 ## Manual Selection
 

@@ -1,25 +1,16 @@
-import { useSearch } from '@tanstack/react-router'
 import { useRegionSearchNavigation } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useRegionSearchNavigation'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
-import {
-  compactMeasureModeParam,
-  zodMeasureModeParam,
-  type MeasureModeParam,
-} from './measureModeParam'
+import { compactMeasureModeParam, type MeasureModeParam } from './measureModeParam'
 
-/** Read the Messen mode param (`measure` JSON). Route-agnostic so map layers can read it too. */
-const useMeasureModeValue = () => {
-  const value = useSearch({
-    strict: false,
-    select: (search) => search[searchParamsRegistry.measure],
-  })
-  return zodMeasureModeParam.safeParse(value).data ?? {}
-}
+const emptyMeasureMode: MeasureModeParam = {}
 
-/** Read/update the Messen mode param. Updates preserve other params and replace history. */
+/**
+ * Read/update the Messen mode param (`measure`), as the region route validated it. Updates
+ * preserve other params and replace history.
+ */
 export const useMeasureModeParam = () => {
-  const measureMode = useMeasureModeValue()
-  const { updateSearch } = useRegionSearchNavigation()
+  const { search, updateSearch } = useRegionSearchNavigation()
+  const measureMode = search[searchParamsRegistry.measure] ?? emptyMeasureMode
 
   const setMeasureModeParam = (next: MeasureModeParam) => {
     updateSearch(
