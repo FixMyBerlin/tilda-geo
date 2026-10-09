@@ -2,7 +2,8 @@ import { styleText } from 'node:util'
 import { confirm, isCancel, note } from '@clack/prompts'
 import { $ } from 'bun'
 import { applyDevPortSlotToProcessEnv, exitOnInvalidDevPortSlot } from './devPortSlot'
-import { logErr, logOk } from './predevLog'
+import { isAttachMode } from './ensureDevStack'
+import { devStackSkillHint, logErr, logOk } from './predevLog'
 
 const label = 'check_migration'
 
@@ -16,8 +17,15 @@ Then start the dev server again.`
 
 const pendingMigrationsError = 'Pending database migrations.'
 
+// A worktree's own stack starts empty, so every migration is pending there.
+const ownStackTipBody = `This worktree runs its own database (DEV_STACK_ID), which starts empty.
+To work on the data of develop, attach to its stack: set \`DEV_ATTACH_STACK=default\`
+in .env.local (plus \`DEV_PORT_SLOT\` when port 5173 is taken).
+${devStackSkillHint}`
+
 function showPendingMigrationsTip() {
   note(pendingMigrationsTipBody, 'Tip')
+  if (process.env.DEV_STACK_ID?.trim() && !isAttachMode()) note(ownStackTipBody, 'Own stack')
 }
 
 export async function checkMigration() {

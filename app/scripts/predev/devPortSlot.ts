@@ -64,7 +64,17 @@ export function portsFromSlot(slot: number): DevPortSlotConfig {
 }
 
 export function devPortSlotConfigFromEnv(env: NodeJS.ProcessEnv = process.env) {
-  return portsFromSlot(parseDevPortSlot(env.DEV_PORT_SLOT))
+  const config = portsFromSlot(parseDevPortSlot(env.DEV_PORT_SLOT))
+  // Attached to the develop stack: its db and tiles stay on the default ports. The slot then
+  // only moves this worktree's Vite, so it can run next to the dev server of develop.
+  if (config.slot > 0 && env.DEV_ATTACH_STACK?.trim() === 'default') {
+    return {
+      ...config,
+      databasePort: DEV_DB_PORT_BASE,
+      tilesPort: DEV_TILES_PORT_BASE,
+    } satisfies DevPortSlotConfig
+  }
+  return config
 }
 
 export function isDevPortSlotMode(env: NodeJS.ProcessEnv = process.env) {
