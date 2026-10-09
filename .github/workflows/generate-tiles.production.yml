@@ -3,8 +3,9 @@ name: Regenerate Production Tiles
 on:
   workflow_dispatch:
   schedule:
-    # Every day at 0:00 AM UTC
-    - cron: '0 0 * * *'
+    # Every day at 23:00 UTC; GitHub starts it about 30 minutes late. Processing waits up to 2 hours
+    # for the fresh Geofabrik file (`waitForFreshData` in processing/steps/download.ts).
+    - cron: '0 23 * * *'
 permissions:
   contents: read
 

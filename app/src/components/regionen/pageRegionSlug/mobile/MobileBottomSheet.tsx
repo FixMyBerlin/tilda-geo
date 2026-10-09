@@ -2,18 +2,14 @@ import { Dialog, DialogPanel, DialogTitle } from '@headlessui/react'
 import { AnimatePresence, motion, useDragControls } from 'motion/react'
 import type { ReactNode } from 'react'
 import { twMerge } from 'tailwind-merge'
+import { UI_SPRING } from '@/components/shared/motion/spring.const'
 import { SheetGrabHandle } from './SheetGrabHandle'
 
 /** Sheet color schemes — panel bg + grab capsule tint per use. */
-type SheetTone = 'default' | 'calculator' | 'debug'
+type SheetTone = 'default' | 'debug'
 
 const toneStyles: Record<SheetTone, { panel: string; grabber: string; grabIcon: string }> = {
   default: { panel: 'bg-white', grabber: 'bg-gray-300', grabIcon: 'text-gray-600' },
-  calculator: {
-    panel: 'bg-fuchsia-800 text-white',
-    grabber: 'bg-white/40',
-    grabIcon: 'text-white',
-  },
   debug: {
     panel: 'bg-pink-300 text-pink-950',
     grabber: 'bg-pink-500/50',
@@ -98,7 +94,7 @@ export const MobileBottomSheet = ({
               initial={{ y: '100%' }}
               animate={{ y: 0 }}
               exit={{ y: '100%' }}
-              transition={{ type: 'spring', damping: 32, stiffness: 320 }}
+              transition={UI_SPRING}
               drag="y"
               dragControls={dragControls}
               dragListener={false}

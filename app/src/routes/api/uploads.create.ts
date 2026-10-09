@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { MapRenderFormatEnum } from '@/prisma/generated/client'
 import { checkApiKey, parseData } from '@/server/api/util/checkApiKey.server'
 import { runWithAuditContextAsync, systemApiAuditContext } from '@/server/audit/auditContext.server'
+import { auditRegionLinksChange } from '@/server/audit/auditRegionLinks.server'
 import db from '@/server/db.server'
 import { layerConfigsCreateFromConfigs } from '@/server/uploads/mapDatasetLayerConfig.server'
 import {
@@ -67,9 +68,14 @@ export const Route = createFileRoute('/api/uploads/create')({
         } = data
 
         await runWithAuditContextAsync(systemApiAuditContext(request.headers), async () => {
+          // The upload is replaced (new id), so its region links are compared across the replace.
+          const replaced = await db.mapDatasetUpload.findUnique({
+            where: { slug: uploadSlug },
+            select: { regions: { select: { slug: true } } },
+          })
           await db.mapDatasetUpload.deleteMany({ where: { slug: uploadSlug } })
 
-          await db.mapDatasetUpload.create({
+          const created = await db.mapDatasetUpload.create({
             data: {
               slug: uploadSlug,
               regions: { connect: regionSlugs.map((slug) => ({ slug })) },
@@ -92,6 +98,12 @@ export const Route = createFileRoute('/api/uploads/create')({
               // Sync normalized layerConfigs rows from configs[] for the admin UI.
               layerConfigs: { create: layerConfigsCreateFromConfigs(configs) },
             },
+          })
+          await auditRegionLinksChange({
+            model: 'MapDatasetUpload',
+            recordId: created.id,
+            oldRegionSlugs: replaced?.regions.map((region) => region.slug) ?? [],
+            newRegionSlugs: regionSlugs,
           })
         })
 

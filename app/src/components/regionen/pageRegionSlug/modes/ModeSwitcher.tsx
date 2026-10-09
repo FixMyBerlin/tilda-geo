@@ -94,12 +94,21 @@ const ModeSwitcherNav = () => {
         observer.disconnect()
       }
     },
-    [highlightedMode, availableModes.notes, availableModes.qa, availableModes.reviewLists],
+    [
+      highlightedMode,
+      availableModes.notes,
+      availableModes.qa,
+      availableModes.reviewLists,
+      availableModes.calculator,
+    ],
   )
 
   if (modes.length <= 1) return null
 
   const highlightedIdentity = modeIdentity[highlightedMode]
+  // Compact modes (tools) are icon-only until active. The pill mirrors the same rule so both
+  // copies of a tab have the same width.
+  const showsLabel = (mode: RegionMode) => !modeIdentity[mode].compact || optimisticMode === mode
 
   return (
     <nav
@@ -130,10 +139,11 @@ const ModeSwitcherNav = () => {
               'rounded text-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-white',
             )}
             aria-current={active ? 'page' : undefined}
+            title={showsLabel(mode) ? undefined : identity.label}
             onMouseEnter={() => setHoveredMode(mode)}
           >
             <Icon className="h-4 w-4 shrink-0" aria-hidden />
-            {identity.label}
+            {showsLabel(mode) ? identity.label : <span className="sr-only">{identity.label}</span>}
           </Link>
         )
       })}
@@ -169,7 +179,7 @@ const ModeSwitcherNav = () => {
                   className={twJoin(tabLayoutClassName, identity.accent.invertedFgClassName)}
                 >
                   <Icon className="h-4 w-4 shrink-0" aria-hidden />
-                  {identity.label}
+                  {showsLabel(mode) ? identity.label : null}
                 </span>
               )
             })}

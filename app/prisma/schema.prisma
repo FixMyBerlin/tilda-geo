@@ -219,6 +219,7 @@ model Region {
   qaConfigs         QaConfig[]
   reviewLists       ReviewList[]
   noteFolders       NoteFolder[]
+  privateBackgroundSources PrivateBackgroundSource[]
 
   @@index([contractId])
   @@index([headerLogoId])
@@ -274,6 +275,33 @@ model RegionBackgroundAssignment {
 
   @@unique([regionId, sourceId])
   @@map("RegionBackgroundAssignment")
+  @@schema("prisma")
+}
+
+// Background maps ("Hintergrundkarten") whose tile URL carries a secret token. Unlike the code
+// catalog (sourcesBackgroundsRaster.const.ts, selected per region via RegionBackgroundAssignment)
+// these are offered to members and admins of the linked regions only, and `tilesUrl` never leaves
+// the server: the map loads tiles through `api/private-backgrounds/…`. See docs/Permissions.md.
+model PrivateBackgroundSource {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  slug String @unique
+  name String
+
+  /// Secret. Upstream raster tile URL with `{z}`, `{x}`, `{y}` placeholders, including the token.
+  tilesUrl        String
+  /// `tilesUrl` is left out of the audit log; this records in it that the URL (token) was replaced.
+  tilesUrlChangedAt DateTime @default(now())
+  attributionHtml String @default("")
+  minzoom         Int?
+  maxzoom         Int?
+  tileSize        Int    @default(256)
+
+  regions Region[]
+
+  @@map("PrivateBackgroundSource")
   @@schema("prisma")
 }
 

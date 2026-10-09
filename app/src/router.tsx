@@ -15,7 +15,7 @@ export const getRouter = () => {
   const router = createRouter({
     routeTree,
     trailingSlash: 'never',
-    // Pretty JSON search via shared routerSearch; `draw` stays jsurl in its hook.
+    // Pretty JSON search via shared routerSearch.
     parseSearch: routerSearch.parse,
     stringifySearch: routerSearch.stringify,
     context: {

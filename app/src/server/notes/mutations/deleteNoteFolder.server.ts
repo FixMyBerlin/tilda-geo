@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { runWithAuditContextAsync } from '@/server/audit/auditContext.server'
+import { auditRegionLinksChange } from '@/server/audit/auditRegionLinks.server'
 import {
   type MemberCaller,
   memberAuditContext,
@@ -37,7 +38,14 @@ export async function deleteNoteFolder(input: z.infer<typeof Schema>, caller: Me
     )
   }
 
-  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
-    db.noteFolder.delete({ where: { id: folder.id } }),
-  )
+  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), async () => {
+    const deleted = await db.noteFolder.delete({ where: { id: folder.id } })
+    await auditRegionLinksChange({
+      model: 'NoteFolder',
+      recordId: folder.id,
+      oldRegionSlugs: [regionSlug],
+      newRegionSlugs: [],
+    })
+    return deleted
+  })
 }

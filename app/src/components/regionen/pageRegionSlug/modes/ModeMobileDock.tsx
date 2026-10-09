@@ -8,6 +8,7 @@ import { playwrightTestId } from '@/components/shared/utils/playwright'
 import { mapOverlayHairlineClassName } from '../mapOverlayChrome.const'
 import { SheetGrabHandle } from '../mobile/SheetGrabHandle'
 import { useInspectorRenderableFeatures } from '../SidebarInspector/useInspectorRenderableFeatures'
+import { useCalculatorNeedsArea } from './calculator/useCalculatorNeedsArea'
 import { modeIdentity } from './modeIdentity'
 import { applyModeMapCameraPadding, resetModeMapCameraPadding } from './modeMapCameraPadding'
 import { modeMobileDockElevationClassName } from './modePanel.const'
@@ -34,7 +35,9 @@ export const ModeMobileDock = () => {
   const inspectorOpen = useInspectorRenderableFeatures().length > 0
   const notesComposeActive = useNotesComposeActive()
   const reviewDrawActive = useReviewDrawActive()
-  const composeOrDraw = notesComposeActive || reviewDrawActive
+  // Summieren: the map is needed until the first area exists; then the result opens.
+  const calculatorNeedsArea = useCalculatorNeedsArea()
+  const composeOrDraw = notesComposeActive || reviewDrawActive || calculatorNeedsArea
   const [userExpanded, setUserExpanded] = useState(() => !composeOrDraw)
   const [composeOrDrawSeen, setComposeOrDrawSeen] = useState(composeOrDraw)
   const dragControls = useDragControls()
@@ -81,8 +84,8 @@ export const ModeMobileDock = () => {
       data-testid={playwrightTestId('mode-mobile-dock')}
       data-expanded={expanded ? 'true' : 'false'}
       className={twMerge(
-        'pointer-events-auto fixed inset-x-0 bottom-0 z-20 flex flex-col overflow-hidden rounded-t-xl pb-[env(safe-area-inset-bottom)]',
-        accent.tintClassName,
+        // White base: the dock lies over the map, and the mode tint alone is translucent.
+        'pointer-events-auto fixed inset-x-0 bottom-0 z-20 flex flex-col overflow-hidden rounded-t-xl bg-white pb-[env(safe-area-inset-bottom)]',
         mapOverlayHairlineClassName,
         modeMobileDockElevationClassName,
       )}
@@ -116,7 +119,7 @@ export const ModeMobileDock = () => {
           direction={expanded ? 'down' : 'up'}
         />
       </div>
-      <div className="min-h-0 flex-1 overflow-hidden">
+      <div className={twMerge('min-h-0 flex-1 overflow-hidden', accent.tintClassName)}>
         <Outlet />
       </div>
     </motion.section>

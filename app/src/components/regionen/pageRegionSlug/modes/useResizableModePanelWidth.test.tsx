@@ -17,6 +17,7 @@ vi.mock('./useCurrentMode', () => ({
     isNotes: true,
     isQa: false,
     isReviewLists: false,
+    isCalculator: false,
   }),
 }))
 

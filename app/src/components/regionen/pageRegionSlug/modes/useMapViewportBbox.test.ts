@@ -3,6 +3,7 @@ import {
   clampViewportPadding,
   MODE_VIEWPORT_BBOX_PADDING_PX,
   paddedViewportBbox,
+  viewportInsets,
 } from './useMapViewportBbox'
 
 const clampTo = [13.4, 52.5, 13.5, 52.6] as const
@@ -126,5 +127,33 @@ describe('clampViewportPadding', () => {
   test('never returns a negative padding', () => {
     expect(clampViewportPadding(0, 0)).toBe(0)
     expect(clampViewportPadding(-10, -10)).toBe(0)
+  })
+})
+
+describe('viewportInsets', () => {
+  const none = { top: 0, right: 0, bottom: 0, left: 0 }
+
+  test('uses the list padding without camera padding', () => {
+    const pad = MODE_VIEWPORT_BBOX_PADDING_PX
+    expect(viewportInsets(800, 600, none)).toEqual({ top: pad, right: pad, bottom: pad, left: pad })
+  })
+
+  test('leaves out the part under the mobile dock', () => {
+    expect(viewportInsets(375, 812, { top: 16, right: 16, bottom: 519, left: 16 })).toEqual({
+      top: 16,
+      right: 16,
+      bottom: 519,
+      left: 16,
+    })
+  })
+
+  test('falls back to the list padding when the camera padding covers the whole map', () => {
+    const pad = MODE_VIEWPORT_BBOX_PADDING_PX
+    expect(viewportInsets(375, 500, { top: 16, right: 16, bottom: 519, left: 16 })).toEqual({
+      top: pad,
+      right: pad,
+      bottom: pad,
+      left: pad,
+    })
   })
 })

@@ -24,6 +24,7 @@
 -- * … FOR INTERSECTIONS
 \i '/processing/topics/parking/custom_functions/estimate_capacity.sql'
 \i '/processing/topics/parking/custom_functions/explode_parkings.sql'
+\i '/processing/topics/parking/custom_functions/quantize_polygon.sql'
 \i '/processing/topics/parking/custom_functions/round_capacity.sql'
 \i '/processing/topics/parking/custom_functions/condition_category_priority.sql'
 \i '/processing/topics/parking/custom_functions/osm_ref.sql'

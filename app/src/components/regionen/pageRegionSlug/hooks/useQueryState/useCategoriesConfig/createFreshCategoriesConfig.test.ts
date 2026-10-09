@@ -19,3 +19,29 @@ describe('createFreshCategoriesConfig()', () => {
     expect(secondStyle?.active).toBeTruthy()
   })
 })
+
+describe('Surface and lighting show the same data groups with the same defaults', () => {
+  const [lit, surface] = createFreshCategoriesConfig(['lit', 'surface'])
+  const activeStyleIds = (category: typeof lit) =>
+    category?.subcategories.map(
+      (subcat) => subcat.styles.find((style) => style.active)?.id ?? 'hidden',
+    )
+
+  test('Same names in the same order', () => {
+    expect(surface?.subcategories.map((subcat) => subcat.name)).toEqual(
+      lit?.subcategories.map((subcat) => subcat.name),
+    )
+  })
+
+  test('Same sources in the same order', () => {
+    expect(surface?.subcategories.map((subcat) => subcat.sourceId)).toEqual(
+      lit?.subcategories.map((subcat) => subcat.sourceId),
+    )
+  })
+
+  test('Roads and bikelanes are on, path classes and highway areas are off', () => {
+    const expected = ['default', 'default', 'hidden', 'hidden']
+    expect(activeStyleIds(lit)).toEqual(expected)
+    expect(activeStyleIds(surface)).toEqual(expected)
+  })
+})

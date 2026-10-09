@@ -11,8 +11,6 @@ import {
 import { useBackgroundParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBackgroundParam'
 import { useBg3dParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBg3dParam'
 import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
-import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
-import { sourcesBackgroundsRaster } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
 import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import {
   mapOverlayAnchoredMenuMaxHeightClassName,
@@ -26,21 +24,16 @@ import {
 } from '../mobile/mobileControlButton.const'
 import { Background3dToggleRow } from './Background3dToggleRow'
 import { ListOption } from './ListOption'
+import { useRegionBackgrounds } from './useRegionBackgrounds'
 
 export const SelectBackground = () => {
   const { mainMap } = useMap()
   const { backgroundParam, setBackgroundParam } = useBackgroundParam()
   const { mapParam, setMapParam } = useMapParam()
   const { is3dActive, toggle3d } = useBg3dParam()
-  const { region } = useRegionLoaderData()
+  const backgrounds = useRegionBackgrounds()
   const isSmBreakpointOrAbove = useBreakpoint('sm')
   const [sheetOpen, setSheetOpen] = useState(false)
-
-  if (!region?.backgroundSources) return null
-
-  const backgrounds = sourcesBackgroundsRaster.filter((s) =>
-    region?.backgroundSources?.includes(s.id),
-  )
 
   const onChange = (value: BackgroundParam) => {
     void setBackgroundParam(value)

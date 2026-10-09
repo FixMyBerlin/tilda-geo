@@ -10,9 +10,12 @@ const integrationDb = await isIntegrationDbAvailable()
 const ADMIN_USER_ID = 'vitest-mcp-admin'
 const CATEGORY_GROUP = 'vitest-mcp-group'
 const CONTRACT_SLUG = 'vitest-mcp-contract'
+const PRIVATE_BACKGROUND_SLUG = 'vitest-mcp-private-background'
 const REGION_SLUG = 'vitest-mcp-region'
 const SECOND_REGION_SLUG = 'vitest-mcp-region-2'
 const OTHER_USER_ID = 'vitest-mcp-other'
+const UPLOAD_SLUG = 'vitest-mcp-upload'
+const SECOND_UPLOAD_SLUG = 'vitest-mcp-upload-2'
 
 async function connectClient() {
   const server = buildMcpServer({
@@ -42,9 +45,13 @@ async function cleanup() {
   await db.note.deleteMany({ where: { folder: inRegion } })
   await db.noteFolder.deleteMany({ where: inRegion })
   await db.reviewList.deleteMany({ where: inRegion })
+  await db.mapDatasetUpload.deleteMany({
+    where: { slug: { in: [UPLOAD_SLUG, SECOND_UPLOAD_SLUG] } },
+  })
   await db.mapDatasetCategory.deleteMany({ where: { groupKey: CATEGORY_GROUP } })
   await db.region.deleteMany({ where: { slug: { in: [REGION_SLUG, SECOND_REGION_SLUG] } } })
   await db.regionContract.deleteMany({ where: { slug: CONTRACT_SLUG } })
+  await db.privateBackgroundSource.deleteMany({ where: { slug: PRIVATE_BACKGROUND_SLUG } })
   await db.user.deleteMany({ where: { id: { in: [ADMIN_USER_ID, OTHER_USER_ID] } } })
 }
 
@@ -142,6 +149,128 @@ describe.skipIf(!integrationDb)('admin MCP tools (integration)', () => {
     expect(audit).not.toBeNull()
   })
 
+  test('map_dataset_uploads_* list, get, remove region, delete', async () => {
+    const categoryKey = `${CATEGORY_GROUP}/uploads`
+    const config = {
+      name: 'Vitest view',
+      categoryKey,
+      layers: [{ id: 'vitest-layer', type: 'line' }],
+      inspector: { enabled: false },
+    }
+    const uploadData = {
+      configs: [config],
+      mapRenderFormat: 'geojson' as const,
+      mapRenderUrl: 'https://example.com/vitest.geojson',
+      githubUrl: 'https://example.com/vitest',
+      dataUpdatedNote: '2026-01-01',
+    }
+    await db.mapDatasetUpload.create({
+      data: {
+        ...uploadData,
+        slug: UPLOAD_SLUG,
+        regions: { connect: [{ slug: REGION_SLUG }, { slug: SECOND_REGION_SLUG }] },
+        layerConfigs: { create: [config] },
+      },
+    })
+    await db.mapDatasetUpload.create({
+      data: {
+        ...uploadData,
+        slug: SECOND_UPLOAD_SLUG,
+        configs: [{ ...config, categoryKey: null }],
+        regions: { connect: [{ slug: SECOND_REGION_SLUG }] },
+        layerConfigs: { create: [{ ...config, categoryKey: null }] },
+      },
+    })
+
+    const slugsOf = (result: Awaited<ReturnType<typeof callTool>>) =>
+      (JSON.parse(result.text) as { slug: string }[]).map((upload) => upload.slug)
+
+    const list = await callTool(client, 'map_dataset_uploads_list')
+    expect(slugsOf(list)).toEqual(expect.arrayContaining([UPLOAD_SLUG, SECOND_UPLOAD_SLUG]))
+    expect(JSON.parse(list.text)).toContainEqual({
+      slug: UPLOAD_SLUG,
+      public: false,
+      createdBy: 'SCRIPT',
+      updatedAt: expect.any(String),
+      dataUpdatedNote: '2026-01-01',
+      regionSlugs: [REGION_SLUG, SECOND_REGION_SLUG],
+      configs: [{ name: 'Vitest view', categoryKey }],
+    })
+
+    const byRegion = await callTool(client, 'map_dataset_uploads_list', { regionSlug: REGION_SLUG })
+    expect(slugsOf(byRegion)).toEqual([UPLOAD_SLUG])
+    const byCategory = await callTool(client, 'map_dataset_uploads_list', { categoryKey })
+    expect(slugsOf(byCategory)).toEqual([UPLOAD_SLUG])
+
+    const got = await callTool(client, 'map_dataset_uploads_get', { slug: UPLOAD_SLUG })
+    expect(got.json()).toMatchObject({
+      slug: UPLOAD_SLUG,
+      configs: [config],
+      regionSlugs: [REGION_SLUG, SECOND_REGION_SLUG],
+    })
+    const missing = await callTool(client, 'map_dataset_uploads_get', { slug: 'vitest-mcp-nope' })
+    expect(missing.text).toBe('Error: Map dataset upload not found: vitest-mcp-nope')
+
+    const unlinked = await callTool(client, 'map_dataset_uploads_remove_region', {
+      uploadSlug: UPLOAD_SLUG,
+      regionSlug: REGION_SLUG,
+    })
+    expect(unlinked.json()).toEqual({ slug: UPLOAD_SLUG, regionSlugs: [SECOND_REGION_SLUG] })
+    const unlinkedAudit = await db.auditLog.findFirst({
+      where: { model: 'MapDatasetUpload', userId: ADMIN_USER_ID },
+      orderBy: { createdAt: 'desc' },
+    })
+    expect(unlinkedAudit).toMatchObject({
+      action: 'UPDATE',
+      recordId: String(got.json().id),
+      oldData: { regionSlugs: [REGION_SLUG, SECOND_REGION_SLUG] },
+      newData: { regionSlugs: [SECOND_REGION_SLUG] },
+      metadata: { changeSource: 'API' },
+    })
+
+    const unlinkedAgain = await callTool(client, 'map_dataset_uploads_remove_region', {
+      uploadSlug: UPLOAD_SLUG,
+      regionSlug: REGION_SLUG,
+    })
+    expect(unlinkedAgain.isError).toBe(true)
+    expect(unlinkedAgain.text).toContain('is not linked to region')
+    const unlinkUnknown = await callTool(client, 'map_dataset_uploads_remove_region', {
+      uploadSlug: 'vitest-mcp-nope',
+      regionSlug: REGION_SLUG,
+    })
+    expect(unlinkUnknown.text).toBe('Error: Map dataset upload not found: vitest-mcp-nope')
+
+    const deleted = await callTool(client, 'map_dataset_uploads_delete', { slug: UPLOAD_SLUG })
+    expect(deleted.isError).toBe(false)
+    expect(deleted.json()).toMatchObject({
+      slug: UPLOAD_SLUG,
+      configs: [config],
+      regionSlugs: [SECOND_REGION_SLUG],
+    })
+    expect(await db.mapDatasetUpload.findUnique({ where: { slug: UPLOAD_SLUG } })).toBeNull()
+    expect(await db.mapDatasetUpload.count({ where: { slug: SECOND_UPLOAD_SLUG } })).toBe(1)
+    expect(await db.region.count({ where: { slug: SECOND_REGION_SLUG } })).toBe(1)
+    const deletedAudit = await db.auditLog.findMany({
+      where: { model: 'MapDatasetUpload', recordId: String(got.json().id), userId: ADMIN_USER_ID },
+      orderBy: [{ createdAt: 'desc' }, { id: 'desc' }],
+      take: 2,
+    })
+    // The DELETE row has columns only, so the dropped region links get their own row.
+    expect(deletedAudit).toMatchObject([
+      {
+        action: 'UPDATE',
+        oldData: { regionSlugs: [SECOND_REGION_SLUG] },
+        newData: { regionSlugs: [] },
+        metadata: { changeSource: 'API' },
+      },
+      { action: 'DELETE', metadata: { changeSource: 'API' } },
+    ])
+
+    const deletedAgain = await callTool(client, 'map_dataset_uploads_delete', { slug: UPLOAD_SLUG })
+    expect(deletedAgain.isError).toBe(true)
+    expect(deletedAgain.text).toBe(`Error: Map dataset upload not found: ${UPLOAD_SLUG}`)
+  })
+
   test('region_contracts_* round-trip', async () => {
     const created = await callTool(client, 'region_contracts_create', {
       slug: CONTRACT_SLUG,
@@ -172,6 +301,80 @@ describe.skipIf(!integrationDb)('admin MCP tools (integration)', () => {
     const deleted = await callTool(client, 'region_contracts_delete', { slug: CONTRACT_SLUG })
     expect(deleted.isError).toBe(false)
   })
+
+  test('private_backgrounds_* round-trip never returns or audits the tile URL', async () => {
+    const tilesUrl = 'https://tiles.example.com/{z}/{x}/{y}.jpg?token=VITEST_SECRET'
+    const created = await callTool(client, 'private_backgrounds_create', {
+      slug: PRIVATE_BACKGROUND_SLUG,
+      name: 'Vitest MCP background',
+      tilesUrl,
+      regionSlugs: [REGION_SLUG],
+    })
+    expect(created.isError).toBe(false)
+    expect(created.json()).toMatchObject({ tileSize: 256, regionSlugs: [REGION_SLUG] })
+
+    const invalid = await callTool(client, 'private_backgrounds_create', {
+      slug: `${PRIVATE_BACKGROUND_SLUG}-2`,
+      name: 'No placeholders',
+      tilesUrl: 'https://tiles.example.com/tile.jpg',
+    })
+    expect(invalid.isError).toBe(true)
+    const zooms = await callTool(client, 'private_backgrounds_update', {
+      slug: PRIVATE_BACKGROUND_SLUG,
+      name: 'Zooms',
+      minzoom: 18,
+      maxzoom: 10,
+    })
+    expect(zooms.isError).toBe(true)
+
+    // Without tilesUrl the stored URL stays; everything else is replaced.
+    const updated = await callTool(client, 'private_backgrounds_update', {
+      slug: PRIVATE_BACKGROUND_SLUG,
+      name: 'Vitest MCP background renamed',
+      maxzoom: 21,
+      regionSlugs: [],
+    })
+    expect(updated.json()).toMatchObject({ name: 'Vitest MCP background renamed', regionSlugs: [] })
+    const stored = await db.privateBackgroundSource.findUniqueOrThrow({
+      where: { slug: PRIVATE_BACKGROUND_SLUG },
+    })
+    expect(stored).toMatchObject({ tilesUrl, maxzoom: 21 })
+
+    // Rotating the token shows up in the audit log as a changed marker, never as the URL.
+    await callTool(client, 'private_backgrounds_update', {
+      slug: PRIVATE_BACKGROUND_SLUG,
+      name: 'Vitest MCP background renamed',
+      tilesUrl: `${tilesUrl}_ROTATED`,
+    })
+    const rotated = await db.privateBackgroundSource.findUniqueOrThrow({
+      where: { slug: PRIVATE_BACKGROUND_SLUG },
+    })
+    expect(rotated.tilesUrlChangedAt.getTime()).toBeGreaterThan(stored.tilesUrlChangedAt.getTime())
+
+    const list = await callTool(client, 'private_backgrounds_list')
+    expect(list.text).toContain(PRIVATE_BACKGROUND_SLUG)
+    const audit = await db.auditLog.findMany({
+      where: { model: 'PrivateBackgroundSource', recordId: String(stored.id) },
+    })
+    expect(audit.length).toBeGreaterThan(0)
+    // Unlinking the region is recorded: the regions decide who may load the tiles.
+    const regionLinkRows = audit.filter((row) =>
+      JSON.stringify(row.newData).includes('regionSlugs'),
+    )
+    expect(regionLinkRows.map((row) => row.newData)).toEqual(
+      expect.arrayContaining([{ regionSlugs: [REGION_SLUG] }, { regionSlugs: [] }]),
+    )
+    expect(regionLinkRows).toHaveLength(2)
+    expect([created.text, updated.text, list.text, JSON.stringify(audit)].join()).not.toContain(
+      'VITEST_SECRET',
+    )
+
+    const deleted = await callTool(client, 'private_backgrounds_delete', {
+      slug: PRIVATE_BACKGROUND_SLUG,
+    })
+    expect(deleted.isError).toBe(false)
+  })
+
   test('note_folders_* / notes_* / note_comments_* round-trip', async () => {
     const folder = await callTool(client, 'note_folders_create', {
       regionSlug: REGION_SLUG,

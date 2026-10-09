@@ -4,16 +4,12 @@ import {
   validBackgroundParams,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/backgroundParam.const'
 import {
-  jsurlParse,
-  jurlStringify,
-} from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/v1/jurlParseStringify'
-import {
   parseMapParam,
   serializeMapParam,
   type MapParam,
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import { mapParamFallback } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParamFallback.const'
-import type { DrawArea } from '@/components/regionen/pageRegionSlug/Map/Calculator/drawing/drawAreaTypes'
+import { zodCalculatorModeParam } from '@/components/regionen/pageRegionSlug/modes/calculator/calculatorModeParam'
 import { zodNotesModeParam } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
 import {
   defaultQaParam,
@@ -28,18 +24,11 @@ import {
   searchBoolean,
   searchStringArray,
 } from '@/lib/searchParamsSchema'
+import {
+  isPrivateBackgroundParam,
+  type PrivateBackgroundParam,
+} from '@/server/private-backgrounds/privateBackgroundParam'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
-
-const parseDrawParam = (query: string | undefined): DrawArea[] => {
-  if (!query) return []
-  const parsed = jsurlParse(query)
-  return Array.isArray(parsed) ? (parsed as DrawArea[]) : []
-}
-
-export const serializeDrawParam = (areas: DrawArea[]) => {
-  if (areas.length === 0) return undefined
-  return jurlStringify(areas)
-}
 
 export const defaultMapSearchValue = serializeMapParam(mapParamFallback)
 
@@ -59,7 +48,14 @@ const mapSearchParam = (defaultValue: string) =>
 const backgroundSearchParam = () =>
   optionalSearchString()
     .transform((s) => s ?? defaultBackgroundParam)
-    .pipe(z.enum(validBackgroundParams).catch(defaultBackgroundParam))
+    .pipe(
+      z
+        .union([
+          z.enum(validBackgroundParams),
+          z.custom<PrivateBackgroundParam>(isPrivateBackgroundParam),
+        ])
+        .catch(defaultBackgroundParam),
+    )
 
 export const regionDialogParamSchema = z.enum(['welcome', 'download', 'docs'])
 
@@ -73,7 +69,6 @@ export const regionSearchSchema = z.object({
   [searchParamsRegistry.f]: optionalSearchString(),
   [searchParamsRegistry.bg]: backgroundSearchParam(),
   [searchParamsRegistry.bg3d]: searchBoolean(false),
-  [searchParamsRegistry.draw]: optionalSearchString(),
   [searchParamsRegistry.debugMap]: optionalSearchBoolean(),
   [searchParamsRegistry.qa]: optionalSearchJson(zodQaParam),
   // Invalid values (e.g. ?dialog=foo) clear rather than throwing the region route into error UI.
@@ -86,6 +81,7 @@ export const regionSearchSchema = z.object({
   // per-child validateSearch schemas.
   [searchParamsRegistry.notes]: optionalSearchJson(zodNotesModeParam),
   [searchParamsRegistry.review]: optionalSearchJson(zodReviewListsModeParam),
+  [searchParamsRegistry.sum]: optionalSearchJson(zodCalculatorModeParam),
   [searchParamsRegistry.photos]: optionalSearchJson(zodStreetImageryParam),
 })
 
@@ -102,8 +98,4 @@ export const getMapParamFromSearch = (search: RegionSearch): MapParam => {
 
 export const getQaParamFromSearch = (search: RegionSearch) => {
   return search[searchParamsRegistry.qa] ?? defaultQaParam
-}
-
-export const getDrawAreasFromSearch = (search: RegionSearch) => {
-  return parseDrawParam(search[searchParamsRegistry.draw])
 }

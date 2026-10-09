@@ -4,7 +4,6 @@ export type SourcesParkingLarsId =
   | 'lars_parking'
   | 'lars_parking_areas'
   | 'lars_parking_debug'
-  | 'lars_parking_points'
   | 'lars_parking_stats'
 
 export const sourcesParkingLars: MapDataSource<SourcesParkingLarsId>[] = [
@@ -73,29 +72,6 @@ export const sourcesParkingLars: MapDataSource<SourcesParkingLarsId>[] = [
     inspector: { enabled: false }, // Those layers have no properties anyways
     // presence: { enabled: false },
     calculator: { enabled: false },
-  },
-  {
-    id: 'lars_parking_points',
-    tileTables: null,
-    tilesUrl: 'https://vts.mapwebbing.eu/processing.parking_spaces/{z}/{x}/{y}.pbf',
-    attributionHtml:
-      '<a rel="noopener noreferrer" href="https://parkraum.osm-verkehrswende.org/" target="_blank">OSM-Parkraumanalyse</a>, © <a rel="noopener noreferrer" href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>',
-    licence: 'ODbL',
-    maxzoom: 20,
-    minzoom: 4,
-    promoteId: undefined,
-    osmIdConfig: undefined,
-    inspector: { enabled: false },
-    // presence: { enabled: false },
-    calculator: {
-      enabled: true,
-      sumKeys: { capacity: 'Stellplätze' },
-      groupByKeys: ['parking'],
-      queryLayers: [
-        'source:lars_parking_points--subcat:parkingPoints--style:default--layer:circle',
-      ],
-      highlightingKey: 'id',
-    },
   },
   {
     id: 'lars_parking_areas',

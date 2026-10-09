@@ -17,6 +17,7 @@ import { REVIEW_ENTRY_MOVE_COLOR, REVIEW_ENTRY_MOVE_COLOR_LABEL } from '../revie
 import { STATUS_LABEL } from '../reviewListsModeFilters'
 import { useReviewListsModeValue } from '../useReviewListsModeParam'
 import { ReviewEntryComment } from './ReviewEntryComment'
+import { ReviewEntryProperties } from './ReviewEntryProperties'
 
 type Props = { entryId: number }
 
@@ -90,8 +91,10 @@ export const ReviewEntryDetail = ({ entryId }: Props) => {
               />
               {REVIEW_ENTRY_MOVE_COLOR_LABEL}
             </span>
-            ). Das Element auf der Karte ziehen oder über die Werkzeugleiste Teile hinzufügen und
-            löschen.
+            ). Punkte lassen sich direkt ziehen. Bei Linien und Flächen Eckpunkte oder Kanten
+            ziehen; der Griff verschiebt die Form als Ganzes, ein Doppelklick auf einen Eckpunkt
+            entfernt ihn. Ein Klick auf das Ende einer Linie setzt sie fort. Über die Werkzeugleiste
+            lassen sich Teile hinzufügen und löschen.
           </p>
         ) : null}
 
@@ -113,31 +116,7 @@ export const ReviewEntryDetail = ({ entryId }: Props) => {
           ))}
         </div>
 
-        {entry.properties &&
-          typeof entry.properties === 'object' &&
-          Object.keys(entry.properties).length > 0 && (
-            <div>
-              <h3 className="mb-1.5 text-xs font-medium text-gray-900">Attribute des Eintrags</h3>
-              <dl className="divide-y divide-gray-950/10 overflow-hidden rounded-md border border-gray-950/10 text-xs">
-                {Object.entries(entry.properties as Record<string, unknown>).map(([key, value]) => {
-                  const display = String(value)
-                  return (
-                    <div
-                      key={key}
-                      className="grid grid-cols-[minmax(0,8.5rem)_minmax(0,1fr)] items-baseline gap-x-2 px-2.5 py-1.5"
-                    >
-                      <dt className="truncate font-medium text-gray-500" title={key}>
-                        {key}
-                      </dt>
-                      <dd className="truncate text-gray-900" title={display}>
-                        {display}
-                      </dd>
-                    </div>
-                  )
-                })}
-              </dl>
-            </div>
-          )}
+        <ReviewEntryProperties properties={entry.properties} />
       </div>
 
       <div className={modePanelTintHairlineTopClassName}>

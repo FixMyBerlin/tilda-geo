@@ -27,6 +27,10 @@ vi.mock('./reviewLists/useReviewDrawActive', () => ({
   useReviewDrawActive,
 }))
 
+vi.mock('./calculator/useCalculatorNeedsArea', () => ({
+  useCalculatorNeedsArea: () => false,
+}))
+
 vi.mock('../SidebarInspector/useInspectorRenderableFeatures', () => ({
   useInspectorRenderableFeatures,
 }))

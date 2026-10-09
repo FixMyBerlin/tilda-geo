@@ -109,7 +109,13 @@ type Props = {
   pageExtras?: AdminFormPageExtras
 } & (
   | { mode: 'create'; initialValues: RegionFormInput }
-  | { mode: 'edit'; initialValues: RegionFormInput; regionSlug: string }
+  | {
+      mode: 'edit'
+      initialValues: RegionFormInput
+      regionSlug: string
+      /** Read-only: `PrivateBackgroundSource` rows linked to this region. */
+      privateBackgrounds: { slug: string; name: string }[]
+    }
 )
 
 export function RegionForm(props: Props) {
@@ -353,6 +359,26 @@ export function RegionForm(props: Props) {
                 label: entry.label,
               }))}
             />
+            {mode === 'edit' && (
+              <div className="text-sm text-gray-700">
+                <p className="font-medium">Private Hintergrundkarten (nur für Mitglieder)</p>
+                {props.privateBackgrounds.length === 0 ? (
+                  <p className="text-gray-500">Keine zugeordnet.</p>
+                ) : (
+                  <ul className="list-disc pl-5">
+                    {props.privateBackgrounds.map((source) => (
+                      <li key={source.slug}>
+                        {source.name} (<code className="text-xs">{source.slug}</code>)
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <p className="mt-1 text-gray-500">
+                  Zuordnung über das Admin-MCP (private_backgrounds_*), Übersicht unter{' '}
+                  <Link to="/admin/private-backgrounds">Private Hintergrundkarten</Link>.
+                </p>
+              </div>
+            )}
           </AdminFormSection>
 
           <AdminFormSection id="navigation" title={sectionLabels.navigation}>

@@ -56,6 +56,43 @@ test.describe('Smoke – region mode pages (unauthenticated)', () => {
     await expectNoConsoleErrors(page)
   })
 
+  test('Summieren mode is open to guests and shows the drawing hint', async ({ page }) => {
+    await page.goto('/regionen/parkraum-berlin-euvm/summieren?map=14/52.5/13.4')
+    expect(new URL(page.url()).pathname).toBe('/regionen/parkraum-berlin-euvm/summieren')
+
+    await expect(page.getByRole('heading', { name: 'Summieren' })).toBeVisible({ timeout: 30_000 })
+    await expect(page.getByText('In die Karte klicken, um eine Fläche zu zeichnen')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Hilfe zum Zeichnen' })).toBeVisible()
+    // The datasets are no longer layers of the category list.
+    await expect(page.getByText('Summieren:')).toHaveCount(0)
+    await waitForMapLoad(page)
+    await verifyMapRendered(page)
+
+    // Compact tab: the label is only visible while the mode is active.
+    const switcher = page.getByRole('navigation', { name: 'Modus' })
+    await switcher.getByRole('link', { name: 'Karte' }).click()
+    await page.waitForURL((url) => new URL(url).pathname === '/regionen/parkraum-berlin-euvm')
+    await expect(page.getByText('In die Karte klicken, um eine Fläche zu zeichnen')).toHaveCount(0)
+    await expect(switcher.getByRole('link', { name: 'Summieren' })).toHaveAttribute(
+      'title',
+      'Summieren',
+    )
+  })
+
+  test('legacy "Summieren: …" layer on the map redirects into Summieren', async ({ page }) => {
+    // `config` from before the layers left the category list: street parking sums switched on.
+    await page.goto('/regionen/parkraum-berlin-euvm?v=3&config=dgp49i.4qfrqd.8&map=14/52.5/13.4')
+    await page.waitForURL(
+      (url) => new URL(url).pathname === '/regionen/parkraum-berlin-euvm/summieren',
+    )
+    await expect(page.getByRole('heading', { name: 'Summieren' })).toBeVisible({ timeout: 30_000 })
+  })
+
+  test('Summieren redirects to the map in a region without a dataset to sum', async ({ page }) => {
+    await page.goto(`${TEST_REGION_URL}/summieren`)
+    await page.waitForURL((url) => new URL(url).pathname === TEST_REGION_URL)
+  })
+
   test('legacy osmNotes=true on the map redirects into Hinweise', async ({ page }) => {
     await page.goto(`${TEST_REGION_URL}?osmNotes=true`)
     await page.waitForURL((url) => new URL(url).pathname === TEST_REGION_NOTES_MODE_URL)

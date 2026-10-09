@@ -1,19 +1,12 @@
 import { Fragment } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
+import { useRegionBackgrounds } from '@/components/regionen/pageRegionSlug/background/useRegionBackgrounds'
 import { useBackgroundParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBackgroundParam'
-import { useRegionLoaderData } from '@/components/regionen/pageRegionSlug/hooks/useRegionLoaderData'
-import { sourcesBackgroundsRaster } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
 import { layerVisibility } from '../utils/layerVisibility'
 
 export const SourcesLayerRasterBackgrounds: React.FC = () => {
   const { backgroundParam } = useBackgroundParam()
-  const { region } = useRegionLoaderData()
-
-  if (!region?.backgroundSources) return null
-
-  const backgrounds = sourcesBackgroundsRaster.filter((s) =>
-    region.backgroundSources.includes(s.id),
-  )
+  const backgrounds = useRegionBackgrounds()
 
   // Last layer in Array `allLayer.filter((l) => l.source === 'openmaptiles')`
   // Picking a different layer would who maptiler Vector data on top of the background

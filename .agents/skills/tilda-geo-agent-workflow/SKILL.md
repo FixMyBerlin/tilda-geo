@@ -118,7 +118,9 @@ DEV_STACK_ID=wt_tilda_geo_my_branch
 DEV_ATTACH_STACK=default
 ```
 
-Add `DEV_PORT_SLOT=1` (or another slot) if Vite **5173** is already taken. Do not copy `.env.local` between worktrees.
+Add `DEV_PORT_SLOT=1` (or another slot) if Vite **5173** is already taken, e.g. by the dev server of develop. With `DEV_ATTACH_STACK=default` the slot only moves Vite (5174, …); db and tiles stay on **5432** / **3000**. Do not copy `.env.local` between worktrees.
+
+**Develop data in a worktree = attach.** This is the way to get the develop db into a worktree, also when predev reports "Pending database migrations" there (its own stack is empty): switch `.env.local` to the attach lines above and rerun `bun run dev`.
 
 | Variable           | Role                                                                                                                                                                |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

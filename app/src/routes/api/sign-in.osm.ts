@@ -33,11 +33,7 @@ function toSafeCallbackURL(rawCallbackURL: string | null, requestUrl: string) {
 
     // Better Auth validates callback targets against configured origins.
     // Passing a relative app path avoids host/canonical-domain drift between environments.
-    // Re-encode search: the allowlist rejects `[`/`]` (legacy `data=[]`) and unencoded commas.
-    const search = normalized.search
-      ? `?${new URLSearchParams(normalized.search.slice(1)).toString()}`
-      : ''
-    return getSafeSignInCallbackURL(`${normalized.pathname}${search}`)
+    return getSafeSignInCallbackURL(`${normalized.pathname}${normalized.search}`)
   } catch {
     return fallback
   }

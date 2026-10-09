@@ -1,5 +1,8 @@
 import { createFreshCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/createFreshCategoriesConfig'
-import { migrateUrl } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/migrateUrl'
+import {
+  migrateUrl,
+  urlMigrationVersion,
+} from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/migrateUrl'
 import { foldNotesComposePinIntoNotesJson } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/migrations/foldNotesComposePinIntoNotesJson'
 import type {
   MapDataCategoryConfig,
@@ -18,8 +21,11 @@ import {
   zodNotesModeParam,
 } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
 import { zodQaParam } from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
-import { streetImageryFromLegacyMapillaryCategory } from '@/server/regions/migrateLegacyMapillaryCategory.server'
 import { migrateOldLitCategory } from '@/server/regions/migrateLitCompletenessConfig.server'
+import {
+  migrateRemovedConfigEntries,
+  REMOVED_CONFIG_ENTRIES_URL_VERSION,
+} from '@/server/regions/migrateRemovedConfigEntries.server'
 import { getRegion } from '@/server/regions/queries/getRegion.server'
 import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { resolveConfigTemplate } from '@/server/regions/regionConfigTemplates.server'
@@ -179,6 +185,7 @@ function migrateConfigCategoryIds(urlConfig: ReturnType<typeof parseConfig>) {
  * - `/regionen/berlin` → normalizes search params (map, config, etc.)
  * - `/regionen/bb-ag` → redirects to `/regionen/bb-pg` (region rename)
  * - `/regionen/bb-ag/hinweise` → redirects to `/regionen/bb-pg/hinweise` (rename, sub-path kept)
+ * - `/regionen/parkraum?config=…` with an old "Summieren: …" layer on → `/regionen/parkraum/summieren`
  *
  * Routes that DON'T trigger this (different or no route match, so this loader never runs):
  * - `/regionen/` → handled by `regionen/index.tsx`
@@ -208,6 +215,9 @@ export async function getRegionRedirectUrl(locationHref: string, regionSlug: str
   const preMigrationParams = new URL(migratedUrl).searchParams
   const hadLegacyQaBookmark = isLegacyQaBookmark(preMigrationParams.get('qa'))
   const hadLegacyNotesOverlay = isLegacyNotesOverlayBookmark(preMigrationParams)
+
+  // `migrateUrl` stamps the current version; the config step below needs the one of the link.
+  const urlVersion = urlMigrationVersion(migratedUrl)
 
   // URL param migrations need the region's current category list to rebuild defaults.
   migratedUrl = migrateUrl(migratedUrl, { categories: region.categories })
@@ -285,9 +295,8 @@ export async function getRegionRedirectUrl(locationHref: string, regionSlug: str
       try {
         const parsedConfig = parseConfig(configParam, simplifiedConfig as MapDataCategoryConfig[])
         const migratedConfig = migrateConfigCategoryIds(parsedConfig)
-        const legacyStreetImagery = streetImageryFromLegacyMapillaryCategory(migratedConfig)
-        if (legacyStreetImagery && !u.searchParams.has(searchParamsRegistry.photos)) {
-          u.searchParams.set(searchParamsRegistry.photos, JSON.stringify(legacyStreetImagery))
+        if (urlVersion < REMOVED_CONFIG_ENTRIES_URL_VERSION) {
+          migrateRemovedConfigEntries(u, migratedConfig, { regionRootPath, region })
         }
         const mergedConfig = mergeCategoriesConfig({
           freshConfig,

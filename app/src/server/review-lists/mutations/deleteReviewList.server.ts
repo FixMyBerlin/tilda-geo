@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { runWithAuditContextAsync } from '@/server/audit/auditContext.server'
+import { auditRegionLinksChange } from '@/server/audit/auditRegionLinks.server'
 import {
   type MemberCaller,
   memberAuditContext,
@@ -37,7 +38,14 @@ export async function deleteReviewList(input: z.infer<typeof Schema>, caller: Me
     )
   }
 
-  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), () =>
-    db.reviewList.delete({ where: { id: list.id } }),
-  )
+  return runWithAuditContextAsync(memberAuditContext(caller, session.userId), async () => {
+    const deleted = await db.reviewList.delete({ where: { id: list.id } })
+    await auditRegionLinksChange({
+      model: 'ReviewList',
+      recordId: list.id,
+      oldRegionSlugs: [regionSlug],
+      newRegionSlugs: [],
+    })
+    return deleted
+  })
 }

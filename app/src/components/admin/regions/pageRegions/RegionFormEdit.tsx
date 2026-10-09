@@ -9,10 +9,18 @@ type Props = {
   formValues?: RegionFormInput
   contracts: TRegionContract[]
   regionId: number
+  privateBackgrounds: { slug: string; name: string }[]
   pageExtras: AdminFormPageExtras
 }
 
-export function RegionFormEdit({ formConfig, formValues, contracts, regionId, pageExtras }: Props) {
+export function RegionFormEdit({
+  formConfig,
+  formValues,
+  contracts,
+  regionId,
+  privateBackgrounds,
+  pageExtras,
+}: Props) {
   const initialValues = formValues ?? regionConfigToFormDefaults(formConfig)
   // Remount when mask defaults change — TanStack Form only reads defaultValues on mount, so after
   // save+invalidate (or reopen) a stale empty mask field would otherwise stick and clear the mask
@@ -32,6 +40,7 @@ export function RegionFormEdit({ formConfig, formValues, contracts, regionId, pa
       contracts={contracts}
       regionId={regionId}
       regionSlug={formConfig.slug}
+      privateBackgrounds={privateBackgrounds}
       pageExtras={pageExtras}
     />
   )

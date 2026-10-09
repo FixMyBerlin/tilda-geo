@@ -5,7 +5,12 @@ import {
 import { bbox, bboxPolygon, buffer } from '@turf/turf'
 import { differenceBy, uniqBy } from 'es-toolkit/compat'
 import 'maplibre-gl/dist/maplibre-gl.css'
-import type { MapLibreEvent, MapStyleImageMissingEvent } from 'maplibre-gl'
+import type {
+  MapLibreEvent,
+  MapSourceDataEvent,
+  MapStyleDataEvent,
+  MapStyleImageMissingEvent,
+} from 'maplibre-gl'
 import { useEffect, useRef, useState } from 'react'
 import type {
   MapGeoJSONFeature,
@@ -15,7 +20,6 @@ import type {
 import { AttributionControl, Map as MapGl, useMap } from 'react-map-gl/maplibre'
 import {
   useMapActions,
-  useMapCalculatorDrawActive,
   useMapInspectorFeatures,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useBg3dParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBg3dParam'
@@ -35,12 +39,15 @@ import {
 } from '@/components/shared/utils/playwright'
 import { MAP_STYLE_URL } from '@/server/api/map-style/mapStyleUrl.const'
 import { SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
+import { CalculatorMap } from '../modes/calculator/CalculatorMap'
+import { useCalculatorDraw } from '../modes/calculator/drawing/useCalculatorDraw'
 import { useModeListActions } from '../modes/mode-list-store'
 import { ModeListHoverEdgeMarker } from '../modes/ModeListHoverEdgeMarker'
 import { listItemIdFromMapFeatures } from '../modes/modeListItemId'
 import { NotesNewRelatedGeometry } from '../modes/notes/new/NotesNewRelatedGeometry'
 import { useNotesComposeActive } from '../modes/notes/useNotesComposeActive'
 import { ReviewMapDrawing } from '../modes/reviewLists/drawing/ReviewMapDrawing'
+import { useReviewDraw } from '../modes/reviewLists/drawing/useReviewDraw'
 import { useReviewDrawActive } from '../modes/reviewLists/useReviewDrawActive'
 import { useCurrentMode } from '../modes/useCurrentMode'
 import { useRegion } from '../regionUtils/useRegion'
@@ -49,7 +56,6 @@ import {
   isStreetImageryFeature,
 } from '../streetImagery/streetImageryClick'
 import { useStreetImageryParam } from '../streetImagery/useStreetImageryParam'
-import { Calculator } from './Calculator/Calculator'
 import { Map3dTouchRotation } from './Map3dTouchRotation'
 import { SearchResultLayers } from './Search/SearchResultLayers'
 import { MAPTERHORN_DEM_SOURCE_ID } from './SourcesAndLayers/mapterhornDem'
@@ -116,7 +122,8 @@ export const RegionMap = () => {
   }
 
   const inspectorFeatures = useMapInspectorFeatures()
-  const calculatorDrawActive = useMapCalculatorDrawActive()
+  const calculatorDraw = useCalculatorDraw()
+  const { draw: reviewDraw } = useReviewDraw()
   const notesComposeActive = useNotesComposeActive()
   const reviewDrawActive = useReviewDrawActive()
   const { providers: streetImageryProviders, setPhoto: setStreetImageryPhoto } =
@@ -208,7 +215,16 @@ export const RegionMap = () => {
     else clearHoveredMapItem()
   }
 
-  const handleMouseMove = ({ features }: MapLayerMouseEvent) => {
+  // Empty unless a drawing surface is active; then pointer gestures on the map belong to it.
+  const {
+    cursor: drawCursor,
+    onMouseMove: drawOnMouseMove,
+    ...drawMapProps
+  } = { ...calculatorDraw.mapProps, ...reviewDraw.mapProps }
+
+  const handleMouseMove = (event: MapLayerMouseEvent) => {
+    drawOnMouseMove?.(event)
+    let { features } = event
     features = extractInteractiveFeatures(mapParam, features)
     updateCursor(features)
     const tildaFeatures = features.filter((feature) => !isStreetImageryFeature(feature))
@@ -220,6 +236,19 @@ export const RegionMap = () => {
     updateCursor([])
     updateHover([])
     updateMapListHover([])
+  }
+
+  const handleData = (event: MapStyleDataEvent | MapSourceDataEvent) => {
+    // GeoJSON that is passed in as data is not fetched, so there is nothing to wait for. The
+    // drawing layers set theirs on every pointer move, which would keep the indicator spinning.
+    if (
+      event.dataType === 'source' &&
+      event.source.type === 'geojson' &&
+      typeof event.source.data !== 'string'
+    ) {
+      return
+    }
+    startMapDataLoading()
   }
 
   const handleLoad = (event: MapLibreEvent) => {
@@ -266,13 +295,13 @@ export const RegionMap = () => {
     updateMapBounds(mainMap?.getBounds() || null)
   }
 
-  // While the calculator draw tool or notes compose is active, no layers are interactive:
+  // In the Summieren mode, or while notes compose or review drawing is active, no layers are interactive:
   // clicking/hovering the data does nothing and the inspector can't open
   // (queryRenderedFeatures returns none). This replaces a special-case guard in the click
   // handler with the map's own interactivity mechanism.
   const computedInteractiveLayerIds = useInteractiveLayers()
   const interactiveLayerIds =
-    calculatorDrawActive || notesComposeActive || reviewDrawActive
+    currentMode.isCalculator || notesComposeActive || reviewDrawActive
       ? NO_INTERACTIVE_LAYERS
       : [
           ...computedInteractiveLayerIds,
@@ -283,10 +312,9 @@ export const RegionMap = () => {
     return null
   }
 
-  type MapMaxBoundsProps = {
-    maxBounds: [number, number, number, number]
-    padding: { top: number; bottom: number; left: number; right: number }
-  }
+  // No `padding` prop here: it would be re-applied on every render and undo the camera padding
+  // that the mobile mode dock sets on the map (`modeMapCameraPadding.ts`).
+  type MapMaxBoundsProps = { maxBounds: [number, number, number, number] }
   let mapMaxBoundsSettings: MapMaxBoundsProps | Record<string, never> = {}
   if (region?.bbox) {
     const maxBounds = region.bbox
@@ -296,11 +324,7 @@ export const RegionMap = () => {
     if (buffered) {
       // turf bbox() returns 4 numbers for 2D; we have no elevation data
       const b = bbox(buffered) as [number, number, number, number]
-      mapMaxBoundsSettings = {
-        maxBounds: b,
-        // Reminder: We have to check fitBounds when changing those padding values.
-        padding: { top: 0, bottom: 0, left: 0, right: 0 },
-      }
+      mapMaxBoundsSettings = { maxBounds: b }
     }
   }
 
@@ -322,7 +346,7 @@ export const RegionMap = () => {
       interactiveLayerIds={interactiveLayerIds}
       // onMouseMove={}
       // onLoad={handleInspect}
-      cursor={pickingLocation ? 'crosshair' : cursorStyle}
+      cursor={pickingLocation ? 'crosshair' : (drawCursor ?? cursorStyle)}
       onMove={notifyMapViewChanged}
       onResize={notifyMapViewChanged}
       onMoveEnd={handleMoveEnd}
@@ -331,9 +355,10 @@ export const RegionMap = () => {
       onMouseMove={handleMouseMove}
       onMouseLeave={handleMouseLeave}
       onLoad={handleLoad}
-      onData={startMapDataLoading}
+      onData={handleData}
       onIdle={finishMapDataLoading}
       doubleClickZoom={true}
+      {...drawMapProps}
       terrain={is3dActive ? { source: MAPTERHORN_DEM_SOURCE_ID, exaggeration: 1.5 } : undefined}
       minZoom={SIMPLIFY_MIN_ZOOM}
       attributionControl={false}
@@ -358,7 +383,7 @@ export const RegionMap = () => {
       <ModeListHoverEdgeMarker />
       <AttributionControl compact={true} position="bottom-left" />
       <Map3dTouchRotation />
-      <Calculator />
+      {currentMode.isCalculator && <CalculatorMap />}
       {currentMode.isReviewLists && <ReviewMapDrawing />}
       {/* <GeolocateControl /> */}
       {/* <ScaleControl /> */}

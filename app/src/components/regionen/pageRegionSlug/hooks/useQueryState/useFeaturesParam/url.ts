@@ -23,12 +23,12 @@ export const numericSourceIds: Record<number, SourceNames> = {
   1: 'osm-notes-source',
   2: 'lars_parking',
   3: 'lars_parking_debug',
-  4: 'lars_parking_points',
+  // 4: 'lars_parking_points', // the community points were only summed; discontinued
   5: 'lars_parking_areas',
   6: 'lars_parking_stats',
   7: 'atlas_boundaries',
-  8: 'atlas_presenceStats',
-  9: 'accidents_unfallatlas',
+  // 8: 'atlas_presenceStats', // the old Statistik category was removed; processing no longer builds this table
+  // 9: 'accidents_unfallatlas', // the Unfallatlas category was removed; discontinued
   10: 'atlas_bikelanes',
   11: 'atlas_bikeroutes',
   12: 'atlas_roads',
@@ -44,7 +44,7 @@ export const numericSourceIds: Record<number, SourceNames> = {
   22: 'atlas_bikelanesPresence',
   23: 'atlas_bikeSuitability',
   24: 'atlas_todos_lines',
-  25: 'atlas_aggregated_lengths',
+  // 25: 'atlas_aggregated_lengths', // the radinfra Statistik category was removed; the table stays for /api/stats
   26: 'tilda_parkings',
   27: 'tilda_parkings_cutouts',
   28: 'tilda_parkings_quantized',
