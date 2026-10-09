@@ -1,4 +1,5 @@
 import { twJoin } from 'tailwind-merge'
+import { useSpaceFinderMinAreaDraft } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-boundary-store'
 import type { StoreFeaturesInspector } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { WEIGHT_GROUPS } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/spaceFinderDefaults'
 import {
@@ -7,6 +8,7 @@ import {
   MODIFIER_MAX_POINTS,
   weightToPoints,
 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/weightScale'
+import { appliedMinAreaM2 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderModeParam'
 import {
   spaceFinderGroupBarStyle,
   spaceFinderGroupStyle,
@@ -177,8 +179,14 @@ const modifierFillClassName = (
 
 export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
   const { spaceFinderMode } = useSpaceFinderModeParam()
-  const areaFilterOn = (spaceFinderMode.minArea ?? 0) > 0
+  const minAreaDraft = useSpaceFinderMinAreaDraft()
   const { runId, variant } = useSpaceFinderSelection()
+  const areaFilterOn =
+    appliedMinAreaM2(
+      spaceFinderMode.minArea === true,
+      variant?.factorConfig.min_area_m2,
+      minAreaDraft,
+    ) > 0
 
   // Gewichte des Laufs, der die hier angezeigten Werte tatsächlich erzeugt hat — NICHT die
   // (womöglich seither ohne Neuberechnung veränderten) aktuellen Variantengewichte. Sonst würden

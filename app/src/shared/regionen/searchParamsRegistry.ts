@@ -14,6 +14,6 @@ export const searchParamsRegistry = {
   notes: 'notes', // JSON: key (folder id or `osm`), search, extent, chips, new (compose pin) (`notesModeParam.ts`)
   photos: 'photos', // JSON: street imagery providers, style, date, shown photo (`streetImageryParam.ts`)
   review: 'review', // JSON: key, search, extent, status, source, new, move (`reviewListsModeParam.ts`)
-  ff: 'ff', // Flächenfinder mode JSON: key (variant id), score, opacity, minArea, new, edit (`spaceFinderModeParam.ts`)
+  space: 'space', // Flächenfinder mode JSON: key (variant id), score, opacity, minArea, new, edit (`spaceFinderModeParam.ts`)
   sum: 'sum', // JSON: key (dataset), filter, areas (`calculatorModeParam.ts`)
 } as const

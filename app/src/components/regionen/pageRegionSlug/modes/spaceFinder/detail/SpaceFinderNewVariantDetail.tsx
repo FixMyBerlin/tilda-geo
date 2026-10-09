@@ -10,7 +10,7 @@ import {
 } from '@/server/planning/planningQueryOptions'
 import { DEFAULT_FACTOR_TEMPLATE } from '../factors/spaceFinderDefaults'
 
-/** ModePanel detail view for »Neue Variante in diesem Gebiet« (`ff.new === 'variant'`). */
+/** ModePanel detail view for »Neue Variante in diesem Gebiet« (`space.new === 'variant'`). */
 export const SpaceFinderNewVariantDetail = ({
   areaId,
   areaTitle,

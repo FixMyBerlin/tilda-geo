@@ -1,6 +1,6 @@
 import { AreaWizard } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/area/AreaWizard'
 
-/** ModePanel detail view for »Neues Planungsgebiet« (`ff.new === 'area'`), driven by the existing wizard. */
+/** ModePanel detail view for »Neues Planungsgebiet« (`space.new === 'area'`), driven by the existing wizard. */
 export const SpaceFinderNewAreaDetail = ({
   regionSlug,
   onCreated,

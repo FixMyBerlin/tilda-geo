@@ -1,5 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
+import {
+  useSpaceFinderBoundaryActions,
+  useSpaceFinderMinAreaDraft,
+} from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-boundary-store'
 import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
 import { updatePlanningVariantFn } from '@/server/planning/planning.functions'
 import { planningVariantQueryOptions } from '@/server/planning/planningQueryOptions'
@@ -8,12 +12,13 @@ import { spaceFinderNumberInputClass } from '../spaceFinderPanelStyles'
 import { useSpaceFinderModeParam } from '../useSpaceFinderModeParam'
 
 /**
- * Zielgrößen-Filter der Flächensuche. Der gespeicherte Wert gehört zur Variante
+ * Zielgrößen-Filter der Flächensuche. Die Quadratmeter gehören zur Variante
  * (`factorConfig.min_area_m2`, beim Anlegen des Planungsgebiets aus dessen Flächengröße
- * vorbelegt) und wird beim Verlassen des Felds gespeichert.
- * `ff.minArea` hält den in der Karte wirksamen Wert (0/fehlend = Filter aus, D7), damit sie
- * schon beim Tippen reagiert; der lokale Zustand hält die Zahl auch sichtbar, während der
- * Filter per Checkbox ausgeschaltet ist (das leert `ff.minArea`, nicht das Eingabefeld).
+ * vorbelegt) und werden beim Verlassen des Felds gespeichert.
+ * `space.minArea: true` schaltet den Filter nur an (fehlend = aus). Der Entwurf im Store
+ * gilt, solange getippt wird, damit die Karte vor dem Speichern reagiert und eine geleerte
+ * Zahl nicht auf den gespeicherten Wert zurückfällt. Der lokale Zustand hält die Zahl auch
+ * sichtbar, während der Filter per Checkbox ausgeschaltet ist.
  */
 const MinAreaFilterForm = ({
   variantId,
@@ -27,27 +32,32 @@ const MinAreaFilterForm = ({
 }) => {
   const queryClient = useQueryClient()
   const { spaceFinderMode, setSpaceFinderModeParam } = useSpaceFinderModeParam()
-  const urlMinArea = spaceFinderMode.minArea ?? 0
-  const filterOn = urlMinArea > 0
+  const draft = useSpaceFinderMinAreaDraft()
+  const { setMinAreaDraft } = useSpaceFinderBoundaryActions()
+  const filterOn = spaceFinderMode.minArea === true
   const [minArea, setLocalMinArea] = useState(savedMinArea)
-  // Checkbox an, aber noch keine Zahl > 0: `ff.minArea` bleibt leer (Filter wirkt noch nicht),
-  // das Feld muss trotzdem freigegeben sein — sonst kommt man ohne gespeicherten Wert nie hinein
-  // und das Feld sperrt sich, sobald man die Zahl zum Neueintippen löscht.
+  // Checkbox an, aber noch keine Zahl > 0: der Filter gilt noch nicht, das Feld muss trotzdem
+  // freigegeben sein — sonst kommt man ohne gespeicherten Wert nie hinein und das Feld sperrt
+  // sich, sobald man die Zahl zum Neueintippen löscht.
   const [awaitingValue, setAwaitingValue] = useState(() => filterOn && savedMinArea <= 0)
   const checked = filterOn || awaitingValue
   const lastSaved = useRef(savedMinArea)
 
-  // Der Filter startet aus; der gespeicherte Wert steht nur im (gesperrten) Feld. Ist er beim
-  // Öffnen einer Variante schon an (Variantenwechsel, Lesezeichen), einmalig deren gespeicherten
-  // Wert in die Karte übernehmen (die Komponente ist je Variante gekeyed).
-  const initialized = useRef(false)
-  useEffect(() => {
-    if (initialized.current) return
-    initialized.current = true
-    if (filterOn && savedMinArea !== urlMinArea) {
-      setSpaceFinderModeParam({ ...spaceFinderMode, minArea: savedMinArea || undefined })
-    }
-  }, [filterOn, savedMinArea, urlMinArea, spaceFinderMode, setSpaceFinderModeParam])
+  useEffect(
+    function clearMinAreaDraftOnceSaved() {
+      if (draft != null && draft === savedMinArea) setMinAreaDraft(null)
+    },
+    [draft, savedMinArea, setMinAreaDraft],
+  )
+
+  useEffect(
+    function clearMinAreaDraftWhenFormUnmounts() {
+      return function clearMinAreaDraft() {
+        setMinAreaDraft(null)
+      }
+    },
+    [setMinAreaDraft],
+  )
 
   const mutation = useMutation({
     mutationFn: (value: number) =>
@@ -62,18 +72,25 @@ const MinAreaFilterForm = ({
     if (minArea !== lastSaved.current) mutation.mutate(minArea)
   }
 
+  const publishDraft = (value: number) => {
+    setMinAreaDraft(value === savedMinArea ? null : value)
+  }
+
   const setFilterOn = (on: boolean) => {
     setAwaitingValue(on && minArea <= 0)
+    // Draft stays while the URL flag is still on, so the map does not fall back to the saved
+    // number for one navigation. `appliedMinAreaM2` ignores the draft once the flag is off.
+    if (on) publishDraft(minArea)
     setSpaceFinderModeParam({
       ...spaceFinderMode,
-      minArea: on && minArea > 0 ? minArea : undefined,
+      minArea: on ? true : undefined,
     })
   }
 
   const setMinArea = (value: number) => {
     setLocalMinArea(value)
     setAwaitingValue(value <= 0)
-    setSpaceFinderModeParam({ ...spaceFinderMode, minArea: value > 0 ? value : undefined })
+    publishDraft(value)
   }
 
   return (

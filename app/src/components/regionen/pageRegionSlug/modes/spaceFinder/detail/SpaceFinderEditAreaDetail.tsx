@@ -1,6 +1,6 @@
 import { AreaEditor } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/area/AreaEditor'
 
-/** ModePanel detail view for »Gebiet bearbeiten« (`ff.edit === 'area'`), driven by the existing editor. */
+/** ModePanel detail view for »Gebiet bearbeiten« (`space.edit === 'area'`), driven by the existing editor. */
 export const SpaceFinderEditAreaDetail = ({
   areaId,
   regionSlug,

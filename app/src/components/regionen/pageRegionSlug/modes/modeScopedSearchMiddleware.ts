@@ -17,7 +17,7 @@ import type { RegionMode } from './useCurrentMode'
 export const stripModeScopedSearch = (search: RegionSearch, mode: RegionMode) => {
   const notesKey = searchParamsRegistry.notes
   const reviewKey = searchParamsRegistry.review
-  const ffKey = searchParamsRegistry.ff
+  const spaceKey = searchParamsRegistry.space
   const featuresKey = searchParamsRegistry.f
   let next = search
 
@@ -39,13 +39,13 @@ export const stripModeScopedSearch = (search: RegionSearch, mode: RegionMode) =>
     }
   }
 
-  // `ff.key` (the active Planungsgebiet/Variante) stays so users come back to the same
+  // `space.key` (the active Planungsgebiet/Variante) stays so users come back to the same
   // configuration; only the transient wizard/editor flags are mode-scoped (D3).
-  if (mode !== 'spaceFinder' && (search[ffKey]?.new || search[ffKey]?.edit)) {
+  if (mode !== 'spaceFinder' && (search[spaceKey]?.new || search[spaceKey]?.edit)) {
     next = {
       ...next,
-      [ffKey]: compactSpaceFinderModeParam({
-        ...search[ffKey],
+      [spaceKey]: compactSpaceFinderModeParam({
+        ...search[spaceKey],
         new: undefined,
         edit: undefined,
       }),

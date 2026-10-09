@@ -71,7 +71,7 @@ export const regionSearchSchema = z.object({
   // per-child validateSearch schemas.
   [searchParamsRegistry.notes]: optionalSearchJson(zodNotesModeParam),
   [searchParamsRegistry.review]: optionalSearchJson(zodReviewListsModeParam),
-  [searchParamsRegistry.ff]: optionalSearchJson(zodSpaceFinderModeParam),
+  [searchParamsRegistry.space]: optionalSearchJson(zodSpaceFinderModeParam),
   [searchParamsRegistry.sum]: optionalSearchJson(zodCalculatorModeParam),
   [searchParamsRegistry.photos]: optionalSearchJson(zodStreetImageryParam),
 })

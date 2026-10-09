@@ -3,7 +3,7 @@ import type { getPlanningAreasFn } from '@/server/planning/planning.functions'
 export type PlanningAreasRow = Awaited<ReturnType<typeof getPlanningAreasFn>>[number]
 export type PlanningAreaVariantRow = PlanningAreasRow['variants'][number]
 
-/** The active Planungsgebiet + Variante, resolved from `ff.key` (a variant id). */
+/** The active Planungsgebiet + Variante, resolved from `space.key` (a variant id). */
 export type SpaceFinderSelectedVariant = {
   areaId: number
   areaTitle: string

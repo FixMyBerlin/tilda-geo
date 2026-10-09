@@ -6,6 +6,7 @@ import {
   useSpaceFinderBoundaryHighlightGeom,
   useSpaceFinderCarriagewaysVisible,
   useSpaceFinderCensusVisible,
+  useSpaceFinderMinAreaDraft,
   useSpaceFinderUserObstaclesGeom,
   useSpaceFinderUserObstaclesVisible,
   useSpaceFinderVegetationAttribution,
@@ -15,6 +16,7 @@ import {
   useSpaceFinderCandidateSelectActive,
   useSpaceFinderCandidates,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-candidates-store'
+import { appliedMinAreaM2 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderModeParam'
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
 import { getTilesUrl } from '@/components/shared/utils/getTilesUrl'
@@ -119,7 +121,7 @@ const scoreColor = (property: string, mode: PlanningScoreMode) => {
 const MAX_FILL_OPACITY = 0.7
 
 // Verhältnis abgedunkelt : voll sichtbar aus den ursprünglichen Festwerten (0.1/0.7),
-// jetzt relativ zur per Regler eingestellten Deckkraft (`ff.opacity`, ScoreModeSwitcher)
+// jetzt relativ zur per Regler eingestellten Deckkraft (`space.opacity`, ScoreModeSwitcher)
 // angewendet, damit das Abdunkeln bei jeder Transparenz-Einstellung sichtbar bleibt.
 const DIMMED_RATIO = 0.1 / 0.7
 
@@ -340,11 +342,16 @@ const CandidateHighlightLayer = ({ runId }: { runId: number | null }) => {
 }
 
 export const SourcesLayersSpaceFinder = () => {
-  const { runId } = useSpaceFinderSelection()
+  const { runId, variant } = useSpaceFinderSelection()
   const { spaceFinderMode } = useSpaceFinderModeParam()
+  const minAreaDraft = useSpaceFinderMinAreaDraft()
   const scoreMode = spaceFinderMode.score ?? 'kombination'
   const hexagonsOpacityPct = spaceFinderMode.opacity ?? 100
-  const minArea = spaceFinderMode.minArea ?? 0
+  const minArea = appliedMinAreaM2(
+    spaceFinderMode.minArea === true,
+    variant?.factorConfig.min_area_m2,
+    minAreaDraft,
+  )
   const areaFilterOn = minArea > 0
   const vegetationOn = useSpaceFinderVegetationVisible()
   const vegetationAttribution = useSpaceFinderVegetationAttribution()

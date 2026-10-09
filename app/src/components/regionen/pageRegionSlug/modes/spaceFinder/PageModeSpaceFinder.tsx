@@ -95,7 +95,7 @@ export const PageModeSpaceFinder = () => {
   const onSelect = (variantId: number | undefined) =>
     setSpaceFinderModeParam({ ...spaceFinderMode, key: variantId })
 
-  // Switching the Gebiet opens its first variant; `ff.key` stays a variant id (D7).
+  // Switching the Gebiet opens its first variant; `space.key` stays a variant id (D7).
   const onSelectArea = (areaId: number) => {
     const area = sortedAreas.find((a) => a.id === areaId)
     onSelect(area?.variants[0]?.id)
@@ -108,7 +108,7 @@ export const PageModeSpaceFinder = () => {
 
   // Auto-select the first variant of the oldest Gebiet when entering the mode without a
   // selection, or when the URL still points at a deleted (orphaned) variant. Skipped while the
-  // create wizard owns the selection (`ff.new`).
+  // create wizard owns the selection (`space.new`).
   useEffect(
     function selectFirstVariantWhenOrphaned() {
       if (spaceFinderMode.new) return
@@ -162,7 +162,7 @@ export const PageModeSpaceFinder = () => {
     setSpaceFinderModeParam({ ...spaceFinderMode, key: variantId, new: undefined })
 
   // Detail views are desktop-only (D10). Create/edit affordances that open them are already
-  // hidden on mobile, but guard here too in case a bookmark still carries `ff.new`/`ff.edit`.
+  // hidden on mobile, but guard here too in case a bookmark still carries `space.new`/`space.edit`.
   const newAreaDetail =
     isDesktop && spaceFinderMode.new === 'area'
       ? {
@@ -218,7 +218,7 @@ export const PageModeSpaceFinder = () => {
     updateSearch(
       {
         [searchParamsRegistry.f]: undefined,
-        [searchParamsRegistry.ff]: compactSpaceFinderModeParam({ ...spaceFinderMode, ...form }),
+        [searchParamsRegistry.space]: compactSpaceFinderModeParam({ ...spaceFinderMode, ...form }),
       },
       { replace: true },
     )

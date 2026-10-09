@@ -10,13 +10,13 @@ Search uses the layout `validateSearch` (`regionSearchSchema`).
 
 Mode filters sit on that shared layout search (not on child `validateSearch`) so switching modes keeps one URL. Each mode owns **one JSON object**:
 
-| URL key  | Schema                    | Shape (compact: omit defaults)                                                                                           |
-| -------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `qa`     | `zodQaParam`              | `{ key, status?, users?, search?, extent? }`                                                                             |
-| `notes`  | `zodNotesModeParam`       | `{ key?, search?, extent?, completed?, commented?, notReacted?, user?, new? }` (`new` is a map-param string compose pin) |
-| `review` | `zodReviewListsModeParam` | `{ key?, search?, extent?, status?, source?, new?, move? }`                                                              |
-| `ff`     | `zodSpaceFinderModeParam` | `{ key?, score?, opacity?, minArea?, new?, edit? }` (`key` is the Variante id; the Gebiet is derived from it)            |
-| `sum`    | `zodCalculatorModeParam`  | `{ key?, filter?, style?, areas? }` (`key`: dataset; `filter`: tag values; `style`: tag to color by; `areas`: GeoJSON)   |
+| URL key  | Schema                    | Shape (compact: omit defaults)                                                                                                                                                                 |
+| -------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `qa`     | `zodQaParam`              | `{ key, status?, users?, search?, extent? }`                                                                                                                                                   |
+| `notes`  | `zodNotesModeParam`       | `{ key?, search?, extent?, completed?, commented?, notReacted?, user?, new? }` (`new` is a map-param string compose pin)                                                                       |
+| `review` | `zodReviewListsModeParam` | `{ key?, search?, extent?, status?, source?, new?, move? }`                                                                                                                                    |
+| `space`  | `zodSpaceFinderModeParam` | `{ key?, score?, opacity?, minArea?, new?, edit? }` (`key` is the Variante id; the Gebiet is derived from it; `minArea: true` turns the Gesuchte-Fläche filter on, the m² stay on the variant) |
+| `sum`    | `zodCalculatorModeParam`  | `{ key?, filter?, style?, areas? }` (`key`: dataset; `filter`: tag values; `style`: tag to color by; `areas`: GeoJSON)                                                                         |
 
 `optionalSearchJson` drops the whole object if the Zod object fails. Each field therefore uses `.catch` so a stale bookmark field (retired status, bad chip) does not wipe the rest. QA `key` stays strict — without it there is nothing to show.
 

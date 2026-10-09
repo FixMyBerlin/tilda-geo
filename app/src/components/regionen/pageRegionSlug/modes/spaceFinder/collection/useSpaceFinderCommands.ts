@@ -24,7 +24,7 @@ type UseSpaceFinderCommandsInput = {
   regionSlug: string
   areas: readonly PlanningAreasRow[]
   selectedOption: SpaceFinderSelectedVariant | undefined
-  /** Writes `ff.key`. `undefined` clears the selection (e.g. the last Gebiet was deleted). */
+  /** Writes `space.key`. `undefined` clears the selection (e.g. the last Gebiet was deleted). */
   onSelect: (variantId: number | undefined) => void
 }
 
@@ -33,7 +33,7 @@ type UseSpaceFinderCommandsInput = {
  * Prüflisten's single collection entity, this manages two levels: the Gebiet ⋯ menu in the panel
  * header acts on `selectedOption.areaId`, the Varianten ⋯ menu on `selectedOption.variantId`.
  * Creation (»Neue Variante«/»Neues Planungsgebiet«) is not here — those open a ModePanel detail
- * view (`ff.new`) with their own forms/wizard.
+ * view (`space.new`) with their own forms/wizard.
  */
 export const useSpaceFinderCommands = ({
   regionSlug,

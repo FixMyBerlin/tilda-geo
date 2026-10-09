@@ -178,7 +178,7 @@ function migrateConfigCategoryIds(urlConfig: ReturnType<typeof parseConfig>) {
  * (not beforeLoad — search-param navigations must not re-run this), so it also runs for mode child
  * routes (`/regionen/berlin/hinweise`, …). Pathname is mode identity; root rewrites are only for
  * unmigrated overlay bookmarks (legacy `osmNotes`/`notes`/`internalNotes` flags, pre-migration
- * `atlasNote`, or a legacy `qa=` string), not for live `qa`/`notes`/`ff`
+ * `atlasNote`, or a legacy `qa=` string), not for live `qa`/`notes`/`space`
  * JSON or compose (`notes.new`). Region-rename rewrites only the slug segment; existing mode paths
  * are not nested.
  *

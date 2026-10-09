@@ -5,9 +5,9 @@ import { isSpaceFinderAreaFormOpen } from './spaceFinderModeParam'
 import { useSpaceFinderModeParam } from './useSpaceFinderModeParam'
 
 /**
- * Resolves the active variant, its planungsgebiet and its shown run from `ff.key` (D7: the URL only
+ * Resolves the active variant, its planungsgebiet and its shown run from `space.key` (D7: the URL only
  * holds the variant id — area and run are both derived from it, not stored separately). The variant
- * query is only enabled while the Flächenfinder mode is actually mounted, so `ff.key` surviving a
+ * query is only enabled while the Flächenfinder mode is actually mounted, so `space.key` surviving a
  * mode switch (D3) does not keep fetching planning data on every other region page.
  *
  * While a Planungsgebiet is being created or edited there is no shown run (`runId` null), so every

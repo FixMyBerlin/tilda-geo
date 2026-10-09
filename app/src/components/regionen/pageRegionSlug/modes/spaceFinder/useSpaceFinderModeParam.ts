@@ -8,20 +8,20 @@ import {
 } from './spaceFinderModeParam'
 
 /**
- * Read/update the Flächenfinder mode param (`ff` JSON). `strict: false` keeps this route-agnostic
+ * Read/update the Flächenfinder mode param (`space` JSON). `strict: false` keeps this route-agnostic
  * so map layers and the inspector can read it too, the same way the other modes do it.
  */
 export const useSpaceFinderModeParam = () => {
   const value = useSearch({
     strict: false,
-    select: (search) => search[searchParamsRegistry.ff],
+    select: (search) => search[searchParamsRegistry.space],
   })
   const spaceFinderMode = zodSpaceFinderModeParam.safeParse(value).data ?? {}
   const { updateSearch } = useRegionSearchNavigation()
 
   const setSpaceFinderModeParam = (next: SpaceFinderModeParam) => {
     updateSearch(
-      { [searchParamsRegistry.ff]: compactSpaceFinderModeParam(next) },
+      { [searchParamsRegistry.space]: compactSpaceFinderModeParam(next) },
       { replace: true },
     )
   }

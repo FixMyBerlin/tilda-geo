@@ -15,7 +15,7 @@ URL keys and filters: [Modes-URL-State-Contract-And-Optimizations.md](./Modes-UR
 | Flächenfinder      | `/regionen/<region>/flaechenfinder` |
 | Summieren          | `/regionen/<region>/summieren`      |
 
-Switching modes keeps map position and layer configuration. Each mode stores its filters in one JSON search object (`notes`, `qa`, `review`, `ff`, `sum`) and restores them when you come back.
+Switching modes keeps map position and layer configuration. Each mode stores its filters in one JSON search object (`notes`, `qa`, `review`, `space`, `sum`) and restores them when you come back.
 
 ## Shared panel
 

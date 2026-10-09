@@ -1,20 +1,25 @@
 import { describe, expect, test } from 'vitest'
 import {
+  appliedMinAreaM2,
   compactSpaceFinderModeParam,
   isSpaceFinderAreaFormOpen,
   zodSpaceFinderModeParam,
 } from './spaceFinderModeParam'
 
 describe('spaceFinderModeParam', () => {
-  test('parses a flat ff object with key', () => {
+  test('parses a flat space object with key', () => {
     expect(
-      zodSpaceFinderModeParam.parse({ key: 7, score: 'bedarf', opacity: 40, minArea: 25 }),
+      zodSpaceFinderModeParam.parse({ key: 7, score: 'bedarf', opacity: 40, minArea: true }),
     ).toEqual({
       key: 7,
       score: 'bedarf',
       opacity: 40,
-      minArea: 25,
+      minArea: true,
     })
+  })
+
+  test('a numeric minArea is dropped; the square meters live on the variant', () => {
+    expect(zodSpaceFinderModeParam.parse({ key: 7, minArea: 25 })).toEqual({ key: 7 })
   })
 
   test('one invalid field is dropped, the rest is kept', () => {
@@ -37,14 +42,15 @@ describe('spaceFinderModeParam', () => {
     expect(zodSpaceFinderModeParam.parse({ edit: 'variant' })).toEqual({})
   })
 
-  test('compactSpaceFinderModeParam omits defaults (score kombination, opacity 100, minArea 0)', () => {
-    expect(compactSpaceFinderModeParam({ score: 'kombination', opacity: 100, minArea: 0 })).toBe(
-      undefined,
-    )
-    expect(compactSpaceFinderModeParam({ key: 3, score: 'bedarf', opacity: 40 })).toEqual({
+  test('compactSpaceFinderModeParam omits defaults (score kombination, opacity 100, minArea off)', () => {
+    expect(compactSpaceFinderModeParam({ score: 'kombination', opacity: 100 })).toBe(undefined)
+    expect(
+      compactSpaceFinderModeParam({ key: 3, score: 'bedarf', opacity: 40, minArea: true }),
+    ).toEqual({
       key: 3,
       score: 'bedarf',
       opacity: 40,
+      minArea: true,
     })
   })
 
@@ -58,6 +64,14 @@ describe('spaceFinderModeParam', () => {
     expect(compactSpaceFinderModeParam({})).toBeUndefined()
     expect(compactSpaceFinderModeParam({ key: undefined })).toBeUndefined()
     expect(compactSpaceFinderModeParam({ key: 3 })).toEqual({ key: 3 })
+  })
+
+  test('appliedMinAreaM2 uses the draft while typing and the saved value otherwise', () => {
+    expect(appliedMinAreaM2(false, 40, 25)).toBe(0)
+    expect(appliedMinAreaM2(true, 40, null)).toBe(40)
+    expect(appliedMinAreaM2(true, 40, 25)).toBe(25)
+    expect(appliedMinAreaM2(true, 40, 0)).toBe(0)
+    expect(appliedMinAreaM2(true, null, null)).toBe(0)
   })
 
   test('isSpaceFinderAreaFormOpen only for creating or editing a Planungsgebiet', () => {

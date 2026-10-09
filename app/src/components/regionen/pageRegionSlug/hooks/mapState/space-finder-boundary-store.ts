@@ -59,6 +59,12 @@ type SpaceFinderBoundaryStore = {
    */
   factorSavePending: boolean
   /**
+   * Square meters being typed into „Gesuchte Fläche“, before blur saves them on the variant.
+   * `null`: the map uses `factorConfig.min_area_m2`. `0`: the field was cleared, so the map
+   * does not fall back to the saved number. The URL only stores whether the filter is on.
+   */
+  minAreaDraft: number | null
+  /**
    * Bbox key of the study area the map was last flown to (`PageModeSpaceFinder`).
    * Lives here so it survives the panel body unmounting. Switching variants that
    * share the same study area must not move the camera. A different boundary
@@ -77,6 +83,7 @@ type SpaceFinderBoundaryStore = {
     setCarriagewaysVisible: (visible: boolean) => void
     setCensusVisible: (visible: boolean) => void
     setFactorSavePending: (pending: boolean) => void
+    setMinAreaDraft: (draft: number | null) => void
     setLastFittedBoundaryKey: (key: string | null) => void
   }
 }
@@ -94,6 +101,7 @@ const useSpaceFinderBoundaryStore = create<SpaceFinderBoundaryStore>()((set) => 
   carriagewaysVisible: false,
   censusVisible: false,
   factorSavePending: false,
+  minAreaDraft: null,
   lastFittedBoundaryKey: null,
   actions: {
     setBoundaryHighlightGeom: (geom, opts) =>
@@ -114,6 +122,8 @@ const useSpaceFinderBoundaryStore = create<SpaceFinderBoundaryStore>()((set) => 
       set((state) =>
         state.factorSavePending === pending ? state : { factorSavePending: pending },
       ),
+    setMinAreaDraft: (draft) =>
+      set((state) => (state.minAreaDraft === draft ? state : { minAreaDraft: draft })),
     setLastFittedBoundaryKey: (key) => set({ lastFittedBoundaryKey: key }),
   },
 }))
@@ -142,6 +152,8 @@ export const useSpaceFinderCensusVisible = () =>
   useSpaceFinderBoundaryStore((state) => state.censusVisible)
 export const useSpaceFinderFactorSavePending = () =>
   useSpaceFinderBoundaryStore((state) => state.factorSavePending)
+export const useSpaceFinderMinAreaDraft = () =>
+  useSpaceFinderBoundaryStore((state) => state.minAreaDraft)
 
 export const useSpaceFinderBoundaryActions = () =>
   useSpaceFinderBoundaryStore((state) => state.actions)
