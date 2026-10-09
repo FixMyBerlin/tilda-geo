@@ -152,6 +152,12 @@ test.describe('Review lists mode (stubbed admin login)', () => {
         await page.getByPlaceholder('Kommentar hinzufügen…').fill('Sieht problematisch aus')
         await page.getByRole('button', { name: 'Kommentieren' }).click()
         await expect(page.getByText('Sieht problematisch aus')).toBeVisible({ timeout: 10_000 })
+
+        page.once('dialog', (dialog) => dialog.accept())
+        await page.getByRole('button', { name: 'Kommentar bearbeiten' }).click()
+        await page.getByRole('button', { name: 'Kommentar löschen' }).click()
+        await expect(page.getByText('Sieht problematisch aus')).toHaveCount(0)
+        await expect(page.getByText('Noch keine Kommentare.')).toBeVisible()
       },
     )
   })

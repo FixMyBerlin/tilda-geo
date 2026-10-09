@@ -1,4 +1,4 @@
-import { PencilSquareIcon } from '@heroicons/react/24/outline'
+import { PencilSquareIcon, TrashIcon } from '@heroicons/react/24/outline'
 import { useId, useState } from 'react'
 import { z } from 'zod'
 import {
@@ -7,8 +7,10 @@ import {
 } from '@/components/regionen/pageRegionSlug/mobile/mobileControlButton.const'
 import { MarkdownEditorField } from '@/components/shared/form/fields/MarkdownEditorField'
 import { Form } from '@/components/shared/form/Form'
+import { notesButtonStyle } from '@/components/shared/links/styles'
 import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
 import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
+import { toastError } from '@/components/shared/toast/toastError'
 import { ModeFormSubmit } from './ModeFormSubmit'
 import type { ModeAccentMode } from './modeIdentity'
 import { useIsAuthor } from './notes/detail/utils/useIsAuthor'
@@ -22,12 +24,15 @@ type Props = {
   body: string
   mode: ModeAccentMode
   onSave: (body: string) => Promise<unknown>
+  /** Shows a delete button in the dialog footer when given. */
+  onDelete?: () => Promise<unknown>
 }
 
-/** Author-only comment edit (QA, Prüflisten). Same rule as internal note comments; the server re-checks. */
-export const ModeCommentEditButton = ({ authorId, body, mode, onSave }: Props) => {
+/** Author-only comment edit and delete (QA, Prüflisten). Same rule as internal note comments; the server re-checks. */
+export const ModeCommentEditButton = ({ authorId, body, mode, onSave, onDelete }: Props) => {
   const formId = useId()
   const [open, setOpen] = useState(false)
+  const [isDeleting, setIsDeleting] = useState(false)
   const isAuthor = useIsAuthor(authorId)
   if (!isAuthor) return null
 
@@ -52,6 +57,31 @@ export const ModeCommentEditButton = ({ authorId, body, mode, onSave }: Props) =
         buttonCloseName="Abbrechen"
         open={open}
         setOpen={setOpen}
+        footerStart={
+          onDelete ? (
+            <button
+              type="button"
+              title="Kommentar löschen"
+              disabled={isDeleting}
+              onClick={async () => {
+                if (!window.confirm('Sind Sie sicher, dass Sie diesen Kommentar löschen möchten?'))
+                  return
+                setIsDeleting(true)
+                try {
+                  await onDelete()
+                  setOpen(false)
+                } catch (error) {
+                  toastError(error, 'Kommentar konnte nicht gelöscht werden')
+                } finally {
+                  setIsDeleting(false)
+                }
+              }}
+              className={notesButtonStyle}
+            >
+              <TrashIcon className="size-6" />
+            </button>
+          ) : undefined
+        }
         primaryAction={
           <ModeFormSubmit
             label="Änderung speichern"

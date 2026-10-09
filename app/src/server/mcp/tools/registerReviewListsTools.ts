@@ -8,6 +8,7 @@ import { createReviewEntry } from '@/server/review-lists/mutations/createReviewE
 import { createReviewEntryComment } from '@/server/review-lists/mutations/createReviewEntryComment.server'
 import { createReviewList } from '@/server/review-lists/mutations/createReviewList.server'
 import { deleteReviewEntry } from '@/server/review-lists/mutations/deleteReviewEntry.server'
+import { deleteReviewEntryComment } from '@/server/review-lists/mutations/deleteReviewEntryComment.server'
 import { deleteReviewList } from '@/server/review-lists/mutations/deleteReviewList.server'
 import { updateReviewEntry } from '@/server/review-lists/mutations/updateReviewEntry.server'
 import { updateReviewEntryComment } from '@/server/review-lists/mutations/updateReviewEntryComment.server'
@@ -105,9 +106,7 @@ export function registerReviewListsTools(server: McpServer, caller: AdminApiCall
   server.registerTool(
     'review_entry_comments_create',
     {
-      description:
-        'Add a comment (Markdown) to a review entry. The author is the API token owner. ' +
-        'Comments cannot be deleted.',
+      description: 'Add a comment (Markdown) to a review entry. The author is the API token owner.',
       inputSchema: { regionSlug: regionSlugInput, entryId: idInput, body: z.string().min(1) },
     },
     (args) => run(() => createReviewEntryComment(args, caller)),
@@ -121,5 +120,15 @@ export function registerReviewListsTools(server: McpServer, caller: AdminApiCall
       inputSchema: { regionSlug: regionSlugInput, commentId: idInput, body: z.string().min(1) },
     },
     (args) => run(() => updateReviewEntryComment(args, caller)),
+  )
+
+  server.registerTool(
+    'review_entry_comments_delete',
+    {
+      description:
+        'Delete a review entry comment. Only the author (here: the API token owner) may do this.',
+      inputSchema: { regionSlug: regionSlugInput, commentId: idInput },
+    },
+    (args) => run(() => deleteReviewEntryComment(args, caller)),
   )
 }

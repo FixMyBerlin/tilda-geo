@@ -166,7 +166,7 @@ Everything is member/admin-only. A list can be linked to several regions; the ac
 | Rename list                                           | Member, admin                                                                                                 |
 | Delete list                                           | Member, admin: only empty lists linked to this region only. Admin (`/admin/review-lists`): any list, cascades |
 | Change which regions a list is linked to              | Admin only (`updateReviewListForAdmin`)                                                                       |
-| Create, edit, delete entries; upload GeoJSON; comment | Member, admin. Author edits own comment (`updateReviewEntryComment`); no delete                               |
+| Create, edit, delete entries; upload GeoJSON; comment | Member, admin. Author edits and deletes own comment (`updateReviewEntryComment`, `deleteReviewEntryComment`)  |
 
 The admin MCP (`/mcp`, tools `review_lists_*`, `review_entries_*`, `review_entry_comments_*`) offers the member actions of the table except the GeoJSON upload and download. As for Hinweise it calls the same functions with the owner of the `AdminApiToken` as session, so it deletes only empty lists linked to one region. `review_lists_update` is the admin update (rename and region links).
 
@@ -174,15 +174,15 @@ Tests: `reviewListMutationsAuth.server.test.ts` (every member mutation rejects n
 
 ## Comments
 
-Comments share the access of the object they belong to. Only the author edits a comment (and must still be a member); admins get no bypass. Edits are written with `runWithAuditContextAsync` (audit log with user, IP, `MEMBER_FORM`), and the UI shows "aktualisiert" with `updatedAt`.
+Comments share the access of the object they belong to. Only the author edits or deletes a comment (and must still be a member); admins get no bypass. Edits are written with `runWithAuditContextAsync` (audit log with user, IP, `MEMBER_FORM`), and the UI shows "aktualisiert" with `updatedAt`.
 
 | Feature        | Edit own comment                             | Delete own comment | Admin edits others |
 | -------------- | -------------------------------------------- | ------------------ | ------------------ |
 | Internal notes | Yes (`updateNoteComment`)                    | Yes                | No                 |
 | QA evaluations | Yes, comment only (`updateQaEvaluationBody`) | No                 | No                 |
-| Prüfeinträge   | Yes (`updateReviewEntryComment`)             | No                 | No                 |
+| Prüfeinträge   | Yes (`updateReviewEntryComment`)             | Yes                | No                 |
 
-Tests: `updateQaEvaluationBody.server.test.ts`, `updateReviewEntryComment.server.test.ts`, `notesAuthorOnly.server.test.ts`.
+Tests: `updateQaEvaluationBody.server.test.ts`, `updateReviewEntryComment.server.test.ts`, `deleteReviewEntryComment.server.test.ts`, `notesAuthorOnly.server.test.ts`.
 
 ## Known gaps and open decisions
 

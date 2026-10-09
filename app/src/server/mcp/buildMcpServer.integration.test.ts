@@ -641,6 +641,17 @@ describe.skipIf(!integrationDb)('admin MCP tools (integration)', () => {
     })
     expect(blockedListDelete.isError).toBe(true)
 
+    const deletedComment = await callTool(client, 'review_entry_comments_delete', {
+      regionSlug: REGION_SLUG,
+      commentId: comment.json().id,
+    })
+    expect(deletedComment.isError).toBe(false)
+    const withoutComment = await callTool(client, 'review_entries_get', {
+      regionSlug: REGION_SLUG,
+      entryId,
+    })
+    expect(withoutComment.json()).toMatchObject({ comments: [] })
+
     const deletedEntry = await callTool(client, 'review_entries_delete', {
       regionSlug: REGION_SLUG,
       entryId,

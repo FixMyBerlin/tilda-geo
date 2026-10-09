@@ -59,6 +59,7 @@ import { createReviewEntry } from './createReviewEntry.server'
 import { createReviewEntryComment } from './createReviewEntryComment.server'
 import { createReviewList } from './createReviewList.server'
 import { deleteReviewEntry } from './deleteReviewEntry.server'
+import { deleteReviewEntryComment } from './deleteReviewEntryComment.server'
 import { deleteReviewList } from './deleteReviewList.server'
 import { updateReviewEntry } from './updateReviewEntry.server'
 import { updateReviewList } from './updateReviewList.server'
@@ -82,6 +83,8 @@ const mutations = {
   deleteReviewEntry: () => deleteReviewEntry({ regionSlug: 'berlin', entryId: 1 }, headers),
   createReviewEntryComment: () =>
     createReviewEntryComment({ regionSlug: 'berlin', entryId: 1, body: 'x' }, headers),
+  deleteReviewEntryComment: () =>
+    deleteReviewEntryComment({ regionSlug: 'berlin', commentId: 1 }, headers),
 }
 
 beforeEach(() => {
