@@ -251,9 +251,16 @@ export const AreaFormFields = ({
               {drawingActive ? 'Zeichnen abbrechen' : 'Gebiet zeichnen'}
             </button>
             {drawingActive && (
-              <p className="text-xs text-gray-500">In der Karte ein Polygon zeichnen.</p>
+              <p key="drawing-hint" className="text-xs text-gray-500">
+                In der Karte ein Polygon zeichnen.
+              </p>
             )}
-            <GeoJsonUpload onGeometry={handleStudyUpload} regionSlug={regionSlug} />
+            {/* Stable key: hiding the drawing hint must not remount the field and drop its state. */}
+            <GeoJsonUpload
+              key="study-area-geojson"
+              onGeometry={handleStudyUpload}
+              regionSlug={regionSlug}
+            />
           </div>
         )}
 

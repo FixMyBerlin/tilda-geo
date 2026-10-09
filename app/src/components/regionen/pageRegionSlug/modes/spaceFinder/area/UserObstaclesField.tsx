@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { SegmentedChoice } from '@/components/shared/SegmentedChoice/SegmentedChoice'
 import {
   MAX_USER_GEOJSON_BYTES,
@@ -71,17 +72,23 @@ export const UserObstaclesField = ({
   const isSoft = mode === 'bonus' || mode === 'penalty'
   const weight = config.weights?.w_eigendaten ?? 0
   const showSlider = isSoft && !!geojson
+  // Only "Entfernen" remounts the field, so a successful drop keeps the green
+  // filename and the history list instead of swapping the field for the summary.
+  const [uploaderKey, setUploaderKey] = useState(0)
 
   return (
     <div className="space-y-1">
-      {geojson ? (
+      {geojson && (
         <div className="rounded border border-gray-200 bg-gray-50 px-2 py-1.5 text-xs">
           <div className="flex items-center justify-between">
             <span className="text-green-700">✓ {featureCount} Objekt(e) geladen</span>
             {!readOnly && (
               <button
                 type="button"
-                onClick={() => setUserGeojson(undefined)}
+                onClick={() => {
+                  setUserGeojson(undefined)
+                  setUploaderKey((key) => key + 1)
+                }}
                 className="text-gray-500 hover:text-red-600"
               >
                 Entfernen
@@ -94,26 +101,26 @@ export const UserObstaclesField = ({
             </p>
           )}
         </div>
-      ) : (
-        !readOnly && (
-          <div className="mt-2">
-            <GeoJsonUploadField
-              parse={parseUserGeojson}
-              onResult={(fc) => setUserGeojson(fc)}
-              maxBytes={MAX_USER_GEOJSON_BYTES}
-              historyScope="user_geojson"
-              regionSlug={regionSlug}
-              label={
-                <>
-                  Eigene GeoJSON- oder GeoPackage-Datei hierher ziehen
-                  <br />
-                  oder klicken (max. {MAX_USER_GEOJSON_BYTES / 1024 / 1024} MB,{' '}
-                  {MAX_USER_GEOJSON_FEATURES.toLocaleString('de-DE')} Objekte)
-                </>
-              }
-            />
-          </div>
-        )
+      )}
+      {!readOnly && (
+        <div className="mt-2">
+          <GeoJsonUploadField
+            key={uploaderKey}
+            parse={parseUserGeojson}
+            onResult={(fc) => setUserGeojson(fc)}
+            maxBytes={MAX_USER_GEOJSON_BYTES}
+            historyScope="user_geojson"
+            regionSlug={regionSlug}
+            label={
+              <>
+                Eigene GeoJSON- oder GeoPackage-Datei hierher ziehen
+                <br />
+                oder klicken (max. {MAX_USER_GEOJSON_BYTES / 1024 / 1024} MB,{' '}
+                {MAX_USER_GEOJSON_FEATURES.toLocaleString('de-DE')} Objekte)
+              </>
+            }
+          />
+        </div>
       )}
       {geojson && showModePicker && (
         <SegmentedChoice

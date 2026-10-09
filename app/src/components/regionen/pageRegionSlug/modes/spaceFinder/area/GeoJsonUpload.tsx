@@ -70,25 +70,28 @@ export function GeoJsonUploadField<T>({
   regionSlug: string
 }) {
   const inputRef = useRef<HTMLInputElement>(null)
+  const historyRequest = useRef(0)
   const [error, setError] = useState<string | null>(null)
   const [fileName, setFileName] = useState<string | null>(null)
   const [dragOver, setDragOver] = useState(false)
   const [history, setHistory] = useState<GeojsonHistoryEntry[]>([])
   const [isConverting, setIsConverting] = useState(false)
 
+  // A slower read must not replace a newer list: a load started before the write
+  // can land afterwards and wipe the names just shown.
   const refreshHistory = () => {
-    void listGeojsonHistoryEntries(regionSlug, historyScope).then(setHistory)
+    const requestId = ++historyRequest.current
+    void listGeojsonHistoryEntries(regionSlug, historyScope).then((entries) => {
+      if (historyRequest.current === requestId) setHistory(entries)
+    })
   }
 
   useEffect(
     function loadGeojsonUploadHistory() {
-      let cancelled = false
+      const requestId = ++historyRequest.current
       void listGeojsonHistoryEntries(regionSlug, historyScope).then((entries) => {
-        if (!cancelled) setHistory(entries)
+        if (historyRequest.current === requestId) setHistory(entries)
       })
-      return function ignoreStaleGeojsonHistory() {
-        cancelled = true
-      }
     },
     [historyScope, regionSlug],
   )
@@ -104,10 +107,12 @@ export function GeoJsonUploadField<T>({
     try {
       const text = await readAsGeoJsonText(file)
       const result = parse(text)
-      setFileName(file.name)
-      onResult(result, file.name)
+      // Persist before telling the parent. The parent re-renders on success; if that
+      // happened first, this field could unmount and drop the name before the write.
       await saveGeojsonHistoryEntry(regionSlug, historyScope, file.name, result)
+      setFileName(file.name)
       refreshHistory()
+      onResult(result, file.name)
     } catch (e) {
       setFileName(null)
       setError((e as Error).message)
