@@ -1,3 +1,4 @@
+import { useSearch } from '@tanstack/react-router'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 import { useRegionSearchNavigation } from '../useRegionSearchNavigation'
@@ -10,10 +11,15 @@ import { serialize } from './v2/serialize'
 // Invariant: ?config= is normalized in the region loader — see ./README.md
 export const useCategoriesConfig = () => {
   const region = useRegion()
-  const { search, updateSearch } = useRegionSearchNavigation()
+  const { updateSearch } = useRegionSearchNavigation()
+  // Only this param: the whole search object is new on every URL change (each map move), and
+  // parsing the config is too slow to repeat then.
+  const configWire = useSearch({
+    strict: false,
+    select: (search) => search[searchParamsRegistry.config],
+  })
   const freshConfig = createFreshCategoriesConfig(region?.categories ?? [])
 
-  const configWire = search[searchParamsRegistry.config]
   const checksum = configWire?.split('.')[0]
   const categoriesConfig =
     configWire && checksum === calcConfigChecksum(freshConfig)
