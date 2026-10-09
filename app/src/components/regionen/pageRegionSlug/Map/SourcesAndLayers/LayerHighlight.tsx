@@ -72,6 +72,11 @@ export const LayerHighlight = ({
     paint: 'paint' in props && props.paint ? structuredClone(props.paint) : undefined,
   } as LayerProps
 
+  // A highlight is hidden together with its layer. The `fill` and `symbol` highlights below
+  // replace the layout, so they get the visibility again.
+  const visibility =
+    'layout' in props && props.layout?.visibility ? { visibility: props.layout.visibility } : {}
+
   if (layerProps.type === 'line') {
     if (!layerProps.paint) layerProps.paint = {}
     delete layerProps.paint['line-blur']
@@ -88,6 +93,7 @@ export const LayerHighlight = ({
       layout: {
         'line-cap': 'round',
         'line-join': 'round',
+        ...visibility,
       },
       paint: {
         'line-color': color,
@@ -117,7 +123,7 @@ export const LayerHighlight = ({
     layerProps = {
       ...layerProps,
       type: 'circle',
-      layout: {},
+      layout: visibility,
       paint: {
         'circle-color': 'transparent',
         'circle-stroke-opacity': opacity,

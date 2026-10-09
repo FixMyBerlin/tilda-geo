@@ -813,3 +813,18 @@ enum DataSchemaImportStatus {
 
   @@schema("prisma")
 }
+
+/// Order of the Atlas-Geo map layers, one list for all regions; edited on /admin/layer-order.
+/// One row per layer key. A region shows the layers of its categories in this order.
+model MapLayerOrder {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  layerKey String  @unique // e.g. "source:atlas_bikelanes--subcat:bikelanes--style:default--layer:line_base"
+  position Int // the bottom layer of the map is 0; the list is always saved as a whole
+  beforeId String? // anchor layer of the basemap style, e.g. "atlas-app-beforeid-below-roadname"; null: position from the config
+
+  @@map("MapLayerOrder")
+  @@schema("prisma")
+}

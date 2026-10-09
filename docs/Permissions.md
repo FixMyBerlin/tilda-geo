@@ -60,7 +60,7 @@ Tests: `app/tests/smoke/public-routes.spec.ts` (renders only, does not check `no
 ## Admin area
 
 - `/admin/*` requires `role = ADMIN` (`app/src/routes/admin.tsx` → `getIsAdminFn`). Signed-in non-admins go to `/access-denied`, guests to sign-in.
-- Every server function used by the admin UI calls `requireAdmin`, either in the `*.functions.ts` handler or in the `queries/` / `mutations/` file it calls.
+- Every server function used by the admin UI calls `requireAdmin`, either in the `*.functions.ts` handler or in the `queries/` / `mutations/` file it calls. One exception: reading the map layer order (`getMapLayerOrderFn`) is public, because every map needs it; saving it is admin-only.
 - Configuration is admin-only: regions, memberships, QA configs, map dataset uploads and categories, region contracts, data schema, API tokens, private background maps, and the region links of Prüflisten.
 
 Tests: `app/tests/pages/admin.stubbed-auth.spec.ts` (non-admin and guest are turned away). Individual `requireAdmin` call sites have no unit tests.
