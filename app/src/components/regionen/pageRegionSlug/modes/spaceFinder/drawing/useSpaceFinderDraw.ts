@@ -19,8 +19,8 @@ const spaceFinderDrawController = createDrawController()
 const spaceFinderDrawHistory = createDrawHistory()
 
 /**
- * The drawing surface for the study area of a Planungsgebiet: one polygon, held in the boundary
- * store. It is only enabled while the user draws (`drawingActive`); the first click starts the
+ * The drawing surface for the study area of a Planungsgebiet: one polygon (or the parts of an
+ * existing area), held in the boundary store. It is only enabled while the user draws (`drawingActive`); the first click starts the
  * polygon, afterwards its corners and edges can be changed directly.
  */
 export const useSpaceFinderDraw = () => {
@@ -36,12 +36,17 @@ export const useSpaceFinderDraw = () => {
     value,
     onChange: (next) => {
       const geometry = geometryFromFeatures(next)
-      setDrawnGeometry(geometry?.type === 'Polygon' ? geometry : null)
+      setDrawnGeometry(
+        geometry?.type === 'Polygon' || geometry?.type === 'MultiPolygon' ? geometry : null,
+      )
     },
     enabled: isSpaceFinder && drawingActive,
     history: spaceFinderDrawHistory,
     historyKey: `session-${drawSession}`,
-    limits: { point: 0, line: 0, polygon: 1 },
+    // A new area is one polygon. An existing area with several parts keeps them editable.
+    limits: { point: 0, line: 0, ...(value.length > 1 ? {} : { polygon: 1 }) },
+    // Matches the ids `featuresFromGeometry` gives the parts.
+    createId: () => `part-${value.length}`,
     emptyTool: 'polygon',
     selectSingle: true,
   })

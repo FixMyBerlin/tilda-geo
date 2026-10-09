@@ -15,6 +15,7 @@ import type { PlanningUseCase } from '../factors/spaceFinderDefaults'
 import type { PlanningVariantDetail } from '../spaceFinderVariantDetail'
 import { useSpaceFinderModeParam } from '../useSpaceFinderModeParam'
 import { AreaFormFields, useEffectiveStudyArea, useStudyAreaKm2 } from './AreaFormFields'
+import type { StudyAreaGeometry } from './extractStudyAreaGeometry'
 import type { UserGeojsonMode } from './UserObstaclesField'
 
 type EditorArea = PlanningVariantDetail['area']
@@ -158,7 +159,8 @@ const AreaEditorForm = ({
         }}
         onUseCaseChange={setUseCase}
         onAreaSizeM2Change={setAreaSizeM2}
-        geometryStepTitle="Gebiet überschreiben"
+        geometryStepTitle="Gebiet ändern"
+        originalStudyArea={area.studyArea as StudyAreaGeometry | null}
       />
 
       {mutation.isError && (

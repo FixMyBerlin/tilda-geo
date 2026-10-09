@@ -11,7 +11,7 @@ type SpaceFinderBoundaryStore = {
   /** Counts the drawing sessions, so undo steps of an earlier session stay apart. */
   drawSession: number
   /** The drawn study area. The create form reads this as `study_area`. */
-  drawnGeometry: GeoJSON.Polygon | null
+  drawnGeometry: GeoJSON.Polygon | GeoJSON.MultiPolygon | null
   /**
    * Uploaded "Eigene Daten" GeoJSON (`factorConfig.user_geojson`) for the active variant.
    * Set by `SpaceFinderBody`. Null when none is uploaded.
@@ -69,7 +69,7 @@ type SpaceFinderBoundaryStore = {
   actions: {
     setBoundaryHighlightGeom: (geom: GeoJsonGeometry | null, opts?: { filled?: boolean }) => void
     setDrawingActive: (active: boolean) => void
-    setDrawnGeometry: (geom: GeoJSON.Polygon | null) => void
+    setDrawnGeometry: (geom: GeoJSON.Polygon | GeoJSON.MultiPolygon | null) => void
     setUserObstaclesGeom: (geom: GeoJsonGeometry | null) => void
     setUserObstaclesVisible: (visible: boolean) => void
     setVegetationVisible: (visible: boolean) => void

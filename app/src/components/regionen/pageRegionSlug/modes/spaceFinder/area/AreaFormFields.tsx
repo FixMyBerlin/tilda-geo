@@ -62,6 +62,8 @@ type AreaFormFieldsProps = {
   titleMissing?: boolean
   showUserData?: boolean
   geometryStepTitle?: string
+  /** The saved study area when an existing Gebiet is edited; "discard" goes back to it. */
+  originalStudyArea?: StudyAreaGeometry | null
 }
 
 /** Shared fields for creating or editing a planungsgebiet. */
@@ -78,6 +80,7 @@ export const AreaFormFields = ({
   titleMissing = false,
   showUserData = true,
   geometryStepTitle = 'Gebiet auswählen',
+  originalStudyArea = null,
 }: AreaFormFieldsProps) => {
   const { mainMap: map } = useMap()
   const { setBoundaryHighlightGeom, setDrawingActive, setDrawnGeometry } =
@@ -114,14 +117,19 @@ export const AreaFormFields = ({
     map.fitBounds([minLng, minLat, maxLng, maxLat], { padding: 60, duration: 800 })
   }
 
-  const switchTab = (tab: AreaTab) => {
-    onAreaTabChange(tab)
-    onStudyAreaChange(null)
-    onBoundaryIdChange(null)
+  // Back to where the form started: the saved area when editing, nothing when creating.
+  const resetToOriginal = () => {
     draw.cancel()
     setDrawingActive(false)
     setDrawnGeometry(null)
-    setBoundaryHighlightGeom(null)
+    onStudyAreaChange(originalStudyArea)
+    setBoundaryHighlightGeom(originalStudyArea, { filled: false })
+  }
+
+  const switchTab = (tab: AreaTab) => {
+    onAreaTabChange(tab)
+    onBoundaryIdChange(null)
+    resetToOriginal()
   }
 
   const toggleDrawing = () => {
@@ -132,11 +140,20 @@ export const AreaFormFields = ({
       if (drawnGeometry) setBoundaryHighlightGeom(drawnGeometry)
       return
     }
+    // Drawing starts from the area that is there, so it can be changed instead of redrawn.
+    const current = effectiveStudyArea as GeoJSON.Geometry | null
+    const isPolygonal = current?.type === 'Polygon' || current?.type === 'MultiPolygon'
+    setDrawnGeometry(isPolygonal ? current : null)
     onStudyAreaChange(null)
-    setDrawnGeometry(null)
     setBoundaryHighlightGeom(null)
     setDrawingActive(true)
   }
+
+  // Something to take back: a running or finished drawing, or a picked area that is not the saved one.
+  const hasGeometryToDiscard =
+    drawingActive ||
+    drawnGeometry != null ||
+    JSON.stringify(state.studyArea ?? null) !== JSON.stringify(originalStudyArea)
 
   const handleStudyUpload = (geometry: StudyAreaGeometry, fileName: string) => {
     draw.cancel()
@@ -253,11 +270,20 @@ export const AreaFormFields = ({
             >
               <PencilSquareIcon className="h-4 w-4" />
               {drawingActive
-                ? drawnGeometry
-                  ? 'Zeichnen beenden'
-                  : 'Zeichnen abbrechen'
-                : 'Gebiet zeichnen'}
+                ? 'Zeichnen beenden'
+                : effectiveStudyArea
+                  ? 'Gebiet bearbeiten'
+                  : 'Gebiet zeichnen'}
             </button>
+            {hasGeometryToDiscard && (
+              <button
+                type="button"
+                onClick={resetToOriginal}
+                className="text-xs text-gray-500 underline hover:text-gray-700"
+              >
+                {originalStudyArea ? 'Änderungen am Gebiet verwerfen' : 'Gebiet verwerfen'}
+              </button>
+            )}
             {drawingActive && (
               <p key="drawing-hint" className="text-xs text-gray-500">
                 Ecken ziehen oder auf eine Kante klicken, um das Gebiet zu ändern.
