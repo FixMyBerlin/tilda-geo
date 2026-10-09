@@ -4,6 +4,10 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-10
 
+### `parkings`
+
+- Tagged `capacity` of a parking line that is cut into several segments: the rounding remainder goes to the longest segment. When two segments have exactly the same length, the one with the lower segment id now gets it. Before, the choice was random, so `capacity` could move between the two segments from one run to the next. The sum per parking line is unchanged.
+
 ### `parkings_quantized`, `off_street_parking_quantized`
 
 - `area` is now the share of one parking space (`area` / `capacity` of the source feature, 2 decimals) instead of the area of the whole source feature. Before, summing `area` over the points overcounted by roughly the capacity of each feature. The last point of a feature takes the rounding remainder, so the points of a feature sum up exactly to `area` on `parkings` / `off_street_parking_areas`.
