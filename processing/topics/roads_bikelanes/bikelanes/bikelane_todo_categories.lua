@@ -451,7 +451,7 @@ local currentness_too_old__mapillary = BikelaneTodo.new({
 
 local missing_width = BikelaneTodo.new({
   id = 'missing_width',
-  desc = 'Ways without `width`',
+  desc = 'Ways without `width` or `est_width`',
   todoTableOnly = true,
   priority =  function(object_tags, result_tags)
     if object_tags.mapillary_coverage and result_tags.surface == 'sett' then return '1' end

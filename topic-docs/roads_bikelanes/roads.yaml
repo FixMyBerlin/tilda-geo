@@ -138,18 +138,30 @@ attributes:
   - key: width
     format: meter
     label: Breite
+    description: Wert des OSM-Tags `width`. Fehlt er oder ist er nicht lesbar, der geschätzte Wert aus `est_width` (siehe `width_confidence`).
   - key: width_effective
     format: meter
     label: Effektive Breite
   - key: width_source
     purpose: qa
     label: Quelle Breite
+    description: Wert des OSM-Tags `source:width`. Nur gesetzt, wenn eine Breite gesetzt ist. Bei einem nicht lesbaren `width` entfällt die Quelle, auch wenn `est_width` genutzt wird.
     format: sanitized_strings
     values:
       - value: ALKIS
         label: Aus ALKIS Daten ausgemessen
       - value: ARCore
         label: Mit dem Handy-Metermaß von StreetComplete gemessen
+  - key: width_confidence
+    purpose: qa
+    label: Konfidenz der Breite
+    values:
+      - value: high
+        label: Hoch
+        description: Wert stammt aus dem OSM-Tag `width`.
+      - value: low
+        label: Niedrig (geschätzt)
+        description: Wert stammt aus dem OSM-Tag `est_width`, weil `width` fehlt oder nicht lesbar ist.
   - key: oneway
     label: Verkehrsrichtung
     values:

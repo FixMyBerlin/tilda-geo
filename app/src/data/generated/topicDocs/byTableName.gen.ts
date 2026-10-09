@@ -1310,6 +1310,8 @@ const data = {
         key: 'width',
         type: 'meter',
         label: 'Breite',
+        description:
+          'Wert des OSM-Tags `width`. Fehlt er oder ist er nicht lesbar, der geschätzte Wert aus `est_width` (siehe `width_confidence`).',
         values: [],
       },
       {
@@ -1323,6 +1325,8 @@ const data = {
         type: 'sanitized_strings',
         label: 'Quelle Breite',
         purpose: 'qa',
+        description:
+          'Wert des OSM-Tags `source:width`. Nur gesetzt, wenn eine Breite gesetzt ist. Bei einem nicht lesbaren `width` entfällt die Quelle, auch wenn `est_width` genutzt wird.',
         values: [
           {
             value: 'ALKIS',
@@ -1331,6 +1335,25 @@ const data = {
           {
             value: 'ARCore',
             label: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
+          },
+        ],
+      },
+      {
+        key: 'width_confidence',
+        type: 'string',
+        label: 'Konfidenz der Breite',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'high',
+            label: 'Hoch',
+            description: 'Wert stammt aus dem OSM-Tag `width`.',
+          },
+          {
+            value: 'low',
+            label: 'Niedrig (geschätzt)',
+            description:
+              'Wert stammt aus dem OSM-Tag `est_width`, weil `width` fehlt oder nicht lesbar ist.',
           },
         ],
       },
@@ -3666,6 +3689,8 @@ const data = {
         key: 'width',
         type: 'meter',
         label: 'Breite',
+        description:
+          'Wert des OSM-Tags `width`. Fehlt er oder ist er nicht lesbar, der geschätzte Wert aus `est_width` (siehe `width_confidence`).',
         values: [],
       },
       {
@@ -3673,6 +3698,8 @@ const data = {
         type: 'sanitized_strings',
         label: 'Quelle Breite',
         purpose: 'qa',
+        description:
+          'Wert des OSM-Tags `source:width`. Nur gesetzt, wenn eine Breite gesetzt ist. Bei einem nicht lesbaren `width` entfällt die Quelle, auch wenn `est_width` genutzt wird.',
         values: [
           {
             value: 'ALKIS',
@@ -12259,6 +12286,8 @@ const data = {
         key: 'width',
         type: 'meter',
         label: 'Breite',
+        description:
+          'Wert des OSM-Tags `width`. Fehlt er oder ist er nicht lesbar, der geschätzte Wert aus `est_width` (siehe `width_confidence`).',
         values: [],
       },
       {
@@ -12272,6 +12301,8 @@ const data = {
         type: 'sanitized_strings',
         label: 'Quelle Breite',
         purpose: 'qa',
+        description:
+          'Wert des OSM-Tags `source:width`. Nur gesetzt, wenn eine Breite gesetzt ist. Bei einem nicht lesbaren `width` entfällt die Quelle, auch wenn `est_width` genutzt wird.',
         values: [
           {
             value: 'ALKIS',
@@ -12280,6 +12311,25 @@ const data = {
           {
             value: 'ARCore',
             label: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
+          },
+        ],
+      },
+      {
+        key: 'width_confidence',
+        type: 'string',
+        label: 'Konfidenz der Breite',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'high',
+            label: 'Hoch',
+            description: 'Wert stammt aus dem OSM-Tag `width`.',
+          },
+          {
+            value: 'low',
+            label: 'Niedrig (geschätzt)',
+            description:
+              'Wert stammt aus dem OSM-Tag `est_width`, weil `width` fehlt oder nicht lesbar ist.',
           },
         ],
       },
@@ -13612,6 +13662,8 @@ const data = {
         key: 'width',
         type: 'meter',
         label: 'Breite',
+        description:
+          'Wert des OSM-Tags `width`. Fehlt er oder ist er nicht lesbar, der geschätzte Wert aus `est_width` (siehe `width_confidence`).',
         values: [],
       },
       {
@@ -13619,6 +13671,8 @@ const data = {
         type: 'sanitized_strings',
         label: 'Quelle Breite',
         purpose: 'qa',
+        description:
+          'Wert des OSM-Tags `source:width`. Nur gesetzt, wenn eine Breite gesetzt ist. Bei einem nicht lesbaren `width` entfällt die Quelle, auch wenn `est_width` genutzt wird.',
         values: [
           {
             value: 'ALKIS',
@@ -13627,6 +13681,25 @@ const data = {
           {
             value: 'ARCore',
             label: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
+          },
+        ],
+      },
+      {
+        key: 'width_confidence',
+        type: 'string',
+        label: 'Konfidenz der Breite',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'high',
+            label: 'Hoch',
+            description: 'Wert stammt aus dem OSM-Tag `width`.',
+          },
+          {
+            value: 'low',
+            label: 'Niedrig (geschätzt)',
+            description:
+              'Wert stammt aus dem OSM-Tag `est_width`, weil `width` fehlt oder nicht lesbar ist.',
           },
         ],
       },
@@ -15290,6 +15363,8 @@ const data = {
         key: 'width',
         type: 'meter',
         label: 'Breite',
+        description:
+          'Wert des OSM-Tags `width`. Fehlt er oder ist er nicht lesbar, der geschätzte Wert aus `est_width` (siehe `width_confidence`).',
         values: [],
       },
       {
