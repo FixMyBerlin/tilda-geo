@@ -41,6 +41,35 @@ export const spaceFinderSelectedVariant = (
   return undefined
 }
 
+/** List row plus the loaded variant. Titles prefer the variant so the header matches the body. */
+export type SpaceFinderActiveSelection = SpaceFinderSelectedVariant & {
+  area: PlanningAreasRow
+}
+
+/**
+ * One selection for the title, the menus, and the body. The list resolves which Gebiet the URL
+ * key belongs to. Once that variant's detail is loaded, its titles win — a rename then cannot
+ * leave the header on the list and the form on the detail.
+ */
+export const spaceFinderActiveSelection = (
+  areas: readonly PlanningAreasRow[],
+  variantId: number | null | undefined,
+  variant: { id: number; title: string; area: { id: number; title: string } } | undefined,
+) => {
+  const selected = spaceFinderSelectedVariant(areas, variantId)
+  if (!selected) return undefined
+  const area = areas.find((candidate) => candidate.id === selected.areaId)
+  if (!area) return undefined
+  const detail = variant != null && variant.id === selected.variantId ? variant : undefined
+  return {
+    ...selected,
+    areaId: detail?.area.id ?? selected.areaId,
+    areaTitle: detail?.area.title ?? selected.areaTitle,
+    variantTitle: detail?.title ?? selected.variantTitle,
+    area,
+  } satisfies SpaceFinderActiveSelection
+}
+
 /** First variant of the oldest Gebiet that has one — the implicit selection. */
 export const firstSpaceFinderVariantId = (areas: readonly PlanningAreasRow[]) =>
   sortedSpaceFinderAreas(areas).find((area) => area.variants.length > 0)?.variants[0]?.id

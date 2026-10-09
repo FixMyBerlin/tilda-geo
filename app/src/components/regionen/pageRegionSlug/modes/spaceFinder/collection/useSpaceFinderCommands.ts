@@ -74,9 +74,14 @@ export const useSpaceFinderCommands = ({
     },
     onSuccess: async () => {
       await invalidateAreas()
-      if (selectedOption) {
-        await queryClient.invalidateQueries(planningAreaQueryOptions(selectedOption.areaId))
-      }
+      if (!selectedOption) return
+      await queryClient.invalidateQueries(planningAreaQueryOptions(selectedOption.areaId))
+      const area = areas.find((candidate) => candidate.id === selectedOption.areaId)
+      await Promise.all(
+        (area?.variants ?? []).map((variant) =>
+          queryClient.invalidateQueries(planningVariantQueryOptions(variant.id)),
+        ),
+      )
     },
   })
 

@@ -23,6 +23,7 @@ import { SpaceFinderCandidateSelectionReset } from './candidates/SpaceFinderCand
 import {
   firstSpaceFinderVariantId,
   sortedSpaceFinderAreas,
+  spaceFinderActiveSelection,
   spaceFinderSelectedVariant,
 } from './collection/spaceFinderCollectionOptions'
 import { SpaceFinderAreaManageMenu } from './collection/SpaceFinderMenus'
@@ -89,8 +90,7 @@ export const PageModeSpaceFinder = () => {
     variant,
     areaFormOpen,
   } = useSpaceFinderSelection()
-  const selectedOption = spaceFinderSelectedVariant(areas, activeVariant)
-  const selectedArea = sortedAreas.find((area) => area.id === selectedOption?.areaId)
+  const selection = spaceFinderActiveSelection(areas, activeVariant, variant)
 
   const onSelect = (variantId: number | undefined) =>
     setSpaceFinderModeParam({ ...spaceFinderMode, key: variantId })
@@ -120,7 +120,7 @@ export const PageModeSpaceFinder = () => {
     [areas, spaceFinderMode],
   )
 
-  const commands = useSpaceFinderCommands({ regionSlug, areas, selectedOption, onSelect })
+  const commands = useSpaceFinderCommands({ regionSlug, areas, selectedOption: selection, onSelect })
 
   const studyArea = variant?.area.studyArea as GeoJSON.Geometry | undefined
   // Outline lives on the page (not the body) so it stays on the map while switching variants of
@@ -178,15 +178,15 @@ export const PageModeSpaceFinder = () => {
         }
       : undefined
   const newVariantDetail =
-    isDesktop && spaceFinderMode.new === 'variant' && selectedOption
+    isDesktop && spaceFinderMode.new === 'variant' && selection
       ? {
           title: 'Neue Variante',
-          subtitle: `Planungsgebiet ${frenchQuote(selectedOption.areaTitle)}`,
+          subtitle: `Planungsgebiet ${frenchQuote(selection.areaTitle)}`,
           onBack: closeNew,
           children: (
             <SpaceFinderNewVariantDetail
-              areaId={selectedOption.areaId}
-              areaTitle={selectedOption.areaTitle}
+              areaId={selection.areaId}
+              areaTitle={selection.areaTitle}
               regionSlug={regionSlug}
               onCreated={onVariantCreated}
               onClose={closeNew}
@@ -195,14 +195,14 @@ export const PageModeSpaceFinder = () => {
         }
       : undefined
   const editAreaDetail =
-    isDesktop && spaceFinderMode.edit === 'area' && variant != null && selectedArea != null
+    isDesktop && spaceFinderMode.edit === 'area' && variant != null && selection != null
       ? {
           title: 'Planungsgebiet bearbeiten',
           onBack: closeEdit,
           children: (
             <SpaceFinderEditAreaDetail
               area={variant.area}
-              variants={selectedArea.variants}
+              variants={selection.area.variants}
               regionSlug={regionSlug}
               onClose={closeEdit}
             />
@@ -231,9 +231,9 @@ export const PageModeSpaceFinder = () => {
   // Header actions belong to the Planungsgebiet (the collection); variant actions live in the
   // Varianten bar. Without any Gebiet, ➕ creates the first one, like Prüflisten with zero lists.
   const showHeaderActions = !panelDetail && isDesktop
-  const actions = !showHeaderActions ? undefined : selectedOption ? (
+  const actions = !showHeaderActions ? undefined : selection ? (
     <SpaceFinderAreaManageMenu
-      selected={selectedOption}
+      selected={selection}
       onEditArea={() => openAreaForm({ edit: 'area' })}
       commands={commands}
     />
@@ -251,10 +251,10 @@ export const PageModeSpaceFinder = () => {
   ) : undefined
 
   const variantSelect =
-    !panelDetail && selectedOption && selectedArea ? (
+    !panelDetail && selection ? (
       <SpaceFinderVariantSelect
-        variants={selectedArea.variants}
-        selected={selectedOption}
+        variants={selection.area.variants}
+        selected={selection}
         onSelect={onSelect}
         editable={isDesktop}
         onNewVariant={() => setSpaceFinderModeParam({ ...spaceFinderMode, new: 'variant' })}
@@ -276,14 +276,14 @@ export const PageModeSpaceFinder = () => {
   return (
     <ModePanel
       title={
-        selectedOption ? `Planungsgebiet ${frenchQuote(selectedOption.areaTitle)}` : 'Flächenfinder'
+        selection ? `Planungsgebiet ${frenchQuote(selection.areaTitle)}` : 'Flächenfinder'
       }
       detail={panelDetail}
       collectionAlwaysOpen={sortedAreas.length === 0}
       collection={
         <SpaceFinderSelect
           areas={sortedAreas}
-          selectedAreaId={selectedOption?.areaId}
+          selectedAreaId={selection?.areaId}
           onSelectArea={onSelectArea}
           onNewArea={isDesktop ? openNewArea : undefined}
         />
@@ -309,14 +309,14 @@ export const PageModeSpaceFinder = () => {
         </p>
       )}
       {!isDesktop && <MobileEditingNotice />}
-      {selectedOption && (
+      {selection && (
         <SpaceFinderNameModal
           kind={commands.nameModal}
           defaultName={
             commands.nameModal === 'renameArea'
-              ? selectedOption.areaTitle
+              ? selection.areaTitle
               : commands.nameModal === 'renameVariant'
-                ? selectedOption.variantTitle
+                ? selection.variantTitle
                 : ''
           }
           isPending={commands.renameVariant.isPending || commands.renameArea.isPending}

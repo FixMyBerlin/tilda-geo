@@ -3,6 +3,7 @@ import {
   firstSpaceFinderVariantId,
   type PlanningAreasRow,
   sortedSpaceFinderAreas,
+  spaceFinderActiveSelection,
   spaceFinderSelectedVariant,
   spaceFinderVariantIdToPrime,
   spaceFinderVariantStatus,
@@ -60,6 +61,34 @@ describe('spaceFinderSelectedVariant', () => {
   test('returns undefined for unknown or missing ids', () => {
     expect(spaceFinderSelectedVariant(areas, 99)).toBeUndefined()
     expect(spaceFinderSelectedVariant(areas, undefined)).toBeUndefined()
+  })
+})
+
+describe('spaceFinderActiveSelection', () => {
+  test('uses list titles until the variant detail is loaded', () => {
+    const selection = spaceFinderActiveSelection(areas, 11, undefined)
+    expect(selection?.areaTitle).toBe('Alt')
+    expect(selection?.variantTitle).toBe('B')
+    expect(selection?.area.id).toBe(1)
+  })
+
+  test('prefers the loaded variant titles', () => {
+    const selection = spaceFinderActiveSelection(areas, 11, {
+      id: 11,
+      title: 'Neu benannt',
+      area: { id: 1, title: 'Gebiet neu' },
+    })
+    expect(selection?.areaTitle).toBe('Gebiet neu')
+    expect(selection?.variantTitle).toBe('Neu benannt')
+  })
+
+  test('ignores a detail that belongs to another variant', () => {
+    const selection = spaceFinderActiveSelection(areas, 11, {
+      id: 10,
+      title: 'Andere',
+      area: { id: 1, title: 'Andere Gebiet' },
+    })
+    expect(selection?.variantTitle).toBe('B')
   })
 })
 
