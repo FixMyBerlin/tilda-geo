@@ -134,7 +134,7 @@ const ModeSwitcherNav = () => {
             from="/regionen/$regionSlug"
             to={modeRoutePaths[mode]}
             params={{ regionSlug }}
-            search={(prev) => modeSwitcherSearch(mode, prev)}
+            search={(prev) => modeSwitcherSearch({ from: optimisticMode, to: mode }, prev)}
             className={twJoin(
               tabLayoutClassName,
               'rounded text-gray-200 outline-none focus-visible:ring-2 focus-visible:ring-white',

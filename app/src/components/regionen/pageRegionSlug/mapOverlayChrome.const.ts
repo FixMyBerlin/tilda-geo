@@ -7,6 +7,13 @@ const mapOverlayRadiusClassName = 'rounded'
 export const mapOverlayLayerControlsWidthClassName = 'w-54'
 
 /**
+ * The same in pixels, with the overlay inset on both sides, for overlays that are placed by
+ * pixel (the loupe of the Messen mode): the open sheet, and its button while it is closed.
+ */
+export const mapOverlayLayerControlsSheetWidthPx = 240
+export const mapOverlayLayerControlsButtonWidthPx = 76
+
+/**
  * Left edge for map overlays that are centered in the visible map while the layer-controls
  * sheet is open: inset + sheet width (`w-54`) + a gap.
  */

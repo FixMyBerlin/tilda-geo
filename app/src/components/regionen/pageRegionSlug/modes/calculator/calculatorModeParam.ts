@@ -1,3 +1,4 @@
+import { polygon } from '@turf/helpers'
 import { z } from 'zod'
 import { areasParamOfPolygons, polygonsOfAreasParam, zodAreasParam } from '../drawAreasParam'
 import type { DrawArea } from './drawing/drawAreaTypes'
@@ -58,12 +59,7 @@ export const calculatorAreasToParam = (areas: DrawArea[]) =>
 export const calculatorAreasFromParam = (areas: CalculatorModeParam['areas']) => {
   return polygonsOfAreasParam(areas).map(
     (coordinates, index) =>
-      ({
-        type: 'Feature',
-        id: calculatorAreaId(index),
-        properties: {},
-        geometry: { type: 'Polygon', coordinates },
-      }) satisfies DrawArea,
+      ({ ...polygon(coordinates), id: calculatorAreaId(index) }) satisfies DrawArea,
   )
 }
 

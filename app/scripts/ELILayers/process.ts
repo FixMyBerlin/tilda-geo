@@ -13,7 +13,6 @@ import { getRasterSourceSpec } from '@osm-editor-kit/maplibre-editor-layer-index
 import { $ } from 'bun'
 import type { MapDataBackgroundSource } from '@/components/regionen/pageRegionSlug/mapData/types'
 import legacyIds from './legacyIds.json'
-import legacyLayers from './legacyLayers.json'
 import { log, warn } from './util'
 
 console.log(styleText(['inverse', 'bold'], 'START'), __filename)
@@ -25,9 +24,9 @@ const outputFile = path.join(
 )
 
 /**
- * Ids are stored in the region configs, so they must not change. Layers that this file had
- * before it was built from the package keep the id they had (`legacyIds.json`, matched once
- * by tile URL); new layers are named after their ELI id.
+ * Ids are stored in the region configs, so they must not change for a layer that a region
+ * uses. Layers are named after their ELI id. `legacyIds.json` keeps the older name (derived
+ * from the file name in the index) for the layers that regions had selected under it.
  */
 const tildaId = (eliId: string) =>
   (legacyIds as Record<string, string>)[eliId] ??
@@ -85,14 +84,7 @@ async function main() {
     return toBackgroundSource(layer) ?? []
   })
 
-  // Layers that left the index but may still be selected in a region config.
-  const known = new Set(converted.map((layer) => layer.id))
-  const retired = (legacyLayers as MapDataBackgroundSource<string>[]).filter(
-    (layer) => !known.has(layer.id),
-  )
-  if (retired.length > 0) log(`Keeping ${retired.length} layers that left the index`)
-
-  const sources = [...converted, ...retired].sort((a, b) => a.id.localeCompare(b.id))
+  const sources = converted.sort((a, b) => a.id.localeCompare(b.id))
   const typeIds = sources.map((layer) => `  | '${layer.id}'`).join('\n')
 
   const typeScriptContent = `// DO NOT EDIT MANUALLY

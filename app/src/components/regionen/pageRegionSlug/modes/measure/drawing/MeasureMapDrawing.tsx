@@ -1,20 +1,19 @@
 import { DrawLayers, DrawLoupe, useDrawDraft } from '@osm-editor-kit/react-map-gl-draw'
-import { along, lineString, pointOnFeature } from '@turf/turf'
+import { along, featureCollection, point, pointOnFeature } from '@turf/turf'
 import type { LayerProps } from 'react-map-gl/maplibre'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import { useRegionBackgrounds } from '@/components/regionen/pageRegionSlug/background/useRegionBackgrounds'
 import { useBackgroundParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBackgroundParam'
 import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
 import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
-import { useLayerControlsOpen } from '../../../SidebarLayerControls/layer-controls-store'
-import type { MeasureShape } from '../measureModeParam'
-import { useMeasureShapes } from '../useMeasureShapes'
 import {
-  formatLength,
-  formatMeasurement,
-  measureGeometry,
-  measureSegments,
-} from '../utils/measureMath'
+  mapOverlayLayerControlsButtonWidthPx,
+  mapOverlayLayerControlsSheetWidthPx,
+} from '../../../mapOverlayChrome.const'
+import { useLayerControlsOpen } from '../../../SidebarLayerControls/layer-controls-store'
+import { isMeasureArea, type MeasureShape } from '../measureModeParam'
+import { useMeasureShapes } from '../useMeasureShapes'
+import { formatLength, formatShapeValue, lineLengthM, measureSegments } from '../utils/measureMath'
 import { MeasureDrawingToolbar } from './MeasureDrawingToolbar'
 import { MEASURE_DRAW_COLORS, measureDrawStyles } from './measureDrawStyles'
 import { useMeasureDraw } from './useMeasureDraw'
@@ -24,56 +23,36 @@ type Props = {
   shapes: MeasureShape[]
 }
 
-type LabelFeature = GeoJSON.Feature<
-  GeoJSON.Point,
-  { label: string; kind: 'total' | 'side'; belowHandle?: boolean }
->
-
-const labelPoint = (geometry: GeoJSON.LineString | GeoJSON.Polygon, lengthM: number) =>
-  geometry.type === 'LineString'
-    ? along(lineString(geometry.coordinates), lengthM / 2, { units: 'meters' }).geometry
-    : pointOnFeature(geometry).geometry
+type LabelProperties = { label: string; kind: 'total' | 'side'; belowHandle?: boolean }
 
 /**
  * One label with the value per shape. `withSides` adds the length of every side, for the
  * shape that is selected or being drawn; a line of one side has only its value.
+ * `belowHandle` moves the value of the selected area off its move handle.
  */
 const labelsOf = (
-  geometry: GeoJSON.LineString | GeoJSON.Polygon,
-  withSides: boolean,
-  isSelected = false,
+  shape: GeoJSON.LineString | GeoJSON.Polygon,
+  { withSides, belowHandle = false }: { withSides: boolean; belowHandle?: boolean },
 ) => {
-  const measurement = measureGeometry(geometry)
-  const segments = measureSegments(geometry)
-  const labels: LabelFeature[] = [
-    {
-      type: 'Feature',
-      geometry: labelPoint(geometry, measurement.kind === 'line' ? measurement.lengthM : 0),
-      properties: {
-        label: formatMeasurement(measurement),
-        kind: 'total',
-        // The selected area shows its move handle on this spot.
-        belowHandle: isSelected && geometry.type === 'Polygon',
-      },
-    },
+  const position =
+    shape.type === 'LineString'
+      ? along(shape, lineLengthM(shape) / 2, { units: 'meters' }).geometry.coordinates
+      : pointOnFeature(shape).geometry.coordinates
+  const total = point<LabelProperties>(position, {
+    label: formatShapeValue(shape),
+    kind: 'total',
+    belowHandle,
+  })
+  const segments = withSides ? measureSegments(shape) : []
+  if (segments.length <= 1) return [total]
+  return [
+    total,
+    ...segments.map(({ middle, lengthM }) =>
+      point<LabelProperties>(middle, { label: formatLength(lengthM), kind: 'side' }),
+    ),
   ]
-  if (withSides && segments.length > 1) {
-    for (const segment of segments) {
-      labels.push({
-        type: 'Feature',
-        geometry: { type: 'Point', coordinates: segment.middle },
-        properties: { label: formatLength(segment.lengthM), kind: 'side' },
-      })
-    }
-  }
-  return labels
 }
 
-// On desktop the top left of the map belongs to the layer list: its button while it is
-// closed, the list (`w-54` plus its inset) while it is open. The loupe docks beside it.
-// On a phone it docks below the header buttons.
-const LAYER_CONTROLS_BUTTON_WIDTH_PX = 64
-const LAYER_CONTROLS_WIDTH_PX = 228
 const LOUPE_MIN_MAP_ZOOM = 15
 const LOUPE_EXTRA_ZOOM = 2.5
 
@@ -90,11 +69,14 @@ export function MeasureMapDrawing({ shapes }: Props) {
   const labelFeatures = [
     ...shapes.flatMap((shape) => {
       const isSelected = shape.id === draw.selectedId
-      return labelsOf(shape.geometry, isSelected, isSelected)
+      return labelsOf(shape.geometry, {
+        withSides: isSelected,
+        belowHandle: isSelected && isMeasureArea(shape),
+      })
     }),
-    ...(draft ? labelsOf(draft, true) : []),
+    ...(draft ? labelsOf(draft, { withSides: true }) : []),
   ]
-  const draftValue = draft ? formatMeasurement(measureGeometry(draft)) : undefined
+  const draftValue = draft ? formatShapeValue(draft) : undefined
 
   const background = regionBackgrounds.find((source) => source.id === backgroundParam)
   // At least the zoom the image has its sharpest tiles for (one less for the 512 px tiles of
@@ -117,7 +99,7 @@ export function MeasureMapDrawing({ shapes }: Props) {
           <Source
             id="measure-draw-labels-source"
             type="geojson"
-            data={{ type: 'FeatureCollection', features: labelFeatures }}
+            data={featureCollection(labelFeatures)}
           />
           <Layer
             {...({
@@ -147,18 +129,23 @@ export function MeasureMapDrawing({ shapes }: Props) {
           />
         </>
       )}
-      {background && loupeZoom !== undefined && (
+      {/* Not mounted while the map is zoomed out: there is nothing exact to place, and the
+          loupe would load tiles of its own. */}
+      {background && loupeZoom !== undefined && mapZoom >= LOUPE_MIN_MAP_ZOOM && (
         <DrawLoupe
           draw={draw}
           zoom={loupeZoom}
           size={isSmBreakpointOrAbove ? 168 : 128}
-          hidden={mapZoom < LOUPE_MIN_MAP_ZOOM}
           shapeColor={MEASURE_DRAW_COLORS.active}
           inset={{
+            // On a phone below the header buttons.
             top: isSmBreakpointOrAbove ? 12 : 104,
+            // On desktop the top left of the map belongs to the layer list.
             left: !isSmBreakpointOrAbove
               ? 12
-              : (layerControlsOpen ? LAYER_CONTROLS_WIDTH_PX : LAYER_CONTROLS_BUTTON_WIDTH_PX) + 12,
+              : layerControlsOpen
+                ? mapOverlayLayerControlsSheetWidthPx
+                : mapOverlayLayerControlsButtonWidthPx,
           }}
         >
           <Source
