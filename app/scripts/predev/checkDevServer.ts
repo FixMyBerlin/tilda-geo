@@ -8,7 +8,8 @@ import {
   portsFromSlot,
 } from './devPortSlot'
 import { probeHostPort } from './devStackPorts'
-import { logErr, logOk } from './predevLog'
+import { isLinkedWorktree } from './envLocalBranch'
+import { devStackSkillHint, logErr, logOk } from './predevLog'
 
 const label = 'check_dev_server'
 const DEV_HOST = '127.0.0.1'
@@ -17,11 +18,14 @@ function isPortInUse(host: string, port: number) {
   return probeHostPort(host, port).then((state) => state === 'open')
 }
 
-function parallelSlotHint(slot: number) {
+function parallelSlotHint(slot: number, linkedWorktree: boolean) {
   const { vitePort } = portsFromSlot(slot)
+  const attachHint = linkedWorktree
+    ? ` To use the database of develop from this worktree, also set \`DEV_ATTACH_STACK=default\`; the slot then only moves Vite. ${devStackSkillHint}`
+    : ''
   return (
     `Or run this worktree on a parallel port slot: add \`DEV_PORT_SLOT=${slot}\` to .env.local and rerun. ` +
-    `Requires the OAuth redirect URL http://127.0.0.1:${vitePort} to be registered.`
+    `Requires the OAuth redirect URL http://127.0.0.1:${vitePort} to be registered.${attachHint}`
   )
 }
 
@@ -42,7 +46,7 @@ export async function checkDevServer() {
   if (!isDevPortSlotMode()) {
     const freeSlot = await findFirstFreeDevPortSlot()
     if (freeSlot !== undefined) {
-      extra = `\n\n${parallelSlotHint(freeSlot)}`
+      extra = `\n\n${parallelSlotHint(freeSlot, await isLinkedWorktree())}`
     }
   }
 

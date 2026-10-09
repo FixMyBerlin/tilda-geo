@@ -4,6 +4,7 @@ import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/map
 import { NodataFallback } from './compositTableRows/NodataFallback'
 import {
   tagsTableLabelCellClass,
+  tagsTableLabelContentClass,
   tagsTableRowClass,
   tagsTableValueCellClass,
 } from './tagsTableLayout'
@@ -48,7 +49,7 @@ export const TagsTableRowFrame = ({
           isSecondaryRow ? 'text-gray-400 group-hover:text-gray-900' : 'text-gray-900',
         )}
       >
-        {label}
+        <span className={tagsTableLabelContentClass}>{label}</span>
       </td>
       <td
         className={twJoin(

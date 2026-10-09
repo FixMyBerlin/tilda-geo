@@ -37,6 +37,8 @@ import {
   type InteracitvityConfiguartion,
 } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/generalization/interacitvityConfiguartion'
 import { customMapIcons } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/customMapIcons.const'
+import { useMeasureDraw } from '@/components/regionen/pageRegionSlug/modes/measure/drawing/useMeasureDraw'
+import { MeasureMap } from '@/components/regionen/pageRegionSlug/modes/measure/MeasureMap'
 import { createInspectorFeatureKey } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/createInspectorFeatureKey'
 import { isDev, isProd } from '@/components/shared/utils/isEnv'
 import {
@@ -136,6 +138,7 @@ export const RegionMap = () => {
 
   const inspectorFeatures = useMapInspectorFeatures()
   const calculatorDraw = useCalculatorDraw()
+  const measureDraw = useMeasureDraw()
   const { draw: reviewDraw } = useReviewDraw()
   const notesComposeActive = useNotesComposeActive()
   const reviewDrawActive = useReviewDrawActive()
@@ -261,7 +264,7 @@ export const RegionMap = () => {
     cursor: drawCursor,
     onMouseMove: drawOnMouseMove,
     ...drawMapProps
-  } = { ...calculatorDraw.mapProps, ...reviewDraw.mapProps }
+  } = { ...calculatorDraw.mapProps, ...measureDraw.mapProps, ...reviewDraw.mapProps }
 
   const handleMouseMove = (event: MapLayerMouseEvent) => {
     drawOnMouseMove?.(event)
@@ -361,14 +364,15 @@ export const RegionMap = () => {
     updateMapBounds(mainMap?.getBounds() || null)
   }
 
-  // In the Summieren mode, while notes compose or review drawing is active, or while the
-  // Flächenfinder study-area polygon is in its point-placing phase, no layers are interactive:
+  // In the Summieren and Messen modes, while notes compose or review drawing is active, or while the
+  // Flächenfinder study area is drawn, no layers are interactive:
   // clicking/hovering the data does nothing and the inspector can't open
   // (queryRenderedFeatures returns none). This replaces a special-case guard in the click
   // handler with the map's own interactivity mechanism.
   const computedInteractiveLayerIds = useInteractiveLayers()
   const interactiveLayerIds =
     currentMode.isCalculator ||
+    currentMode.isMeasure ||
     notesComposeActive ||
     reviewDrawActive ||
     (currentMode.isSpaceFinder && spaceFinderPolygonDrawing)
@@ -460,6 +464,7 @@ export const RegionMap = () => {
       <AttributionControl compact={true} position="bottom-left" />
       <Map3dTouchRotation />
       {currentMode.isCalculator && <CalculatorMap />}
+      {currentMode.isMeasure && <MeasureMap />}
       {currentMode.isReviewLists && <ReviewMapDrawing />}
       {/* <GeolocateControl /> */}
       {/* <ScaleControl /> */}

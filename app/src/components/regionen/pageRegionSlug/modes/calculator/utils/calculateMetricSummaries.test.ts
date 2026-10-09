@@ -37,6 +37,44 @@ describe('getAvailableMetricsForAreas', () => {
 })
 
 describe('calculateMetricSummaryForAreas', () => {
+  test('a filter does not reorder groups or values', () => {
+    const areas = [
+      {
+        key: 'a1',
+        features: [
+          createFeature({ capacity: 5, surface: 'asphalt', parking: 'lane' }),
+          createFeature({ capacity: 3, surface: 'sett', parking: 'lane' }),
+          createFeature({ capacity: 4, surface: 'sett', parking: 'street_side' }),
+        ],
+      },
+    ]
+    const order = (filter: Record<string, string>) =>
+      calculateMetricSummaryForAreas({
+        areas,
+        metric: 'capacity',
+        groupByKeys: ['surface', 'parking'],
+        filter,
+      }).combined.groups.map((group) => [group.key, ...group.values.map((v) => v.filterValue)])
+
+    const unfiltered = [
+      ['surface', 'sett', 'asphalt'],
+      ['parking', 'lane', 'street_side'],
+    ]
+    expect(order({})).toEqual(unfiltered)
+    // With the filter, asphalt (5) is larger than sett (3) and still listed second.
+    expect(order({ parking: 'lane' })).toEqual(unfiltered)
+  })
+
+  test('the same id in two sources is two points', () => {
+    const point = (source: string) =>
+      ({ ...createFeature({ capacity: 1 }), id: '1', source }) as MapGeoJSONFeature
+    const areas = [{ key: 'a1', features: [point('street'), point('off_street'), point('street')] }]
+
+    const result = calculateMetricSummaryForAreas({ areas, metric: 'capacity', groupByKeys: [] })
+
+    expect(result.combined.total).toBe(2)
+  })
+
   test('calculates totals and sub sums for configured group keys', () => {
     const areas = [
       {

@@ -12,4 +12,6 @@ export const AUDIT_SKIP_UPDATE_MODELS = ['Session'] as const
 export const AUDIT_IGNORED_FIELDS = {
   User: ['accessedRegions'],
   AdminApiToken: ['lastUsedAt'],
+  // The URL holds a secret token; audit rows outlive the record and a rotated token.
+  PrivateBackgroundSource: ['tilesUrl'],
 } as const

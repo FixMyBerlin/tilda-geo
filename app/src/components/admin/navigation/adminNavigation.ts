@@ -87,6 +87,11 @@ export const adminNavigation: AdminNavItem[] = [
         description: 'Aufträge und die zugehörigen Regionen.',
       },
       {
+        name: 'Private Hintergrundkarten',
+        to: '/admin/private-backgrounds',
+        description: 'Hintergrundkarten mit geheimem Token, nur für Mitglieder der Regionen.',
+      },
+      {
         name: 'Prüflisten',
         to: '/admin/review-lists',
         countKey: 'reviewLists',

@@ -18,7 +18,7 @@ import {
   isAttachMode,
 } from './ensureDevStack'
 import { repoRootFromApp } from './ensureEnv'
-import { logErr, logOk, logWarn } from './predevLog'
+import { devStackSkillHint, logErr, logOk, logWarn } from './predevLog'
 
 const label = 'check_docker'
 
@@ -65,7 +65,7 @@ export async function checkDocker() {
       }
       logErr(
         label,
-        `DEV_ATTACH_STACK is set but ports ${databasePort}, ${tilesPort} are not published — start the target stack first`,
+        `DEV_ATTACH_STACK is set but ports ${databasePort}, ${tilesPort} are not published — start the target stack first (\`bun run dev\` in its checkout). ${devStackSkillHint}`,
       )
       process.exit(1)
     }

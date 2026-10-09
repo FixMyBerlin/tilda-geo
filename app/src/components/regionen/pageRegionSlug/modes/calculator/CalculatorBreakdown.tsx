@@ -5,6 +5,7 @@ import type { MapDataSourceCalculator } from '@/components/regionen/pageRegionSl
 import { ConditionalFormattedKey } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/ConditionalFormattedKey'
 import { ConditionalFormattedValue } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/ConditionalFormattedValue'
 import { modePanelTintHairlineTopClassName } from '../modePanel.const'
+import { type CalculatorDataset, calculatorTranslationSourceId } from './calculatorDatasets.const'
 import type { CalculatorFilter } from './calculatorModeParam'
 import {
   calculateMetricSummaryForAreas,
@@ -26,7 +27,8 @@ type CalculatorAreaSummary = CalculatorSummary['byArea'][number]['summary']
  */
 export type CalculatorBreakdownData = {
   sumKeys: NonNullable<MapDataSourceCalculator['sumKeys']>
-  sourceId: string
+  /** The sources of the dataset; their translations name the tags and values. */
+  parts: CalculatorDataset['parts']
   metrics: CalculatorMetric[]
   selectedMetric: CalculatorMetric | null
   selectedMetricLabel: string
@@ -140,7 +142,7 @@ const MetricControls = ({
 const AreaSummary = ({
   areaSummary,
   label,
-  sourceId,
+  parts,
   onDelete,
   filter,
   onToggleFilter,
@@ -150,7 +152,7 @@ const AreaSummary = ({
 }: {
   areaSummary: CalculatorAreaSummary
   label: string
-  sourceId: string
+  parts: CalculatorDataset['parts']
   onDelete: () => void
   filter: CalculatorFilter
   onToggleFilter: (key: string, value: string) => void
@@ -172,7 +174,10 @@ const AreaSummary = ({
     {areaSummary.groups.map((group) => (
       <div key={group.key} className="mb-2 last:mb-0">
         <div className="text-xs font-semibold text-gray-700">
-          <ConditionalFormattedKey sourceId={sourceId} tagKey={group.key} />
+          <ConditionalFormattedKey
+            sourceId={calculatorTranslationSourceId(parts, group.key)}
+            tagKey={group.key}
+          />
         </div>
         {group.values.map((groupValue) => {
           const groupFilter = filter[group.key]
@@ -209,7 +214,7 @@ const AreaSummary = ({
                   title={groupValue.value.length > 20 ? groupValue.value : undefined}
                 >
                   <ConditionalFormattedValue
-                    sourceId={sourceId}
+                    sourceId={calculatorTranslationSourceId(parts, group.key, groupValue.value)}
                     tagKey={group.key}
                     tagValue={groupValue.value}
                   />
@@ -267,7 +272,7 @@ export const CalculatorBreakdown = ({ data }: { data: CalculatorBreakdownData })
               key={key}
               areaSummary={areaSummary}
               label={`${selectedMetricLabel}${summary.byArea.length > 1 ? ` Fläche ${index + 1}` : ''}`}
-              sourceId={data.sourceId}
+              parts={data.parts}
               onDelete={() => data.onDeleteArea(key)}
               filter={data.filter}
               styleColors={data.styleColors}

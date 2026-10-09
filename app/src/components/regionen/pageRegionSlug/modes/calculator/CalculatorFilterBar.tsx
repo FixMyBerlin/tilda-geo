@@ -6,13 +6,15 @@ import { translations } from '@/components/regionen/pageRegionSlug/SidebarInspec
 import { MotionAutoHeight } from '@/components/shared/motion/MotionAutoHeight'
 import { ModeFilterSelect } from '../ModeFilterSelect'
 import { modePanelFilterControlClassName } from '../modePanel.const'
+import { type CalculatorDataset, calculatorTranslationSourceId } from './calculatorDatasets.const'
 import type { CalculatorFilter } from './calculatorModeParam'
 import { calculatorMissingGroupValueLabel } from './utils/calculateMetricSummaries'
 
 const defaultStyleValue = 'default'
 
 type Props = {
-  sourceId: string
+  /** The sources of the dataset; their translations name the tags and values. */
+  parts: CalculatorDataset['parts']
   /** The tags of the dataset: what the points can be colored by. */
   groupByKeys: string[]
   style: string | undefined
@@ -28,7 +30,7 @@ type Props = {
  * it again.
  */
 export const CalculatorFilterBar = ({
-  sourceId,
+  parts,
   groupByKeys,
   style,
   onStyleChange,
@@ -41,7 +43,7 @@ export const CalculatorFilterBar = ({
     { value: defaultStyleValue, label: 'Einfarbig' },
     ...groupByKeys.map((key) => ({
       value: key,
-      label: `Nach ${translations[`${sourceId}--${key}--key`] ?? key}`,
+      label: `Nach ${translations[`${calculatorTranslationSourceId(parts, key)}--${key}--key`] ?? key}`,
     })),
   ]
 
@@ -67,10 +69,14 @@ export const CalculatorFilterBar = ({
               className={`${modePanelFilterControlClassName} max-w-full gap-1 px-1.5`}
             >
               <span className="min-w-0 truncate [&_span]:truncate">
-                <ConditionalFormattedKey sourceId={sourceId} tagKey={key} />:{' '}
+                <ConditionalFormattedKey
+                  sourceId={calculatorTranslationSourceId(parts, key)}
+                  tagKey={key}
+                />
+                :{' '}
                 <span className="font-semibold">
                   <ConditionalFormattedValue
-                    sourceId={sourceId}
+                    sourceId={calculatorTranslationSourceId(parts, key, value)}
                     tagKey={key}
                     tagValue={value || calculatorMissingGroupValueLabel}
                   />

@@ -10,6 +10,7 @@ import {
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import { mapParamFallback } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParamFallback.const'
 import { zodCalculatorModeParam } from '@/components/regionen/pageRegionSlug/modes/calculator/calculatorModeParam'
+import { zodMeasureModeParam } from '@/components/regionen/pageRegionSlug/modes/measure/measureModeParam'
 import { zodNotesModeParam } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
 import {
   defaultQaParam,
@@ -25,6 +26,10 @@ import {
   searchBoolean,
   searchStringArray,
 } from '@/lib/searchParamsSchema'
+import {
+  isPrivateBackgroundParam,
+  type PrivateBackgroundParam,
+} from '@/server/private-backgrounds/privateBackgroundParam'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 
 export const defaultMapSearchValue = serializeMapParam(mapParamFallback)
@@ -45,7 +50,14 @@ const mapSearchParam = (defaultValue: string) =>
 const backgroundSearchParam = () =>
   optionalSearchString()
     .transform((s) => s ?? defaultBackgroundParam)
-    .pipe(z.enum(validBackgroundParams).catch(defaultBackgroundParam))
+    .pipe(
+      z
+        .union([
+          z.enum(validBackgroundParams),
+          z.custom<PrivateBackgroundParam>(isPrivateBackgroundParam),
+        ])
+        .catch(defaultBackgroundParam),
+    )
 
 export const regionDialogParamSchema = z.enum(['welcome', 'download', 'docs'])
 
@@ -73,6 +85,7 @@ export const regionSearchSchema = z.object({
   [searchParamsRegistry.review]: optionalSearchJson(zodReviewListsModeParam),
   [searchParamsRegistry.space]: optionalSearchJson(zodSpaceFinderModeParam),
   [searchParamsRegistry.sum]: optionalSearchJson(zodCalculatorModeParam),
+  [searchParamsRegistry.measure]: optionalSearchJson(zodMeasureModeParam),
   [searchParamsRegistry.photos]: optionalSearchJson(zodStreetImageryParam),
 })
 

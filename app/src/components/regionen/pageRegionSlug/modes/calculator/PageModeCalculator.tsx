@@ -45,7 +45,7 @@ export const PageModeCalculator = () => {
       filter={
         activeDataset ? (
           <CalculatorFilterBar
-            sourceId={activeDataset.sourceId}
+            parts={activeDataset.parts}
             groupByKeys={activeDataset.groupByKeys}
             style={style}
             onStyleChange={setStyle}

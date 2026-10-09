@@ -96,9 +96,10 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
     calculator: {
       enabled: true,
       sumKeys: { capacity: 'Stellplätze', area: 'Fläche m²' },
+      // The order of the groups in the Summieren panel.
       groupByKeys: [
-        'parking',
         'operator_type',
+        'parking',
         'orientation',
         'surface',
         'condition_category_primary',
@@ -124,7 +125,7 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
     calculator: {
       enabled: true,
       sumKeys: { capacity: 'Stellplätze', area: 'Fläche m²' },
-      groupByKeys: ['parking', 'operator_type', 'access', 'condition_category_primary'],
+      groupByKeys: ['operator_type', 'parking', 'access', 'condition_category_primary'],
       highlightingKey: 'id',
     },
   },

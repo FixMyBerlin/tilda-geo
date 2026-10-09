@@ -51,10 +51,14 @@ const coercePropertyValue = (value: unknown) => {
   return String(value)
 }
 
+/** Shape of `ReviewEntry.properties` as every write path stores it (see `normalizeProperties`). */
+export const reviewEntryPropertiesSchema = z.record(z.string(), z.string())
+export type ReviewEntryDisplayProperties = z.infer<typeof reviewEntryPropertiesSchema>
+
 /** Drop `tilda_` keys and empty values; coerce the rest to trimmed strings. Invents no keys. */
 export const normalizeProperties = (raw: unknown) => {
   if (!isPlainObject(raw)) return {}
-  const properties: Record<string, string> = {}
+  const properties: ReviewEntryDisplayProperties = {}
   for (const [key, value] of Object.entries(raw)) {
     if (key.startsWith(TILDA_RESERVED_KEY_PREFIX)) continue
     if (value === null || value === undefined) continue

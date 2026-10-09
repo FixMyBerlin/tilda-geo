@@ -10,6 +10,7 @@ import { requireAdmin } from '@/server/auth/session.server'
 import db from '@/server/db.server'
 import { getNoteFolder } from '@/server/notes/queries/getNoteFolder.server'
 import { getNoteFoldersForAdmin } from '@/server/notes/queries/getNoteFoldersForAdmin.server'
+import { listPrivateBackgrounds } from '@/server/private-backgrounds/privateBackgroundWriteService.server'
 import { getQaConfig } from '@/server/qa-configs/queries/getQaConfig.server'
 import { getQaConfigsForAdmin } from '@/server/qa-configs/queries/getQaConfigsForAdmin.server'
 import { getQaConfigStatsForAdmin } from '@/server/qa-configs/queries/getQaConfigStatsForAdmin.server'
@@ -61,7 +62,10 @@ export const getAdminRegionEditLoaderFn = createServerFn({ method: 'GET' })
       getRegionContracts(headers),
     ])
     const linkCounts = await getRegionAdminLinkCounts(region)
-    return { region, formConfig, formValues, contracts, linkCounts }
+    const privateBackgrounds = (await listPrivateBackgrounds()).filter((source) =>
+      source.regionSlugs.includes(data.regionSlug),
+    )
+    return { region, formConfig, formValues, contracts, linkCounts, privateBackgrounds }
   })
 
 const AdminUploadsLoaderInput = mapDatasetUploadsSearchSchema
@@ -260,6 +264,14 @@ export const getAdminRegionContractNewLoaderFn = createServerFn({ method: 'GET' 
     await requireAdmin(getRequestHeaders())
     const regions = await getRegions()
     return { regions }
+  },
+)
+
+export const getAdminPrivateBackgroundsLoaderFn = createServerFn({ method: 'GET' }).handler(
+  async () => {
+    await requireAdmin(getRequestHeaders())
+    const sources = await listPrivateBackgrounds()
+    return { sources }
   },
 )
 

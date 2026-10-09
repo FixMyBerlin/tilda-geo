@@ -79,6 +79,16 @@ describe('applyDevPortSlotToProcessEnv', () => {
     expect(env.TILES_PORT).toBe('3002')
     expect(env.VITE_APP_ORIGIN).toBe('http://127.0.0.1:5175')
   })
+
+  test('attached to develop: the slot only moves Vite', () => {
+    const env = { DEV_PORT_SLOT: '2', DEV_ATTACH_STACK: 'default' } as unknown as NodeJS.ProcessEnv
+    const config = applyDevPortSlotToProcessEnv(env)
+    expect(config.vitePort).toBe(5175)
+    expect(env.DATABASE_PORT).toBe('5432')
+    expect(env.TILES_PORT).toBe('3000')
+    expect(env.VITE_TILES_PORT).toBe('3000')
+    expect(env.VITE_APP_ORIGIN).toBe('http://127.0.0.1:5175')
+  })
 })
 
 describe('portsFromSlot', () => {

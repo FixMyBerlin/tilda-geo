@@ -5,6 +5,7 @@ import {
   normalizeGeometry,
   normalizeProperties,
   resolveFeatureImportId,
+  reviewEntryPropertiesSchema,
   reviewFeatureCollectionSchema,
 } from '@/shared/reviewLists/reviewEntryImport'
 
@@ -41,6 +42,10 @@ export const reviewEntryGeometrySchema = z.object({
     .min(1)
     .refine(hasOnlyFiniteNumberLeaves, 'coordinates must contain only finite numbers'),
 })
+
+/** Read side of the Prisma `Json?` column: typed display attributes, `{}` when unset. */
+export const parseStoredProperties = (properties: Prisma.JsonValue) =>
+  reviewEntryPropertiesSchema.parse(properties ?? {})
 
 export type ReviewEntryData = {
   geometry: unknown

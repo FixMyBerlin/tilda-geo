@@ -12,6 +12,7 @@ export const AUDITED_MODELS = [
   'RegionNavigationLink',
   'RegionContract',
   'RegionUpload',
+  'PrivateBackgroundSource',
   'Membership',
   'MapDatasetUpload',
   'MapDatasetCategory',

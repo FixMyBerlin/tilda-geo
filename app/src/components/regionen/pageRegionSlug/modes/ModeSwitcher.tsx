@@ -101,6 +101,7 @@ const ModeSwitcherNav = () => {
       availableModes.reviewLists,
       availableModes.spaceFinder,
       availableModes.calculator,
+      availableModes.measure,
     ],
   )
 

@@ -29,10 +29,15 @@ WHERE
 -- Other: proportional decimal.
 WITH
   -- Per original_id: total length, total capacity, capacity_source; only groups with > 1 segment.
+  -- `ORDER BY id` in the SUM: float addition depends on the order of the rows, so without it the last digits of total_length (and of the proportional capacity) change between runs.
   total_lengths AS (
     SELECT
       original_id,
-      SUM(ST_Length (geom)) AS total_length,
+      SUM(
+        ST_Length (geom)
+        ORDER BY
+          id
+      ) AS total_length,
       MAX((tags ->> 'capacity')::NUMERIC) AS total_capacity,
       MAX(tags ->> 'capacity_source') AS capacity_source,
       COUNT(*) AS count
@@ -46,6 +51,7 @@ WITH
       COUNT(*) > 1
   ),
   -- Per segment: length fraction (frac), integer base (floor_capacity), and length_rank (1 = longest). Used for both branches.
+  -- `pc.id` breaks ties between segments of the same length (common after `ST_SnapToGrid`), so the remainder lands on the same segment in every run.
   proportional AS (
     SELECT
       pc.id,
@@ -60,7 +66,8 @@ WITH
         PARTITION BY
           pc.original_id
         ORDER BY
-          seg_len DESC
+          seg_len DESC,
+          pc.id
       ) AS length_rank
     FROM
       (

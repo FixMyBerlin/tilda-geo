@@ -16,4 +16,5 @@ export const searchParamsRegistry = {
   review: 'review', // JSON: key, search, extent, status, source, new, move (`reviewListsModeParam.ts`)
   space: 'space', // Flächenfinder mode JSON: key (variant id), score, opacity, minArea, new, edit (`spaceFinderModeParam.ts`)
   sum: 'sum', // JSON: key (dataset), filter, areas (`calculatorModeParam.ts`)
+  measure: 'measure', // JSON: lines, areas, bg (`measureModeParam.ts`)
 } as const

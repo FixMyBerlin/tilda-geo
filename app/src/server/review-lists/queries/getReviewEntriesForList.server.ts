@@ -5,7 +5,7 @@ import { type MemberCaller, getMemberSession } from '@/server/auth/memberCaller.
 import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
 import { formatUserDisplayName } from '@/shared/userDisplayName'
-import { reviewEntryGeometrySchema } from '../geojson'
+import { parseStoredProperties, reviewEntryGeometrySchema } from '../geojson'
 
 const Schema = z.object({
   regionSlug: z.string(),
@@ -60,8 +60,7 @@ export async function getReviewEntriesForList(input: z.infer<typeof Schema>, cal
         authorOsmName: entry.createdBy?.osmName ?? null,
         commentCount: entry._count.comments,
         // Display attributes from upload/drawing (kept under a namespace to avoid clobbering ours).
-        // Writes store `normalizeProperties` → Record<string, string>; Prisma types the column as Json.
-        data: (entry.properties ?? {}) as Record<string, string>,
+        data: parseStoredProperties(entry.properties),
       },
       { id: entry.id },
     ),

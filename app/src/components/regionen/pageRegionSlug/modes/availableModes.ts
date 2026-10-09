@@ -14,6 +14,7 @@ type AvailableModes = Record<Exclude<RegionMode, 'map'>, boolean>
  * - reviewLists: at least one assigned list, or the user is a region member/admin (can create the first)
  * - calculator: the region has a category with a dataset that can be summed
  * - spaceFinder: `region.spaceFinderEnabled` and the user is a region member/admin (always member-only)
+ * - measure: every region
  */
 export const deriveAvailableModes = ({
   region,
@@ -33,19 +34,20 @@ export const deriveAvailableModes = ({
     reviewLists: reviewListsCount > 0 || canManage,
     calculator: calculatorDatasetsForCategories(region.categories).length > 0,
     spaceFinder: region.spaceFinderEnabled && canManage,
+    measure: true,
   } satisfies AvailableModes
 }
 
 /**
  * QA, Prüflisten and Flächenfinder are always member-only (every planning server function already
  * requires membership). Hinweise is member-only when the region has only internal notes.
- * Summieren is open to everyone who can see the region.
+ * Summieren and Messen are open to everyone who can see the region.
  */
 export const isMemberOnlyMode = (
   mode: Exclude<RegionMode, 'map'>,
   region: Pick<TRegion, 'notesOsm' | 'notesInternal'>,
 ) => {
   if (mode === 'qa' || mode === 'reviewLists' || mode === 'spaceFinder') return true
-  if (mode === 'calculator') return false
+  if (mode === 'calculator' || mode === 'measure') return false
   return Boolean(region.notesInternal && !region.notesOsm)
 }

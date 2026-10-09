@@ -1,5 +1,6 @@
 import {
   createDrawController,
+  createDrawHistory,
   featuresFromGeometry,
   geometryFromFeatures,
   shapeTypeOf,
@@ -26,6 +27,12 @@ import {
 } from './review-draw-store'
 
 const reviewDrawController = createDrawController()
+/**
+ * The steps of the entry whose geometry is edited; `historyKey` keeps the entries apart.
+ * Creating and deleting an entry are not steps, and a new entry has none: while it is drawn,
+ * undo takes back corners, which needs no history.
+ */
+const reviewDrawHistory = createDrawHistory()
 
 type EntryGeometry = NonNullable<ReturnType<typeof geometryFromFeatures>>
 
@@ -39,6 +46,8 @@ const UPDATE_GEOMETRY_KEY = ['review-lists', 'updateEntryGeometry'] as const
  *   map, editable, until the save succeeds.
  * - Edit (`rl.move` with a selected entry): the entry's geometry, one shape per part. Every
  *   finished edit is written to the query cache at once and saved in the background.
+ *
+ * Undo and redo arrive as a change like any other, so a step is saved the same way.
  */
 export const useReviewDraw = () => {
   const regionSlug = useRegionSlug()
@@ -151,6 +160,8 @@ export const useReviewDraw = () => {
           limits: { singleType: true, min: 1 },
           // Matches the ids `featuresFromGeometry` gives the parts after the save.
           createId: () => `part-${editFeatures.length}`,
+          history: reviewDrawHistory,
+          historyKey: `entry-${editingEntryId}`,
         }),
   })
 

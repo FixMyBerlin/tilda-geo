@@ -5,6 +5,10 @@ import { getProcessingMeta } from '@/server/api/util/getProcessingMeta.server'
 import { getAppSession, requireAdmin } from '@/server/auth/session.server'
 import { checkRegionAuthorization } from '@/server/authorization/checkRegionAuthorization.server'
 import { membershipExists } from '@/server/memberships/queries/membershipExists.server'
+import {
+  getPrivateBackgroundsForRegion,
+  type TPrivateBackground,
+} from '@/server/private-backgrounds/getPrivateBackgroundsForRegion.server'
 import { getRegionRedirectUrl } from '@/server/regions/getRegionRedirectUrl.server'
 import { lookupBoundaryOsmIds } from '@/server/regions/masks/lookupBoundaryOsmIds.server'
 import { getRegion } from '@/server/regions/queries/getRegion.server'
@@ -18,10 +22,13 @@ import { deleteRegion } from './mutations/deleteRegion.server'
 import { updateRegionWithData } from './mutations/updateRegion.server'
 import { DeleteRegionSchema, RegionFormRawSchema, RegionFormSchema } from './regionWriteSchema'
 
+const noPrivateBackgrounds: TPrivateBackground[] = []
+
 /**
  * Single server round-trip for the region page's loader: resolve redirects (slug rename /
  * ?config=/?map= migration), then — when there is no redirect — resolve the session, authorize, and
- * return the region (redacted for non-members) plus `hasPermissions`. May also return a temporary
+ * return the region (redacted for non-members) plus `hasPermissions` and, for members, the private
+ * background sources. May also return a temporary
  * redirect that adds `dialog=welcome` when the welcome panel should auto-open (cookie-aware).
  *
  * Consolidates what were three serial GET server fns (redirect → beforeLoad → loader): the region is
@@ -45,6 +52,7 @@ export const getRegionPageDataFn = createServerFn({ method: 'GET' })
         authorized: false as const,
         region: null,
         hasPermissions: false,
+        privateBackgrounds: noPrivateBackgrounds,
       }
     }
 
@@ -62,6 +70,7 @@ export const getRegionPageDataFn = createServerFn({ method: 'GET' })
         authorized: false as const,
         region: redactRegionForDeniedAccess(region),
         hasPermissions: false,
+        privateBackgrounds: noPrivateBackgrounds,
       }
     }
 
@@ -83,6 +92,7 @@ export const getRegionPageDataFn = createServerFn({ method: 'GET' })
         authorized: true as const,
         region: null,
         hasPermissions,
+        privateBackgrounds: noPrivateBackgrounds,
       }
     }
 
@@ -92,6 +102,10 @@ export const getRegionPageDataFn = createServerFn({ method: 'GET' })
       authorized: true as const,
       region,
       hasPermissions,
+      // Member-only, also on PUBLIC regions; the proxy route checks the same on every tile.
+      privateBackgrounds: hasPermissions
+        ? await getPrivateBackgroundsForRegion(region.slug)
+        : noPrivateBackgrounds,
     }
   })
 

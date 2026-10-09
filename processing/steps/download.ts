@@ -26,7 +26,10 @@ export async function waitForFreshData() {
     return
   }
 
-  const maxTries = 20 // ~7 hours (at 20 Min per try)
+  // Check every 20 minutes for 2 hours, then continue with the existing file.
+  // The nightly run starts around 23:30 UTC, about when Geofabrik publishes. A file that is not there
+  // after 2 hours did not come that night (production, Aug–Oct 2026), so waiting longer only delays the run.
+  const maxTries = 7
   const timeoutMinutes = 20
 
   // Use German timezone (Europe/Berlin) for all date comparisons

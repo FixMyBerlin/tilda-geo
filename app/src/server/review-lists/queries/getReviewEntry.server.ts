@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { type MemberCaller, getMemberSession } from '@/server/auth/memberCaller.server'
 import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
+import { parseStoredProperties } from '../geojson'
 
 const Schema = z.object({
   regionSlug: z.string(),
@@ -42,5 +43,5 @@ export async function getReviewEntry(input: z.infer<typeof Schema>, caller: Memb
     },
   })
   if (!entry) throw notFound()
-  return entry
+  return { ...entry, properties: parseStoredProperties(entry.properties) }
 }

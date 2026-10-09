@@ -1,9 +1,9 @@
 import { ListboxOption } from '@headlessui/react'
 import { ArrowSmallRightIcon } from '@heroicons/react/20/solid'
 import { twJoin } from 'tailwind-merge'
-import type { SourcesRasterIds } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
+import type { BackgroundParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/backgroundParam.const'
 
-type Props = { value: SourcesRasterIds; name: string }
+type Props = { value: BackgroundParam; name: string }
 
 // https://headlessui.com/react/listbox#styling-the-active-and-selected-option
 export const ListOption = ({ value, name }: Props) => {

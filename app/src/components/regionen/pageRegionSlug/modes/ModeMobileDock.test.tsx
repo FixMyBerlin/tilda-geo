@@ -31,6 +31,10 @@ vi.mock('./calculator/useCalculatorNeedsArea', () => ({
   useCalculatorNeedsArea: () => false,
 }))
 
+vi.mock('./measure/useMeasureNeedsShape', () => ({
+  useMeasureNeedsShape: () => false,
+}))
+
 vi.mock('../SidebarInspector/useInspectorRenderableFeatures', () => ({
   useInspectorRenderableFeatures,
 }))
