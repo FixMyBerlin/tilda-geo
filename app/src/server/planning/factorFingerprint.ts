@@ -60,6 +60,24 @@ export const areaInputsDiffer = (current: FactorLike, snapshot: FactorLike) => {
   return sortedJson(pick(current)) !== sortedJson(pick(snapshot))
 }
 
+/**
+ * After a factor save: mark the last run stale when the new factors differ from it, clear the flag
+ * when they match again and the Gebiet still matches, and leave it when there is no run or the
+ * Gebiet itself is still changed.
+ */
+export const runFreshnessAfterFactorSave = (
+  next: VariantFactorConfig,
+  area: PlanningAreaInput,
+  snapshot: MergedFactorConfig | null | undefined,
+) => {
+  if (snapshot == null) return 'keep' as const
+  // Gleicher Vergleich wie in der Oberfläche: gemergte Config gegen den normalisierten Lauf.
+  const merged = mergeFactorConfig(area, next)
+  if (factorsDiffer(merged, comparableRunSnapshot(snapshot, area))) return 'stale' as const
+  if (areaInputsDiffer(merged, snapshot)) return 'keep' as const
+  return 'fresh' as const
+}
+
 /** Banner-Text der Ursachen; leer wenn nichts veraltet ist. */
 export const outdatedBannerReason = (factorsChanged: boolean, areaChanged: boolean) => {
   const parts = [

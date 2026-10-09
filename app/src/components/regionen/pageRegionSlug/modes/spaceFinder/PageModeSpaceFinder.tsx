@@ -36,6 +36,7 @@ import { SpaceFinderNewAreaDetail } from './detail/SpaceFinderNewAreaDetail'
 import { SpaceFinderNewVariantDetail } from './detail/SpaceFinderNewVariantDetail'
 import { SpaceFinderBody } from './SpaceFinderBody'
 import { compactSpaceFinderModeParam } from './spaceFinderModeParam'
+import { spaceFinderOpenRunStatus } from './spaceFinderRunStatus'
 import { useSpaceFinderModeParam } from './useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from './useSpaceFinderSelection'
 
@@ -91,6 +92,8 @@ export const PageModeSpaceFinder = () => {
     areaFormOpen,
   } = useSpaceFinderSelection()
   const selection = spaceFinderActiveSelection(areas, activeVariant, variant)
+  const run =
+    variant != null && variant.id === activeVariant ? spaceFinderOpenRunStatus(variant) : null
 
   const onSelect = (variantId: number | undefined) =>
     setSpaceFinderModeParam({ ...spaceFinderMode, key: variantId })
@@ -120,7 +123,12 @@ export const PageModeSpaceFinder = () => {
     [areas, spaceFinderMode],
   )
 
-  const commands = useSpaceFinderCommands({ regionSlug, areas, selectedOption: selection, onSelect })
+  const commands = useSpaceFinderCommands({
+    regionSlug,
+    areas,
+    selectedOption: selection,
+    onSelect,
+  })
 
   const studyArea = variant?.area.studyArea as GeoJSON.Geometry | undefined
   // Outline lives on the page (not the body) so it stays on the map while switching variants of
@@ -255,6 +263,7 @@ export const PageModeSpaceFinder = () => {
       <SpaceFinderVariantSelect
         variants={selection.area.variants}
         selected={selection}
+        activeStatus={run?.status}
         onSelect={onSelect}
         editable={isDesktop}
         onNewVariant={() => setSpaceFinderModeParam({ ...spaceFinderMode, new: 'variant' })}
@@ -268,16 +277,15 @@ export const PageModeSpaceFinder = () => {
       <RunButton
         variantId={activeVariant}
         regionSlug={regionSlug}
-        latestJob={variant.jobs[0] ?? null}
+        status={run?.status ?? 'none'}
+        latestJob={run?.latestJob}
         showJobStatus={false}
       />
     ) : undefined
 
   return (
     <ModePanel
-      title={
-        selection ? `Planungsgebiet ${frenchQuote(selection.areaTitle)}` : 'Flächenfinder'
-      }
+      title={selection ? `Planungsgebiet ${frenchQuote(selection.areaTitle)}` : 'Flächenfinder'}
       detail={panelDetail}
       collectionAlwaysOpen={sortedAreas.length === 0}
       collection={

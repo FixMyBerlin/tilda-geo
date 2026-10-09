@@ -5,6 +5,7 @@ import {
   sortedSpaceFinderAreas,
   spaceFinderActiveSelection,
   spaceFinderSelectedVariant,
+  spaceFinderRunNeedsRerun,
   spaceFinderVariantIdToPrime,
   spaceFinderVariantStatus,
 } from './spaceFinderCollectionOptions'
@@ -129,5 +130,27 @@ describe('spaceFinderVariantStatus', () => {
   test('complete and not calculated', () => {
     expect(spaceFinderVariantStatus({ ...base, currentRunId: 1 } as never)).toBe('complete')
     expect(spaceFinderVariantStatus(base as never)).toBe('none')
+  })
+
+  test('live drift marks a finished run stale before the stored flag', () => {
+    expect(
+      spaceFinderVariantStatus(
+        { ...base, currentRunId: 1, runs: [{ status: 'COMPLETE', stale: false }] } as never,
+        { outdated: true },
+      ),
+    ).toBe('stale')
+  })
+
+  test('a variant that never ran is not stale', () => {
+    expect(spaceFinderVariantStatus(base as never, { outdated: true })).toBe('none')
+  })
+})
+
+describe('spaceFinderRunNeedsRerun', () => {
+  test('a finished or failed attempt is a rerun', () => {
+    expect(spaceFinderRunNeedsRerun('complete')).toBe(true)
+    expect(spaceFinderRunNeedsRerun('stale')).toBe(true)
+    expect(spaceFinderRunNeedsRerun('none', 'FAILED')).toBe(true)
+    expect(spaceFinderRunNeedsRerun('none')).toBe(false)
   })
 })

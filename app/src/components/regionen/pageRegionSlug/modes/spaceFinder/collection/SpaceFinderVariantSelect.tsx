@@ -60,17 +60,22 @@ export const SpaceFinderVariantSelect = ({
   editable,
   onNewVariant,
   commands,
-}: Props) => {
+  activeStatus,
+}: Props & {
+  /** Open variant, including live drift. Other rows keep the list-row status. */
+  activeStatus?: SpaceFinderVariantStatus
+}) => {
   const { accent } = modeIdentity.spaceFinder
   const activeVariant = variants.find((variant) => variant.id === selected.variantId)
-  const activeStatus = activeVariant ? spaceFinderVariantStatus(activeVariant) : 'none'
+  const shownStatus =
+    activeStatus ?? (activeVariant ? spaceFinderVariantStatus(activeVariant) : 'none')
 
   return (
     <div className="border-b border-white/80 bg-emerald-600 text-white">
       <ModePanelCollectionDisclosure
-        icon={<StatusIcon status={activeStatus} />}
+        icon={<StatusIcon status={shownStatus} />}
         title={`Variante ${frenchQuote(selected.variantTitle)}`}
-        subtitle={statusText[activeStatus]}
+        subtitle={statusText[shownStatus]}
         mutedClassName={accent.invertedMutedClassName}
         headingLevel="h2"
         actions={
@@ -86,7 +91,12 @@ export const SpaceFinderVariantSelect = ({
               options={variants.map((variant) => ({
                 value: String(variant.id),
                 label: variant.title,
-                description: statusText[spaceFinderVariantStatus(variant)],
+                description:
+                  statusText[
+                    variant.id === selected.variantId
+                      ? shownStatus
+                      : spaceFinderVariantStatus(variant)
+                  ],
               }))}
               onChange={(next) => onSelect(Number(next))}
             />

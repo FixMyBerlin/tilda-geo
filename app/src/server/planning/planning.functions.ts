@@ -16,7 +16,7 @@ import { getRegionIdBySlug } from '@/server/regions/queries/getRegionIdBySlug.se
 import { parseRegionGeoJsonBBox } from '@/server/regions/regionGeoJson'
 import { authorizePlanningRegion } from './authorizePlanningRegion.server'
 import { ensureAreaCensusStats, refreshAreaCensusStats } from './censusSaettigung.server'
-import { factorsDiffer } from './factorFingerprint'
+import { runFreshnessAfterFactorSave } from './factorFingerprint'
 import {
   areaInputFromRow,
   mergeFactorConfig,
@@ -171,6 +171,17 @@ async function markRunsStaleForVariant(variantId: number) {
       stale: false,
     },
     data: { stale: true },
+  })
+}
+
+async function markRunsFreshForVariant(variantId: number) {
+  await db.planningRun.updateMany({
+    where: {
+      variantId,
+      status: { in: ['COMPLETE', 'EMPTY'] },
+      stale: true,
+    },
+    data: { stale: false },
   })
 }
 
@@ -660,7 +671,26 @@ export const updatePlanningVariantFn = createServerFn({ method: 'POST' })
     await authorizeByVariant(getRequestHeaders(), data.variantId)
     const existing = await db.planningVariant.findFirstOrThrow({
       where: { id: data.variantId },
-      select: { factorConfig: true },
+      select: {
+        factorConfig: true,
+        area: {
+          select: {
+            studyArea: true,
+            userGeojson: true,
+            userGeojsonMode: true,
+            useCase: true,
+            areaSizeM2: true,
+            censusSaettigungEw: true,
+            censusEwPerHa: true,
+          },
+        },
+        runs: {
+          where: { status: { in: ['COMPLETE', 'EMPTY'] } },
+          orderBy: { createdAt: 'desc' },
+          take: 1,
+          select: { factorConfigSnapshot: true },
+        },
+      },
     })
     let factorConfig = data.factorConfig
     if (data.minAreaM2 !== undefined) {
@@ -681,13 +711,20 @@ export const updatePlanningVariantFn = createServerFn({ method: 'POST' })
       },
       select: { id: true, areaId: true },
     })
-    // Titel, Beschreibung und `min_area_m2` (Client-Filter) ändern das Ergebnis nicht.
-    // `factorsDiffer` ignoriert `min_area_m2`, deshalb reicht der Vergleich der gespeicherten Config.
-    if (
-      stored !== undefined &&
-      factorsDiffer(parseVariantFactorConfig(existing.factorConfig), stored)
-    ) {
-      await markRunsStaleForVariant(data.variantId)
+    // Titel und Beschreibung ändern das Ergebnis nicht. `min_area_m2` ist ein Client-Filter und
+    // zählt in `runFreshnessAfterFactorSave` nicht. Ein Speichern, das wieder dem letzten Lauf
+    // entspricht (Änderungen verwerfen), hebt `stale` auf — solange das Gebiet noch passt.
+    if (stored !== undefined) {
+      const snapshot = existing.runs[0]
+        ? parseFactorConfigSnapshot(existing.runs[0].factorConfigSnapshot)
+        : null
+      const freshness = runFreshnessAfterFactorSave(
+        stored,
+        areaInputFromRow(existing.area),
+        snapshot,
+      )
+      if (freshness === 'stale') await markRunsStaleForVariant(data.variantId)
+      if (freshness === 'fresh') await markRunsFreshForVariant(data.variantId)
     }
     return result
   })

@@ -1,12 +1,7 @@
 import { useEffect } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { formatDate } from '@/components/shared/date/formatDate'
-import {
-  areaInputsDiffer,
-  comparableRunSnapshot,
-  factorsDiffer,
-  outdatedBannerReason,
-} from '@/server/planning/factorFingerprint'
+import { comparableRunSnapshot } from '@/server/planning/factorFingerprint'
 import { areaInputFromRow } from '@/server/planning/mergeFactorConfig'
 import { useSpaceFinderBoundaryActions } from '../../hooks/mapState/space-finder-boundary-store'
 import { modePanelMutedClassName } from '../modePanel.const'
@@ -14,48 +9,26 @@ import { SpaceFinderCandidatesSection } from './candidates/SpaceFinderCandidates
 import { DisplaySection } from './display/DisplaySection'
 import { FactorEditorPanel } from './factors/FactorEditorPanel'
 import { JobStatusBadge } from './run/JobStatusBadge'
+import { spaceFinderOpenRunStatus } from './spaceFinderRunStatus'
 import type { PlanningVariantDetail } from './spaceFinderVariantDetail'
 
-type LatestJob = PlanningVariantDetail['jobs'][number] | null
-type LatestRun = PlanningVariantDetail['runs'][number] | null
-
-/** Status line (D5): run state, outdated reason, progress while running. */
-const StatusSection = ({
-  variant,
-  latestJob,
-  latestRun,
-  isLocked,
-  hasCompleteRun,
-}: {
-  variant: PlanningVariantDetail
-  latestJob: LatestJob
-  latestRun: LatestRun
-  isLocked: boolean
-  hasCompleteRun: boolean
-}) => {
-  const lastRunConfig = latestRun?.factorConfigSnapshot ?? null
-  const comparableSnapshot = comparableRunSnapshot(lastRunConfig, areaInputFromRow(variant.area))
-  const currentConfig = variant.factorConfig
-  const outdatedReason =
-    hasCompleteRun && !isLocked
-      ? outdatedBannerReason(
-          factorsDiffer(currentConfig, comparableSnapshot),
-          areaInputsDiffer(currentConfig, lastRunConfig),
-        )
-      : null
+/** Status line (D5): same run state as the Varianten dropdown and the run button. */
+const StatusSection = ({ variant }: { variant: PlanningVariantDetail }) => {
+  const { status, outdatedReason, latestJob, latestRun, hasCompleteRun } =
+    spaceFinderOpenRunStatus(variant)
 
   return (
     <div className="flex flex-col gap-2 px-4 py-2">
-      {outdatedReason && (
+      {status === 'stale' && (
         <p className="rounded bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
-          {outdatedReason} — Ergebnis veraltet. Bitte neu berechnen.
+          {outdatedReason ? `${outdatedReason} — ` : ''}Ergebnis veraltet. Bitte neu berechnen.
         </p>
       )}
       {latestJob != null && <JobStatusBadge jobId={latestJob.id} variantId={variant.id} />}
-      {latestJob == null && latestRun != null && hasCompleteRun && !outdatedReason && (
+      {status === 'complete' && latestJob == null && latestRun != null && hasCompleteRun && (
         <p className="text-xs text-green-700">✓ Ergebnis vom {formatDate(latestRun.createdAt)}</p>
       )}
-      {latestJob == null && !hasCompleteRun && (
+      {status === 'none' && latestJob == null && (
         <p className={modePanelMutedClassName}>Noch nicht berechnet.</p>
       )}
     </div>
@@ -97,20 +70,12 @@ export const SpaceFinderBody = ({
 
   if (!variant) return null
 
-  const latestJob = variant.jobs[0] ?? null
-  const latestRun = variant.runs[0] ?? null
-  const isLocked = latestJob?.status === 'QUEUED' || latestJob?.status === 'RUNNING'
-  const hasCompleteRun = latestRun?.status === 'COMPLETE'
+  const { status, latestRun, hasCompleteRun } = spaceFinderOpenRunStatus(variant)
+  const isLocked = status === 'running'
 
   return (
     <div className="flex flex-col">
-      <StatusSection
-        variant={variant}
-        latestJob={latestJob}
-        latestRun={latestRun}
-        isLocked={isLocked}
-        hasCompleteRun={hasCompleteRun}
-      />
+      <StatusSection variant={variant} />
       <div className="flex flex-col gap-3 p-3">
         {editable ? (
           <FactorEditorPanel

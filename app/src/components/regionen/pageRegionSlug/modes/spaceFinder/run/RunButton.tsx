@@ -5,6 +5,10 @@ import {
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
 import { useSpaceFinderFactorSavePending } from '../../../hooks/mapState/space-finder-boundary-store'
+import {
+  type SpaceFinderVariantStatus,
+  spaceFinderRunNeedsRerun,
+} from '../collection/spaceFinderCollectionOptions'
 import { JobStatusBadge } from './JobStatusBadge'
 
 type LatestJob = { id: number; status: string }
@@ -13,11 +17,13 @@ type LatestJob = { id: number; status: string }
 export const RunButton = ({
   variantId,
   regionSlug,
+  status,
   latestJob,
   showJobStatus = true,
 }: {
   variantId: number
   regionSlug: string
+  status: SpaceFinderVariantStatus
   latestJob?: LatestJob | null
   /** Set false when the caller shows `JobStatusBadge` itself elsewhere (Flächenfinder: the
    * sticky footer only holds the button; progress/outdated status lives in its own section). */
@@ -33,8 +39,8 @@ export const RunButton = ({
     },
   })
 
-  const isInFlight = latestJob?.status === 'QUEUED' || latestJob?.status === 'RUNNING'
-  const hasFinishedRun = latestJob?.status === 'DONE' || latestJob?.status === 'FAILED'
+  const isInFlight = status === 'running'
+  const hasFinishedRun = spaceFinderRunNeedsRerun(status, latestJob?.status)
   // Faktoren speichern sich automatisch; bis das durch ist, würde der Lauf serverseitig noch
   // mit dem alten Stand rechnen (siehe FactorEditorPanel).
   const factorSavePending = useSpaceFinderFactorSavePending()

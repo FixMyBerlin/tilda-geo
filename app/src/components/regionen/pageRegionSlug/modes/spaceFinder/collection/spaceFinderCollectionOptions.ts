@@ -42,7 +42,7 @@ export const spaceFinderSelectedVariant = (
 }
 
 /** List row plus the loaded variant. Titles prefer the variant so the header matches the body. */
-export type SpaceFinderActiveSelection = SpaceFinderSelectedVariant & {
+type SpaceFinderActiveSelection = SpaceFinderSelectedVariant & {
   area: PlanningAreasRow
 }
 
@@ -89,14 +89,25 @@ export const spaceFinderVariantIdToPrime = (
 
 export type SpaceFinderVariantStatus = 'running' | 'stale' | 'complete' | 'none'
 
-/** Run state of a variant for the Varianten dropdown; mirrors the status line in the panel body. */
+/**
+ * Run state shared by the Varianten dropdown, the status line, and the run button.
+ * `outdated` is the live factor/area drift of the open variant; list rows only have `runs[].stale`.
+ */
 export const spaceFinderVariantStatus = (
   variant: Pick<PlanningAreaVariantRow, 'currentRunId' | 'jobs' | 'runs'>,
+  options?: { outdated?: boolean },
 ) => {
   const jobStatus = variant.jobs[0]?.status
   if (jobStatus === 'QUEUED' || jobStatus === 'RUNNING') return 'running'
   const latestRun = variant.runs[0]
-  if (latestRun?.status === 'COMPLETE' && latestRun.stale) return 'stale'
-  if (variant.currentRunId != null) return 'complete'
+  // No finished run means nothing can be out of date — a missing snapshot must not count as drift.
+  if (latestRun?.status === 'COMPLETE' && (options?.outdated || latestRun.stale)) return 'stale'
+  if (variant.currentRunId != null || latestRun?.status === 'COMPLETE') return 'complete'
   return 'none'
 }
+
+/** A finished or failed attempt offers »Neu berechnen«; a variant that never ran offers »Berechnung starten«. */
+export const spaceFinderRunNeedsRerun = (
+  status: SpaceFinderVariantStatus,
+  jobStatus?: string | null,
+) => status === 'complete' || status === 'stale' || jobStatus === 'DONE' || jobStatus === 'FAILED'

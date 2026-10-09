@@ -4,8 +4,9 @@ import {
   comparableRunSnapshot,
   factorsDiffer,
   outdatedBannerReason,
+  runFreshnessAfterFactorSave,
 } from './factorFingerprint'
-import { mergeFactorConfig, type PlanningAreaInput } from './mergeFactorConfig'
+import { mergeFactorConfig, type PlanningAreaInput, stripAutoSaettigung } from './mergeFactorConfig'
 
 const area = (overrides: Partial<PlanningAreaInput> = {}): PlanningAreaInput => ({
   studyArea: { type: 'Polygon', coordinates: [] },
@@ -71,6 +72,40 @@ describe('areaInputsDiffer', () => {
       {},
     )
     expect(areaInputsDiffer(current, snapshot)).toBe(true)
+  })
+})
+
+describe('runFreshnessAfterFactorSave', () => {
+  const input = area({ censusSaettigungEw: 22 })
+
+  it('lässt einen Lauf in Ruhe, den es nicht gibt', () => {
+    expect(runFreshnessAfterFactorSave({ weights: { w_cyclepath: 0.2 } }, input, null)).toBe('keep')
+  })
+
+  it('markiert den Lauf veraltet, wenn die Faktoren vom Snapshot abweichen', () => {
+    const snapshot = mergeFactorConfig(input, { weights: { w_cyclepath: 0.2 } })
+    const next = { ...stripAutoSaettigung(snapshot), weights: { w_cyclepath: 0.8 } }
+    expect(runFreshnessAfterFactorSave(next, input, snapshot)).toBe('stale')
+  })
+
+  it('hebt veraltet auf, wenn die Faktoren wieder dem Lauf entsprechen', () => {
+    const snapshot = mergeFactorConfig(input, { weights: { w_cyclepath: 0.2 } })
+    expect(runFreshnessAfterFactorSave(stripAutoSaettigung(snapshot), input, snapshot)).toBe(
+      'fresh',
+    )
+  })
+
+  it('hebt veraltet nicht auf, solange das Gebiet vom Lauf abweicht', () => {
+    const snapshot = mergeFactorConfig(area({ useCase: 'fahrradbox' }), {
+      weights: { w_cyclepath: 0.2 },
+    })
+    expect(
+      runFreshnessAfterFactorSave(
+        stripAutoSaettigung(snapshot),
+        area({ useCase: 'mobilitaetsstation' }),
+        snapshot,
+      ),
+    ).toBe('keep')
   })
 })
 
