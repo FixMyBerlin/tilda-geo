@@ -1,6 +1,5 @@
 import { useEffect } from 'react'
 import { twJoin } from 'tailwind-merge'
-import { CollapsibleBox } from '@/components/shared/CollapsibleBox/CollapsibleBox'
 import { formatDate } from '@/components/shared/date/formatDate'
 import {
   areaInputsDiffer,
@@ -13,7 +12,6 @@ import { useSpaceFinderBoundaryActions } from '../../hooks/mapState/space-finder
 import { modePanelMutedClassName } from '../modePanel.const'
 import { SpaceFinderCandidatesSection } from './candidates/SpaceFinderCandidatesSection'
 import { DisplaySection } from './display/DisplaySection'
-import { UserObstaclesToggle } from './display/LayerToggles'
 import { FactorEditorPanel } from './factors/FactorEditorPanel'
 import { JobStatusBadge } from './run/JobStatusBadge'
 import type { PlanningVariantDetail } from './spaceFinderVariantDetail'
@@ -65,10 +63,9 @@ const StatusSection = ({
 }
 
 /**
- * Flächenfinder panel body (D5): status line, Faktoren, Anzeige (only with a complete run)
- * and Auswahl as collapsible sections, not a list. The Eigene-Daten layer toggle is
- * independent of `hasCompleteRun` (uploaded data shows on the map before the first run)
- * and therefore lives outside `DisplaySection`.
+ * Flächenfinder panel body (D5): status line, Faktoren, Anzeige and Auswahl as
+ * collapsible sections, not a list. Anzeige appears before the first run only when
+ * Eigene Daten are uploaded (that layer toggle alone); the rest needs a complete run.
  */
 export const SpaceFinderBody = ({
   regionSlug,
@@ -139,12 +136,7 @@ export const SpaceFinderBody = ({
             Faktoren und Berechnung nur am Desktop bearbeitbar.
           </p>
         )}
-        {hasCompleteRun && <DisplaySection variant={variant} />}
-        {userGeojson != null && (
-          <CollapsibleBox title="Eigene Daten" defaultOpen={false}>
-            <UserObstaclesToggle />
-          </CollapsibleBox>
-        )}
+        <DisplaySection variant={variant} />
         {editable && variant.currentRunId != null && (
           <SpaceFinderCandidatesSection variantId={variant.id} runId={variant.currentRunId} />
         )}
