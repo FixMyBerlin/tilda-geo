@@ -1,33 +1,35 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { MAX_STUDY_AREA_KM2 } from '@/lib/planningStudyAreaLimit'
 import { deletePlanningAreaFn, updatePlanningAreaFn } from '@/server/planning/planning.functions'
-import type { getPlanningAreaFn } from '@/server/planning/planning.functions'
 import {
   planningAreaQueryOptions,
   planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
 import { useSpaceFinderBoundaryActions } from '../../../hooks/mapState/space-finder-boundary-store'
+import type { PlanningAreaVariantRow } from '../collection/spaceFinderCollectionOptions'
 import type { PlanningUseCase } from '../factors/spaceFinderDefaults'
+import type { PlanningVariantDetail } from '../spaceFinderVariantDetail'
 import { useSpaceFinderModeParam } from '../useSpaceFinderModeParam'
 import { AreaFormFields, useEffectiveStudyArea, useStudyAreaKm2 } from './AreaFormFields'
 import type { UserGeojsonMode } from './UserObstaclesField'
 
-type PlanningAreaDetail = Awaited<ReturnType<typeof getPlanningAreaFn>>
+type EditorArea = PlanningVariantDetail['area']
 
 const jsonEqual = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
 
 const AreaEditorForm = ({
   area,
-  areaId,
+  variants,
   regionSlug,
   onClose,
   onDeleted,
 }: {
-  area: PlanningAreaDetail
-  areaId: number
+  /** Full Gebiet from the open variant. The areas list does not carry geometry or own data. */
+  area: EditorArea
+  variants: PlanningAreaVariantRow[]
   regionSlug: string
   onClose: () => void
   onDeleted?: () => void
@@ -60,7 +62,7 @@ const AreaEditorForm = ({
   const areaKm2 = useStudyAreaKm2(effectiveStudyArea)
   const areaTooLarge = areaKm2 != null && areaKm2 > MAX_STUDY_AREA_KM2
 
-  const hasCompleteRuns = area.variants.some((v) => v.runs[0]?.status === 'COMPLETE')
+  const hasCompleteRuns = variants.some((v) => v.runs[0]?.status === 'COMPLETE')
   const geometryDirty = effectiveStudyArea != null && !jsonEqual(effectiveStudyArea, area.studyArea)
   const obstaclesChanged =
     obstaclesDirty ||
@@ -74,7 +76,7 @@ const AreaEditorForm = ({
     mutationFn: () =>
       updatePlanningAreaFn({
         data: {
-          areaId,
+          areaId: area.id,
           title,
           studyArea: effectiveStudyArea!,
           userGeojson: userGeojson ?? null,
@@ -85,8 +87,8 @@ const AreaEditorForm = ({
       }),
     onSuccess: () => {
       queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
-      queryClient.invalidateQueries(planningAreaQueryOptions(areaId))
-      for (const v of area.variants) {
+      queryClient.invalidateQueries(planningAreaQueryOptions(area.id))
+      for (const v of variants) {
         queryClient.invalidateQueries(planningVariantQueryOptions(v.id))
       }
       onClose()
@@ -94,11 +96,11 @@ const AreaEditorForm = ({
   })
 
   const deleteMutation = useMutation({
-    mutationFn: () => deletePlanningAreaFn({ data: { areaId } }),
+    mutationFn: () => deletePlanningAreaFn({ data: { areaId: area.id } }),
     onSuccess: () => {
       const areasKey = planningAreasQueryOptions(regionSlug).queryKey
       const previous = queryClient.getQueryData(areasKey) ?? []
-      const remaining = previous.filter((a) => a.id !== areaId)
+      const remaining = previous.filter((a) => a.id !== area.id)
       // Optimistic remove so auto-select cannot resurrect the deleted id.
       queryClient.setQueryData(areasKey, remaining)
       queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
@@ -194,28 +196,24 @@ const AreaEditorForm = ({
 
 /** Edit an existing planungsgebiet: geometry, name, use-case/size, and user obstacles. */
 export const AreaEditor = ({
-  areaId,
+  area,
+  variants,
   regionSlug,
   onClose,
   onDeleted,
 }: {
-  areaId: number
+  area: EditorArea
+  variants: PlanningAreaVariantRow[]
   regionSlug: string
   onClose: () => void
   onDeleted?: () => void
-}) => {
-  const { data: area } = useQuery(planningAreaQueryOptions(areaId))
-
-  if (!area) return null
-
-  return (
-    <AreaEditorForm
-      key={areaId}
-      area={area}
-      areaId={areaId}
-      regionSlug={regionSlug}
-      onClose={onClose}
-      onDeleted={onDeleted}
-    />
-  )
-}
+}) => (
+  <AreaEditorForm
+    key={area.id}
+    area={area}
+    variants={variants}
+    regionSlug={regionSlug}
+    onClose={onClose}
+    onDeleted={onDeleted}
+  />
+)

@@ -75,7 +75,7 @@ export const PageModeSpaceFinder = () => {
   const { mainMap: map } = useMap()
   const { setBoundaryHighlightGeom, setLastFittedBoundaryKey } = useSpaceFinderBoundaryActions()
 
-  // Primed by the route loader (ensureQueryData).
+  // Primed by the route loader (areas list and the active variant).
   const { data: areas } = useSuspenseQuery(planningAreasQueryOptions(regionSlug))
   const sortedAreas = sortedSpaceFinderAreas(areas)
 
@@ -195,13 +195,14 @@ export const PageModeSpaceFinder = () => {
         }
       : undefined
   const editAreaDetail =
-    isDesktop && spaceFinderMode.edit === 'area' && activeArea != null
+    isDesktop && spaceFinderMode.edit === 'area' && variant != null && selectedArea != null
       ? {
           title: 'Planungsgebiet bearbeiten',
           onBack: closeEdit,
           children: (
             <SpaceFinderEditAreaDetail
-              areaId={activeArea}
+              area={variant.area}
+              variants={selectedArea.variants}
               regionSlug={regionSlug}
               onClose={closeEdit}
             />
