@@ -80,8 +80,7 @@ CREATE UNIQUE INDEX unique_parkings_quantized_id_idx ON parkings_quantized (id);
 
 -- WHAT IT DOES:
 -- Create quantized points for off_street_parking_areas (polygon) using clustering approach.
--- * Generate 2m grid of candidate points within polygon
--- * Cluster into exactly `capacity` clusters using ST_ClusterKMeans
+-- * Place one point per cluster of a 2m grid within the polygon (`tilda_quantize_polygon`)
 -- * If grid generates fewer points than capacity, duplicate centroids with small offsets
 -- * Each point gets capacity: 1 and its share of the area (area / capacity) in tags;
 --   the last point of a feature takes the rounding remainder so the sum equals the source area
@@ -105,64 +104,21 @@ WITH
       (tags ->> 'capacity')::INTEGER IS NOT NULL
       AND (tags ->> 'capacity')::INTEGER > 0
   ),
-  -- STEP 2: Generate 2m grid of candidate points within polygon
-  -- Only id and capacity travel through the grid steps; tags and meta are joined back in STEP 5
-  -- (carrying the JSON on every grid point made the sorts spill to disk).
-  dense_grid AS (
+  -- STEP 2: Cluster a 2m grid of points within each polygon into `capacity` clusters
+  -- and take the centroid of each cluster (see `tilda_quantize_polygon`).
+  -- Only id and capacity are carried along; tags and meta are joined back in STEP 3.
+  cluster_centroids AS (
     SELECT
       a.id,
       a.capacity,
-      ST_Centroid (gc.geom) as point_geom,
-      gc.i,
-      gc.j,
-      -- Point count per area (needed for clustering)
-      COUNT(*) OVER (
-        PARTITION BY
-          a.id
-      ) as point_count
+      c.cluster_id,
+      c.centroid_geom,
+      c.cluster_count
     FROM
       areas a
-      CROSS JOIN LATERAL ST_SquareGrid (2.0, a.geom) gc
-    WHERE
-      ST_Centroid (gc.geom) && a.geom
-      AND ST_Within (ST_Centroid (gc.geom), a.geom)
+      CROSS JOIN LATERAL tilda_quantize_polygon (a.geom, a.capacity) AS c
   ),
-  -- STEP 3: Cluster candidate points into exactly `capacity` clusters
-  -- Use LEAST to prevent error when capacity exceeds grid points
-  clustered AS (
-    SELECT
-      id,
-      capacity,
-      point_geom,
-      ST_ClusterKMeans (point_geom, LEAST(capacity, point_count)::INTEGER) OVER (
-        PARTITION BY
-          id
-        ORDER BY
-          i,
-          j
-      ) as cluster_id
-    FROM
-      dense_grid
-  ),
-  -- STEP 4: Get centroid of each cluster
-  cluster_centroids AS (
-    SELECT
-      id,
-      capacity,
-      cluster_id,
-      ST_Centroid (ST_Collect (point_geom)) as centroid_geom,
-      COUNT(*) OVER (
-        PARTITION BY
-          id
-      ) as cluster_count
-    FROM
-      clustered
-    GROUP BY
-      id,
-      capacity,
-      cluster_id
-  ),
-  -- STEP 5: Expand to exact capacity with unique geometries
+  -- STEP 3: Expand to exact capacity with unique geometries
   -- If cluster_count < capacity, duplicate centroids with small circular offsets
   expanded_points AS (
     SELECT
