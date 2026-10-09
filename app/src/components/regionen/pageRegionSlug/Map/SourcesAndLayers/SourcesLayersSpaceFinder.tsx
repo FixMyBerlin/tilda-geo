@@ -30,17 +30,20 @@ import { LayerHighlight } from './LayerHighlight'
 export const planningHexagonsSourceId = 'planning-hexagons-source'
 export const planningHexagonsLayerId = 'planning-hexagons'
 /**
- * Unsichtbarer Fixpunkt, direkt (und ausschließlich) beim ersten Rendern mit
+ * Zwei unsichtbare Fixpunkte, direkt (und ausschließlich) beim ersten Rendern mit
  * gesetztem `runId` gemountet und danach nie mehr entfernt oder neu erzeugt.
- * Die Hexagon-Layer (Fläche/Highlight/Label) hängen sich per `beforeId` immer
- * direkt darunter ein. Vegetation/Fahrbahnen/Zensus/Eigene-Daten-Layer werden
- * dagegen ganz normal ohne `beforeId` angehängt (landen also immer ganz oben
- * auf dem aktuellen Stapel) und liegen dadurch immer über der Decke – und
- * damit immer über den Hexagonen. Ohne diesen Fixpunkt würde ein Neu-Mount der
- * Hexagon-Layer (z.B. Ein-/Ausblenden über ScoreModeSwitcher) sie ohne
- * `beforeId` ganz oben neu einfügen, also über bereits sichtbare
- * Vegetation/Zensus/Eigene-Daten-Layer.
+ *
+ * - Die Hexagon-Layer (Fläche/Highlight/Label) hängen sich per `beforeId` immer direkt
+ *   unter die Decke (`ceiling`).
+ * - Die Kontroll-Layer (Vegetation, Fahrbahnen, Zensus, Eigene Daten) hängen sich per
+ *   `beforeId` unter den Boden (`floor`), der direkt vor der Decke liegt, und liegen
+ *   damit immer unter den Hexagonen.
+ *
+ * Ohne die Fixpunkte würde ein Neu-Mount (z.B. Ein-/Ausblenden über ScoreModeSwitcher
+ * oder die Schalter) einen Layer ohne `beforeId` ganz oben einfügen, also über bereits
+ * sichtbare andere Layer.
  */
+const planningOverlayFloorLayerId = 'planning-overlay-floor'
 const planningOverlayCeilingLayerId = 'planning-overlay-ceiling'
 /** MVT layer name of the Martin function source (see registerPlanningFunctions.server.ts). */
 export const planningHexagonsSourceLayer = 'planning_hexagons'
@@ -325,18 +328,21 @@ const UserObstaclesLayer = () => {
     <Source id="planning-user-obstacles" type="geojson" data={geom as any}>
       <Layer
         id="planning-user-obstacles-fill"
+        beforeId={planningOverlayFloorLayerId}
         type="fill"
         filter={['==', ['geometry-type'], 'Polygon']}
         paint={{ 'fill-color': '#7c3aed', 'fill-opacity': 0.2 }}
       />
       <Layer
         id="planning-user-obstacles-line"
+        beforeId={planningOverlayFloorLayerId}
         type="line"
         filter={['in', ['geometry-type'], ['literal', ['LineString', 'Polygon']]]}
         paint={{ 'line-color': '#6d28d9', 'line-width': 2 }}
       />
       <Layer
         id="planning-user-obstacles-circle"
+        beforeId={planningOverlayFloorLayerId}
         type="circle"
         filter={['==', ['geometry-type'], 'Point']}
         paint={{
@@ -434,6 +440,7 @@ export const SourcesLayersSpaceFinder = () => {
       <BoundaryHighlightLayer />
 
       {/* Siehe Kommentar bei planningOverlayCeilingLayerId. */}
+      <Layer id={planningOverlayFloorLayerId} type="background" layout={{ visibility: 'none' }} />
       <Layer id={planningOverlayCeilingLayerId} type="background" layout={{ visibility: 'none' }} />
 
       {hexagonsOpacityPct > 0 && (
@@ -472,6 +479,7 @@ export const SourcesLayersSpaceFinder = () => {
           />
           <Layer
             id="planning-vegetation-fill"
+            beforeId={planningOverlayFloorLayerId}
             source="planning-vegetation-source"
             source-layer="planning_vegetation"
             type="fill"
@@ -479,6 +487,7 @@ export const SourcesLayersSpaceFinder = () => {
           />
           <Layer
             id="planning-vegetation-pattern"
+            beforeId={planningOverlayFloorLayerId}
             source="planning-vegetation-source"
             source-layer="planning_vegetation"
             type="fill"
@@ -486,6 +495,7 @@ export const SourcesLayersSpaceFinder = () => {
           />
           <Layer
             id="planning-vegetation-outline"
+            beforeId={planningOverlayFloorLayerId}
             source="planning-vegetation-source"
             source-layer="planning_vegetation"
             type="line"
@@ -499,6 +509,7 @@ export const SourcesLayersSpaceFinder = () => {
           <Source id="planning-carriageways-source" type="vector" tiles={[carriagewaysUrl]} />
           <Layer
             id="planning-carriageways-fill"
+            beforeId={planningOverlayFloorLayerId}
             source="planning-carriageways-source"
             source-layer="planning_carriageways"
             type="fill"
@@ -506,6 +517,7 @@ export const SourcesLayersSpaceFinder = () => {
           />
           <Layer
             id="planning-carriageways-outline"
+            beforeId={planningOverlayFloorLayerId}
             source="planning-carriageways-source"
             source-layer="planning_carriageways"
             type="line"
@@ -522,8 +534,8 @@ export const SourcesLayersSpaceFinder = () => {
             tiles={[censusUrl]}
             attribution={CENSUS_ATTRIBUTION}
           />
-          <Layer {...censusCircleLayerProps} />
-          <Layer {...censusLabelLayerProps} />
+          <Layer {...censusCircleLayerProps} beforeId={planningOverlayFloorLayerId} />
+          <Layer {...censusLabelLayerProps} beforeId={planningOverlayFloorLayerId} />
         </>
       )}
     </>
