@@ -4,7 +4,7 @@ import {
   StreetImageryLocaleProvider,
 } from '@osm-editor-kit/street-imagery-react'
 import { useState } from 'react'
-import { twMerge } from 'tailwind-merge'
+import { twJoin, twMerge } from 'tailwind-merge'
 import {
   mapControlButtonGroupSegmentClassName,
   mobileControlButtonClassName,
@@ -31,8 +31,9 @@ const lineCount = (count: number) =>
 
 /** Colouring and date filter of the photo layers. */
 export const StreetImagerySettings = () => {
-  const { providers, style, date, setStyle, setDate } = useStreetImageryParam()
-  const { capturedAt, counts } = useStreetImageryCapturedAt(providers)
+  const { providers, style, date, photoType, setStyle, setDate, setPhotoType } =
+    useStreetImageryParam()
+  const { capturedAt, counts } = useStreetImageryCapturedAt(providers, photoType)
   const [dateInputsOpen, setDateInputsOpen] = useState(false)
 
   if (providers.length === 0) {
@@ -67,16 +68,55 @@ export const StreetImagerySettings = () => {
           ))}
         </div>
         <ul className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-xs text-gray-700">
-          {getStreetImageryStyle(style, date).legend.map((entry) => (
-            <li key={entry.id} className="flex items-center gap-1">
+          {getStreetImageryStyle(style, date).legend.map((entry) => {
+            const dot = (
               <span
                 className="size-2.5 flex-none rounded-full"
                 style={{ backgroundColor: entry.color }}
               />
-              {entry.name}
-            </li>
-          ))}
+            )
+            if (!entry.photoType) {
+              return (
+                <li key={entry.id} className="flex items-center gap-1">
+                  {dot}
+                  {entry.name}
+                </li>
+              )
+            }
+            const only = photoType === entry.photoType
+            return (
+              <li key={entry.id}>
+                <button
+                  type="button"
+                  aria-pressed={only}
+                  title={only ? 'Wieder alle Fotos zeigen' : `Nur ${entry.name} zeigen`}
+                  onClick={() => setPhotoType(only ? undefined : entry.photoType)}
+                  className={twJoin(
+                    '-mx-1 flex cursor-pointer items-center gap-1 rounded px-1 hover:bg-yellow-100',
+                    only && 'bg-yellow-400 text-gray-950 hover:bg-yellow-400',
+                    photoType && !only && 'text-gray-400 line-through',
+                  )}
+                >
+                  {dot}
+                  {entry.name}
+                </button>
+              </li>
+            )
+          })}
         </ul>
+        {/* The legend of the other style has no type entries: the filter stays visible here. */}
+        {photoType && style !== 'type' && (
+          <p className="mt-1 text-xs text-gray-700">
+            Nur {photoType === 'pano' ? '360° Fotos' : 'klassische Fotos'} ·{' '}
+            <button
+              type="button"
+              onClick={() => setPhotoType(undefined)}
+              className="cursor-pointer underline decoration-gray-300 underline-offset-2 hover:text-gray-950"
+            >
+              alle zeigen
+            </button>
+          </p>
+        )}
       </div>
 
       <div>

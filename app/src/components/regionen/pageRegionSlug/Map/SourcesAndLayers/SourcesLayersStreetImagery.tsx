@@ -17,7 +17,7 @@ import { useStreetImageryParam } from '../../streetImagery/useStreetImageryParam
  * layers and their look come from the package. Not part of the categories; see `?photos=`.
  */
 export const SourcesLayersStreetImagery = () => {
-  const { providers, style, date, photo: selected } = useStreetImageryParam()
+  const { providers, style, date, photoType, photo: selected } = useStreetImageryParam()
   const { mapParam } = useMapParam()
   const bbox = useMapViewportBbox('mainMap')
   const { photo } = useShownStreetImageryPhoto()
@@ -36,7 +36,7 @@ export const SourcesLayersStreetImagery = () => {
           providers={providers}
           bbox={bbox}
           zoom={mapParam.zoom}
-          filter={{ date }}
+          filter={{ date, photoTypes: photoType ? [photoType] : undefined }}
           options={{
             beforeId: 'atlas-app-beforeid-below-roadname',
             photoCircleColor: getStreetImageryStyle(style, date).color,
