@@ -45,6 +45,19 @@ export const spaceFinderSelectedVariant = (
 export const firstSpaceFinderVariantId = (areas: readonly PlanningAreasRow[]) =>
   sortedSpaceFinderAreas(areas).find((area) => area.variants.length > 0)?.variants[0]?.id
 
+/**
+ * Variant the Flächenfinder loader should prefetch. A key that is still in the list wins.
+ * A missing or deleted key warms the same variant the page will write into the URL; the loader
+ * does not redirect, because the create wizard may own the selection (`space.new`).
+ */
+export const spaceFinderVariantIdToPrime = (
+  areas: readonly PlanningAreasRow[],
+  key: number | undefined,
+) => {
+  if (key != null && spaceFinderSelectedVariant(areas, key)) return key
+  return firstSpaceFinderVariantId(areas)
+}
+
 export type SpaceFinderVariantStatus = 'running' | 'stale' | 'complete' | 'none'
 
 /** Run state of a variant for the Varianten dropdown; mirrors the status line in the panel body. */

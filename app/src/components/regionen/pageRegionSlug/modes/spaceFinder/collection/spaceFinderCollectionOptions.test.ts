@@ -4,6 +4,7 @@ import {
   type PlanningAreasRow,
   sortedSpaceFinderAreas,
   spaceFinderSelectedVariant,
+  spaceFinderVariantIdToPrime,
   spaceFinderVariantStatus,
 } from './spaceFinderCollectionOptions'
 
@@ -59,6 +60,17 @@ describe('spaceFinderSelectedVariant', () => {
   test('returns undefined for unknown or missing ids', () => {
     expect(spaceFinderSelectedVariant(areas, 99)).toBeUndefined()
     expect(spaceFinderSelectedVariant(areas, undefined)).toBeUndefined()
+  })
+})
+
+describe('spaceFinderVariantIdToPrime', () => {
+  test('keeps a key that still exists', () => {
+    expect(spaceFinderVariantIdToPrime(areas, 11)).toBe(11)
+  })
+
+  test('falls back to the first variant when the key is missing or deleted', () => {
+    expect(spaceFinderVariantIdToPrime(areas, undefined)).toBe(10)
+    expect(spaceFinderVariantIdToPrime(areas, 99)).toBe(10)
   })
 })
 
