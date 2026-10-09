@@ -6,17 +6,12 @@ type SpaceFinderBoundaryStore = {
   boundaryHighlightGeom: GeoJsonGeometry | null
   /** Translucent fill while creating the Gebiet, outline only while viewing it. */
   boundaryHighlightFilled: boolean
-  /** TerraDraw session is active (draw or edit). */
+  /** The study-area drawing session is active (draw or edit). */
   drawingActive: boolean
-  /**
-   * True while TerraDraw is in polygon mode (placing vertices). False in edit/select
-   * after the polygon is finished. Distinct from `drawingActive` (whole session).
-   * RegionMap ignores data-layer clicks while this is true so a vertex click does not
-   * open the feature inspector.
-   */
-  polygonDrawInProgress: boolean
-  /** TerraDraw output. The create form reads this as `study_area`. */
-  drawnGeometry: GeoJsonGeometry | null
+  /** Counts the drawing sessions, so undo steps of an earlier session stay apart. */
+  drawSession: number
+  /** The drawn study area. The create form reads this as `study_area`. */
+  drawnGeometry: GeoJSON.Polygon | null
   /**
    * Uploaded "Eigene Daten" GeoJSON (`factorConfig.user_geojson`) for the active variant.
    * Set by `SpaceFinderBody`. Null when none is uploaded.
@@ -74,8 +69,7 @@ type SpaceFinderBoundaryStore = {
   actions: {
     setBoundaryHighlightGeom: (geom: GeoJsonGeometry | null, opts?: { filled?: boolean }) => void
     setDrawingActive: (active: boolean) => void
-    setPolygonDrawInProgress: (active: boolean) => void
-    setDrawnGeometry: (geom: GeoJsonGeometry | null) => void
+    setDrawnGeometry: (geom: GeoJSON.Polygon | null) => void
     setUserObstaclesGeom: (geom: GeoJsonGeometry | null) => void
     setUserObstaclesVisible: (visible: boolean) => void
     setVegetationVisible: (visible: boolean) => void
@@ -92,7 +86,7 @@ const useSpaceFinderBoundaryStore = create<SpaceFinderBoundaryStore>()((set) => 
   boundaryHighlightGeom: null,
   boundaryHighlightFilled: true,
   drawingActive: false,
-  polygonDrawInProgress: false,
+  drawSession: 0,
   drawnGeometry: null,
   userObstaclesGeom: null,
   userObstaclesVisible: true,
@@ -106,10 +100,14 @@ const useSpaceFinderBoundaryStore = create<SpaceFinderBoundaryStore>()((set) => 
   actions: {
     setBoundaryHighlightGeom: (geom, opts) =>
       set({ boundaryHighlightGeom: geom, boundaryHighlightFilled: opts?.filled ?? true }),
-    setDrawingActive: (active) => set({ drawingActive: active }),
-    setPolygonDrawInProgress: (active) =>
+    setDrawingActive: (active) =>
       set((state) =>
-        state.polygonDrawInProgress === active ? state : { polygonDrawInProgress: active },
+        state.drawingActive === active
+          ? state
+          : {
+              drawingActive: active,
+              drawSession: active ? state.drawSession + 1 : state.drawSession,
+            },
       ),
     setDrawnGeometry: (geom) => set({ drawnGeometry: geom }),
     setUserObstaclesGeom: (geom) => set({ userObstaclesGeom: geom }),
@@ -134,8 +132,8 @@ export const useSpaceFinderBoundaryHighlightFilled = () =>
   useSpaceFinderBoundaryStore((state) => state.boundaryHighlightFilled)
 export const useSpaceFinderDrawingActive = () =>
   useSpaceFinderBoundaryStore((state) => state.drawingActive)
-export const useSpaceFinderPolygonDrawInProgress = () =>
-  useSpaceFinderBoundaryStore((state) => state.polygonDrawInProgress)
+export const useSpaceFinderDrawSession = () =>
+  useSpaceFinderBoundaryStore((state) => state.drawSession)
 export const useSpaceFinderDrawnGeometry = () =>
   useSpaceFinderBoundaryStore((state) => state.drawnGeometry)
 export const useSpaceFinderUserObstaclesGeom = () =>

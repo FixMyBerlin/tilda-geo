@@ -11,6 +11,7 @@ import {
   useSpaceFinderDrawnGeometry,
   useSpaceFinderDrawingActive,
 } from '../../../hooks/mapState/space-finder-boundary-store'
+import { useSpaceFinderDraw } from '../drawing/useSpaceFinderDraw'
 import {
   GROUP_HELP,
   PLANNING_USE_CASES,
@@ -83,6 +84,7 @@ export const AreaFormFields = ({
     useSpaceFinderBoundaryActions()
   const drawingActive = useSpaceFinderDrawingActive()
   const drawnGeometry = useSpaceFinderDrawnGeometry()
+  const draw = useSpaceFinderDraw()
 
   const effectiveStudyArea = state.studyArea ?? drawnGeometry
 
@@ -116,6 +118,7 @@ export const AreaFormFields = ({
     onAreaTabChange(tab)
     onStudyAreaChange(null)
     onBoundaryIdChange(null)
+    draw.cancel()
     setDrawingActive(false)
     setDrawnGeometry(null)
     setBoundaryHighlightGeom(null)
@@ -123,7 +126,10 @@ export const AreaFormFields = ({
 
   const toggleDrawing = () => {
     if (drawingActive) {
+      draw.cancel()
       setDrawingActive(false)
+      // Keep the finished area visible on the map once the drawing tools are gone.
+      if (drawnGeometry) setBoundaryHighlightGeom(drawnGeometry)
       return
     }
     onStudyAreaChange(null)
@@ -133,6 +139,7 @@ export const AreaFormFields = ({
   }
 
   const handleStudyUpload = (geometry: StudyAreaGeometry, fileName: string) => {
+    draw.cancel()
     setDrawingActive(false)
     onStudyAreaChange(geometry)
     setBoundaryHighlightGeom(geometry)
@@ -245,11 +252,15 @@ export const AreaFormFields = ({
               )}
             >
               <PencilSquareIcon className="h-4 w-4" />
-              {drawingActive ? 'Zeichnen abbrechen' : 'Gebiet zeichnen'}
+              {drawingActive
+                ? drawnGeometry
+                  ? 'Zeichnen beenden'
+                  : 'Zeichnen abbrechen'
+                : 'Gebiet zeichnen'}
             </button>
             {drawingActive && (
               <p key="drawing-hint" className="text-xs text-gray-500">
-                In der Karte ein Polygon zeichnen.
+                Ecken ziehen oder auf eine Kante klicken, um das Gebiet zu ändern.
               </p>
             )}
             {/* Stable key: hiding the drawing hint must not remount the field and drop its state. */}

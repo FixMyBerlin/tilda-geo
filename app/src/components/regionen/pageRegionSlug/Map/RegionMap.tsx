@@ -18,7 +18,7 @@ import type {
   ViewStateChangeEvent,
 } from 'react-map-gl/maplibre'
 import { AttributionControl, Map as MapGl, useMap } from 'react-map-gl/maplibre'
-import { useSpaceFinderPolygonDrawInProgress } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-boundary-store'
+import { useSpaceFinderDrawingActive } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-boundary-store'
 import {
   useSpaceFinderCandidateSelectActive,
   useSpaceFinderCandidatesActions,
@@ -59,6 +59,7 @@ import { ReviewMapDrawing } from '../modes/reviewLists/drawing/ReviewMapDrawing'
 import { useReviewDraw } from '../modes/reviewLists/drawing/useReviewDraw'
 import { useReviewDrawActive } from '../modes/reviewLists/useReviewDrawActive'
 import { SpaceFinderMapDrawing } from '../modes/spaceFinder/drawing/SpaceFinderMapDrawing'
+import { useSpaceFinderDraw } from '../modes/spaceFinder/drawing/useSpaceFinderDraw'
 import { useSpaceFinderSelection } from '../modes/spaceFinder/useSpaceFinderSelection'
 import { useCurrentMode } from '../modes/useCurrentMode'
 import { useRegion } from '../regionUtils/useRegion'
@@ -142,7 +143,8 @@ export const RegionMap = () => {
   const { draw: reviewDraw } = useReviewDraw()
   const notesComposeActive = useNotesComposeActive()
   const reviewDrawActive = useReviewDrawActive()
-  const spaceFinderPolygonDrawing = useSpaceFinderPolygonDrawInProgress()
+  const spaceFinderDraw = useSpaceFinderDraw()
+  const spaceFinderDrawingActive = useSpaceFinderDrawingActive() && currentMode.isSpaceFinder
   const candidateSelectActive = useSpaceFinderCandidateSelectActive()
   const { toggleCandidate, setCandidateGeometry } = useSpaceFinderCandidatesActions()
   const { runId: spaceFinderRunId } = useSpaceFinderSelection()
@@ -152,7 +154,7 @@ export const RegionMap = () => {
   const pickingLocation = useArmedLocationOpenerId() != null
 
   const handleClick = ({ features, ...event }: MapLayerMouseEvent) => {
-    if (reviewDrawActive) return
+    if (reviewDrawActive || spaceFinderDrawingActive) return
     if (pickingLocation) return
     if (containMaskFeature(features)) {
       return
@@ -264,7 +266,12 @@ export const RegionMap = () => {
     cursor: drawCursor,
     onMouseMove: drawOnMouseMove,
     ...drawMapProps
-  } = { ...calculatorDraw.mapProps, ...measureDraw.mapProps, ...reviewDraw.mapProps }
+  } = {
+    ...calculatorDraw.mapProps,
+    ...measureDraw.mapProps,
+    ...reviewDraw.mapProps,
+    ...spaceFinderDraw.mapProps,
+  }
 
   const handleMouseMove = (event: MapLayerMouseEvent) => {
     drawOnMouseMove?.(event)
@@ -375,7 +382,7 @@ export const RegionMap = () => {
     currentMode.isMeasure ||
     notesComposeActive ||
     reviewDrawActive ||
-    (currentMode.isSpaceFinder && spaceFinderPolygonDrawing)
+    spaceFinderDrawingActive
       ? NO_INTERACTIVE_LAYERS
       : [
           ...computedInteractiveLayerIds,
