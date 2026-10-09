@@ -11,105 +11,90 @@
 DO $$ BEGIN RAISE NOTICE 'START merging parkings %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
 -- 1. Create a TEMP table for clustering
--- Properties that are in tags (jsonb) and need to be clustered should be separate columns so we can index them properly.
+-- `candidates` reduces the tags to the ones that have to be equal for two parkings to be merged.
+-- The final SELECT assigns a cluster_id to each spatially connected group of parkings that share those tags.
 -- The temp table is dropped automatically once our db connection is closed.
 CREATE TEMP TABLE cluster_candidates AS
-SELECT
-  id,
-  geom,
-  tag_source,
-  geom_source,
-  meta,
-  (tags ->> 'capacity')::NUMERIC AS capacity,
-  (tags ->> 'area')::NUMERIC AS area,
-  jsonb_build_object(
-    -- CRITICAL: Keep these lists in sync:
-    -- 1. `result_tags` in `processing/topics/parking/parkings/helper/result_tags_parkings.lua`
-    -- 2. `result_tags` in `processing/topics/parking/separate_parkings/helper/result_tags_separate_parking.lua`
-    -- 3. `jsonb_build_object` in `processing/topics/parking/4_merge_parkings.sql`
-    /* sql-formatter-disable */
-    'side', side,
-    'source', tags->>'source',
-    --
-    -- Road properties
-    'road', tags ->> 'road',
-    'road_name', COALESCE(tags ->> 'road_name', street_name), -- this fallback should probably be implemented earlier
-    'road_width', tags ->> 'road_width',
-    'road_width_confidence', tags ->> 'road_width_confidence',
-    'road_width_source', tags ->> 'road_width_source',
-    'road_oneway', tags ->> 'road_oneway',
-    'operator_type', tags ->> 'operator_type',
-    'operator_type_source', tags ->> 'operator_type_source',
-    'operator_type_confidence', tags ->> 'operator_type_confidence',
-    'mapillary', tags ->> 'mapillary',
-    --
-    -- Capacity & Area
-    -- capacity - separate column
-    'capacity_source', tags ->> 'capacity_source',
-    'capacity_confidence', tags ->> 'capacity_confidence',
-    -- 'area', tags ->> 'area',
-    'area_confidence', tags ->> 'area_confidence',
-    'area_source', tags ->> 'area_source',
-    --
-    -- Parking properties
-    'condition_category', tags ->> 'condition_category',
-    'condition_category_primary', tags ->> 'condition_category_primary',
-    'covered', tags ->> 'covered',
-    'direction', tags ->> 'direction',
-    'informal', tags ->> 'informal',
-    'location', tags ->> 'location',
-    'markings', tags ->> 'markings',
-    'orientation', tags ->> 'orientation',
-    'parking', tags ->> 'parking',
-    'reason', tags ->> 'reason',
-    'staggered', tags ->> 'staggered',
-    'traffic_sign', tags ->> 'traffic_sign',
-    'zone', tags ->> 'zone',
-    --
-    -- Access
-    'access', tags ->> 'access',
-    --
-    -- Surface
-    'surface', tags ->> 'surface',
-    'surface_confidence', tags ->> 'surface_confidence',
-    'surface_source', tags ->> 'surface_source'
-    /* sql-formatter-enable*/
-  ) as tags,
-  0 as cluster_id
-FROM
-  _parking_parkings_cutted p;
-
-CREATE INDEX cluster_candidates_idx ON cluster_candidates USING BTREE (tags);
-
-CREATE INDEX cluster_candidates_geom_idx ON cluster_candidates USING GIST (geom);
-
--- We assign a cluster_id to each spatially connected group of parkings that share the same tags
--- ST_ClusterDBSCAN parameters:
---   geom: geometry column to cluster
---   eps := 0.0: distance threshold (0.0 means only touching/intersecting geometries are clustered together)
---   minpoints := 1: minimum number of geometries to form a cluster (1 means any single geometry can be its own cluster)
 WITH
-  clustered AS (
+  candidates AS (
     SELECT
       id,
-      ST_ClusterDBSCAN (geom, eps := 0.0, minpoints := 1) OVER (
-        PARTITION BY
-          tags
-        ORDER BY
-          id
-      ) AS cluster_id
+      geom,
+      tag_source,
+      geom_source,
+      meta,
+      (tags ->> 'capacity')::NUMERIC AS capacity,
+      (tags ->> 'area')::NUMERIC AS area,
+      jsonb_build_object(
+        -- CRITICAL: Keep these lists in sync:
+        -- 1. `result_tags` in `processing/topics/parking/parkings/helper/result_tags_parkings.lua`
+        -- 2. `result_tags` in `processing/topics/parking/separate_parkings/helper/result_tags_separate_parking.lua`
+        -- 3. `jsonb_build_object` in `processing/topics/parking/4_merge_parkings.sql`
+        /* sql-formatter-disable */
+        'side', side,
+        'source', tags->>'source',
+        --
+        -- Road properties
+        'road', tags ->> 'road',
+        'road_name', COALESCE(tags ->> 'road_name', street_name), -- this fallback should probably be implemented earlier
+        'road_width', tags ->> 'road_width',
+        'road_width_confidence', tags ->> 'road_width_confidence',
+        'road_width_source', tags ->> 'road_width_source',
+        'road_oneway', tags ->> 'road_oneway',
+        'operator_type', tags ->> 'operator_type',
+        'operator_type_source', tags ->> 'operator_type_source',
+        'operator_type_confidence', tags ->> 'operator_type_confidence',
+        'mapillary', tags ->> 'mapillary',
+        --
+        -- Capacity & Area
+        -- capacity - separate column
+        'capacity_source', tags ->> 'capacity_source',
+        'capacity_confidence', tags ->> 'capacity_confidence',
+        -- 'area', tags ->> 'area',
+        'area_confidence', tags ->> 'area_confidence',
+        'area_source', tags ->> 'area_source',
+        --
+        -- Parking properties
+        'condition_category', tags ->> 'condition_category',
+        'condition_category_primary', tags ->> 'condition_category_primary',
+        'covered', tags ->> 'covered',
+        'direction', tags ->> 'direction',
+        'informal', tags ->> 'informal',
+        'location', tags ->> 'location',
+        'markings', tags ->> 'markings',
+        'orientation', tags ->> 'orientation',
+        'parking', tags ->> 'parking',
+        'reason', tags ->> 'reason',
+        'staggered', tags ->> 'staggered',
+        'traffic_sign', tags ->> 'traffic_sign',
+        'zone', tags ->> 'zone',
+        --
+        -- Access
+        'access', tags ->> 'access',
+        --
+        -- Surface
+        'surface', tags ->> 'surface',
+        'surface_confidence', tags ->> 'surface_confidence',
+        'surface_source', tags ->> 'surface_source'
+        /* sql-formatter-enable*/
+      ) as tags
     FROM
-      cluster_candidates
+      _parking_parkings_cutted p
   )
-UPDATE cluster_candidates cc
-SET
-  cluster_id = clustered.cluster_id
+SELECT
+  *,
+  -- ST_ClusterDBSCAN parameters:
+  --   geom: geometry column to cluster
+  --   eps := 0.0: distance threshold (0.0 means only touching/intersecting geometries are clustered together)
+  --   minpoints := 1: minimum number of geometries to form a cluster (1 means any single geometry can be its own cluster)
+  ST_ClusterDBSCAN (geom, eps := 0.0, minpoints := 1) OVER (
+    PARTITION BY
+      tags
+    ORDER BY
+      id
+  ) AS cluster_id
 FROM
-  clustered
-WHERE
-  cc.id = clustered.id;
-
-CREATE INDEX cluster_candidates_full_idx ON cluster_candidates USING BTREE (cluster_id, tags);
+  candidates;
 
 -- 2. Create the result table by merging each cluster
 DROP TABLE IF EXISTS _parking_parkings_merged;
