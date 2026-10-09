@@ -1,6 +1,7 @@
 import { DrawLayers } from '@osm-editor-kit/react-map-gl-draw'
 import { useEffect } from 'react'
-import { ModeMapHint } from '../../ModeMapHint'
+import { ModeMapHint, ModeMapToolbarRow } from '../../ModeMapHint'
+import { ModeMapUndoRedo } from '../../ModeMapUndoRedo'
 import {
   type ReviewComposeType,
   useReviewComposeFeatures,
@@ -53,31 +54,34 @@ export const ReviewMapDrawing = () => {
       {session === 'compose' && !draw.isDrawing && composeIsEmpty && (
         <ModeMapHint>{composeHints[composeType]}</ModeMapHint>
       )}
-      {session === 'compose' ? (
-        <ReviewDrawingToolbar
-          type={composeType}
-          isDrawing={draw.isDrawing}
-          onTypeChange={(type) => {
-            draw.cancel()
-            setComposeType(type)
-          }}
-          onFinish={draw.finish}
-          onCancel={draw.cancel}
-        />
-      ) : (
-        <ReviewEditToolbar
-          isDrawing={draw.isDrawing}
-          isAddingPart={draw.tool !== 'select'}
-          canAddPart={editType !== null && draw.canAdd(editType)}
-          canDeletePart={draw.canDeleteSelected}
-          onAddPart={() => {
-            if (editType) draw.setTool(draw.tool === 'select' ? editType : 'select')
-          }}
-          onDeletePart={draw.deleteSelected}
-          onFinish={draw.finish}
-          onCancel={draw.cancel}
-        />
-      )}
+      <ModeMapToolbarRow>
+        {session === 'compose' ? (
+          <ReviewDrawingToolbar
+            type={composeType}
+            isDrawing={draw.isDrawing}
+            onTypeChange={(type) => {
+              draw.cancel()
+              setComposeType(type)
+            }}
+            onFinish={draw.finish}
+            onCancel={draw.cancel}
+          />
+        ) : (
+          <ReviewEditToolbar
+            isDrawing={draw.isDrawing}
+            isAddingPart={draw.tool !== 'select'}
+            canAddPart={editType !== null && draw.canAdd(editType)}
+            canDeletePart={draw.canDeleteSelected}
+            onAddPart={() => {
+              if (editType) draw.setTool(draw.tool === 'select' ? editType : 'select')
+            }}
+            onDeletePart={draw.deleteSelected}
+            onFinish={draw.finish}
+            onCancel={draw.cancel}
+          />
+        )}
+        <ModeMapUndoRedo draw={draw} />
+      </ModeMapToolbarRow>
     </>
   )
 }

@@ -63,6 +63,7 @@ export function CalculatorMapDrawing({ areas, getFeatureLabel }: Props) {
         </>
       )}
       <CalculatorDrawingToolbar
+        draw={draw}
         isDrawing={draw.isDrawing}
         hasAreas={drawAreas.length > 0}
         isAddingArea={draw.tool === 'polygon'}

@@ -22,9 +22,11 @@ Route `/regionen/<region>/summieren`. Product description: [docs/Modes-Concept-S
 Drawing uses [`@osm-editor-kit/react-map-gl-draw`](https://github.com/osm-editor-kit/react-map-gl-draw): the areas are a controlled value, the layers are declarative `<Source>`/`<Layer>`, and pointer gestures arrive through `<Map>` props.
 
 - `drawing/useCalculatorDraw.ts` — the drawing surface (options, limits), enabled in this mode. `RegionMap` spreads its `mapProps` onto `<Map>`.
-- `drawing/CalculatorMapDrawing.tsx` — `<DrawLayers>`, the area labels, the first-step hint and "done" / "cancel" while drawing.
-- `CalculatorPanelActions.tsx` — the actions in the panel header, like "new entry" in the other modes: a further area and the help. Deleting is the bin next to each area in the result.
+- `drawing/CalculatorMapDrawing.tsx` — `<DrawLayers>`, the area labels, the first-step hint, undo / redo, and "done" / "cancel" while drawing.
+- `CalculatorPanelActions.tsx` — the actions in the panel header, like "new entry" in the other modes: a further area and the help. Deleting is the bin next to each area in the result; it goes through `draw.replace()` so it can be undone.
 - `drawing/calculatorDrawStyles.ts` — layer styles.
+
+Undo and redo come from the package (`createDrawHistory()` in `useCalculatorDraw.ts`, buttons in the shared `ModeMapUndoRedo`). Every finished edit is one step and one URL update; while an area is drawn, a step is one corner. The steps are kept in memory for this drawing surface only (Prüflisten have their own), survive a mode switch like the areas do, and are gone after a reload. If the areas change without the drawing surface (a pasted link, the browser's back button), the steps no longer fit and are ignored.
 
 There are no draw/edit modes. The first click starts an area; afterwards it can be changed directly. A further area starts from the plus in the panel header.
 

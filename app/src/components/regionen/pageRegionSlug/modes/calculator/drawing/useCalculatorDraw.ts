@@ -1,5 +1,6 @@
 import {
   createDrawController,
+  createDrawHistory,
   useDraw,
   useDrawPreview,
   type DrawFeature,
@@ -10,13 +11,16 @@ import { CALCULATOR_AREA_PRECISION, calculatorAreaId } from '../calculatorModePa
 import type { DrawArea } from './drawAreaTypes'
 
 const calculatorDrawController = createDrawController()
+// The steps of the areas only; other drawing surfaces (Prüflisten) keep their own.
+const calculatorDrawHistory = createDrawHistory()
 
 const isDrawArea = (feature: DrawFeature): feature is DrawArea =>
   feature.geometry.type === 'Polygon'
 
 /**
  * The calculator's drawing surface. The areas live in the URL (`sum.areas`); a change arrives here
- * once per finished edit, so every edit is one URL update.
+ * once per finished edit, so every edit is one URL update and one step to undo. Change the areas
+ * from outside the map with `replace()`, so that is a step as well.
  */
 export const useCalculatorDraw = () => {
   const { drawAreas, setDrawAreas } = useCalculatorAreas()
@@ -27,6 +31,7 @@ export const useCalculatorDraw = () => {
     value: drawAreas,
     onChange: (next) => setDrawAreas(next.filter(isDrawArea)),
     enabled,
+    history: calculatorDrawHistory,
     limits: { point: 0, line: 0 },
     // One area is the normal case: the first click starts it, and it stays editable.
     emptyTool: 'polygon',

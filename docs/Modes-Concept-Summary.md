@@ -84,11 +84,14 @@ The area calculator. Draw one or more areas on the map; the panel sums the value
 - **Open to everyone** who can see the region.
 - The sum is computed in the browser from the points rendered on the map, so the whole area has to be in view (the panel warns otherwise).
 - While the mode is open, map clicks belong to drawing: the inspector does not open.
+- **Undo and redo** on the map (buttons, Cmd/Ctrl+Z) cover drawing, changing and deleting areas. The steps are kept in memory for this mode only and are gone after a reload.
 
 Old links keep working: `draw` becomes `sum.areas`, and a "Summieren: …" layer switched on in `config` opens this mode with the matching filter ([`migrateLegacyCalculatorSubcategories.server.ts`](../app/src/server/regions/migrateLegacyCalculatorSubcategories.server.ts)).
 
 ## Prüflisten
 
 GeoJSON lists of candidates (points, lines, polygons, including Multi\*). Pick a list, set status, comment. Lists live in the database, can be assigned to several regions, and support upload/download. Members can draw new entries and edit geometry. Source is upload or manual.
+
+While the geometry of an entry is edited, undo and redo on the map (buttons, Cmd/Ctrl+Z) step through the changes to that entry; every step is saved like an edit. The steps are separate from those of Summieren and end with the edit session. Creating and deleting an entry cannot be undone. While a new entry is drawn, undo takes back the last corner.
 
 UI names: **Prüfliste** / **Prüfeintrag**. Status and comments exist. A richer evaluation workflow is still placeholder-level. Admin: `/admin/review-lists`.

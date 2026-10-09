@@ -16,6 +16,7 @@ import {
   type CalculatorDisplayMode,
 } from './CalculatorBreakdown'
 import type { CalculatorFilter } from './calculatorModeParam'
+import { useCalculatorDraw } from './drawing/useCalculatorDraw'
 import type { useCalculatorDatasets } from './useCalculatorDatasets'
 import {
   calculateMetricSummaryForAreas,
@@ -49,7 +50,8 @@ export const CalculatorResult = ({ dataset, filter, onToggleFilter }: Props) => 
   const mapBounds = useMapBounds()
   const styleColors = useCalculatorStyleColors()
 
-  const { drawAreas, setDrawAreas } = useCalculatorAreas()
+  const { drawAreas } = useCalculatorAreas()
+  const draw = useCalculatorDraw()
   const { updateCalculation } = useUpdateCalculation()
   const [preferredMetric, setPreferredMetric] = useState<
     (typeof calculatorMetricOrder)[number] | null
@@ -82,7 +84,8 @@ export const CalculatorResult = ({ dataset, filter, onToggleFilter }: Props) => 
 
   const handleDelete = (key: string) => {
     const next = drawAreas.filter((a) => a.id !== key)
-    setDrawAreas(next)
+    // Through the drawing surface, so a deleted area can be brought back with undo.
+    draw.replace(next)
     updateCalculation(queryLayers, next)
   }
 

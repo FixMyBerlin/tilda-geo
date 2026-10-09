@@ -16,21 +16,33 @@ const useVisibleMapCenterClassName = () =>
     useLayerControlsOpen() && mapOverlayBesideLayerControlsClassName,
   )
 
-type ToolbarProps = { children: ReactNode; 'aria-label': string }
+type ToolbarRowProps = { children: ReactNode }
 
 /**
- * Drawing toolbar of a mode at the top of the visible map; below the floating header buttons
- * on a phone.
+ * Where the drawing toolbars of a mode sit: at the top of the visible map; below the floating
+ * header buttons on a phone. Holds one or more `ModeMapToolbar` groups side by side.
  */
+export const ModeMapToolbarRow = ({ children }: ToolbarRowProps) => (
+  <div
+    className={twJoin(
+      useVisibleMapCenterClassName(),
+      'top-14 z-1000 flex-wrap items-start gap-2 sm:top-2.5',
+    )}
+  >
+    {children}
+  </div>
+)
+
+type ToolbarProps = { children: ReactNode; 'aria-label': string }
+
+/** One group of joined buttons in a `ModeMapToolbarRow`. */
 export const ModeMapToolbar = ({ children, 'aria-label': ariaLabel }: ToolbarProps) => (
-  <div className={twJoin(useVisibleMapCenterClassName(), 'top-14 z-1000 sm:top-2.5')}>
-    <div
-      className="pointer-events-auto isolate inline-flex rounded-md shadow-xs"
-      role="group"
-      aria-label={ariaLabel}
-    >
-      {children}
-    </div>
+  <div
+    className="pointer-events-auto isolate inline-flex rounded-md shadow-xs"
+    role="group"
+    aria-label={ariaLabel}
+  >
+    {children}
   </div>
 )
 
