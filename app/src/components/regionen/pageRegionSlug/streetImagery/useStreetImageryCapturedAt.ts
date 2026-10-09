@@ -55,7 +55,7 @@ const useLineTileCapturedAt = (providers: StreetImageryProviderId[], enabled: bo
  */
 export const useStreetImageryCapturedAt = (providers: StreetImageryProviderId[]) => {
   const { mapParam } = useMapParam()
-  const bbox = useMapViewportBbox('mainMap', mapParam)
+  const bbox = useMapViewportBbox('mainMap')
   // All photos in view, before the date filter: the slider marks where photos exist.
   const { photos } = useAllProviderPhotos(providers, bbox, mapParam.zoom)
   const noPhotos = photos.length === 0

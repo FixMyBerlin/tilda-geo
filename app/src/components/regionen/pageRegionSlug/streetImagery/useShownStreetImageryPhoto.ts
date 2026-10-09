@@ -28,7 +28,7 @@ export const useStreetImageryViewerActions = () =>
 export const useShownStreetImageryPhoto = () => {
   const { providers, photo: selected } = useStreetImageryParam()
   const { mapParam } = useMapParam()
-  const bbox = useMapViewportBbox('mainMap', mapParam)
+  const bbox = useMapViewportBbox('mainMap')
   const { photos } = useAllProviderPhotos(providers, selected ? bbox : null, mapParam.zoom)
   const viewerPhoto = useStreetImageryViewerStore((state) => state.viewerPhoto)
 
