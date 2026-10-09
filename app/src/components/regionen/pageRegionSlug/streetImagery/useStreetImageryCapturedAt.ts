@@ -7,10 +7,14 @@ import {
 import { useEffect, useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
-import type { StreetImageryProviderId } from './streetImageryParam'
+import type { StreetImageryParam, StreetImageryProviderId } from './streetImageryParam'
 
 /** Capture times of the track lines MapLibre has loaded from a provider's own line tiles. */
-const useLineTileCapturedAt = (providers: StreetImageryProviderId[], enabled: boolean) => {
+const useLineTileCapturedAt = (
+  providers: StreetImageryProviderId[],
+  photoType: StreetImageryParam['photoType'],
+  enabled: boolean,
+) => {
   const { mainMap } = useMap()
   const [capturedAt, setCapturedAt] = useState<number[]>([])
   const providersKey = providers.join(',')
@@ -29,6 +33,8 @@ const useLineTileCapturedAt = (providers: StreetImageryProviderId[], enabled: bo
             sourceLayer: tiles.sourceLayer,
           })) {
             const time = feature.properties[tiles.properties.capturedAt]
+            const isPano = feature.properties[tiles.properties.isPano]
+            if (photoType && isPano !== (photoType === 'pano')) continue
             if (typeof time === 'number') {
               bySequence.set(feature.properties[tiles.properties.sequenceId], time)
             }
@@ -43,7 +49,7 @@ const useLineTileCapturedAt = (providers: StreetImageryProviderId[], enabled: bo
         mainMap.off('idle', read)
       }
     },
-    [mainMap, enabled, providersKey],
+    [mainMap, enabled, providersKey, photoType],
   )
 
   return enabled ? capturedAt : []
@@ -52,14 +58,23 @@ const useLineTileCapturedAt = (providers: StreetImageryProviderId[], enabled: bo
 /**
  * Capture times for the marks of the date slider: of the photos in view, or, zoomed out where no
  * photos are loaded, of the track lines. Only data the map has loaded anyway; no extra requests.
+ * With a `photoType` only that type is counted.
  */
-export const useStreetImageryCapturedAt = (providers: StreetImageryProviderId[]) => {
+export const useStreetImageryCapturedAt = (
+  providers: StreetImageryProviderId[],
+  photoType: StreetImageryParam['photoType'],
+) => {
   const { mapParam } = useMapParam()
   const bbox = useMapViewportBbox('mainMap')
   // All photos in view, before the date filter: the slider marks where photos exist.
-  const { photos } = useAllProviderPhotos(providers, bbox, mapParam.zoom)
+  const { photos } = useAllProviderPhotos(
+    providers,
+    bbox,
+    mapParam.zoom,
+    photoType ? [photoType] : undefined,
+  )
   const noPhotos = photos.length === 0
-  const lineTileTimes = useLineTileCapturedAt(providers, noPhotos)
+  const lineTileTimes = useLineTileCapturedAt(providers, photoType, noPhotos)
   // Panoramax has no line tiles; its lines are loaded as data from zoom 10 (same query as the map).
   const { data: panoramaxLines = [] } = useProviderSequences(
     'panoramax',
@@ -71,7 +86,12 @@ export const useStreetImageryCapturedAt = (providers: StreetImageryProviderId[])
     return { capturedAt: photos.map((photo) => photo.capturedAt), counts: 'photos' as const }
   }
   return {
-    capturedAt: [...lineTileTimes, ...panoramaxLines.map((line) => line.capturedAt)],
+    capturedAt: [
+      ...lineTileTimes,
+      ...panoramaxLines
+        .filter((line) => !photoType || line.isPano === (photoType === 'pano'))
+        .map((line) => line.capturedAt),
+    ],
     counts: 'lines' as const,
   }
 }
