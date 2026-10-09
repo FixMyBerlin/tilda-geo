@@ -1,5 +1,5 @@
 import { Listbox, ListboxButton, ListboxOptions } from '@headlessui/react'
-import { CheckIcon } from '@heroicons/react/20/solid'
+import { CheckIcon, LockClosedIcon } from '@heroicons/react/20/solid'
 import { GlobeAltIcon } from '@heroicons/react/24/outline'
 import { useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
@@ -12,6 +12,7 @@ import { useBackgroundParam } from '@/components/regionen/pageRegionSlug/hooks/u
 import { useBg3dParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBg3dParam'
 import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
 import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
+import { isPrivateBackgroundParam } from '@/server/private-backgrounds/privateBackgroundParam'
 import {
   mapOverlayAnchoredMenuMaxHeightClassName,
   mapOverlayMenuClassName,
@@ -119,6 +120,15 @@ export const SelectBackground = () => {
                     <span className="line-clamp-2 leading-tight hyphens-auto" lang="de">
                       {name}
                     </span>
+                    {isPrivateBackgroundParam(value) && (
+                      <>
+                        <LockClosedIcon
+                          className="ml-auto size-4 shrink-0 text-gray-500"
+                          aria-hidden="true"
+                        />
+                        <span className="sr-only">Nur für Mitglieder dieser Region</span>
+                      </>
+                    )}
                   </button>
                 )
               })}
