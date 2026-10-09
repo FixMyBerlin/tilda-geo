@@ -3,12 +3,6 @@ import { AreaWizard } from '@/components/regionen/pageRegionSlug/modes/spaceFind
 /** ModePanel detail view for »Neues Planungsgebiet« (`space.new === 'area'`), driven by the existing wizard. */
 export const SpaceFinderNewAreaDetail = ({
   onCreated,
-  onClose,
 }: {
   onCreated: (areaId: number, variantId: number) => void
-  onClose: () => void
-}) => (
-  <div className="px-4 py-3">
-    <AreaWizard onCreated={onCreated} onCancel={onClose} />
-  </div>
-)
+}) => <AreaWizard onCreated={onCreated} />

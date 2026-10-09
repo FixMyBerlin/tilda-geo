@@ -11,8 +11,4 @@ export const SpaceFinderEditAreaDetail = ({
   area: PlanningVariantDetail['area']
   variants: PlanningAreaVariantRow[]
   onClose: () => void
-}) => (
-  <div className="px-4 py-3">
-    <AreaEditor area={area} variants={variants} onClose={onClose} onDeleted={onClose} />
-  </div>
-)
+}) => <AreaEditor area={area} variants={variants} onClose={onClose} />

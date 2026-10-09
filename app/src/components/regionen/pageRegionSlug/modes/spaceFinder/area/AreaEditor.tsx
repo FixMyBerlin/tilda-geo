@@ -2,7 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { MAX_STUDY_AREA_KM2 } from '@/lib/planningStudyAreaLimit'
-import { deletePlanningAreaFn, updatePlanningAreaFn } from '@/server/planning/planning.functions'
+import { updatePlanningAreaFn } from '@/server/planning/planning.functions'
 import {
   planningAreaQueryOptions,
   planningAreasQueryOptions,
@@ -13,7 +13,6 @@ import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import type { PlanningAreaVariantRow } from '../collection/spaceFinderCollectionOptions'
 import type { PlanningUseCase } from '../factors/spaceFinderDefaults'
 import type { PlanningVariantDetail } from '../spaceFinderVariantDetail'
-import { useSpaceFinderModeParam } from '../useSpaceFinderModeParam'
 import { AreaFormFields, useEffectiveStudyArea, useStudyAreaKm2 } from './AreaFormFields'
 import type { StudyAreaGeometry } from './extractStudyAreaGeometry'
 import type { UserGeojsonMode } from './UserObstaclesField'
@@ -26,18 +25,15 @@ const AreaEditorForm = ({
   area,
   variants,
   onClose,
-  onDeleted,
 }: {
   /** Full Gebiet from the open variant. The areas list does not carry geometry or own data. */
   area: EditorArea
   variants: PlanningAreaVariantRow[]
   onClose: () => void
-  onDeleted?: () => void
 }) => {
   const regionSlug = useRegionSlug()
   const queryClient = useQueryClient()
   const { setBoundaryHighlightGeom } = useSpaceFinderBoundaryActions()
-  const { spaceFinderMode, setSpaceFinderModeParam } = useSpaceFinderModeParam()
 
   const [title, setTitle] = useState(area.title)
   const [boundaryId, setBoundaryId] = useState<string | null>(null)
@@ -96,78 +92,51 @@ const AreaEditorForm = ({
     },
   })
 
-  const deleteMutation = useMutation({
-    mutationFn: () => deletePlanningAreaFn({ data: { areaId: area.id } }),
-    onSuccess: () => {
-      const areasKey = planningAreasQueryOptions(regionSlug).queryKey
-      const previous = queryClient.getQueryData(areasKey) ?? []
-      const remaining = previous.filter((a) => a.id !== area.id)
-      // Optimistic remove so auto-select cannot resurrect the deleted id.
-      queryClient.setQueryData(areasKey, remaining)
-      queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
-
-      const next = remaining[0]
-      const nextVariant = next?.variants[0]
-      setSpaceFinderModeParam({ ...spaceFinderMode, key: nextVariant?.id })
-      onDeleted?.()
-      onClose()
-    },
-  })
-
   return (
-    <div className="flex flex-col gap-2 rounded border border-gray-200 p-2.5 text-sm">
-      <div className="flex items-center justify-between gap-2">
-        <h3 className="font-semibold">Planungsgebiet bearbeiten</h3>
-        <button
-          type="button"
-          onClick={onClose}
-          className="text-xs text-gray-500 hover:text-gray-700"
-        >
-          Schließen
-        </button>
+    <div className="flex flex-col text-sm">
+      <div className="flex flex-col">
+        {hasCompleteRuns && (geometryDirty || obstaclesChanged || useCaseChanged) && (
+          <p className="mx-3 mt-3 rounded bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
+            Änderungen am Planungsgebiet (Gebiet, eigene Daten, Art oder Größe) markieren bestehende
+            Ergebnisse als veraltet. Bitte betroffene Varianten neu berechnen.
+          </p>
+        )}
+
+        <AreaFormFields
+          state={{
+            title,
+            boundaryId,
+            studyArea,
+            areaTab,
+            userGeojson,
+            userGeojsonMode,
+            useCase,
+            areaSizeM2,
+          }}
+          onTitleChange={setTitle}
+          onBoundaryIdChange={setBoundaryId}
+          onStudyAreaChange={setStudyArea}
+          onAreaTabChange={setAreaTab}
+          onUserGeojsonChange={(geojson) => {
+            setUserGeojson(geojson)
+            setObstaclesDirty(true)
+          }}
+          onUserGeojsonModeChange={(mode) => {
+            setUserGeojsonMode(mode)
+            setObstaclesDirty(true)
+          }}
+          onUseCaseChange={setUseCase}
+          onAreaSizeM2Change={setAreaSizeM2}
+          geometryStepTitle="Geometrie des Gebiets"
+          originalStudyArea={area.studyArea as StudyAreaGeometry | null}
+        />
+
+        {mutation.isError && (
+          <p className="px-3 text-xs text-red-600">{String((mutation.error as Error).message)}</p>
+        )}
       </div>
 
-      {hasCompleteRuns && (geometryDirty || obstaclesChanged || useCaseChanged) && (
-        <p className="rounded bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
-          Änderungen am Planungsgebiet (Gebiet, eigene Daten, Art oder Größe) markieren bestehende
-          Ergebnisse als veraltet. Bitte betroffene Varianten neu berechnen.
-        </p>
-      )}
-
-      <AreaFormFields
-        state={{
-          title,
-          boundaryId,
-          studyArea,
-          areaTab,
-          userGeojson,
-          userGeojsonMode,
-          useCase,
-          areaSizeM2,
-        }}
-        onTitleChange={setTitle}
-        onBoundaryIdChange={setBoundaryId}
-        onStudyAreaChange={setStudyArea}
-        onAreaTabChange={setAreaTab}
-        onUserGeojsonChange={(geojson) => {
-          setUserGeojson(geojson)
-          setObstaclesDirty(true)
-        }}
-        onUserGeojsonModeChange={(mode) => {
-          setUserGeojsonMode(mode)
-          setObstaclesDirty(true)
-        }}
-        onUseCaseChange={setUseCase}
-        onAreaSizeM2Change={setAreaSizeM2}
-        geometryStepTitle="Gebiet ändern"
-        originalStudyArea={area.studyArea as StudyAreaGeometry | null}
-      />
-
-      {mutation.isError && (
-        <p className="text-xs text-red-600">{String((mutation.error as Error).message)}</p>
-      )}
-
-      <div className="flex items-center justify-between gap-2">
+      <div className="flex items-center justify-between gap-2 px-3 pb-3">
         <button
           type="button"
           onClick={() => mutation.mutate()}
@@ -177,18 +146,6 @@ const AreaEditorForm = ({
           )}
         >
           {mutation.isPending ? 'Speichern…' : 'Gebiet speichern'}
-        </button>
-        <button
-          type="button"
-          onClick={() => {
-            if (window.confirm('Planungsgebiet und alle Varianten unwiderruflich löschen?')) {
-              deleteMutation.mutate()
-            }
-          }}
-          disabled={deleteMutation.isPending}
-          className="text-xs text-red-500 hover:text-red-700 disabled:opacity-50"
-        >
-          Löschen
         </button>
       </div>
     </div>
@@ -200,18 +157,8 @@ export const AreaEditor = ({
   area,
   variants,
   onClose,
-  onDeleted,
 }: {
   area: EditorArea
   variants: PlanningAreaVariantRow[]
   onClose: () => void
-  onDeleted?: () => void
-}) => (
-  <AreaEditorForm
-    key={area.id}
-    area={area}
-    variants={variants}
-    onClose={onClose}
-    onDeleted={onDeleted}
-  />
-)
+}) => <AreaEditorForm key={area.id} area={area} variants={variants} onClose={onClose} />

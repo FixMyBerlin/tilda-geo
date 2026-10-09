@@ -21,19 +21,16 @@ export const CollapsibleBoxChevron = ({ open }: { open: boolean }) => (
 )
 
 /**
- * Auf-/zuklappbare Box mit Titelzeile. Basis für die nummerierten `WizardStep`s und die
- * Flächenfinder-Abschnitte, damit beide im Planungspanel identisch aussehen und sich gleich verhalten.
- * `leading` erlaubt ein optionales Element (z.B. die Schritt-Nummer) links vom Titel.
+ * Auf-/zuklappbare Box mit Titelzeile. Basis für die Flächenfinder-Abschnitte, damit sie im
+ * Planungspanel identisch aussehen und sich gleich verhalten.
  */
 export const CollapsibleBox = ({
   title,
-  leading,
   defaultOpen = true,
   onOpenChange,
   children,
 }: {
   title: React.ReactNode
-  leading?: React.ReactNode
   defaultOpen?: boolean
   onOpenChange?: (open: boolean) => void
   children: React.ReactNode
@@ -49,7 +46,6 @@ export const CollapsibleBox = ({
         }}
         className={collapsibleBoxHeaderClass(open)}
       >
-        {leading}
         <span className="flex-1">{title}</span>
         <CollapsibleBoxChevron open={open} />
       </DisclosureButton>

@@ -173,7 +173,7 @@ export const PageModeSpaceFinder = () => {
       ? {
           title: 'Neues Planungsgebiet',
           onBack: closeNew,
-          children: <SpaceFinderNewAreaDetail onCreated={onAreaCreated} onClose={closeNew} />,
+          children: <SpaceFinderNewAreaDetail onCreated={onAreaCreated} />,
         }
       : undefined
   const newVariantDetail =

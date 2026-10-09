@@ -17,10 +17,8 @@ import type { UserGeojsonMode } from './UserObstaclesField'
 /** Reduced wizard: name + geometry + eigene Daten. Creates area + first variant (no auto-run). */
 export const AreaWizard = ({
   onCreated,
-  onCancel,
 }: {
   onCreated: (areaId: number, variantId: number) => void
-  onCancel: () => void
 }) => {
   const regionSlug = useRegionSlug()
   const queryClient = useQueryClient()
@@ -81,7 +79,7 @@ export const AreaWizard = ({
   }
 
   return (
-    <div className="flex flex-col gap-2">
+    <div className="flex flex-col">
       <AreaFormFields
         state={{
           title,
@@ -105,9 +103,9 @@ export const AreaWizard = ({
       />
 
       {mutation.isError && (
-        <p className="text-xs text-red-600">{String((mutation.error as Error).message)}</p>
+        <p className="px-3 text-xs text-red-600">{String((mutation.error as Error).message)}</p>
       )}
-      <div className="flex gap-2">
+      <div className="flex gap-2 px-3 pb-3">
         <button
           type="button"
           onClick={handleSubmit}
@@ -116,16 +114,9 @@ export const AreaWizard = ({
         >
           {mutation.isPending ? 'Wird angelegt…' : 'Planungsgebiet anlegen'}
         </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="text-xs text-gray-500 hover:text-gray-700"
-        >
-          Abbrechen
-        </button>
       </div>
       {(title.trim().length === 0 || !effectiveStudyArea) && (
-        <p className="text-xs text-red-600">Alle Felder ausfüllen</p>
+        <p className="px-3 pb-3 text-xs text-red-600">Alle Felder ausfüllen</p>
       )}
     </div>
   )
