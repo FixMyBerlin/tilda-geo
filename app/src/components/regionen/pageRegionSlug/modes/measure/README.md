@@ -28,6 +28,11 @@ One history for all lines and areas together (`createDrawHistory()` in
 last change, whichever shape it was made on, including a deleted measurement. The steps are kept
 in memory and are gone after a reload.
 
+## Closed lines become areas
+
+`closeLines` of the draw package: a line that ends on its first corner turns into an area (the
+same id as a new area, from `createId`). Continuing a line from its end works the same way.
+
 ## Take-over with Summieren
 
 `../modeSwitcherSearch.ts`: a switch from Summieren to Messen copies `sum.areas` to

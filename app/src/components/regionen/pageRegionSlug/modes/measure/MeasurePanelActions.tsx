@@ -77,6 +77,7 @@ export const MeasurePanelActions = () => {
             <p>
               Zum Abschließen doppelklicken, den letzten Eckpunkt anklicken oder „Fertig“ wählen.
             </p>
+            <p>Endet eine Linie auf ihrem ersten Eckpunkt, wird sie zur Fläche.</p>
             <p>
               <code>ESC</code> bricht das Zeichnen ab, die Rücktaste entfernt den letzten Eckpunkt.
             </p>
