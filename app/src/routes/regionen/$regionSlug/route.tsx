@@ -6,6 +6,7 @@ import RegionPagePending from '@/components/regionen/pageRegionSlug/RegionPagePe
 import { isProd } from '@/components/shared/utils/isEnv'
 import { productName } from '@/data/tildaProductNames.const'
 import { DEV_REGION_ERROR_QUERY_KEY } from '@/dev/errorPreviews'
+import { mapLayerOrderQueryOptions } from '@/server/map-layer-order/mapLayerOrderQueryOptions'
 import { processingMetadataQueryOptions } from '@/server/regions/processingMetadataQueryOptions'
 import {
   regionQaConfigsQueryOptions,
@@ -92,6 +93,7 @@ export const Route = createFileRoute('/regionen/$regionSlug')({
       queryClient.ensureQueryData(regionUploadsUserQueryOptions(regionSlug)),
       queryClient.ensureQueryData(regionUploadsSystemLayerQueryOptions(regionSlug)),
       queryClient.ensureQueryData(processingMetadataQueryOptions()),
+      queryClient.ensureQueryData(mapLayerOrderQueryOptions()),
     ])
 
     const availableModes = deriveAvailableModes({
