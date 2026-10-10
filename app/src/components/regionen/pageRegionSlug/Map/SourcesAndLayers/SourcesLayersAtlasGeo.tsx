@@ -24,15 +24,10 @@ import { buildAtlasLayerEntries } from './sortLayers/buildAtlasLayerEntries'
 //    https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/LayerSpecification/#beforeid
 // 2. Layers that share a `beforeId` stack in mount order, the first one at the bottom. The same
 //    holds for layers without a `beforeId` (raster backgrounds), which sit on top of the style.
-// All layers are therefore rendered as one list, apart from their Sources, sorted by the order
-// from /admin/layer-order.
-//
-// Performance Note:
-// Maplibre GL JS will only create network request for sources that are used by a visible layer.
-// But, it will create them again, when the source was unmounted.
-// TODO / BUG: But, we still see network requests when we toggle the visibility like we do here. Which is fine for now, due to browser caching.
+// All layers are therefore rendered as one list, sorted by the order from /admin/layer-order.
+// Source and Layers are two components, see <AllSources> and <AllLayers>.
 
-const SourcesAtlasGeo = () => {
+export const SourcesAtlasGeo = () => {
   const useDebugCachelessTiles = useMapDebugUseDebugCachelessTiles()
   const { categoriesConfig } = useCategoriesConfig()
 
@@ -77,7 +72,7 @@ const SourcesAtlasGeo = () => {
   )
 }
 
-const LayersAtlasGeo = () => {
+export const LayersAtlasGeo = () => {
   const debugLayerStyles = useMapDebugDebugLayerStyles()
   const { categoriesConfig } = useCategoriesConfig()
   const { backgroundParam } = useBackgroundParam()
@@ -103,15 +98,6 @@ const LayersAtlasGeo = () => {
       {layerEntries.map(({ highlightLayerId, layerProps }) => (
         <LayerHighlight key={highlightLayerId} {...layerProps} id={highlightLayerId} />
       ))}
-    </>
-  )
-}
-
-export const SourcesLayersAtlasGeo = () => {
-  return (
-    <>
-      <SourcesAtlasGeo />
-      <LayersAtlasGeo />
     </>
   )
 }
