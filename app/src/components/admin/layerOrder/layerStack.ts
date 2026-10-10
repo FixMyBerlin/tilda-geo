@@ -1,26 +1,24 @@
 import type { AtlasLayerEntry } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/sortLayers/getAllAtlasLayerEntries'
-import type {
-  AtlasAppAnchorId,
-  TBeforeIds,
-} from '@/components/regionen/pageRegionSlug/mapData/types'
+import type { LayerPosition } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/utils/beforeId'
+import type { AtlasAppAnchorId } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { AtlasAppAnchorIdSchema } from '@/server/map-layer-order/schemas'
 
-type StackSlotId = NonNullable<TBeforeIds>
-type StackItem = { slot: StackSlotId; title: string; hint?: string } | { basemap: string }
+type StackItem =
+  | { slot: LayerPosition; title: string; hint?: string }
+  | { basemap: string }
+  | { fixed: string }
 
 /**
- * The map from top to bottom: the positions (`beforeId`s) our layers can have, and the basemap
- * layers between them. The positions have to follow the layer order of the Maptiler style;
- * tests/smoke/map-layer-order.spec.ts checks them against the live style.
+ * The map from top to bottom: the positions our layers can have (`slot`), the basemap layers
+ * between them (`basemap`) and what else TILDA draws there but cannot be sorted (`fixed`).
+ * The positions are `LAYER_POSITIONS`, top first.
  */
 export const STACK: StackItem[] = [
+  { fixed: 'Maske, Hinweise, Prüflisten, Messen, Suchergebnis' },
   { slot: 'atlas-app-beforeid-top', title: 'Ganz oben' },
   { slot: 'atlas-app-beforeid-group1', title: 'Gruppe 1' },
-  {
-    slot: 'atlas-app-beforeid-fallback',
-    title: 'Gruppe der statischen Daten',
-    hint: 'Statische Daten ohne eigene Position liegen hier, über den TILDA-Layern dieser Gruppe.',
-  },
+  { fixed: 'Statische Daten ohne eigene Position' },
+  { slot: 'atlas-app-beforeid-fallback', title: 'Gruppe der statischen Daten' },
   { slot: 'atlas-app-beforeid-group2', title: 'Gruppe 2' },
   { basemap: 'Hausnummern' },
   {
@@ -29,10 +27,11 @@ export const STACK: StackItem[] = [
     hint: 'Standard für Punkte, Symbole und Beschriftungen.',
   },
   { basemap: 'Straßennamen' },
+  { fixed: 'Straßenfotos' },
   { slot: 'atlas-app-beforeid-below-roadname', title: 'Unter den Straßennamen' },
   {
     basemap:
-      'Luftbild oder anderer Hintergrund, wenn gewählt – verdeckt die Hintergrundkarte darunter',
+      'Luftbild oder anderer Hintergrund, wenn gewählt. Verdeckt die Hintergrundkarte darunter; die Layer der Positionen darunter liegen dann direkt über dem Luftbild, in derselben Reihenfolge.',
   },
   { basemap: 'Ortsnamen, Landesgrenze' },
   { slot: 'boundary_country', title: 'Unter den Ortsnamen', hint: 'Standard für Linien.' },
@@ -41,6 +40,7 @@ export const STACK: StackItem[] = [
   { basemap: 'Gebäude' },
   { slot: 'building', title: 'Unter den Gebäuden' },
   { basemap: 'Straßen, Schienen, Brücken' },
+  { fixed: 'QA-Flächen' },
   { slot: 'atlas-app-beforeid-below-road', title: 'Unter den Straßen' },
   { basemap: 'Gewässer' },
   { slot: 'atlas-app-beforeid-above-landuse', title: 'Über der Landnutzung' },
@@ -52,10 +52,10 @@ export const STACK: StackItem[] = [
 export const STACK_SLOT_IDS = STACK.flatMap((item) => ('slot' in item ? [item.slot] : []))
 
 /**
- * All layers from the bottom of the map to the top, each with its position. Positions only exist
- * on the default background; on a raster background this list alone is the order.
+ * All layers with their position, lower layers first. The map sorts by position first, so the
+ * order of this list only counts among the layers of one position.
  */
-export type LayerOrder = { layerKey: string; slot: StackSlotId }[]
+export type LayerOrder = { layerKey: string; slot: LayerPosition }[]
 
 type SavedEntry = { layerKey: string; beforeId: string | null }
 
@@ -92,7 +92,7 @@ export function toSavedOrder(order: LayerOrder, atlasLayers: AtlasLayerEntry[]) 
 }
 
 /** The layers at a position, the top layer first. */
-export function layersAt(order: LayerOrder, slot: StackSlotId) {
+export function layersAt(order: LayerOrder, slot: LayerPosition) {
   return order
     .filter((entry) => entry.slot === slot)
     .map((entry) => entry.layerKey)
@@ -100,7 +100,7 @@ export function layersAt(order: LayerOrder, slot: StackSlotId) {
 }
 
 /** Sorts the layers of one position (top layer first); all other layers keep their place in the list. */
-export function reorderSlot(order: LayerOrder, slot: StackSlotId, layerKeys: string[]) {
+export function reorderSlot(order: LayerOrder, slot: LayerPosition, layerKeys: string[]) {
   const bottomFirst = [...layerKeys].reverse()
   let next = 0
   return order.map((entry) =>
@@ -109,11 +109,6 @@ export function reorderSlot(order: LayerOrder, slot: StackSlotId, layerKeys: str
 }
 
 /** Moves a layer to another position, on top of the layers that are already there. */
-export function moveToSlot(order: LayerOrder, layerKey: string, slot: StackSlotId) {
-  const others = order.filter((entry) => entry.layerKey !== layerKey)
-  const topOfSlot = others.map((entry) => entry.slot).lastIndexOf(slot)
-  // An empty position has no neighbour to sit on, so the layer keeps its place in the list.
-  const index =
-    topOfSlot === -1 ? order.findIndex((entry) => entry.layerKey === layerKey) : topOfSlot + 1
-  return [...others.slice(0, index), { layerKey, slot }, ...others.slice(index)]
+export function moveToSlot(order: LayerOrder, layerKey: string, slot: LayerPosition) {
+  return [...order.filter((entry) => entry.layerKey !== layerKey), { layerKey, slot }]
 }

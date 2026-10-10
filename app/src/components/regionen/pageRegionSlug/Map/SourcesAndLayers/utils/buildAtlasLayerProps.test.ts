@@ -18,32 +18,21 @@ const baseParams = {
 }
 
 describe('buildAtlasLayerProps', () => {
-  test('admin beforeId wins over subcategory and type defaults on the default background', () => {
+  test('the beforeId is the position on the default background', () => {
     const props = buildAtlasLayerProps({
       ...baseParams,
       backgroundId: 'default',
-      subcategoryBeforeId: 'atlas-app-beforeid-top',
-      adminBeforeId: 'atlas-app-beforeid-below-roadname',
+      position: 'boundary_country',
     })
-    expect(props.beforeId).toBe('atlas-app-beforeid-below-roadname')
+    expect(props.beforeId).toBe('boundary_country')
   })
 
-  test('custom raster backgrounds drop beforeId so data sits on top', () => {
+  test('the beforeId is right above the raster background for a position below it', () => {
     const props = buildAtlasLayerProps({
       ...baseParams,
       backgroundId: 'esri',
-      subcategoryBeforeId: 'atlas-app-beforeid-top',
-      adminBeforeId: 'atlas-app-beforeid-below-roadname',
+      position: 'boundary_country',
     })
-    expect(props.beforeId).toBeUndefined()
-  })
-
-  test('without an admin override, subcategory beforeId is used', () => {
-    const props = buildAtlasLayerProps({
-      ...baseParams,
-      backgroundId: 'default',
-      subcategoryBeforeId: 'atlas-app-beforeid-top',
-    })
-    expect(props.beforeId).toBe('atlas-app-beforeid-top')
+    expect(props.beforeId).toBe('atlas-app-beforeid-below-roadname')
   })
 })

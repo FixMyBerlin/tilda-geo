@@ -1,5 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { STACK_SLOT_IDS } from '@/components/admin/layerOrder/layerStack'
+import { LAYER_POSITIONS } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/utils/beforeId'
 import { TEST_REGION_URL } from '../fixtures/routes'
 import { getMapLayerIds, waitForAtlasGeoLayers, waitForMapLoad } from '../utils/maps'
 
@@ -17,13 +17,12 @@ test('Smoke – map layer order: the basemap has all positions in order and atla
 
   const layerIds = await getMapLayerIds(page)
 
-  // /admin/layer-order lists these positions from top to bottom; the basemap style defines them.
-  const slotPositions = STACK_SLOT_IDS.map((slot) => layerIds.indexOf(slot))
-  for (const [i, slot] of STACK_SLOT_IDS.entries()) {
-    expect(slotPositions[i], `${slot} missing from the basemap style`).toBeGreaterThan(-1)
+  const positions = LAYER_POSITIONS.map((position) => layerIds.indexOf(position))
+  for (const [i, position] of LAYER_POSITIONS.entries()) {
+    expect(positions[i], `${position} missing from the basemap style`).toBeGreaterThan(-1)
   }
-  expect(slotPositions, 'STACK does not follow the basemap style').toEqual(
-    [...slotPositions].sort((a, b) => b - a),
+  expect(positions, 'LAYER_POSITIONS does not follow the basemap style').toEqual(
+    [...positions].sort((a, b) => a - b),
   )
 
   const atlasLayerPositions = layerIds

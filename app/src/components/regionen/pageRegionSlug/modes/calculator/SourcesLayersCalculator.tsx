@@ -5,6 +5,7 @@ import {
   useMapDebugUseDebugCachelessTiles,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapDebugState'
 import { useBackgroundParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBackgroundParam'
+import { layerPosition } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/utils/beforeId'
 import {
   buildAtlasLayerProps,
   isAtlasStyleLayer,
@@ -97,7 +98,7 @@ export const SourcesLayersCalculator = ({ datasetId, part, filter, areas, styleC
           visibility: layerVisibility(true),
           debugLayerStyles,
           backgroundId: backgroundParam,
-          subcategoryBeforeId: undefined,
+          position: layerPosition({ layer, subcategoryBeforeId: undefined }),
         })
         // Points that are not summed are dimmed, not removed: the calculation reads the rendered
         // points, and the panel needs the filtered-out ones to offer their values. Only the

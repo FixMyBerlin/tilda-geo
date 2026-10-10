@@ -2,12 +2,10 @@ import type { FilterSpecification } from 'maplibre-gl'
 import type { LayerProps } from 'react-map-gl/maplibre'
 import { getDebugStyleForLayerType } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/debugLayerStyles'
 import type {
-  AtlasAppAnchorId,
   AtlasLayerType,
   FileMapDataSubcategoryStyleLayer,
-  TBeforeIds,
 } from '@/components/regionen/pageRegionSlug/mapData/types'
-import { beforeId } from './beforeId'
+import { beforeIdOnBackground, type LayerPosition } from './beforeId'
 
 export type AtlasStyleLayer = Extract<FileMapDataSubcategoryStyleLayer, { type: AtlasLayerType }>
 
@@ -35,11 +33,8 @@ type BuildAtlasLayerPropsParams = {
   visibility: Visibility
   debugLayerStyles: boolean
   backgroundId: string | undefined
-  subcategoryBeforeId: TBeforeIds
-  // Admin-assigned anchor group (from the MapLayerOrder table, see /admin/layer-order).
-  // Highest precedence — but like all beforeIds only on the default background;
-  // custom raster backgrounds put all data on top (beforeId undefined).
-  adminBeforeId?: AtlasAppAnchorId
+  /** See `layerPosition`. */
+  position: LayerPosition
 }
 
 /** Build LayerProps by switching on layer.type so each branch returns a single coherent layer type (no assertion). */
@@ -50,27 +45,16 @@ export function buildAtlasLayerProps({
   visibility,
   debugLayerStyles,
   backgroundId,
-  subcategoryBeforeId,
-  adminBeforeId,
+  position,
 }: BuildAtlasLayerPropsParams) {
   const layerFilter: FilterSpecification | undefined = debugLayerStyles
     ? (['all'] as const)
     : layer.filter
-  // Precedence: admin override > per-layer config > subcategory config > type-based default
-  const adminOverride = backgroundId === 'default' ? adminBeforeId : undefined
-  const styleBeforeId = backgroundId === 'default' && layer.beforeId ? layer.beforeId : undefined
   const base = {
     id: layerId,
     source: sourceKey,
     'source-layer': layer['source-layer'],
-    beforeId:
-      adminOverride ??
-      styleBeforeId ??
-      beforeId({
-        backgroundId,
-        subcategoryBeforeId,
-        layerType: layer.type,
-      }),
+    beforeId: beforeIdOnBackground(position, backgroundId),
     ...(layerFilter ? { filter: layerFilter } : {}),
     ...(layer.maxzoom ? { maxzoom: layer.maxzoom } : {}),
     ...(layer.minzoom ? { minzoom: layer.minzoom } : {}),

@@ -20,10 +20,9 @@ import { buildAtlasLayerEntries } from './sortLayers/buildAtlasLayerEntries'
 // We also use this visbility to add/remove interactive layers.
 //
 // Layer order:
-// 1. `beforeId` puts a layer below an anchor layer of the basemap style.
+// 1. `beforeId` puts a layer below a layer of the basemap style, its position (see `layerPosition`).
 //    https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/LayerSpecification/#beforeid
-// 2. Layers that share a `beforeId` stack in mount order, the first one at the bottom. The same
-//    holds for layers without a `beforeId` (raster backgrounds), which sit on top of the style.
+// 2. Layers that share a `beforeId` stack in mount order, the first one at the bottom.
 // All layers are therefore rendered as one list, sorted by the order from /admin/layer-order.
 // Source and Layers are two components, see <AllSources> and <AllLayers>.
 

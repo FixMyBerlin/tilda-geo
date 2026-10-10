@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { createFreshCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/createFreshCategoriesConfig'
+import { layerPositionRank } from '../utils/beforeId'
 import { buildAtlasLayerEntries } from './buildAtlasLayerEntries'
 
 const bikelanesConfig = () => createFreshCategoriesConfig(['bikelanes'])
@@ -10,57 +11,52 @@ const defaultArgs = {
 }
 
 describe('buildAtlasLayerEntries', () => {
-  test('DB positions reorder entries bottom-first', () => {
+  test('the saved order sorts the layers of one position, lower layer first', () => {
     const categoriesConfig = bikelanesConfig()
-    const configOrder = buildAtlasLayerEntries({
-      categoriesConfig,
-      layerOrder: [],
-      ...defaultArgs,
-    })
-    const first = configOrder[0]!.layerId
-    const last = configOrder.at(-1)!.layerId
+    const configOrder = buildAtlasLayerEntries({ categoriesConfig, layerOrder: [], ...defaultArgs })
+    const samePosition = configOrder.filter((e) => e.position === configOrder[0]!.position)
+    const first = samePosition[0]!.layerId
+    const last = samePosition.at(-1)!.layerId
     expect(first).not.toBe(last)
 
-    const reordered = buildAtlasLayerEntries({
+    const ids = buildAtlasLayerEntries({
       categoriesConfig,
       layerOrder: [
         { layerKey: last, beforeId: null },
         { layerKey: first, beforeId: null },
       ],
       ...defaultArgs,
-    })
+    }).map((e) => e.layerId)
 
-    expect(reordered.map((e) => e.layerId)).toEqual([
-      last,
-      first,
-      ...configOrder.map((e) => e.layerId).filter((id) => id !== last && id !== first),
-    ])
+    // Layers that are not part of the saved order come after the saved ones.
+    expect(ids.slice(0, 2)).toEqual([last, first])
   })
 
-  test('DB beforeId override applies on the default background, not on a raster background', () => {
+  test('layers of a lower position mount first, on every background', () => {
+    const categoriesConfig = createFreshCategoriesConfig(['bikelanes', 'surface', 'poi'])
+    for (const backgroundParam of ['default', 'esri']) {
+      const entries = buildAtlasLayerEntries({
+        categoriesConfig,
+        layerOrder: [],
+        backgroundParam,
+        debugLayerStyles: false,
+      })
+      const ranks = entries.map((e) => layerPositionRank(e.position))
+      expect(new Set(ranks).size).toBeGreaterThan(2)
+      expect(ranks).toEqual([...ranks].sort((a, b) => a - b))
+    }
+  })
+
+  test('a saved beforeId is the position of the layer', () => {
     const categoriesConfig = bikelanesConfig()
-    const configOrder = buildAtlasLayerEntries({
-      categoriesConfig,
-      layerOrder: [],
-      ...defaultArgs,
-    })
+    const configOrder = buildAtlasLayerEntries({ categoriesConfig, layerOrder: [], ...defaultArgs })
     const layerKey = configOrder[0]!.layerId
-    const layerOrder = [{ layerKey, beforeId: 'atlas-app-beforeid-below-roadname' as const }]
+    const layerOrder = [{ layerKey, beforeId: 'atlas-app-beforeid-group2' as const }]
 
-    const onDefault = buildAtlasLayerEntries({
-      categoriesConfig,
-      layerOrder,
-      ...defaultArgs,
-    })
-    expect(onDefault[0]!.layerProps.beforeId).toBe('atlas-app-beforeid-below-roadname')
-
-    const onRaster = buildAtlasLayerEntries({
-      categoriesConfig,
-      layerOrder,
-      backgroundParam: 'esri',
-      debugLayerStyles: false,
-    })
-    expect(onRaster[0]!.layerProps.beforeId).toBeUndefined()
+    const onDefault = buildAtlasLayerEntries({ categoriesConfig, layerOrder, ...defaultArgs })
+    const moved = onDefault.find((e) => e.layerId === layerKey)
+    expect(moved?.position).toBe('atlas-app-beforeid-group2')
+    expect(moved?.layerProps.beforeId).toBe('atlas-app-beforeid-group2')
   })
 
   test('unknown DB beforeId is ignored and the config/type default is used', () => {

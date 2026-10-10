@@ -1,6 +1,14 @@
 import { describe, expect, test } from 'vitest'
 import type { AtlasLayerEntry } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/sortLayers/getAllAtlasLayerEntries'
-import { layersAt, moveToSlot, reorderSlot, toLayerOrder, toSavedOrder } from './layerStack'
+import { LAYER_POSITIONS } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/utils/beforeId'
+import {
+  layersAt,
+  moveToSlot,
+  reorderSlot,
+  STACK_SLOT_IDS,
+  toLayerOrder,
+  toSavedOrder,
+} from './layerStack'
 
 const TOP = 'atlas-app-beforeid-top'
 
@@ -85,19 +93,20 @@ describe('reorderSlot', () => {
 describe('moveToSlot', () => {
   test('puts the layer on top of the layers of the new position', () => {
     const order = moveToSlot(toLayerOrder([], atlasLayers), 'fill-a', TOP)
-    expect(keys(order)).toEqual(['line-a', 'fill-b', 'line-b', 'label', 'fill-a'])
+    expect(layersAt(order, TOP)).toEqual(['fill-a', 'label'])
+    expect(layersAt(order, 'landuse')).toEqual(['fill-b'])
     expect(toSavedOrder(order, atlasLayers).at(-1)).toEqual({ layerKey: 'fill-a', beforeId: TOP })
-  })
-
-  test('a layer that moves to an empty position keeps its place in the list', () => {
-    const order = moveToSlot(toLayerOrder([], atlasLayers), 'fill-a', 'atlas-app-beforeid-group2')
-    expect(keys(order)).toEqual(keys(toLayerOrder([], atlasLayers)))
-    expect(layersAt(order, 'atlas-app-beforeid-group2')).toEqual(['fill-a'])
   })
 
   test('moving back to the default position removes the beforeId', () => {
     const moved = moveToSlot(toLayerOrder([], atlasLayers), 'fill-a', TOP)
     const saved = toSavedOrder(moveToSlot(moved, 'fill-a', 'landuse'), atlasLayers)
     expect(saved.find((entry) => entry.layerKey === 'fill-a')?.beforeId).toBe(null)
+  })
+})
+
+describe('STACK', () => {
+  test('lists the positions of the map, top first', () => {
+    expect(STACK_SLOT_IDS).toEqual([...LAYER_POSITIONS].reverse())
   })
 })

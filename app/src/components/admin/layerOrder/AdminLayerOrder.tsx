@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useState } from 'react'
-import { twMerge } from 'tailwind-merge'
+import { twJoin, twMerge } from 'tailwind-merge'
 import { AdminAsideActions } from '@/components/admin/aside/AdminAsideActions'
 import { AdminAsideLayout } from '@/components/admin/aside/AdminAsideLayout'
 import { useAdminAsideVariant } from '@/components/admin/aside/adminAsideSection'
@@ -200,15 +200,22 @@ function LayerOrderEditor({ savedOrder }: LayerOrderEditorProps) {
         ) : null}
       </div>
       {/* No changes while a save runs: the editor starts again from the saved order afterwards. */}
-      <fieldset disabled={save.isPending} className="contents">
+      <fieldset disabled={save.isPending} className="min-w-0 space-y-4">
         {STACK.map((item) => {
-          if ('basemap' in item) {
+          if ('basemap' in item || 'fixed' in item) {
+            const text = 'basemap' in item ? `Hintergrundkarte: ${item.basemap}` : item.fixed
             return (
               <p
-                key={item.basemap}
-                className="flex items-center gap-3 text-xs font-medium tracking-wide text-gray-500 uppercase before:h-px before:flex-1 before:bg-gray-300 after:h-px after:flex-1 after:bg-gray-300"
+                key={text}
+                className={twJoin(
+                  'flex items-center gap-3 text-xs font-medium before:h-px before:flex-1 after:h-px after:flex-1',
+                  'basemap' in item
+                    ? 'text-gray-500 before:bg-gray-300 after:bg-gray-300'
+                    : 'text-yellow-800 before:bg-yellow-300 after:bg-yellow-300',
+                )}
               >
-                Hintergrundkarte: {item.basemap}
+                {'fixed' in item ? <span className="font-semibold">Fest: </span> : null}
+                <span className="max-w-xl text-center">{text}</span>
               </p>
             )
           }

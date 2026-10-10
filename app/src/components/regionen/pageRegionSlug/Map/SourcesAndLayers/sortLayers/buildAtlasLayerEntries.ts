@@ -9,6 +9,7 @@ import type { MapLayerOrderEntry } from '@/server/map-layer-order/queries/getMap
 import { AtlasAppAnchorIdSchema } from '@/server/map-layer-order/schemas'
 import { getLayerHighlightId } from '../../utils/layerHighlight'
 import { layerVisibility } from '../../utils/layerVisibility'
+import { type LayerPosition, layerPosition, layerPositionRank } from '../utils/beforeId'
 import {
   type AtlasStyleLayer,
   buildAtlasLayerProps,
@@ -18,7 +19,7 @@ import { sortByLayerOrder } from './sortByLayerOrder'
 
 type Props = {
   categoriesConfig: MapDataCategoryConfig[]
-  /** Rows of the MapLayerOrder table, bottom layer first. Empty: keep the config order. */
+  /** Rows of the MapLayerOrder table, bottom layer first. Empty: the config order. */
   layerOrder: MapLayerOrderEntry[]
   backgroundParam: string | undefined
   debugLayerStyles: boolean
@@ -46,7 +47,7 @@ export function buildAtlasLayerEntries({
     {
       layer: AtlasStyleLayer
       sourceKey: string
-      subcategoryBeforeId: MapDataCategoryConfig['subcategories'][number]['beforeId']
+      position: LayerPosition
       visible: boolean
     }
   >()
@@ -75,7 +76,11 @@ export function buildAtlasLayerEntries({
           layers.set(layerId, {
             layer,
             sourceKey,
-            subcategoryBeforeId: subcategoryConfig.beforeId,
+            position: layerPosition({
+              layer,
+              subcategoryBeforeId: subcategoryConfig.beforeId,
+              adminBeforeId: adminBeforeIds.get(layerId),
+            }),
             visible,
           })
         }
@@ -85,6 +90,7 @@ export function buildAtlasLayerEntries({
 
   const entries = Array.from(layers, ([layerId, { visible, ...layerConfig }]) => ({
     layerId,
+    position: layerConfig.position,
     // All styles of a subcategory are mounted at once and reuse style layer ids like
     // "structure-icons", so the highlight id comes from the unique layer key.
     highlightLayerId: getLayerHighlightId(layerId),
@@ -94,13 +100,18 @@ export function buildAtlasLayerEntries({
       visibility: layerVisibility(visible),
       debugLayerStyles,
       backgroundId: backgroundParam,
-      adminBeforeId: adminBeforeIds.get(layerId),
     }),
   }))
 
-  return sortByLayerOrder({
+  const savedOrder = sortByLayerOrder({
     items: entries,
     getKey: (entry) => entry.layerId,
     orderedKeys: layerOrder.map((entry) => entry.layerKey),
   })
+  // Layers of a lower position mount first. On the default background that changes nothing, each
+  // position has its own `beforeId`. On a raster background the lower positions share one
+  // `beforeId` (see `beforeIdOnBackground`) and with this stack like on the default background.
+  return [...savedOrder].sort(
+    (a, b) => layerPositionRank(a.position) - layerPositionRank(b.position),
+  )
 }

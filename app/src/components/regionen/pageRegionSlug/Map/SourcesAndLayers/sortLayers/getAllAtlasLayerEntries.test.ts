@@ -1,5 +1,8 @@
 import { describe, expect, test } from 'vitest'
-import { STACK_SLOT_IDS } from '@/components/admin/layerOrder/layerStack'
+import { categories } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/categories.const'
+import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
+import { createLayerKeyAtlasGeo } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
+import { layerPosition } from '../utils/beforeId'
 import { getAllAtlasLayerEntries } from './getAllAtlasLayerEntries'
 
 describe('getAllAtlasLayerEntries', () => {
@@ -23,10 +26,26 @@ describe('getAllAtlasLayerEntries', () => {
     expect(shared?.categoryNames.length).toBeGreaterThan(1)
   })
 
-  // /admin/layer-order shows a layer at its default position; a position it does not know would
-  // hide the layer there.
-  test('every default beforeId is a position of the admin stack', () => {
-    const unknown = entries.filter((entry) => !STACK_SLOT_IDS.includes(entry.defaultBeforeId))
-    expect(unknown.map((entry) => `${entry.layerKey} → ${entry.defaultBeforeId}`)).toEqual([])
+  // The layer key has no category id: the same key has to be the same layer at the same position.
+  test('a layer key that several subcategories share has one position', () => {
+    const positions = new Map<string, Set<string>>()
+    for (const category of categories) {
+      for (const subcategory of category.subcategories) {
+        for (const style of subcategory.styles) {
+          for (const layer of style.layers ?? []) {
+            const key = createLayerKeyAtlasGeo(
+              getSourceData(subcategory.sourceId).id,
+              subcategory.id,
+              style.id,
+              layer.id,
+            )
+            const position = layerPosition({ layer, subcategoryBeforeId: subcategory.beforeId })
+            positions.set(key, (positions.get(key) ?? new Set()).add(position))
+          }
+        }
+      }
+    }
+    const clashes = [...positions].filter(([, set]) => set.size > 1)
+    expect(clashes.map(([key, set]) => `${key} → ${[...set].join(' / ')}`)).toEqual([])
   })
 })

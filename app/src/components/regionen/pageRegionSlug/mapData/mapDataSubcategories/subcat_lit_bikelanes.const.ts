@@ -13,6 +13,7 @@ export const subcat_lit_bikelanes: FileMapDataSubcategory = {
   name: 'Radverkehrsanlagen',
   ui: 'checkbox',
   sourceId: source,
+  beforeId: 'atlas-app-beforeid-top',
   styles: [
     {
       id: 'default',

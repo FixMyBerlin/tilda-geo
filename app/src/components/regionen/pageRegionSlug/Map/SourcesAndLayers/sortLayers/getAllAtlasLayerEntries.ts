@@ -1,7 +1,7 @@
 import { categories } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/categories.const'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
 import { createLayerKeyAtlasGeo } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
-import { beforeId } from '../utils/beforeId'
+import { type LayerPosition, layerPosition } from '../utils/beforeId'
 import { isAtlasStyleLayer } from '../utils/buildAtlasLayerProps'
 
 /**
@@ -19,8 +19,8 @@ export function getAllAtlasLayerEntries() {
       categoryNames: string[]
       subcategoryName: string
       styleName: string
-      /** The `beforeId` from the config on the default background, see `buildAtlasLayerProps`. */
-      defaultBeforeId: NonNullable<ReturnType<typeof beforeId>>
+      /** The position from the config. */
+      defaultBeforeId: LayerPosition
     }
   >()
   for (const category of categories) {
@@ -34,14 +34,10 @@ export function getAllAtlasLayerEntries() {
             known.categoryNames.push(category.name)
             continue
           }
-          const defaultBeforeId =
-            layer.beforeId ??
-            beforeId({
-              backgroundId: 'default',
-              subcategoryBeforeId: subcategory.beforeId,
-              layerType: layer.type,
-            })
-          if (!defaultBeforeId) throw new Error(`Missing default beforeId for ${layerKey}`)
+          const defaultBeforeId = layerPosition({
+            layer,
+            subcategoryBeforeId: subcategory.beforeId,
+          })
           entries.set(layerKey, {
             layerKey,
             layerId: layer.id,
