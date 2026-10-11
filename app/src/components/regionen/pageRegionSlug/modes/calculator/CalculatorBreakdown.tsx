@@ -1,23 +1,21 @@
 import { FunnelIcon, TrashIcon } from '@heroicons/react/20/solid'
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { twJoin } from 'tailwind-merge'
-import type { MapDataSourceCalculator } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { ConditionalFormattedKey } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/ConditionalFormattedKey'
 import { ConditionalFormattedValue } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/ConditionalFormattedValue'
 import { modePanelTintHairlineTopClassName } from '../modePanel.const'
-import { type CalculatorDataset, calculatorTranslationSourceId } from './calculatorDatasets.const'
-import type { CalculatorFilter } from './calculatorModeParam'
 import {
-  calculateMetricSummaryForAreas,
-  calculatorMetricOrder,
-} from './utils/calculateMetricSummaries'
+  type CalculatorDataset,
+  type CalculatorMetric,
+  calculatorTranslationSourceId,
+} from './calculatorDatasets.const'
+import type { CalculatorFilter } from './calculatorModeParam'
+import type { calculateMetricSummaryForAreas } from './utils/calculateMetricSummaries'
 import {
   calculatorStyleOtherColor,
   type CalculatorStyleColors,
 } from './utils/calculatorStyleColors'
 
 export type CalculatorDisplayMode = 'value' | 'percent'
-type CalculatorMetric = (typeof calculatorMetricOrder)[number]
 type CalculatorSummary = ReturnType<typeof calculateMetricSummaryForAreas>
 type CalculatorAreaSummary = CalculatorSummary['byArea'][number]['summary']
 
@@ -26,7 +24,7 @@ type CalculatorAreaSummary = CalculatorSummary['byArea'][number]['summary']
  * to keep call sites tidy.
  */
 export type CalculatorBreakdownData = {
-  sumKeys: NonNullable<MapDataSourceCalculator['sumKeys']>
+  sumKeys: CalculatorDataset['sumKeys']
   /** The sources of the dataset; their translations name the tags and values. */
   parts: CalculatorDataset['parts']
   metrics: CalculatorMetric[]
@@ -34,10 +32,10 @@ export type CalculatorBreakdownData = {
   selectedMetricLabel: string
   summary: CalculatorSummary | null
   displayMode: CalculatorDisplayMode
-  showViewportWarning: boolean
+  /** New areas are being summed; the values shown are those of the areas before. */
+  isUpdating: boolean
   onSelectMetric: (metric: CalculatorMetric) => void
   onSetDisplayMode: (mode: CalculatorDisplayMode) => void
-  onShowArea: () => void
   onDeleteArea: (key: string) => void
   /** Tag values the sum is narrowed to (`sum.filter`). */
   filter: CalculatorFilter
@@ -53,29 +51,6 @@ const toggleClassName = (active: boolean) =>
     'px-2 py-1 text-xs leading-tight',
     active ? 'bg-fuchsia-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-50',
   )
-
-/** Warning that the calculation only covers what's currently in the viewport. */
-const ViewportWarning = ({ onShowArea }: { onShowArea: () => void }) => (
-  <div className="rounded border border-fuchsia-200 bg-white px-2 py-1.5 text-xs leading-snug text-fuchsia-800">
-    <div className="flex items-start gap-1.5">
-      <ExclamationTriangleIcon className="mt-0.5 size-4 shrink-0 text-fuchsia-700" />
-      <p>
-        Die Berechnung basiert auf sichtbaren Kartendaten. Bitte stellen Sie sicher, dass die
-        gesamte Fläche sichtbar ist, um genaue Ergebnisse zu erhalten.
-      </p>
-    </div>
-    <div className="mt-1.5 flex justify-end">
-      <button
-        type="button"
-        onClick={onShowArea}
-        aria-label="Gesamte Zeichenfläche in der Karte anzeigen"
-        className="rounded border border-fuchsia-300 px-1.5 py-0.5 text-xs font-semibold text-fuchsia-800 hover:bg-fuchsia-50"
-      >
-        Fläche anzeigen
-      </button>
-    </div>
-  </div>
-)
 
 /** Metric selector (when >1 metric) + value/percent display-mode toggle. */
 const MetricControls = ({
@@ -181,14 +156,20 @@ const AreaSummary = ({
         </div>
         {group.values.map((groupValue) => {
           const groupFilter = filter[group.key]
-          const selected = groupFilter === groupValue.filterValue
+          const selected = groupFilter?.includes(groupValue.filterValue) ?? false
           return (
             <button
               key={`${group.key}::${groupValue.filterValue}`}
               type="button"
               onClick={() => onToggleFilter(group.key, groupValue.filterValue)}
               aria-pressed={selected}
-              title={selected ? 'Filter entfernen' : 'Nur diese Werte summieren'}
+              title={
+                selected
+                  ? 'Filter entfernen'
+                  : groupFilter
+                    ? 'Auch diese Werte summieren'
+                    : 'Nur diese Werte summieren'
+              }
               className={twJoin(
                 'group/row -mr-1 flex w-[calc(100%+0.25rem)] min-w-0 cursor-pointer justify-between gap-2 rounded-sm py-0.5 pr-1 pl-2 text-left text-xs tabular-nums transition-colors',
                 selected
@@ -238,8 +219,8 @@ const AreaSummary = ({
 )
 
 /**
- * The calculator breakdown (viewport warning + metric controls + per-area summaries +
- * combined total). Only rendered once an area is drawn.
+ * The calculator breakdown (metric controls + per-area summaries + combined total). Only
+ * rendered once an area is summed.
  * Presentational only — all data/handlers come from CalculatorResult via `data`. Styled for
  * the tinted mode panel (desktop column and mobile dock).
  */
@@ -247,10 +228,15 @@ export const CalculatorBreakdown = ({ data }: { data: CalculatorBreakdownData })
   const { summary, selectedMetric, selectedMetricLabel, metrics } = data
 
   return (
-    <div className="min-w-0 text-sm leading-tight">
+    // While new sums load, the last ones stay in place, faded: nothing in the panel moves.
+    <div
+      aria-busy={data.isUpdating}
+      className={twJoin(
+        'min-w-0 text-sm leading-tight transition-opacity',
+        data.isUpdating && 'opacity-50',
+      )}
+    >
       <div className="space-y-2 px-4 py-3">
-        {data.showViewportWarning && <ViewportWarning onShowArea={data.onShowArea} />}
-
         <MetricControls
           metrics={metrics}
           selectedMetric={selectedMetric}

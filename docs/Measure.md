@@ -33,16 +33,21 @@ areas, grouped by tag values. The app only passes the dataset names, the areas a
 `tilda_measure_<dataset>(extent)` returns the features of a dataset. It is the one place that says
 which tables a dataset reads.
 
-| Dataset           | Part → table                                                             | Amounts            |
-| ----------------- | ------------------------------------------------------------------------ | ------------------ |
-| `parking`         | `street` → `parkings` (lines), `off_street` → `off_street_parking_areas` | `capacity`, `area` |
-| `bikelanes`       | `bikelanes` → `bikelanes`                                                | `length` (meters)  |
-| `roads`           | `roads` → `roads`, `paths` → `roadsPathClasses`                          | `length` (meters)  |
-| `bicycle_parking` | `points` → `bicycleParking_points`, `areas` → `bicycleParking_areas`     | `capacity`         |
+| Dataset           | Part → table                                                             | Amounts                                |
+| ----------------- | ------------------------------------------------------------------------ | -------------------------------------- |
+| `parking`         | `street` → `parkings` (lines), `off_street` → `off_street_parking_areas` | `capacity`, `area`                     |
+| `bikelanes`       | `bikelanes` → `bikelanes`                                                | `length`, `length_directions` (meters) |
+| `roads`           | `roads` → `roads`, `paths` → `roadsPathClasses`                          | `length`, `length_directions` (meters) |
+| `bicycle_parking` | `points` → `bicycleParking_points`, `areas` → `bicycleParking_areas`     | `capacity`                             |
 
 A new dataset is one more function. Callers add what is theirs: QA filters parking
-by `operator_type` and moves bikelanes to their street side; Statistik counts kilometers per
-direction; Summieren groups by the tags of its panel.
+by `operator_type` and moves bikelanes to their street side; Summieren groups by the tags of its
+panel.
+
+`length_directions` is the length per direction of travel: the `length` of a oneway (`oneway` is
+`yes`, `implicit_yes` or `yes_dual_carriageway`), twice the `length` of every other line. Statistik
+and Summieren sum this amount, so a street with both directions counts like two oneways. QA
+compares the plain `length`.
 
 ## Whole things and fractions
 

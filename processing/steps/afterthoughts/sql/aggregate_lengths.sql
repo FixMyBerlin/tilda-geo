@@ -4,7 +4,7 @@
 -- Bundesland and Kreis, into public.aggregated_lengths (table shell: initialize_aggregated_lengths.sql).
 -- A line that crosses a boundary counts on each side with the share of its length that lies there
 -- (processing/measure/measure_functions.sql).
--- Kilometers are per direction: a line that is not oneway counts twice.
+-- Kilometers are per direction: a line that is not oneway counts twice (`length_directions`).
 -- INPUT: public.boundaries (admin_level 4 and 6), datasets `bikelanes` and `roads` (part roads only)
 -- OUTPUT: public.aggregated_lengths (bikelane_length, road_length: {class: km}); read by /api/stats
 --
@@ -23,8 +23,7 @@ kilometers AS (
     f.part,
     COALESCE(f.tags ->> 'category', f.tags ->> 'road') AS class,
     ROUND(SUM(
-      (f.tags ->> 'length')::FLOAT
-      * CASE WHEN f.tags ->> 'oneway' IN ('yes', 'implicit_yes', 'yes_dual_carriageway') THEN 1 ELSE 2 END
+      (f.tags ->> 'length_directions')::FLOAT
       * tilda_measure_share(a.geom, f.geom)
     ) / 1000) AS km
   FROM areas a

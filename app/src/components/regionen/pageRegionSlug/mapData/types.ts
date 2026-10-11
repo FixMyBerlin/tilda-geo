@@ -68,21 +68,6 @@ type MapDataSourceInspector =
       enabled: false
     }
 
-export type MapDataSourceCalculator =
-  | {
-      enabled: true
-      sumKeys: Partial<Record<'capacity' | 'area' | 'length', string>>
-      groupByKeys: string[]
-      /** @desc The key used by the highlighting LayerHighlight component to change the appearance of the selected element */
-      highlightingKey: string
-    }
-  | {
-      enabled: false
-      sumKeys?: undefined
-      groupByKeys?: undefined
-      highlightingKey?: undefined
-    }
-
 export type MapDataOsmIdConfig =
   | undefined
   | { osmType: string; osmId: string }
@@ -102,8 +87,6 @@ type MapDataSourceShared<TIds> = {
   osmIdConfig: MapDataOsmIdConfig
   /** @desc Inspector: Enable and configure Inspector */
   inspector: MapDataSourceInspector
-  /** @desc Calculator: Enable and configure calculator feature */
-  calculator: MapDataSourceCalculator
 }
 
 /** Processing tables; tile URL via `getMapDataSourceTilesUrl` (`atlas_generalized_*` PG functions). */

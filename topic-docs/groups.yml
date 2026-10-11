@@ -4,11 +4,9 @@ groups:
     tables:
       - parkings
       - parkings_edges
-      - parkings_quantized
       - parkings_no
       - parkings_cutouts
       - off_street_parking_areas
-      - off_street_parking_quantized
   - id: atlas
     label: Atlas Daten
     tables:

@@ -41,9 +41,29 @@ $$;
 -- The features of a dataset that touch `extent` (3857), each in its own geometry.
 -- `part` names the source table, so callers can filter or break down by it.
 -- Amounts are numeric tags: `capacity` (parking, bicycle_parking; a bicycle parking without one
--- counts as 1) and `length` in meters (bikelanes, roads).
+-- counts as 1), `length` in meters (bikelanes, roads) and `length_directions`, the meters per
+-- direction of travel (`tilda_measure_directions`).
 -- One function per dataset, each a single SELECT: the planner inlines it, so the tables are read
 -- with their indexes, and a caller only needs the tables of its own dataset to exist.
+
+-- The directions of travel of a line: 1 for a oneway, else 2. Kilometers of a network are
+-- compared per direction, so a street with both directions counts like two oneways.
+CREATE OR REPLACE FUNCTION tilda_measure_directions(tags JSONB)
+RETURNS INT
+LANGUAGE sql IMMUTABLE PARALLEL SAFE
+AS $$
+  SELECT CASE WHEN tags ->> 'oneway' IN ('yes', 'implicit_yes', 'yes_dual_carriageway') THEN 1 ELSE 2 END
+$$;
+
+-- `tags` with `length_directions`. Without a numeric `length` the tags stay as they are.
+CREATE OR REPLACE FUNCTION tilda_measure_length_tags(tags JSONB)
+RETURNS JSONB
+LANGUAGE sql IMMUTABLE PARALLEL SAFE
+AS $$
+  SELECT CASE WHEN jsonb_typeof(tags -> 'length') = 'number'
+    THEN tags || jsonb_build_object('length_directions', (tags ->> 'length')::NUMERIC * tilda_measure_directions(tags))
+    ELSE tags END
+$$;
 
 CREATE OR REPLACE FUNCTION tilda_measure_parking(extent geometry)
 RETURNS TABLE (part TEXT, id TEXT, geom geometry, tags JSONB, meta JSONB)
@@ -58,16 +78,16 @@ CREATE OR REPLACE FUNCTION tilda_measure_bikelanes(extent geometry)
 RETURNS TABLE (part TEXT, id TEXT, geom geometry, tags JSONB, meta JSONB)
 LANGUAGE sql STABLE PARALLEL SAFE
 AS $$
-  SELECT 'bikelanes', id, geom, tags, meta FROM public.bikelanes WHERE geom && extent
+  SELECT 'bikelanes', id, geom, tilda_measure_length_tags(tags), meta FROM public.bikelanes WHERE geom && extent
 $$;
 
 CREATE OR REPLACE FUNCTION tilda_measure_roads(extent geometry)
 RETURNS TABLE (part TEXT, id TEXT, geom geometry, tags JSONB, meta JSONB)
 LANGUAGE sql STABLE PARALLEL SAFE
 AS $$
-  SELECT 'roads', id, geom, tags, meta FROM public.roads WHERE geom && extent
+  SELECT 'roads', id, geom, tilda_measure_length_tags(tags), meta FROM public.roads WHERE geom && extent
   UNION ALL
-  SELECT 'paths', id, geom, tags, meta FROM public."roadsPathClasses" WHERE geom && extent
+  SELECT 'paths', id, geom, tilda_measure_length_tags(tags), meta FROM public."roadsPathClasses" WHERE geom && extent
 $$;
 
 CREATE OR REPLACE FUNCTION tilda_measure_bicycle_parking(extent geometry)
