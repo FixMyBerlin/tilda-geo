@@ -62,7 +62,7 @@ import { Map3dTouchRotation } from './Map3dTouchRotation'
 import { SearchResultLayers } from './Search/SearchResultLayers'
 import { MAPTERHORN_DEM_SOURCE_ID } from './SourcesAndLayers/mapterhornDem'
 import { SourcesLayerRasterBackgrounds } from './SourcesAndLayers/SourcesLayerRasterBackgrounds'
-import { SourcesLayersAtlasGeo } from './SourcesAndLayers/SourcesLayersAtlasGeo'
+import { LayersAtlasGeo, SourcesAtlasGeo } from './SourcesAndLayers/SourcesLayersAtlasGeo'
 import { SourcesLayersInternalNotes } from './SourcesAndLayers/SourcesLayersInternalNotes'
 import { SourcesLayersMap3dBuildings } from './SourcesAndLayers/SourcesLayersMap3dBuildings'
 import { SourcesLayersMap3dDem } from './SourcesAndLayers/SourcesLayersMap3dDem'
@@ -372,7 +372,8 @@ export const RegionMap = () => {
       <SourcesLayersMap3dDem />
       <SourcesLayersMap3dBuildings />
       <SourcesLayersSystemDatasets />
-      <SourcesLayersAtlasGeo />
+      <SourcesAtlasGeo />
+      <LayersAtlasGeo />
       <SourcesLayersStaticDatasets />
       <SourcesLayersStreetImagery />
       <SourcesLayersOsmNotes />
