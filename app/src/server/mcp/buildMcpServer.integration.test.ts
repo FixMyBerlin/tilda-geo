@@ -15,8 +15,8 @@ const REGION_SLUG = 'vitest-mcp-region'
 const SECOND_REGION_SLUG = 'vitest-mcp-region-2'
 const OTHER_USER_ID = 'vitest-mcp-other'
 const UPLOAD_SLUG = 'vitest-mcp-upload'
-const QA_CONFIG_SLUG = 'vitest-mcp-qa'
-const QA_MAP_TABLE = 'public.vitest_mcp_qa_areas'
+const QA_MAP_TABLE = 'public.vitest_mcp_qa'
+const QA_AREA_TABLE = 'data.vitest_mcp_qa_cells'
 const SECOND_UPLOAD_SLUG = 'vitest-mcp-upload-2'
 
 async function connectClient() {
@@ -47,9 +47,12 @@ async function cleanup() {
   await db.note.deleteMany({ where: { folder: inRegion } })
   await db.noteFolder.deleteMany({ where: inRegion })
   await db.reviewList.deleteMany({ where: inRegion })
-  await db.qaEvaluation.deleteMany({ where: { config: { slug: QA_CONFIG_SLUG } } })
-  await db.qaConfig.deleteMany({ where: { slug: QA_CONFIG_SLUG } })
-  await db.$executeRawUnsafe(`DROP TABLE IF EXISTS ${QA_MAP_TABLE}`)
+  const inQaRegion = { region: { slug: REGION_SLUG } }
+  await db.qaEvaluation.deleteMany({ where: { config: inQaRegion } })
+  await db.qaConfig.deleteMany({ where: inQaRegion })
+  for (const table of [QA_AREA_TABLE, `${QA_MAP_TABLE}_indicators`, QA_MAP_TABLE]) {
+    await db.$executeRawUnsafe(`DROP TABLE IF EXISTS ${table}`)
+  }
   await db.mapDatasetUpload.deleteMany({
     where: { slug: { in: [UPLOAD_SLUG, SECOND_UPLOAD_SLUG] } },
   })
@@ -677,86 +680,149 @@ describe.skipIf(!integrationDb)('admin MCP tools (integration)', () => {
     expect(JSON.parse(lists.text)).toEqual([])
   })
 
-  test('qa_configs_list / qa_areas_list / qa_evaluations_* round-trip', async () => {
+  test('qa_configs_* / qa_areas_list / qa_evaluations_* round-trip', async () => {
+    // What processing writes for one cell with one indicator.
+    await db.$executeRawUnsafe(`CREATE TABLE ${QA_AREA_TABLE} (id text)`)
     await db.$executeRawUnsafe(
-      `CREATE TABLE ${QA_MAP_TABLE} (id text PRIMARY KEY, relative numeric, count_reference int, count_current int, difference int, geom public.geometry(MultiPolygon, 3857))`,
+      `CREATE TABLE ${QA_MAP_TABLE} AS
+       SELECT 'cell-1'::text AS id, public.ST_Buffer(public.ST_SetSRID(public.ST_MakePoint(1492000, 6894000), 3857), 50) AS geom`,
     )
     await db.$executeRawUnsafe(
-      `INSERT INTO ${QA_MAP_TABLE} VALUES ('area-1', 2, 10, 20, 10, public.ST_Multi(public.ST_Buffer(public.ST_Transform(public.ST_SetSRID(public.ST_MakePoint(13.4, 52.5), 4326), 3857), 100)))`,
+      `CREATE TABLE ${QA_MAP_TABLE}_indicators AS
+       SELECT 'cell-1'::text AS area_id, 'category'::text AS indicator_key, 100::numeric AS reference,
+              160::numeric AS current, 60::numeric AS difference, 0.6::numeric AS deviation,
+              '{"cycleway": {"reference": 100, "current": 160}}'::jsonb AS breakdown`,
     )
     const region = await db.region.findUniqueOrThrow({ where: { slug: REGION_SLUG } })
-    const config = await db.qaConfig.create({
-      data: {
-        slug: QA_CONFIG_SLUG,
-        label: 'MCP QA',
-        mapTable: QA_MAP_TABLE,
-        referenceFrozenAt: new Date('2026-01-01'),
-        regionId: region.id,
-      },
-    })
-    const area = { regionSlug: REGION_SLUG, configSlug: QA_CONFIG_SLUG, areaId: 'area-1' }
+    const indicator = {
+      key: 'category',
+      label: 'Kategorie',
+      goodThreshold: '10',
+      needsReviewThreshold: '20',
+      absoluteDifferenceThreshold: '50',
+    }
+    const config = {
+      slug: 'vitest-mcp-qa',
+      label: 'MCP QA',
+      isActive: 'true',
+      mapTable: QA_MAP_TABLE,
+      dataset: 'bikelanes',
+      areaTable: QA_AREA_TABLE,
+      areaFilter: 'with_reference',
+      referenceTable: 'data.vitest_mcp_qa_reference',
+      indicators: [indicator],
+      regionId: region.id,
+      trustedOsmUsernames: 'Mapper A\nmapper a',
+      referenceFrozenAt: '2026-01-15',
+    }
 
-    const configs = await callTool(client, 'qa_configs_list', { regionSlug: REGION_SLUG })
-    expect(JSON.parse(configs.text)).toEqual([
-      expect.objectContaining({ slug: QA_CONFIG_SLUG, evaluationCount: 0 }),
+    const unknownTag = await callTool(client, 'qa_configs_create', {
+      ...config,
+      indicators: [{ ...indicator, key: 'not_a_bikelanes_tag' }],
+    })
+    expect(unknownTag.isError).toBe(true)
+    expect(unknownTag.text).toContain('Merkmal "not_a_bikelanes_tag"')
+    const unknownAreaFilter = await callTool(client, 'qa_configs_create', {
+      ...config,
+      areaFilter: 'some',
+    })
+    expect(unknownAreaFilter.isError).toBe(true)
+
+    const created = await callTool(client, 'qa_configs_create', config)
+    expect(created.isError).toBe(false)
+    const id = created.json().id as number
+    const audit = await db.auditLog.findFirst({
+      where: { model: 'QaConfig', recordId: String(id), userId: ADMIN_USER_ID },
+    })
+    expect(audit?.metadata).toMatchObject({ changeSource: 'API' })
+
+    const got = await callTool(client, 'qa_configs_get', { id })
+    expect(got.json()).toMatchObject({
+      qaConfig: {
+        indicators: [{ key: 'category', goodThreshold: 0.1, needsReviewThreshold: 0.2 }],
+        trustedOsmUsernames: ['mapper a'],
+      },
+      config: { ...config, regionId: String(region.id), trustedOsmUsernames: 'mapper a' },
+    })
+    const updated = await callTool(client, 'qa_configs_update', {
+      ...(got.json().config as object),
+      id,
+      label: 'MCP QA renamed',
+    })
+    expect(updated.isError).toBe(false)
+    const list = await callTool(client, 'qa_configs_list', { regionSlug: REGION_SLUG })
+    expect(JSON.parse(list.text)).toEqual([
+      expect.objectContaining({ id, label: 'MCP QA renamed', areaFilter: 'with_reference' }),
     ])
 
-    const unknownArea = await callTool(client, 'qa_evaluations_create', {
-      ...area,
-      areaId: 'missing',
-      userStatus: 'OK_STRUCTURAL_CHANGE',
+    const cell = { regionSlug: REGION_SLUG, configSlug: config.slug, areaId: 'cell-1' }
+    const wrongRegion = await callTool(client, 'qa_evaluations_list', {
+      ...cell,
+      regionSlug: SECOND_REGION_SLUG,
     })
-    expect(unknownArea.text).toBe('Error: Area not found in this QA config: missing')
+    expect(wrongRegion.text).toBe('Error: Not found')
 
-    const created = await callTool(client, 'qa_evaluations_create', {
-      ...area,
-      userStatus: 'OK_STRUCTURAL_CHANGE',
-      body: 'Baustelle',
+    const unknownIndicator = await callTool(client, 'qa_evaluations_create', {
+      ...cell,
+      decisions: [{ indicatorKey: 'oneway', userStatus: 'OK_REFERENCE_ERROR' }],
     })
-    expect(created.isError).toBe(false)
-    // relative 2 with the default thresholds is PROBLEMATIC; the counts come from the map table.
-    expect(created.json()).toMatchObject({
-      evaluatorType: 'USER',
-      userId: ADMIN_USER_ID,
-      userStatus: 'OK_STRUCTURAL_CHANGE',
-      systemStatus: 'PROBLEMATIC',
-      decisionData: { relative: 2, referenceCount: 10, currentCount: 20, absoluteChange: 10 },
+    expect(unknownIndicator.isError).toBe(true)
+    const decided = await callTool(client, 'qa_evaluations_create', {
+      ...cell,
+      body: 'Checked',
+      decisions: [{ indicatorKey: 'category', userStatus: 'OK_REFERENCE_ERROR' }],
     })
-    const evaluationId = created.json().id as number
-
-    const audit = await db.auditLog.findFirst({
-      where: { model: 'QaEvaluation', recordId: String(evaluationId) },
-    })
-    expect(audit).toMatchObject({
-      userId: ADMIN_USER_ID,
-      metadata: { changeSource: 'API', adminTokenId: 'vitest-mcp-token' },
-    })
-
+    expect(JSON.parse(decided.text)).toEqual([
+      expect.objectContaining({
+        systemStatus: 'PROBLEMATIC',
+        userStatus: 'OK_REFERENCE_ERROR',
+        userId: ADMIN_USER_ID,
+      }),
+    ])
+    const [{ id: evaluationId }] = JSON.parse(decided.text) as [{ id: number }]
     const edited = await callTool(client, 'qa_evaluations_update', {
       regionSlug: REGION_SLUG,
       evaluationId,
-      body: 'Baustelle bis 2027',
+      body: 'Checked twice',
     })
-    expect(edited.json()).toMatchObject({ id: evaluationId, body: 'Baustelle bis 2027' })
-
-    const systemEvaluation = await db.qaEvaluation.create({
-      data: { configId: config.id, areaId: 'area-1', systemStatus: 'PROBLEMATIC' },
-    })
-    const notAuthor = await callTool(client, 'qa_evaluations_update', {
-      regionSlug: REGION_SLUG,
-      evaluationId: systemEvaluation.id,
-      body: 'x',
-    })
-    expect(notAuthor.text).toContain('Not allowed: Only the author can update this comment')
-
-    const history = await callTool(client, 'qa_evaluations_list', area)
-    expect(JSON.parse(history.text)).toHaveLength(2)
+    expect(edited.isError).toBe(false)
 
     const areas = await callTool(client, 'qa_areas_list', {
       regionSlug: REGION_SLUG,
-      configSlug: QA_CONFIG_SLUG,
-      status: 'all',
+      configSlug: config.slug,
     })
-    expect(areas.json()).toMatchObject({ totalCount: 1, items: [{ areaId: 'area-1' }] })
+    expect(areas.json()).toMatchObject({
+      totalCount: 1,
+      items: [{ areaId: 'cell-1', userStatus: 'OK_REFERENCE_ERROR' }],
+    })
+    const gotCell = await callTool(client, 'qa_evaluations_list', cell)
+    expect(gotCell.json()).toMatchObject({
+      indicators: [
+        {
+          key: 'category',
+          userStatus: 'OK_REFERENCE_ERROR',
+          decisionData: { reference: 100, current: 160, difference: 60, deviation: 0.6 },
+          history: [{ id: evaluationId, body: 'Checked twice' }],
+        },
+      ],
+    })
+
+    const systemEvaluation = await db.qaEvaluation.create({
+      data: { configId: id, areaId: 'cell-1', indicatorKey: 'category', systemStatus: 'GOOD' },
+    })
+    const foreign = await callTool(client, 'qa_evaluations_update', {
+      regionSlug: REGION_SLUG,
+      evaluationId: systemEvaluation.id,
+      body: 'Hijacked',
+    })
+    expect(foreign.text).toContain('Not allowed: Only the author can update this comment')
+
+    const blockedDelete = await callTool(client, 'qa_configs_delete', { id })
+    expect(blockedDelete.isError).toBe(true)
+    await db.qaEvaluation.deleteMany({ where: { configId: id } })
+    const deleted = await callTool(client, 'qa_configs_delete', { id })
+    expect(deleted.isError).toBe(false)
+    const missing = await callTool(client, 'qa_configs_get', { id })
+    expect(missing.text).toBe('Error: Not found')
   })
 })

@@ -104,13 +104,13 @@ Tests: `docs-region-downloads.spec.ts` (export: guest denied on PUBLIC, admin al
 
 The mode routes (`app/src/routes/regionen/$regionSlug/*.tsx`) first require region access (parent layout), then redirect non-members of member-only modes to `/access-denied`. Navigation buttons follow `deriveAvailableModes` and `isMemberOnlyMode` in `availableModes.ts`. The server functions below enforce the same rules on their own.
 
-| Mode                        | Opens for                                                                      | Shown in navigation when                                                              |
-| --------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------- |
-| Map (default)               | Everyone with region access                                                    | Always                                                                                |
-| Hinweise (`/hinweise`)      | Region access. Member-only when the region has internal notes and no OSM notes | Region has OSM or internal notes enabled. Otherwise the route redirects to the map    |
-| Qualitätssicherung (`/qa`)  | Members and admins                                                             | Member/admin and at least one QA config                                               |
-| Prüflisten (`/prueflisten`) | Members and admins                                                             | Member/admin (also before the first list exists)                                      |
-| Summieren (`/summieren`)    | Everyone with region access. Nothing is stored; areas and dataset are URL only | Region has a category with a dataset to sum. Otherwise the route redirects to the map |
+| Mode                        | Opens for                                                                                                                                     | Shown in navigation when                                                              |
+| --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Map (default)               | Everyone with region access                                                                                                                   | Always                                                                                |
+| Hinweise (`/hinweise`)      | Region access. Member-only when the region has internal notes and no OSM notes                                                                | Region has OSM or internal notes enabled. Otherwise the route redirects to the map    |
+| Qualitätssicherung (`/qa`)  | Members and admins                                                                                                                            | Member/admin and at least one QA config                                               |
+| Prüflisten (`/prueflisten`) | Members and admins                                                                                                                            | Member/admin (also before the first list exists)                                      |
+| Summieren (`/summieren`)    | Everyone with region access, also for the sums the server computes (`getCalculatorSumsFn`). Nothing is stored; areas and dataset are URL only | Region has a category with a dataset to sum. Otherwise the route redirects to the map |
 
 Tests: `availableModes.test.ts`, `app/tests/smoke/region-modes.spec.ts` (guests denied; Summieren open to guests), `app/tests/pages/modes-access.stubbed-auth.spec.ts` (signed-in non-member denied, plain member allowed), `canAccessMemberModeForRegion.server.test.ts`.
 
@@ -153,9 +153,9 @@ Everything is member/admin-only: navigation, map styles (status colors), area li
 | Create evaluation (status + comment)                    | Member, admin (`createQaEvaluation`). Author edits the comment (`updateQaEvaluationBody`); status and delete are not editable |
 | Create / edit / delete QA config                        | Admin                                                                                                                         |
 
-The admin MCP (`/mcp`, tools `qa_configs_list`, `qa_areas_list`, `qa_evaluations_*`) reads configs, areas and evaluations and offers the member actions of the table. As for Hinweise it calls the same functions with the owner of the `AdminApiToken` as session, so an evaluation is created as the token owner and only the author edits its comment. `qa_evaluations_create` reads the counts of the area from the map table on the server. QA configs stay in the admin UI.
+The admin MCP (`/mcp`, tools `qa_configs_*`, `qa_areas_list`, `qa_evaluations_*`) offers the actions of the table except the map status and the user list. As for Hinweise it calls the same functions with the owner of the `AdminApiToken` as session, so config writes pass the admin form's validation, an evaluation is created as the token owner and only the author edits its comment. `qa_evaluations_create` reads the numbers of the cell from the map table on the server.
 
-Tests: `app/tests/pages/qa-mode.stubbed-auth.spec.ts` (admin happy path), mode tests above. `qaConfigAdminOnly.server.test.ts` (config create/update/delete reject non-admins).
+Tests: `app/tests/pages/qa-mode.stubbed-auth.spec.ts` (admin happy path), mode tests above. `qaConfigAdminOnly.server.test.ts` (config create/update/delete reject non-admins). `buildMcpServer.integration.test.ts` (MCP: round-trip, invalid indicator rejected, comment of another evaluator rejected).
 
 ### Prüflisten
 
