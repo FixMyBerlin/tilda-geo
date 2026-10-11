@@ -18,17 +18,17 @@ import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCu
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { internalNotesQueryOptions } from '@/server/regions/regionQueryOptions'
 
+// Source and Layers are two components, see <AllSources> and <AllLayers>.
+
 export const internalNotesLayerId = 'internal-notes-layer'
 export const internalNotesSourceId = 'internal-notes-source'
 
-export const SourcesLayersInternalNotes = () => {
+// Both components use the same data and conditions, so the Layers never render without their Source.
+const useInternalNotes = () => {
   const region = useRegion()
-  const { featuresParam } = useFeaturesParam()
   const currentMode = useCurrentMode()
   const notesModeValue = useNotesModeValue()
   const notesSelection = useNotesSelection()
-  const hoveredListItem = useHoveredListItem()
-  const hoveredMapItemId = useHoveredMapItemId()
   const showLayers = currentMode.isNotes && notesSelection.kind === 'internal'
   // Map markers always follow the active folder, same query as the panel list.
   const { selectedFolderId } = useNoteFolders()
@@ -41,8 +41,33 @@ export const SourcesLayersInternalNotes = () => {
     enabled: showLayers && selectedFolderId !== undefined,
   })
 
+  if (result === undefined) return undefined
+  if (!showLayers) return undefined
+  return result
+}
+
+export const SourcesInternalNotes = () => {
+  const result = useInternalNotes()
   if (result === undefined) return null
-  if (!showLayers) return null
+
+  return (
+    <Source
+      id={internalNotesSourceId}
+      key={internalNotesSourceId}
+      type="geojson"
+      data={result.featureCollection}
+      promoteId="id"
+      // attribution="" Internal data / copyrighted
+    />
+  )
+}
+
+export const LayersInternalNotes = () => {
+  const result = useInternalNotes()
+  const { featuresParam } = useFeaturesParam()
+  const hoveredListItem = useHoveredListItem()
+  const hoveredMapItemId = useHoveredMapItemId()
+  if (result === undefined) return null
 
   const selectedFeatureIds = featuresParam
     .filter((feature) => feature.sourceId === internalNotesSourceId)
@@ -56,14 +81,6 @@ export const SourcesLayersInternalNotes = () => {
 
   return (
     <>
-      <Source
-        id={internalNotesSourceId}
-        key={internalNotesSourceId}
-        type="geojson"
-        data={result.featureCollection}
-        promoteId="id"
-        // attribution="" Internal data / copyrighted
-      />
       <Layer
         id={`${internalNotesLayerId}-highlight`}
         key={`${internalNotesLayerId}-highlight`}

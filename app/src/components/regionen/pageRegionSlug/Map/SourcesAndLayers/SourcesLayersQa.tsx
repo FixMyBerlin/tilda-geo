@@ -26,6 +26,8 @@ import {
   qaMapStatusColorExpression,
 } from './qaMapPaint'
 
+// Source and Layers are two components, see <AllSources> and <AllLayers>.
+
 export const qaLayerId = 'qa-layer'
 export const qaSourceId = 'qa-source'
 export const qaMinZoom = 12
@@ -44,24 +46,72 @@ const hideHoveredOrSelected = (highlightIdStrings: string[]) => {
   return ['any', ...conditions] as ExpressionSpecification
 }
 
-export const SourcesLayersQa = () => {
-  useQaMapState()
+// Both components use the same query and conditions, so the Layers never render without their Source.
+const useActiveQaConfig = () => {
   const hasPermissions = useHasPermissions()
   const { qaParamData } = useQaParam()
-  const { backgroundParam } = useBackgroundParam()
   const regionSlug = useRegionSlug()
   const currentMode = useCurrentMode()
-  const { featuresParam } = useFeaturesParam()
   const { data: qaConfigs } = useQuery({
     ...regionQaConfigsQueryOptions(regionSlug ?? ''),
     enabled: hasPermissions && Boolean(regionSlug),
   })
 
-  const hoveredListItem = useHoveredListItem()
-  const hoveredMapItemId = useHoveredMapItemId()
-
   const activeQaConfig = qaConfigs?.find((config) => config.slug === qaParamData.key)
   const vectorSourceName = activeQaConfig?.mapTable.replace('public.', '')
+
+  if (!hasPermissions) {
+    return undefined
+  }
+
+  // QA lives only in the QA mode now (not on the default map / other modes).
+  if (!currentMode.isQa) {
+    return undefined
+  }
+
+  if (!activeQaConfig || !vectorSourceName) {
+    return undefined
+  }
+
+  return { activeQaConfig, vectorSourceName }
+}
+
+export const SourcesQa = () => {
+  useQaMapState()
+  const active = useActiveQaConfig()
+  if (!active) return null
+  const { activeQaConfig, vectorSourceName } = active
+
+  const dataUrl = getTilesUrl(vectorSourceName)
+
+  // Key by vector tileset so Source + layers remount together when switching QA configs.
+  // Otherwise MapLibre can apply new source-layer ids while the vector source URL is still
+  // the previous tileset, causing "Source layer X does not exist on source qa-source".
+  const qaVectorSetKey = `${qaSourceId}:${vectorSourceName}`
+
+  return (
+    <Source
+      id={qaSourceId}
+      key={`${qaVectorSetKey}--source`}
+      type="vector"
+      url={dataUrl}
+      // NOTE: We will likely have to make the promoteId part of the config
+      promoteId={'id'}
+      attribution={activeQaConfig.mapAttribution || ''}
+      minzoom={qaMinZoom}
+      maxzoom={16} // higher than default to fix geometric precision for circles and such
+    />
+  )
+}
+
+export const LayersQa = () => {
+  const { backgroundParam } = useBackgroundParam()
+  const { featuresParam } = useFeaturesParam()
+  const hoveredListItem = useHoveredListItem()
+  const hoveredMapItemId = useHoveredMapItemId()
+  const active = useActiveQaConfig()
+  if (!active) return null
+  const { vectorSourceName } = active
 
   const selectedIdStrings = featuresParam
     .filter((feature) => feature.sourceId === qaSourceId)
@@ -78,115 +128,84 @@ export const SourcesLayersQa = () => {
   ] as ExpressionSpecification
   const hideBaseFill = hideHoveredOrSelected(highlightIdStrings)
 
-  if (!hasPermissions) {
-    return null
-  }
-
-  // QA lives only in the QA mode now (not on the default map / other modes).
-  if (!currentMode.isQa) {
-    return null
-  }
-
-  if (!activeQaConfig || !vectorSourceName) {
-    return null
-  }
-
-  const dataUrl = getTilesUrl(vectorSourceName)
-
-  // Key by vector tileset so Source + layers remount together when switching QA configs.
-  // Otherwise MapLibre can apply new source-layer ids while the vector source URL is still
-  // the previous tileset, causing "Source layer X does not exist on source qa-source".
   const qaVectorSetKey = `${qaSourceId}:${vectorSourceName}`
 
   return (
-    <>
-      <Source
-        id={qaSourceId}
-        key={`${qaVectorSetKey}--source`}
-        type="vector"
-        url={dataUrl}
-        // NOTE: We will likely have to make the promoteId part of the config
-        promoteId={'id'}
-        attribution={activeQaConfig.mapAttribution || ''}
-        minzoom={qaMinZoom}
-        maxzoom={16} // higher than default to fix geometric precision for circles and such
+    <Fragment key={`${qaVectorSetKey}--layers`}>
+      <Layer
+        id={qaLayerId}
+        source={qaSourceId}
+        source-layer={vectorSourceName}
+        type="fill"
+        beforeId={backgroundParam === 'default' ? 'atlas-app-beforeid-below-road' : undefined}
+        paint={{
+          'fill-color': qaMapStatusColorExpression(QA_MAP_UNSTYLED_FILL),
+          'fill-opacity': ['case', hideBaseFill, 0, QA_MAP_FILL_OPACITY],
+          'fill-outline-color': qaMapStatusColorExpression(QA_MAP_UNSTYLED_OUTLINE),
+        }}
       />
-      <Fragment key={`${qaVectorSetKey}--layers`}>
-        <Layer
-          id={qaLayerId}
-          source={qaSourceId}
-          source-layer={vectorSourceName}
-          type="fill"
-          beforeId={backgroundParam === 'default' ? 'atlas-app-beforeid-below-road' : undefined}
-          paint={{
-            'fill-color': qaMapStatusColorExpression(QA_MAP_UNSTYLED_FILL),
-            'fill-opacity': ['case', hideBaseFill, 0, QA_MAP_FILL_OPACITY],
-            'fill-outline-color': qaMapStatusColorExpression(QA_MAP_UNSTYLED_OUTLINE),
-          }}
-        />
-        <Layer
-          id={`${qaLayerId}-outline`}
-          source={qaSourceId}
-          source-layer={vectorSourceName}
-          type="line"
-          paint={{
-            'line-color': qaMapStatusColorExpression(QA_MAP_UNSTYLED_OUTLINE),
-            'line-width': 3,
-            'line-opacity': ['case', hideBaseFill, 0, 1],
-          }}
-        />
-        {highlightIdStrings.length > 0 ? (
-          <>
-            <Layer
-              id={`${qaLayerId}-highlight`}
-              source={qaSourceId}
-              source-layer={vectorSourceName}
-              type="line"
-              filter={highlightFilter}
-              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
-              paint={{
-                'line-color': qaAccent,
-                'line-opacity': 0.5,
-                'line-width': 10,
-                'line-offset': -5,
-              }}
-            />
-            <Layer
-              id={`${qaLayerId}-highlight-outline`}
-              source={qaSourceId}
-              source-layer={vectorSourceName}
-              type="line"
-              filter={highlightFilter}
-              layout={{ 'line-cap': 'round', 'line-join': 'round' }}
-              paint={{
-                'line-color': qaAccent,
-                'line-opacity': 0.5,
-                'line-width': 3,
-              }}
-            />
-          </>
-        ) : null}
-        <LayerHighlight
-          id={getLayerHighlightId(qaLayerId)}
-          source={qaSourceId}
-          source-layer={vectorSourceName}
-          type="fill"
-          paint={{}}
-          hoverColor={qaAccent}
-          includeSelected={false}
-        />
-        <LayerHighlight
-          id={getLayerHighlightId(`${qaLayerId}-outline`)}
-          source={qaSourceId}
-          source-layer={vectorSourceName}
-          type="line"
-          paint={{
-            'line-width': 3,
-          }}
-          hoverColor={qaAccent}
-          includeSelected={false}
-        />
-      </Fragment>
-    </>
+      <Layer
+        id={`${qaLayerId}-outline`}
+        source={qaSourceId}
+        source-layer={vectorSourceName}
+        type="line"
+        paint={{
+          'line-color': qaMapStatusColorExpression(QA_MAP_UNSTYLED_OUTLINE),
+          'line-width': 3,
+          'line-opacity': ['case', hideBaseFill, 0, 1],
+        }}
+      />
+      {highlightIdStrings.length > 0 ? (
+        <>
+          <Layer
+            id={`${qaLayerId}-highlight`}
+            source={qaSourceId}
+            source-layer={vectorSourceName}
+            type="line"
+            filter={highlightFilter}
+            layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+            paint={{
+              'line-color': qaAccent,
+              'line-opacity': 0.5,
+              'line-width': 10,
+              'line-offset': -5,
+            }}
+          />
+          <Layer
+            id={`${qaLayerId}-highlight-outline`}
+            source={qaSourceId}
+            source-layer={vectorSourceName}
+            type="line"
+            filter={highlightFilter}
+            layout={{ 'line-cap': 'round', 'line-join': 'round' }}
+            paint={{
+              'line-color': qaAccent,
+              'line-opacity': 0.5,
+              'line-width': 3,
+            }}
+          />
+        </>
+      ) : null}
+      <LayerHighlight
+        id={getLayerHighlightId(qaLayerId)}
+        source={qaSourceId}
+        source-layer={vectorSourceName}
+        type="fill"
+        paint={{}}
+        hoverColor={qaAccent}
+        includeSelected={false}
+      />
+      <LayerHighlight
+        id={getLayerHighlightId(`${qaLayerId}-outline`)}
+        source={qaSourceId}
+        source-layer={vectorSourceName}
+        type="line"
+        paint={{
+          'line-width': 3,
+        }}
+        hoverColor={qaAccent}
+        includeSelected={false}
+      />
+    </Fragment>
   )
 }
