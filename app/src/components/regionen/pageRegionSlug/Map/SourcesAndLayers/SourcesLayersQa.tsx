@@ -25,6 +25,7 @@ import {
   QA_MAP_UNSTYLED_OUTLINE,
   qaMapStatusColorExpression,
 } from './qaMapPaint'
+import { beforeIdOnBackground } from './utils/beforeId'
 
 // Source and Layers are two components, see <AllSources> and <AllLayers>.
 
@@ -39,12 +40,19 @@ const hideHoveredOrSelected = (highlightIdStrings: string[]) => {
   const conditions: ExpressionSpecification[] = [
     ['boolean', ['feature-state', 'hover'], false],
     ['boolean', ['feature-state', 'selected'], false],
+    // One `==` per id: with `in` next to `feature-state`, maplibre paints every feature with
+    // the default opacity of 1.
+    ...highlightIdStrings.map((id): ExpressionSpecification => ['==', ['to-string', ['id']], id]),
   ]
-  if (highlightIdStrings.length > 0) {
-    conditions.push(['in', ['to-string', ['id']], ['literal', highlightIdStrings]])
-  }
   return ['any', ...conditions] as ExpressionSpecification
 }
+
+/** An area with a status, see `qaMapStatusColorExpression`. The others are gray. */
+const hasStatus = [
+  'any',
+  ['!=', ['feature-state', 'userStatus'], null],
+  ['!=', ['feature-state', 'systemStatus'], null],
+] as ExpressionSpecification
 
 // Both components use the same query and conditions, so the Layers never render without their Source.
 const useActiveQaConfig = () => {
@@ -137,11 +145,24 @@ export const LayersQa = () => {
         source={qaSourceId}
         source-layer={vectorSourceName}
         type="fill"
-        beforeId={backgroundParam === 'default' ? 'atlas-app-beforeid-below-road' : undefined}
+        beforeId={beforeIdOnBackground('atlas-app-beforeid-below-road', backgroundParam)}
         paint={{
           'fill-color': qaMapStatusColorExpression(QA_MAP_UNSTYLED_FILL),
           'fill-opacity': ['case', hideBaseFill, 0, QA_MAP_FILL_OPACITY],
           'fill-outline-color': qaMapStatusColorExpression(QA_MAP_UNSTYLED_OUTLINE),
+        }}
+      />
+      {/* Neighbours share their border. The gray outlines are an own layer below, so a gray
+          neighbour never covers the border of an area with a status. */}
+      <Layer
+        id={`${qaLayerId}-outline-unstyled`}
+        source={qaSourceId}
+        source-layer={vectorSourceName}
+        type="line"
+        paint={{
+          'line-color': QA_MAP_UNSTYLED_OUTLINE,
+          'line-width': 3,
+          'line-opacity': ['case', ['any', hideBaseFill, hasStatus], 0, 1],
         }}
       />
       <Layer
@@ -152,7 +173,7 @@ export const LayersQa = () => {
         paint={{
           'line-color': qaMapStatusColorExpression(QA_MAP_UNSTYLED_OUTLINE),
           'line-width': 3,
-          'line-opacity': ['case', hideBaseFill, 0, 1],
+          'line-opacity': ['case', ['all', hasStatus, ['!', hideBaseFill]], 1, 0],
         }}
       />
       {highlightIdStrings.length > 0 ? (
