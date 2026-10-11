@@ -2,12 +2,13 @@
 -- QA comparison: count parkings in voronoi polygons vs reference data.
 -- Splits by priority (data.euvm_qa_voronoi_2026.priority boolean): false -> qa_parkings_euvm, true -> qa_parkings_euvm_priority.
 -- Source data.euvm_qa_voronoi_2026 is expected to be pre-clipped to Berlin and
--- pre-normalized to valid MultiPolygon (docs/qa_create_new_voronoi_baseline.sql).
+-- pre-normalized to valid MultiPolygon (docs/qa_create_new_voronoi_baseline.sql),
+-- with straightened cell borders (FixMyBerlin/scripts 2026-tilda-qa-voronoi-simplify).
+-- The map shows the same geometry the counts use.
 -- 1. Rebuild main + previous tables (previous run's values preserved) and load reference voronoi (filtered by priority)
--- 2. Count current parkings and collect last_editors per cell, on full-precision geometry
+-- 2. Count current parkings and collect last_editors per cell
 -- 3. Difference and relative
 -- 4. Previous relative
--- 5. Snap to grid (2 m) for presentation only; preserves shared edges
 -- INPUT: data.euvm_qa_voronoi_2026 (polygon, priority boolean), public.parkings_quantized, public.off_street_parking_quantized
 -- OUTPUT: public.qa_parkings_euvm (priority false), public.qa_parkings_euvm_priority (priority true)
 --         both carry `last_editors` JSONB: [{osmUser, spaceCount, updatedAt}, ...] per cell, ordered by updatedAt desc
@@ -268,28 +269,6 @@ UPDATE public.qa_parkings_euvm_priority q
 SET previous_relative = prev.relative
 FROM public.qa_parkings_euvm_priority_previous prev
 WHERE q.id = prev.id;
-
--- 5. Simplify for presentation (snap to 2 m grid; preserves shared edges).
--- Snap can collapse thin slivers into lines; extract the polygonal part.
--- A cell that collapses entirely keeps its pre-snap polygon (only rows with a
--- non-empty snapped polygon are updated). Measured: 156 cells produced
--- GeometryCollections; exactly one cell (id=23373) collapses to empty at 2 m.
-UPDATE public.qa_parkings_euvm q
-SET geom = s.geom
-FROM (
-  SELECT id, ST_Multi(ST_CollectionExtract(ST_MakeValid(ST_SnapToGrid(geom, 2)), 3)) AS geom
-  FROM public.qa_parkings_euvm
-) s
-WHERE q.id = s.id
-  AND NOT ST_IsEmpty(s.geom);
-UPDATE public.qa_parkings_euvm_priority q
-SET geom = s.geom
-FROM (
-  SELECT id, ST_Multi(ST_CollectionExtract(ST_MakeValid(ST_SnapToGrid(geom, 2)), 3)) AS geom
-  FROM public.qa_parkings_euvm_priority
-) s
-WHERE q.id = s.id
-  AND NOT ST_IsEmpty(s.geom);
 
 CREATE INDEX IF NOT EXISTS qa_parkings_euvm_geom_idx ON public.qa_parkings_euvm USING GIST (geom);
 CREATE INDEX IF NOT EXISTS qa_parkings_euvm_priority_geom_idx ON public.qa_parkings_euvm_priority USING GIST (geom);

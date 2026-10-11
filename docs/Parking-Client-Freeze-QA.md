@@ -3,16 +3,22 @@
 When we freeze parking data for delivery, we always:
 
 1. **Export** the freeze package with [`scripts/tilda-parkraum-euvm-export/freeze_with_qa.py`](../../scripts/tilda-parkraum-euvm-export/freeze_with_qa.py) (customer GPKGs + quantized QA GeoJSON + `qa/PACKAGE.md`). Prefer `prod` so the baseline SQL matches the freeze points.
-2. **Generate** the new dated baseline on **production**: edit `base_table` / `target_table` in [`qa_create_new_voronoi_baseline.sql`](qa_create_new_voronoi_baseline.sql) and run the whole script. That builds `data.<target_table>` from live `public.*_quantized` (recalculated `count_reference` on **clipped** geometry), copying name + priority from `data.<base_table>` (usually `euvm_qa_voronoi`) and normalizing + clipping polygons to Berlin. Nightly processing no longer clips.
+2. **Generate** the new dated baseline on **production**: edit `base_table` / `target_table` in [`qa_create_new_voronoi_baseline.sql`](qa_create_new_voronoi_baseline.sql) and run the whole script. That builds `data.<target_table>` from live `public.*_quantized` (recalculated `count_reference` on **clipped** geometry), copying geometry, name + priority from `data.<base_table>` (prefer the latest dated baseline, its borders are already straightened; `euvm_qa_voronoi` is the delivered original) and normalizing + clipping polygons to Berlin. Nightly processing no longer clips.
 3. **Export** `data.<target_table>` from production as a **SQL dump** (TablePlus → SQL, or `pg_dump --table=data.<target_table>`). Put the file at `data-schema/<target_table>/<target_table>.sql`. Keep it as SQL — do not convert to GeoPackage/GeoJSON; an ogr2ogr round-trip would replace the text `id` primary key with an integer `ogc_fid`.
 4. **Create the spec, load and verify**: paste the [agent prompt](#agent-prompt-step-4) below into an agent chat, filling in `<new_table>`, `<previous_table>`, and `<path>`. It stops before publish and reports the row count so you can compare it to the previous baseline.
-5. **Publish** to S3 (CLI only; not the admin page):
+5. **Straighten the cell borders** in the local table when the base table still had the dense delivered borders (a vertex every few metres). Skip this when `base_table` was an already straightened baseline such as `euvm_qa_voronoi_2026`. Use [`scripts/2026-tilda-qa-voronoi-simplify`](../../scripts/2026-tilda-qa-voronoi-simplify/):
+   ```bash
+   uv run simplify.py --table <target_table>          # report only
+   uv run simplify.py --table <target_table> --write  # update data.<target_table> and its .sql
+   ```
+   Junctions stay, neighbours keep identical borders, ids stay, and no parking point changes cell, so `count_reference` stays valid.
+6. **Publish** to S3 (CLI only; not the admin page):
    ```bash
    bun run data-schema-publish -- --table <target_table> --mode snapshot
    ```
    Use `--mode snapshot` so the previous dump stays under `snapshots/`. First-ever publish of a table may use `--mode override`.
-6. **Import** on local, staging, and production via `/admin/data-schema` → Import (or MCP `data_schema_import`). This replaces empty placeholders from processing with the real baseline.
-7. **(Decide)** Point [`9_qa_parkings_euvm_voronoi.sql`](../processing/topics/parking/9_qa_parkings_euvm_voronoi.sql) at the new `data.*` table and deploy, so nightly QA fills the stable public maps `qa_parkings_euvm` / `qa_parkings_euvm_priority`. `QaConfig` on `parkraum-berlin-euvm` keeps pointing at those public tables. Behaviour: [Region modes, Qualitätssicherung](Modes-Concept-Summary.md#qualitätssicherung).
+7. **Import** on local, staging, and production via `/admin/data-schema` → Import (or MCP `data_schema_import`). This replaces empty placeholders from processing with the real baseline.
+8. **(Decide)** Point [`9_qa_parkings_euvm_voronoi.sql`](../processing/topics/parking/9_qa_parkings_euvm_voronoi.sql) at the new `data.*` table and deploy, so nightly QA fills the stable public maps `qa_parkings_euvm` / `qa_parkings_euvm_priority`. `QaConfig` on `parkraum-berlin-euvm` keeps pointing at those public tables. Behaviour: [Region modes, Qualitätssicherung](Modes-Concept-Summary.md#qualitätssicherung).
 
 ## Agent prompt (step 4)
 

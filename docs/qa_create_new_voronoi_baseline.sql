@@ -10,8 +10,8 @@
 -- edit the variables in the DECLARE block, then run the whole script.
 --
 -- This script is step 2 of the freeze checklist. Everything that happens before
--- and after it (SQL dump export, spec, load/verify,
--- publish, Import, processing step 9) is documented once in
+-- and after it (SQL dump export, spec, load/verify, straightening the cell
+-- borders, publish, Import, processing step 9) is documented once in
 -- docs/Parking-Client-Freeze-QA.md — follow that.
 
 CREATE SCHEMA IF NOT EXISTS data;
