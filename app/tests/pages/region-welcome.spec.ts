@@ -89,12 +89,22 @@ async function requirePrivateRegion() {
   return region
 }
 
+/** A database without the seed's welcome content (a copy of staging, for example) cannot run this file. */
+async function skipWithoutSeedWelcome() {
+  const region = await db.region.findUnique({
+    where: { slug: SLUG_WITH_FAQ },
+    select: { welcomeEnabled: true },
+  })
+  test.skip(!region?.welcomeEnabled, 'Needs the seed welcome content: run `bun run seed`.')
+}
+
 let hasDemoWelcomeImages = false
 
 test.describe('Region welcome panel', () => {
   test.describe.configure({ mode: 'serial' })
 
   test.beforeAll(async () => {
+    await skipWithoutSeedWelcome()
     await assertRegionExists(SLUG_WITH_FAQ)
     await assertRegionExists(SLUG_NO_FAQ)
     await assertRegionExists(SLUG_NO_IMAGE)
@@ -261,6 +271,8 @@ test.describe('Region welcome panel', () => {
 
 test.describe('Region welcome panel (mobile)', () => {
   test.describe.configure({ mode: 'serial' })
+
+  test.beforeAll(skipWithoutSeedWelcome)
   test.use({ viewport: MOBILE_VIEWPORT })
 
   test('auto-opens bottom sheet with pinned Zur Karte CTA and FAQ swap', async ({ page }) => {

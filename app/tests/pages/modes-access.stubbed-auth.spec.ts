@@ -66,7 +66,7 @@ test.describe('Region modes – non-admin access (stubbed user login)', () => {
       const path = `/regionen/${PUBLIC_REGION}/prueflisten`
       await page.goto(path)
       expect(new URL(page.url()).pathname).toBe(path)
-      await expect(page.getByRole('heading', { name: 'Prüflisten' })).toBeVisible({
+      await expect(page.getByRole('region', { name: 'Prüflisten' })).toBeVisible({
         timeout: 30_000,
       })
     })
