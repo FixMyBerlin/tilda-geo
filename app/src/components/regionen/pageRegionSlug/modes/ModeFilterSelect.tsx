@@ -4,6 +4,7 @@ import {
   ChatBubbleLeftIcon,
   ChevronDownIcon,
   FlagIcon,
+  TagIcon,
   UserIcon,
   UsersIcon,
   ViewfinderCircleIcon,
@@ -27,6 +28,7 @@ export const modeFilterIcons = {
   author: UserIcon,
   users: UsersIcon,
   extent: ViewfinderCircleIcon,
+  category: TagIcon,
 } as const satisfies Record<string, FilterIcon>
 
 type Props<T extends string> = {

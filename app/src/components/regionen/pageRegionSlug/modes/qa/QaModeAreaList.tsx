@@ -5,8 +5,7 @@ import { qaSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndL
 import { mergeModeUrlFeature } from '@/components/regionen/pageRegionSlug/Map/utils/partitionClickedFeatures'
 import {
   evaluatorTypeConfig,
-  systemStatusConfig,
-  userStatusConfig,
+  qaStatusPillConfig,
 } from '@/components/regionen/pageRegionSlug/modes/qa/detail/qaConfigs'
 import { TimeWithRelativeTooltip } from '@/components/shared/date/TimeWithRelativeTooltip'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
@@ -44,19 +43,22 @@ type Props = {
   regionSlug: string
   status: QaStatusKey | typeof QA_STATUS_SELECT_ALL
   users?: string[]
+  /** Selected indicator keys (`ind` param), `undefined` = every indicator. */
+  indicatorKeys?: string[]
   search: string
   extent: ModeListExtent
 }
 
 /**
- * QA mode area rows. Filters (status, users, search, map extent) run on the server.
- * Clicking an area selects it in `f` (mode panel detail) and pans if it is off-screen.
+ * QA mode area rows. Filters (status, users, indicators, search, map extent) run on the server.
+ * Clicking an area selects it in `f` (mode panel detail) and flies the map to its bbox.
  */
 export const QaModeAreaList = ({
   configSlug,
   regionSlug,
   status,
   users,
+  indicatorKeys,
   search,
   extent,
 }: Props) => {
@@ -70,7 +72,7 @@ export const QaModeAreaList = ({
     queryKey: [
       'qa-configs',
       'getQaAreaList',
-      { configSlug, regionSlug, status, users, search, extent, bbox },
+      { configSlug, regionSlug, status, users, indicatorKeys, search, extent, bbox },
     ],
     queryFn: () =>
       getQaAreaListFn({
@@ -79,6 +81,7 @@ export const QaModeAreaList = ({
           regionSlug,
           status,
           userIds: users,
+          indicatorKeys,
           search: search || undefined,
           bbox,
         },
@@ -149,8 +152,7 @@ export const QaModeAreaList = ({
       ) : null}
       <ul>
         {areas.map((area) => {
-          const userConfig = area.userStatus ? userStatusConfig[area.userStatus] : null
-          const config = userConfig ?? systemStatusConfig[area.systemStatus]
+          const config = qaStatusPillConfig(area)
           return (
             <ModeListItem
               key={area.areaId}

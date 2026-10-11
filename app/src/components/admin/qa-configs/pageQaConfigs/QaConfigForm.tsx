@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useRouter } from '@tanstack/react-router'
+import type { z } from 'zod'
 import { AdminFormLayout, type AdminFormPageExtras } from '@/components/admin/aside/AdminFormLayout'
 import { AdminFormSection } from '@/components/admin/aside/AdminFormSection'
 import { RadioGroup } from '@/components/shared/form/fields/RadioGroup'
@@ -9,9 +10,17 @@ import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form, type SubmitResult } from '@/components/shared/form/Form'
 import { adminNavCountsQueryOptions } from '@/server/admin/adminNavQueryOptions'
 import { createQaConfigFn, updateQaConfigFn } from '@/server/qa-configs/qa-configs.functions'
-import { CreateQaConfigFormSchema } from '@/server/qa-configs/schemas'
-import { QaPercentField } from './QaPercentField'
-import { QaThresholdPreview } from './QaThresholdPreview'
+import {
+  qaAreaFilterLabels,
+  qaDatasets,
+  type QaDatasetKey,
+} from '@/server/qa-configs/qaDatasets.const'
+import {
+  CreateQaConfigFormSchema,
+  type QaIndicatorDraft,
+  type UpdateQaConfigFormSchema,
+} from '@/server/qa-configs/schemas'
+import { QaIndicatorsField } from './QaIndicatorsField'
 
 export type QaConfigFormValues = {
   slug: string
@@ -19,9 +28,12 @@ export type QaConfigFormValues = {
   isActive: 'true' | 'false'
   mapTable: string
   mapAttribution: string
-  goodThreshold: string
-  needsReviewThreshold: string
-  absoluteDifferenceThreshold: string
+  // '' is the unselected placeholder option; the schema rejects it as "required".
+  dataset: QaDatasetKey | ''
+  areaTable: string
+  areaFilter: 'all' | 'priority' | 'non_priority' | 'with_reference'
+  referenceTable: string
+  indicators: QaIndicatorDraft[]
   regionId: string
   trustedOsmUsernames: string
   referenceFrozenAt: string
@@ -33,9 +45,11 @@ export const qaConfigFormEmptyDefaults = {
   isActive: 'true',
   mapTable: '',
   mapAttribution: '',
-  goodThreshold: '10',
-  needsReviewThreshold: '20',
-  absoluteDifferenceThreshold: '4',
+  dataset: '',
+  areaTable: '',
+  areaFilter: 'all',
+  referenceTable: '',
+  indicators: [],
   regionId: '',
   trustedOsmUsernames: '',
   referenceFrozenAt: '',
@@ -45,10 +59,21 @@ export const qaConfigFormEmptyDefaults = {
 const sectionLabels = {
   assignment: 'Zuordnung',
   map: 'Karte',
-  thresholds: 'Schwellenwerte',
+  tables: 'Datensatz & Tabellen',
+  indicators: 'Indikatoren',
   trustList: 'Vertrauensliste',
   status: 'Status',
 } satisfies Record<string, string>
+
+const datasetOptions: [string, string][] = [
+  ['', '— Datensatz wählen —'],
+  ...Object.entries(qaDatasets).map(([key, dataset]): [string, string] => [key, dataset.label]),
+]
+
+const areaFilterItems = Object.entries(qaAreaFilterLabels).map(([value, label]) => ({
+  value,
+  label,
+}))
 
 type Props = {
   regions: Array<{ id: number; slug: string }>
@@ -62,7 +87,8 @@ export function QaConfigForm(props: Props) {
   const { mode, defaultValues, regions, pageExtras } = props
   const router = useRouter()
   const queryClient = useQueryClient()
-  const regionOptions = regions.map((r) => [r.id.toString(), r.slug] as [string, string])
+  const regionOptions = regions.map((r): [string, string] => [r.id.toString(), r.slug])
+  const configId = mode === 'edit' ? props.id : undefined
 
   return (
     <Form<QaConfigFormValues>
@@ -72,11 +98,17 @@ export function QaConfigForm(props: Props) {
       schema={CreateQaConfigFormSchema}
       onSubmit={async (values) => {
         // Send the raw field values: the server functions parse them with the same schema, which
-        // converts the percent thresholds to fractions exactly once.
+        // converts the indicators' percent thresholds to fractions exactly once. `dataset`
+        // includes the form's unselected placeholder `''`, which the schema rejects with a normal
+        // validation error — the cast just narrows the "form state" type to the schema input.
         const result =
           mode === 'create'
-            ? await createQaConfigFn({ data: values })
-            : await updateQaConfigFn({ data: { ...values, id: props.id } })
+            ? await createQaConfigFn({
+                data: values as z.input<typeof CreateQaConfigFormSchema>,
+              })
+            : await updateQaConfigFn({
+                data: { ...values, id: props.id } as z.input<typeof UpdateQaConfigFormSchema>,
+              })
         if (!result.success) return result as SubmitResult<QaConfigFormValues>
         // `isActive` feeds the sidebar count.
         await queryClient.invalidateQueries({ queryKey: adminNavCountsQueryOptions().queryKey })
@@ -137,36 +169,44 @@ export function QaConfigForm(props: Props) {
           </AdminFormSection>
 
           <AdminFormSection
-            id="thresholds"
-            title={sectionLabels.thresholds}
-            description="Diese Regeln entscheiden automatisch, ob ein Bereich als „Gut“, „Überprüfung nötig“ oder „Problematisch“ markiert wird. Die absolute Toleranz gewinnt immer zuerst — erst wenn ein Bereich sie überschreitet, zählt der Prozentwert."
+            id="tables"
+            title={sectionLabels.tables}
+            description="Legt Maßeinheit und Tabellen fest, aus denen die Indikatoren unten gespeist werden."
           >
-            <div className="grid gap-6 lg:grid-cols-2">
-              <div className="space-y-4">
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <QaPercentField
-                    form={form}
-                    name="goodThreshold"
-                    label="Gut bis"
-                    help="Weicht der aktuelle Lauf höchstens um diesen Prozentsatz vom Referenzwert ab, gilt der Bereich als „Gut“ (grün)."
-                  />
-                  <QaPercentField
-                    form={form}
-                    name="needsReviewThreshold"
-                    label="Überprüfung bis"
-                    help="Oberhalb von „Gut bis“ und bis zu diesem Prozentsatz gilt „Überprüfung nötig“ (gelb). Alles darüber ist „Problematisch“ (rot)."
-                  />
-                </div>
-                <TextField
-                  form={form}
-                  name="absoluteDifferenceThreshold"
-                  label="Absolute Toleranz (Stellplätze)"
-                  type="number"
-                  help="So viele Stellplätze Unterschied gelten immer als „Gut“ — unabhängig vom Prozentwert. Verhindert, dass kleine Referenzwerte (z. B. 2 → 3 Stellplätze) fälschlich als große Abweichung zählen."
-                />
-              </div>
-              <QaThresholdPreview form={form} />
-            </div>
+            <Select
+              form={form}
+              name="dataset"
+              label="Datensatz"
+              options={datasetOptions}
+              help="Legt Maßeinheit und die für Indikatoren wählbaren Merkmale fest."
+            />
+            <TextField
+              form={form}
+              name="areaTable"
+              label="Flächen-Tabelle"
+              help='Schema-qualifizierte Tabelle mit den QA-Flächen, z. B. "data.euvm_qa_voronoi_2026".'
+            />
+            <RadioGroup
+              form={form}
+              name="areaFilter"
+              label="Flächen-Filter"
+              items={areaFilterItems}
+              help='"Priorisiert" nutzt die Spalte "priority" der Flächen-Tabelle. "Mit Referenzwerten" prüft nur Flächen, die in der Referenz-Tabelle einen Wert haben – Neues in bisher leeren Flächen fällt dann nicht auf.'
+            />
+            <TextField
+              form={form}
+              name="referenceTable"
+              label="Referenz-Tabelle"
+              help='Schema-qualifizierte Tabelle mit den Referenzwerten, z. B. "data.qa_parkings_euvm_reference_2026". Kann nach dem Anlegen noch fehlen (Freeze folgt später).'
+            />
+          </AdminFormSection>
+
+          <AdminFormSection
+            id="indicators"
+            title={sectionLabels.indicators}
+            description="Jeder Indikator vergleicht je Fläche die Menge (Stellplätze bzw. Meter) mit der Referenz – als Gesamtmenge oder aufgeteilt nach den Werten eines Merkmals, z. B. Meter je Kategorie. Die Differenz ist die Menge, die hinzugekommen, weggefallen oder anders getaggt ist; die Abweichung ist ihr Anteil an der größeren der beiden Mengen. Beispiel: 100 m Radweg, davon 20 m jetzt mit anderer Kategorie → 20 m Differenz, 20 % Abweichung."
+          >
+            <QaIndicatorsField form={form} configId={configId} />
           </AdminFormSection>
 
           <AdminFormSection id="trustList" title={sectionLabels.trustList}>
@@ -183,7 +223,7 @@ export function QaConfigForm(props: Props) {
               label="Vertrauensliste (OSM-Benutzernamen)"
               optional
               rows={5}
-              help="Ein OSM-Benutzername pro Zeile, wird kleingeschrieben gespeichert. Leere Liste = aus. Eine gelb/rot bewertete Zelle bekommt den System-Status »Gut (Vertrauensliste)«, wenn die seit dem Freeze bearbeiteten Stellplätze zuletzt von diesen Nutzer:innen bearbeitet wurden; bis zu »Absolute Toleranz« Stellplätze anderer Bearbeiter:innen sind erlaubt. Umbenannte OSM-Accounts hier nachtragen."
+              help="Ein OSM-Benutzername pro Zeile, wird kleingeschrieben gespeichert. Leere Liste = aus. Eine gelb/rot bewertete Zelle bekommt den System-Status »Gut (Vertrauensliste)«, wenn die seit dem Freeze bearbeiteten Werte zuletzt von diesen Nutzer:innen bearbeitet wurden; bis zu »Absolute Toleranz« Einheiten anderer Bearbeiter:innen sind erlaubt. Umbenannte OSM-Accounts hier nachtragen."
             />
           </AdminFormSection>
 

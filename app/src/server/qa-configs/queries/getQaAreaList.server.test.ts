@@ -3,7 +3,7 @@ import {
   QA_STATUS_OPTIONS,
   type QaStatusParam,
 } from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
-import { qaStatusSqlPredicate } from './getQaAreaList.server'
+import { qaIndicatorSqlPredicate, qaStatusSqlPredicate } from './getQaAreaList.server'
 
 describe('qaStatusSqlPredicate', () => {
   test('all and undefined emit TRUE with no params', () => {
@@ -35,5 +35,19 @@ describe('qaStatusSqlPredicate', () => {
     expect(() => qaStatusSqlPredicate('actionable' as QaStatusParam, 2)).toThrow(
       'Unknown QA status key: actionable',
     )
+  })
+})
+
+describe('qaIndicatorSqlPredicate', () => {
+  test('absent or empty selection means every indicator', () => {
+    expect(qaIndicatorSqlPredicate(undefined, 3)).toEqual({ sql: 'TRUE', params: [] })
+    expect(qaIndicatorSqlPredicate([], 3)).toEqual({ sql: 'TRUE', params: [] })
+  })
+
+  test('a selection binds the keys as one text array', () => {
+    expect(qaIndicatorSqlPredicate(['total', 'surface'], 3)).toEqual({
+      sql: 'l."indicatorKey" = ANY($3::text[])',
+      params: [['total', 'surface']],
+    })
   })
 })

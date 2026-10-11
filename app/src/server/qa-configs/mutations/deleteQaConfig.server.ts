@@ -1,12 +1,16 @@
-import { adminFormAuditContext, runWithAuditContextAsync } from '@/server/audit/auditContext.server'
-import { requireAdmin } from '@/server/auth/session.server'
+import { runWithAuditContextAsync } from '@/server/audit/auditContext.server'
+import {
+  adminAuditContext,
+  type MemberCaller,
+  requireAdminSession,
+} from '@/server/auth/memberCaller.server'
 import db from '@/server/db.server'
 import { DeleteQaConfigSchema } from '../schemas'
 
-export async function deleteQaConfig(input: { id: number }, headers: Headers) {
-  const admin = await requireAdmin(headers)
+export async function deleteQaConfig(input: { id: number }, caller: MemberCaller) {
+  const admin = await requireAdminSession(caller)
   const { id } = DeleteQaConfigSchema.parse(input)
-  return runWithAuditContextAsync(adminFormAuditContext(headers, admin.userId), () =>
+  return runWithAuditContextAsync(adminAuditContext(caller, admin.userId), () =>
     db.qaConfig.delete({ where: { id } }),
   )
 }

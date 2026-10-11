@@ -14,38 +14,54 @@ export const useQaParam = () => {
     updateSearch({ [searchParamsRegistry.qa]: compactQaParam(value) }, { replace: true })
   }
 
-  const toggleUser = (userId: string) => {
+  /** Applies `patch` to the current `qa` param; a no-op (no `key` yet) clears it instead. */
+  const updateQaParamData = (patch: (current: QaParamData) => QaParamData) => {
     updateSearch(
       (prev) => {
         const current = getQaParamFromSearch(prev)
         if (!current.key) return { [searchParamsRegistry.qa]: undefined }
-        const currentUsers = current.users || []
-        const newUsers = currentUsers.includes(userId)
-          ? currentUsers.filter((id) => id !== userId)
-          : [...currentUsers, userId]
-        return {
-          [searchParamsRegistry.qa]: compactQaParam({
-            ...current,
-            users: newUsers.length > 0 ? newUsers : undefined,
-          }),
-        }
+        return { [searchParamsRegistry.qa]: compactQaParam(patch(current)) }
       },
       { replace: true },
     )
+  }
+
+  const toggleUser = (userId: string) => {
+    updateQaParamData((current) => {
+      const currentUsers = current.users || []
+      const newUsers = currentUsers.includes(userId)
+        ? currentUsers.filter((id) => id !== userId)
+        : [...currentUsers, userId]
+      return { ...current, users: newUsers.length > 0 ? newUsers : undefined }
+    })
   }
 
   const clearUsers = () => {
-    updateSearch(
-      (prev) => {
-        const current = getQaParamFromSearch(prev)
-        if (!current.key) return { [searchParamsRegistry.qa]: undefined }
-        return {
-          [searchParamsRegistry.qa]: compactQaParam({ ...current, users: undefined }),
-        }
-      },
-      { replace: true },
-    )
+    updateQaParamData((current) => ({ ...current, users: undefined }))
   }
 
-  return { qaParamData, setQaParamData, toggleUser, clearUsers }
+  /** Toggles one indicator key. Starting point (no `ind` in the URL) is "every indicator". */
+  const toggleIndicator = (indicatorKey: string, allIndicatorKeys: readonly string[]) => {
+    updateQaParamData((current) => {
+      const currentKeys = current.ind && current.ind.length > 0 ? current.ind : allIndicatorKeys
+      const nextKeys = currentKeys.includes(indicatorKey)
+        ? currentKeys.filter((key) => key !== indicatorKey)
+        : [...currentKeys, indicatorKey]
+      return { ...current, ind: nextKeys.length > 0 ? nextKeys : undefined }
+    })
+  }
+
+  /** "Alle Attribute": back to no indicator filter. */
+  const clearIndicators = () => {
+    updateQaParamData((current) => ({ ...current, ind: undefined }))
+  }
+
+  return {
+    qaParamData,
+    setQaParamData,
+    toggleUser,
+    clearUsers,
+    toggleIndicator,
+    clearIndicators,
+  }
 }

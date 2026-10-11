@@ -6,27 +6,49 @@ import {
   qaLayerId,
   qaSourceId,
 } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersQa'
-import { qaStatusForMapFilter } from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
 import {
-  qaMapPayloadAppliesDefault,
-  resolveQaMapStatus,
-} from '@/components/regionen/pageRegionSlug/modes/qa/qaMapDefaultStatus'
+  qaStatusForMapFilter,
+  resolvedQaIndicatorKeys,
+} from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
 import { isProd } from '@/components/shared/utils/isEnv'
+import {
+  encodeQaStatusLetters,
+  QA_NO_USER_STATUS_LETTER,
+  worstQaIndicatorStatus,
+} from '@/shared/qaIndicatorStatus'
+import { qaMapPayloadAppliesDefault } from '@/shared/qaMapDefaultStatus'
 import { useMapActions, useMapLoaded } from './useMapState'
-import { qaMapRowMatchesStatus, useQaMapData } from './useQaMapData'
+import {
+  qaMapRowMatchesStatus,
+  resolveQaIndicatorPairs,
+  selectQaIndicatorPairs,
+  useQaMapData,
+} from './useQaMapData'
 
 /** Keeps QA feature-state in sync with the payload. Tile availability is `map.on('sourcedata')`; payload/filter is the effect below. */
 export const useQaMapState = () => {
   const { mainMap } = useMap()
   const mapLoaded = useMapLoaded()
   const { startFeatureStateSync, finishFeatureStateSync } = useMapActions()
-  const { data: currentQaData, qaDataByAreaId, qaParamData } = useQaMapData()
+  const { data: currentQaData, qaDataByAreaId, indicators, qaParamData } = useQaMapData()
 
   const shouldUpdateFeatureStates = mainMap !== undefined && mapLoaded
   const applyDefault =
     currentQaData !== undefined &&
     qaMapPayloadAppliesDefault({ search: qaParamData.search, userIds: qaParamData.users })
   const statusFilter = qaStatusForMapFilter(qaParamData.status)
+  // The map and the area list resolve the URL keys the same way: a selection that matches no key
+  // of the config means every indicator.
+  const resolvedIndicatorKeys = resolvedQaIndicatorKeys(
+    qaParamData.ind,
+    indicators.map((indicator) => indicator.key),
+  )
+  const selectedIndicatorKeys =
+    qaParamData.ind && qaParamData.ind.length > 0 && resolvedIndicatorKeys.length > 0
+      ? resolvedIndicatorKeys
+      : undefined
+  // A new array every render; the effect below depends on its content.
+  const selectedIndicatorKeysId = selectedIndicatorKeys?.join('\u0000')
 
   const syncQaFeatureStates = useEffectEvent(function syncQaFeatureStates() {
     if (!mainMap || !shouldUpdateFeatureStates) return
@@ -44,21 +66,48 @@ export const useQaMapState = () => {
 
       if (!isProd) console.time('[DEV][useQaMapState] setFeatureState')
 
+      // A cell can render as several features across tile boundaries; decide its feature-state
+      // once per areaId instead of redoing the same pair/filter work for every duplicate.
+      const featureStateByAreaId = new Map<
+        string,
+        { systemStatus: string | null; userStatus: string | null }
+      >()
+
+      const featureStateForArea = (areaId: string) => {
+        const cached = featureStateByAreaId.get(areaId)
+        if (cached) return cached
+
+        const pairs = resolveQaIndicatorPairs(
+          qaDataByAreaId.get(areaId),
+          indicators.length,
+          applyDefault,
+        )
+        const selectedPairs = pairs
+          ? selectQaIndicatorPairs(pairs, indicators, selectedIndicatorKeys)
+          : undefined
+
+        // Only set status if visible — null systemStatus/userStatus when filtered out.
+        let result: { systemStatus: string | null; userStatus: string | null }
+        if (
+          !selectedPairs ||
+          selectedPairs.length === 0 ||
+          !qaMapRowMatchesStatus(selectedPairs, statusFilter)
+        ) {
+          result = { systemStatus: null, userStatus: null }
+        } else {
+          const worst = worstQaIndicatorStatus(selectedPairs)!
+          const { sys, usr } = encodeQaStatusLetters([worst])
+          result = { systemStatus: sys, userStatus: usr === QA_NO_USER_STATUS_LETTER ? null : usr }
+        }
+
+        featureStateByAreaId.set(areaId, result)
+        return result
+      }
+
       mapQaFeatures.forEach((feature) => {
         const featureId = feature.id?.toString()
         if (!featureId) return
-
-        const resolved = resolveQaMapStatus(qaDataByAreaId.get(featureId), applyDefault)
-        // Only set status if visible — null systemStatus/userStatus when filtered out.
-        if (!resolved || !qaMapRowMatchesStatus(resolved, statusFilter)) {
-          mainMap.setFeatureState(feature, { systemStatus: null, userStatus: null })
-          return
-        }
-
-        mainMap.setFeatureState(feature, {
-          systemStatus: resolved.systemStatus,
-          userStatus: resolved.userStatus,
-        })
+        mainMap.setFeatureState(feature, featureStateForArea(featureId))
       })
 
       if (!isProd) console.timeEnd('[DEV][useQaMapState] setFeatureState')
@@ -72,7 +121,16 @@ export const useQaMapState = () => {
     function syncFeatureStatesAfterQaDataChanges() {
       syncQaFeatureStates()
     },
-    [applyDefault, qaDataByAreaId, statusFilter, shouldUpdateFeatureStates, mainMap, mapLoaded],
+    [
+      applyDefault,
+      qaDataByAreaId,
+      indicators,
+      selectedIndicatorKeysId,
+      statusFilter,
+      shouldUpdateFeatureStates,
+      mainMap,
+      mapLoaded,
+    ],
   )
 
   useEffect(

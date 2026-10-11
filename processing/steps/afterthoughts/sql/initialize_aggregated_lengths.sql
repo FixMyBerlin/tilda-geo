@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS public.aggregated_lengths
   bikelane_length JSONB,
   road_length JSONB
 );
+CREATE INDEX IF NOT EXISTS aggregated_lengths_geom_idx ON public.aggregated_lengths USING gist(geom);
 
 DO $$
 DECLARE

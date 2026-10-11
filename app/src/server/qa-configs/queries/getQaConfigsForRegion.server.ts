@@ -1,7 +1,8 @@
 import { z } from 'zod'
-import { getMemberSession, type MemberCaller } from '@/server/auth/memberCaller.server'
+import { type MemberCaller, getMemberSession } from '@/server/auth/memberCaller.server'
 import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
+import { parseQaConfigRow } from '../utils/parseQaConfigIndicators'
 
 const Schema = z.object({
   regionSlug: z.string(),
@@ -34,5 +35,5 @@ export async function getQaConfigsForRegion(input: z.infer<typeof Schema>, calle
     ],
   })
 
-  return qaConfigs
+  return qaConfigs.map(parseQaConfigRow)
 }

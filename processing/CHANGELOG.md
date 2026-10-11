@@ -10,7 +10,15 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ### `parkings_quantized`, `off_street_parking_quantized`
 
-- `area` is now the share of one parking space (`area` / `capacity` of the source feature, 2 decimals) instead of the area of the whole source feature. Before, summing `area` over the points overcounted by roughly the capacity of each feature. The last point of a feature takes the rounding remainder, so the points of a feature sum up exactly to `area` on `parkings` / `off_street_parking_areas`.
+- Removed (tables, exports, tiles). QA, Statistik and Summieren measure the features in their own geometry instead of generated points: a parking line or lot that crosses the border of an area counts with the share of its `capacity` that lies inside (`processing/measure/measure_functions.sql`, [docs/Measure.md](../docs/Measure.md)).
+
+### `aggregated_lengths`
+
+- Kilometers per Bundesland and Kreis are measured on the lines instead of on a point every 100 m, so a line that crosses a boundary counts on each side with the exact share of its length. Values move by about 1 km in single classes. Still kilometers per direction (a line that is not oneway counts twice).
+
+### QA tables (`qa_*_indicators`)
+
+- Amounts per cell are measured on the lines and areas instead of on generated points (bikelanes: a point every 5 m; parking: a point per space), so they can be fractional. A reference table has to be written with the same code as the nightly run reads it; references written from points must be rebuilt.
 
 ## 2026-09
 

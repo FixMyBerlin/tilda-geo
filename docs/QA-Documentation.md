@@ -3,180 +3,225 @@
 ## Contents
 
 - [Overview](#overview)
-- [Key Components](#key-components)
-  - [1. System vs User Status](#1-system-vs-user-status)
-  - [2. User Decision Protection Rule](#2-user-decision-protection-rule)
-  - [3. System Status Update Rules](#3-system-status-update-rules)
-    - [3.1. System Overwrites System](#31-system-overwrites-system-no-user-decision)
-    - [3.2. System Overwrites User Decision](#32-system-overwrites-user-decision)
-    - [3.3. Trusted OSM editors (automatic OK)](#33-trusted-osm-editors-automatic-ok)
-- [Data Flow](#data-flow)
+- [Scope: TILDA data, not the customer's merged network](#scope-tilda-data-not-the-customers-merged-network)
+- [1. Indicators](#1-indicators)
+- [2. Thresholds and status](#2-thresholds-and-status)
+- [3. Trusted OSM editors (automatic OK)](#3-trusted-osm-editors-automatic-ok)
+- [4. Nightly update rules, per indicator](#4-nightly-update-rules-per-indicator)
+- [5. Processing tables (the contract app code reads)](#5-processing-tables-the-contract-app-code-reads)
+- [6. Reference table](#6-reference-table)
+- [7. Nightly update job](#7-nightly-update-job)
+- [Cells](QA-Cells.md)
+- [Map status payload, caching and options](QA-Map-Status-Payload.md)
 - [Parking client freeze + QA](Parking-Client-Freeze-QA.md)
-- [Adding a New QA Config](#adding-a-new-qa-config)
 
 ## Overview
 
-The QA (Quality Assurance) system provides automated and manual evaluation of data quality across different regions and datasets. It combines system-generated evaluations based on thresholds with human expert evaluations to ensure data accuracy and reliability.
+The QA system compares a dataset's current state to a frozen reference, per cell, and flags cells
+where the difference looks like a data problem rather than a real-world change. It combines
+system-generated statuses (thresholds) with human decisions (one status per cell and indicator,
+with a comment).
 
-## Key Components
+Two datasets exist today: `parking_euvm` (parking spaces) and `bikelanes` (meters of cycling
+infrastructure). Both share the processing functions
+([`processing/qa/qa_functions.sql`](../processing/qa/qa_functions.sql)) and the evaluation rules
+([`qaEvaluationRules.ts`](../app/src/server/qa-configs/evaluation/qaEvaluationRules.ts)).
 
-### 1. System vs User Status
+## Scope: TILDA data, not the customer's merged network
 
-The QA system uses a dual-status approach:
+QA runs on TILDA's own processing tables. For the Berlin cycling delivery, the customer file
+merges TILDA's `bikelanes` (side geometries) and `roads` (centerlines) into one network outside
+this repository — nothing in TILDA merges them. Consequences:
 
-**System Status** (Automatic):
+- QA covers `bikelanes` per cell. A change that only touches `roads` (e.g. the surface of a
+  mixed-traffic street with no separate bikelane) is invisible to QA unless a second `QaConfig` on
+  `roads` is added (same generic SQL, other indicators). This has not been decided yet.
+- The reference for the bikelanes config is TILDA `bikelanes` at delivery date
+  (`data.qa_bikelanes_berlin_reference_<year>`, [freeze checklist](Parking-Client-Freeze-QA.md)).
+  The merged customer file is not a valid reference.
+- Indicator keys are TILDA tag names (`category`, `oneway`, …), not the customer schema.
 
-- `GOOD` - Small difference, likely OK (Green)
-- `NEEDS_REVIEW` - Medium difference, needs review (Yellow)
-- `PROBLEMATIC` - Large difference, likely problem (Red)
-- `TRUSTED_EDITOR_CHANGE` - Over threshold, but the changed spaces were last edited by trusted OSM users — "Gut (Vertrauensliste)" (Blue)
+## 1. Indicators
 
-**User Status** (Manual):
+One `QaConfig` = one dataset + one cell set + a list of indicators, so a reviewer sees every
+indicator of a cell in one view.
 
-- `OK_STRUCTURAL_CHANGE` - User confirmed OK, caused by construction/structural changes
-- `OK_REFERENCE_ERROR` - User confirmed OK, caused by wrong reference data
-- `NOT_OK_DATA_ERROR` - User confirmed problem, current data needs fixing
-- `NOT_OK_PROCESSING_ERROR` - User confirmed problem, processing needs fixing
-- `OK_QA_TOOLING_ERROR` - Diff OK, caused by methodical error in QA tooling (geometries/definitions) (Teal / distinct OK green in UI)
+- The **dataset** ([`qaDatasets.const.ts`](../app/src/server/qa-configs/qaDatasets.const.ts))
+  fixes the **amount** that is compared: the `capacity` of parking lines and lots, or the bikelane
+  length in meters. It also names the source table whose topic-doc attributes can be picked as
+  indicators (`parkings` / `bikelanes`; numeric attributes are left out).
+- A feature that crosses a cell border counts in each cell with the share that lies inside it
+  ([Measure.md](Measure.md)), so amounts can be fractional (12.4 parking spaces).
+- An **indicator** is a Merkmal plus its thresholds (§2): `{ key, label, goodThreshold,
+needsReviewThreshold, absoluteDifferenceThreshold }` in `QaConfig.indicators`, validated by
+  [`qaIndicatorsSchema.ts`](../app/src/server/qa-configs/schemas/qaIndicatorsSchema.ts). `key` is
+  either `total` (the plain amount) or a tag, e.g. `condition_category_primary`; each key once per config.
+  The order of the list is the order in the detail panel and on the map when statuses tie.
+- **Defaults** for a new config (admin form, seeds): parking `total` + `condition_category_primary`;
+  bikelanes `category` (meters per category — the category is derived from `traffic_sign` and
+  follows every change in length) + `oneway` (not part of the category).
+- **Bikelanes `oneway`**: the derived values count like the tagged ones (`implicit_yes` as `yes`,
+  `assumed_no` as `no`, see `tilda_qa_bikelane_tags`). They have the same effect, so tagging one
+  in OSM is not a change to review. The reference is built with the same rule.
 
-**Priority Rules**:
+### The comparison
 
-- User status **always overrides** system status when present
-- System status is used as fallback when no user evaluation exists
-- Areas with no evaluations show as gray (neutral)
+Per cell, the amount is split by the values of the indicator's tag (untagged features form the
+class `__none__`; the `total` has one class) and compared class by class with the reference:
 
-### 2. User Decision Protection Rule
+- `reference`, `current`: the summed amounts.
+- `difference = max(amount gained, amount lost)` over the classes — the amount that was added,
+  removed or now carries another value. For the `total` this is `|reference − current|`.
+- `deviation = difference / max(reference, current)`, 0 when both are 0. Always between 0 and 1:
+  a cell whose features all disappeared, or which had none in the reference, has deviation 1.
+- `breakdown`: `{ value: { reference, current } }` per class (not for the `total`).
 
-When a user has marked an area as NOT_OK (`NOT_OK_DATA_ERROR` or `NOT_OK_PROCESSING_ERROR`), the system must **not** overwrite that with new PROBLEMATIC or NEEDS_REVIEW evaluations. Only a GOOD system evaluation may overwrite a NOT_OK user decision (problem resolved). Full matrix: [§3.2 System Overwrites User Decision](#32-system-overwrites-user-decision).
+Class amounts are rounded to 0.1 first. Computed in `tilda_qa_compute_indicators`
+([`qa_functions.sql`](../processing/qa/qa_functions.sql), tests in
+[`qa_functions.test.sql`](../processing/qa/qa_functions.test.sql)).
 
-### 3. System Status Update Rules
+| Indicator  | reference (per class)         | current (per class)           | difference | deviation |
+| ---------- | ----------------------------- | ----------------------------- | ---------- | --------- |
+| `total`    | 75 spaces                     | 45 spaces                     | 30         | 0.4       |
+| `category` | 800 m track, 200 m lane       | 600 m track, 400 m lane       | 200        | 0.2       |
+| `surface`  | 10 m asphalt                  | 5 m asphalt, 10 m sett        | 10         | 0.6667    |
+| `oneway`   | 300 m `yes`, 100 m `__none__` | 300 m `yes`, 100 m `__none__` | 0          | 0         |
 
-When to create a new evaluation depends on whether there is a user decision: [§3.1](#31-system-overwrites-system-no-user-decision) (no user decision) or [§3.2](#32-system-overwrites-user-decision) (user decision present). `TRUSTED_EDITOR_CHANGE` ([§3.3](#33-trusted-osm-editors-automatic-ok)) is simply one more possible **effective system status**, computed alongside GOOD/NEEDS_REVIEW/PROBLEMATIC — it does not change when an evaluation is created, only which status it gets.
+A newly added tag counts as a change (`__none__` → value) — intended.
 
-#### 3.1. System Overwrites System (No User Decision)
+## 2. Thresholds and status
 
-When there is **no user decision** (`userStatus === null`), the system uses an **effective system status** to decide. The effective status is computed in this order (`getEffectiveSystemStatus` in `qaEvaluationRules.ts`):
+Thresholds live inside each indicator: units and semantic weight differ per attribute (a
+`category` change should alert early, `oneway` refinements late). Relative thresholds are stored as
+0–1 fractions; the admin form edits them in percent and converts once, at the form boundary
+([`schemas.ts`](../app/src/server/qa-configs/schemas.ts)). The absolute threshold is in the
+dataset's unit.
 
-1. **\|absoluteDifference\| ≤ threshold** (`QaConfig.absoluteDifferenceThreshold`): effective status = **GOOD**; nothing else is checked.
-2. Otherwise, if the percent-based status is not GOOD **and** the trusted-editor check ([§3.3](#33-trusted-osm-editors-automatic-ok)) passes: effective status = **TRUSTED_EDITOR_CHANGE**.
-3. Otherwise: effective status = the percent-based status (GOOD / NEEDS_REVIEW / PROBLEMATIC from `goodThreshold` / `needsReviewThreshold`).
+`calculateIndicatorStatus({ deviation, difference, thresholds })`
+([`qaEvaluationRules.ts`](../app/src/server/qa-configs/evaluation/qaEvaluationRules.ts)) decides:
 
-`QaConfig.goodThreshold`/`needsReviewThreshold` are stored as a 0–1 fraction (e.g. `0.1` for 10 %). The admin form shows and edits them as a percent — the conversion happens once, at the form/schema boundary (`qaThresholdPreview.ts`, used by `schemas.ts`); nothing else in the system deals in percent.
+1. `difference ≤ absoluteDifferenceThreshold` → **GOOD**, whatever the deviation (a noise floor in
+   dataset units).
+2. `deviation ≤ goodThreshold` → **GOOD**.
+3. `deviation ≤ needsReviewThreshold` → **NEEDS_REVIEW**.
+4. otherwise → **PROBLEMATIC**.
 
-**When \|absoluteDifference\| ≤ threshold** (effective = GOOD):
+Boundaries are inclusive, with a `1e-9` epsilon so float rounding does not flip a value that sits
+exactly on a boundary.
 
-| Previous System Status | Effective New Status | Action                                                         |
-| ---------------------- | -------------------- | -------------------------------------------------------------- |
-| **GOOD**               | GOOD                 | **No change** — keep existing evaluation                       |
-| **NEEDS_REVIEW**       | GOOD                 | **Create new evaluation** — system overwrites itself with GOOD |
-| **PROBLEMATIC**        | GOOD                 | **Create new evaluation** — system overwrites itself with GOOD |
+**User status** (manual, per indicator), which always overrides the system status in the UI
+(`qaEffectiveStatus` in [`qaIndicatorStatus.ts`](../app/src/shared/qaIndicatorStatus.ts)):
 
-**When \|absoluteDifference\| > threshold** (effective status = %-based: GOOD / NEEDS_REVIEW / PROBLEMATIC):
+| Status                    | Meaning                                                             |
+| ------------------------- | ------------------------------------------------------------------- |
+| `OK_STRUCTURAL_CHANGE`    | Confirmed OK, caused by construction / a real structural change     |
+| `OK_REFERENCE_ERROR`      | Confirmed OK, the reference data was wrong                          |
+| `OK_QA_TOOLING_ERROR`     | Confirmed OK, caused by a methodical error in the QA tooling itself |
+| `NOT_OK_DATA_ERROR`       | Confirmed problem, current data needs fixing                        |
+| `NOT_OK_PROCESSING_ERROR` | Confirmed problem, processing needs fixing                          |
 
-| Previous System Status | Effective New Status | Action                                               |
-| ---------------------- | -------------------- | ---------------------------------------------------- |
-| **GOOD**               | GOOD                 | **No change** — keep existing evaluation             |
-| **GOOD**               | NEEDS_REVIEW         | **Create new evaluation** — system overwrites itself |
-| **GOOD**               | PROBLEMATIC          | **Create new evaluation** — system overwrites itself |
-| **NEEDS_REVIEW**       | GOOD                 | **Create new evaluation** — system overwrites itself |
-| **NEEDS_REVIEW**       | NEEDS_REVIEW         | **No change** — keep existing evaluation             |
-| **NEEDS_REVIEW**       | PROBLEMATIC          | **Create new evaluation** — system overwrites itself |
-| **PROBLEMATIC**        | GOOD                 | **Create new evaluation** — system overwrites itself |
-| **PROBLEMATIC**        | NEEDS_REVIEW         | **Create new evaluation** — system overwrites itself |
-| **PROBLEMATIC**        | PROBLEMATIC          | **No change** — keep existing evaluation             |
+The admin form's "Mit aktuellen Daten prüfen" counts the statuses the latest processing run would
+get with the thresholds being typed, and lists the largest differences.
 
-Effective status **unchanged** (e.g. GOOD → GOOD) → never create a new evaluation. Effective status **changed** → create a new evaluation where the tables say “Create new evaluation”. `TRUSTED_EDITOR_CHANGE` is not in the tables above but follows exactly the same rule: unchanged (e.g. `TRUSTED_EDITOR_CHANGE` → `TRUSTED_EDITOR_CHANGE`, because trusted editors still cover the diff) → no-op; changed (into or out of `TRUSTED_EDITOR_CHANGE`) → create a new evaluation with the new effective status. User classifications are not overwritten here; see [§3.2](#32-system-overwrites-user-decision) for when the system may reset a user decision (only when it becomes GOOD).
+The single-indicator design compared `max/min − 1`; its migration converts a threshold `t` to
+`t / (1 + t)` (10 % → 9.09 %), which keeps every cell's status.
 
-#### 3.2. System Overwrites User Decision
+## 3. Trusted OSM editors (automatic OK)
 
-When there is **a user decision** (`userStatus !== null`), the system respects user decisions with specific rules. `TRUSTED_EDITOR_CHANGE` is not GOOD, so it **never** resets a user decision — only an effective status of GOOD does (same rule as NEEDS_REVIEW/PROBLEMATIC in the table below).
+Some deviations are expected: known-good OSM contributors re-map an area and the difference to the
+frozen reference is real, not a data problem. A `QaConfig` can list `trustedOsmUsernames` whose
+recent edits turn an indicator's non-GOOD status into `TRUSTED_EDITOR_CHANGE` (»Gut
+(Vertrauensliste)«, map letter `T`).
 
-| Previous User Status        | New System Status | Action                                                    |
-| --------------------------- | ----------------- | --------------------------------------------------------- |
-| **OK_STRUCTURAL_CHANGE**    | GOOD              | **No change** - User decision is permanent                |
-| **OK_STRUCTURAL_CHANGE**    | NEEDS_REVIEW      | **No change** - User decision is permanent                |
-| **OK_STRUCTURAL_CHANGE**    | PROBLEMATIC       | **No change** - User decision is permanent                |
-| **OK_REFERENCE_ERROR**      | GOOD              | **No change** - User decision is permanent                |
-| **OK_REFERENCE_ERROR**      | NEEDS_REVIEW      | **No change** - User decision is permanent                |
-| **OK_REFERENCE_ERROR**      | PROBLEMATIC       | **No change** - User decision is permanent                |
-| **OK_QA_TOOLING_ERROR**     | GOOD              | **Reset user decision** - System detects problem resolved |
-| **OK_QA_TOOLING_ERROR**     | NEEDS_REVIEW      | **No change** - User decision is permanent                |
-| **OK_QA_TOOLING_ERROR**     | PROBLEMATIC       | **No change** - User decision is permanent                |
-| **NOT_OK_DATA_ERROR**       | GOOD              | **Reset user decision** - System detects problem resolved |
-| **NOT_OK_DATA_ERROR**       | NEEDS_REVIEW      | **No change** - Protect user's NOT_OK decision            |
-| **NOT_OK_DATA_ERROR**       | PROBLEMATIC       | **No change** - Protect user's NOT_OK decision            |
-| **NOT_OK_PROCESSING_ERROR** | GOOD              | **Reset user decision** - System detects problem resolved |
-| **NOT_OK_PROCESSING_ERROR** | NEEDS_REVIEW      | **No change** - Protect user's NOT_OK decision            |
-| **NOT_OK_PROCESSING_ERROR** | PROBLEMATIC       | **No change** - Protect user's NOT_OK decision            |
+- `trustedOsmUsernames` — OSM display names, stored lowercase. An empty list means off.
+- `referenceFrozenAt` — 00:00 UTC of the freeze day; edits from then on are checked. Not the
+  previous evaluation's date: that would reset the window every time a trusted row is written.
+- Per cell, `public.<map>_last_editors` (§5) lists `{ osmUser, amount, updatedAt }` per
+  `(osmUser, updatedAt)` pair among the cell's features; the same list applies to every indicator.
 
-**Summary**:
+`checkTrustedEditors` passes when, among the edits since the freeze, at least one is by a trusted
+user and the untrusted `amount` is ≤ the indicator's `absoluteDifferenceThreshold`.
+`applyTrustedEditors` then turns NEEDS_REVIEW / PROBLEMATIC into `TRUSTED_EDITOR_CHANGE`; a
+difference within the absolute threshold stays GOOD. It is not GOOD, so it never resets a human
+decision (§4); on the map it ranks like a user OK. Its row `body` names the trusted editors.
 
-- **OK decisions** (`OK_STRUCTURAL_CHANGE`, `OK_REFERENCE_ERROR`): never reset.
-- **OK_QA_TOOLING_ERROR** and **NOT_OK** (`NOT_OK_DATA_ERROR`, `NOT_OK_PROCESSING_ERROR`): reset only when system status becomes GOOD.
-- **Reset**: new evaluation with `userStatus = null`, `body = null`, `userId = null`.
-- **Effective system status** (and thus "GOOD") follows [§3.1](#31-system-overwrites-system-no-user-decision) (absolute diff before %).
-- **Stored system status on a user evaluation**: computed from the counts in the saved decision data (same thresholds as nightly), not a `NEEDS_REVIEW` placeholder. Users cannot set system status; `NEEDS_REVIEW` is only a system value.
+Limitations: deleted OSM objects leave no editor behind, so a deletion always needs a review;
+production needs the non-anonymized extract; merged parking lines credit their whole capacity to
+the latest editor; an OSM account rename breaks the match until the list is updated; enabling the
+list on a config with open reviews can flip many indicators in one night.
 
-**Order of checks** (`getQaUpdateDecision` in `qaEvaluationRules.ts`):
+## 4. Nightly update rules, per indicator
 
-1. No previous evaluation → always create a `SYSTEM` evaluation (first run).
-2. **Reset check** (independent of, and before, any data-changed gate): previous user status is `NOT_OK_DATA_ERROR`, `NOT_OK_PROCESSING_ERROR`, or `OK_QA_TOOLING_ERROR` and the effective status is `GOOD` → create a reset evaluation (see above).
-3. Otherwise, a **data-changed gate** applies: `dataChanged = (effective status !== previous systemStatus) OR (previousRelative !== currentRelative AND |absoluteDifference| > threshold)`. If `dataChanged` is false → keep the existing evaluation.
-4. If `dataChanged` is true, a new evaluation is created only when [§3.1](#31-system-overwrites-system-no-user-decision)/[§3.2](#32-system-overwrites-user-decision) say so — without a user decision, whenever the effective status changed; with a user decision, only the reset case from step 2 (already handled above).
+For each `(cell, indicator)`: the latest row `P` (its stored system status and user status) and
+the freshly computed system status `S`. `getQaUpdateDecision` returns `create`, `reset` or `none`,
+**independently per indicator** — a decision on `condition_category_primary` never touches `total`.
 
-The relative-change part of the gate (`previousRelative !== currentRelative`) therefore never creates an evaluation by itself — it only opens the gate for the effective-status check, so the tables in §3.1/§3.2 remain the full truth for when an evaluation is created. `previousRelative` comes from the processing table's previous run (`public.qa_parkings_euvm*.previous_relative`), not from the previously stored evaluation.
+| Case                                                                                                                             | Decision                       |
+| -------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
+| No previous row                                                                                                                  | `create`                       |
+| No user status, `S` unchanged                                                                                                    | `none`                         |
+| No user status, `S` differs                                                                                                      | `create`                       |
+| Permanent user status (`OK_STRUCTURAL_CHANGE`, `OK_REFERENCE_ERROR`)                                                             | `none`, always                 |
+| Resettable user status (`NOT_OK_DATA_ERROR`, `NOT_OK_PROCESSING_ERROR`, `OK_QA_TOOLING_ERROR`), `S = GOOD`, row was **not** GOOD | `reset`                        |
+| Same, but the row was already GOOD                                                                                               | `none` — no signal of a fix    |
+| Same, `S` is not GOOD                                                                                                            | `none` — protects the decision |
 
-#### 3.3. Trusted OSM editors (automatic OK)
+`create` and `reset` write a SYSTEM row (no user status). A user submission writes a USER row that
+copies the indicator's current system status — that stored value is "the row" above. "Alle offenen
+als OK markieren" writes one USER row per non-GOOD, undecided indicator (`isOpenQaIndicator`).
 
-Some deviations are expected: known-good OSM contributors legitimately re-map an area (e.g. re-survey a street), and the diff against the frozen reference is real but not a data or processing problem. Rather than leave the cell as `NEEDS_REVIEW`/`PROBLEMATIC` for a human to confirm, a `QaConfig` can list `trustedOsmUsernames` whose recent edits turn a bad percent-based status into the `TRUSTED_EDITOR_CHANGE` system status instead — see the step order in [§3.1](#31-system-overwrites-system-no-user-decision).
+Example, parking cell with `total` and `condition_category_primary`: processing reports 30 of 75 spaces
+missing → `total` PROBLEMATIC (`create`), `condition_category_primary` unchanged (`none`). A reviewer marks
+`total` `NOT_OK_DATA_ERROR`. It stays red while the data is wrong; the night the spaces are mapped
+again, `total` becomes GOOD and a `reset` row clears the decision.
 
-**Inputs** (`QaConfig`):
+## 5. Processing tables (the contract app code reads)
 
-- `trustedOsmUsernames: String[]` — OSM display names, stored lowercase and trimmed. Empty list (the default) means the check can never pass.
-- `referenceFrozenAt: DateTime` — 00:00 UTC of the day the reference voronoi baseline was frozen; required. Edits from that moment on are checked against `trustedOsmUsernames`.
+For a config with `mapTable = public.<name>`, all tables are created in SQL (never via
+`osm2pgsql.define_table`), so a `--create` run does not wipe them:
 
-**Per-cell input**: the map table's `last_editors` JSONB column (aggregated by processing step 9), one entry per `(osmUser, updatedAt)` pair touching the cell's points: `{ osmUser: string | null, spaceCount: number, updatedAt: number }`. `updatedAt` is the OSM object's last-edit time as **Unix epoch seconds**, always present (osm2pgsql runs with `--extra-attributes`); `osmUser` is `null` for an anonymized extract; a cell with no points has `[]`.
+- **`public.<name>`**: `id TEXT PRIMARY KEY, geom geometry(MultiPolygon, 3857)` + GIST index. The
+  only table Martin publishes as vector tiles (no values, so nothing private leaks).
+- **`public.<name>_indicators`**: `area_id, indicator_key, reference, current, difference,
+deviation, breakdown` (§1), primary key `(area_id, indicator_key)`. One row per cell and
+  indicator with reference rows (§6), also when both sides are empty. Rebuilt every run, like
+  `_last_editors`.
+- **`public.<name>_last_editors`**: `area_id, last_editors JSONB` (§3), one row per cell, `[]`
+  when empty.
 
-**The check** (`checkTrustedEditors` in `qaEvaluationRules.ts`):
+Built by `tilda_qa_finalize` and driven per dataset by `tilda_qa_run_dataset`
+([`qa_functions.sql`](../processing/qa/qa_functions.sql)), called from
+[`9_qa_parkings.sql`](../processing/topics/parking/9_qa_parkings.sql) and
+[`5_qa_bikelanes.sql`](../processing/topics/roads_bikelanes/5_qa_bikelanes.sql). Both first build
+`_qa_features(geom, amount, tags, osm_user, updated_at)` from the dataset's features
+([Measure.md](Measure.md)): the public parking lines and lots with their `capacity`, the bikelanes
+with their `length`. Bikelane geometry stays on the road centerline in the database, but the cells
+are per street side, so for QA the lines are moved by `|offset|` to the right of the line
+(left-side lines run against the OSM way, see `roads_bikelanes_bikelanes.lua`).
 
-1. Only entries edited **at or after** the freeze cutoff count (`updatedAt * 1000 >= referenceFrozenAt`); entries edited before the freeze are part of the frozen baseline and are ignored entirely (neither trusted nor untrusted).
-2. An entry is trusted only if `osmUser` is non-null and, lowercased, is in `trustedOsmUsernames`. **`null` osmUser is never trusted** — production must run this against the internal (non-anonymized) extract, or the check can never pass.
-3. The cell passes when **at least one considered entry is trusted** AND the summed `spaceCount` of the untrusted considered entries (`untrustedSpaceCount`) is **≤ `absoluteDifferenceThreshold`** — the same tolerance §3.1 already uses for "no real change".
-4. An empty `trustedOsmUsernames` list, or an empty `last_editors`, naturally never passes (no entry can ever be trusted).
+The map shows the cell geometry the measure uses. The borders of the cells are straightened once,
+in the cell table itself ([freeze checklist](Parking-Client-Freeze-QA.md), step 2).
 
-**Why the freeze date, not the previous evaluation's `createdAt`**: using the previous evaluation as the cutoff would make a `TRUSTED_EDITOR_CHANGE` row's own creation reset the cutoff to "now", so no edit could ever be after it again — the very next night the check would find nothing new and flip back to a plain bad review. The cutoff is always the reference's freeze date, so every night re-checks the same fixed window of edits.
+## 6. Reference table
 
-**Relation to §3.1/§3.2**: `TRUSTED_EDITOR_CHANGE` is one more effective system status (see [§3.1](#31-system-overwrites-system-no-user-decision)). A change into or out of it creates a new `SYSTEM` row like any other status change, and it never resets a human decision (only GOOD does, per [§3.2](#32-system-overwrites-user-decision)). A `TRUSTED_EDITOR_CHANGE` row's `body` names the trusted editors and, if `untrustedSpaceCount > 0`, how many Stellplätze were last edited by others within the tolerance.
+Each config points at a `referenceTable` (`data.*`): `area_id, indicator_key, value_key, amount`,
+one row per cell, indicator and class (`value_key = '__total__'` for the `total`). It is written
+once, at freeze time, by `tilda_qa_write_reference(dataset, config_id, target_table)` — see the
+[freeze checklist](Parking-Client-Freeze-QA.md). An indicator added later has no reference rows
+until the next freeze and is left out until then — comparing it against 0 would rate every cell
+PROBLEMATIC; the nightly logs it as missing. A missing table (CI, fresh DB) leaves out all
+indicators.
 
-**Limitations**:
+The **cell table** (`areaTable`, also `data.*`) has `id`, `geom` and optionally `priority` for
+`areaFilter`; see [QA-Cells.md](QA-Cells.md).
 
-- **Deleted OSM objects**: a capacity drop caused by objects being deleted (not edited) leaves no recently-edited points behind to attribute to a trusted editor, so a genuine deletion never becomes `TRUSTED_EDITOR_CHANGE` — it always needs human review.
-- **Anonymized extracts**: `osmUser` must come from the internal (non-anonymized) extract in production; a public/anonymized extract has `osmUser: null` everywhere and can never pass the check.
-- **Merged on-street lines**: when several OSM ways are merged into one parking line, its whole capacity is attributed to the latest editor among the merged ways — so `last_editors` is an approximation, not an exact per-space attribution.
-- **OSM renames**: extracts carry the account's current display name on all its edits, so when a trusted contributor renames their OSM account, the listed name no longer matches any of their edits until the config is updated.
-- **First night after enabling**: turning this on (or widening the list) for a config that already has bad reviews can flip many cells at once — watch the `by trusted editors` count in the nightly log line (`post-processing-qa-update.ts`).
+## 7. Nightly update job
 
-## Data Flow
+Per active config, three reads: every `<map>_indicators` row, every `<map>_last_editors` row and
+the latest `QaEvaluation` per `(area, indicator)` (`ORDER BY createdAt DESC, id DESC` — rows of one
+run share a timestamp). Decisions (§4) are computed in memory and written in chunks of 1,000. A
+failing config is logged and skipped; `qa_update_completed_at` is written anyway.
 
-Parking client freezes must include a QA package (quantized points) and a new production `data.*` voronoi baseline; see [Parking client freeze + QA](Parking-Client-Freeze-QA.md).
-
-1. **Reference data**: Stored in a dated `data.*` baseline (currently `data.euvm_qa_voronoi_2026`) that is valid MultiPolygon, already clipped to Berlin, and has straightened cell borders ([`scripts/2026-tilda-qa-voronoi-simplify`](../../scripts/2026-tilda-qa-voronoi-simplify/)). The map shows the same geometry the counts use. During processing it is copied to `public.qa_parkings_euvm` / `public.qa_parkings_euvm_priority` (recreatable with limitations; all public). Script: [`parking/9_qa_parkings_euvm_voronoi.sql`](../processing/topics/parking/9_qa_parkings_euvm_voronoi.sql). The script does **not** clip to Berlin (that happens in [`qa_create_new_voronoi_baseline.sql`](qa_create_new_voronoi_baseline.sql)). It keeps previous run data for comparison and joins TILDA data to reference; update rules use it ([§3.1](#31-system-overwrites-system-no-user-decision), [§3.2](#32-system-overwrites-user-decision)). Every environment gets the real baseline via `/admin/data-schema` → Import after publish — the empty placeholder that step 9 creates when the table is missing is only a CI/throwaway fallback, not a supported setup. Keep the undated base table `data.euvm_qa_voronoi` published so the generator SQL can be re-run outside production. Freeze checklist: [Parking client freeze + QA](Parking-Client-Freeze-QA.md).
-2. **QA update API** (`/api/private/post-processing-qa-update`): Runs after processing; loads active configs, queries each config’s map table, computes system status from thresholds, applies [System status update rules](#3-system-status-update-rules), creates new evaluations when warranted.
-3. **App**: Loads public vector tiles, enriches with private evaluation data (`setFeatureState`); map allows filtering and creating evaluations.
-
-## Adding a New QA Config
-
-### 1. Database Requirements
-
-**Source Table Requirements**:
-
-- Must have a unique `id` column that is **always a string type**
-- Must contain comparison data (reference vs current values)
-- Must have polygon/area geometry data for map display
-- For the trusted-editor check ([§3.3](#33-trusted-osm-editors-automatic-ok)) to work, the table needs a `last_editors` JSONB column; processing step 9 (parking) aggregates it per cell.
-
-### 2. Create QA Config
-
-Use the admin UI to create a new config.
-Set `mapTable` to your source table (e.g., `public.my_qa_table`).
-Set the required `referenceFrozenAt` (the reference baseline's freeze date). Optionally add `trustedOsmUsernames` (OSM display names, one per trusted contributor) to enable the [§3.3 trusted-editor check](#33-trusted-osm-editors-automatic-ok); leave it empty to keep the check permanently failing (no cell can ever become `TRUSTED_EDITOR_CHANGE`).
+`?dryRun=1` returns the same per-config counts without writing — used to calibrate new indicators'
+thresholds on staging. Indicator keys in `<map>_indicators` but not in the config (or the reverse,
+until the next processing run) are logged and skipped.

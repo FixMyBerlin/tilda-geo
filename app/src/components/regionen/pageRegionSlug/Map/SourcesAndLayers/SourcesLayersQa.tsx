@@ -35,6 +35,12 @@ export const qaMinZoom = 12
 
 const qaAccent = modeIdentity.qa.accent.hex
 
+/**
+ * The area id as a string. Read from the `id` property, not from `['id']`: area ids are text,
+ * and a layer filter only sees the id of the tile feature, which is empty for a text id.
+ */
+const qaAreaId = ['to-string', ['get', 'id']] as ExpressionSpecification
+
 /** Base fill/outline hide under pointer hover (feature-state) and under list-hover/selection ids. */
 const hideHoveredOrSelected = (highlightIdStrings: string[]) => {
   const conditions: ExpressionSpecification[] = [
@@ -42,7 +48,7 @@ const hideHoveredOrSelected = (highlightIdStrings: string[]) => {
     ['boolean', ['feature-state', 'selected'], false],
     // One `==` per id: with `in` next to `feature-state`, maplibre paints every feature with
     // the default opacity of 1.
-    ...highlightIdStrings.map((id): ExpressionSpecification => ['==', ['to-string', ['id']], id]),
+    ...highlightIdStrings.map((id): ExpressionSpecification => ['==', qaAreaId, id]),
   ]
   return ['any', ...conditions] as ExpressionSpecification
 }
@@ -131,7 +137,7 @@ export const LayersQa = () => {
   )
   const highlightFilter = [
     'in',
-    ['to-string', ['id']],
+    qaAreaId,
     ['literal', highlightIdStrings],
   ] as ExpressionSpecification
   const hideBaseFill = hideHoveredOrSelected(highlightIdStrings)

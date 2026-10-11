@@ -1,18 +1,25 @@
 -- MANUAL ONLY — not part of nightly processing.
 --
--- Create a new data.* QA voronoi baseline from live public.*_quantized points.
--- Copies id / name / priority from an existing base table; normalizes geom to
--- valid MultiPolygon, clips to Berlin (osm_id 62422), drops cells that clip to
--- empty, and recalculates count_reference against the clipped geometry.
--- Nightly processing no longer clips — the clip lives here.
+-- What this script still does: build a new data.* CELL table (id, geom, name, priority) from an
+-- existing one, clipped and validated against Berlin. This is the only recipe we have for
+-- clipping/validating a cell table, so it stays, trimmed down.
 --
--- Run on production at freeze / delivery time (same DB that will feed nightly QA):
--- edit the variables in the DECLARE block, then run the whole script.
+-- It does not compute reference values. Those live in a separate long-format `data.*` reference
+-- table per config, written with the QA functions (processing/qa/qa_functions.sql) — see
+-- docs/Parking-Client-Freeze-QA.md. The cell table produced here only needs `id` + `geom`
+-- (+ optional `name` / `priority`).
 --
--- This script is step 2 of the freeze checklist. Everything that happens before
--- and after it (SQL dump export, spec, load/verify, straightening the cell
--- borders, publish, Import, processing step 9) is documented once in
--- docs/Parking-Client-Freeze-QA.md — follow that.
+-- Run this only when the CELL SET itself needs to change (a new priority split, a new provider
+-- export, or clipping a not-yet-clipped table to Berlin for the first time). Reusing an existing,
+-- already-clipped cell table (e.g. data.euvm_qa_voronoi_2026) needs none of this — go straight to
+-- tilda_qa_write_reference.
+--
+-- Run on production (same DB that will feed nightly QA): edit the variables in the DECLARE
+-- block, then run the whole script.
+--
+-- Everything that happens before and after this (SQL dump export, spec, load/verify, straightening
+-- the cell borders, publish, Import) is documented once in docs/Parking-Client-Freeze-QA.md —
+-- follow that.
 
 CREATE SCHEMA IF NOT EXISTS data;
 
@@ -25,8 +32,6 @@ DECLARE
   base_rows bigint;
   target_rows bigint;
   dropped bigint;
-  target_ref_sum bigint;
-  base_ref_sum bigint;
   n_invalid bigint;
   n_clipped bigint;
   berlin_exists boolean;
@@ -57,26 +62,6 @@ BEGIN
     RAISE EXCEPTION 'Missing public.boundaries row osm_id = 62422 (Berlin); refusing to clip';
   END IF;
 
-  -- Same point filter as processing/topics/parking/9_qa_parkings_euvm_voronoi.sql
-  DROP TABLE IF EXISTS _qa_voronoi_baseline_points;
-  CREATE TEMP TABLE _qa_voronoi_baseline_points AS
-  SELECT
-    public.ST_Transform(geom, 5243) AS geom
-  FROM
-    public.parkings_quantized
-  WHERE
-    tags ->> 'operator_type' IS NULL
-    OR tags ->> 'operator_type' <> 'private'
-  UNION ALL
-  SELECT
-    public.ST_Transform(geom, 5243) AS geom
-  FROM
-    public.off_street_parking_quantized
-  WHERE
-    tags ->> 'operator_type' = 'public';
-
-  CREATE INDEX _qa_voronoi_baseline_points_geom_idx ON _qa_voronoi_baseline_points USING GIST (geom);
-
   EXECUTE format(
     $sql$
       SELECT
@@ -99,7 +84,6 @@ BEGIN
         id TEXT PRIMARY KEY,
         geom public.geometry (MultiPolygon, 4326),
         name varchar,
-        count_reference smallint,
         priority boolean
       )
     $sql$,
@@ -110,13 +94,12 @@ BEGIN
   -- already within Berlin is a no-op on the polygon; CollectionExtract keeps it polygonal.
   EXECUTE format(
     $sql$
-      INSERT INTO data.%I (id, geom, name, priority, count_reference)
+      INSERT INTO data.%I (id, geom, name, priority)
       SELECT
         b.id::TEXT,
         clipped.geom,
         b.name,
-        b.priority,
-        LEAST(COALESCE(c.cnt, 0), 32767)::SMALLINT AS count_reference
+        b.priority
       FROM
         data.%I b
         CROSS JOIN public.boundaries berlin
@@ -132,14 +115,6 @@ BEGIN
               )
             ) AS geom
         ) clipped
-        LEFT JOIN LATERAL (
-          SELECT
-            COUNT(*)::INTEGER AS cnt
-          FROM
-            _qa_voronoi_baseline_points p
-          WHERE
-            public.ST_Contains(public.ST_Transform(clipped.geom, 5243), p.geom)
-        ) c ON TRUE
       WHERE
         berlin.osm_id = 62422
         AND NOT public.ST_IsEmpty(clipped.geom)
@@ -149,9 +124,7 @@ BEGIN
   );
 
   EXECUTE format('SELECT count(*) FROM data.%I', base_table) INTO base_rows;
-  EXECUTE format('SELECT COALESCE(SUM(count_reference), 0) FROM data.%I', base_table) INTO base_ref_sum;
   EXECUTE format('SELECT count(*) FROM data.%I', target_table) INTO target_rows;
-  EXECUTE format('SELECT COALESCE(SUM(count_reference), 0) FROM data.%I', target_table) INTO target_ref_sum;
 
   dropped := base_rows - target_rows;
   -- Empty-after-clip cells are dropped on purpose (4 on the 2026 vintage).
@@ -163,6 +136,6 @@ BEGIN
     RAISE EXCEPTION 'Dropped % cells (base=% target=%); sanity cap is 50', dropped, base_rows, target_rows;
   END IF;
 
-  RAISE NOTICE 'Created data.%: rows=%, dropped=%, sum(count_reference)=% (base data.% was sum=%)',
-    target_table, target_rows, dropped, target_ref_sum, base_table, base_ref_sum;
+  RAISE NOTICE 'Created data.%: rows=%, dropped=% (base data.% was rows=%)',
+    target_table, target_rows, dropped, base_table, base_rows;
 END $$;

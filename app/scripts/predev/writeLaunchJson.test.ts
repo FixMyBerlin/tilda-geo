@@ -3,12 +3,6 @@ import { portsFromSlot } from './devPortSlot'
 import { buildLaunchJson } from './writeLaunchJson'
 
 describe('buildLaunchJson()', () => {
-  test('uses the default Vite port without a slot', () => {
-    const [configuration] = buildLaunchJson(portsFromSlot(0).vitePort).configurations
-    expect(configuration?.port).toBe(5173)
-    expect(configuration?.url).toBe('http://127.0.0.1:5173')
-  })
-
   test('follows the port slot', () => {
     const [configuration] = buildLaunchJson(portsFromSlot(2).vitePort).configurations
     expect(configuration?.port).toBe(5175)

@@ -13,8 +13,10 @@ import {
   QA_AREA_LIST_LIMIT_ALL,
   QA_AREA_LIST_LIMIT_VIEW,
 } from '@/server/qa-configs/qaAreaList.const'
+import { parseQaConfigIndicators } from '@/server/qa-configs/utils/parseQaConfigIndicators'
+import { worstQaIndicatorStatus } from '@/shared/qaIndicatorStatus'
 import { getQaTableName } from '../utils/getQaTableName'
-import { qaSearchSqlPredicate } from './qaSearchSql'
+import { qaSearchSqlPredicate, type SqlFragment } from './qaSearchSql'
 
 /** Shared with the `getQaAreaListFn` validator so the RPC boundary and the query cannot drift. */
 export const QaAreaListSchema = z.object({
@@ -24,6 +26,8 @@ export const QaAreaListSchema = z.object({
   // every area. The URL schema tolerates stale values, so a real client never sends one.
   status: zodQaParamStatus.optional(),
   userIds: z.array(z.string()).optional(),
+  // Selected indicator keys; absent or empty = every indicator of the config.
+  indicatorKeys: z.array(z.string()).optional(),
   search: z.string().optional(),
   // WGS84 [minLng, minLat, maxLng, maxLat]; present = extent 'view', absent = extent 'all'
   bbox: z.tuple([z.number(), z.number(), z.number(), z.number()]).optional(),
@@ -33,8 +37,10 @@ export type QaAreaListItem = {
   areaId: string
   bbox: [number, number, number, number]
   center: [number, number]
+  /** Of the worst selected indicator — the same cell color the map paints. */
   systemStatus: QaSystemStatus
   userStatus: QaEvaluationStatus | null
+  indicatorKey: string
   createdAt: Date
   evaluatorType: QaEvaluatorType
   authorOsmName: string | null
@@ -45,15 +51,8 @@ export type QaAreaListItem = {
 
 export type QaAreaListResult = { items: QaAreaListItem[]; totalCount: number; limit: number }
 
-type ListRow = {
+type AreaRow = {
   areaId: string
-  systemStatus: QaSystemStatus
-  userStatus: QaEvaluationStatus | null
-  createdAt: Date
-  evaluatorType: QaEvaluatorType
-  authorOsmName: string | null
-  authorFirstName: string | null
-  authorLastName: string | null
   comment_count: bigint | number | null
   min_lng: number
   min_lat: number
@@ -64,15 +63,26 @@ type ListRow = {
   total_count: bigint | number | null
 }
 
+type IndicatorRow = {
+  areaId: string
+  indicatorKey: string
+  systemStatus: QaSystemStatus
+  userStatus: QaEvaluationStatus | null
+  createdAt: Date
+  evaluatorType: QaEvaluatorType
+  authorOsmName: string | null
+  authorFirstName: string | null
+  authorLastName: string | null
+}
+
 const emptyResult = (limit: number) =>
   ({ items: [], totalCount: 0, limit }) satisfies QaAreaListResult
 
-type SqlFragment = {
-  sql: string
-  params: string[]
-}
-
-/** Status filter on the latest-per-area CTE alias `l`. `'all'` / undefined → no constraint. */
+/**
+ * Status filter on the latest-per-(area, indicator) CTE alias `l`. `'all'` / undefined → no
+ * constraint. The caller wraps this in `bool_or(...)` per area: a cell matches when ANY selected
+ * indicator matches.
+ */
 export function qaStatusSqlPredicate(status: QaStatusParam | undefined, nextParamIndex: number) {
   if (status === undefined || status === QA_STATUS_SELECT_ALL) {
     return { sql: 'TRUE', params: [] } satisfies SqlFragment
@@ -85,7 +95,7 @@ export function qaStatusSqlPredicate(status: QaStatusParam | undefined, nextPara
   }
 
   const clauses: string[] = []
-  const params: string[] = []
+  const params: unknown[] = []
   let index = nextParamIndex
 
   if (option.userStatus === null) {
@@ -104,11 +114,27 @@ export function qaStatusSqlPredicate(status: QaStatusParam | undefined, nextPara
   return { sql: clauses.join(' AND '), params } satisfies SqlFragment
 }
 
-const QA_ABSOLUTE_CHANGE_SORT_SQL = `CASE WHEN l."decisionData"->>'absoluteChange' ~ '^-?[0-9]+(\\.[0-9]+)?$' THEN abs((l."decisionData"->>'absoluteChange')::numeric) END`
+/**
+ * Restrict the latest-row CTE to the selected indicators. An empty / absent selection means "all",
+ * the same convention the URL param uses.
+ */
+export function qaIndicatorSqlPredicate(
+  indicatorKeys: string[] | undefined,
+  nextParamIndex: number,
+) {
+  if (!indicatorKeys || indicatorKeys.length === 0) {
+    return { sql: 'TRUE', params: [] } satisfies SqlFragment
+  }
+  return {
+    sql: `l."indicatorKey" = ANY($${nextParamIndex}::text[])`,
+    params: [indicatorKeys],
+  } satisfies SqlFragment
+}
 
 export async function getQaAreaList(input: z.infer<typeof QaAreaListSchema>, caller: MemberCaller) {
   const appSession = await getMemberSession(caller)
-  const { configSlug, regionSlug, status, userIds, search, bbox } = QaAreaListSchema.parse(input)
+  const { configSlug, regionSlug, status, userIds, indicatorKeys, search, bbox } =
+    QaAreaListSchema.parse(input)
   const hasBbox = bbox !== undefined
   const limit = hasBbox ? QA_AREA_LIST_LIMIT_VIEW : QA_AREA_LIST_LIMIT_ALL
 
@@ -123,6 +149,15 @@ export async function getQaAreaList(input: z.infer<typeof QaAreaListSchema>, cal
   if (!qaConfig) {
     return emptyResult(limit)
   }
+  const indicators = parseQaConfigIndicators(qaConfig.indicators)
+  const selectedKeys =
+    indicatorKeys && indicatorKeys.length > 0
+      ? indicators.filter((indicator) => indicatorKeys.includes(indicator.key))
+      : indicators
+  if (selectedKeys.length === 0) {
+    return emptyResult(limit)
+  }
+  const indicatorOrder = new Map(selectedKeys.map((indicator, index) => [indicator.key, index]))
 
   const tableName = getQaTableName(qaConfig.mapTable)
   const params: unknown[] = [qaConfig.id]
@@ -131,6 +166,12 @@ export async function getQaAreaList(input: z.infer<typeof QaAreaListSchema>, cal
     params.push(userIds)
     userFilterSql = `e."userId" = ANY($${params.length}::text[])`
   }
+
+  const indicatorPredicate = qaIndicatorSqlPredicate(
+    selectedKeys.map((indicator) => indicator.key),
+    params.length + 1,
+  )
+  params.push(...indicatorPredicate.params)
 
   const statusPredicate = qaStatusSqlPredicate(status, params.length + 1)
   params.push(...statusPredicate.params)
@@ -148,25 +189,36 @@ export async function getQaAreaList(input: z.infer<typeof QaAreaListSchema>, cal
   params.push(limit)
   const limitIndex = params.length
 
-  const sql = `
+  // `latest` is one row per (area, indicator); `matched` folds it back to one row per area, so the
+  // status filter is an ANY-of-the-selected-indicators match and the sort key is the largest
+  // difference of the selected indicators (all in the dataset unit).
+  const areaSql = `
 WITH latest AS (
-  SELECT DISTINCT ON (e."areaId")
-         e."areaId", e."systemStatus", e."userStatus", e."createdAt", e."decisionData",
-         e."userId", e."evaluatorType", e.body
+  SELECT DISTINCT ON (e."areaId", e."indicatorKey")
+         e."areaId", e."indicatorKey", e."systemStatus", e."userStatus", e."decisionData",
+         e."userId", e.body
   FROM prisma."QaEvaluation" e
   WHERE e."configId" = $1
     AND (${userFilterSql})
-  ORDER BY e."areaId", e."createdAt" DESC, e.id DESC
+  ORDER BY e."areaId", e."indicatorKey", e."createdAt" DESC, e.id DESC
+),
+matched AS (
+  SELECT l."areaId",
+         bool_or(${statusPredicate.sql}) AS status_match,
+         bool_or(${searchPredicate.sql}) AS search_match,
+         max((l."decisionData"->>'difference')::numeric) AS sort_difference
+  FROM latest l
+  LEFT JOIN prisma."User" u ON u.id = l."userId"
+  WHERE ${indicatorPredicate.sql}
+  GROUP BY l."areaId"
 )
-SELECT l."areaId", l."systemStatus", l."userStatus", l."createdAt", l."evaluatorType",
-       u."osmName" AS "authorOsmName", u."firstName" AS "authorFirstName", u."lastName" AS "authorLastName",
+SELECT m."areaId",
        COALESCE(c.comment_count, 0) AS comment_count,
        public.ST_XMin(g.env) AS min_lng, public.ST_YMin(g.env) AS min_lat,
        public.ST_XMax(g.env) AS max_lng, public.ST_YMax(g.env) AS max_lat,
        public.ST_X(g.center) AS center_lng, public.ST_Y(g.center) AS center_lat,
        count(*) OVER () AS total_count
-FROM latest l
-LEFT JOIN prisma."User" u ON u.id = l."userId"
+FROM matched m
 LEFT JOIN (
   SELECT e."areaId", count(*)::int AS comment_count
   FROM prisma."QaEvaluation" e
@@ -174,10 +226,10 @@ LEFT JOIN (
     AND e.body IS NOT NULL
     AND btrim(e.body) <> ''
   GROUP BY e."areaId"
-) c ON c."areaId" = l."areaId"
+) c ON c."areaId" = m."areaId"
 -- Inner join guarantees geometry (orphans without a map-table area are
 -- reported on the admin QA config page instead).
-INNER JOIN ${tableName} a ON a.id = l."areaId"
+INNER JOIN ${tableName} a ON a.id = m."areaId"
 CROSS JOIN LATERAL (
   SELECT
     -- Envelope first: 5 vertices instead of the full ring. Exact here because
@@ -188,39 +240,80 @@ CROSS JOIN LATERAL (
     -- geometry(MultiPolygon, 3857) and never inserts empty geometry.
     public.ST_Transform(public.ST_PointOnSurface(a.geom), 4326) AS center
 ) g
-WHERE ${statusPredicate.sql}
-  AND ${searchPredicate.sql}
+WHERE m.status_match
+  AND m.search_match
   AND ${bboxFilterSql}
-ORDER BY ${QA_ABSOLUTE_CHANGE_SORT_SQL} DESC NULLS LAST, l."areaId" ASC
+ORDER BY m.sort_difference DESC NULLS LAST, m."areaId" ASC
 LIMIT $${limitIndex}
 `
 
-  const rows = await db.$queryRawUnsafe<ListRow[]>(sql, ...params)
-  const totalCount = rows[0] ? Number(rows[0].total_count ?? 0) : 0
+  const areaRows = await db.$queryRawUnsafe<AreaRow[]>(areaSql, ...params)
+  const totalCount = areaRows[0] ? Number(areaRows[0].total_count ?? 0) : 0
+  if (areaRows.length === 0) {
+    return emptyResult(limit)
+  }
 
-  return {
-    items: rows.map(
-      (row) =>
-        ({
-          areaId: row.areaId,
-          bbox: [
-            Number(row.min_lng),
-            Number(row.min_lat),
-            Number(row.max_lng),
-            Number(row.max_lat),
-          ] satisfies [number, number, number, number],
-          center: [Number(row.center_lng), Number(row.center_lat)] satisfies [number, number],
-          systemStatus: row.systemStatus,
-          userStatus: row.userStatus,
-          createdAt: row.createdAt,
-          evaluatorType: row.evaluatorType,
-          authorOsmName: row.authorOsmName,
-          authorFirstName: row.authorFirstName,
-          authorLastName: row.authorLastName,
-          commentCount: Number(row.comment_count ?? 0),
-        }) satisfies QaAreaListItem,
-    ),
-    totalCount,
-    limit,
-  } satisfies QaAreaListResult
+  // Second query, not one per cell: the latest row of every selected indicator for the page of
+  // areas we are about to render, so `worstQaIndicatorStatus` can pick the cell's status in TS.
+  const indicatorRows = await db.$queryRawUnsafe<IndicatorRow[]>(
+    `
+      SELECT DISTINCT ON (e."areaId", e."indicatorKey")
+             e."areaId", e."indicatorKey", e."systemStatus", e."userStatus", e."createdAt",
+             e."evaluatorType",
+             u."osmName" AS "authorOsmName", u."firstName" AS "authorFirstName",
+             u."lastName" AS "authorLastName"
+      FROM prisma."QaEvaluation" e
+      LEFT JOIN prisma."User" u ON u.id = e."userId"
+      WHERE e."configId" = $1
+        AND e."areaId" = ANY($2::text[])
+        AND e."indicatorKey" = ANY($3::text[])
+        AND (${userIds && userIds.length > 0 ? 'e."userId" = ANY($4::text[])' : 'TRUE'})
+      ORDER BY e."areaId", e."indicatorKey", e."createdAt" DESC, e.id DESC
+    `,
+    qaConfig.id,
+    areaRows.map((row) => row.areaId),
+    selectedKeys.map((indicator) => indicator.key),
+    ...(userIds && userIds.length > 0 ? [userIds] : []),
+  )
+
+  const byAreaId = new Map<string, IndicatorRow[]>()
+  for (const row of indicatorRows) {
+    const group = byAreaId.get(row.areaId) ?? []
+    group.push(row)
+    byAreaId.set(row.areaId, group)
+  }
+
+  const items = areaRows.flatMap((row) => {
+    const group = (byAreaId.get(row.areaId) ?? []).sort(
+      (a, b) =>
+        (indicatorOrder.get(a.indicatorKey) ?? 0) - (indicatorOrder.get(b.indicatorKey) ?? 0),
+    )
+    // Ties keep the first indicator, i.e. the config order — same rule as the map.
+    const worst = worstQaIndicatorStatus(group)
+    if (!worst) return []
+
+    return [
+      {
+        areaId: row.areaId,
+        bbox: [
+          Number(row.min_lng),
+          Number(row.min_lat),
+          Number(row.max_lng),
+          Number(row.max_lat),
+        ] satisfies [number, number, number, number],
+        center: [Number(row.center_lng), Number(row.center_lat)] satisfies [number, number],
+        systemStatus: worst.systemStatus,
+        userStatus: worst.userStatus,
+        indicatorKey: worst.indicatorKey,
+        createdAt: worst.createdAt,
+        evaluatorType: worst.evaluatorType,
+        authorOsmName: worst.authorOsmName,
+        authorFirstName: worst.authorFirstName,
+        authorLastName: worst.authorLastName,
+        commentCount: Number(row.comment_count ?? 0),
+      } satisfies QaAreaListItem,
+    ]
+  })
+
+  return { items, totalCount, limit } satisfies QaAreaListResult
 }
