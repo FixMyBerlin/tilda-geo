@@ -1,10 +1,11 @@
 import { z } from 'zod'
 import { QaEvaluationStatus } from '@/prisma/generated/client'
+import { runWithAuditContextAsync } from '@/server/audit/auditContext.server'
 import {
-  memberFormAuditContext,
-  runWithAuditContextAsync,
-} from '@/server/audit/auditContext.server'
-import { requireAuth } from '@/server/auth/session.server'
+  type MemberCaller,
+  memberAuditContext,
+  requireMemberSession,
+} from '@/server/auth/memberCaller.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
 import {
@@ -33,9 +34,9 @@ export const CreateQaEvaluationSchema = z.object({
 
 export async function createQaEvaluation(
   input: z.infer<typeof CreateQaEvaluationSchema>,
-  headers: Headers,
+  caller: MemberCaller,
 ) {
-  const appSession = await requireAuth(headers)
+  const appSession = await requireMemberSession(caller)
   await authorizeRegionMemberByRegionSlug(appSession, input.regionSlug)
 
   const { configSlug, areaId, regionSlug, userStatus, body, decisionData } =
@@ -73,7 +74,7 @@ export async function createQaEvaluation(
       )?.systemStatus ?? 'NEEDS_REVIEW')
 
   const evaluation = await runWithAuditContextAsync(
-    memberFormAuditContext(headers, appSession.userId),
+    memberAuditContext(caller, appSession.userId),
     () =>
       db.qaEvaluation.create({
         data: {

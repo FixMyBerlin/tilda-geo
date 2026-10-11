@@ -15,6 +15,8 @@ const REGION_SLUG = 'vitest-mcp-region'
 const SECOND_REGION_SLUG = 'vitest-mcp-region-2'
 const OTHER_USER_ID = 'vitest-mcp-other'
 const UPLOAD_SLUG = 'vitest-mcp-upload'
+const QA_CONFIG_SLUG = 'vitest-mcp-qa'
+const QA_MAP_TABLE = 'public.vitest_mcp_qa_areas'
 const SECOND_UPLOAD_SLUG = 'vitest-mcp-upload-2'
 
 async function connectClient() {
@@ -45,6 +47,9 @@ async function cleanup() {
   await db.note.deleteMany({ where: { folder: inRegion } })
   await db.noteFolder.deleteMany({ where: inRegion })
   await db.reviewList.deleteMany({ where: inRegion })
+  await db.qaEvaluation.deleteMany({ where: { config: { slug: QA_CONFIG_SLUG } } })
+  await db.qaConfig.deleteMany({ where: { slug: QA_CONFIG_SLUG } })
+  await db.$executeRawUnsafe(`DROP TABLE IF EXISTS ${QA_MAP_TABLE}`)
   await db.mapDatasetUpload.deleteMany({
     where: { slug: { in: [UPLOAD_SLUG, SECOND_UPLOAD_SLUG] } },
   })
@@ -670,5 +675,88 @@ describe.skipIf(!integrationDb)('admin MCP tools (integration)', () => {
     expect(deletedList.isError).toBe(false)
     const lists = await callTool(client, 'review_lists_list', { regionSlug: REGION_SLUG })
     expect(JSON.parse(lists.text)).toEqual([])
+  })
+
+  test('qa_configs_list / qa_areas_list / qa_evaluations_* round-trip', async () => {
+    await db.$executeRawUnsafe(
+      `CREATE TABLE ${QA_MAP_TABLE} (id text PRIMARY KEY, relative numeric, count_reference int, count_current int, difference int, geom public.geometry(MultiPolygon, 3857))`,
+    )
+    await db.$executeRawUnsafe(
+      `INSERT INTO ${QA_MAP_TABLE} VALUES ('area-1', 2, 10, 20, 10, public.ST_Multi(public.ST_Buffer(public.ST_Transform(public.ST_SetSRID(public.ST_MakePoint(13.4, 52.5), 4326), 3857), 100)))`,
+    )
+    const region = await db.region.findUniqueOrThrow({ where: { slug: REGION_SLUG } })
+    const config = await db.qaConfig.create({
+      data: {
+        slug: QA_CONFIG_SLUG,
+        label: 'MCP QA',
+        mapTable: QA_MAP_TABLE,
+        referenceFrozenAt: new Date('2026-01-01'),
+        regionId: region.id,
+      },
+    })
+    const area = { regionSlug: REGION_SLUG, configSlug: QA_CONFIG_SLUG, areaId: 'area-1' }
+
+    const configs = await callTool(client, 'qa_configs_list', { regionSlug: REGION_SLUG })
+    expect(JSON.parse(configs.text)).toEqual([
+      expect.objectContaining({ slug: QA_CONFIG_SLUG, evaluationCount: 0 }),
+    ])
+
+    const unknownArea = await callTool(client, 'qa_evaluations_create', {
+      ...area,
+      areaId: 'missing',
+      userStatus: 'OK_STRUCTURAL_CHANGE',
+    })
+    expect(unknownArea.text).toBe('Error: Area not found in this QA config: missing')
+
+    const created = await callTool(client, 'qa_evaluations_create', {
+      ...area,
+      userStatus: 'OK_STRUCTURAL_CHANGE',
+      body: 'Baustelle',
+    })
+    expect(created.isError).toBe(false)
+    // relative 2 with the default thresholds is PROBLEMATIC; the counts come from the map table.
+    expect(created.json()).toMatchObject({
+      evaluatorType: 'USER',
+      userId: ADMIN_USER_ID,
+      userStatus: 'OK_STRUCTURAL_CHANGE',
+      systemStatus: 'PROBLEMATIC',
+      decisionData: { relative: 2, referenceCount: 10, currentCount: 20, absoluteChange: 10 },
+    })
+    const evaluationId = created.json().id as number
+
+    const audit = await db.auditLog.findFirst({
+      where: { model: 'QaEvaluation', recordId: String(evaluationId) },
+    })
+    expect(audit).toMatchObject({
+      userId: ADMIN_USER_ID,
+      metadata: { changeSource: 'API', adminTokenId: 'vitest-mcp-token' },
+    })
+
+    const edited = await callTool(client, 'qa_evaluations_update', {
+      regionSlug: REGION_SLUG,
+      evaluationId,
+      body: 'Baustelle bis 2027',
+    })
+    expect(edited.json()).toMatchObject({ id: evaluationId, body: 'Baustelle bis 2027' })
+
+    const systemEvaluation = await db.qaEvaluation.create({
+      data: { configId: config.id, areaId: 'area-1', systemStatus: 'PROBLEMATIC' },
+    })
+    const notAuthor = await callTool(client, 'qa_evaluations_update', {
+      regionSlug: REGION_SLUG,
+      evaluationId: systemEvaluation.id,
+      body: 'x',
+    })
+    expect(notAuthor.text).toContain('Not allowed: Only the author can update this comment')
+
+    const history = await callTool(client, 'qa_evaluations_list', area)
+    expect(JSON.parse(history.text)).toHaveLength(2)
+
+    const areas = await callTool(client, 'qa_areas_list', {
+      regionSlug: REGION_SLUG,
+      configSlug: QA_CONFIG_SLUG,
+      status: 'all',
+    })
+    expect(areas.json()).toMatchObject({ totalCount: 1, items: [{ areaId: 'area-1' }] })
   })
 })

@@ -6,7 +6,7 @@ import {
   zodQaParamStatus,
 } from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
 import type { QaEvaluationStatus, QaEvaluatorType, QaSystemStatus } from '@/prisma/generated/client'
-import { getAppSession } from '@/server/auth/session.server'
+import { getMemberSession, type MemberCaller } from '@/server/auth/memberCaller.server'
 import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
 import {
@@ -106,8 +106,8 @@ export function qaStatusSqlPredicate(status: QaStatusParam | undefined, nextPara
 
 const QA_ABSOLUTE_CHANGE_SORT_SQL = `CASE WHEN l."decisionData"->>'absoluteChange' ~ '^-?[0-9]+(\\.[0-9]+)?$' THEN abs((l."decisionData"->>'absoluteChange')::numeric) END`
 
-export async function getQaAreaList(input: z.infer<typeof QaAreaListSchema>, headers: Headers) {
-  const appSession = await getAppSession(headers)
+export async function getQaAreaList(input: z.infer<typeof QaAreaListSchema>, caller: MemberCaller) {
+  const appSession = await getMemberSession(caller)
   const { configSlug, regionSlug, status, userIds, search, bbox } = QaAreaListSchema.parse(input)
   const hasBbox = bbox !== undefined
   const limit = hasBbox ? QA_AREA_LIST_LIMIT_VIEW : QA_AREA_LIST_LIMIT_ALL

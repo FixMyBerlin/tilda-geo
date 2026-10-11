@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { getAppSession } from '@/server/auth/session.server'
+import { getMemberSession, type MemberCaller } from '@/server/auth/memberCaller.server'
 import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
 import { getQaTableName } from '../utils/getQaTableName'
@@ -19,8 +19,11 @@ const QaDecisionDataResultSchema = z.object({
 
 export type QaDecisionData = z.infer<typeof QaDecisionDataResultSchema>
 
-export async function getQaDecisionDataForArea(input: z.infer<typeof Schema>, headers: Headers) {
-  const appSession = await getAppSession(headers)
+export async function getQaDecisionDataForArea(
+  input: z.infer<typeof Schema>,
+  caller: MemberCaller,
+) {
+  const appSession = await getMemberSession(caller)
 
   const { configSlug, areaId, regionSlug } = Schema.parse(input)
 

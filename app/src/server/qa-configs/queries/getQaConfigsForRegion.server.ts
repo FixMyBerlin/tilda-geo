@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { getAppSession } from '@/server/auth/session.server'
+import { getMemberSession, type MemberCaller } from '@/server/auth/memberCaller.server'
 import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
 
@@ -7,8 +7,8 @@ const Schema = z.object({
   regionSlug: z.string(),
 })
 
-export async function getQaConfigsForRegion(input: z.infer<typeof Schema>, headers: Headers) {
-  const session = await getAppSession(headers)
+export async function getQaConfigsForRegion(input: z.infer<typeof Schema>, caller: MemberCaller) {
+  const session = await getMemberSession(caller)
   const { regionSlug } = Schema.parse(input)
 
   // Check authorization using the helper

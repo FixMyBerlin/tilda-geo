@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { getAppSession } from '@/server/auth/session.server'
+import { getMemberSession, type MemberCaller } from '@/server/auth/memberCaller.server'
 import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
 import { transformEvaluationWithDecisionData } from '@/server/qa-configs/schemas/qaDecisionDataSchema'
@@ -10,8 +10,8 @@ const Schema = z.object({
   regionSlug: z.string(),
 })
 
-export async function getQaEvaluationsForArea(input: z.infer<typeof Schema>, headers: Headers) {
-  const appSession = await getAppSession(headers)
+export async function getQaEvaluationsForArea(input: z.infer<typeof Schema>, caller: MemberCaller) {
+  const appSession = await getMemberSession(caller)
 
   const { configSlug, areaId, regionSlug } = Schema.parse(input)
 
