@@ -5,9 +5,10 @@ import { RegionPanelToggle } from '@/components/regionen/pageRegionSlug/welcome/
 import { RegionWelcomeDesktopPanel } from '@/components/regionen/pageRegionSlug/welcome/RegionWelcomeDesktopPanel'
 import { useRegionWelcomePanel } from '@/components/regionen/pageRegionSlug/welcome/useRegionWelcomePanel'
 import { NavigationDesktop } from '../NavigationDesktop/NavigationDesktop'
+import { NavigationDesktopMenu } from '../NavigationDesktop/NavigationDesktopMenu'
 import { NavigationWrapper } from '../NavigationWrapper/NavigationWrapper'
 import { HeaderRegionenLogo } from './HeaderRegionenLogo'
-import { defaultPrimaryNavigation } from './navigation.const'
+import { defaultPrimaryNavigation, defaultSecondaryNavigationGrouped } from './navigation.const'
 
 export const HeaderRegionen = () => {
   const region = useRegion()
@@ -15,6 +16,21 @@ export const HeaderRegionen = () => {
   const { welcome, isOpen, closePanel, togglePanel, toggleRef, panelRef, motionTransition } =
     useRegionWelcomePanel()
   const primaryNavigation = [...defaultPrimaryNavigation, ...(region?.navigationLinks ?? [])]
+
+  // Without welcome content the burger only offers the global links — same small flyout as the app header.
+  if (!welcome) {
+    return (
+      <NavigationWrapper>
+        <NavigationDesktop
+          logo={<HeaderRegionenLogo />}
+          primaryNavigation={primaryNavigation}
+          trailing={
+            <NavigationDesktopMenu menuItems={defaultSecondaryNavigationGrouped} logo={false} />
+          }
+        />
+      </NavigationWrapper>
+    )
+  }
 
   return (
     <MotionConfig transition={motionTransition}>
@@ -25,7 +41,6 @@ export const HeaderRegionen = () => {
           logo={<HeaderRegionenLogo />}
           primaryNavigation={primaryNavigation}
           trailing={
-            // Always shown: the panel is also the region secondary-links surface (not welcome-only).
             <RegionPanelToggle
               panelId={panelId}
               expanded={isOpen}
