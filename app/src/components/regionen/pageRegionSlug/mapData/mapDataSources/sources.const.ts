@@ -43,7 +43,6 @@ export const sources: MapDataSource<SourcesId>[] = [
       highlightingKey: 'id',
       documentedKeys: ['name', 'admin_level'],
     },
-    // presence: { enabled: false },
     calculator: { enabled: false },
   },
   {
@@ -86,7 +85,6 @@ export const sources: MapDataSource<SourcesId>[] = [
         'composit_mapillary',
       ],
     },
-    // presence: { enabled: true },
     calculator: { enabled: false },
   },
   {
@@ -120,7 +118,6 @@ export const sources: MapDataSource<SourcesId>[] = [
         'route_description__if_present',
       ],
     },
-    // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
     calculator: { enabled: false },
   },
   {
@@ -154,7 +151,6 @@ export const sources: MapDataSource<SourcesId>[] = [
         'composit_mapillary',
       ],
     },
-    // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
     calculator: { enabled: false },
   },
   {
@@ -218,7 +214,6 @@ export const sources: MapDataSource<SourcesId>[] = [
         'composit_mapillary',
       ],
     },
-    // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
     calculator: { enabled: false },
   },
   {
@@ -236,7 +231,6 @@ export const sources: MapDataSource<SourcesId>[] = [
       highlightingKey: 'id',
       documentedKeys: ['composit_road_bikelanes'],
     },
-    // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
     calculator: { enabled: false },
   },
   {
@@ -260,7 +254,6 @@ export const sources: MapDataSource<SourcesId>[] = [
         'traffic_sign',
       ],
     },
-    // presence: { enabled: false }, // this is false until we are able to merge the `bikelanesPresence` with `bikelanes`
     calculator: { enabled: false },
   },
   {
@@ -278,7 +271,6 @@ export const sources: MapDataSource<SourcesId>[] = [
       highlightingKey: 'id',
       documentedKeys: ['name', 'category'],
     },
-    // presence: { enabled: false },
     calculator: { enabled: false },
   },
   {
@@ -296,7 +288,6 @@ export const sources: MapDataSource<SourcesId>[] = [
       highlightingKey: 'id',
       documentedKeys: ['name', 'category', 'type'],
     },
-    // presence: { enabled: false },
     calculator: { enabled: false },
   },
   {
@@ -314,7 +305,6 @@ export const sources: MapDataSource<SourcesId>[] = [
       highlightingKey: 'id',
       documentedKeys: ['name', 'place', 'population', 'population_date'],
     },
-    // presence: { enabled: false },
     calculator: { enabled: false },
   },
   {
@@ -328,7 +318,6 @@ export const sources: MapDataSource<SourcesId>[] = [
     promoteId: 'id',
     osmIdConfig: { osmTypeId: 'id' },
     inspector: { enabled: false },
-    // presence: { enabled: false },
     calculator: { enabled: false },
   },
   {
@@ -346,7 +335,6 @@ export const sources: MapDataSource<SourcesId>[] = [
       highlightingKey: 'id',
       documentedKeys: ['landuse'],
     },
-    // presence: { enabled: false },
     calculator: { enabled: false },
   },
   {
@@ -374,7 +362,6 @@ export const sources: MapDataSource<SourcesId>[] = [
         'composit_mapillary',
       ],
     },
-    // presence: { enabled: false },
     calculator: { enabled: false }, // TODO
   },
   {
@@ -392,7 +379,6 @@ export const sources: MapDataSource<SourcesId>[] = [
       highlightingKey: 'id',
       documentedKeys: ['traffic_sign'],
     },
-    // presence: { enabled: false },
     calculator: { enabled: false }, // TODO
   },
   {
@@ -410,7 +396,6 @@ export const sources: MapDataSource<SourcesId>[] = [
       highlightingKey: 'id',
       documentedKeys: [],
     },
-    // presence: { enabled: false },
     calculator: { enabled: false }, // TODO
   },
 ]

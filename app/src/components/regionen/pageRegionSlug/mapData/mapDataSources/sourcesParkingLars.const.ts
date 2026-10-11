@@ -43,7 +43,6 @@ export const sourcesParkingLars: MapDataSource<SourcesParkingLarsId>[] = [
         },
       ],
     },
-    // presence: { enabled: false },
     calculator: { enabled: false },
   },
   {
@@ -70,7 +69,6 @@ export const sourcesParkingLars: MapDataSource<SourcesParkingLarsId>[] = [
     promoteId: undefined,
     osmIdConfig: undefined,
     inspector: { enabled: false }, // Those layers have no properties anyways
-    // presence: { enabled: false },
     calculator: { enabled: false },
   },
   {
@@ -107,7 +105,6 @@ export const sourcesParkingLars: MapDataSource<SourcesParkingLarsId>[] = [
         },
       ],
     },
-    // presence: { enabled: false },
     calculator: { enabled: false },
   },
   {
@@ -138,7 +135,6 @@ export const sourcesParkingLars: MapDataSource<SourcesParkingLarsId>[] = [
         'aera_sqkm',
       ],
     },
-    // presence: { enabled: false },
     calculator: { enabled: false },
   },
 ]

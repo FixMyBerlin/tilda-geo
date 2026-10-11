@@ -102,10 +102,6 @@ type MapDataSourceShared<TIds> = {
   osmIdConfig: MapDataOsmIdConfig
   /** @desc Inspector: Enable and configure Inspector */
   inspector: MapDataSourceInspector
-  /** @desc Inspector: Enable info data on presence */
-  // presence: {
-  //   enabled: boolean
-  // }
   /** @desc Calculator: Enable and configure calculator feature */
   calculator: MapDataSourceCalculator
 }
