@@ -1,6 +1,6 @@
 import { feature, featureCollection } from '@turf/helpers'
 import { useEffect } from 'react'
-import { Layer, Source, useMap } from 'react-map-gl/maplibre'
+import { Layer, Source } from 'react-map-gl/maplibre'
 import {
   useSpaceFinderBoundaryHighlightFilled,
   useSpaceFinderBoundaryHighlightGeom,
@@ -81,13 +81,13 @@ const HEXAGON_LABEL_MIN_ZOOM = 18
 // wechselnden transparenten und undurchsichtigen Nachbar-Hexagonen. Der Farbton
 // hängt vom aktiven Anzeigemodus ab — dieselben Farben wie `spaceFinderGroupStyle`
 // (Bedarf blau, Bebauung lila); Kombination ist keine Faktorgruppe und bekommt ein
-// positives Smaragdgrün (Rot wirkt negativ, gute Flächen sollen positiv wirken). Das
-// bläuliche Grün hebt sich vom Waldgrün des Vegetations-Layers ab.
+// positives Gelbgrün/Lime (Rot wirkt negativ, gute Flächen sollen positiv wirken). Der
+// Vegetations-Layer nutzt ein bläuliches Smaragdgrün, damit beide unterscheidbar bleiben.
 const HEXAGON_FADE_IN_THRESHOLD = 10
 const HEXAGON_SCORE_RAMP: Record<PlanningScoreMode, { fadeFrom: string; stops: string[] }> = {
   kombination: {
-    fadeFrom: 'rgba(236,253,245,0)',
-    stops: ['#ecfdf5', '#6ee7b7', '#10b981', '#065f46'],
+    fadeFrom: 'rgba(247,254,231,0)',
+    stops: ['#f7fee7', '#bef264', '#84cc16', '#3f6212'],
   },
   bedarf: {
     fadeFrom: 'rgba(239,246,255,0)',
@@ -250,45 +250,10 @@ const censusLabelLayerProps = {
   },
 }
 
-// Vegetation als Punktmuster (kartografische Konvention: unregelmäßige grüne Punkte) auf
-// leichter hellgrüner Fläche, damit sie sich nicht nur über die Farbe vom grünen
-// Hexagon-Verlauf abhebt. Das Muster wird zur Laufzeit gezeichnet, weil das Sprite nur
-// einfarbige Muster hat.
-const VEGETATION_PATTERN_ID = 'planning-vegetation-dots'
-const VEGETATION_PATTERN_DOTS = [
-  [4, 5, 1.6],
-  [13, 3, 1.2],
-  [22, 8, 1.8],
-  [9, 14, 1.3],
-  [18, 19, 1.6],
-  [28, 15, 1.2],
-  [5, 24, 1.4],
-  [14, 28, 1.8],
-  [26, 26, 1.3],
-] as const
-
-const useVegetationPattern = () => {
-  const { current: map } = useMap()
-  useEffect(
-    function registerVegetationPattern() {
-      if (!map || map.hasImage(VEGETATION_PATTERN_ID)) return
-      const size = 32
-      const canvas = document.createElement('canvas')
-      canvas.width = size
-      canvas.height = size
-      const ctx = canvas.getContext('2d')
-      if (!ctx) return
-      ctx.fillStyle = '#2d6a4f'
-      for (const [x, y, r] of VEGETATION_PATTERN_DOTS) {
-        ctx.beginPath()
-        ctx.arc(x, y, r, 0, Math.PI * 2)
-        ctx.fill()
-      }
-      map.addImage(VEGETATION_PATTERN_ID, ctx.getImageData(0, 0, size, size), { pixelRatio: 2 })
-    },
-    [map],
-  )
-}
+// Vegetation als helle smaragdgrüne Fläche. Das bläuliche Grün hebt sich vom gelbgrünen
+// Hexagon-Verlauf (Lime) ab.
+const VEGETATION_FILL_COLOR = '#6ee7b7'
+const VEGETATION_LINE_COLOR = '#047857'
 
 const BoundaryHighlightLayer = () => {
   const geom = useSpaceFinderBoundaryHighlightGeom()
@@ -400,7 +365,6 @@ export const SourcesLayersSpaceFinder = () => {
   )
   const areaFilterOn = minArea > 0
   const vegetationOn = useSpaceFinderVegetationVisible()
-  useVegetationPattern()
   const vegetationAttribution = useSpaceFinderVegetationAttribution()
   const carriagewaysOn = useSpaceFinderCarriagewaysVisible()
   const censusOn = useSpaceFinderCensusVisible()
@@ -483,15 +447,7 @@ export const SourcesLayersSpaceFinder = () => {
             source="planning-vegetation-source"
             source-layer="planning_vegetation"
             type="fill"
-            paint={{ 'fill-color': '#a3d977', 'fill-opacity': 0.2 }}
-          />
-          <Layer
-            id="planning-vegetation-pattern"
-            beforeId={planningOverlayFloorLayerId}
-            source="planning-vegetation-source"
-            source-layer="planning_vegetation"
-            type="fill"
-            paint={{ 'fill-pattern': VEGETATION_PATTERN_ID, 'fill-opacity': 0.8 }}
+            paint={{ 'fill-color': VEGETATION_FILL_COLOR, 'fill-opacity': 0.45 }}
           />
           <Layer
             id="planning-vegetation-outline"
@@ -499,7 +455,7 @@ export const SourcesLayersSpaceFinder = () => {
             source="planning-vegetation-source"
             source-layer="planning_vegetation"
             type="line"
-            paint={{ 'line-color': '#1b4332', 'line-width': 0.5, 'line-opacity': 0.6 }}
+            paint={{ 'line-color': VEGETATION_LINE_COLOR, 'line-width': 0.5, 'line-opacity': 0.8 }}
           />
         </>
       )}
