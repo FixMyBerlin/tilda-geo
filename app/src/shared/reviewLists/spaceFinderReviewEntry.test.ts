@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest'
+import { SPACE_FINDER_CHECKLIST } from './spaceFinderChecklist.const'
 import {
   buildSpaceFinderReviewProperties,
   parseSpaceFinderSourceMeta,
@@ -48,6 +49,9 @@ describe('buildSpaceFinderReviewProperties', () => {
       Teilscores_markdown:
         'Bedarf 72 · Bebauung 55 · Radweg 80 · ÖPNV + Bikesharing 60; ' +
         'Zu-/Abschläge: Vegetation −3 · Parken +2',
+      Prüfkriterien_markdown: SPACE_FINDER_CHECKLIST.map(
+        (c, index) => `${index + 1}. ${c.label}`,
+      ).join('\n'),
     })
   })
 
@@ -77,13 +81,25 @@ describe('buildSpaceFinderReviewProperties', () => {
     expect(properties.Teilscores_markdown).not.toContain('\n')
   })
 
+  test('adds the same checklist to every candidate as a numbered Markdown list', () => {
+    const properties = buildSpaceFinderReviewProperties({ ...base, candidateProperties: {} })
+    const lines = properties.Prüfkriterien_markdown!.split('\n')
+    expect(lines).toHaveLength(SPACE_FINDER_CHECKLIST.length)
+    expect(lines.every((line, index) => line.startsWith(`${index + 1}. `))).toBe(true)
+  })
+
   test('omits missing or invalid values', () => {
     const properties = buildSpaceFinderReviewProperties({
       ...base,
       useCaseLabel: null,
       candidateProperties: { mce_gesamtscore: null, eignungsklasse: ' ', cluster_area_m2: 'x' },
     })
-    expect(Object.keys(properties)).toEqual(['Planungsgebiet', 'Variante', 'H3-ID'])
+    expect(Object.keys(properties)).toEqual([
+      'Planungsgebiet',
+      'Variante',
+      'H3-ID',
+      'Prüfkriterien_markdown',
+    ])
   })
 
   test('never emits reserved tilda_ keys', () => {

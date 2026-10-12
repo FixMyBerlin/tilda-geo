@@ -3,6 +3,7 @@ import {
   PLANNING_MODIFIER_SCORE_KEYS,
   PLANNING_SCORE_LABELS,
 } from '@/shared/regionen/planningScoreLabels.const'
+import { SPACE_FINDER_CHECKLIST } from './spaceFinderChecklist.const'
 
 /** Import identity of a Flächenfinder candidate in a review list; makes re-imports detectable. */
 export const spaceFinderImportId = (h3Id: string) => `flaechenfinder:${h3Id}`
@@ -52,6 +53,13 @@ const scoreBreakdown = (props: CandidateProperties) => {
 }
 
 /**
+ * The checklist as a numbered Markdown list. It needs line breaks, so the single-line attribute
+ * editor flattens it when someone edits and saves the attributes (known, accepted for now).
+ */
+const checklistMarkdown = () =>
+  SPACE_FINDER_CHECKLIST.map((criterion, index) => `${index + 1}. ${criterion.label}`).join('\n')
+
+/**
  * Readable snapshot of a candidate for the review list (shown and editable there). Keys are German
  * on purpose; missing values are omitted. No `tilda_` keys (reserved for export/system data).
  * `Teilscores_markdown` is rendered as Markdown by the entry detail.
@@ -89,6 +97,7 @@ export const buildSpaceFinderReviewProperties = ({
   properties.Variante = variantTitle
   properties['H3-ID'] = h3Id
   if (breakdown) properties.Teilscores_markdown = breakdown
+  properties.Prüfkriterien_markdown = checklistMarkdown()
   return properties
 }
 
