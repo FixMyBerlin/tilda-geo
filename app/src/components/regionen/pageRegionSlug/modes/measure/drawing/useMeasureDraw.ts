@@ -42,11 +42,12 @@ export const useMeasureDraw = () => {
     limits: { point: 0 },
     // A length is the common case: the first click starts a line. Areas start from the panel.
     emptyTool: 'line',
+    // A line that ends on its first corner becomes an area.
+    closeLines: true,
     precision: MEASURE_PRECISION,
-    // Matches the id the new shape gets when it is read back from the URL. The shape that is
-    // being finished is still the draft when the id is asked for.
-    createId: () =>
-      measureDrawController.store.getState().draft?.type === 'polygon'
+    // Matches the id the new shape gets when it is read back from the URL.
+    createId: (type) =>
+      type === 'polygon'
         ? measureAreaId(shapes.filter(isMeasureArea).length)
         : measureLineId(shapes.filter(isMeasureLine).length),
   })

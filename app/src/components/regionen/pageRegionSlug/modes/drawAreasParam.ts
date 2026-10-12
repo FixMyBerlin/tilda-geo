@@ -1,6 +1,8 @@
+import { lineString, multiLineString, multiPolygon, polygon } from '@turf/helpers'
 import { z } from 'zod'
 
-const zodPosition = z.tuple([z.number(), z.number()])
+// `number[]` like GeoJSON's `Position`, so values of Turf and of the drawing package fit as they are.
+const zodPosition = z.array(z.number()).length(2)
 
 const zodPolygonCoordinates = z.array(z.array(zodPosition).min(4)).min(1)
 
@@ -31,16 +33,10 @@ export const polygonsOfAreasParam = (areas: AreasParam | undefined) => {
   return areas.type === 'Polygon' ? [areas.coordinates] : areas.coordinates
 }
 
-export const areasParamOfPolygons = (polygons: number[][][][]) => {
-  // GeoJSON types positions as `number[]`; drawn positions always are `[lng, lat]`.
-  const typed = polygons as z.infer<typeof zodPolygonCoordinates>[]
-  const [first] = typed
+export const areasParamOfPolygons = (polygons: GeoJSON.Position[][][]) => {
+  const [first] = polygons
   if (!first) return undefined
-  return (
-    typed.length === 1
-      ? { type: 'Polygon', coordinates: first }
-      : { type: 'MultiPolygon', coordinates: typed }
-  ) satisfies AreasParam
+  return polygons.length === 1 ? polygon(first).geometry : multiPolygon(polygons).geometry
 }
 
 /** The areas on a coarser grid, e.g. the one of the mode that takes them over. */
@@ -48,8 +44,8 @@ export const roundAreasParam = (areas: AreasParam, precision: number) => {
   const factor = 10 ** precision
   const round = (value: number) => Math.round(value * factor) / factor
   return areasParamOfPolygons(
-    polygonsOfAreasParam(areas).map((polygon) =>
-      polygon.map((ring) => ring.map(([lng, lat]) => [round(lng), round(lat)])),
+    polygonsOfAreasParam(areas).map((rings) =>
+      rings.map((ring) => ring.map((position) => position.map(round))),
     ),
   )
 }
@@ -59,13 +55,8 @@ export const linesOfLinesParam = (lines: LinesParam | undefined) => {
   return lines.type === 'LineString' ? [lines.coordinates] : lines.coordinates
 }
 
-export const linesParamOfLines = (lines: number[][][]) => {
-  const typed = lines as z.infer<typeof zodLineCoordinates>[]
-  const [first] = typed
+export const linesParamOfLines = (lines: GeoJSON.Position[][]) => {
+  const [first] = lines
   if (!first) return undefined
-  return (
-    typed.length === 1
-      ? { type: 'LineString', coordinates: first }
-      : { type: 'MultiLineString', coordinates: typed }
-  ) satisfies LinesParam
+  return lines.length === 1 ? lineString(first).geometry : multiLineString(lines).geometry
 }

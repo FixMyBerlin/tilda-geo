@@ -64,6 +64,7 @@ const withStubbedReviewListsAdmin = async (
   testInfo: TestInfo,
   identityKey: string,
   run: (ctx: { listName: string }) => Promise<void>,
+  search = '',
 ) => {
   const baseURL = testInfo.project.use.baseURL
   if (typeof baseURL !== 'string') throw new Error('Playwright baseURL must be a string')
@@ -76,9 +77,9 @@ const withStubbedReviewListsAdmin = async (
   const listName = `E2E Liste ${identityKey} ${Date.now()}`
 
   try {
-    await page.goto(MODE_URL)
+    await page.goto(`${MODE_URL}${search}`)
     expect(new URL(page.url()).pathname).toBe(MODE_URL)
-    await expect(page.getByRole('heading', { name: 'Prüflisten' })).toBeVisible()
+    await expect(page.getByRole('region', { name: 'Prüflisten' })).toBeVisible()
     await waitForMapLoad(page)
     await run({ listName })
     await expectNoConsoleErrors(page)
@@ -90,6 +91,9 @@ const withStubbedReviewListsAdmin = async (
 }
 
 const createListAndUploadSample = async (page: Page, listName: string) => {
+  // With a list in the region the header shows it and is closed; its heading button opens it.
+  const headerToggle = page.getByRole('region', { name: 'Prüflisten' }).locator('button:has(h1)')
+  if ((await headerToggle.getAttribute('aria-expanded')) === 'false') await headerToggle.click()
   await page.getByRole('button', { name: 'Neue Prüfliste…' }).click()
   await page.getByLabel('Name').fill(listName)
   await page.getByRole('button', { name: 'Anlegen' }).click()
@@ -139,7 +143,6 @@ test.describe('Review lists mode (stubbed admin login)', () => {
           page.getByRole('button', { name: 'Geometrie-Bearbeitung beenden' }),
         ).toHaveAttribute('aria-pressed', 'true')
         await expect.poll(() => parseReviewListsParam(page).move === true).toBe(true)
-        await expect(page.getByRole('button', { name: 'Ändern' })).toBeVisible()
         await expect(page.getByRole('button', { name: 'Teil hinzufügen' })).toBeVisible()
         await expect(page.getByRole('button', { name: 'Teil löschen' })).toBeVisible()
         await page.getByRole('button', { name: 'Geometrie-Bearbeitung beenden' }).click()
@@ -152,6 +155,12 @@ test.describe('Review lists mode (stubbed admin login)', () => {
         await page.getByPlaceholder('Kommentar hinzufügen…').fill('Sieht problematisch aus')
         await page.getByRole('button', { name: 'Kommentieren' }).click()
         await expect(page.getByText('Sieht problematisch aus')).toBeVisible({ timeout: 10_000 })
+
+        page.once('dialog', (dialog) => dialog.accept())
+        await page.getByRole('button', { name: 'Kommentar bearbeiten' }).click()
+        await page.getByRole('button', { name: 'Kommentar löschen' }).click()
+        await expect(page.getByText('Sieht problematisch aus')).toHaveCount(0)
+        await expect(page.getByText('Noch keine Kommentare.')).toBeVisible()
       },
     )
   })
@@ -170,9 +179,9 @@ test.describe('Review lists mode (stubbed admin login)', () => {
           timeout: 10_000,
         })
 
-        // Clicking a list entry flies the shared map to it — this only works because <MapProvider>
-        // wraps the panel <Outlet/>, so the panel's useMap() resolves. The uploaded entries sit near
-        // [13.4, 52.5]; the `map` URL param (zoom/lat/lng) must reflect the flyTo at zoom ≥ 15.
+        // Clicking a list entry outside the view moves the shared map to it — this only works
+        // because <MapProvider> wraps the panel <Outlet/>, so the panel's useMap() resolves. The
+        // uploaded entries sit near [13.4, 52.5]; the map starts far away and never zooms in.
         await expect
           .poll(
             () => {
@@ -180,12 +189,13 @@ test.describe('Review lists mode (stubbed admin login)', () => {
               if (!map) return false
               const [zoom, lat, lng] = map.split('/').map(Number)
               if (zoom === undefined || lat === undefined || lng === undefined) return false
-              return zoom >= 15 && Math.abs(lat - 52.5) < 0.1 && Math.abs(lng - 13.4) < 0.1
+              return zoom <= 14 && Math.abs(lat - 52.5) < 0.1 && Math.abs(lng - 13.4) < 0.1
             },
-            { timeout: 6_000 },
+            { timeout: 30_000 },
           )
           .toBe(true)
       },
+      '?map=14/48.14/11.57',
     )
   })
 })

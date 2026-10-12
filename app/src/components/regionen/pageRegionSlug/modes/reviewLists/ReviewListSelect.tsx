@@ -1,6 +1,7 @@
 import { Menu, MenuButton, MenuHeading, MenuItem, MenuItems, MenuSection } from '@headlessui/react'
 import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline'
 import { twJoin } from 'tailwind-merge'
+import { formatNumber } from '@/components/shared/utils/formatNumber'
 import type { ReviewListForRegion } from '@/server/review-lists/queries/getReviewListsForRegion.server'
 import { mapOverlayMenuClassName } from '../../mapOverlayChrome.const'
 import { ModeCollectionNewRow } from '../ModeCollectionNewRow'
@@ -45,7 +46,7 @@ export const ReviewListSelect = ({
           options={lists.map((list) => ({
             value: String(list.id),
             label: list.name,
-            description: String(list.entryCount),
+            description: formatNumber(list.entryCount),
             private: true,
             regionHint: sharedWithRegionsSubtitle('Liste', list.regions, currentRegionSlug),
           }))}

@@ -4,7 +4,7 @@
 import type { MapDataBackgroundSource } from '@/components/regionen/pageRegionSlug/mapData/types'
 
 export type SourcesRasterIdsELI =
-  | 'ELI_aachen-alkis'
+  | 'ELI_aachen-alkis-wms'
   | 'ELI_aargau-agis-2014'
   | 'ELI_aargau-agis-2014-hillshade'
   | 'ELI_aargau-agis-2016'
@@ -23,36 +23,34 @@ export type SourcesRasterIdsELI =
   | 'ELI_basemap-at-overlay'
   | 'ELI_basemap-at-surface'
   | 'ELI_basemap-at-terrain'
+  | 'ELI_berlin-2017'
+  | 'ELI_berlin-2018'
+  | 'ELI_berlin-2019'
+  | 'ELI_berlin-2020'
   | 'ELI_berlin-2020-truedop'
-  | 'ELI_berlinaerialphotograph2014'
-  | 'ELI_berlinaerialphotograph2015'
-  | 'ELI_berlinaerialphotograph2016'
-  | 'ELI_berlinaerialphotograph2017'
-  | 'ELI_berlinaerialphotograph2018'
-  | 'ELI_berlinaerialphotograph2019'
-  | 'ELI_berlinaerialphotograph2020'
-  | 'ELI_berlinaerialphotograph2021'
-  | 'ELI_berlinaerialphotograph2022'
-  | 'ELI_berlinaerialphotograph2023'
-  | 'ELI_berlinaerialphotograph2024'
-  | 'ELI_berlinaerialphotograph2025'
-  | 'ELI_berlinaerialphotograph2025-summer'
-  | 'ELI_berlinaerialphotograph2026'
-  | 'ELI_berlinalkis'
-  | 'ELI_berlinbaeumealkis'
-  | 'ELI_berlinstrassenbefahrungalkis'
+  | 'ELI_berlin-2021'
+  | 'ELI_berlin-2022'
+  | 'ELI_berlin-2023'
+  | 'ELI_berlin-2024'
+  | 'ELI_berlin-2025'
+  | 'ELI_berlin-2025-summer'
+  | 'ELI_berlin-2026'
+  | 'ELI_berlin-alkis'
+  | 'ELI_berlin-baumbestand-alkis'
+  | 'ELI_berlin-strassenbefahrung-2014-alkis'
   | 'ELI_bev-inspire-orthofoto'
   | 'ELI_bgt-standaardvisualisatie-wmts'
+  | 'ELI_bkg-verwaltungsgebiete'
   | 'ELI_brandenburg-alkis'
   | 'ELI_brandenburg-dgm'
   | 'ELI_brandenburg-dop20c'
-  | 'ELI_deutschebahnvzglinesjanuary2017'
-  | 'ELI_deutschebahnvzglinesnov2015'
+  | 'ELI_db-inspire-2013-11'
+  | 'ELI_db-inspire-2015-11'
   | 'ELI_ems-orthophotographie-2022'
-  | 'ELI_erlangen2016'
-  | 'ELI_erlangen2018'
-  | 'ELI_erlangen2020'
-  | 'ELI_erlangen2022'
+  | 'ELI_erlangen-2016'
+  | 'ELI_erlangen-2018'
+  | 'ELI_erlangen-2020'
+  | 'ELI_erlangen-2022'
   | 'ELI_fr-ign-orthoexpress-2024'
   | 'ELI_frankfurt-am-main-2016'
   | 'ELI_frankfurt-am-main-2017'
@@ -84,8 +82,22 @@ export type SourcesRasterIdsELI =
   | 'ELI_geoportal2-pl-streets-wms'
   | 'ELI_geoportal2-pl-telecommunications-cable-wms'
   | 'ELI_geoportal2-pl-water-pipe-wms'
-  | 'ELI_germany-verwaltungsgrenzen'
-  | 'ELI_hamburg-alkis'
+  | 'ELI_geosn-dgm-cl'
+  | 'ELI_geosn-dgm-sg'
+  | 'ELI_geosn-dop-2005'
+  | 'ELI_geosn-dop-2006-2008'
+  | 'ELI_geosn-dop-2009-2011'
+  | 'ELI_geosn-dop-2012-2014'
+  | 'ELI_geosn-dop-2015-2017'
+  | 'ELI_geosn-dop-2018-2020'
+  | 'ELI_geosn-dop-2021-2022'
+  | 'ELI_geosn-dop-2023-2024'
+  | 'ELI_geosn-dop-cir'
+  | 'ELI_geosn-dop-rgb'
+  | 'ELI_geosn-flurstuecke'
+  | 'ELI_geosn-rohdop-rgb'
+  | 'ELI_geosn-webatlas'
+  | 'ELI_hamburg-alkis-farbig'
   | 'ELI_hamburg-dk5'
   | 'ELI_hamburg-dop20-belaubt'
   | 'ELI_hamburg-dop20-unbelaubt'
@@ -93,13 +105,13 @@ export type SourcesRasterIdsELI =
   | 'ELI_hessen-dop20'
   | 'ELI_hessen-dtk'
   | 'ELI_hessen-webatlas'
-  | 'ELI_k-ln-truedop-2024'
   | 'ELI_kanton-schaffhausen-dsm-2013'
   | 'ELI_kanton-schaffhausen-luftbild-2013'
   | 'ELI_klimadatastyrelsen-screen-map'
   | 'ELI_klimadatastyrelsen-surface-shadow-40cm'
   | 'ELI_klimadatastyrelsen-terrain-shadow-40cm'
   | 'ELI_klimadatastyrelsen-topography-dtk25'
+  | 'ELI_koeln-truedop-2024'
   | 'ELI_kt-tg-av'
   | 'ELI_kt-tg-ortho-2017'
   | 'ELI_kt-tg-radrouten'
@@ -108,6 +120,11 @@ export type SourcesRasterIdsELI =
   | 'ELI_ktbaselstadt2017'
   | 'ELI_ktbaselstadt2020'
   | 'ELI_ktbaselstadt2023'
+  | 'ELI_lsa-alkis-bu'
+  | 'ELI_lsa-alkis-cp'
+  | 'ELI_lsa-atkis-hyn'
+  | 'ELI_lsa-dop20'
+  | 'ELI_lsa-dvg'
   | 'ELI_lu-geoportail-opendata-basemap'
   | 'ELI_lu-geoportail-opendata-cadastre'
   | 'ELI_lu-geoportail-opendata-ortho-2019-winter'
@@ -117,25 +134,24 @@ export type SourcesRasterIdsELI =
   | 'ELI_lu-openstreetmap-lidar-hillshade-2019-classy'
   | 'ELI_ludwigshafen-2019'
   | 'ELI_ludwigshafen-2022'
-  | 'ELI_mainz-gint-latest'
-  | 'ELI_mecklenburg-vorpommern-dgm'
-  | 'ELI_mecklenburg-vorpommern-dop20'
-  | 'ELI_mecklenburg-vorpommern-dop20-2019'
-  | 'ELI_mecklenburg-vorpommern-dop20-2020'
-  | 'ELI_mecklenburg-vorpommern-dop20-2021'
-  | 'ELI_mecklenburg-vorpommern-dop20-2022'
-  | 'ELI_mecklenburg-vorpommern-dop20-2023'
-  | 'ELI_mecklenburg-vorpommern-dop20-2024'
-  | 'ELI_mecklenburg-vorpommern-flurst-cke'
-  | 'ELI_mecklenburg-vorpommern-orka-mv'
-  | 'ELI_mecklenburg-vorpommern-topo'
-  | 'ELI_metropoleruhrluftbilder-10cm'
+  | 'ELI_mainzlatestaerialimagery'
+  | 'ELI_metropole-ruhr-rvr-dop10'
   | 'ELI_mulhouse-2018'
+  | 'ELI_mv-dgm'
+  | 'ELI_mv-dop20'
+  | 'ELI_mv-dop20-2019'
+  | 'ELI_mv-dop20-2020'
+  | 'ELI_mv-dop20-2021'
+  | 'ELI_mv-dop20-2022'
+  | 'ELI_mv-dop20-2023'
+  | 'ELI_mv-dop20-2024'
+  | 'ELI_mv-dtk'
+  | 'ELI_mv-flurstuecke'
   | 'ELI_niedersachsen-alkis'
   | 'ELI_niedersachsen-dop20'
-  | 'ELI_nrw-alkis'
-  | 'ELI_nrw-alkis-buildings'
-  | 'ELI_nrw-alkis-buildings-gst'
+  | 'ELI_nrw-alkis-buildings-gst-wms'
+  | 'ELI_nrw-alkis-buildings-wms'
+  | 'ELI_nrw-alkis-wms'
   | 'ELI_nrw-dtm-wms'
   | 'ELI_nrw-idop-wms'
   | 'ELI_nrw-ortho-wms'
@@ -150,6 +166,7 @@ export type SourcesRasterIdsELI =
   | 'ELI_ogdorthozh2020'
   | 'ELI_ogdorthozh2021'
   | 'ELI_ogdorthozh2024'
+  | 'ELI_orka-mv'
   | 'ELI_osmim-imagicode-lc81960222015233lgn00ir'
   | 'ELI_osmim-imagicode-lc81960222015233lgn00vis'
   | 'ELI_osmim-imagicode-northsea-s2-2016'
@@ -160,26 +177,6 @@ export type SourcesRasterIdsELI =
   | 'ELI_osmim-imagicode-walps-autumn-2017'
   | 'ELI_rheinland-pfalz-dop20'
   | 'ELI_saarland-dop20'
-  | 'ELI_saxony-borders-and-parcels'
-  | 'ELI_saxony-digitalterrainmodel-contour-lines'
-  | 'ELI_saxony-digitalterrainmodel-ground'
-  | 'ELI_saxony-dop20-historic-2005'
-  | 'ELI_saxony-dop20-historic-2006-2008'
-  | 'ELI_saxony-dop20-historic-2009-2011'
-  | 'ELI_saxony-dop20-historic-2012-2014'
-  | 'ELI_saxony-dop20-historic-2015-2017'
-  | 'ELI_saxony-dop20-historic-2018-2020'
-  | 'ELI_saxony-dop20-historic-2021-2022'
-  | 'ELI_saxony-dop20-historic-2023-2024'
-  | 'ELI_saxony-dop20-latest'
-  | 'ELI_saxony-dop20-latest-infrared'
-  | 'ELI_saxony-dop20-raw'
-  | 'ELI_saxony-webatlassn'
-  | 'ELI_saxonyanhalt-alkis-bu'
-  | 'ELI_saxonyanhalt-alkis-cp'
-  | 'ELI_saxonyanhalt-atkis-hyn'
-  | 'ELI_saxonyanhalt-dop20'
-  | 'ELI_saxonyanhalt-dvg'
   | 'ELI_solothurn-sogis2018-dsm-wms'
   | 'ELI_solothurn-sogis2018-dtm-wms'
   | 'ELI_spw-ortho-last'
@@ -196,13 +193,13 @@ export type SourcesRasterIdsELI =
   | 'ELI_stuttgart-latest'
   | 'ELI_teclines'
   | 'ELI_tecstops'
-  | 'ELI_thueringen-dop20'
+  | 'ELI_thuringia-dop20'
   | 'ELI_tirol-gv-at-contourlines'
   | 'ELI_tirol-gv-at-dgm'
   | 'ELI_tirol-gv-at-dom'
   | 'ELI_tirol-gv-at-orthofoto'
   | 'ELI_tirol-gv-at-orthofoto-cir'
-  | 'ELI_viersen-alkis'
+  | 'ELI_viersen-alkis-wms'
   | 'ELI_vogis-cnv-at-dgm'
   | 'ELI_vogis-cnv-at-dom'
   | 'ELI_vogis-cnv-at-ef2012-12cm'
@@ -220,7 +217,7 @@ export type SourcesRasterIdsELI =
 
 export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterIdsELI>[] = [
   {
-    id: 'ELI_aachen-alkis',
+    id: 'ELI_aachen-alkis-wms',
     name: 'Aachen Liegenschaftskataster',
     tilesUrl:
       'https://geodienste.staedteregion-aachen.de/?MAP=ALKIS_LK_Inkas.qgs&LAYERS=alkis_lk_inkas&FORMAT=image/png&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
@@ -444,43 +441,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     category: 'elevation',
   },
   {
-    id: 'ELI_berlin-2020-truedop',
-    name: 'Berlin/Geoportal TrueDOP20RGB (2020)',
-    tilesUrl: 'https://tiles.codefor.de/berlin-2020-truedop20rgb/{z}/{x}/{y}.png',
-    attributionHtml:
-      'Geoportal Berlin/Digitale farbige TrueOrthophotos 2020 (TrueDOP20RGB) (codefor.de mirror)',
-    tileSize: 256,
-    bbox: [13.0587, 52.3217, 13.7654, 52.6827],
-    maxzoom: 20,
-    category: 'historicphoto',
-    endDate: '2020-08',
-  },
-  {
-    id: 'ELI_berlinaerialphotograph2014',
-    name: 'Berlin/Geoportal DOP20RGB (2014)',
-    tilesUrl: 'https://tiles.codefor.de/berlin/geoportal/luftbilder/2014-dop20rgb/{z}/{x}/{y}.png',
-    attributionHtml:
-      'Geoportal Berlin/Digitale farbige Orthophotos 2014 (DOP20RGB) (codefor.de mirror)',
-    maxzoom: 20,
-  },
-  {
-    id: 'ELI_berlinaerialphotograph2015',
-    name: 'Berlin/Geoportal DOP20RGB (2015)',
-    tilesUrl: 'https://tiles.codefor.de/berlin/geoportal/luftbilder/2015-dop20rgb/{z}/{x}/{y}.png',
-    attributionHtml:
-      'Geoportal Berlin/Digitale farbige Orthophotos 2015 (DOP20RGB) (codefor.de mirror)',
-    maxzoom: 20,
-  },
-  {
-    id: 'ELI_berlinaerialphotograph2016',
-    name: 'Berlin/Geoportal DOP20RGB (2016)',
-    tilesUrl: 'https://tiles.codefor.de/berlin/geoportal/luftbilder/2016-dop20rgb/{z}/{x}/{y}.png',
-    attributionHtml:
-      'Geoportal Berlin/Digitale farbige Orthophotos 2016 (DOP20RGB) (codefor.de mirror)',
-    maxzoom: 20,
-  },
-  {
-    id: 'ELI_berlinaerialphotograph2017',
+    id: 'ELI_berlin-2017',
     name: 'Berlin/Geoportal DOP20RGB (2017)',
     tilesUrl: 'https://tiles.codefor.de/berlin/geoportal/luftbilder/2017-dop20rgb/{z}/{x}/{y}.png',
     attributionHtml:
@@ -492,7 +453,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2017-03-28',
   },
   {
-    id: 'ELI_berlinaerialphotograph2018',
+    id: 'ELI_berlin-2018',
     name: 'Berlin/Geoportal DOP20RGB (2018)',
     tilesUrl: 'https://tiles.codefor.de/berlin/geoportal/luftbilder/2018-dop20rgb/{z}/{x}/{y}.png',
     attributionHtml:
@@ -504,7 +465,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2018-04-07',
   },
   {
-    id: 'ELI_berlinaerialphotograph2019',
+    id: 'ELI_berlin-2019',
     name: 'Berlin/Geoportal DOP20RGB (2019)',
     tilesUrl: 'https://tiles.codefor.de/berlin/geoportal/luftbilder/2019-dop20rgb/{z}/{x}/{y}.png',
     attributionHtml:
@@ -516,7 +477,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2019-04-06',
   },
   {
-    id: 'ELI_berlinaerialphotograph2020',
+    id: 'ELI_berlin-2020',
     name: 'Berlin/Geoportal DOP20RGB (2020)',
     tilesUrl:
       'https://tiles.codefor.de/berlin/geoportal/luftbilder/2020-truedop20rgb/{z}/{x}/{y}.png',
@@ -529,7 +490,19 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2020-08',
   },
   {
-    id: 'ELI_berlinaerialphotograph2021',
+    id: 'ELI_berlin-2020-truedop',
+    name: 'Berlin/Geoportal TrueDOP20RGB (2020)',
+    tilesUrl: 'https://tiles.codefor.de/berlin-2020-truedop20rgb/{z}/{x}/{y}.png',
+    attributionHtml:
+      'Geoportal Berlin/Digitale farbige TrueOrthophotos 2020 (TrueDOP20RGB) (codefor.de mirror)',
+    tileSize: 256,
+    bbox: [13.0587, 52.3217, 13.7654, 52.6827],
+    maxzoom: 20,
+    category: 'historicphoto',
+    endDate: '2020-08',
+  },
+  {
+    id: 'ELI_berlin-2021',
     name: 'Berlin/Geoportal DOP20RGB (2021)',
     tilesUrl: 'https://tiles.codefor.de/berlin/geoportal/luftbilder/2021-dop20rgbi/{z}/{x}/{y}.png',
     attributionHtml:
@@ -541,7 +514,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2021-02-22',
   },
   {
-    id: 'ELI_berlinaerialphotograph2022',
+    id: 'ELI_berlin-2022',
     name: 'Berlin/Geoportal DOP20RGB (2022)',
     tilesUrl: 'https://tiles.codefor.de/berlin/geoportal/luftbilder/2022-dop20rgbi/{z}/{x}/{y}.png',
     attributionHtml:
@@ -553,7 +526,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2022-03-09',
   },
   {
-    id: 'ELI_berlinaerialphotograph2023',
+    id: 'ELI_berlin-2023',
     name: 'Berlin/Geoportal DOP20RGB (2023)',
     tilesUrl: 'https://tiles.codefor.de/berlin/geoportal/luftbilder/2023-dop20rgbi/{z}/{x}/{y}.png',
     attributionHtml:
@@ -565,7 +538,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2023',
   },
   {
-    id: 'ELI_berlinaerialphotograph2024',
+    id: 'ELI_berlin-2024',
     name: 'Berlin/Geoportal DOP20RGB (2024)',
     tilesUrl: 'https://tiles.codefor.de/berlin/geoportal/luftbilder/2024-dop20rgbi/{z}/{x}/{y}.png',
     attributionHtml:
@@ -577,7 +550,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2024',
   },
   {
-    id: 'ELI_berlinaerialphotograph2025',
+    id: 'ELI_berlin-2025',
     name: 'Berlin/Geoportal DOP20RGB (2025)',
     tilesUrl: 'https://tiles.codefor.de/berlin/geoportal/luftbilder/2025-dop20rgb/{z}/{x}/{y}.png',
     attributionHtml:
@@ -589,7 +562,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2025',
   },
   {
-    id: 'ELI_berlinaerialphotograph2025-summer',
+    id: 'ELI_berlin-2025-summer',
     name: 'Berlin/Geoportal DOP20RGB (2025) Sommer',
     tilesUrl:
       'https://tiles.codefor.de/berlin/geoportal/luftbilder/2025-truedop20rgb/{z}/{x}/{y}.png',
@@ -602,7 +575,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2025',
   },
   {
-    id: 'ELI_berlinaerialphotograph2026',
+    id: 'ELI_berlin-2026',
     name: 'Berlin/Geoportal DOP20RGB (2026)',
     tilesUrl: 'https://tiles.codefor.de/berlin/geoportal/luftbilder/2026-dop20rgb/{z}/{x}/{y}.png',
     attributionHtml:
@@ -615,7 +588,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2026',
   },
   {
-    id: 'ELI_berlinalkis',
+    id: 'ELI_berlin-alkis',
     name: 'Berlin/Geoportal ALKIS',
     tilesUrl: 'https://mapproxy.codefor.de/tiles/1.0.0/alkis_30/mercator/{z}/{x}/{y}.png',
     attributionHtml:
@@ -627,7 +600,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2023',
   },
   {
-    id: 'ELI_berlinbaeumealkis',
+    id: 'ELI_berlin-baumbestand-alkis',
     name: 'Berlin/Geoportal Baumbestand, Alkis s/w',
     tilesUrl:
       'https://mapproxy.codefor.de/tiles/1.0.0/baumbestand_0_1_3_4_alkis/mercator/{z}/{x}/{y}.png',
@@ -640,7 +613,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2024',
   },
   {
-    id: 'ELI_berlinstrassenbefahrungalkis',
+    id: 'ELI_berlin-strassenbefahrung-2014-alkis',
     name: 'Berlin/Geoportal Straßenbefahrung 2014, Alkis',
     tilesUrl:
       'https://mapproxy.codefor.de/tiles/1.0.0/strassenbefahrung_alkis/mercator/{z}/{x}/{y}.png',
@@ -671,6 +644,16 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     bbox: [3.3275, 50.7347, 7.2771, 53.5819],
     maxzoom: 25,
     category: 'map',
+  },
+  {
+    id: 'ELI_bkg-verwaltungsgebiete',
+    name: 'Verwaltungsgebiete 1:250000',
+    tilesUrl:
+      'https://sgx.geodatenzentrum.de/wms_vg250?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=vg250_li,vg250_gem,vg250_pk&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
+    attributionHtml: '© BKG <YEAR> dl-de/by-2-0',
+    tileSize: 256,
+    bbox: [5.8557, 47.2654, 15.0393, 55.075],
+    category: 'other',
   },
   {
     id: 'ELI_brandenburg-alkis',
@@ -709,7 +692,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2023',
   },
   {
-    id: 'ELI_deutschebahnvzglinesjanuary2017',
+    id: 'ELI_db-inspire-2013-11',
     name: 'Deutsche Bahn VzG lines January 2017',
     tilesUrl:
       'https://wms.michreichert.de/vzg-strecken-2017?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.1.1&SERVICE=WMS&REQUEST=GetMap&LAYERS=vzg_strecken,station_codes,level_crossings&STYLES=&SRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
@@ -720,7 +703,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2013-11',
   },
   {
-    id: 'ELI_deutschebahnvzglinesnov2015',
+    id: 'ELI_db-inspire-2015-11',
     name: 'Deutsche Bahn VzG lines Nov 2015',
     tilesUrl:
       'https://wms.michreichert.de/vzg-strecken-2015?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.1.1&SERVICE=WMS&REQUEST=GetMap&LAYERS=vzg_strecken,station_codes,level_crossings&STYLES=&SRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
@@ -745,7 +728,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2022',
   },
   {
-    id: 'ELI_erlangen2016',
+    id: 'ELI_erlangen-2016',
     name: 'Erlangen Luftbild (2016 5,0 cm)',
     tilesUrl: 'https://osm.rrze.fau.de/protected/YgktSWTTo6HS9nKi/lbe2016/{z}/{x}/{y}.jpg',
     attributionHtml: '© Stadt Erlangen | © GEOCART GmbH',
@@ -756,7 +739,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2016-03-18',
   },
   {
-    id: 'ELI_erlangen2018',
+    id: 'ELI_erlangen-2018',
     name: 'Erlangen Luftbild (2018 5,0 cm)',
     tilesUrl: 'https://osm.rrze.fau.de/protected/YgktSWTTo6HS9nKi/lbe2018/{z}/{x}/{y}.jpg',
     attributionHtml: '© Stadt Erlangen | © Hansa Luftbild AG',
@@ -767,7 +750,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2018-04-09',
   },
   {
-    id: 'ELI_erlangen2020',
+    id: 'ELI_erlangen-2020',
     name: 'Erlangen TrueDOP (2020 20cm)',
     tilesUrl: 'https://geodaten.erlangen.de/luftbilder/2020/{z}/{x}/{y}.png',
     attributionHtml: '© Stadt Erlangen',
@@ -779,7 +762,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2020-03-28',
   },
   {
-    id: 'ELI_erlangen2022',
+    id: 'ELI_erlangen-2022',
     name: 'Erlangen TrueDOP (2022 20 cm)',
     tilesUrl: 'https://geodaten.erlangen.de/luftbilder/2022/{z}/{x}/{y}.png',
     attributionHtml: '© Stadt Erlangen',
@@ -1135,17 +1118,170 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     category: 'other',
   },
   {
-    id: 'ELI_germany-verwaltungsgrenzen',
-    name: 'Verwaltungsgebiete 1:250000',
+    id: 'ELI_geosn-dgm-cl',
+    name: 'Saxony contour lines',
     tilesUrl:
-      'https://sgx.geodatenzentrum.de/wms_vg250?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=vg250_li,vg250_gem,vg250_pk&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
-    attributionHtml: '© BKG <YEAR> dl-de/by-2-0',
+      'https://geodienste.sachsen.de/wms_geosn_hoehe/guest?LAYERS=hoehenlinien_50m,hoehenlinien_25m,hoehenlinien_20m,hoehenlinien_5m,hoehenlinien_2_5m&STYLES=&FORMAT=image/png&transparent=true&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
     tileSize: 256,
-    bbox: [5.8557, 47.2654, 15.0393, 55.075],
+    bbox: [11.8669, 50.1675, 15.0508, 51.6838],
+    category: 'elevation',
+  },
+  {
+    id: 'ELI_geosn-dgm-sg',
+    name: 'Saxony shaded ground',
+    tilesUrl:
+      'https://geodienste.sachsen.de/wms_geosn_hoehe/guest?LAYERS=relief_standard&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
+    tileSize: 256,
+    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
+    category: 'elevation',
+  },
+  {
+    id: 'ELI_geosn-dop-2005',
+    name: 'Saxony historical aerial imagery 2005',
+    tilesUrl:
+      'https://geodienste.sachsen.de/wms_geosn_dop-2005/guest?LAYERS=dop_2005&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
+    tileSize: 256,
+    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
+    category: 'historicphoto',
+    endDate: '2005',
+  },
+  {
+    id: 'ELI_geosn-dop-2006-2008',
+    name: 'Saxony historical aerial imagery 2006-2008',
+    tilesUrl:
+      'https://geodienste.sachsen.de/wms_geosn_dop_2006_2008/guest?LAYERS=dop_2006_2008_rgb&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
+    tileSize: 256,
+    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
+    category: 'historicphoto',
+    endDate: '2008',
+  },
+  {
+    id: 'ELI_geosn-dop-2009-2011',
+    name: 'Saxony historical aerial imagery 2009-2011',
+    tilesUrl:
+      'https://geodienste.sachsen.de/wms_geosn_dop_2009_2011/guest?LAYERS=dop_2009_2011_rgb&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
+    tileSize: 256,
+    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
+    category: 'historicphoto',
+    endDate: '2011',
+  },
+  {
+    id: 'ELI_geosn-dop-2012-2014',
+    name: 'Saxony historical aerial imagery 2012-2014',
+    tilesUrl:
+      'https://geodienste.sachsen.de/wms_geosn_dop_2012_2014/guest?LAYERS=dop_2012_2014_rgb&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
+    tileSize: 256,
+    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
+    category: 'historicphoto',
+    endDate: '2014',
+  },
+  {
+    id: 'ELI_geosn-dop-2015-2017',
+    name: 'Saxony historical aerial imagery 2015-2017',
+    tilesUrl:
+      'https://geodienste.sachsen.de/wms_geosn_dop_2015_2017/guest?LAYERS=dop_2015_2017_rgb&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
+    tileSize: 256,
+    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
+    category: 'historicphoto',
+    endDate: '2017',
+  },
+  {
+    id: 'ELI_geosn-dop-2018-2020',
+    name: 'Saxony historical aerial imagery 2018-2020',
+    tilesUrl:
+      'https://geodienste.sachsen.de/wms_geosn_dop_2018_2020/guest?LAYERS=dop_2018_2020_rgb&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
+    tileSize: 256,
+    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
+    category: 'historicphoto',
+    endDate: '2020',
+  },
+  {
+    id: 'ELI_geosn-dop-2021-2022',
+    name: 'Saxony historical aerial imagery 2021-2022',
+    tilesUrl:
+      'https://geodienste.sachsen.de/wms_geosn_dop_2021_2022/guest?LAYERS=dop_2021_2022_rgb&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
+    tileSize: 256,
+    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
+    category: 'historicphoto',
+    endDate: '2022',
+  },
+  {
+    id: 'ELI_geosn-dop-2023-2024',
+    name: 'Saxony historical aerial imagery 2023-2024',
+    tilesUrl:
+      'https://geodienste.sachsen.de/wms_geosn_dop_2023_2024/guest?LAYERS=dop_2023_2024_rgb&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
+    tileSize: 256,
+    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
+    category: 'historicphoto',
+    endDate: '2024',
+  },
+  {
+    id: 'ELI_geosn-dop-cir',
+    name: 'Saxony latest aerial imagery infrared',
+    tilesUrl:
+      'https://geodienste.sachsen.de/wms_geosn_dop-cir/guest?LAYERS=sn_dop_020_cir&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
+    tileSize: 256,
+    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
+    category: 'photo',
+    endDate: '2023',
+  },
+  {
+    id: 'ELI_geosn-dop-rgb',
+    name: 'Saxony latest aerial imagery',
+    tilesUrl:
+      'https://geodienste.sachsen.de/wms_geosn_dop-rgb/guest?LAYERS=sn_dop_020&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
+    tileSize: 256,
+    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
+    category: 'photo',
+    best: true,
+    endDate: '2023',
+  },
+  {
+    id: 'ELI_geosn-flurstuecke',
+    name: 'Saxony borders and parcels',
+    tilesUrl:
+      'https://geodienste.sachsen.de/wms_geosn_flurstuecke/guest?LAYERS=Flurstueck,Gemarkung,Gemarkungsname&STYLES=&FORMAT=image/png&transparent=true&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
+    tileSize: 256,
+    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
     category: 'other',
   },
   {
-    id: 'ELI_hamburg-alkis',
+    id: 'ELI_geosn-rohdop-rgb',
+    name: 'Saxony raw aerial imagery',
+    tilesUrl:
+      'https://geodienste.sachsen.de/wms_geosn_rohdop-rgb/guest?LAYERS=sn_rohdop_020&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
+    tileSize: 256,
+    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
+    category: 'photo',
+    best: true,
+    endDate: '2024',
+  },
+  {
+    id: 'ELI_geosn-webatlas',
+    name: 'Saxony WebAtlasSN',
+    tilesUrl:
+      'https://geodienste.sachsen.de/wms_geosn_webatlas-sn/guest?LAYERS=Vegetation,Siedlung,Gewaesser,Verkehr,Administrative_Einheiten,Beschriftung&STYLES=&FORMAT=image/png&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
+    tileSize: 256,
+    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
+    category: 'map',
+  },
+  {
+    id: 'ELI_hamburg-alkis-farbig',
     name: 'Hamburg ALKIS Basiskarte (farbig) (HH LGV ALKIS 2025)',
     tilesUrl:
       'https://geodienste.hamburg.de/HH_WMS_ALKIS_Basiskarte?REQUEST=GetMap&SERVICE=WMS&VERSION=1.3.0&FORMAT=image/png&STYLES=&LAYERS=0,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,27,25,23,29,30&WIDTH=512&HEIGHT=512&CRS=EPSG:3857&BBOX={bbox-epsg-3857}',
@@ -1237,18 +1373,6 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     category: 'map',
   },
   {
-    id: 'ELI_k-ln-truedop-2024',
-    name: 'Köln TrueDOP 2024',
-    tilesUrl:
-      'https://geoportal.stadt-koeln.de/wss/service/luftbilder_2024_wms/guest?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&BBOX={bbox-epsg-3857}&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&LAYERS=luftbilder_24&STYLES=&FORMAT=image/jpeg',
-    attributionHtml: 'Stadt Köln (2024)',
-    tileSize: 256,
-    bbox: [6.7695, 50.8285, 7.184, 51.0871],
-    category: 'photo',
-    best: true,
-    endDate: '2024-07-09',
-  },
-  {
     id: 'ELI_kanton-schaffhausen-dsm-2013',
     name: 'Kanton Schaffhausen, Relief 2013',
     tilesUrl:
@@ -1315,6 +1439,18 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     bbox: [8.0185, 54.4682, 15.3099, 57.8229],
     maxzoom: 19,
     category: 'map',
+  },
+  {
+    id: 'ELI_koeln-truedop-2024',
+    name: 'Köln TrueDOP 2024',
+    tilesUrl:
+      'https://geoportal.stadt-koeln.de/wss/service/luftbilder_2024_wms/guest?SERVICE=WMS&VERSION=1.3.0&REQUEST=GetMap&BBOX={bbox-epsg-3857}&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&LAYERS=luftbilder_24&STYLES=&FORMAT=image/jpeg',
+    attributionHtml: 'Stadt Köln (2024)',
+    tileSize: 256,
+    bbox: [6.7695, 50.8285, 7.184, 51.0871],
+    category: 'photo',
+    best: true,
+    endDate: '2024-07-09',
   },
   {
     id: 'ELI_kt-tg-av',
@@ -1410,6 +1546,60 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     category: 'photo',
     best: true,
     endDate: '2023-05',
+  },
+  {
+    id: 'ELI_lsa-alkis-bu',
+    name: '© GeoBasis-DE/LVermGeo LSA, ALKIS Building Outlines',
+    tilesUrl:
+      'https://geodatenportal.sachsen-anhalt.de/ows_INSPIRE_LVermGeo_ALKIS_BU_WMS?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=BU.Building&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
+    attributionHtml: '© GeoBasis-DE/LVermGeo LSA',
+    tileSize: 256,
+    bbox: [10.5607, 50.931, 13.1543, 53.0417],
+    category: 'other',
+    best: true,
+  },
+  {
+    id: 'ELI_lsa-alkis-cp',
+    name: '© GeoBasis-DE/LVermGeo LSA, ALKIS Cadastre parcels',
+    tilesUrl:
+      'https://geodatenportal.sachsen-anhalt.de/ows_INSPIRE_LVermGeo_ALKIS_CP_WMS?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=CP.CadastralParcel&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
+    attributionHtml: '© GeoBasis-DE/LVermGeo LSA',
+    tileSize: 256,
+    bbox: [10.5607, 50.931, 13.1543, 53.0417],
+    category: 'map',
+    best: true,
+  },
+  {
+    id: 'ELI_lsa-atkis-hyn',
+    name: '© GeoBasis-DE/LVermGeo LSA, ATKIS Hydro Network',
+    tilesUrl:
+      'https://geodatenportal.sachsen-anhalt.de/ows_INSPIRE_LVermGeo_ATKIS_HY-N_WMS?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=HY.Network&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
+    attributionHtml: '© GeoBasis-DE/LVermGeo LSA',
+    tileSize: 256,
+    bbox: [10.5607, 50.931, 13.1543, 53.0417],
+    category: 'map',
+  },
+  {
+    id: 'ELI_lsa-dop20',
+    name: '© GeoBasis-DE/LVermGeo LSA, DOP20',
+    tilesUrl:
+      'https://www.geodatenportal.sachsen-anhalt.de/wss/service/ST_LVermGeo_DOP_WMS_OpenData/guest?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=lsa_lvermgeo_dop20_2&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
+    attributionHtml: '© GeoBasis-DE/LVermGeo LSA',
+    tileSize: 256,
+    bbox: [10.5607, 50.931, 13.1543, 53.0417],
+    category: 'photo',
+    best: true,
+  },
+  {
+    id: 'ELI_lsa-dvg',
+    name: '© GeoBasis-DE/LVermGeo LSA, Digital administrative boundaries',
+    tilesUrl:
+      'https://www.geodatenportal.sachsen-anhalt.de/wss/service/ST_LVermGeo_DVG_ALKIS_WMS_OpenData/guest?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=flur,gema,gmdbez,gmd,land,lk&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
+    attributionHtml: '© GeoBasis-DE/LVermGeo LSA',
+    tileSize: 256,
+    bbox: [10.5607, 50.931, 13.1543, 53.0417],
+    category: 'map',
+    best: true,
   },
   {
     id: 'ELI_lu-geoportail-opendata-basemap',
@@ -1520,7 +1710,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2022',
   },
   {
-    id: 'ELI_mainz-gint-latest',
+    id: 'ELI_mainzlatestaerialimagery',
     name: 'Mainz latest aerial imagery',
     tilesUrl:
       'https://geodaten.mainz.de/map/service?LAYERS=Orthophoto&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
@@ -1530,126 +1720,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     category: 'photo',
   },
   {
-    id: 'ELI_mecklenburg-vorpommern-dgm',
-    name: 'Mecklenburg-Vorpommern DGM1 Schummerung',
-    tilesUrl:
-      'https://www.geodaten-mv.de/dienste/dgm_wms?LAYERS=schummerung_NW,hohenlinien&STYLES=&CRS=EPSG:3857&BBOX={bbox-epsg-3857}&FORMAT=image/png&WIDTH=512&HEIGHT=512&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
-    attributionHtml: '© GeoBasis-DE/MV <YEAR>, CC-by 4.0, www.laiv-mv.de',
-    tileSize: 256,
-    bbox: [10.5768, 53.1008, 14.4298, 54.6954],
-    category: 'elevation',
-  },
-  {
-    id: 'ELI_mecklenburg-vorpommern-dop20',
-    name: 'Mecklenburg-Vorpommern DOP20',
-    tilesUrl:
-      'https://www.geodaten-mv.de/dienste/adv_dop?LAYERS=mv_dop&STYLES=&CRS=EPSG:3857&BBOX={bbox-epsg-3857}&FORMAT=image/png&WIDTH=512&HEIGHT=512&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
-    attributionHtml: '© GeoBasis-DE/MV <YEAR>, CC-by 4.0, www.laiv-mv.de',
-    tileSize: 256,
-    bbox: [10.5768, 53.1008, 14.4298, 54.6954],
-    category: 'photo',
-    best: true,
-  },
-  {
-    id: 'ELI_mecklenburg-vorpommern-dop20-2019',
-    name: 'Mecklenburg-Vorpommern DOP20, 2019',
-    tilesUrl:
-      'https://www.geodaten-mv.de/dienste/doparchiv_wms/service?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=rgb2019&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
-    attributionHtml: '© GeoBasis-DE/MV 2019, CC-by 4.0, www.laiv-mv.de',
-    tileSize: 256,
-    bbox: [10.74, 53.5588, 13.8018, 54.6954],
-    category: 'historicphoto',
-    endDate: '2019',
-  },
-  {
-    id: 'ELI_mecklenburg-vorpommern-dop20-2020',
-    name: 'Mecklenburg-Vorpommern DOP20, 2020',
-    tilesUrl:
-      'https://www.geodaten-mv.de/dienste/doparchiv_wms/service?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=rgb2020&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
-    attributionHtml: '© GeoBasis-DE/MV 2020, CC-by 4.0, www.laiv-mv.de',
-    tileSize: 256,
-    bbox: [10.5768, 53.1008, 13.8196, 54.0459],
-    category: 'historicphoto',
-    endDate: '2020',
-  },
-  {
-    id: 'ELI_mecklenburg-vorpommern-dop20-2021',
-    name: 'Mecklenburg-Vorpommern DOP20, 2021',
-    tilesUrl:
-      'https://www.geodaten-mv.de/dienste/doparchiv_wms/service?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=rgb2021&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
-    attributionHtml: '© GeoBasis-DE/MV 2021, CC-by 4.0, www.laiv-mv.de',
-    tileSize: 256,
-    bbox: [12.2348, 53.2456, 14.4298, 54.6954],
-    category: 'historicphoto',
-    endDate: '2021',
-  },
-  {
-    id: 'ELI_mecklenburg-vorpommern-dop20-2022',
-    name: 'Mecklenburg-Vorpommern DOP20, 2022',
-    tilesUrl:
-      'https://www.geodaten-mv.de/dienste/doparchiv_wms/service?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=rgb2022&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
-    attributionHtml: '© GeoBasis-DE/MV 2022, CC-by 4.0, www.laiv-mv.de',
-    tileSize: 256,
-    bbox: [10.5768, 53.1008, 12.8456, 54.2982],
-    category: 'historicphoto',
-    endDate: '2022',
-  },
-  {
-    id: 'ELI_mecklenburg-vorpommern-dop20-2023',
-    name: 'Mecklenburg-Vorpommern DOP20, 2023',
-    tilesUrl:
-      'https://www.geodaten-mv.de/dienste/doparchiv_wms/service?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=rgb2023&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
-    attributionHtml: '© GeoBasis-DE/MV 2023, CC-by 4.0, www.laiv-mv.de',
-    tileSize: 256,
-    bbox: [12.2486, 53.1595, 14.4298, 54.2694],
-    category: 'historicphoto',
-    endDate: '2023',
-  },
-  {
-    id: 'ELI_mecklenburg-vorpommern-dop20-2024',
-    name: 'Mecklenburg-Vorpommern DOP20, 2024',
-    tilesUrl:
-      'https://www.geodaten-mv.de/dienste/doparchiv_wms/service?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=rgb2024&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
-    attributionHtml: '© GeoBasis-DE/MV 2024, CC-by 4.0, www.laiv-mv.de',
-    tileSize: 256,
-    bbox: [10.74, 53.5419, 13.8032, 54.6954],
-    category: 'historicphoto',
-    endDate: '2024',
-  },
-  {
-    id: 'ELI_mecklenburg-vorpommern-flurst-cke',
-    name: 'Mecklenburg-Vorpommern Flurstücke',
-    tilesUrl:
-      'https://www.geodaten-mv.de/dienste/dfg_wms?LAYERS=gema,flur&STYLES=&CRS=EPSG:3857&BBOX={bbox-epsg-3857}&FORMAT=image/png&WIDTH=512&HEIGHT=512&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
-    attributionHtml: '© GeoBasis-DE/MV <YEAR>, CC-by 4.0, www.laiv-mv.de',
-    tileSize: 256,
-    bbox: [10.5768, 53.1008, 14.4298, 54.6954],
-    category: 'other',
-  },
-  {
-    id: 'ELI_mecklenburg-vorpommern-orka-mv',
-    name: 'Offene Regionalkarte Mecklenburg-Vorpommern (ORKa.MV)',
-    tilesUrl:
-      'https://www.orka-mv.de/geodienste/orkamv/tiles/1.0.0/orkamv/GLOBAL_WEBMERCATOR/{z}/{x}/{y}.png',
-    attributionHtml: 'ORKa.MV',
-    tileSize: 256,
-    bbox: [10.5475, 53.1021, 14.4545, 54.7221],
-    minzoom: 12,
-    maxzoom: 19,
-    category: 'osmbasedmap',
-  },
-  {
-    id: 'ELI_mecklenburg-vorpommern-topo',
-    name: 'Mecklenburg-Vorpommern DTK',
-    tilesUrl:
-      'https://www.geodaten-mv.de/dienste/gdimv_dtk?LAYERS=mv_uek1000,mv_uek750,mv_uek250,mv_dtk100,mv_dtk50,mv_dtk25,mv_dtk10&STYLES=&CRS=EPSG:3857&BBOX={bbox-epsg-3857}&FORMAT=image/png&WIDTH=512&HEIGHT=512&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
-    attributionHtml: '© GeoBasis-DE/MV <YEAR>, CC-by 4.0, www.laiv-mv.de',
-    tileSize: 256,
-    bbox: [10.5768, 53.1008, 14.4298, 54.6954],
-    category: 'map',
-  },
-  {
-    id: 'ELI_metropoleruhrluftbilder-10cm',
+    id: 'ELI_metropole-ruhr-rvr-dop10',
     name: 'Metropole Ruhr: Luftbilder (10 cm)',
     tilesUrl:
       'https://geodaten.metropoleruhr.de/dop/dop?LAYERS=DOP&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
@@ -1668,6 +1739,113 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     maxzoom: 22,
     category: 'photo',
     endDate: '2018',
+  },
+  {
+    id: 'ELI_mv-dgm',
+    name: 'Mecklenburg-Vorpommern DGM1 Schummerung',
+    tilesUrl:
+      'https://www.geodaten-mv.de/dienste/dgm_wms?LAYERS=schummerung_NW,hohenlinien&STYLES=&CRS=EPSG:3857&BBOX={bbox-epsg-3857}&FORMAT=image/png&WIDTH=512&HEIGHT=512&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: '© GeoBasis-DE/MV <YEAR>, CC-by 4.0, www.laiv-mv.de',
+    tileSize: 256,
+    bbox: [10.5768, 53.1008, 14.4298, 54.6954],
+    category: 'elevation',
+  },
+  {
+    id: 'ELI_mv-dop20',
+    name: 'Mecklenburg-Vorpommern DOP20',
+    tilesUrl:
+      'https://www.geodaten-mv.de/dienste/adv_dop?LAYERS=mv_dop&STYLES=&CRS=EPSG:3857&BBOX={bbox-epsg-3857}&FORMAT=image/png&WIDTH=512&HEIGHT=512&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: '© GeoBasis-DE/MV <YEAR>, CC-by 4.0, www.laiv-mv.de',
+    tileSize: 256,
+    bbox: [10.5768, 53.1008, 14.4298, 54.6954],
+    category: 'photo',
+    best: true,
+  },
+  {
+    id: 'ELI_mv-dop20-2019',
+    name: 'Mecklenburg-Vorpommern DOP20, 2019',
+    tilesUrl:
+      'https://www.geodaten-mv.de/dienste/doparchiv_wms/service?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=rgb2019&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
+    attributionHtml: '© GeoBasis-DE/MV 2019, CC-by 4.0, www.laiv-mv.de',
+    tileSize: 256,
+    bbox: [10.74, 53.5588, 13.8018, 54.6954],
+    category: 'historicphoto',
+    endDate: '2019',
+  },
+  {
+    id: 'ELI_mv-dop20-2020',
+    name: 'Mecklenburg-Vorpommern DOP20, 2020',
+    tilesUrl:
+      'https://www.geodaten-mv.de/dienste/doparchiv_wms/service?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=rgb2020&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
+    attributionHtml: '© GeoBasis-DE/MV 2020, CC-by 4.0, www.laiv-mv.de',
+    tileSize: 256,
+    bbox: [10.5768, 53.1008, 13.8196, 54.0459],
+    category: 'historicphoto',
+    endDate: '2020',
+  },
+  {
+    id: 'ELI_mv-dop20-2021',
+    name: 'Mecklenburg-Vorpommern DOP20, 2021',
+    tilesUrl:
+      'https://www.geodaten-mv.de/dienste/doparchiv_wms/service?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=rgb2021&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
+    attributionHtml: '© GeoBasis-DE/MV 2021, CC-by 4.0, www.laiv-mv.de',
+    tileSize: 256,
+    bbox: [12.2348, 53.2456, 14.4298, 54.6954],
+    category: 'historicphoto',
+    endDate: '2021',
+  },
+  {
+    id: 'ELI_mv-dop20-2022',
+    name: 'Mecklenburg-Vorpommern DOP20, 2022',
+    tilesUrl:
+      'https://www.geodaten-mv.de/dienste/doparchiv_wms/service?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=rgb2022&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
+    attributionHtml: '© GeoBasis-DE/MV 2022, CC-by 4.0, www.laiv-mv.de',
+    tileSize: 256,
+    bbox: [10.5768, 53.1008, 12.8456, 54.2982],
+    category: 'historicphoto',
+    endDate: '2022',
+  },
+  {
+    id: 'ELI_mv-dop20-2023',
+    name: 'Mecklenburg-Vorpommern DOP20, 2023',
+    tilesUrl:
+      'https://www.geodaten-mv.de/dienste/doparchiv_wms/service?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=rgb2023&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
+    attributionHtml: '© GeoBasis-DE/MV 2023, CC-by 4.0, www.laiv-mv.de',
+    tileSize: 256,
+    bbox: [12.2486, 53.1595, 14.4298, 54.2694],
+    category: 'historicphoto',
+    endDate: '2023',
+  },
+  {
+    id: 'ELI_mv-dop20-2024',
+    name: 'Mecklenburg-Vorpommern DOP20, 2024',
+    tilesUrl:
+      'https://www.geodaten-mv.de/dienste/doparchiv_wms/service?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=rgb2024&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
+    attributionHtml: '© GeoBasis-DE/MV 2024, CC-by 4.0, www.laiv-mv.de',
+    tileSize: 256,
+    bbox: [10.74, 53.5419, 13.8032, 54.6954],
+    category: 'historicphoto',
+    endDate: '2024',
+  },
+  {
+    id: 'ELI_mv-dtk',
+    name: 'Mecklenburg-Vorpommern DTK',
+    tilesUrl:
+      'https://www.geodaten-mv.de/dienste/gdimv_dtk?LAYERS=mv_uek1000,mv_uek750,mv_uek250,mv_dtk100,mv_dtk50,mv_dtk25,mv_dtk10&STYLES=&CRS=EPSG:3857&BBOX={bbox-epsg-3857}&FORMAT=image/png&WIDTH=512&HEIGHT=512&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: '© GeoBasis-DE/MV <YEAR>, CC-by 4.0, www.laiv-mv.de',
+    tileSize: 256,
+    bbox: [10.5768, 53.1008, 14.4298, 54.6954],
+    category: 'map',
+  },
+  {
+    id: 'ELI_mv-flurstuecke',
+    name: 'Mecklenburg-Vorpommern Flurstücke',
+    tilesUrl:
+      'https://www.geodaten-mv.de/dienste/dfg_wms?LAYERS=gema,flur&STYLES=&CRS=EPSG:3857&BBOX={bbox-epsg-3857}&FORMAT=image/png&WIDTH=512&HEIGHT=512&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+    attributionHtml: '© GeoBasis-DE/MV <YEAR>, CC-by 4.0, www.laiv-mv.de',
+    tileSize: 256,
+    bbox: [10.5768, 53.1008, 14.4298, 54.6954],
+    category: 'other',
   },
   {
     id: 'ELI_niedersachsen-alkis',
@@ -1691,17 +1869,17 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     best: true,
   },
   {
-    id: 'ELI_nrw-alkis',
-    name: 'NRW Liegenschaftskataster',
+    id: 'ELI_nrw-alkis-buildings-gst-wms',
+    name: 'NRW Buildings GST',
     tilesUrl:
-      'https://www.wms.nrw.de/geobasis/wms_nw_alkis?LAYERS=adv_alkis_tatsaechliche_nutzung,adv_alkis_gewaesser,adv_alkis_vegetation,adv_alkis_verkehr,adv_alkis_siedlung,adv_alkis_gesetzl_festlegungen,adv_alkis_bodensch,adv_alkis_oeff_rechtl_sonst_festl,adv_alkis_weiteres,adv_alkis_bauw_einricht,adv_alkis_gebaeude,adv_alkis_flurstuecke&FORMAT=image/png&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+      'https://www.wms.nrw.de/geobasis/wms_nw_alkis_punktgenauigkeit?LAYERS=nw_gst_PunktortAG&FORMAT=image/png&TRANSPARENT=TRUE&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
     attributionHtml: '',
     tileSize: 256,
     bbox: [5.8644, 50.3209, 9.4683, 52.5335],
     category: 'other',
   },
   {
-    id: 'ELI_nrw-alkis-buildings',
+    id: 'ELI_nrw-alkis-buildings-wms',
     name: 'NRW Buildings',
     tilesUrl:
       'https://www.wms.nrw.de/geobasis/wms_nw_alkis?LAYERS=adv_alkis_gebaeude&FORMAT=image/png&STYLES=Gelb&TRANSPARENT=TRUE&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
@@ -1711,10 +1889,10 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     category: 'other',
   },
   {
-    id: 'ELI_nrw-alkis-buildings-gst',
-    name: 'NRW Buildings GST',
+    id: 'ELI_nrw-alkis-wms',
+    name: 'NRW Liegenschaftskataster',
     tilesUrl:
-      'https://www.wms.nrw.de/geobasis/wms_nw_alkis_punktgenauigkeit?LAYERS=nw_gst_PunktortAG&FORMAT=image/png&TRANSPARENT=TRUE&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
+      'https://www.wms.nrw.de/geobasis/wms_nw_alkis?LAYERS=adv_alkis_tatsaechliche_nutzung,adv_alkis_gewaesser,adv_alkis_vegetation,adv_alkis_verkehr,adv_alkis_siedlung,adv_alkis_gesetzl_festlegungen,adv_alkis_bodensch,adv_alkis_oeff_rechtl_sonst_festl,adv_alkis_weiteres,adv_alkis_bauw_einricht,adv_alkis_gebaeude,adv_alkis_flurstuecke&FORMAT=image/png&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
     attributionHtml: '',
     tileSize: 256,
     bbox: [5.8644, 50.3209, 9.4683, 52.5335],
@@ -1892,6 +2070,18 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     endDate: '2024',
   },
   {
+    id: 'ELI_orka-mv',
+    name: 'Offene Regionalkarte Mecklenburg-Vorpommern (ORKa.MV)',
+    tilesUrl:
+      'https://www.orka-mv.de/geodienste/orkamv/tiles/1.0.0/orkamv/GLOBAL_WEBMERCATOR/{z}/{x}/{y}.png',
+    attributionHtml: 'ORKa.MV',
+    tileSize: 256,
+    bbox: [10.5475, 53.1021, 14.4545, 54.7221],
+    minzoom: 12,
+    maxzoom: 19,
+    category: 'osmbasedmap',
+  },
+  {
     id: 'ELI_osmim-imagicode-lc81960222015233lgn00ir',
     name: 'imagico.de: Northern German west coast tidalflats (infrared)',
     tilesUrl:
@@ -2013,223 +2203,6 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     bbox: [6.3459, 49.0962, 7.4304, 49.6541],
     minzoom: 10,
     category: 'photo',
-    best: true,
-  },
-  {
-    id: 'ELI_saxony-borders-and-parcels',
-    name: 'Saxony borders and parcels',
-    tilesUrl:
-      'https://geodienste.sachsen.de/wms_geosn_flurstuecke/guest?LAYERS=Flurstueck,Gemarkung,Gemarkungsname&STYLES=&FORMAT=image/png&transparent=true&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
-    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
-    tileSize: 256,
-    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
-    category: 'other',
-  },
-  {
-    id: 'ELI_saxony-digitalterrainmodel-contour-lines',
-    name: 'Saxony contour lines',
-    tilesUrl:
-      'https://geodienste.sachsen.de/wms_geosn_hoehe/guest?LAYERS=hoehenlinien_50m,hoehenlinien_25m,hoehenlinien_20m,hoehenlinien_5m,hoehenlinien_2_5m&STYLES=&FORMAT=image/png&transparent=true&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
-    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
-    tileSize: 256,
-    bbox: [11.8669, 50.1675, 15.0508, 51.6838],
-    category: 'elevation',
-  },
-  {
-    id: 'ELI_saxony-digitalterrainmodel-ground',
-    name: 'Saxony shaded ground',
-    tilesUrl:
-      'https://geodienste.sachsen.de/wms_geosn_hoehe/guest?LAYERS=relief_standard&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
-    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
-    tileSize: 256,
-    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
-    category: 'elevation',
-  },
-  {
-    id: 'ELI_saxony-dop20-historic-2005',
-    name: 'Saxony historical aerial imagery 2005',
-    tilesUrl:
-      'https://geodienste.sachsen.de/wms_geosn_dop-2005/guest?LAYERS=dop_2005&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
-    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
-    tileSize: 256,
-    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
-    category: 'historicphoto',
-    endDate: '2005',
-  },
-  {
-    id: 'ELI_saxony-dop20-historic-2006-2008',
-    name: 'Saxony historical aerial imagery 2006-2008',
-    tilesUrl:
-      'https://geodienste.sachsen.de/wms_geosn_dop_2006_2008/guest?LAYERS=dop_2006_2008_rgb&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
-    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
-    tileSize: 256,
-    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
-    category: 'historicphoto',
-    endDate: '2008',
-  },
-  {
-    id: 'ELI_saxony-dop20-historic-2009-2011',
-    name: 'Saxony historical aerial imagery 2009-2011',
-    tilesUrl:
-      'https://geodienste.sachsen.de/wms_geosn_dop_2009_2011/guest?LAYERS=dop_2009_2011_rgb&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
-    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
-    tileSize: 256,
-    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
-    category: 'historicphoto',
-    endDate: '2011',
-  },
-  {
-    id: 'ELI_saxony-dop20-historic-2012-2014',
-    name: 'Saxony historical aerial imagery 2012-2014',
-    tilesUrl:
-      'https://geodienste.sachsen.de/wms_geosn_dop_2012_2014/guest?LAYERS=dop_2012_2014_rgb&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
-    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
-    tileSize: 256,
-    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
-    category: 'historicphoto',
-    endDate: '2014',
-  },
-  {
-    id: 'ELI_saxony-dop20-historic-2015-2017',
-    name: 'Saxony historical aerial imagery 2015-2017',
-    tilesUrl:
-      'https://geodienste.sachsen.de/wms_geosn_dop_2015_2017/guest?LAYERS=dop_2015_2017_rgb&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
-    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
-    tileSize: 256,
-    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
-    category: 'historicphoto',
-    endDate: '2017',
-  },
-  {
-    id: 'ELI_saxony-dop20-historic-2018-2020',
-    name: 'Saxony historical aerial imagery 2018-2020',
-    tilesUrl:
-      'https://geodienste.sachsen.de/wms_geosn_dop_2018_2020/guest?LAYERS=dop_2018_2020_rgb&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
-    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
-    tileSize: 256,
-    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
-    category: 'historicphoto',
-    endDate: '2020',
-  },
-  {
-    id: 'ELI_saxony-dop20-historic-2021-2022',
-    name: 'Saxony historical aerial imagery 2021-2022',
-    tilesUrl:
-      'https://geodienste.sachsen.de/wms_geosn_dop_2021_2022/guest?LAYERS=dop_2021_2022_rgb&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
-    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
-    tileSize: 256,
-    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
-    category: 'historicphoto',
-    endDate: '2022',
-  },
-  {
-    id: 'ELI_saxony-dop20-historic-2023-2024',
-    name: 'Saxony historical aerial imagery 2023-2024',
-    tilesUrl:
-      'https://geodienste.sachsen.de/wms_geosn_dop_2023_2024/guest?LAYERS=dop_2023_2024_rgb&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
-    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
-    tileSize: 256,
-    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
-    category: 'historicphoto',
-    endDate: '2024',
-  },
-  {
-    id: 'ELI_saxony-dop20-latest',
-    name: 'Saxony latest aerial imagery',
-    tilesUrl:
-      'https://geodienste.sachsen.de/wms_geosn_dop-rgb/guest?LAYERS=sn_dop_020&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
-    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
-    tileSize: 256,
-    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
-    category: 'photo',
-    best: true,
-    endDate: '2023',
-  },
-  {
-    id: 'ELI_saxony-dop20-latest-infrared',
-    name: 'Saxony latest aerial imagery infrared',
-    tilesUrl:
-      'https://geodienste.sachsen.de/wms_geosn_dop-cir/guest?LAYERS=sn_dop_020_cir&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
-    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
-    tileSize: 256,
-    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
-    category: 'photo',
-    endDate: '2023',
-  },
-  {
-    id: 'ELI_saxony-dop20-raw',
-    name: 'Saxony raw aerial imagery',
-    tilesUrl:
-      'https://geodienste.sachsen.de/wms_geosn_rohdop-rgb/guest?LAYERS=sn_rohdop_020&STYLES=&FORMAT=image/jpeg&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
-    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
-    tileSize: 256,
-    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
-    category: 'photo',
-    best: true,
-    endDate: '2024',
-  },
-  {
-    id: 'ELI_saxony-webatlassn',
-    name: 'Saxony WebAtlasSN',
-    tilesUrl:
-      'https://geodienste.sachsen.de/wms_geosn_webatlas-sn/guest?LAYERS=Vegetation,Siedlung,Gewaesser,Verkehr,Administrative_Einheiten,Beschriftung&STYLES=&FORMAT=image/png&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
-    attributionHtml: 'Staatsbetrieb Geobasisinformation und Vermessung Sachsen',
-    tileSize: 256,
-    bbox: [11.8596, 50.1567, 15.0558, 51.6932],
-    category: 'map',
-  },
-  {
-    id: 'ELI_saxonyanhalt-alkis-bu',
-    name: '© GeoBasis-DE/LVermGeo LSA, ALKIS Building Outlines',
-    tilesUrl:
-      'https://geodatenportal.sachsen-anhalt.de/ows_INSPIRE_LVermGeo_ALKIS_BU_WMS?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=BU.Building&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
-    attributionHtml: '© GeoBasis-DE/LVermGeo LSA',
-    tileSize: 256,
-    bbox: [10.5607, 50.931, 13.1543, 53.0417],
-    category: 'other',
-    best: true,
-  },
-  {
-    id: 'ELI_saxonyanhalt-alkis-cp',
-    name: '© GeoBasis-DE/LVermGeo LSA, ALKIS Cadastre parcels',
-    tilesUrl:
-      'https://geodatenportal.sachsen-anhalt.de/ows_INSPIRE_LVermGeo_ALKIS_CP_WMS?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=CP.CadastralParcel&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
-    attributionHtml: '© GeoBasis-DE/LVermGeo LSA',
-    tileSize: 256,
-    bbox: [10.5607, 50.931, 13.1543, 53.0417],
-    category: 'map',
-    best: true,
-  },
-  {
-    id: 'ELI_saxonyanhalt-atkis-hyn',
-    name: '© GeoBasis-DE/LVermGeo LSA, ATKIS Hydro Network',
-    tilesUrl:
-      'https://geodatenportal.sachsen-anhalt.de/ows_INSPIRE_LVermGeo_ATKIS_HY-N_WMS?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=HY.Network&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
-    attributionHtml: '© GeoBasis-DE/LVermGeo LSA',
-    tileSize: 256,
-    bbox: [10.5607, 50.931, 13.1543, 53.0417],
-    category: 'map',
-  },
-  {
-    id: 'ELI_saxonyanhalt-dop20',
-    name: '© GeoBasis-DE/LVermGeo LSA, DOP20',
-    tilesUrl:
-      'https://www.geodatenportal.sachsen-anhalt.de/wss/service/ST_LVermGeo_DOP_WMS_OpenData/guest?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=lsa_lvermgeo_dop20_2&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
-    attributionHtml: '© GeoBasis-DE/LVermGeo LSA',
-    tileSize: 256,
-    bbox: [10.5607, 50.931, 13.1543, 53.0417],
-    category: 'photo',
-    best: true,
-  },
-  {
-    id: 'ELI_saxonyanhalt-dvg',
-    name: '© GeoBasis-DE/LVermGeo LSA, Digital administrative boundaries',
-    tilesUrl:
-      'https://www.geodatenportal.sachsen-anhalt.de/wss/service/ST_LVermGeo_DVG_ALKIS_WMS_OpenData/guest?FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=flur,gema,gmdbez,gmd,land,lk&STYLES=&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
-    attributionHtml: '© GeoBasis-DE/LVermGeo LSA',
-    tileSize: 256,
-    bbox: [10.5607, 50.931, 13.1543, 53.0417],
-    category: 'map',
     best: true,
   },
   {
@@ -2409,7 +2382,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     category: 'other',
   },
   {
-    id: 'ELI_thueringen-dop20',
+    id: 'ELI_thuringia-dop20',
     name: 'Thüringen DOP20',
     tilesUrl:
       'https://www.geoproxy.geoportal-th.de/geoproxy/services/DOP?LAYERS=th_dop&STYLES=&CRS=EPSG:3857&BBOX={bbox-epsg-3857}&FORMAT=image/png&WIDTH=512&HEIGHT=512&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap',
@@ -2473,7 +2446,7 @@ export const sourcesBackgroundsRasterELI: MapDataBackgroundSource<SourcesRasterI
     category: 'photo',
   },
   {
-    id: 'ELI_viersen-alkis',
+    id: 'ELI_viersen-alkis-wms',
     name: 'ALKIS Kreis Viersen',
     tilesUrl:
       'https://gdi-niederrhein-geodienste.de/flurkarte_verb_sammeldienst/service?VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&LAYERS=FlurkarteNW_Viersen&STYLES=&CRS=EPSG:3857&BBOX={bbox-epsg-3857}&WIDTH=512&HEIGHT=512&FORMAT=image/png',

@@ -180,10 +180,11 @@ function getStubbedIdentity(role: StubbedSessionRole, identityKey?: string) {
 async function upsertStubbedUser(role: StubbedSessionRole, identityKey?: string) {
   const identity = getStubbedIdentity(role, identityKey)
 
+  // By `osmId`: specs that give the user a real email leave a row that the stub email does not find.
   return db.user.upsert({
-    where: { email: identity.email },
+    where: { osmId: identity.osmId },
     update: {
-      osmId: identity.osmId,
+      email: identity.email,
       osmName: identity.osmName,
       role,
       firstName: null,

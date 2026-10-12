@@ -1,51 +1,37 @@
-import { area as turfArea, length as turfLength, lineString } from '@turf/turf'
+import { area, distance, feature, length, lineString, midpoint } from '@turf/turf'
 
-type Position = GeoJSON.Position
+type Shape = GeoJSON.LineString | GeoJSON.Polygon
 
-const lineLengthM = (coordinates: Position[]) =>
-  coordinates.length < 2 ? 0 : turfLength(lineString(coordinates), { units: 'kilometers' }) * 1000
+// Geodesic, in metres.
+export const lineLengthM = (line: GeoJSON.LineString) => length(feature(line), { units: 'meters' })
 
-export type Measurement =
-  | { kind: 'line'; lengthM: number }
-  | { kind: 'area'; areaM2: number; perimeterM: number }
+export const areaM2 = (polygon: GeoJSON.Polygon) => area(polygon)
 
-/** Length of a line; area and perimeter (outer ring) of a polygon. Geodesic, in metres. */
-export const measureGeometry = (geometry: GeoJSON.LineString | GeoJSON.Polygon) => {
-  if (geometry.type === 'LineString') {
-    return { kind: 'line', lengthM: lineLengthM(geometry.coordinates) } satisfies Measurement
-  }
-  return {
-    kind: 'area',
-    areaM2: turfArea(geometry),
-    perimeterM: lineLengthM(geometry.coordinates[0] ?? []),
-  } satisfies Measurement
-}
+/** Length of the outer ring. */
+export const perimeterM = (polygon: GeoJSON.Polygon) =>
+  length(lineString(polygon.coordinates[0] ?? []), { units: 'meters' })
 
 /** The sides of a line or of the outer ring of a polygon, each with its length and middle. */
-export const measureSegments = (geometry: GeoJSON.LineString | GeoJSON.Polygon) => {
-  const path =
-    geometry.type === 'LineString' ? geometry.coordinates : (geometry.coordinates[0] ?? [])
-  return path.flatMap((start, index) => {
-    const end = path[index + 1]
-    if (!end) return []
-    const [startLng = 0, startLat = 0] = start
-    const [endLng = 0, endLat = 0] = end
-    return [
-      {
-        lengthM: lineLengthM([start, end]),
-        // Sides are short, so the middle of the two corners is the middle of the side.
-        middle: [(startLng + endLng) / 2, (startLat + endLat) / 2] satisfies Position,
-      },
-    ]
+export const measureSegments = (shape: Shape) => {
+  const path = shape.type === 'LineString' ? shape.coordinates : (shape.coordinates[0] ?? [])
+  return path.slice(1).map((end, index) => {
+    const start = path[index] ?? end
+    return {
+      lengthM: distance(start, end, { units: 'meters' }),
+      middle: midpoint(start, end).geometry.coordinates,
+    }
   })
 }
 
-const formatter = (maximumFractionDigits: number, minimumFractionDigits = 0) =>
-  new Intl.NumberFormat('de-DE', { maximumFractionDigits, minimumFractionDigits })
+const formatter = (fractionDigits: number) =>
+  new Intl.NumberFormat('de-DE', {
+    maximumFractionDigits: fractionDigits,
+    minimumFractionDigits: fractionDigits,
+  })
 
-const oneDecimal = formatter(1, 1)
-const twoDecimals = formatter(2, 2)
 const whole = formatter(0)
+const oneDecimal = formatter(1)
+const twoDecimals = formatter(2)
 
 /** `3,45 m` below 10 m, `12,4 m` below 100 m, `123 m` below 1 km, then `1,23 km`. */
 export const formatLength = (metres: number) => {
@@ -63,5 +49,6 @@ export const formatArea = (squareMetres: number) => {
   return `${twoDecimals.format(squareMetres / 1_000_000)} km²`
 }
 
-export const formatMeasurement = (measurement: Measurement) =>
-  measurement.kind === 'line' ? formatLength(measurement.lengthM) : formatArea(measurement.areaM2)
+/** The value a shape is measured for: the length of a line, the area of a polygon. */
+export const formatShapeValue = (shape: Shape) =>
+  shape.type === 'LineString' ? formatLength(lineLengthM(shape)) : formatArea(areaM2(shape))

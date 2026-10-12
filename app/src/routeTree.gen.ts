@@ -43,6 +43,7 @@ import { Route as AdminPrivateBackgroundsRouteImport } from './routes/admin/priv
 import { Route as AdminNoteFoldersRouteImport } from './routes/admin/note-folders'
 import { Route as AdminMapDatasetUploadsRouteImport } from './routes/admin/map-dataset-uploads'
 import { Route as AdminMapDatasetCategoriesRouteImport } from './routes/admin/map-dataset-categories'
+import { Route as AdminLayerOrderRouteImport } from './routes/admin/layer-order'
 import { Route as AdminDataSchemaRouteImport } from './routes/admin/data-schema'
 import { Route as AdminAuditLogRouteImport } from './routes/admin/audit-log'
 import { Route as AdminApiTokensRouteImport } from './routes/admin/api-tokens'
@@ -295,6 +296,11 @@ const AdminMapDatasetCategoriesRoute =
     path: '/map-dataset-categories',
     getParentRoute: () => AdminRoute,
   } as any)
+const AdminLayerOrderRoute = AdminLayerOrderRouteImport.update({
+  id: '/layer-order',
+  path: '/layer-order',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminDataSchemaRoute = AdminDataSchemaRouteImport.update({
   id: '/data-schema',
   path: '/data-schema',
@@ -747,6 +753,7 @@ export interface FileRoutesByFullPath {
   '/admin/api-tokens': typeof AdminApiTokensRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/data-schema': typeof AdminDataSchemaRoute
+  '/admin/layer-order': typeof AdminLayerOrderRoute
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesRouteWithChildren
   '/admin/map-dataset-uploads': typeof AdminMapDatasetUploadsRouteWithChildren
   '/admin/note-folders': typeof AdminNoteFoldersRouteWithChildren
@@ -859,6 +866,7 @@ export interface FileRoutesByTo {
   '/admin/api-tokens': typeof AdminApiTokensRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/data-schema': typeof AdminDataSchemaRoute
+  '/admin/layer-order': typeof AdminLayerOrderRoute
   '/api/boundary': typeof ApiBoundaryRoute
   '/api/campaigns': typeof ApiCampaignsRoute
   '/api/map-style': typeof ApiMapStyleRoute
@@ -966,6 +974,7 @@ export interface FileRoutesById {
   '/admin/api-tokens': typeof AdminApiTokensRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/data-schema': typeof AdminDataSchemaRoute
+  '/admin/layer-order': typeof AdminLayerOrderRoute
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesRouteWithChildren
   '/admin/map-dataset-uploads': typeof AdminMapDatasetUploadsRouteWithChildren
   '/admin/note-folders': typeof AdminNoteFoldersRouteWithChildren
@@ -1083,6 +1092,7 @@ export interface FileRouteTypes {
     | '/admin/api-tokens'
     | '/admin/audit-log'
     | '/admin/data-schema'
+    | '/admin/layer-order'
     | '/admin/map-dataset-categories'
     | '/admin/map-dataset-uploads'
     | '/admin/note-folders'
@@ -1195,6 +1205,7 @@ export interface FileRouteTypes {
     | '/admin/api-tokens'
     | '/admin/audit-log'
     | '/admin/data-schema'
+    | '/admin/layer-order'
     | '/api/boundary'
     | '/api/campaigns'
     | '/api/map-style'
@@ -1301,6 +1312,7 @@ export interface FileRouteTypes {
     | '/admin/api-tokens'
     | '/admin/audit-log'
     | '/admin/data-schema'
+    | '/admin/layer-order'
     | '/admin/map-dataset-categories'
     | '/admin/map-dataset-uploads'
     | '/admin/note-folders'
@@ -1686,6 +1698,13 @@ declare module '@tanstack/react-router' {
       path: '/map-dataset-categories'
       fullPath: '/admin/map-dataset-categories'
       preLoaderRoute: typeof AdminMapDatasetCategoriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/layer-order': {
+      id: '/admin/layer-order'
+      path: '/layer-order'
+      fullPath: '/admin/layer-order'
+      preLoaderRoute: typeof AdminLayerOrderRouteImport
       parentRoute: typeof AdminRoute
     }
     '/admin/data-schema': {
@@ -2429,6 +2448,7 @@ interface AdminRouteChildren {
   AdminApiTokensRoute: typeof AdminApiTokensRoute
   AdminAuditLogRoute: typeof AdminAuditLogRoute
   AdminDataSchemaRoute: typeof AdminDataSchemaRoute
+  AdminLayerOrderRoute: typeof AdminLayerOrderRoute
   AdminMapDatasetCategoriesRoute: typeof AdminMapDatasetCategoriesRouteWithChildren
   AdminMapDatasetUploadsRoute: typeof AdminMapDatasetUploadsRouteWithChildren
   AdminNoteFoldersRoute: typeof AdminNoteFoldersRouteWithChildren
@@ -2447,6 +2467,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminApiTokensRoute: AdminApiTokensRoute,
   AdminAuditLogRoute: AdminAuditLogRoute,
   AdminDataSchemaRoute: AdminDataSchemaRoute,
+  AdminLayerOrderRoute: AdminLayerOrderRoute,
   AdminMapDatasetCategoriesRoute: AdminMapDatasetCategoriesRouteWithChildren,
   AdminMapDatasetUploadsRoute: AdminMapDatasetUploadsRouteWithChildren,
   AdminNoteFoldersRoute: AdminNoteFoldersRouteWithChildren,

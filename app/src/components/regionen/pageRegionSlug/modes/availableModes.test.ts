@@ -75,8 +75,9 @@ describe('deriveAvailableModes()', () => {
     const calculator = (categories: RegionFields['categories']) =>
       deriveAvailableModes({ region: region({ categories }), qaConfigsCount: 0 }).calculator
     expect(calculator([])).toBe(false)
-    expect(calculator(['bikelanes', 'roads'])).toBe(false)
-    expect(calculator(['bikelanes', 'parkingTilda'])).toBe(true)
+    expect(calculator(['lit', 'poi'])).toBe(false)
+    expect(calculator(['bikelanes'])).toBe(true)
+    expect(calculator(['lit', 'parkingTilda'])).toBe(true)
     expect(calculator(['parkingLars'])).toBe(false)
   })
 })

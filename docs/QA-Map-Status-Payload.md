@@ -5,12 +5,18 @@ How QA mode colors ~23.5k polygons without putting private judgements into publi
 ## Contents
 
 - [The constraint](#the-constraint)
+- [Letter payload](#letter-payload)
+- [Worst-of ranking](#worst-of-ranking)
 - [How it works today](#how-it-works-today)
 - [Decision](#decision)
 - [Details panel](#details-panel)
 - [Optimistic cache splice](#optimistic-cache-splice)
 
-Numbers below were measured on the local dev database against the production import, config `euvm-parkraum-2025-aussen` (`public.qa_parkings_euvm`), on 2026-09-03.
+Numbers in [How it works today](#how-it-works-today) were measured on the local dev database
+against the production import, config `euvm-parkraum-2025-aussen` (`public.qa_parkings_euvm`), on
+2026-09-03, back when a config had exactly one indicator. They illustrate the general shape of the
+payload (mostly-GOOD, omit the default) but predate the per-indicator letters below; re-measure
+once a multi-indicator config (e.g. the bikelanes config) has real evaluation data.
 
 ## The constraint
 
@@ -22,6 +28,51 @@ Two datasets meet on one map:
 | System decision (`GOOD` / `NEEDS_REVIEW` / `PROBLEMATIC` / `TRUSTED_EDITOR_CHANGE`) and user decisions | `prisma."QaEvaluation"`, via an authorized server function | Region members only |
 
 Counts are public aggregates of OSM data. The judgement is not. Putting `systemStatus` on the map table so it rides in the tile is the cheapest paint path, but tile endpoints are public and unauthenticated, so it is rejected. Geometry stays in tiles; status is fetched separately and applied with `setFeatureState`.
+
+## Letter payload
+
+A cell with several indicators cannot be reduced to one status without losing information a
+filter needs, so the payload carries one row per cell, `{ areaId: string; sys: string; usr: string
+}`, with **one character per indicator, in `QaConfig.indicators` order**:
+
+- `sys[i]`: `G` = GOOD, `N` = NEEDS_REVIEW, `P` = PROBLEMATIC, `T` = TRUSTED_EDITOR_CHANGE (»Gut (Vertrauensliste)«, [QA Documentation §3](QA-Documentation.md#3-trusted-osm-editors-automatic-ok)).
+- `usr[i]`: `S` = OK_STRUCTURAL_CHANGE, `R` = OK_REFERENCE_ERROR, `D` = NOT_OK_DATA_ERROR,
+  `P` = NOT_OK_PROCESSING_ERROR, `Q` = OK_QA_TOOLING_ERROR, `.` = no user decision. (The
+  QA-tooling-error letter changed from the two-character `QA` used internally in older code to a
+  single `Q`, so every letter is exactly one character and both strings stay the same length.)
+
+`sys` and `usr` each use the letter `P` for a different status (`PROBLEMATIC` vs.
+`NOT_OK_PROCESSING_ERROR`) — they are never compared against each other, only decoded
+independently per string, so this is not ambiguous in code, only worth knowing when reading a raw
+payload by eye.
+
+`encodeQaStatusLetters` / `decodeQaStatusLetters` do the round-trip. An unknown letter (a payload
+written by an older or newer config) decodes to the map default (`GOOD`, no user status), so a
+config change between payload and client never throws.
+
+A cell is **omitted** from the payload when every indicator is GOOD with no user decision
+(`isQaMapDefaultLetters`: `sys` matches `^G*$` and `usr` matches `^\.*$`) — the same omit-by-default
+rule as the single-indicator payload (§[How it works today](#how-it-works-today)), and again only
+for the **full** (unfiltered) payload; a search or user filter returns its matches in full,
+including all-GOOD ones.
+
+## Worst-of ranking
+
+The map still paints one `(systemStatus, userStatus)` feature-state pair per cell — `qaMapPaint.ts`
+is unchanged. Which indicator's pair wins is decided by `worstQaIndicatorStatus`, over the
+currently **selected** indicators only (`qa.ind` param; absent = all):
+
+1. A user `NOT_OK_*` status (on any selected indicator) outranks everything.
+2. Otherwise, a system `PROBLEMATIC`.
+3. Otherwise, a system `NEEDS_REVIEW`.
+4. Otherwise, a user OK status (`OK_STRUCTURAL_CHANGE`, `OK_REFERENCE_ERROR`, `OK_QA_TOOLING_ERROR`)
+   outranks a plain `GOOD` — so one reviewed indicator never hides an open problem on another one,
+   and selecting only the reviewed indicator does show it as OK rather than as an open problem. A system
+   `TRUSTED_EDITOR_CHANGE` ranks the same as a user OK.
+5. Otherwise `GOOD`.
+
+Ties keep the first indicator in config order. Filtering to one indicator therefore shows exactly
+that indicator's own color, e.g. green for `oneway` in a cell that is red because of `category`.
 
 ## How it works today
 

@@ -1,10 +1,11 @@
-import { requireAdmin } from '@/server/auth/session.server'
+import { type MemberCaller, requireAdminSession } from '@/server/auth/memberCaller.server'
 import db from '@/server/db.server'
 import { qaConfigsInRegionWhere } from '@/server/regions/regionScopedWhere'
 import { optionalTrimmed } from '@/server/utils/searchString'
+import { parseQaConfigRow } from '../utils/parseQaConfigIndicators'
 
-export async function getQaConfigsForAdmin(input: { regionSlug?: string }, headers: Headers) {
-  await requireAdmin(headers)
+export async function getQaConfigsForAdmin(input: { regionSlug?: string }, caller: MemberCaller) {
+  await requireAdminSession(caller)
 
   const regionSlug = optionalTrimmed(input.regionSlug)
   const qaConfigs = await db.qaConfig.findMany({
@@ -18,5 +19,5 @@ export async function getQaConfigsForAdmin(input: { regionSlug?: string }, heade
     orderBy: [{ regionId: 'asc' }, { slug: 'asc' }],
   })
 
-  return qaConfigs
+  return qaConfigs.map(parseQaConfigRow)
 }

@@ -2,6 +2,8 @@ import { expect, test, type Page } from '@playwright/test'
 import db from '../../src/server/db.server'
 import { cleanupStubbedSessionData, createStubbedUserSession } from '../fixtures/auth'
 
+const REAL_EMAIL_PREFIX = 'e2e-contact-complete-'
+
 /** Time for hydration + contact-profile modal to open when no real contact email is set. */
 const MODAL_OPEN_WINDOW_MS = 4000
 
@@ -15,6 +17,8 @@ test.describe('Contact profile prompt modal', () => {
   test.afterEach(async () => {
     await cleanupStubbedSessionData('USER', 'contact-profile-modal-incomplete')
     await cleanupStubbedSessionData('USER', 'contact-profile-modal-complete')
+    // The second test changes the email, so the stub user is no longer found by its stub email.
+    await db.user.deleteMany({ where: { email: { startsWith: REAL_EMAIL_PREFIX } } })
   })
 
   test('shows when user has no real contact email (OSM placeholder)', async ({
@@ -51,7 +55,7 @@ test.describe('Contact profile prompt modal', () => {
     await db.user.update({
       where: { id: user.id },
       data: {
-        email: `e2e-contact-complete-${user.id}@example.com`,
+        email: `${REAL_EMAIL_PREFIX}${user.id}@example.com`,
       },
     })
 

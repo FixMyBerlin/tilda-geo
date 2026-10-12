@@ -75,7 +75,7 @@ function createFormErrorParser(seen: WeakSet<object>) {
 }
 
 /** Normalize form/field error to string (Standard Schema and adapters may return objects with .message). */
-export function formatFormError(err: unknown) {
+function formatFormError(err: unknown) {
   const result = createFormErrorParser(new WeakSet()).safeParse(err)
   return result.success ? result.data : String(err)
 }

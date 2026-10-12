@@ -39,6 +39,9 @@ export const useStreetImageryParam = () => {
 
   const setDate = (date: DateRange) => update((current) => ({ ...current, date }))
 
+  const setPhotoType = (photoType: StreetImageryParam['photoType']) =>
+    update((current) => ({ ...current, photoType }))
+
   const setPhoto = (photo: StreetImageryParam['photo']) =>
     update((current) => ({ ...current, photo }))
 
@@ -46,10 +49,12 @@ export const useStreetImageryParam = () => {
     providers: param.providers,
     style: param.style ?? defaultStreetImageryStyle,
     date: param.date ?? defaultStreetImageryDate(),
+    photoType: param.photoType,
     photo: param.photo,
     toggleProvider,
     setStyle,
     setDate,
+    setPhotoType,
     setPhoto,
   }
 }

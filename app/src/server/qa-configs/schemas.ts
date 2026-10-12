@@ -1,18 +1,61 @@
 import { z } from 'zod'
 import { fractionToPercent, percentToFraction } from '@/shared/qaThresholdPercent'
+import { qaDatasetKeySchema } from './qaDatasets.const'
+import {
+  type QaIndicator,
+  qaIndicatorThresholdsSchema,
+  qaIndicatorsSchema,
+} from './schemas/qaIndicatorsSchema'
 
-const QaConfigSchema = z.object({
-  id: z.number().optional(),
-  slug: z.string(),
-  label: z.string(),
-  isActive: z.boolean(),
-  mapTable: z.string(),
-  mapAttribution: z.string().optional(),
-  goodThreshold: z.number().min(0).max(1),
-  needsReviewThreshold: z.number().min(0).max(1),
-  absoluteDifferenceThreshold: z.number().int().min(0),
-  regionId: z.number(),
+const qaSchemaQualifiedTableSchema = z
+  .string()
+  .regex(/^data\.[a-z_0-9]+$/, 'Muss im Format "data.tabellenname" sein')
+
+// The map table processing writes to, and every `<map>_indicators` / `<map>_last_editors`
+// companion table name is derived from (getQaTableName.ts) — always `public.*`.
+const qaMapTableSchema = z
+  .string()
+  .regex(/^public\.[a-z_0-9]+$/, 'Muss im Format "public.tabellenname" sein')
+
+const requiredText = (message: string) => z.string().trim().min(1, message)
+
+/** Percent text as typed ("10") <-> the stored 0–1 fraction (0.1). */
+const percentFieldCodec = z.codec(
+  requiredText('Prozentwert ist erforderlich'),
+  z
+    .number()
+    .min(0, 'Wert darf nicht kleiner als 0 % sein.')
+    .max(1, 'Wert darf nicht größer als 100 % sein.'),
+  {
+    decode: (text) => percentToFraction(Number(text)),
+    encode: (fraction) => String(fractionToPercent(fraction)),
+  },
+)
+
+const numberFieldCodec = z.codec(requiredText('Absolute Toleranz ist erforderlich'), z.number(), {
+  decode: (text) => Number(text),
+  encode: (value) => String(value),
 })
+
+/** One indicator as the admin form edits it: thresholds as text, the relative ones in percent. */
+const qaIndicatorDraftSchema = z.object({
+  key: z.string().min(1, 'Merkmal auswählen'),
+  label: requiredText('Label ist erforderlich'),
+  goodThreshold: percentFieldCodec,
+  needsReviewThreshold: percentFieldCodec,
+  absoluteDifferenceThreshold: numberFieldCodec,
+})
+
+export type QaIndicatorDraft = z.input<typeof qaIndicatorDraftSchema>
+
+/** A draft's thresholds, decoded and checked — input of the threshold preview. */
+export const qaIndicatorDraftThresholdsSchema = qaIndicatorDraftSchema
+  .pick({ goodThreshold: true, needsReviewThreshold: true, absoluteDifferenceThreshold: true })
+  .pipe(qaIndicatorThresholdsSchema)
+
+/** Stored indicators → form drafts (edit form defaults, dataset defaults). */
+export const qaIndicatorsToDrafts = (indicators: readonly QaIndicator[]) =>
+  indicators.map((indicator) => qaIndicatorDraftSchema.encode(indicator))
 
 const trueOrFalse = z.enum(['true', 'false']).transform((v) => v === 'true')
 
@@ -30,65 +73,47 @@ const trustedOsmUsernamesFromTextarea = z.string().transform((value) => [
 // `date` input string (e.g. "2025-06-30") -> Date; a date-only ISO string parses as 00:00 UTC
 const referenceFrozenAtFromDateInput = z.iso.date().transform((value) => new Date(value))
 
-// The admin form shows/edits `goodThreshold`/`needsReviewThreshold` as a percent (e.g. 10 for
-// 10 %) — easier to reason about than the raw 0–1 ratio. `QaConfig` keeps storing the fraction;
-// this is the only place the percent <-> fraction conversion happens (see qaThresholdCalculations.ts,
-// reused by the list table and the form's "Probe-Rechnung" preview).
-const percentThresholdFromInput = z.coerce
-  .number()
-  .min(0, 'Wert darf nicht kleiner als 0 % sein.')
-  .max(100, 'Wert darf nicht größer als 100 % sein.')
-  .transform(percentToFraction)
-
-/** „Gut bis“ darf nicht über „Überprüfung bis“ liegen — sonst gäbe es Werte, die keinem Status zugeordnet werden können. */
-function requireGoodThresholdNotAboveNeedsReview(
-  data: { goodThreshold: number; needsReviewThreshold: number },
-  ctx: z.RefinementCtx,
-) {
-  if (data.goodThreshold > data.needsReviewThreshold) {
-    ctx.addIssue({
-      code: 'custom',
-      path: ['needsReviewThreshold'],
-      message: `„Überprüfung bis“ (${fractionToPercent(data.needsReviewThreshold)} %) muss mindestens so hoch sein wie „Gut bis“ (${fractionToPercent(data.goodThreshold)} %).`,
-    })
-  }
-}
-
-const CreateQaConfigObjectSchema = QaConfigSchema.omit({
-  id: true,
-  isActive: true,
-  regionId: true,
-  goodThreshold: true,
-  needsReviewThreshold: true,
-  absoluteDifferenceThreshold: true,
-  mapAttribution: true,
-}).extend({
+/** The admin form's field values → the `QaConfig` row. The server functions parse with it too. */
+export const CreateQaConfigFormSchema = z.object({
+  slug: z.string(),
+  label: z.string(),
   isActive: trueOrFalse,
-  regionId: z.coerce.number().int().positive('Region ID must be a valid positive integer'),
-  goodThreshold: percentThresholdFromInput,
-  needsReviewThreshold: percentThresholdFromInput,
-  absoluteDifferenceThreshold: z.coerce.number().int().min(0),
+  mapTable: qaMapTableSchema,
   mapAttribution: z
     .string()
     .optional()
     .transform((v) => v || null), // Convert empty/undefined to null for Prisma
+  dataset: qaDatasetKeySchema,
+  areaTable: qaSchemaQualifiedTableSchema,
+  areaFilter: z.enum(['all', 'priority', 'non_priority', 'with_reference']),
+  referenceTable: qaSchemaQualifiedTableSchema,
+  indicators: z.array(qaIndicatorDraftSchema).pipe(qaIndicatorsSchema),
+  regionId: z.coerce.number().int().positive('Region ID must be a valid positive integer'),
   trustedOsmUsernames: trustedOsmUsernamesFromTextarea,
   referenceFrozenAt: referenceFrozenAtFromDateInput,
 })
 
-// Schema for creating QA configs
-export const CreateQaConfigFormSchema = CreateQaConfigObjectSchema.superRefine(
-  requireGoodThresholdNotAboveNeedsReview,
-)
+/** A stored config → the form's field values (edit form defaults, MCP round-trip). */
+export const qaConfigToFormValues = (qaConfig: z.output<typeof CreateQaConfigFormSchema>) =>
+  ({
+    slug: qaConfig.slug,
+    label: qaConfig.label,
+    isActive: qaConfig.isActive ? 'true' : 'false',
+    mapTable: qaConfig.mapTable,
+    mapAttribution: qaConfig.mapAttribution ?? '',
+    dataset: qaConfig.dataset,
+    areaTable: qaConfig.areaTable,
+    areaFilter: qaConfig.areaFilter,
+    referenceTable: qaConfig.referenceTable,
+    indicators: qaIndicatorsToDrafts(qaConfig.indicators),
+    regionId: qaConfig.regionId.toString(),
+    trustedOsmUsernames: qaConfig.trustedOsmUsernames.join('\n'),
+    referenceFrozenAt: qaConfig.referenceFrozenAt.toISOString().slice(0, 10),
+  }) satisfies z.input<typeof CreateQaConfigFormSchema>
 
-const UpdateQaConfigObjectSchema = CreateQaConfigObjectSchema.extend({
+export const UpdateQaConfigFormSchema = CreateQaConfigFormSchema.extend({
   id: z.coerce.number().int().positive('ID must be a valid positive integer'),
 })
-
-// Schema for updating QA configs (includes id)
-export const UpdateQaConfigFormSchema = UpdateQaConfigObjectSchema.superRefine(
-  requireGoodThresholdNotAboveNeedsReview,
-)
 
 export const GetQaConfigSchema = z.object({
   id: z.number(),

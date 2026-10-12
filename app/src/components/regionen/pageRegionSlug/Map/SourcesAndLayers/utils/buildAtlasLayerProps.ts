@@ -4,9 +4,8 @@ import { getDebugStyleForLayerType } from '@/components/regionen/pageRegionSlug/
 import type {
   AtlasLayerType,
   FileMapDataSubcategoryStyleLayer,
-  TBeforeIds,
 } from '@/components/regionen/pageRegionSlug/mapData/types'
-import { beforeId } from './beforeId'
+import { beforeIdOnBackground, type LayerPosition } from './beforeId'
 
 export type AtlasStyleLayer = Extract<FileMapDataSubcategoryStyleLayer, { type: AtlasLayerType }>
 
@@ -34,7 +33,8 @@ type BuildAtlasLayerPropsParams = {
   visibility: Visibility
   debugLayerStyles: boolean
   backgroundId: string | undefined
-  subcategoryBeforeId: TBeforeIds
+  /** See `layerPosition`. */
+  position: LayerPosition
 }
 
 /** Build LayerProps by switching on layer.type so each branch returns a single coherent layer type (no assertion). */
@@ -45,23 +45,16 @@ export function buildAtlasLayerProps({
   visibility,
   debugLayerStyles,
   backgroundId,
-  subcategoryBeforeId,
+  position,
 }: BuildAtlasLayerPropsParams) {
   const layerFilter: FilterSpecification | undefined = debugLayerStyles
     ? (['all'] as const)
     : layer.filter
-  const styleBeforeId = backgroundId === 'default' && layer.beforeId ? layer.beforeId : undefined
   const base = {
     id: layerId,
     source: sourceKey,
     'source-layer': layer['source-layer'],
-    beforeId:
-      styleBeforeId ??
-      beforeId({
-        backgroundId,
-        subcategoryBeforeId,
-        layerType: layer.type,
-      }),
+    beforeId: beforeIdOnBackground(position, backgroundId),
     ...(layerFilter ? { filter: layerFilter } : {}),
     ...(layer.maxzoom ? { maxzoom: layer.maxzoom } : {}),
     ...(layer.minzoom ? { minzoom: layer.minzoom } : {}),

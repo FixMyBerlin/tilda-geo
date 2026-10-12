@@ -8,7 +8,7 @@ import { useCalculatorDatasets } from './useCalculatorDatasets'
 /**
  * Summieren mode: draw areas on the map (`CalculatorMap`) and read the totals of the selected
  * dataset here. A click on a value of the breakdown narrows the sum to it; the
- * filter line also sets how the points are colored. Nothing is stored;
+ * filter line also sets how the features are colored. Nothing is stored;
  * areas, dataset and filter live in the URL (`sum`), so a calculation is shared by
  * its link.
  */

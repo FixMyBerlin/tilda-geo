@@ -17,31 +17,21 @@ const covers = (source: Source, [lng, lat]: [number, number]) => {
   return lng >= west && lng <= east && lat >= south && lat <= north
 }
 
-// Larger is better. Local images (with a coverage) beat worldwide ones: they are the
-// orthophotos of the state or city, sharper and better placed than satellite mosaics.
-const rank = (source: Source) =>
-  [
-    source.bbox ? 1 : 0,
-    source.best ? 1 : 0,
-    Number.parseInt(source.endDate ?? '0', 10) || 0,
-    source.maxzoom ?? 0,
-  ] as const
-
-const compareRank = (a: Source, b: Source) => {
-  const rankA = rank(a)
-  const rankB = rank(b)
-  for (const [index, value] of rankA.entries()) {
-    const other = rankB[index] ?? 0
-    if (value !== other) return other - value
-  }
-  return 0
-}
+// Local images (with a coverage) beat worldwide ones: they are the orthophotos of the state
+// or city, sharper and better placed than satellite mosaics. Then the one the index
+// recommends, the newest (`2025-09` sorts after `2025`), the sharpest.
+const compareRank = (a: Source, b: Source) =>
+  Number(Boolean(b.bbox)) - Number(Boolean(a.bbox)) ||
+  Number(Boolean(b.best)) - Number(Boolean(a.best)) ||
+  (b.endDate ?? '').localeCompare(a.endDate ?? '') ||
+  (b.maxzoom ?? 0) - (a.maxzoom ?? 0)
 
 /**
  * The aerial image the Messen mode shows by itself at `center`.
  *
- * 1. The best aerial among the backgrounds the region offers (`allowedIds`): local before
- *    worldwide, then the one the Editor Layer Index recommends, the newest, the sharpest.
+ * 1. The best aerial among the backgrounds the region offers (`allowedIds`) whose coverage box
+ *    contains the place; see `compareRank`. The box is larger than the real coverage, so a
+ *    region should not list an aerial that has no imagery inside the region.
  * 2. Without one: a worldwide aerial (`fallbackAerialBackgroundIds`), also when the region
  *    does not list it. Measuring needs an image.
  */
@@ -60,11 +50,10 @@ export const pickAerialBackground = <TSource extends Source>({
         source.category === 'photo' && allowedIds.includes(source.id) && covers(source, center),
     )
     .sort(compareRank)
-  if (allowed[0]) return allowed[0]
-
-  for (const id of fallbackAerialBackgroundIds) {
-    const source = sources.find((candidate) => candidate.id === id)
-    if (source) return source
-  }
-  return undefined
+  return (
+    allowed[0] ??
+    fallbackAerialBackgroundIds
+      .map((id) => sources.find((source) => source.id === id))
+      .find((source) => source !== undefined)
+  )
 }

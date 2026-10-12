@@ -1,5 +1,6 @@
 import { OsmUserLink } from '@/components/regionen/pageRegionSlug/SidebarInspector/OsmUserLink'
 import {
+  deleteReviewEntryCommentFn,
   getReviewEntryFn,
   updateReviewEntryCommentFn,
 } from '@/server/review-lists/review-lists.functions'
@@ -32,6 +33,10 @@ export const ReviewEntryComment = ({ comment, regionSlug, onSaved }: Props) => {
               await updateReviewEntryCommentFn({
                 data: { regionSlug, commentId: comment.id, body },
               })
+              await onSaved()
+            }}
+            onDelete={async () => {
+              await deleteReviewEntryCommentFn({ data: { regionSlug, commentId: comment.id } })
               await onSaved()
             }}
           />

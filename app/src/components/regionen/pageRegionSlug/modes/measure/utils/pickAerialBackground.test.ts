@@ -23,6 +23,20 @@ describe('pickAerialBackground', () => {
     )
   })
 
+  test('takes the newer of two images of the same year', () => {
+    const sameYear = [
+      { id: 'spring', category: 'photo' as const, endDate: '2025-04', bbox: berlin },
+      { id: 'autumn', category: 'photo' as const, endDate: '2025-09', bbox: berlin },
+    ]
+    expect(
+      pickAerialBackground({
+        sources: sameYear,
+        allowedIds: ['spring', 'autumn'],
+        center: inBerlin,
+      })?.id,
+    ).toBe('autumn')
+  })
+
   test('prefers the one the index recommends', () => {
     expect(pick(['berlin-2025', 'berlin-2020'], inBerlin)).toBe('berlin-2020')
   })

@@ -29,6 +29,7 @@ import {
 import { mcpEnvLabel } from '@/server/mcp/mcpCursorConfig'
 import { ok, run } from '@/server/mcp/mcpToolResult'
 import { registerNotesTools } from '@/server/mcp/tools/registerNotesTools'
+import { registerQaTools } from '@/server/mcp/tools/registerQaTools'
 import { registerReviewListsTools } from '@/server/mcp/tools/registerReviewListsTools'
 import {
   PrivateBackgroundConfigSchema,
@@ -98,7 +99,7 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
     {
       instructions:
         `TILDA admin tools bound to the ${envLabel} environment (${origin}). ` +
-        `Writes (regions_*, region_uploads_create, region_contracts_*, private_backgrounds_*, map_dataset_categories_*, map_dataset_uploads_delete, map_dataset_uploads_remove_region, data_schema_import) mutate the ${envLabel} database — ` +
+        `Writes (regions_*, region_uploads_create, region_contracts_*, private_backgrounds_*, map_dataset_categories_*, map_dataset_uploads_delete, map_dataset_uploads_remove_region, data_schema_import, qa_configs_*) mutate the ${envLabel} database — ` +
         `call env_info first and confirm you are on the intended environment before any write. ` +
         `Writes are attributed in the audit log to the API token owner. ` +
         `regions_get / regions_list return { region, config }; use config for regions_update. ` +
@@ -110,7 +111,9 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
         `map_dataset_uploads_* list, read and remove those uploads; the static datasets script only creates and replaces them, so a retired dataset stays until it is deleted here or in the admin UI. Deleting removes the database row only, the files on S3 stay. ` +
         `processing_runs_list / processing_runs_get read nightly processing timings from public.meta (same data as /admin/processing). ` +
         `note_folders_* / notes_* / note_comments_* manage internal notes (Hinweise) and review_lists_* / review_entries_* / review_entry_comments_* manage review lists (Prüflisten) of one region (regionSlug). ` +
-        `They act as the API token owner with the same rules as the region UI: notes and comments can only be edited or deleted by their author (the tool answers "Not allowed: …" otherwise), and only empty folders and lists can be deleted. note_folders_update / review_lists_update also set which regions a folder or list is linked to.`,
+        `They act as the API token owner with the same rules as the region UI: notes and comments can only be edited or deleted by their author (the tool answers "Not allowed: …" otherwise), and only empty folders and lists can be deleted. note_folders_update / review_lists_update also set which regions a folder or list is linked to. ` +
+        `qa_configs_* manage the QA configs (Qualitätssicherung) of a region with the validation of the admin form; qa_configs_get returns the form values for qa_configs_update. ` +
+        `qa_areas_list / qa_evaluations_* read the cells of one config (regionSlug, configSlug) with their numbers and status, and store user decisions and comments as the API token owner with the same rules as the region UI; evaluations are a history and cannot be deleted.`,
     },
   )
 
@@ -123,7 +126,7 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
         'Tools include regions_*, region_uploads_create, region_contracts_*, private_backgrounds_*, ' +
         'map_dataset_categories_*, map_dataset_uploads_*, data_schema_*, processing_runs_*, audit_list, ' +
         'note_folders_*, notes_*, note_comments_*, ' +
-        'review_lists_*, review_entries_* and review_entry_comments_*.',
+        'review_lists_*, review_entries_*, review_entry_comments_*, qa_configs_*, qa_areas_list and qa_evaluations_*.',
     },
     () => ok({ environment: envLabel, origin, viteAppEnv: process.env.VITE_APP_ENV }),
   )
@@ -516,6 +519,7 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
   const memberCaller = adminApiMemberCaller(auth, request)
   registerNotesTools(server, memberCaller)
   registerReviewListsTools(server, memberCaller)
+  registerQaTools(server, memberCaller)
 
   return server
 }

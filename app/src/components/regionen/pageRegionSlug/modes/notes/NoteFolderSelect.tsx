@@ -2,6 +2,7 @@ import { Menu, MenuButton, MenuHeading, MenuItem, MenuItems, MenuSection } from 
 import { EllipsisHorizontalIcon } from '@heroicons/react/24/outline'
 import { twJoin } from 'tailwind-merge'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
+import { formatNumber } from '@/components/shared/utils/formatNumber'
 import type { NoteFolderForRegion } from '@/server/notes/queries/getNoteFoldersForRegion.server'
 import { mapOverlayMenuClassName } from '../../mapOverlayChrome.const'
 import { ModeCollectionNewRow } from '../ModeCollectionNewRow'
@@ -47,7 +48,7 @@ export const NoteFolderSelect = ({
     ...folders.map((folder) => ({
       value: String(folder.id),
       label: folder.name,
-      description: String(folder.noteCount),
+      description: formatNumber(folder.noteCount),
       private: true,
       regionHint: sharedWithRegionsSubtitle('Ordner', folder.regions, currentRegionSlug),
     })),

@@ -1,3 +1,4 @@
+import { polygon } from '@turf/helpers'
 import { z } from 'zod'
 import { areasParamOfPolygons, polygonsOfAreasParam, zodAreasParam } from '../drawAreasParam'
 import type { DrawArea } from './drawing/drawAreaTypes'
@@ -8,11 +9,12 @@ import type { DrawArea } from './drawing/drawAreaTypes'
  * own geometry lives here too, so one param is the whole state of the mode.
  *
  * - `key` is the dataset (`calculatorDatasets.const.ts`). Omitted for the region's first dataset.
- * - `filter` narrows the sum to points with these tag values, e.g. `{ operator_type: 'public' }`.
- *   The keys are the group-by keys of the dataset; `''` stands for a missing value. Omitted for
- *   the default filter of the dataset, so `{}` is "no filter" where a dataset has one.
- * - `style` colors the points by the values of one tag (a group-by key of the dataset).
- *   Without it all points have the color of the dataset.
+ * - `filter` narrows the sum to features with these tag values, e.g. `{ operator_type: 'public' }`,
+ *   or `{ part: ['bikelanes', 'roads'] }` for several values of a tag. The keys are the group-by
+ *   keys of the dataset; `''` stands for a missing value. Omitted for the default filter of the
+ *   dataset, so `{}` is "no filter" where a dataset has one.
+ * - `style` colors the features by the values of one tag (a group-by key of the dataset).
+ *   Without it all features have the color of their part.
  * - `areas` are the drawn areas as one GeoJSON geometry: a `Polygon`, or a `MultiPolygon` for
  *   several areas. That is how Prüfeinträge store their geometry. Unlike `notes.new` /
  *   `review.new` the areas stay in the URL in other modes, so a look at the map does not
@@ -29,14 +31,31 @@ export const CALCULATOR_AREA_PRECISION = 5
 // as soon as one field fails.
 export const zodCalculatorModeParam = z.object({
   key: z.string().optional().catch(undefined),
-  filter: z.record(z.string(), z.string()).optional().catch(undefined),
+  filter: z
+    .record(z.string(), z.union([z.string(), z.array(z.string())]))
+    .optional()
+    .catch(undefined),
   style: z.string().optional().catch(undefined),
   areas: zodAreasParam.optional().catch(undefined),
 })
 
 export type CalculatorModeParam = z.infer<typeof zodCalculatorModeParam>
 
-export type CalculatorFilter = NonNullable<CalculatorModeParam['filter']>
+/** The values a feature may have per tag; a feature matches when every tag has one of them. */
+export type CalculatorFilter = Record<string, string[]>
+
+export const calculatorFilterFromParam = (filter: NonNullable<CalculatorModeParam['filter']>) =>
+  Object.fromEntries(
+    Object.entries(filter)
+      .map(([key, value]): [string, string[]] => [key, [...new Set([value].flat())]])
+      .filter(([, values]) => values.length > 0),
+  ) satisfies CalculatorFilter
+
+/** One value of a tag is written as a plain string, which keeps links short. */
+export const calculatorFilterToParam = (filter: CalculatorFilter) =>
+  Object.fromEntries(
+    Object.entries(filter).map(([key, values]) => [key, values.length === 1 ? values[0] : values]),
+  ) as NonNullable<CalculatorModeParam['filter']>
 
 export const compactCalculatorModeParam = (param: CalculatorModeParam) => {
   const next: CalculatorModeParam = {}
@@ -58,16 +77,14 @@ export const calculatorAreasToParam = (areas: DrawArea[]) =>
 export const calculatorAreasFromParam = (areas: CalculatorModeParam['areas']) => {
   return polygonsOfAreasParam(areas).map(
     (coordinates, index) =>
-      ({
-        type: 'Feature',
-        id: calculatorAreaId(index),
-        properties: {},
-        geometry: { type: 'Polygon', coordinates },
-      }) satisfies DrawArea,
+      ({ ...polygon(coordinates), id: calculatorAreaId(index) }) satisfies DrawArea,
   )
 }
 
 export const calculatorAreaId = (index: number) => `part-${index}`
+
+/** The id of all areas together in the rows of the server: their union, so an overlap counts once. */
+export const calculatorCombinedAreaId = 'combined'
 
 /** The param from its raw URL value (JSON); `{}` when missing or unreadable. For URL migrations. */
 export const parseCalculatorModeParam = (raw: string | null) => {

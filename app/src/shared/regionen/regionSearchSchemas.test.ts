@@ -146,6 +146,19 @@ describe('regionSearchSchema', () => {
     })
   })
 
+  test('parses qa indicator selection and omits it from compact when empty', () => {
+    const parsed = parseRegionSearch({
+      qa: { key: 'cfg', ind: ['total', 'surface'] },
+    })
+    expect(getQaParamFromSearch(parsed)).toEqual({ key: 'cfg', ind: ['total', 'surface'] })
+
+    expect(compactQaParam({ key: 'cfg', ind: [] })).toEqual({ key: 'cfg' })
+  })
+
+  test('resets a malformed qa indicator selection but keeps the config key', () => {
+    expect(parseRegionSearch({ qa: { key: 'cfg', ind: 'total' } }).qa).toEqual({ key: 'cfg' })
+  })
+
   // A retired status key in a bookmark used to drop the whole qa param, losing the config key.
   test('resets stale qa filter fields but keeps the config key', () => {
     expect(parseRegionSearch({ qa: { key: 'cfg', status: 'actionable' } }).qa).toEqual({

@@ -58,7 +58,9 @@ export const MobileModeSwitcher = () => {
                       from="/regionen/$regionSlug"
                       to={modeRoutePaths[mode]}
                       params={{ regionSlug }}
-                      search={(prev) => modeSwitcherSearch(mode, prev)}
+                      search={(prev) =>
+                        modeSwitcherSearch({ from: optimisticMode, to: mode }, prev)
+                      }
                       aria-current={active ? 'page' : undefined}
                       className={twJoin(
                         'flex w-full cursor-pointer items-center gap-2 px-3 py-2.5 text-left text-sm select-none',

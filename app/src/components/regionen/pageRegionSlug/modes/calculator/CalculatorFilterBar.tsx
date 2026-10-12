@@ -15,7 +15,7 @@ const defaultStyleValue = 'default'
 type Props = {
   /** The sources of the dataset; their translations name the tags and values. */
   parts: CalculatorDataset['parts']
-  /** The tags of the dataset: what the points can be colored by. */
+  /** The tags of the dataset: what the features can be colored by. */
   groupByKeys: string[]
   style: string | undefined
   onStyleChange: (key: string | undefined) => void
@@ -25,7 +25,7 @@ type Props = {
 }
 
 /**
- * Filter line of the Summieren panel: how the points are colored (`sum.style`) and the active
+ * Filter line of the Summieren panel: how the features are colored (`sum.style`) and the active
  * filters (`sum.filter`). A filter is set by clicking a value in the breakdown; a chip removes
  * it again.
  */
@@ -38,7 +38,9 @@ export const CalculatorFilterBar = ({
   onToggleFilter,
   onClearFilter,
 }: Props) => {
-  const entries = Object.entries(filter)
+  const entries = Object.entries(filter).flatMap(([key, values]) =>
+    values.map((value) => [key, value] as const),
+  )
   const styleOptions = [
     { value: defaultStyleValue, label: 'Einfarbig' },
     ...groupByKeys.map((key) => ({
@@ -53,7 +55,7 @@ export const CalculatorFilterBar = ({
       <MotionAutoHeight>
         <div className="flex flex-wrap items-center gap-1.5">
           <ModeFilterSelect
-            label="Punkte einfärben"
+            label="Karte einfärben"
             triggerPrefix="Farbe"
             icon={SwatchIcon}
             value={style ?? defaultStyleValue}
@@ -62,7 +64,7 @@ export const CalculatorFilterBar = ({
           />
           {entries.map(([key, value]) => (
             <button
-              key={key}
+              key={`${key}::${value}`}
               type="button"
               onClick={() => onToggleFilter(key, value)}
               title="Filter entfernen"

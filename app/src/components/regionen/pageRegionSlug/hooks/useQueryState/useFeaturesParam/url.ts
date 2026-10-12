@@ -47,11 +47,11 @@ export const numericSourceIds: Record<number, SourceNames> = {
   // 25: 'atlas_aggregated_lengths', // the radinfra Statistik category was removed; the table stays for /api/stats
   26: 'tilda_parkings',
   27: 'tilda_parkings_cutouts',
-  28: 'tilda_parkings_quantized',
+  // 28: 'tilda_parkings_quantized', // the parking points were only summed; Summieren sums the parking lines now
   // 29: 'tilda_parkings_separate',
   30: 'tilda_parkings_no',
   31: 'tilda_parkings_off_street',
-  32: 'tilda_parkings_off_street_quantized',
+  // 32: 'tilda_parkings_off_street_quantized', // the parking points were only summed; Summieren sums the parking areas now
   33: 'internal-notes-source',
   34: 'review-entries-source',
   35: 'qa-source',

@@ -19,7 +19,8 @@ function createSourceProps(mapRenderFormat: string, mapRenderUrl: string) {
 }
 
 // Renders user-selectable static datasets controlled by URL parameters.
-// SystemLayer datasets are handled separately by SourcesLayersSystemDatasets.
+// SystemLayer datasets are handled separately by SourcesSystemDatasets and LayersSystemDatasets.
+// Source and Layers are two components, see <AllSources> and <AllLayers>.
 //
 // Performance optimizations:
 // - Filters datasets before mapping to avoid unnecessary iterations
@@ -31,66 +32,81 @@ function createSourceProps(mapRenderFormat: string, mapRenderUrl: string) {
 // - Unmounting hidden datasets is fine for memory, but causes remount overhead on toggle
 // - For frequently toggled datasets, consider keeping mounted with visibility: 'none'
 // - Layer identity (id, type) remains stable to avoid style diffing overhead
-export const SourcesLayersStaticDatasets = () => {
+const useSelectedDatasets = () => {
   const { dataParam: selectedDatasetIds } = useDataParam()
-  const debugLayerStyles = useMapDebugDebugLayerStyles()
   const { data: regionDatasets } = useRegionDatasetsQuery()
 
   // Use Set for O(1) lookups instead of O(n) array.includes()
-  const selectedDatasetIdsSet = selectedDatasetIds ? new Set(selectedDatasetIds) : null
+  const selectedDatasetIdsSet = new Set(selectedDatasetIds ?? [])
 
   // Filter visible datasets before mapping to avoid unnecessary iterations
-  const visibleDatasets = selectedDatasetIdsSet
-    ? regionDatasets.filter(({ id: sourceId, subId }) => {
-        const datasetSourceId = createSourceKeyStaticDatasets(sourceId, subId)
-        return selectedDatasetIdsSet.has(datasetSourceId)
-      })
-    : []
+  return regionDatasets.filter(({ id: sourceId, subId }) => {
+    const datasetSourceId = createSourceKeyStaticDatasets(sourceId, subId)
+    return selectedDatasetIdsSet.has(datasetSourceId)
+  })
+}
 
-  if (!selectedDatasetIdsSet || visibleDatasets.length === 0) return null
+export const SourcesStaticDatasets = () => {
+  const visibleDatasets = useSelectedDatasets()
 
   return (
     <>
       {visibleDatasets.map(
-        ({ id: sourceId, subId, mapRenderFormat, mapRenderUrl, attributionHtml, layers }) => {
+        ({ id: sourceId, subId, mapRenderFormat, mapRenderUrl, attributionHtml }) => {
           const datasetSourceId = createSourceKeyStaticDatasets(sourceId, subId)
           const sourceProps = createSourceProps(mapRenderFormat, mapRenderUrl)
 
           return (
-            <Fragment key={datasetSourceId}>
-              <Source
-                id={datasetSourceId}
-                key={datasetSourceId}
-                attribution={attributionHtml}
-                {...sourceProps}
-              />
-              {layers.map((layer) => {
-                const layerId = createDatasetSourceLayerKey(sourceId, subId, layer.id)
-                const layerHighlightId = getLayerHighlightId(layerId)
-                const beforeId =
-                  'beforeId' in layer
-                    ? layer.beforeId || 'atlas-app-beforeid-fallback'
-                    : 'atlas-app-beforeid-fallback'
-                const layerProps = buildUploadLayerProps({
-                  layer: layer as UploadLayerWithAtlasType,
-                  layerId,
-                  sourceId: datasetSourceId,
-                  debugLayerStyles,
-                  beforeId,
-                  ...(mapRenderFormat === 'pmtiles' && { sourceLayer: 'default' as const }),
-                })
-
-                return (
-                  <Fragment key={layerId}>
-                    <Layer key={layerId} {...layerProps} />
-                    <LayerHighlight key={layerHighlightId} {...layerProps} id={layerHighlightId} />
-                  </Fragment>
-                )
-              })}
-            </Fragment>
+            <Source
+              id={datasetSourceId}
+              key={datasetSourceId}
+              attribution={attributionHtml}
+              {...sourceProps}
+            />
           )
         },
       )}
+    </>
+  )
+}
+
+export const LayersStaticDatasets = () => {
+  const debugLayerStyles = useMapDebugDebugLayerStyles()
+  const visibleDatasets = useSelectedDatasets()
+
+  return (
+    <>
+      {visibleDatasets.map(({ id: sourceId, subId, mapRenderFormat, layers }) => {
+        const datasetSourceId = createSourceKeyStaticDatasets(sourceId, subId)
+
+        return (
+          <Fragment key={datasetSourceId}>
+            {layers.map((layer) => {
+              const layerId = createDatasetSourceLayerKey(sourceId, subId, layer.id)
+              const layerHighlightId = getLayerHighlightId(layerId)
+              const beforeId =
+                'beforeId' in layer
+                  ? layer.beforeId || 'atlas-app-beforeid-fallback'
+                  : 'atlas-app-beforeid-fallback'
+              const layerProps = buildUploadLayerProps({
+                layer: layer as UploadLayerWithAtlasType,
+                layerId,
+                sourceId: datasetSourceId,
+                debugLayerStyles,
+                beforeId,
+                ...(mapRenderFormat === 'pmtiles' && { sourceLayer: 'default' as const }),
+              })
+
+              return (
+                <Fragment key={layerId}>
+                  <Layer key={layerId} {...layerProps} />
+                  <LayerHighlight key={layerHighlightId} {...layerProps} id={layerHighlightId} />
+                </Fragment>
+              )
+            })}
+          </Fragment>
+        )
+      })}
     </>
   )
 }

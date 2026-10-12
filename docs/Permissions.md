@@ -60,7 +60,7 @@ Tests: `app/tests/smoke/public-routes.spec.ts` (renders only, does not check `no
 ## Admin area
 
 - `/admin/*` requires `role = ADMIN` (`app/src/routes/admin.tsx` → `getIsAdminFn`). Signed-in non-admins go to `/access-denied`, guests to sign-in.
-- Every server function used by the admin UI calls `requireAdmin`, either in the `*.functions.ts` handler or in the `queries/` / `mutations/` file it calls.
+- Every server function used by the admin UI calls `requireAdmin`, either in the `*.functions.ts` handler or in the `queries/` / `mutations/` file it calls. One exception: reading the map layer order (`getMapLayerOrderFn`) is public, because every map needs it; saving it is admin-only.
 - Configuration is admin-only: regions, memberships, QA configs, map dataset uploads and categories, region contracts, data schema, API tokens, private background maps, and the region links of Prüflisten.
 
 Tests: `app/tests/pages/admin.stubbed-auth.spec.ts` (non-admin and guest are turned away). Individual `requireAdmin` call sites have no unit tests.
@@ -70,7 +70,7 @@ Tests: `app/tests/pages/admin.stubbed-auth.spec.ts` (non-admin and guest are tur
 | Location                                                  | Guard                                                                                                                                                                                                                                                                                                                                                 |
 | --------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `api/admin/*`                                             | `guardAdminApi`: Bearer `AdminApiToken` (minted by an admin). A few routes use the admin session instead                                                                                                                                                                                                                                              |
-| `/mcp`                                                    | `guardAdminApi` (Bearer `AdminApiToken`). Hinweise and Prüflisten tools then run the member functions as the token owner                                                                                                                                                                                                                              |
+| `/mcp`                                                    | `guardAdminApi` (Bearer `AdminApiToken`). Hinweise, Prüflisten and QA tools then run the member functions as the token owner                                                                                                                                                                                                                          |
 | `api/private/*`                                           | `ATLAS_API_KEY` (system hooks)                                                                                                                                                                                                                                                                                                                        |
 | `api/auth/osm-token`, `api/notes/$regionSlug/$folderId/*` | `ExternalApiToken` (Bearer, 1 hour, scope `notes`), issued by `api/auth/osm-token` for a verified OSM access token. Then the same member/admin checks as the UI. CORS allow-list `externalApiOrigins`. See [External-Notes-API.md](External-Notes-API.md)                                                                                             |
 | `api/*` (top level)                                       | Mixed, per route: none for public data (boundaries, map style, stats, campaigns, OSM notes RSS, OSMCha2 changeset RSS), member/admin for region data (`private-backgrounds.$slug.$z.$x.$y`, `uploads.$slug`, `notes.$regionSlug.download`, `regions.$regionSlug.uploads-csv`, `export.*`), `ATLAS_API_KEY` for `regions`, `uploads`, `uploads.create` |
@@ -104,14 +104,14 @@ Tests: `docs-region-downloads.spec.ts` (export: guest denied on PUBLIC, admin al
 
 The mode routes (`app/src/routes/regionen/$regionSlug/*.tsx`) first require region access (parent layout), then redirect non-members of member-only modes to `/access-denied`. Navigation buttons follow `deriveAvailableModes` and `isMemberOnlyMode` in `availableModes.ts`. The server functions below enforce the same rules on their own.
 
-| Mode                              | Opens for                                                                                                       | Shown in navigation when                                                              |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| Map (default)                     | Everyone with region access                                                                                     | Always                                                                                |
-| Hinweise (`/hinweise`)            | Region access. Member-only when the region has internal notes and no OSM notes                                  | Region has OSM or internal notes enabled. Otherwise the route redirects to the map    |
-| Qualitätssicherung (`/qa`)        | Members and admins                                                                                              | Member/admin and at least one QA config                                               |
-| Prüflisten (`/prueflisten`)       | Members and admins                                                                                              | Member/admin (also before the first list exists)                                      |
-| Flächenfinder (`/flaechenfinder`) | Members and admins, only when the region has `spaceFinderEnabled` (default off). The flag applies to admins too | Member/admin and `spaceFinderEnabled`. Otherwise the route redirects to the map       |
-| Summieren (`/summieren`)          | Everyone with region access. Nothing is stored; areas and dataset are URL only                                  | Region has a category with a dataset to sum. Otherwise the route redirects to the map |
+| Mode                              | Opens for                                                                                                                                     | Shown in navigation when                                                              |
+| --------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| Map (default)                     | Everyone with region access                                                                                                                   | Always                                                                                |
+| Hinweise (`/hinweise`)            | Region access. Member-only when the region has internal notes and no OSM notes                                                                | Region has OSM or internal notes enabled. Otherwise the route redirects to the map    |
+| Qualitätssicherung (`/qa`)        | Members and admins                                                                                                                            | Member/admin and at least one QA config                                               |
+| Prüflisten (`/prueflisten`)       | Members and admins                                                                                                                            | Member/admin (also before the first list exists)                                      |
+| Flächenfinder (`/flaechenfinder`) | Members and admins, only when the region has `spaceFinderEnabled` (default off). The flag applies to admins too                               | Member/admin and `spaceFinderEnabled`. Otherwise the route redirects to the map       |
+| Summieren (`/summieren`)          | Everyone with region access, also for the sums the server computes (`getCalculatorSumsFn`). Nothing is stored; areas and dataset are URL only | Region has a category with a dataset to sum. Otherwise the route redirects to the map |
 
 Tests: `availableModes.test.ts`, `app/tests/smoke/region-modes.spec.ts` (guests denied; Summieren open to guests), `app/tests/pages/modes-access.stubbed-auth.spec.ts` (signed-in non-member denied, plain member allowed), `canAccessMemberModeForRegion.server.test.ts`.
 
@@ -154,7 +154,9 @@ Everything is member/admin-only: navigation, map styles (status colors), area li
 | Create evaluation (status + comment)                    | Member, admin (`createQaEvaluation`). Author edits the comment (`updateQaEvaluationBody`); status and delete are not editable |
 | Create / edit / delete QA config                        | Admin                                                                                                                         |
 
-Tests: `app/tests/pages/qa-mode.stubbed-auth.spec.ts` (admin happy path), mode tests above. `qaConfigAdminOnly.server.test.ts` (config create/update/delete reject non-admins).
+The admin MCP (`/mcp`, tools `qa_configs_*`, `qa_areas_list`, `qa_evaluations_*`) offers the actions of the table except the map status and the user list. As for Hinweise it calls the same functions with the owner of the `AdminApiToken` as session, so config writes pass the admin form's validation, an evaluation is created as the token owner and only the author edits its comment. `qa_evaluations_create` reads the numbers of the cell from the map table on the server.
+
+Tests: `app/tests/pages/qa-mode.stubbed-auth.spec.ts` (admin happy path), mode tests above. `qaConfigAdminOnly.server.test.ts` (config create/update/delete reject non-admins). `buildMcpServer.integration.test.ts` (MCP: round-trip, invalid indicator rejected, comment of another evaluator rejected).
 
 ### Prüflisten
 
@@ -167,7 +169,7 @@ Everything is member/admin-only. A list can be linked to several regions; the ac
 | Rename list                                           | Member, admin                                                                                                 |
 | Delete list                                           | Member, admin: only empty lists linked to this region only. Admin (`/admin/review-lists`): any list, cascades |
 | Change which regions a list is linked to              | Admin only (`updateReviewListForAdmin`)                                                                       |
-| Create, edit, delete entries; upload GeoJSON; comment | Member, admin. Author edits own comment (`updateReviewEntryComment`); no delete                               |
+| Create, edit, delete entries; upload GeoJSON; comment | Member, admin. Author edits and deletes own comment (`updateReviewEntryComment`, `deleteReviewEntryComment`)  |
 
 The admin MCP (`/mcp`, tools `review_lists_*`, `review_entries_*`, `review_entry_comments_*`) offers the member actions of the table except the GeoJSON upload and download. As for Hinweise it calls the same functions with the owner of the `AdminApiToken` as session, so it deletes only empty lists linked to one region. `review_lists_update` is the admin update (rename and region links).
 
@@ -181,15 +183,15 @@ Tests: `authorizePlanningRegion.server.test.ts` (flag off rejects members and ad
 
 ## Comments
 
-Comments share the access of the object they belong to. Only the author edits a comment (and must still be a member); admins get no bypass. Edits are written with `runWithAuditContextAsync` (audit log with user, IP, `MEMBER_FORM`), and the UI shows "aktualisiert" with `updatedAt`.
+Comments share the access of the object they belong to. Only the author edits or deletes a comment (and must still be a member); admins get no bypass. Edits are written with `runWithAuditContextAsync` (audit log with user, IP, `MEMBER_FORM`), and the UI shows "aktualisiert" with `updatedAt`.
 
 | Feature        | Edit own comment                             | Delete own comment | Admin edits others |
 | -------------- | -------------------------------------------- | ------------------ | ------------------ |
 | Internal notes | Yes (`updateNoteComment`)                    | Yes                | No                 |
 | QA evaluations | Yes, comment only (`updateQaEvaluationBody`) | No                 | No                 |
-| Prüfeinträge   | Yes (`updateReviewEntryComment`)             | No                 | No                 |
+| Prüfeinträge   | Yes (`updateReviewEntryComment`)             | Yes                | No                 |
 
-Tests: `updateQaEvaluationBody.server.test.ts`, `updateReviewEntryComment.server.test.ts`, `notesAuthorOnly.server.test.ts`.
+Tests: `updateQaEvaluationBody.server.test.ts`, `updateReviewEntryComment.server.test.ts`, `deleteReviewEntryComment.server.test.ts`, `notesAuthorOnly.server.test.ts`.
 
 ## Known gaps and open decisions
 

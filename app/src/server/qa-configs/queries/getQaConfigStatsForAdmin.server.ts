@@ -1,6 +1,9 @@
 import { z } from 'zod'
-import { requireAdmin } from '@/server/auth/session.server'
+import { type MemberCaller, requireAdminSession } from '@/server/auth/memberCaller.server'
 import db from '@/server/db.server'
+import { selectQaLatestEvaluationRows } from '@/server/qa-configs/queries/qaIndicatorRows.server'
+import { parseQaConfigIndicators } from '@/server/qa-configs/utils/parseQaConfigIndicators'
+import { worstQaIndicatorStatus } from '@/shared/qaIndicatorStatus'
 
 const Schema = z.object({
   configId: z.number(),
@@ -25,25 +28,24 @@ export type QaConfigStats = {
   }
 }
 
-export async function getQaConfigStatsForAdmin(input: z.infer<typeof Schema>, headers: Headers) {
-  await requireAdmin(headers)
+/**
+ * Cells per status for the admin config card.
+ *
+ * A cell is counted once, by its **worst effective indicator** (`worstQaIndicatorStatus`, the same
+ * ranking the map paints with): if that indicator carries a user decision it lands in `USER`,
+ * otherwise in `SYSTEM`. So the buckets add up to `totalAreas` and read as "what does this cell
+ * look like right now", not "how many rows of each kind exist".
+ */
+export async function getQaConfigStatsForAdmin(
+  input: z.infer<typeof Schema>,
+  caller: MemberCaller,
+) {
+  await requireAdminSession(caller)
   const { configId } = Schema.parse(input)
-  // Get latest evaluations for each area
-  const evaluations = await db.qaEvaluation.findMany({
-    where: { configId },
-    orderBy: { createdAt: 'desc' },
-    distinct: ['areaId'],
-    select: {
-      evaluatorType: true,
-      systemStatus: true,
-      userStatus: true,
-      areaId: true,
-    },
-  })
 
-  // Initialize stats structure
+  const qaConfig = await db.qaConfig.findFirst({ where: { id: configId } })
   const stats: QaConfigStats = {
-    totalAreas: evaluations.length,
+    totalAreas: 0,
     evaluationStats: {
       SYSTEM: {
         GOOD: 0,
@@ -60,48 +62,34 @@ export async function getQaConfigStatsForAdmin(input: z.infer<typeof Schema>, he
       },
     },
   }
+  if (!qaConfig) return stats
 
-  // Group evaluations by evaluatorType and status
-  for (const evaluation of evaluations) {
-    switch (evaluation.evaluatorType) {
-      case 'SYSTEM': {
-        switch (evaluation.systemStatus) {
-          case 'GOOD':
-            stats.evaluationStats.SYSTEM.GOOD++
-            break
-          case 'NEEDS_REVIEW':
-            stats.evaluationStats.SYSTEM.NEEDS_REVIEW++
-            break
-          case 'PROBLEMATIC':
-            stats.evaluationStats.SYSTEM.PROBLEMATIC++
-            break
-          case 'TRUSTED_EDITOR_CHANGE':
-            stats.evaluationStats.SYSTEM.TRUSTED_EDITOR_CHANGE++
-            break
-        }
-        break
-      }
-      case 'USER': {
-        if (!evaluation.userStatus) break
-        switch (evaluation.userStatus) {
-          case 'OK_STRUCTURAL_CHANGE':
-            stats.evaluationStats.USER.OK_STRUCTURAL_CHANGE++
-            break
-          case 'OK_REFERENCE_ERROR':
-            stats.evaluationStats.USER.OK_REFERENCE_ERROR++
-            break
-          case 'NOT_OK_DATA_ERROR':
-            stats.evaluationStats.USER.NOT_OK_DATA_ERROR++
-            break
-          case 'NOT_OK_PROCESSING_ERROR':
-            stats.evaluationStats.USER.NOT_OK_PROCESSING_ERROR++
-            break
-          case 'OK_QA_TOOLING_ERROR':
-            stats.evaluationStats.USER.OK_QA_TOOLING_ERROR++
-            break
-        }
-        break
-      }
+  const indicators = parseQaConfigIndicators(qaConfig.indicators)
+  const indicatorOrder = new Map(indicators.map((indicator, index) => [indicator.key, index]))
+
+  const latestRows = await selectQaLatestEvaluationRows({ configId })
+
+  const byAreaId = new Map<string, typeof latestRows>()
+  for (const row of latestRows) {
+    // A retired indicator key would distort the picture the admin sees for the current config.
+    if (!indicatorOrder.has(row.indicatorKey)) continue
+    const group = byAreaId.get(row.areaId) ?? []
+    group.push(row)
+    byAreaId.set(row.areaId, group)
+  }
+
+  for (const group of byAreaId.values()) {
+    group.sort(
+      (a, b) =>
+        (indicatorOrder.get(a.indicatorKey) ?? 0) - (indicatorOrder.get(b.indicatorKey) ?? 0),
+    )
+    const worst = worstQaIndicatorStatus(group)
+    if (!worst) continue
+    stats.totalAreas += 1
+    if (worst.userStatus) {
+      stats.evaluationStats.USER[worst.userStatus] += 1
+    } else {
+      stats.evaluationStats.SYSTEM[worst.systemStatus] += 1
     }
   }
 

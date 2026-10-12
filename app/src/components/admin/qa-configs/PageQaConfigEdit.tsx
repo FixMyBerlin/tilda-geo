@@ -8,11 +8,12 @@ import { AdminAsideLink } from '@/components/admin/aside/AdminAsideActions'
 import { toAdminAsideSections } from '@/components/admin/aside/adminAsideSection'
 import { AdminFormSection } from '@/components/admin/aside/AdminFormSection'
 import { AuditHistoryPanel } from '@/components/admin/audit-log/AuditHistoryPanel'
+import { Callout } from '@/components/shared/Callout/Callout'
 import { toastSuccess } from '@/components/shared/toast/toastSuccess'
 import { adminNavCountsQueryOptions } from '@/server/admin/adminNavQueryOptions'
 import { getQaConfigExportFilename } from '@/server/qa-configs/export/getQaConfigExportFilename'
 import { deleteQaConfigFn } from '@/server/qa-configs/qa-configs.functions'
-import { fractionToPercent } from '@/shared/qaThresholdPercent'
+import { qaConfigToFormValues } from '@/server/qa-configs/schemas'
 import { QaConfigExportSection } from './pageQaConfigs/QaConfigExportSection'
 import { QaConfigForm } from './pageQaConfigs/QaConfigForm'
 import { QaConfigOrphanedEvaluationsSection } from './pageQaConfigs/QaConfigOrphanedEvaluationsSection'
@@ -59,23 +60,21 @@ export function PageQaConfigEdit() {
         mode="edit"
         id={qaConfig.id}
         regions={regions}
-        defaultValues={{
-          slug: qaConfig.slug,
-          label: qaConfig.label,
-          isActive: qaConfig.isActive ? 'true' : 'false',
-          mapTable: qaConfig.mapTable,
-          mapAttribution: qaConfig.mapAttribution ?? '',
-          goodThreshold: fractionToPercent(qaConfig.goodThreshold).toString(),
-          needsReviewThreshold: fractionToPercent(qaConfig.needsReviewThreshold).toString(),
-          absoluteDifferenceThreshold: qaConfig.absoluteDifferenceThreshold.toString(),
-          regionId: qaConfig.regionId.toString(),
-          trustedOsmUsernames: qaConfig.trustedOsmUsernames.join('\n'),
-          referenceFrozenAt: qaConfig.referenceFrozenAt.toISOString().slice(0, 10),
-        }}
+        defaultValues={qaConfigToFormValues(qaConfig)}
         pageExtras={{
           sections,
           content: (
             <>
+              {qaConfig.referenceTableExists ? null : (
+                <Callout tone="warning">
+                  <p>
+                    Die Referenz-Tabelle <code>{qaConfig.referenceTable}</code> existiert nicht in
+                    dieser Datenbank. Ohne sie schreibt das Processing keine Indikator-Werte und
+                    alle Flächen erscheinen als »Gut«. Import über /admin/data-schema
+                    (docs/Parking-Client-Freeze-QA.md).
+                  </p>
+                </Callout>
+              )}
               <AdminFormSection
                 id="stats"
                 title={pageSectionLabels.stats}

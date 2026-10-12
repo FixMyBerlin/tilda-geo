@@ -1,5 +1,13 @@
 import { describe, expect, test } from 'vitest'
-import { formatArea, formatLength, measureGeometry, measureSegments } from './measureMath'
+import {
+  areaM2,
+  formatArea,
+  formatLength,
+  formatShapeValue,
+  lineLengthM,
+  measureSegments,
+  perimeterM,
+} from './measureMath'
 
 // About 100 m east-west and 100 m north-south at the latitude of Berlin.
 const lng100m = 0.001474
@@ -17,24 +25,23 @@ const square = {
   ],
 } satisfies GeoJSON.Polygon
 
-describe('measureGeometry', () => {
+describe('lengths and areas', () => {
   test('length of a line in metres', () => {
-    const result = measureGeometry({
+    const line = {
       type: 'LineString',
       coordinates: [
         [13.4, 52.5],
         [13.4 + lng100m, 52.5],
       ],
-    })
-    expect(result.kind).toBe('line')
-    expect(result.kind === 'line' && result.lengthM).toBeCloseTo(100, 0)
+    } satisfies GeoJSON.LineString
+    expect(lineLengthM(line)).toBeCloseTo(100, 0)
+    expect(formatShapeValue(line)).toBe(formatLength(lineLengthM(line)))
   })
 
   test('area and perimeter of a polygon', () => {
-    const result = measureGeometry(square)
-    if (result.kind !== 'area') throw new Error('expected an area')
-    expect(result.areaM2 / 10_000).toBeCloseTo(1, 1)
-    expect(result.perimeterM / 400).toBeCloseTo(1, 2)
+    expect(areaM2(square) / 10_000).toBeCloseTo(1, 1)
+    expect(perimeterM(square) / 400).toBeCloseTo(1, 2)
+    expect(formatShapeValue(square)).toBe(formatArea(areaM2(square)))
   })
 })
 

@@ -161,6 +161,11 @@ export const adminNavigation: AdminNavItem[] = [
     icon: Cog6ToothIcon,
     children: [
       {
+        name: 'Karten-Layer-Reihenfolge',
+        to: '/admin/layer-order',
+        description: 'Reihenfolge der Layer auf der Karte, global für alle Regionen.',
+      },
+      {
         name: 'Änderungsverlauf',
         to: '/admin/audit-log',
         description: 'Alle Änderungen an Regionen, Aufträgen, Uploads und mehr.',

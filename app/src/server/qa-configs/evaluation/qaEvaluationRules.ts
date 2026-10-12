@@ -1,134 +1,104 @@
-import type { QaSystemStatus } from '@/prisma/generated/client'
+import type { QaEvaluationStatus, QaSystemStatus } from '@/prisma/generated/client'
 
-const qaResettableUserStatuses = [
+export type QaIndicatorThresholdValues = {
+  goodThreshold: number
+  needsReviewThreshold: number
+  absoluteDifferenceThreshold: number
+}
+
+// Values arrive from NUMERIC columns (rounded to 4 decimals in SQL); the epsilon keeps
+// boundary values like 0.2 on the inclusive side after float conversion.
+const EPSILON = 1e-9
+
+/**
+ * Status of one indicator in one cell (docs: QA-Documentation.md, "Thresholds and status").
+ * `difference` within the absolute threshold always wins (noise floor in dataset units);
+ * otherwise the relative `deviation` (0–1) decides.
+ */
+export function calculateIndicatorStatus(input: {
+  deviation: number
+  difference: number
+  thresholds: QaIndicatorThresholdValues
+}) {
+  const { deviation, difference, thresholds } = input
+
+  if (difference <= thresholds.absoluteDifferenceThreshold + EPSILON) {
+    return 'GOOD' as const satisfies QaSystemStatus
+  }
+  if (deviation <= thresholds.goodThreshold + EPSILON) {
+    return 'GOOD' as const satisfies QaSystemStatus
+  }
+  if (deviation <= thresholds.needsReviewThreshold + EPSILON) {
+    return 'NEEDS_REVIEW' as const satisfies QaSystemStatus
+  }
+  return 'PROBLEMATIC' as const satisfies QaSystemStatus
+}
+
+/** Cleared by the system when the indicator becomes GOOD again. */
+const QA_RESETTABLE_USER_STATUSES: readonly QaEvaluationStatus[] = [
   'NOT_OK_DATA_ERROR',
   'NOT_OK_PROCESSING_ERROR',
   'OK_QA_TOOLING_ERROR',
-] as const
+]
 
-export type QaUserStatus = (typeof qaResettableUserStatuses)[number] | string
+const isResettableUserStatus = (status: QaEvaluationStatus) =>
+  QA_RESETTABLE_USER_STATUSES.includes(status)
 
-export function calculateSystemStatus(
-  relative: number | null,
-  config: { goodThreshold: number; needsReviewThreshold: number },
-) {
-  if (relative === null) {
-    return 'NEEDS_REVIEW' as const
-  }
-
-  const normalizedRelative = relative > 0 && relative < 1 ? 1 / relative : relative
-  const difference = Math.abs(normalizedRelative - 1.0)
-
-  if (difference <= config.goodThreshold) {
-    return 'GOOD' as const
-  }
-  if (difference <= config.needsReviewThreshold) {
-    return 'NEEDS_REVIEW' as const
-  }
-  return 'PROBLEMATIC' as const
-}
-
-function shouldResetUserDecision(
-  newSystemStatus: QaSystemStatus,
-  previousUserStatus: QaUserStatus | null,
-) {
-  if (!previousUserStatus) return false
-
-  const isNotOkDecision =
-    previousUserStatus === 'NOT_OK_DATA_ERROR' || previousUserStatus === 'NOT_OK_PROCESSING_ERROR'
-
-  if (isNotOkDecision) {
-    return newSystemStatus === 'GOOD'
-  }
-
-  if (previousUserStatus === 'OK_QA_TOOLING_ERROR') {
-    return newSystemStatus === 'GOOD'
-  }
-
-  return false
-}
-
-function shouldCreateNewEvaluation(
-  previousEvaluation: { systemStatus: QaSystemStatus; userStatus: QaUserStatus | null } | null,
-  newSystemStatus: QaSystemStatus,
-) {
-  if (!previousEvaluation) return true
-
-  const previousSystemStatus = previousEvaluation.systemStatus
-  const hasUserDecision = previousEvaluation.userStatus !== null
-
-  if (!hasUserDecision) {
-    return previousSystemStatus !== newSystemStatus
-  }
-
-  return shouldResetUserDecision(newSystemStatus, previousEvaluation.userStatus)
-}
-
-function pickEffectiveSystemStatus({
-  systemStatus,
-  absoluteDifferenceWithinThreshold,
-  changedByTrustedEditors,
-}: {
+/**
+ * Nightly decision for one (cell, indicator), given its latest evaluation row and the
+ * freshly computed system status (docs: QA-Documentation.md, "Nightly update rules").
+ *
+ * - `create`: write a SYSTEM row (first sighting, or system status changed without a user decision)
+ * - `reset`: write a SYSTEM row that clears a resettable user decision
+ * - `none`: write nothing
+ *
+ * A resettable decision is only cleared when the indicator *becomes* GOOD, i.e. the status stored
+ * on the user row (the system status at decision time) was not GOOD. A reviewer who marks a GOOD
+ * indicator as NOT_OK keeps that decision; the system has no signal that it was fixed.
+ */
+export function getQaUpdateDecision(input: {
+  previous: { systemStatus: QaSystemStatus; userStatus: QaEvaluationStatus | null } | null
   systemStatus: QaSystemStatus
-  absoluteDifferenceWithinThreshold: boolean
-  changedByTrustedEditors: boolean
 }) {
-  // 1. A small absolute difference is no change, whatever the percentage says.
-  if (absoluteDifferenceWithinThreshold) return 'GOOD'
+  const { previous, systemStatus } = input
 
-  // 2. A larger difference is fine when trusted OSM users made the edits.
-  if (systemStatus !== 'GOOD' && changedByTrustedEditors) return 'TRUSTED_EDITOR_CHANGE'
+  if (!previous) return 'create' as const
 
-  // 3. Otherwise the percent-based status applies.
-  return systemStatus
-}
-
-export function getEffectiveSystemStatus({
-  systemStatus,
-  absoluteDifference,
-  absoluteDifferenceThreshold,
-  changedByTrustedEditors,
-}: {
-  systemStatus: QaSystemStatus
-  absoluteDifference: number | null
-  absoluteDifferenceThreshold: number
-  // Whether trusted OSM users made the edits since the reference was frozen.
-  changedByTrustedEditors: boolean
-}) {
-  const absoluteDifferenceWithinThreshold =
-    absoluteDifference !== null && Math.abs(absoluteDifference) <= absoluteDifferenceThreshold
-
-  return {
-    absoluteDifferenceWithinThreshold,
-    effectiveSystemStatus: pickEffectiveSystemStatus({
-      systemStatus,
-      absoluteDifferenceWithinThreshold,
-      changedByTrustedEditors,
-    }),
+  if (previous.userStatus === null) {
+    return previous.systemStatus === systemStatus ? ('none' as const) : ('create' as const)
   }
+
+  if (!isResettableUserStatus(previous.userStatus)) return 'none' as const
+
+  const becameGood = systemStatus === 'GOOD' && previous.systemStatus !== 'GOOD'
+  return becameGood ? ('reset' as const) : ('none' as const)
 }
 
-// One (osmUser, updatedAt) pair aggregated from the last edit(s) touching a voronoi cell's points.
-// updatedAt is the OSM object's last-edit time as Unix epoch seconds; always present because
-// osm2pgsql runs with --extra-attributes. osmUser is null for an anonymized extract. Produced by
-// processing step 9.
+/**
+ * One (osmUser, updatedAt) pair among the last edits on a cell's features, from processing
+ * (`<map>_last_editors`). `amount` is the dataset measure of those features (parking: spaces,
+ * bikelanes: meters), `updatedAt` Unix epoch seconds; `osmUser` is null for anonymized extracts.
+ */
 export type QaLastEditor = {
   osmUser: string | null
-  spaceCount: number
+  amount: number
   updatedAt: number
 }
 
-// Did trusted OSM users make the edits since the reference baseline was frozen?
-// See docs/QA-Documentation.md.
+/**
+ * Did trusted OSM users make the edits since the reference was frozen? Edits by others are
+ * tolerated up to the indicator's absolute threshold (same unit as `amount`).
+ * Docs: QA-Documentation.md, "Trusted OSM editors".
+ */
 export function checkTrustedEditors({
   lastEditors,
   trustedOsmUsernames,
   referenceFrozenAt,
   absoluteDifferenceThreshold,
 }: {
-  lastEditors: QaLastEditor[]
+  lastEditors: readonly QaLastEditor[]
   // Lowercase, trimmed OSM display names — normalized at the input schema.
-  trustedOsmUsernames: string[]
+  trustedOsmUsernames: readonly string[]
   // 00:00 UTC of the freeze day; edits from that moment on count.
   referenceFrozenAt: Date
   absoluteDifferenceThreshold: number
@@ -137,7 +107,7 @@ export function checkTrustedEditors({
   const cutoffMs = referenceFrozenAt.getTime()
 
   const trustedEditorsFound = new Set<string>()
-  let untrustedSpaceCount = 0
+  let untrustedAmount = 0
 
   for (const editor of lastEditors) {
     if (editor.updatedAt * 1000 < cutoffMs) {
@@ -148,54 +118,28 @@ export function checkTrustedEditors({
     if (editor.osmUser !== null && trustedUsernames.has(editor.osmUser.toLowerCase())) {
       trustedEditorsFound.add(editor.osmUser)
     } else {
-      untrustedSpaceCount += editor.spaceCount
+      untrustedAmount += editor.amount
     }
   }
 
-  const passed = trustedEditorsFound.size > 0 && untrustedSpaceCount <= absoluteDifferenceThreshold
+  const passed =
+    trustedEditorsFound.size > 0 && untrustedAmount <= absoluteDifferenceThreshold + EPSILON
 
   return {
     passed,
     trustedEditors: [...trustedEditorsFound].sort((a, b) => a.localeCompare(b)),
-    untrustedSpaceCount,
+    untrustedAmount,
   }
 }
 
-export function getQaUpdateDecision(input: {
-  previousEvaluation: { systemStatus: QaSystemStatus; userStatus: QaUserStatus | null } | null
-  evaluation: {
-    systemStatus: QaSystemStatus
-    previousRelative: number | null
-    currentRelative: number | null
-    absoluteDifference: number | null
-    absoluteDifferenceThreshold: number
-    changedByTrustedEditors: boolean
+/**
+ * Trusted editors turn a non-GOOD indicator into TRUSTED_EDITOR_CHANGE ("Gut (Vertrauensliste)").
+ * Applied after `calculateIndicatorStatus`, so a difference within the absolute threshold stays
+ * GOOD. It is not GOOD itself, so it never resets a human decision (`getQaUpdateDecision`).
+ */
+export function applyTrustedEditors(systemStatus: QaSystemStatus, trustedEditorsPassed: boolean) {
+  if (systemStatus !== 'GOOD' && trustedEditorsPassed) {
+    return 'TRUSTED_EDITOR_CHANGE' as const satisfies QaSystemStatus
   }
-}) {
-  const { absoluteDifferenceWithinThreshold, effectiveSystemStatus } = getEffectiveSystemStatus({
-    systemStatus: input.evaluation.systemStatus,
-    absoluteDifference: input.evaluation.absoluteDifference,
-    absoluteDifferenceThreshold: input.evaluation.absoluteDifferenceThreshold,
-    changedByTrustedEditors: input.evaluation.changedByTrustedEditors,
-  })
-
-  const shouldReset = shouldResetUserDecision(
-    effectiveSystemStatus,
-    input.previousEvaluation?.userStatus ?? null,
-  )
-  const systemStatusChanged = input.previousEvaluation?.systemStatus !== effectiveSystemStatus
-  const relativeChanged = input.evaluation.previousRelative !== input.evaluation.currentRelative
-  const dataChanged = systemStatusChanged || (relativeChanged && !absoluteDifferenceWithinThreshold)
-  const shouldCreate =
-    shouldReset || shouldCreateNewEvaluation(input.previousEvaluation, effectiveSystemStatus)
-
-  return {
-    effectiveSystemStatus,
-    absoluteDifferenceWithinThreshold,
-    shouldReset,
-    systemStatusChanged,
-    relativeChanged,
-    dataChanged,
-    shouldCreate,
-  }
+  return systemStatus
 }

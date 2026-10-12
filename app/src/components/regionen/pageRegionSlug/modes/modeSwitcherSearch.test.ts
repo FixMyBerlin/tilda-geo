@@ -24,17 +24,17 @@ describe('modeSwitcherSearch', () => {
       map: '14/52.5/13.4',
       [searchParamsRegistry.notes]: { new: '14/52.5/13.4' },
     }
-    expect(modeSwitcherSearch('notes', prev)).toBe(prev)
-    expect(modeSwitcherSearch('map', prev)).toBe(prev)
-    expect(modeSwitcherSearch('qa', prev)).toBe(prev)
-    expect(modeSwitcherSearch('reviewLists', prev)).toBe(prev)
-    expect(modeSwitcherSearch('measure', prev)).toBe(prev)
-    expect(modeSwitcherSearch('calculator', prev)).toBe(prev)
+    expect(modeSwitcherSearch({ from: 'map', to: 'notes' }, prev)).toBe(prev)
+    expect(modeSwitcherSearch({ from: 'map', to: 'map' }, prev)).toBe(prev)
+    expect(modeSwitcherSearch({ from: 'map', to: 'qa' }, prev)).toBe(prev)
+    expect(modeSwitcherSearch({ from: 'map', to: 'reviewLists' }, prev)).toBe(prev)
+    expect(modeSwitcherSearch({ from: 'map', to: 'measure' }, prev)).toBe(prev)
+    expect(modeSwitcherSearch({ from: 'map', to: 'calculator' }, prev)).toBe(prev)
   })
 
   test('takes the areas of Summieren over to Messen when Messen has none', () => {
     const prev = { sum: { key: 'parking', areas: area }, measure: { lines: line } }
-    expect(modeSwitcherSearch('measure', prev)).toEqual({
+    expect(modeSwitcherSearch({ from: 'map', to: 'measure' }, prev)).toEqual({
       sum: prev.sum,
       measure: { lines: line, areas: area },
     })
@@ -43,7 +43,7 @@ describe('modeSwitcherSearch', () => {
   test('takes the areas of Messen over to Summieren on its coarser grid, without the lines', () => {
     const prev = { measure: { lines: line, areas: area } }
     const next: { measure?: unknown; sum?: { areas?: typeof area; lines?: unknown } } =
-      modeSwitcherSearch('calculator', prev)
+      modeSwitcherSearch({ from: 'map', to: 'calculator' }, prev)
     expect(next.measure).toBe(prev.measure)
     expect(next.sum?.areas?.coordinates[0]?.[0]).toEqual([13.4, 52.5])
     expect(next.sum?.lines).toBeUndefined()
@@ -52,13 +52,18 @@ describe('modeSwitcherSearch', () => {
   test('leaves a mode alone that has areas of its own', () => {
     const own = { ...area, coordinates: [[...(area.coordinates[0] ?? [])].reverse()] }
     const prev = { sum: { areas: area }, measure: { areas: own } }
-    expect(modeSwitcherSearch('measure', prev)).toBe(prev)
-    expect(modeSwitcherSearch('calculator', prev)).toBe(prev)
+    expect(modeSwitcherSearch({ from: 'map', to: 'measure' }, prev)).toBe(prev)
+    expect(modeSwitcherSearch({ from: 'map', to: 'calculator' }, prev)).toBe(prev)
   })
 
   test('does not copy when another mode is opened', () => {
     const prev = { sum: { areas: area } }
-    expect(modeSwitcherSearch('map', prev)).toBe(prev)
-    expect(modeSwitcherSearch('notes', prev)).toBe(prev)
+    expect(modeSwitcherSearch({ from: 'calculator', to: 'map' }, prev)).toBe(prev)
+    expect(modeSwitcherSearch({ from: 'map', to: 'notes' }, prev)).toBe(prev)
+  })
+
+  test('does not copy on the tab of the mode that is already open', () => {
+    const prev = { sum: { areas: area } }
+    expect(modeSwitcherSearch({ from: 'measure', to: 'measure' }, prev)).toBe(prev)
   })
 })

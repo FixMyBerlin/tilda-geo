@@ -1,53 +1,28 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { useOptimistic, useState } from 'react'
 import { IntlProvider } from 'react-intl'
-import { useMap } from 'react-map-gl/maplibre'
 import {
+  applyQaDecisionsToMapRow,
   qaMapDataQueryOptions,
   restoreQaMapDataRow,
   upsertQaMapDataRow,
+  type QaMapDataRow,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useQaMapData'
 import { useQaParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useQaParam'
-import { qaLayerId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersQa'
-import { safeSetFeatureState } from '@/components/regionen/pageRegionSlug/Map/utils/safeSetFeatureState'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { translations } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/translations.const'
-import { TimeWithRelativeTooltip } from '@/components/shared/date/TimeWithRelativeTooltip'
 import { AdminLogDataButton } from '@/components/shared/debug/AdminLogDataButton'
-import { buttonStylesOnYellow } from '@/components/shared/links/styles'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { toastError } from '@/components/shared/toast/toastError'
 import {
+  createQaEvaluationsFn,
   getQaDecisionDataForAreaFn,
-  getQaEvaluationsForAreaFn,
 } from '@/server/qa-configs/qa-configs.functions'
-import type { CreateQaEvaluationInput } from '@/server/qa-configs/qa-configs.functions'
-import { createQaEvaluationFn } from '@/server/qa-configs/qa-configs.functions'
-import type { QaEvaluationForArea } from '@/server/qa-configs/queries/getQaEvaluationsForArea.server'
-import { qaEvalDraftId } from '../../composerDrafts/composerDraftIds'
-import { isEmptyComposerDraftValues } from '../../composerDrafts/composerDraftStorage'
-import { useComposerDraft } from '../../composerDrafts/useComposerDraft'
+import { qaMapPayloadAppliesDefault } from '@/shared/qaMapDefaultStatus'
 import { modePanelMutedClassName } from '../../modePanel.const'
-import { QA_MAP_DEFAULT_STATUS } from '../qaMapDefaultStatus'
-import { SYSTEM_STATUS_TO_LETTER, USER_STATUS_TO_LETTER, userStatusConfig } from './qaConfigs'
-import { QaDecisionData as QaDecisionDataComponent } from './QaDecisionData'
-import { QaEvaluationCard } from './QaEvaluationCard'
-import { QaEvaluationForm } from './QaEvaluationForm'
-import { QaEvaluationHistory } from './QaEvaluationHistory'
-
-type QaMapFeatureStateSnapshot = {
-  userStatus: string | null
-  systemStatus: string | null
-}
-
-const systemStatusLetters = new Set<string>(Object.values(SYSTEM_STATUS_TO_LETTER))
-
-const systemStatusLetter = (value: unknown) => {
-  if (typeof value === 'string' && systemStatusLetters.has(value)) {
-    return value as (typeof SYSTEM_STATUS_TO_LETTER)[keyof typeof SYSTEM_STATUS_TO_LETTER]
-  }
-  return undefined
-}
+import { groupQaThread } from './groupQaThread'
+import { QaDecisionForm, type QaEvaluationDecisionInput } from './QaDecisionForm'
+import { QaIndicatorValues } from './QaIndicatorValues'
+import { QaThread } from './QaThread'
 
 type Props = {
   areaId: string
@@ -56,56 +31,19 @@ type Props = {
 export const QaDetail = ({ areaId }: Props) => {
   const regionSlug = useRegionSlug()
   const { qaParamData } = useQaParam()
-  const [draftSessionKey, setDraftSessionKey] = useState(0)
-  const draftId = qaEvalDraftId(regionSlug, qaParamData.key, areaId)
-  return (
-    <QaDetailSession
-      key={`${draftId}-${draftSessionKey}`}
-      areaId={areaId}
-      onDraftSessionConsumed={() => setDraftSessionKey((key) => key + 1)}
-    />
-  )
-}
-
-const QaDetailSession = ({
-  areaId,
-  onDraftSessionConsumed,
-}: Props & { onDraftSessionConsumed: () => void }) => {
-  const regionSlug = useRegionSlug()
-  const { qaParamData } = useQaParam()
-  const { mainMap } = useMap()
-  const [showForm, setShowForm] = useState(false)
   const queryClient = useQueryClient()
-  const draftId = qaEvalDraftId(regionSlug, qaParamData.key, areaId)
-  const { isReady, draftValues, saveDraft, clearDraft } = useComposerDraft(draftId)
-  const hasDraft = Boolean(draftValues && !isEmptyComposerDraftValues(draftValues))
 
-  const evaluationsQueryKey = ['qaEvaluations', qaParamData.key, areaId, regionSlug]
-  const { data: evaluations, isError: isEvaluationsError } = useQuery<QaEvaluationForArea[]>({
-    queryKey: evaluationsQueryKey,
-    queryFn: () =>
-      getQaEvaluationsForAreaFn({
-        data: {
-          configSlug: qaParamData.key,
-          areaId,
-          regionSlug: regionSlug,
-        },
-      }),
-    enabled: Boolean(regionSlug && qaParamData.key),
-  })
-
+  const decisionDataQueryKey = ['qaDecisionData', qaParamData.key, areaId, regionSlug]
   const { data: decisionData, isError: isDecisionDataError } = useQuery({
-    queryKey: ['qaDecisionData', qaParamData.key, areaId, regionSlug],
+    queryKey: decisionDataQueryKey,
     queryFn: () =>
       getQaDecisionDataForAreaFn({
-        data: {
-          configSlug: qaParamData.key,
-          areaId,
-          regionSlug: regionSlug,
-        },
+        data: { configSlug: qaParamData.key, areaId, regionSlug },
       }),
     enabled: Boolean(regionSlug && qaParamData.key),
   })
+
+  const indicators = decisionData?.indicators ?? []
 
   const mapDataQueryKey =
     qaParamData.key && regionSlug
@@ -117,197 +55,100 @@ const QaDetailSession = ({
         }).queryKey
       : null
 
-  const latestEvaluation = evaluations?.[0]
-  const hasEvaluation = !!latestEvaluation
-  const systemStatus = latestEvaluation?.systemStatus
-  const baseUserStatus = latestEvaluation?.userStatus ?? null
-
-  // React 19: useOptimistic for optimistic UI updates with automatic rollback
-  // useOptimistic automatically syncs with baseUserStatus when it changes
-  const [optimisticUserStatus, setOptimisticUserStatus] = useOptimistic<string | null, string>(
-    baseUserStatus,
-    (_currentStatus, newStatus: string) => newStatus,
-  )
-
-  // Use optimistic status for UI (useOptimistic handles base state internally)
-  const userStatus = optimisticUserStatus
-  const hasUserEvaluation = hasEvaluation && userStatus !== null
-
-  // Look up the currently rendered QA polygon so we can set/restore MapLibre feature-state
-  // on optimistic save. Same queryRenderedFeatures as useQaMapState, filtered to this areaId.
-  const queryRenderedQaFeature = () => {
-    if (!mainMap) return undefined
-    return mainMap.queryRenderedFeatures({
-      layers: [qaLayerId],
-      filter: ['==', ['get', 'id'], areaId],
-    })[0]
-  }
-
-  const applyOptimisticMapUpdate = (status: string) => {
-    const statusConfig = userStatusConfig[status as keyof typeof userStatusConfig]
-    if (!statusConfig) return
-
-    const targetFeature = queryRenderedQaFeature()
-    const currentMapData = mapDataQueryKey ? (queryClient.getQueryData(mapDataQueryKey) ?? []) : []
-    const payloadItem = currentMapData.find((item) => item.areaId === areaId)
-    const optimisticSystemStatus =
-      systemStatusLetter(targetFeature?.state?.systemStatus) ??
-      payloadItem?.systemStatus ??
-      QA_MAP_DEFAULT_STATUS.systemStatus
-
-    if (targetFeature && mainMap) {
-      safeSetFeatureState(mainMap, targetFeature, {
-        userStatus: USER_STATUS_TO_LETTER[status as keyof typeof USER_STATUS_TO_LETTER],
-        systemStatus: optimisticSystemStatus,
-      })
-    }
-
-    if (!mapDataQueryKey) return
-
-    queryClient.setQueryData(
-      mapDataQueryKey,
-      upsertQaMapDataRow(currentMapData, {
-        areaId,
-        systemStatus: optimisticSystemStatus,
-        userStatus: USER_STATUS_TO_LETTER[status as keyof typeof USER_STATUS_TO_LETTER],
-      }),
-    )
-  }
-
-  const { mutate: createEvaluationMutation, isPending } = useMutation({
-    mutationFn: (input: CreateQaEvaluationInput) => createQaEvaluationFn({ data: input }),
+  // Optimistic update: patch only the decided indicators' letters in the map payload cache
+  // (`applyQaDecisionsToMapRow`) — `useQaMapState` reacts to the cache change and repaints the
+  // cell with the current filters, so the feature-state doesn't need to be touched here directly.
+  const { mutateAsync: createEvaluationsMutation, isPending } = useMutation({
+    mutationFn: (input: {
+      configSlug: string
+      regionSlug: string
+      areaId: string
+      body?: string
+      decisions: QaEvaluationDecisionInput[]
+    }) => createQaEvaluationsFn({ data: input }),
     onMutate: (input) => {
-      const currentMapData = mapDataQueryKey
-        ? (queryClient.getQueryData(mapDataQueryKey) ?? [])
-        : []
+      if (!mapDataQueryKey) return {}
+      const currentMapData = queryClient.getQueryData<QaMapDataRow[]>(mapDataQueryKey) ?? []
       const previousRow = currentMapData.find((item) => item.areaId === areaId)
-      const targetFeature = queryRenderedQaFeature()
-      const previousFeatureState: QaMapFeatureStateSnapshot | undefined = targetFeature
-        ? {
-            userStatus: (targetFeature.state?.userStatus as string | null | undefined) ?? null,
-            systemStatus: (targetFeature.state?.systemStatus as string | null | undefined) ?? null,
-          }
-        : undefined
-
-      applyOptimisticMapUpdate(input.userStatus)
-      return {
-        previousRow: previousRow ? { ...previousRow } : undefined,
-        previousFeatureState,
-      }
+      const applyDefault = qaMapPayloadAppliesDefault({
+        search: qaParamData.search,
+        userIds: qaParamData.users,
+      })
+      const nextRow = applyQaDecisionsToMapRow(
+        previousRow,
+        areaId,
+        indicators,
+        input.decisions,
+        applyDefault,
+      )
+      queryClient.setQueryData(mapDataQueryKey, upsertQaMapDataRow(currentMapData, nextRow))
+      return { previousRow }
     },
     onSuccess: () => {
-      clearDraft()
-      onDraftSessionConsumed()
-      queryClient.invalidateQueries({ queryKey: evaluationsQueryKey })
+      queryClient.invalidateQueries({ queryKey: decisionDataQueryKey })
       // Area list, user dropdown, and map payload all derive from evaluations.
       queryClient.invalidateQueries({ queryKey: ['qa-configs'] })
     },
     onError: (error, _variables, context) => {
       if (mapDataQueryKey) {
-        const currentMapData = queryClient.getQueryData(mapDataQueryKey) ?? []
+        const currentMapData = queryClient.getQueryData<QaMapDataRow[]>(mapDataQueryKey) ?? []
         queryClient.setQueryData(
           mapDataQueryKey,
           restoreQaMapDataRow(currentMapData, areaId, context?.previousRow),
         )
       }
-
-      const targetFeature = queryRenderedQaFeature()
-      if (targetFeature && context?.previousFeatureState && mainMap) {
-        safeSetFeatureState(mainMap, targetFeature, context.previousFeatureState)
-      }
-
       toastError(error, 'QA-Bewertung konnte nicht gespeichert werden')
     },
   })
 
-  const handleSubmit = (values: { userStatus: string; comment?: string }) => {
-    const { userStatus: submittedStatus, comment: body } = values
-    setOptimisticUserStatus(submittedStatus)
-
-    createEvaluationMutation({
+  const handleSubmit = async (
+    decisions: QaEvaluationDecisionInput[],
+    comment: string | undefined,
+  ) => {
+    await createEvaluationsMutation({
       configSlug: qaParamData.key,
-      areaId: areaId,
-      regionSlug: regionSlug,
-      userStatus: submittedStatus as CreateQaEvaluationInput['userStatus'],
-      body,
-      decisionData: decisionData || undefined,
+      regionSlug,
+      areaId,
+      body: comment,
+      decisions,
     })
-
-    setShowForm(false)
   }
-
-  // Determine form visibility based on UX state
-  // Primary: System evaluation exists but no user evaluation
-  // Secondary: Everything else (no evaluation OR has user evaluation)
-  const shouldShowFormPrimary = hasEvaluation && systemStatus !== null && userStatus === null
-  const isFormVisible = shouldShowFormPrimary || (!shouldShowFormPrimary && showForm) || hasDraft
 
   return (
     <IntlProvider messages={translations} locale="de" defaultLocale="de">
-      <div className="flex flex-col gap-7 p-3 text-sm">
-        {isEvaluationsError ? (
-          <p className={modePanelMutedClassName}>Bewertungen konnten nicht geladen werden.</p>
-        ) : null}
+      {/* Text sizes of this panel: `text-sm` for content, `text-xs text-gray-500` for labels,
+          descriptions and times, and smaller only for the difference numbers (QaChange). */}
+      <div className="flex flex-col gap-4 p-3 text-sm">
         {isDecisionDataError ? (
           <p className={modePanelMutedClassName}>
             Bewertungsgrundlage konnte nicht geladen werden.
           </p>
         ) : null}
-        {latestEvaluation && (
-          <div>
-            <h4 className="mb-2 font-medium text-gray-900">Aktuelle Bewertung</h4>
-            <QaEvaluationCard evaluation={latestEvaluation} variant="header" />
-          </div>
-        )}
 
-        {decisionData && (
-          <div>
-            <div className="mb-2 flex items-center justify-between gap-2">
-              <h4 className="font-medium text-gray-900">Letzte Bewertungsgrundlage</h4>
-              {latestEvaluation && <TimeWithRelativeTooltip date={latestEvaluation.createdAt} />}
+        {decisionData && indicators.length === 0 ? (
+          <p className={modePanelMutedClassName}>
+            Für diesen Bereich liegen noch keine Werte vor. Entweder wurde die Konfiguration noch
+            nicht verarbeitet oder ihre Indikatoren haben noch keine Referenzwerte.
+          </p>
+        ) : decisionData ? (
+          <>
+            <QaIndicatorValues indicators={indicators} />
+            <div className="border-t border-gray-200 pt-3">
+              <QaDecisionForm
+                indicators={indicators}
+                onSubmit={handleSubmit}
+                isSubmitting={isPending}
+              />
             </div>
-            <QaDecisionDataComponent decisionData={decisionData} />
+            <QaThread entries={groupQaThread(indicators)} />
+          </>
+        ) : !isDecisionDataError ? (
+          <div className="flex items-center gap-2">
+            <SmallSpinner />
           </div>
-        )}
+        ) : null}
 
-        <section>
-          {!isReady ? (
-            <div className="flex items-center gap-2">
-              <SmallSpinner />
-            </div>
-          ) : isFormVisible ? (
-            <QaEvaluationForm
-              onSubmit={handleSubmit}
-              isLoading={isPending}
-              draftId={draftId}
-              defaultValues={
-                {
-                  userStatus: draftValues?.userStatus ?? '',
-                  comment: draftValues?.comment ?? '',
-                } satisfies { userStatus: string; comment: string }
-              }
-              saveDraft={saveDraft}
-            />
-          ) : (
-            <button
-              type="button"
-              onClick={() => setShowForm(true)}
-              className={buttonStylesOnYellow}
-            >
-              {hasUserEvaluation ? 'Bewertung aktualisieren' : 'Bewertung hinzufügen'}
-            </button>
-          )}
-        </section>
-
-        {evaluations && evaluations.length > 1 && (
-          <div>
-            <h4 className="mb-2 font-medium text-gray-900">
-              Bewertungsverlauf ({evaluations.length - 1})
-            </h4>
-            <QaEvaluationHistory evaluations={evaluations} />
-          </div>
-        )}
-        <AdminLogDataButton data={{ areaId, decisionData, evaluations }} />
+        <AdminLogDataButton data={{ areaId, decisionData }} />
       </div>
     </IntlProvider>
   )

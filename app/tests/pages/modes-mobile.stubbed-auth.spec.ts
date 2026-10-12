@@ -52,7 +52,7 @@ test.describe('Region modes (mobile)', () => {
       await page.getByRole('menuitem', { name: 'Hinweise' }).click()
 
       await expect(page).toHaveURL(/\/regionen\/woldegk\/hinweise/)
-      await expect(page.getByRole('heading', { name: 'Hinweise' })).toBeVisible({ timeout: 30_000 })
+      await expect(page.getByRole('region', { name: 'Hinweise' })).toBeVisible({ timeout: 30_000 })
       await expect(page.getByLabel('Modus-Panel')).toHaveAttribute('data-expanded', 'true')
       await expect(page.getByRole('dialog')).toHaveCount(0)
       await expect(page.locator('.maplibregl-canvas').first()).toBeVisible()
@@ -60,7 +60,7 @@ test.describe('Region modes (mobile)', () => {
       await page.getByRole('button', { name: /^Modus:/ }).click()
       await page.getByRole('menuitem', { name: 'Karte' }).click()
       await expect(page).toHaveURL(/\/regionen\/woldegk\/?(?:\?|$)/)
-      await expect(page.getByRole('heading', { name: 'Hinweise' })).toHaveCount(0)
+      await expect(page.getByRole('region', { name: 'Hinweise' })).toHaveCount(0)
 
       await expectNoConsoleErrors(page)
     })

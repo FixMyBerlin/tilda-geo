@@ -6,13 +6,15 @@ import {
   photoTypeColorExpression,
   yearsAgoMs,
   type DateRange,
+  type PhotoTypeFilter,
 } from '@osm-editor-kit/street-imagery'
 import type { DataDrivenPropertyValueSpecification } from 'maplibre-gl'
 import { streetImageryDefaultMaxAgeYears, type StreetImageryStyleId } from './streetImageryParam'
 
 type StreetImageryStyle = {
   name: string
-  legend: { id: string; name: string; color: string }[]
+  /** Entries with a `photoType` filter the photos to that type when clicked. */
+  legend: { id: string; name: string; color: string; photoType?: PhotoTypeFilter }[]
   /** Colour of the view shapes; zoomed out also of dots and lines. */
   color: DataDrivenPropertyValueSpecification<string>
 }
@@ -33,8 +35,18 @@ export const getStreetImageryStyle = (
     return {
       name: streetImageryStyleNames.type,
       legend: [
-        { id: 'flat', name: 'Klassische Fotos', color: PHOTO_TYPE_COLORS.flat },
-        { id: 'panorama', name: '360° Fotos', color: PHOTO_TYPE_COLORS.panorama },
+        {
+          id: 'flat',
+          name: 'Klassische Fotos',
+          color: PHOTO_TYPE_COLORS.flat,
+          photoType: 'flat',
+        },
+        {
+          id: 'panorama',
+          name: '360° Fotos',
+          color: PHOTO_TYPE_COLORS.panorama,
+          photoType: 'pano',
+        },
       ],
       color: photoTypeColorExpression,
     }
