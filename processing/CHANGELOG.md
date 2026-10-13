@@ -4,6 +4,10 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-10
 
+### `roads`, `routing`, `bikelanes`
+
+- Fix: `maxspeed` is now read from `zone:maxspeed` (e.g. `DE:30`, `30`) and from `source:maxspeed=DE:zone:30` (colon form) when the way has no `maxspeed` tag. Before, these values gave no `maxspeed`.
+
 ### `parkings`
 
 - Tagged `capacity` of a parking line that is cut into several segments: the rounding remainder goes to the longest segment. When two segments have exactly the same length, the one with the lower segment id now gets it. Before, the choice was random, so `capacity` could move between the two segments from one run to the next. The sum per parking line is unchanged.
