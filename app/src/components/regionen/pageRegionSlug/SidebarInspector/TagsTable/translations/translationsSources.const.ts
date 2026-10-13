@@ -11,7 +11,4 @@ export const translationsSources = {
   'atlas_roads--part--key': 'Netz',
   'atlas_roads--part=roads': 'Straßen',
   'atlas_roads--part=paths': 'Wege',
-  'atlas_bicycleParking--part--key': 'Erfasst als',
-  'atlas_bicycleParking--part=points': 'Punkt',
-  'atlas_bicycleParking--part=areas': 'Fläche',
 }

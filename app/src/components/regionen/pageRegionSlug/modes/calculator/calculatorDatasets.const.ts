@@ -182,6 +182,8 @@ const calculatorDatasets: CalculatorDataset[] = [
     categoryIds: ['bicycleParking'],
     measureDatasets: ['bicycle_parking'],
     sumKeys: { capacity: 'Stellplätze' },
+    // Only the points: a bicycle parking mapped as an area is in `bicycleParking_points` as well,
+    // as the point at its centroid.
     parts: [
       part({
         id: 'points',
@@ -189,13 +191,6 @@ const calculatorDatasets: CalculatorDataset[] = [
         sourceLayer: 'bicycleParking_points',
         groupByKeys: ['bicycle_parking', 'covered', 'access'],
         layers: pointLayers(partColors[0]),
-      }),
-      part({
-        id: 'areas',
-        sourceId: 'atlas_bicycleParking',
-        sourceLayer: 'bicycleParking_areas',
-        groupByKeys: ['bicycle_parking', 'covered', 'access'],
-        layers: areaLayers(partColors[1]),
       }),
     ],
     defaultFilter: {},
