@@ -147,11 +147,6 @@ export const tilesetConfigs: Record<
     uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.ackli54b/#14/52.51622/13.37036',
     bbox: bboxBrandenburg,
   },
-  parkings_quantized: {
-    sourceLayer: 'parkings_quantized',
-    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.7k74d6ok/#14/52.51622/13.37036',
-    bbox: bboxNeukoelln,
-  },
   parkings_separate: {
     sourceLayer: 'parkings_separate',
     uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.aizmu2ft/#14/52.51622/13.37036',
@@ -181,10 +176,5 @@ export const tilesetConfigs: Record<
     sourceLayer: 'off_street_parking_area_labels',
     uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.8w7zl0bm/#14/52.51622/13.37036',
     bbox: bboxBrandenburg,
-  },
-  off_street_parking_quantized: {
-    sourceLayer: 'off_street_parking_quantized',
-    uploadUrl: 'https://studio.mapbox.com/tilesets/hejco.TODO/#14/52.51622/13.37036', // TODO: Replace with actual tileset URL
-    bbox: bboxPartOfNorthGermany,
   },
 }

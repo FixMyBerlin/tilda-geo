@@ -11,6 +11,7 @@ import { Link } from '@/components/shared/links/Link'
 import { toastSuccess } from '@/components/shared/toast/toastSuccess'
 import { adminNavCountsQueryOptions } from '@/server/admin/adminNavQueryOptions'
 import { deleteQaConfigFn } from '@/server/qa-configs/qa-configs.functions'
+import { qaDatasets } from '@/server/qa-configs/qaDatasets.const'
 import type { getQaConfigsForAdmin } from '@/server/qa-configs/queries/getQaConfigsForAdmin.server'
 import { fractionToPercent } from '@/shared/qaThresholdPercent'
 import { QaConfigStatusPill } from './QaConfigStatusPill'
@@ -21,11 +22,28 @@ const header = [
   'Name',
   'Region',
   'Status',
-  'Kartentabelle',
-  'Schwellen',
+  'Datensatz',
+  'Indikatoren',
   { id: 'evaluations', label: 'Bewertungen', align: 'right' as const },
   { id: 'actions', label: 'Aktionen', srOnly: true, align: 'right' as const },
 ]
+
+/** Compact per-indicator summary, e.g. "total · 10 % / 20 % / ±4 Stellplätze". */
+function QaConfigIndicatorsSummary({ config }: { config: QaConfigRow }) {
+  return (
+    <ul className="space-y-0.5">
+      {config.indicators.map((indicator) => (
+        <li key={indicator.key} className="whitespace-nowrap">
+          <code className="text-xs">{indicator.key}</code>
+          {' · '}
+          {fractionToPercent(indicator.goodThreshold)} % /{' '}
+          {fractionToPercent(indicator.needsReviewThreshold)} % / ±
+          {indicator.absoluteDifferenceThreshold} {qaDatasets[config.dataset].unit}
+        </li>
+      ))}
+    </ul>
+  )
+}
 
 export function QaConfigsTable({ qaConfigs }: { qaConfigs: QaConfigRow[] }) {
   const router = useRouter()
@@ -61,12 +79,12 @@ export function QaConfigsTable({ qaConfigs }: { qaConfigs: QaConfigRow[] }) {
             <QaConfigStatusPill isActive={config.isActive} />
           </td>
           <td className={adminTableClasses.td}>
-            <code className="text-xs break-all">{config.mapTable}</code>
+            <span className="block">{qaDatasets[config.dataset].label}</span>
+            <code className="block text-xs break-all text-gray-500">{config.areaTable}</code>
+            <code className="block text-xs break-all text-gray-500">{config.referenceTable}</code>
           </td>
-          <td className={twJoin(adminTableClasses.td, 'whitespace-nowrap tabular-nums')}>
-            {fractionToPercent(config.goodThreshold)} % /{' '}
-            {fractionToPercent(config.needsReviewThreshold)} % · ±
-            {config.absoluteDifferenceThreshold}
+          <td className={twJoin(adminTableClasses.td, 'tabular-nums')}>
+            <QaConfigIndicatorsSummary config={config} />
           </td>
           <td className={twJoin(adminTableClasses.td, 'text-right tabular-nums')}>
             {config._count.qaEvaluations.toLocaleString('de-DE')}

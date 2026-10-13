@@ -24,7 +24,7 @@ const validSqlSpec = {
       'Generated on production by docs/qa_create_new_voronoi_baseline.sql, then exported as a SQL dump.',
   },
   indexes: [{ name: 'euvm_qa_voronoi_2026_geom_idx', using: 'gist', columns: ['geom'] }],
-  consumedBy: 'processing/topics/parking/9_qa_parkings_euvm_voronoi.sql',
+  consumedBy: 'processing/topics/parking/9_qa_parkings.sql',
 }
 
 describe('parseDataSchemaSpec', () => {
@@ -80,7 +80,7 @@ describe('parseDataSchemaSpec', () => {
     const spec = parseDataSchemaSpec(validSqlSpec, 'euvm_qa_voronoi_2026')
     expect(spec.source.file).toBe('euvm_qa_voronoi_2026.sql')
     expect(spec.import).toBeUndefined()
-    expect(spec.consumedBy).toBe('processing/topics/parking/9_qa_parkings_euvm_voronoi.sql')
+    expect(spec.consumedBy).toBe('processing/topics/parking/9_qa_parkings.sql')
   })
 
   it('rejects a .geojson source without an import block', () => {

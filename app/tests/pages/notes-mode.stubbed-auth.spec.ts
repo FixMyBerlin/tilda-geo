@@ -54,7 +54,7 @@ test.describe('Notes mode – note folders (stubbed admin login)', () => {
 
       // Rename it via the header "Ordner verwalten" menu.
       await page.getByRole('button', { name: 'Ordner verwalten' }).click()
-      await page.getByRole('button', { name: 'Umbenennen' }).click()
+      await page.getByRole('menuitem', { name: 'Umbenennen' }).click()
       await page.getByLabel('Name').fill(renamedFolderName)
       await page.getByRole('button', { name: 'Speichern' }).click()
       await expect(
@@ -62,7 +62,8 @@ test.describe('Notes mode – note folders (stubbed admin login)', () => {
       ).toBeVisible({ timeout: 10_000 })
 
       // Create a note inside the renamed folder.
-      await page.getByRole('button', { name: 'Neuer Hinweis' }).click()
+      // An empty folder shows a second "Neuer Hinweis" button in the list; the first is the header's.
+      await page.getByRole('button', { name: 'Neuer Hinweis' }).first().click()
       await expect(page.getByRole('heading', { name: 'Neuer interner Hinweis' })).toBeVisible()
       await page.getByPlaceholder('Betreff').fill(noteSubject)
       await page.getByPlaceholder('Hinweis').fill('E2E-Testinhalt für den Ordner-Workflow.')
@@ -91,7 +92,7 @@ test.describe('Notes mode – note folders (stubbed admin login)', () => {
       ).toBeVisible({ timeout: 10_000 })
 
       await page.getByRole('button', { name: 'Ordner verwalten' }).click()
-      const deleteButton = page.getByRole('button', { name: 'Löschen' })
+      const deleteButton = page.getByRole('menuitem', { name: 'Löschen' })
       await expect(deleteButton).toBeEnabled()
       await deleteButton.click()
 

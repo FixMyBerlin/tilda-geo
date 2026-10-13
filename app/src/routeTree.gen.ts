@@ -43,6 +43,7 @@ import { Route as AdminPrivateBackgroundsRouteImport } from './routes/admin/priv
 import { Route as AdminNoteFoldersRouteImport } from './routes/admin/note-folders'
 import { Route as AdminMapDatasetUploadsRouteImport } from './routes/admin/map-dataset-uploads'
 import { Route as AdminMapDatasetCategoriesRouteImport } from './routes/admin/map-dataset-categories'
+import { Route as AdminLayerOrderRouteImport } from './routes/admin/layer-order'
 import { Route as AdminDataSchemaRouteImport } from './routes/admin/data-schema'
 import { Route as AdminAuditLogRouteImport } from './routes/admin/audit-log'
 import { Route as AdminApiTokensRouteImport } from './routes/admin/api-tokens'
@@ -65,6 +66,7 @@ import { Route as AdminMapDatasetCategoriesIndexRouteImport } from './routes/adm
 import { Route as RegionenRegionSlugSummierenRouteImport } from './routes/regionen/$regionSlug/summieren'
 import { Route as RegionenRegionSlugQaRouteImport } from './routes/regionen/$regionSlug/qa'
 import { Route as RegionenRegionSlugPrueflistenRouteImport } from './routes/regionen/$regionSlug/prueflisten'
+import { Route as RegionenRegionSlugMessenRouteImport } from './routes/regionen/$regionSlug/messen'
 import { Route as RegionenRegionSlugHinweiseRouteImport } from './routes/regionen/$regionSlug/hinweise'
 import { Route as ApiUploadsCreateRouteImport } from './routes/api/uploads.create'
 import { Route as ApiUploadsSlugRouteImport } from './routes/api/uploads.$slug'
@@ -293,6 +295,11 @@ const AdminMapDatasetCategoriesRoute =
     path: '/map-dataset-categories',
     getParentRoute: () => AdminRoute,
   } as any)
+const AdminLayerOrderRoute = AdminLayerOrderRouteImport.update({
+  id: '/layer-order',
+  path: '/layer-order',
+  getParentRoute: () => AdminRoute,
+} as any)
 const AdminDataSchemaRoute = AdminDataSchemaRouteImport.update({
   id: '/data-schema',
   path: '/data-schema',
@@ -407,6 +414,12 @@ const RegionenRegionSlugPrueflistenRoute =
   RegionenRegionSlugPrueflistenRouteImport.update({
     id: '/prueflisten',
     path: '/prueflisten',
+    getParentRoute: () => RegionenRegionSlugRouteRoute,
+  } as any)
+const RegionenRegionSlugMessenRoute =
+  RegionenRegionSlugMessenRouteImport.update({
+    id: '/messen',
+    path: '/messen',
     getParentRoute: () => RegionenRegionSlugRouteRoute,
   } as any)
 const RegionenRegionSlugHinweiseRoute =
@@ -733,6 +746,7 @@ export interface FileRoutesByFullPath {
   '/admin/api-tokens': typeof AdminApiTokensRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/data-schema': typeof AdminDataSchemaRoute
+  '/admin/layer-order': typeof AdminLayerOrderRoute
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesRouteWithChildren
   '/admin/map-dataset-uploads': typeof AdminMapDatasetUploadsRouteWithChildren
   '/admin/note-folders': typeof AdminNoteFoldersRouteWithChildren
@@ -792,6 +806,7 @@ export interface FileRoutesByFullPath {
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
   '/regionen/$regionSlug/hinweise': typeof RegionenRegionSlugHinweiseRoute
+  '/regionen/$regionSlug/messen': typeof RegionenRegionSlugMessenRoute
   '/regionen/$regionSlug/prueflisten': typeof RegionenRegionSlugPrueflistenRoute
   '/regionen/$regionSlug/qa': typeof RegionenRegionSlugQaRoute
   '/regionen/$regionSlug/summieren': typeof RegionenRegionSlugSummierenRoute
@@ -843,6 +858,7 @@ export interface FileRoutesByTo {
   '/admin/api-tokens': typeof AdminApiTokensRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/data-schema': typeof AdminDataSchemaRoute
+  '/admin/layer-order': typeof AdminLayerOrderRoute
   '/api/boundary': typeof ApiBoundaryRoute
   '/api/campaigns': typeof ApiCampaignsRoute
   '/api/map-style': typeof ApiMapStyleRoute
@@ -892,6 +908,7 @@ export interface FileRoutesByTo {
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
   '/regionen/$regionSlug/hinweise': typeof RegionenRegionSlugHinweiseRoute
+  '/regionen/$regionSlug/messen': typeof RegionenRegionSlugMessenRoute
   '/regionen/$regionSlug/prueflisten': typeof RegionenRegionSlugPrueflistenRoute
   '/regionen/$regionSlug/qa': typeof RegionenRegionSlugQaRoute
   '/regionen/$regionSlug/summieren': typeof RegionenRegionSlugSummierenRoute
@@ -948,6 +965,7 @@ export interface FileRoutesById {
   '/admin/api-tokens': typeof AdminApiTokensRoute
   '/admin/audit-log': typeof AdminAuditLogRoute
   '/admin/data-schema': typeof AdminDataSchemaRoute
+  '/admin/layer-order': typeof AdminLayerOrderRoute
   '/admin/map-dataset-categories': typeof AdminMapDatasetCategoriesRouteWithChildren
   '/admin/map-dataset-uploads': typeof AdminMapDatasetUploadsRouteWithChildren
   '/admin/note-folders': typeof AdminNoteFoldersRouteWithChildren
@@ -1007,6 +1025,7 @@ export interface FileRoutesById {
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
   '/regionen/$regionSlug/hinweise': typeof RegionenRegionSlugHinweiseRoute
+  '/regionen/$regionSlug/messen': typeof RegionenRegionSlugMessenRoute
   '/regionen/$regionSlug/prueflisten': typeof RegionenRegionSlugPrueflistenRoute
   '/regionen/$regionSlug/qa': typeof RegionenRegionSlugQaRoute
   '/regionen/$regionSlug/summieren': typeof RegionenRegionSlugSummierenRoute
@@ -1063,6 +1082,7 @@ export interface FileRouteTypes {
     | '/admin/api-tokens'
     | '/admin/audit-log'
     | '/admin/data-schema'
+    | '/admin/layer-order'
     | '/admin/map-dataset-categories'
     | '/admin/map-dataset-uploads'
     | '/admin/note-folders'
@@ -1122,6 +1142,7 @@ export interface FileRouteTypes {
     | '/api/uploads/$slug'
     | '/api/uploads/create'
     | '/regionen/$regionSlug/hinweise'
+    | '/regionen/$regionSlug/messen'
     | '/regionen/$regionSlug/prueflisten'
     | '/regionen/$regionSlug/qa'
     | '/regionen/$regionSlug/summieren'
@@ -1173,6 +1194,7 @@ export interface FileRouteTypes {
     | '/admin/api-tokens'
     | '/admin/audit-log'
     | '/admin/data-schema'
+    | '/admin/layer-order'
     | '/api/boundary'
     | '/api/campaigns'
     | '/api/map-style'
@@ -1222,6 +1244,7 @@ export interface FileRouteTypes {
     | '/api/uploads/$slug'
     | '/api/uploads/create'
     | '/regionen/$regionSlug/hinweise'
+    | '/regionen/$regionSlug/messen'
     | '/regionen/$regionSlug/prueflisten'
     | '/regionen/$regionSlug/qa'
     | '/regionen/$regionSlug/summieren'
@@ -1277,6 +1300,7 @@ export interface FileRouteTypes {
     | '/admin/api-tokens'
     | '/admin/audit-log'
     | '/admin/data-schema'
+    | '/admin/layer-order'
     | '/admin/map-dataset-categories'
     | '/admin/map-dataset-uploads'
     | '/admin/note-folders'
@@ -1336,6 +1360,7 @@ export interface FileRouteTypes {
     | '/api/uploads/$slug'
     | '/api/uploads/create'
     | '/regionen/$regionSlug/hinweise'
+    | '/regionen/$regionSlug/messen'
     | '/regionen/$regionSlug/prueflisten'
     | '/regionen/$regionSlug/qa'
     | '/regionen/$regionSlug/summieren'
@@ -1662,6 +1687,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminMapDatasetCategoriesRouteImport
       parentRoute: typeof AdminRoute
     }
+    '/admin/layer-order': {
+      id: '/admin/layer-order'
+      path: '/layer-order'
+      fullPath: '/admin/layer-order'
+      preLoaderRoute: typeof AdminLayerOrderRouteImport
+      parentRoute: typeof AdminRoute
+    }
     '/admin/data-schema': {
       id: '/admin/data-schema'
       path: '/data-schema'
@@ -1814,6 +1846,13 @@ declare module '@tanstack/react-router' {
       path: '/prueflisten'
       fullPath: '/regionen/$regionSlug/prueflisten'
       preLoaderRoute: typeof RegionenRegionSlugPrueflistenRouteImport
+      parentRoute: typeof RegionenRegionSlugRouteRoute
+    }
+    '/regionen/$regionSlug/messen': {
+      id: '/regionen/$regionSlug/messen'
+      path: '/messen'
+      fullPath: '/regionen/$regionSlug/messen'
+      preLoaderRoute: typeof RegionenRegionSlugMessenRouteImport
       parentRoute: typeof RegionenRegionSlugRouteRoute
     }
     '/regionen/$regionSlug/hinweise': {
@@ -2389,6 +2428,7 @@ interface AdminRouteChildren {
   AdminApiTokensRoute: typeof AdminApiTokensRoute
   AdminAuditLogRoute: typeof AdminAuditLogRoute
   AdminDataSchemaRoute: typeof AdminDataSchemaRoute
+  AdminLayerOrderRoute: typeof AdminLayerOrderRoute
   AdminMapDatasetCategoriesRoute: typeof AdminMapDatasetCategoriesRouteWithChildren
   AdminMapDatasetUploadsRoute: typeof AdminMapDatasetUploadsRouteWithChildren
   AdminNoteFoldersRoute: typeof AdminNoteFoldersRouteWithChildren
@@ -2407,6 +2447,7 @@ const AdminRouteChildren: AdminRouteChildren = {
   AdminApiTokensRoute: AdminApiTokensRoute,
   AdminAuditLogRoute: AdminAuditLogRoute,
   AdminDataSchemaRoute: AdminDataSchemaRoute,
+  AdminLayerOrderRoute: AdminLayerOrderRoute,
   AdminMapDatasetCategoriesRoute: AdminMapDatasetCategoriesRouteWithChildren,
   AdminMapDatasetUploadsRoute: AdminMapDatasetUploadsRouteWithChildren,
   AdminNoteFoldersRoute: AdminNoteFoldersRouteWithChildren,
@@ -2446,6 +2487,7 @@ const PreviewRouteWithChildren =
 
 interface RegionenRegionSlugRouteRouteChildren {
   RegionenRegionSlugHinweiseRoute: typeof RegionenRegionSlugHinweiseRoute
+  RegionenRegionSlugMessenRoute: typeof RegionenRegionSlugMessenRoute
   RegionenRegionSlugPrueflistenRoute: typeof RegionenRegionSlugPrueflistenRoute
   RegionenRegionSlugQaRoute: typeof RegionenRegionSlugQaRoute
   RegionenRegionSlugSummierenRoute: typeof RegionenRegionSlugSummierenRoute
@@ -2455,6 +2497,7 @@ interface RegionenRegionSlugRouteRouteChildren {
 const RegionenRegionSlugRouteRouteChildren: RegionenRegionSlugRouteRouteChildren =
   {
     RegionenRegionSlugHinweiseRoute: RegionenRegionSlugHinweiseRoute,
+    RegionenRegionSlugMessenRoute: RegionenRegionSlugMessenRoute,
     RegionenRegionSlugPrueflistenRoute: RegionenRegionSlugPrueflistenRoute,
     RegionenRegionSlugQaRoute: RegionenRegionSlugQaRoute,
     RegionenRegionSlugSummierenRoute: RegionenRegionSlugSummierenRoute,

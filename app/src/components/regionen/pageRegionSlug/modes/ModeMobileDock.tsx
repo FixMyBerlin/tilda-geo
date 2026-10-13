@@ -9,6 +9,7 @@ import { mapOverlayHairlineClassName } from '../mapOverlayChrome.const'
 import { SheetGrabHandle } from '../mobile/SheetGrabHandle'
 import { useInspectorRenderableFeatures } from '../SidebarInspector/useInspectorRenderableFeatures'
 import { useCalculatorNeedsArea } from './calculator/useCalculatorNeedsArea'
+import { useMeasureNeedsShape } from './measure/useMeasureNeedsShape'
 import { modeIdentity } from './modeIdentity'
 import { applyModeMapCameraPadding, resetModeMapCameraPadding } from './modeMapCameraPadding'
 import { modeMobileDockElevationClassName } from './modePanel.const'
@@ -35,9 +36,11 @@ export const ModeMobileDock = () => {
   const inspectorOpen = useInspectorRenderableFeatures().length > 0
   const notesComposeActive = useNotesComposeActive()
   const reviewDrawActive = useReviewDrawActive()
-  // Summieren: the map is needed until the first area exists; then the result opens.
+  // Summieren and Messen: the map is needed until the first shape exists; then the result opens.
   const calculatorNeedsArea = useCalculatorNeedsArea()
-  const composeOrDraw = notesComposeActive || reviewDrawActive || calculatorNeedsArea
+  const measureNeedsShape = useMeasureNeedsShape()
+  const composeOrDraw =
+    notesComposeActive || reviewDrawActive || calculatorNeedsArea || measureNeedsShape
   const [userExpanded, setUserExpanded] = useState(() => !composeOrDraw)
   const [composeOrDrawSeen, setComposeOrDrawSeen] = useState(composeOrDraw)
   const dragControls = useDragControls()

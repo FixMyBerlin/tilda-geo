@@ -2,7 +2,10 @@ import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { z } from 'zod'
 import { createQaConfigWithData } from './mutations/createQaConfig.server'
-import { CreateQaEvaluationSchema, createQaEvaluation } from './mutations/createQaEvaluation.server'
+import {
+  CreateQaEvaluationsSchema,
+  createQaEvaluations,
+} from './mutations/createQaEvaluations.server'
 import { deleteQaConfig } from './mutations/deleteQaConfig.server'
 import { updateQaConfigWithData } from './mutations/updateQaConfig.server'
 import {
@@ -13,11 +16,12 @@ import { getQaAreaList, QaAreaListSchema } from './queries/getQaAreaList.server'
 import { getQaConfigsForRegion } from './queries/getQaConfigsForRegion.server'
 import { getQaDataForMap } from './queries/getQaDataForMap.server'
 import { getQaDecisionDataForArea } from './queries/getQaDecisionDataForArea.server'
-import { getQaEvaluationsForArea } from './queries/getQaEvaluationsForArea.server'
 import { getQaUsersForConfig } from './queries/getQaUsersForConfig.server'
+import {
+  PreviewQaIndicatorThresholdsSchema,
+  previewQaIndicatorThresholds,
+} from './queries/previewQaIndicatorThresholds.server'
 import { CreateQaConfigFormSchema, DeleteQaConfigSchema, UpdateQaConfigFormSchema } from './schemas'
-
-export type CreateQaEvaluationInput = z.infer<typeof CreateQaEvaluationSchema>
 
 const QaDataForMapInput = z.object({
   configSlug: z.string(),
@@ -45,10 +49,6 @@ export const getQaUsersForConfigFn = createServerFn({ method: 'GET' })
   .validator((data: z.infer<typeof QaUsersForConfigInput>) => QaUsersForConfigInput.parse(data))
   .handler(async ({ data }) => getQaUsersForConfig(data, getRequestHeaders()))
 
-export const getQaEvaluationsForAreaFn = createServerFn({ method: 'GET' })
-  .validator((data: z.infer<typeof QaAreaInput>) => QaAreaInput.parse(data))
-  .handler(async ({ data }) => getQaEvaluationsForArea(data, getRequestHeaders()))
-
 export const getQaDecisionDataForAreaFn = createServerFn({ method: 'GET' })
   .validator((data: z.infer<typeof QaAreaInput>) => QaAreaInput.parse(data))
   .handler(async ({ data }) => getQaDecisionDataForArea(data, getRequestHeaders()))
@@ -59,11 +59,11 @@ export const getQaConfigsForRegionFn = createServerFn({ method: 'GET' })
   )
   .handler(async ({ data }) => getQaConfigsForRegion(data, getRequestHeaders()))
 
-export const createQaEvaluationFn = createServerFn({ method: 'POST' })
-  .validator((data: z.infer<typeof CreateQaEvaluationSchema>) =>
-    CreateQaEvaluationSchema.parse(data),
+export const createQaEvaluationsFn = createServerFn({ method: 'POST' })
+  .validator((data: z.infer<typeof CreateQaEvaluationsSchema>) =>
+    CreateQaEvaluationsSchema.parse(data),
   )
-  .handler(async ({ data }) => createQaEvaluation(data, getRequestHeaders()))
+  .handler(async ({ data }) => createQaEvaluations(data, getRequestHeaders()))
 
 export const createQaConfigFn = createServerFn({ method: 'POST' })
   .validator((data: z.input<typeof CreateQaConfigFormSchema>) =>
@@ -86,3 +86,11 @@ export const updateQaEvaluationBodyFn = createServerFn({ method: 'POST' })
     UpdateQaEvaluationBodySchema.parse(data),
   )
   .handler(async ({ data }) => updateQaEvaluationBody(data, getRequestHeaders()))
+
+// Admin-only threshold workbench preview — POST because it is an explicit action
+// triggered by a button, not page data.
+export const previewQaIndicatorThresholdsFn = createServerFn({ method: 'POST' })
+  .validator((data: z.infer<typeof PreviewQaIndicatorThresholdsSchema>) =>
+    PreviewQaIndicatorThresholdsSchema.parse(data),
+  )
+  .handler(async ({ data }) => previewQaIndicatorThresholds(data, getRequestHeaders()))

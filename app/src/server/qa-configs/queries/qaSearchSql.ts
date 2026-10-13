@@ -1,6 +1,7 @@
-type SqlFragment = {
+/** A SQL condition plus the params it binds, for callers composing a larger query. */
+export type SqlFragment = {
   sql: string
-  params: string[]
+  params: unknown[]
 }
 
 /** Case-insensitive search over area id, evaluator OSM name, and evaluation body. */

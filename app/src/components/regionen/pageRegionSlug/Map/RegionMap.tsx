@@ -31,6 +31,8 @@ import {
   interactivityConfiguration,
   type InteracitvityConfiguartion,
 } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/generalization/interacitvityConfiguartion'
+import { useMeasureDraw } from '@/components/regionen/pageRegionSlug/modes/measure/drawing/useMeasureDraw'
+import { MeasureMap } from '@/components/regionen/pageRegionSlug/modes/measure/MeasureMap'
 import { createInspectorFeatureKey } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/createInspectorFeatureKey'
 import { isDev, isProd } from '@/components/shared/utils/isEnv'
 import {
@@ -58,18 +60,10 @@ import {
 import { useStreetImageryParam } from '../streetImagery/useStreetImageryParam'
 import { Map3dTouchRotation } from './Map3dTouchRotation'
 import { SearchResultLayers } from './Search/SearchResultLayers'
+import { AllLayers } from './SourcesAndLayers/AllLayers'
+import { AllSources } from './SourcesAndLayers/AllSources'
 import { MAPTERHORN_DEM_SOURCE_ID } from './SourcesAndLayers/mapterhornDem'
-import { SourcesLayerRasterBackgrounds } from './SourcesAndLayers/SourcesLayerRasterBackgrounds'
-import { SourcesLayersAtlasGeo } from './SourcesAndLayers/SourcesLayersAtlasGeo'
-import { SourcesLayersInternalNotes } from './SourcesAndLayers/SourcesLayersInternalNotes'
-import { SourcesLayersMap3dBuildings } from './SourcesAndLayers/SourcesLayersMap3dBuildings'
-import { SourcesLayersMap3dDem } from './SourcesAndLayers/SourcesLayersMap3dDem'
-import { SourcesLayersOsmNotes } from './SourcesAndLayers/SourcesLayersOsmNotes'
-import { SourcesLayersQa } from './SourcesAndLayers/SourcesLayersQa'
 import { SourcesLayersReviewEntries } from './SourcesAndLayers/SourcesLayersReviewEntries'
-import { SourcesLayersStaticDatasets } from './SourcesAndLayers/SourcesLayersStaticDatasets'
-import { SourcesLayersStreetImagery } from './SourcesAndLayers/SourcesLayersStreetImagery'
-import { SourcesLayersSystemDatasets } from './SourcesAndLayers/SourcesLayersSystemDatasets'
 import { TerrainProfileHoverMarkerLayer } from './SourcesAndLayers/TerrainProfileHoverMarkerLayer'
 import { UpdateFeatureState } from './UpdateFeatureState'
 import { MASK_INTERACTIVE_LAYER_IDS } from './utils/maskLayerUtils'
@@ -123,6 +117,7 @@ export const RegionMap = () => {
 
   const inspectorFeatures = useMapInspectorFeatures()
   const calculatorDraw = useCalculatorDraw()
+  const measureDraw = useMeasureDraw()
   const { draw: reviewDraw } = useReviewDraw()
   const notesComposeActive = useNotesComposeActive()
   const reviewDrawActive = useReviewDrawActive()
@@ -220,7 +215,7 @@ export const RegionMap = () => {
     cursor: drawCursor,
     onMouseMove: drawOnMouseMove,
     ...drawMapProps
-  } = { ...calculatorDraw.mapProps, ...reviewDraw.mapProps }
+  } = { ...calculatorDraw.mapProps, ...measureDraw.mapProps, ...reviewDraw.mapProps }
 
   const handleMouseMove = (event: MapLayerMouseEvent) => {
     drawOnMouseMove?.(event)
@@ -295,13 +290,13 @@ export const RegionMap = () => {
     updateMapBounds(mainMap?.getBounds() || null)
   }
 
-  // In the Summieren mode, or while notes compose or review drawing is active, no layers are interactive:
+  // In the Summieren and Messen modes, or while notes compose or review drawing is active, no layers are interactive:
   // clicking/hovering the data does nothing and the inspector can't open
   // (queryRenderedFeatures returns none). This replaces a special-case guard in the click
   // handler with the map's own interactivity mechanism.
   const computedInteractiveLayerIds = useInteractiveLayers()
   const interactiveLayerIds =
-    currentMode.isCalculator || notesComposeActive || reviewDrawActive
+    currentMode.isCalculator || currentMode.isMeasure || notesComposeActive || reviewDrawActive
       ? NO_INTERACTIVE_LAYERS
       : [
           ...computedInteractiveLayerIds,
@@ -363,18 +358,10 @@ export const RegionMap = () => {
       minZoom={SIMPLIFY_MIN_ZOOM}
       attributionControl={false}
     >
-      {/* Order: First Background Sources, then Vector Tile Sources */}
+      {/* Order: <AllLayers> defines the stacking of the data layers; <AllSources> holds their Sources. */}
       <UpdateFeatureState />
-      <SourcesLayerRasterBackgrounds />
-      <SourcesLayersMap3dDem />
-      <SourcesLayersMap3dBuildings />
-      <SourcesLayersSystemDatasets />
-      <SourcesLayersAtlasGeo />
-      <SourcesLayersStaticDatasets />
-      <SourcesLayersStreetImagery />
-      <SourcesLayersOsmNotes />
-      <SourcesLayersInternalNotes />
-      <SourcesLayersQa />
+      <AllSources />
+      <AllLayers />
       <SearchResultLayers />
       <NotesNewRelatedGeometry />
       {/* Last in tree + moveLayer: stay above remounted highlights. Do not use this layer as beforeId. */}
@@ -384,6 +371,7 @@ export const RegionMap = () => {
       <AttributionControl compact={true} position="bottom-left" />
       <Map3dTouchRotation />
       {currentMode.isCalculator && <CalculatorMap />}
+      {currentMode.isMeasure && <MeasureMap />}
       {currentMode.isReviewLists && <ReviewMapDrawing />}
       {/* <GeolocateControl /> */}
       {/* <ScaleControl /> */}

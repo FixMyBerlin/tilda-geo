@@ -1,4 +1,4 @@
-import { isIsoDate, type DateRange } from '@osm-editor-kit/street-imagery'
+import { isIsoDate, type DateRange, type PhotoTypeFilter } from '@osm-editor-kit/street-imagery'
 import { format, subYears } from 'date-fns'
 import { z } from 'zod'
 
@@ -9,6 +9,8 @@ export type StreetImageryProviderId = (typeof streetImageryProviderIds)[number]
 export const streetImageryStyleIds = ['type', 'age'] as const
 export type StreetImageryStyleId = (typeof streetImageryStyleIds)[number]
 export const defaultStreetImageryStyle: StreetImageryStyleId = 'type'
+
+const streetImageryPhotoTypes = ['flat', 'pano'] as const satisfies PhotoTypeFilter[]
 
 /** Photos older than this are hidden until the user moves the date slider. */
 export const streetImageryDefaultMaxAgeYears = 2
@@ -21,6 +23,8 @@ export const zodStreetImageryParam = z.object({
   style: z.enum(streetImageryStyleIds).optional(),
   /** Absent: the default (last 2 years). `{}`: all dates. */
   date: z.object({ from: isoDate.optional(), to: isoDate.optional() }).optional(),
+  /** Only photos of this type. Absent: classic and 360° photos. */
+  photoType: z.enum(streetImageryPhotoTypes).optional(),
   /** The photo in the viewer. */
   photo: z
     .object({
@@ -42,6 +46,7 @@ export const compactStreetImageryParam = (value: StreetImageryParam) => {
     providers: value.providers,
     style: value.style === defaultStreetImageryStyle ? undefined : value.style,
     date: value.date,
+    photoType: value.photoType,
     photo: value.photo,
   } satisfies StreetImageryParam
 }

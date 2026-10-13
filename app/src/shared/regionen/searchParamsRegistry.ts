@@ -15,4 +15,5 @@ export const searchParamsRegistry = {
   photos: 'photos', // JSON: street imagery providers, style, date, shown photo (`streetImageryParam.ts`)
   review: 'review', // JSON: key, search, extent, status, source, new, move (`reviewListsModeParam.ts`)
   sum: 'sum', // JSON: key (dataset), filter, areas (`calculatorModeParam.ts`)
+  measure: 'measure', // JSON: lines, areas, bg (`measureModeParam.ts`)
 } as const

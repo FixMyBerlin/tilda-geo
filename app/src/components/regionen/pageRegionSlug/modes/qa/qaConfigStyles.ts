@@ -87,6 +87,9 @@ export const zodQaParam = z.object({
   key: z.string(),
   status: zodQaParamStatus.optional().catch(undefined),
   users: z.array(z.string()).optional().catch(undefined),
+  // Selected indicator keys (`QaConfig.indicators[].key`); absent or empty = all indicators, same
+  // convention as `users`. Dropped from the URL as soon as nothing is filtered out.
+  ind: z.array(z.string()).optional().catch(undefined),
   search: z.string().optional().catch(undefined),
   extent: z.enum(['view', 'all']).optional().catch(undefined),
 })
@@ -100,10 +103,15 @@ export const compactQaParam = (data: QaParamData) => {
   const next: QaParamData = { key: data.key }
   if (data.status) next.status = data.status
   if (data.users && data.users.length > 0) next.users = data.users
+  if (data.ind && data.ind.length > 0) next.ind = data.ind
   if (data.search) next.search = data.search
   if (data.extent && data.extent !== 'view') next.extent = data.extent
   return next
 }
+
+/** `undefined` = every indicator selected (the default, matching the compacted-away URL state). */
+export const resolvedQaIndicatorKeys = (ind: QaParamData['ind'], allKeys: readonly string[]) =>
+  ind && ind.length > 0 ? allKeys.filter((key) => ind.includes(key)) : [...allKeys]
 
 /** Missing URL status is the default filter, not Alle Status. */
 export const resolvedQaStatusSelectValue = (status: QaParamData['status']) =>

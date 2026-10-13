@@ -25,6 +25,23 @@ export type MapDataBackgroundSource<TIds> = {
   maxzoom?: RasterSourceSpecification['maxzoom']
   minzoom?: RasterSourceSpecification['minzoom']
   tileSize?: RasterSourceSpecification['tileSize']
+  scheme?: RasterSourceSpecification['scheme']
+  /** @desc `photo` marks an aerial image; the Messen mode picks its background from those. */
+  category?:
+    | 'photo'
+    | 'map'
+    | 'historicmap'
+    | 'osmbasedmap'
+    | 'historicphoto'
+    | 'qa'
+    | 'elevation'
+    | 'other'
+  /** @desc The Editor Layer Index recommends this layer for its area. */
+  best?: boolean
+  /** @desc When the image was taken, e.g. `2025` or `2025-04` (Editor Layer Index `end_date`). */
+  endDate?: string
+  /** @desc Coverage as `[west, south, east, north]`; missing for worldwide layers. */
+  bbox?: [number, number, number, number]
 }
 
 export type MapDataSourceInspectorEditor = {
@@ -51,21 +68,6 @@ type MapDataSourceInspector =
       enabled: false
     }
 
-export type MapDataSourceCalculator =
-  | {
-      enabled: true
-      sumKeys: Partial<Record<'capacity' | 'area' | 'length', string>>
-      groupByKeys: string[]
-      /** @desc The key used by the highlighting LayerHighlight component to change the appearance of the selected element */
-      highlightingKey: string
-    }
-  | {
-      enabled: false
-      sumKeys?: undefined
-      groupByKeys?: undefined
-      highlightingKey?: undefined
-    }
-
 export type MapDataOsmIdConfig =
   | undefined
   | { osmType: string; osmId: string }
@@ -85,12 +87,6 @@ type MapDataSourceShared<TIds> = {
   osmIdConfig: MapDataOsmIdConfig
   /** @desc Inspector: Enable and configure Inspector */
   inspector: MapDataSourceInspector
-  /** @desc Inspector: Enable info data on presence */
-  // presence: {
-  //   enabled: boolean
-  // }
-  /** @desc Calculator: Enable and configure calculator feature */
-  calculator: MapDataSourceCalculator
 }
 
 /** Processing tables; tile URL via `getMapDataSourceTilesUrl` (`atlas_generalized_*` PG functions). */
@@ -126,8 +122,23 @@ export type StaticMapDataCategory = {
 type StaticMapDataSubcategory = FileMapDataSubcategory & {
   id: SubcategoryId
   defaultStyle: 'default' | 'hidden'
-  // TODO: We might need to add a "mapOrder" value here to specify that "places" needs to be at the top on the map but at the bottom of the dropdown in the UI
+  // The order on the map is independent of the order in the UI, see /admin/layer-order.
 }
+
+// We have some layer without content in our Maptiler basemap style that can be used as an anchor.
+// Listed from the bottom of the map to the top.
+// Modify at https://cloud.maptiler.com/maps/editor?map=08357855-50d4-44e1-ac9f-ea099d9de4a5
+const ATLAS_APP_ANCHOR_IDS = [
+  'atlas-app-beforeid-above-landuse',
+  'atlas-app-beforeid-below-road',
+  'atlas-app-beforeid-below-roadname',
+  'atlas-app-beforeid-group2',
+  'atlas-app-beforeid-fallback',
+  'atlas-app-beforeid-group1',
+  'atlas-app-beforeid-top',
+] as const
+
+type AtlasAppAnchorId = (typeof ATLAS_APP_ANCHOR_IDS)[number]
 
 export type TBeforeIds =
   | 'housenumber'
@@ -135,15 +146,7 @@ export type TBeforeIds =
   | 'boundary_country'
   | 'landuse'
   | 'building'
-  // We have some layer without content that can be used as an anchor
-  // Modify at https://cloud.maptiler.com/maps/editor?map=08357855-50d4-44e1-ac9f-ea099d9de4a5
-  | 'atlas-app-beforeid-above-landuse'
-  | 'atlas-app-beforeid-below-road'
-  | 'atlas-app-beforeid-below-roadname'
-  | 'atlas-app-beforeid-group2'
-  | 'atlas-app-beforeid-fallback'
-  | 'atlas-app-beforeid-group1'
-  | 'atlas-app-beforeid-top'
+  | AtlasAppAnchorId
   | undefined
 
 /** @desc: Thematic "filter" on the raw vector tile data; eg. 'Radinfrastruktur, Oberflächen, Beleuchtung' */

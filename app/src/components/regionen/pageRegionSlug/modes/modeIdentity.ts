@@ -6,6 +6,7 @@ import {
   MapIcon,
 } from '@heroicons/react/24/outline'
 import type { ComponentType, SVGProps } from 'react'
+import { RulerIcon } from './measure/RulerIcon'
 import type { RegionMode } from './useCurrentMode'
 
 type ModeIcon = ComponentType<SVGProps<SVGSVGElement>>
@@ -104,6 +105,22 @@ export const modeIdentity = {
       invertedMutedClassName: 'text-white/80',
       tintClassName: 'bg-fuchsia-700/10',
       tintEmphasisClassName: 'bg-fuchsia-700/20',
+    },
+  },
+  measure: {
+    label: 'Messen',
+    shortLabel: 'Messen',
+    icon: RulerIcon,
+    compact: true,
+    accent: {
+      className: 'bg-orange-700',
+      textClassName: 'text-orange-700',
+      hex: '#c2410c',
+      rgb: [194, 65, 12],
+      invertedFgClassName: 'text-white',
+      invertedMutedClassName: 'text-white/80',
+      tintClassName: 'bg-orange-700/10',
+      tintEmphasisClassName: 'bg-orange-700/20',
     },
   },
 } as const satisfies Record<

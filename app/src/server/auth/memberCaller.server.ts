@@ -21,7 +21,7 @@ export type AdminApiCaller = {
 }
 
 /**
- * Who calls a member function (notes, Prüflisten): the request headers of our own frontend
+ * Who calls a member function (notes, Prüflisten, QA): the request headers of our own frontend
  * (session from the cookie), an external API request, or the admin MCP. All end up as a session
  * that the same member checks run against.
  */
@@ -35,7 +35,7 @@ export async function getMemberSession(caller: MemberCaller): Promise<SessionAct
   return caller instanceof Headers ? getAppSession(caller) : caller.session
 }
 
-/** For the admin-only functions of notes and Prüflisten (region links of folders and lists). */
+/** For the admin-only functions (region links of note folders and Prüflisten, QA configs). */
 export async function requireAdminSession(caller: MemberCaller): Promise<SessionActor> {
   if (caller instanceof Headers) return requireAdmin(caller)
   if (caller.session.role !== UserRoleEnum.ADMIN) {

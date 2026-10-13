@@ -10,6 +10,7 @@ import {
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParam'
 import { mapParamFallback } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/utils/mapParamFallback.const'
 import { zodCalculatorModeParam } from '@/components/regionen/pageRegionSlug/modes/calculator/calculatorModeParam'
+import { zodMeasureModeParam } from '@/components/regionen/pageRegionSlug/modes/measure/measureModeParam'
 import { zodNotesModeParam } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
 import {
   defaultQaParam,
@@ -82,6 +83,7 @@ export const regionSearchSchema = z.object({
   [searchParamsRegistry.notes]: optionalSearchJson(zodNotesModeParam),
   [searchParamsRegistry.review]: optionalSearchJson(zodReviewListsModeParam),
   [searchParamsRegistry.sum]: optionalSearchJson(zodCalculatorModeParam),
+  [searchParamsRegistry.measure]: optionalSearchJson(zodMeasureModeParam),
   [searchParamsRegistry.photos]: optionalSearchJson(zodStreetImageryParam),
 })
 

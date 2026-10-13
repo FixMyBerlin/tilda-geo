@@ -20,7 +20,7 @@ type Props<T extends Record<string, unknown>> = {
 /**
  * Percent number input (0–100) with a visible "%" suffix. The field value stays the percent
  * string the admin typed — `schemas.ts` converts it to the stored 0–1 fraction at the form/schema
- * boundary (see `qaThresholdCalculations.ts`), so this component never sees the fraction.
+ * boundary, so this component never sees the fraction.
  */
 export function QaPercentField<T extends Record<string, unknown>>({
   form,
@@ -48,7 +48,7 @@ export function QaPercentField<T extends Record<string, unknown>>({
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange((_prev) => e.target.value as typeof _prev)}
                 type="number"
-                step={1}
+                step="any"
                 min={0}
                 max={100}
                 inputMode="decimal"

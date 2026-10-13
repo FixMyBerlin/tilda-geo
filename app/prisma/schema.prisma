@@ -701,10 +701,20 @@ model QaConfig {
   // Map attribution for the source
   mapAttribution String? // e.g., "QA Data: tilda-geo.de"
 
-  // Thresholds for automatic system evaluation
-  goodThreshold               Float @default(0.1) // relative <= 0.1 difference = GOOD
-  needsReviewThreshold        Float @default(0.2) // relative <= 0.2 difference = NEEDS_REVIEW
-  absoluteDifferenceThreshold Int   @default(4) // absolute difference <= this value is not considered a change
+  // Dataset key from qaDatasets.const.ts; fixes the amount, the source tables and the tag-key catalog
+  dataset String // e.g., "parking_euvm"
+
+  // Cell/area table for this config (schema-qualified, e.g. "data.euvm_qa_voronoi_2026")
+  areaTable String
+
+  // Which cells of the area table are checked
+  areaFilter QaAreaFilter @default(all)
+
+  // Long-format reference table (schema-qualified, e.g. "data.qa_parkings_euvm_reference_2026")
+  referenceTable String
+
+  // Indicators ([{ key: "total" or a tag key, label, thresholds }]); validated by qaIndicatorsSchema
+  indicators Json
 
   // Lowercase OSM display names, one entry per user
   trustedOsmUsernames String[] @default([])
@@ -729,6 +739,9 @@ model QaEvaluation {
   // Reference to row in existing data table (could be voronoi, h3, etc.)
   areaId String // Links to public.qa_parkings_euvm.id
 
+  // Key of the indicator this row evaluates (QaConfig.indicators[].key)
+  indicatorKey String
+
   // System automatic evaluation (based on thresholds)
   systemStatus QaSystemStatus @default(NEEDS_REVIEW)
 
@@ -752,8 +765,17 @@ model QaEvaluation {
   // Remove unique constraint to allow evaluation history
   // @@unique([configId, areaId])  // REMOVED
 
-  @@index([configId, areaId, createdAt(sort: Desc), id(sort: Desc)])
+  @@index([configId, areaId, indicatorKey, createdAt(sort: Desc), id(sort: Desc)])
   @@map("QaEvaluation")
+  @@schema("prisma")
+}
+
+enum QaAreaFilter {
+  all
+  priority
+  non_priority
+  with_reference // only cells that have an amount in the reference table
+
   @@schema("prisma")
 }
 
@@ -811,5 +833,20 @@ enum DataSchemaImportStatus {
   SUCCESS
   FAILED
 
+  @@schema("prisma")
+}
+
+/// Order of the Atlas-Geo map layers, one list for all regions; edited on /admin/layer-order.
+/// Exactly one row per layer of the code: the app adds and removes rows when it starts (`getMapLayerOrder`).
+model MapLayerOrder {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  layerKey String  @unique // e.g. "source:atlas_bikelanes--subcat:bikelanes--style:default--layer:line_base"
+  position Int // the bottom layer of the map is 0; the list is always saved as a whole
+  beforeId String? // layer of the basemap style (`LAYER_POSITIONS`), e.g. "atlas-app-beforeid-below-roadname"; null: the position from the layer config
+
+  @@map("MapLayerOrder")
   @@schema("prisma")
 }

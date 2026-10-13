@@ -1,6 +1,6 @@
 import { twJoin } from 'tailwind-merge'
 import { OsmUserLink } from '@/components/regionen/pageRegionSlug/SidebarInspector/OsmUserLink'
-import type { QaEvaluationForArea } from '@/server/qa-configs/queries/getQaEvaluationsForArea.server'
+import type { QaEvaluationForArea } from '@/server/qa-configs/queries/getQaDecisionDataForArea.server'
 import { evaluatorTypeConfig } from './qaConfigs'
 
 type Props = {

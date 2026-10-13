@@ -29,7 +29,7 @@ async function exchange(headers: Record<string, string>) {
     method: 'POST',
     headers,
   })
-  const response = await handleExternalApiRequest(request, async () => ({
+  const response = await handleExternalApiRequest(async () => ({
     status: 201,
     body: await exchangeOsmToken(request),
   }))

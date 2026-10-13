@@ -8,6 +8,7 @@ import { createReviewEntry } from './mutations/createReviewEntry.server'
 import { createReviewEntryComment } from './mutations/createReviewEntryComment.server'
 import { createReviewList } from './mutations/createReviewList.server'
 import { deleteReviewEntry } from './mutations/deleteReviewEntry.server'
+import { deleteReviewEntryComment } from './mutations/deleteReviewEntryComment.server'
 import { deleteReviewList } from './mutations/deleteReviewList.server'
 import { deleteReviewListForAdmin } from './mutations/deleteReviewListForAdmin.server'
 import { updateReviewEntry } from './mutations/updateReviewEntry.server'
@@ -118,3 +119,8 @@ const UpdateCommentInput = RegionSlug.extend({
 export const updateReviewEntryCommentFn = createServerFn({ method: 'POST' })
   .validator((data: z.infer<typeof UpdateCommentInput>) => UpdateCommentInput.parse(data))
   .handler(async ({ data }) => updateReviewEntryComment(data, getRequestHeaders()))
+
+const DeleteCommentInput = RegionSlug.extend({ commentId: z.number() })
+export const deleteReviewEntryCommentFn = createServerFn({ method: 'POST' })
+  .validator((data: z.infer<typeof DeleteCommentInput>) => DeleteCommentInput.parse(data))
+  .handler(async ({ data }) => deleteReviewEntryComment(data, getRequestHeaders()))

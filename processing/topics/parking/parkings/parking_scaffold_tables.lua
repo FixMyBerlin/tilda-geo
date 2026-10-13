@@ -70,29 +70,6 @@ osm2pgsql.define_table({
   },
 })
 
--- Quantized tables (filled by SQL in 8_create_quantized_tables.sql)
-osm2pgsql.define_table({
-  name = 'parkings_quantized',
-  columns = {
-    { column = 'id',   type = 'text', not_null = true },
-    { column = 'tags', type = 'jsonb' },
-    { column = 'meta', type = 'jsonb' },
-    { column = 'geom', type = 'point', projection = 3857 },
-    { column = 'minzoom', type = 'integer', not_null = true },
-  },
-})
-
-osm2pgsql.define_table({
-  name = 'off_street_parking_quantized',
-  columns = {
-    { column = 'id',   type = 'text', not_null = true },
-    { column = 'tags', type = 'jsonb' },
-    { column = 'meta', type = 'jsonb' },
-    { column = 'geom', type = 'point', projection = 3857 },
-    { column = 'minzoom', type = 'integer', not_null = true },
-  },
-})
-
 -- Labels (filled by SQL in 10_create_labels.sql)
 osm2pgsql.define_table({
   name = 'parkings_separate_labels',

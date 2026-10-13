@@ -1,20 +1,29 @@
 import { z } from 'zod'
 
-export const qaDecisionDataSchema = z.object({
-  relative: z.coerce.number().nullable(),
-  currentCount: z.coerce.number().nullable(),
-  referenceCount: z.coerce.number().nullable(),
-  absoluteChange: z.coerce.number().nullable(),
-  goodThreshold: z.number(),
-  needsReviewThreshold: z.number(),
+const qaDecisionDataBreakdownSchema = z.record(
+  z.string(),
+  z.object({ reference: z.number(), current: z.number() }),
+)
+
+const qaDecisionDataSchema = z.object({
+  reference: z.number(),
+  current: z.number(),
+  difference: z.number(),
+  deviation: z.number(),
+  breakdown: qaDecisionDataBreakdownSchema.optional(),
+  thresholds: z.object({
+    goodThreshold: z.number(),
+    needsReviewThreshold: z.number(),
+    absoluteDifferenceThreshold: z.number(),
+  }),
 })
 
-export type QaDecisionDataStored = z.infer<typeof qaDecisionDataSchema>
+export type QaDecisionData = z.infer<typeof qaDecisionDataSchema>
 
 // Helper function to transform evaluation with parsed decision data
 export function transformEvaluationWithDecisionData<T extends { decisionData: unknown }>(
   evaluation: T,
-): Omit<T, 'decisionData'> & { decisionData: QaDecisionDataStored | null } {
+): Omit<T, 'decisionData'> & { decisionData: QaDecisionData | null } {
   const parsedDecisionData = evaluation.decisionData
     ? qaDecisionDataSchema.safeParse(evaluation.decisionData)
     : null

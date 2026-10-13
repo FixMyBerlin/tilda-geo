@@ -1,4 +1,5 @@
-import { sql } from 'bun'
+import { join } from 'node:path'
+import { $, sql } from 'bun'
 
 export async function initializeSchemaData() {
   await sql`CREATE SCHEMA IF NOT EXISTS data`
@@ -6,6 +7,10 @@ export async function initializeSchemaData() {
 }
 
 export async function initializeCustomFunctionsDataTables() {
-  // Add custom SQL functions here when processing needs them in the database.
+  // Shared by topic SQL and afterthoughts: measure (the share of a feature inside an area), then
+  // QA, which builds on it.
+  for (const file of ['../measure/measure_functions.sql', '../qa/qa_functions.sql']) {
+    await $`psql -v ON_ERROR_STOP=1 -q -f ${join(import.meta.dir, file)}`
+  }
   return true
 }

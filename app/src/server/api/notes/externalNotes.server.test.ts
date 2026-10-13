@@ -46,7 +46,6 @@ import {
 import { externalApiPreflightResponse } from '@/server/api/util/externalApiCors.server'
 import { handleExternalApiRequest } from '@/server/api/util/externalApiResponses.server'
 
-const ID_ORIGIN = 'http://127.0.0.1:8080'
 const TOKEN = 'tildageode_ext_test'
 const BASE = 'https://tilda-geo.de/api/notes/berlin/7'
 const folderParams = { regionSlug: 'berlin', folderId: '7' }
@@ -69,20 +68,19 @@ const note = {
   folder: { regions: [{ id: 11 }] },
 }
 
-function request(url: string, init: RequestInit & { token?: string | null; origin?: string } = {}) {
-  const { token = TOKEN, origin = ID_ORIGIN, ...rest } = init
+function request(url: string, init: RequestInit & { token?: string | null } = {}) {
+  const { token = TOKEN, ...rest } = init
   return new Request(url, {
     ...rest,
     headers: {
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...(origin ? { Origin: origin } : {}),
       'Content-Type': 'application/json',
     },
   })
 }
 
-async function run(req: Request, handler: () => Promise<unknown>) {
-  const response = await handleExternalApiRequest(req, async () => ({
+async function run(handler: () => Promise<unknown>) {
+  const response = await handleExternalApiRequest(async () => ({
     status: 200,
     body: await handler(),
   }))
@@ -122,7 +120,7 @@ beforeEach(() => {
 describe('external notes API: who may', () => {
   test('member reads the folder as GeoJSON; the token is looked up by its hash', async () => {
     const req = request(BASE)
-    const { response, body } = await run(req, () => listExternalNotes(req, folderParams))
+    const { response, body } = await run(() => listExternalNotes(req, folderParams))
 
     expect(response.status).toBe(200)
     expect(body.type).toBe('FeatureCollection')
@@ -144,7 +142,7 @@ describe('external notes API: who may', () => {
   test('non-member gets 403 not_member, also on a PUBLIC region, and no notes are read', async () => {
     asMember(false)
     const req = request(BASE)
-    const { response, body } = await run(req, () => listExternalNotes(req, folderParams))
+    const { response, body } = await run(() => listExternalNotes(req, folderParams))
 
     expect(response.status).toBe(403)
     expect(body.error).toBe('not_member')
@@ -157,7 +155,7 @@ describe('external notes API: who may', () => {
       method: 'POST',
       body: JSON.stringify({ subject: 'x', latitude: 52.5, longitude: 13.4 }),
     })
-    const { response, body } = await run(req, () => createExternalNote(req, folderParams))
+    const { response, body } = await run(() => createExternalNote(req, folderParams))
 
     expect(response.status).toBe(403)
     expect(body.error).toBe('not_member')
@@ -168,7 +166,7 @@ describe('external notes API: who may', () => {
     asMember(false)
     db.externalApiToken.findUnique.mockResolvedValue(tokenRow({ role: UserRoleEnum.ADMIN }))
     const req = request(BASE)
-    const { response } = await run(req, () => listExternalNotes(req, folderParams))
+    const { response } = await run(() => listExternalNotes(req, folderParams))
 
     expect(response.status).toBe(200)
   })
@@ -176,7 +174,7 @@ describe('external notes API: who may', () => {
   test('unknown region is 404 region_not_found', async () => {
     db.region.findFirst.mockResolvedValue(null)
     const req = request(BASE)
-    const { response, body } = await run(req, () => listExternalNotes(req, folderParams))
+    const { response, body } = await run(() => listExternalNotes(req, folderParams))
 
     expect(response.status).toBe(404)
     expect(body.error).toBe('region_not_found')
@@ -186,7 +184,7 @@ describe('external notes API: who may', () => {
     db.noteFolder.findFirst.mockResolvedValue(null)
 
     const list = request(BASE)
-    const listed = await run(list, () => listExternalNotes(list, folderParams))
+    const listed = await run(() => listExternalNotes(list, folderParams))
     expect(listed.response.status).toBe(404)
     expect(listed.body.error).toBe('folder_not_found')
     expect(db.noteFolder.findFirst).toHaveBeenCalledWith(
@@ -197,7 +195,7 @@ describe('external notes API: who may', () => {
       method: 'POST',
       body: JSON.stringify({ subject: 'x', latitude: 52.5, longitude: 13.4 }),
     })
-    const created = await run(create, () => createExternalNote(create, folderParams))
+    const created = await run(() => createExternalNote(create, folderParams))
     expect(created.body.error).toBe('folder_not_found')
     expect(db.note.findMany).not.toHaveBeenCalled()
     expect(db.note.create).not.toHaveBeenCalled()
@@ -206,7 +204,7 @@ describe('external notes API: who may', () => {
   test('note of another folder is 404 note_not_found and is not changed', async () => {
     db.note.findFirst.mockResolvedValue(null)
     const req = request(`${BASE}/42`, { method: 'PATCH', body: JSON.stringify({ resolved: true }) })
-    const { response, body } = await run(req, () => updateExternalNote(req, noteParams))
+    const { response, body } = await run(() => updateExternalNote(req, noteParams))
 
     expect(response.status).toBe(404)
     expect(body.error).toBe('note_not_found')
@@ -223,7 +221,7 @@ describe('external notes API: token', () => {
       tokenRow({ expiresAt: new Date(Date.now() - 1000) }),
     )
     const req = request(BASE)
-    const { response, body } = await run(req, () => listExternalNotes(req, folderParams))
+    const { response, body } = await run(() => listExternalNotes(req, folderParams))
 
     expect(response.status).toBe(401)
     expect(body.error).toBe('token_expired')
@@ -233,25 +231,25 @@ describe('external notes API: token', () => {
   test('unknown token, token of another scope and missing token are 401', async () => {
     db.externalApiToken.findUnique.mockResolvedValue(null)
     const unknown = request(BASE)
-    expect((await run(unknown, () => listExternalNotes(unknown, folderParams))).body.error).toBe(
+    expect((await run(() => listExternalNotes(unknown, folderParams))).body.error).toBe(
       'invalid_token',
     )
 
     db.externalApiToken.findUnique.mockResolvedValue(tokenRow({ scope: 'other' }))
     const otherScope = request(BASE)
-    expect(
-      (await run(otherScope, () => listExternalNotes(otherScope, folderParams))).body.error,
-    ).toBe('invalid_token')
+    expect((await run(() => listExternalNotes(otherScope, folderParams))).body.error).toBe(
+      'invalid_token',
+    )
 
     const missing = request(BASE, { token: null })
-    const result = await run(missing, () => listExternalNotes(missing, folderParams))
+    const result = await run(() => listExternalNotes(missing, folderParams))
     expect(result.response.status).toBe(401)
     expect(result.body.error).toBe('missing_token')
   })
 
   test('an admin API token is not accepted', async () => {
     const req = request(BASE, { token: 'tildageode_admin_abc' })
-    const { response } = await run(req, () => listExternalNotes(req, folderParams))
+    const { response } = await run(() => listExternalNotes(req, folderParams))
 
     expect(response.status).toBe(401)
     expect(db.externalApiToken.findUnique).not.toHaveBeenCalled()
@@ -259,64 +257,40 @@ describe('external notes API: token', () => {
 })
 
 describe('external notes API: CORS', () => {
-  test('wrong origin is rejected before the token is looked at', async () => {
-    const req = request(BASE, { origin: 'https://evil.example' })
-    const { response, body } = await run(req, () => listExternalNotes(req, folderParams))
-
-    expect(response.status).toBe(403)
-    expect(body.error).toBe('origin_not_allowed')
-    expect(response.headers.get('Access-Control-Allow-Origin')).toBeNull()
-    expect(db.externalApiToken.findUnique).not.toHaveBeenCalled()
-  })
-
-  test('allowed origin is echoed, also on errors', async () => {
+  test('any origin is allowed, also on errors', async () => {
     const ok = request(BASE)
-    const okResult = await run(ok, () => listExternalNotes(ok, folderParams))
-    expect(okResult.response.headers.get('Access-Control-Allow-Origin')).toBe(ID_ORIGIN)
-    expect(okResult.response.headers.get('Vary')).toBe('Origin')
+    const okResult = await run(() => listExternalNotes(ok, folderParams))
+    expect(okResult.response.headers.get('Access-Control-Allow-Origin')).toBe('*')
 
     asMember(false)
     const denied = request(BASE)
-    const deniedResult = await run(denied, () => listExternalNotes(denied, folderParams))
-    expect(deniedResult.response.headers.get('Access-Control-Allow-Origin')).toBe(ID_ORIGIN)
+    const deniedResult = await run(() => listExternalNotes(denied, folderParams))
+    expect(deniedResult.response.status).toBe(403)
+    expect(deniedResult.response.headers.get('Access-Control-Allow-Origin')).toBe('*')
   })
 
-  test('preflight: allowed origin gets methods and the Authorization header, others 403', () => {
-    const allowed = externalApiPreflightResponse(
-      request(BASE, { method: 'OPTIONS', token: null, origin: 'http://127.0.0.1:8080' }),
-    )
-    expect(allowed.status).toBe(204)
-    expect(allowed.headers.get('Access-Control-Allow-Origin')).toBe('http://127.0.0.1:8080')
-    expect(allowed.headers.get('Access-Control-Allow-Methods')).toBe('GET, POST, PATCH, OPTIONS')
-    expect(allowed.headers.get('Access-Control-Allow-Headers')).toContain('Authorization')
-
-    const denied = externalApiPreflightResponse(
-      request(BASE, { method: 'OPTIONS', token: null, origin: 'https://evil.example' }),
-    )
-    expect(denied.status).toBe(403)
-    expect(denied.headers.get('Access-Control-Allow-Origin')).toBeNull()
+  test('preflight allows the methods and the Authorization header', () => {
+    const response = externalApiPreflightResponse()
+    expect(response.status).toBe(204)
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*')
+    expect(response.headers.get('Access-Control-Allow-Methods')).toBe('GET, POST, PATCH, OPTIONS')
+    expect(response.headers.get('Access-Control-Allow-Headers')).toContain('Authorization')
   })
 })
 
 describe('external notes API: reads and writes', () => {
   test('list filters by status and bbox', async () => {
     const closed = request(`${BASE}?status=closed`)
-    expect(
-      (await run(closed, () => listExternalNotes(closed, folderParams))).body.features,
-    ).toEqual([])
+    expect((await run(() => listExternalNotes(closed, folderParams))).body.features).toEqual([])
 
     const inside = request(`${BASE}?bbox=13,52,14,53`)
-    expect(
-      (await run(inside, () => listExternalNotes(inside, folderParams))).body.features,
-    ).toHaveLength(1)
+    expect((await run(() => listExternalNotes(inside, folderParams))).body.features).toHaveLength(1)
 
     const outside = request(`${BASE}?bbox=8,48,9,49`)
-    expect(
-      (await run(outside, () => listExternalNotes(outside, folderParams))).body.features,
-    ).toEqual([])
+    expect((await run(() => listExternalNotes(outside, folderParams))).body.features).toEqual([])
 
     const invalid = request(`${BASE}?bbox=1,2,3`)
-    const result = await run(invalid, () => listExternalNotes(invalid, folderParams))
+    const result = await run(() => listExternalNotes(invalid, folderParams))
     expect(result.response.status).toBe(400)
     expect(result.body.error).toBe('invalid_input')
   })
@@ -336,7 +310,7 @@ describe('external notes API: reads and writes', () => {
       ],
     })
     const req = request(`${BASE}/42`)
-    const { body } = await run(req, () => getExternalNote(req, noteParams))
+    const { body } = await run(() => getExternalNote(req, noteParams))
 
     expect(body).toMatchObject({
       id: 42,
@@ -357,7 +331,7 @@ describe('external notes API: reads and writes', () => {
       method: 'POST',
       body: JSON.stringify({ subject: 'Radweg fehlt', latitude: 52.5, longitude: 13.4 }),
     })
-    const { response } = await run(req, () => createExternalNote(req, folderParams))
+    const { response } = await run(() => createExternalNote(req, folderParams))
 
     expect(response.status).toBe(200)
     expect(db.note.create).toHaveBeenCalledWith({
@@ -382,7 +356,7 @@ describe('external notes API: reads and writes', () => {
       method: 'POST',
       body: JSON.stringify({ subject: 'x', latitude: '52.5' }),
     })
-    const { response, body } = await run(req, () => createExternalNote(req, folderParams))
+    const { response, body } = await run(() => createExternalNote(req, folderParams))
 
     expect(response.status).toBe(400)
     expect(body.error).toBe('invalid_input')
@@ -394,7 +368,7 @@ describe('external notes API: reads and writes', () => {
       method: 'POST',
       body: JSON.stringify({ body: 'Danke' }),
     })
-    await run(comment, () => createExternalNoteComment(comment, noteParams))
+    await run(() => createExternalNoteComment(comment, noteParams))
     expect(db.noteComment.create).toHaveBeenCalledWith({
       data: { noteId: 42, body: 'Danke', userId: 'user-1' },
     })
@@ -403,7 +377,7 @@ describe('external notes API: reads and writes', () => {
       method: 'PATCH',
       body: JSON.stringify({ resolved: true }),
     })
-    await run(resolve, () => updateExternalNote(resolve, noteParams))
+    await run(() => updateExternalNote(resolve, noteParams))
     expect(db.note.update).toHaveBeenCalledWith({
       where: { id: 42 },
       data: { resolvedAt: expect.any(Date) },

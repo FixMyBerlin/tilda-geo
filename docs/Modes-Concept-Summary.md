@@ -1,6 +1,6 @@
 # Region modes
 
-A region has a shared map and extra pages that reconfigure the UI around it. The default map stays `/regionen/<region>`. Hinweise, Qualitätssicherung, Prüflisten, and Summieren are their own routes. They show up in the main navigation when the region has the matching data (notes flags, at least one QA config, review lists, a category with a dataset to sum). Members can open Prüflisten before the first list exists so they can create one.
+A region has a shared map and extra pages that reconfigure the UI around it. The default map stays `/regionen/<region>`. Hinweise, Qualitätssicherung, Prüflisten, Summieren, and Messen are their own routes. They show up in the main navigation when the region has the matching data (notes flags, at least one QA config, review lists, a category with a dataset to sum); Messen is in every region. Members can open Prüflisten before the first list exists so they can create one.
 
 Who may open and change what per mode: [Permissions.md](./Permissions.md).
 
@@ -13,8 +13,9 @@ URL keys and filters: [Modes-URL-State-Contract-And-Optimizations.md](./Modes-UR
 | Qualitätssicherung | `/regionen/<region>/qa`          |
 | Prüflisten         | `/regionen/<region>/prueflisten` |
 | Summieren          | `/regionen/<region>/summieren`   |
+| Messen             | `/regionen/<region>/messen`      |
 
-Switching modes keeps map position and layer configuration. Each mode stores its filters in one JSON search object (`notes`, `qa`, `review`, `sum`) and restores them when you come back.
+Switching modes keeps map position and layer configuration. Each mode stores its filters in one JSON search object (`notes`, `qa`, `review`, `sum`, `measure`) and restores them when you come back.
 
 ## Shared panel
 
@@ -28,6 +29,7 @@ The inspector still shows the selected feature. Hovering a list row draws a mode
 | Qualitätssicherung          | No                                                                                     | Yes only                                                 |
 | Prüflisten                  | No                                                                                     | Yes only                                                 |
 | Summieren (area calculator) | No. The former "Summieren: …" layers are gone from the category UI.                    | Yes only                                                 |
+| Messen (lengths and areas)  | No                                                                                     | Yes only                                                 |
 
 ## Hinweise
 
@@ -77,16 +79,28 @@ New configs are created in admin. The source table needs a string `id`, comparis
 
 The area calculator. Draw one or more areas on the map; the panel sums the values of the selected dataset inside them (e.g. parking spaces, area) and breaks them down by property. Tools are shown icon-only in the header switcher until they are active.
 
-- **Datasets** are a list owned by the mode ([`calculatorDatasets.const.ts`](../app/src/components/regionen/pageRegionSlug/modes/calculator/calculatorDatasets.const.ts)), not categories. Today there is one, "Parkraum", for regions with the category `parkingTilda`: the parking along the streets and the parking off the street, summed together. It opens filtered to the public parking along the streets (the default filter of the dataset: two filters, each removed with one click). The points of the selected dataset are only on the map in this mode; those that are part of the sum are shown in full color, the others faded.
-- **Filter:** a click on a value of the breakdown narrows the sum to points with that value (several tags combine); the other points are dimmed on the map.
-- **Darstellung:** the points can be colored by one of the properties of the breakdown; the values in the panel then carry the color and are the legend.
+- **Datasets** are a list owned by the mode ([`calculatorDatasets.const.ts`](../app/src/components/regionen/pageRegionSlug/modes/calculator/calculatorDatasets.const.ts)), not categories. A dataset is a folder of tables that are summed together, and a region offers the folders of its categories: "Parkraum" (`parkingTilda`; parking lines along the streets and parking lots), "Straßen & Wege" (`bikelanes` or `roads`; cycling infrastructure, streets and paths) and "Fahrradstellplätze" (`bicycleParking`; one point per bicycle parking). A folder opens narrowed by its default filter, each part of it removed with one click: Parkraum to the public parking along the streets, Straßen & Wege to the cycling infrastructure. The lines, areas and points of the selected dataset are only on the map in this mode.
+- **The sum** is computed on the server from the whole dataset, whatever the map shows: a feature that crosses the border of an area counts with the share that lies inside ([Measure.md](Measure.md)). Parking spaces are shown as whole numbers, rounded down (34.6 is 34, 34.9 is 35). It updates when an area is finished, not while dragging.
+- **On the map** only the selected dataset is shown: the categories are hidden while the mode is open, their settings stay. Everything outside the drawn areas is dimmed, so the dataset is visibly cut at the border.
+- **Filter:** a click on a value of the breakdown narrows the sum to features with that value (several tags combine); the other features are faded on the map.
+- **Darstellung:** the features can be colored by one of the properties of the breakdown; the values in the panel then carry the color and are the legend.
 - **Nothing is stored.** Dataset, filter, coloring and areas live in the URL in one param (`sum`), so a calculation is shared by its link. The areas stay in the URL when switching to another mode and are back when returning.
 - **Open to everyone** who can see the region.
-- The sum is computed in the browser from the points rendered on the map, so the whole area has to be in view (the panel warns otherwise).
 - While the mode is open, map clicks belong to drawing: the inspector does not open.
 - **Undo and redo** on the map (buttons, Cmd/Ctrl+Z) cover drawing, changing and deleting areas. The steps are kept in memory for this mode only and are gone after a reload.
 
 Old links keep working: `draw` becomes `sum.areas`, and a "Summieren: …" layer switched on in `config` opens this mode with the matching filter ([`migrateLegacyCalculatorSubcategories.server.ts`](../app/src/server/regions/migrateLegacyCalculatorSubcategories.server.ts)).
+
+## Messen
+
+Measure lengths and areas on the map. Open to everyone who can see the region, in every region. Details: [`modes/measure/README.md`](../app/src/components/regionen/pageRegionSlug/modes/measure/README.md).
+
+- **Shapes:** any number of lines and areas. "+ Linie" and "+ Fläche" in the panel start one; the first click on the map starts a line. The panel lists every measurement with its value (areas with their perimeter) and the totals; the map labels each shape, and every side of the selected one.
+- **Aerial image:** the mode shows the best aerial image for the place by itself and brings the previous background back when it is left. Another background can be picked while measuring.
+- **Loupe:** while a corner is placed or dragged, a loupe in the corner of the map shows the spot enlarged, with a crosshair on the point that is measured.
+- **Nothing is stored.** The measurements live in the URL in one param (`measure`) and stay there in other modes.
+- **Summieren:** when the mode is opened from Summieren (or the other way round) and has no areas yet, the areas are copied over once. After that both modes change their areas independently.
+- While the mode is open, map clicks belong to drawing: the inspector does not open.
 
 ## Prüflisten
 

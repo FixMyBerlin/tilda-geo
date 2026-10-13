@@ -76,7 +76,7 @@ export function adminApiAuditContext(auth: AdminApiAuth, request: Request) {
 }
 
 /**
- * The token owner as caller of member functions (notes, Prüflisten). `verifyAdminApiToken` only
+ * The token owner as caller of member functions (notes, Prüflisten, QA). `verifyAdminApiToken` only
  * accepts tokens whose owner is still an ADMIN, so the role is known without another lookup.
  */
 export function adminApiMemberCaller(auth: AdminApiAuth, request: Request) {

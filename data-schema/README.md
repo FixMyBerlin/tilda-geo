@@ -52,6 +52,19 @@ Most tables load from GeoJSON/GPKG via `ogr2ogr`. Some tables — notably the QA
 
 See [Parking client freeze + QA](../docs/Parking-Client-Freeze-QA.md).
 
+## QA tables: which is what
+
+The QA ([docs/QA-Documentation.md](../docs/QA-Documentation.md)) reads two kinds of tables: cells and reference values. A `QaConfig` names one of each (`areaTable`, `referenceTable`).
+
+| Table                                   | Kind      | What it holds                                                                                                          | Read by                                |
+| --------------------------------------- | --------- | ---------------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| `euvm_qa_voronoi_2026`                  | Cells     | The 34,655 street-based cells of Berlin (`id`, `geom`, `name`, `priority`), borders straightened. No reference values. | Every QA config, parking and bikelanes |
+| `euvm_qa_voronoi`                       | Cells     | The same cells as delivered, with dense borders. Only the starting point for a new dated cell table.                   | Nothing in processing or the app       |
+| `qa_parkings_euvm_reference_2026`       | Reference | Public parking spaces per cell, indicator and tag value, as of the delivery of 2026-06-03.                             | Parking QA configs (eUVM)              |
+| `qa_bikelanes_infravelo_reference_2026` | Reference | Meters of cycling infrastructure per cell, indicator and tag value, as of the TILDA export of 2026-01-29.              | Bikelanes QA config of infraVelo       |
+
+Why the cells look like this: [docs/QA-Cells.md](../docs/QA-Cells.md). How a reference table is built and published: [docs/Parking-Client-Freeze-QA.md](../docs/Parking-Client-Freeze-QA.md).
+
 ## What is on S3
 
 Publish overwrites three current files per table. The dump is a `pg_dump` custom archive with gzip (`pg_restore` reads it; not a `.sql` file). Gzip, not zstd: Homebrew `libpq` cannot restore zstd — the flag is in [`pgDumpArchiveFlags.ts`](../app/src/server/dataSchema/pgDumpArchiveFlags.ts). Import downloads `data.dump` and checks it against the manifest `sha256`. `--mode snapshot` copies the current spec, dump, and manifest into `snapshots/<UTC>/` first, then overwrites the current files. Dump/restore majors: [Postgres major versions](#postgres-major-versions).

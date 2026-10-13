@@ -1,291 +1,194 @@
 import { describe, expect, test } from 'vitest'
-import {
-  planQaEvaluationCreates,
-  type QaAreaRow,
-  type QaEvaluationConfig,
-  type QaPreviousEvaluation,
-} from './planQaEvaluationCreates'
+import type { QaIndicator } from '@/server/qa-configs/schemas/qaIndicatorsSchema'
+import type { QaIndicatorTableRow, QaLatestEvaluationRow } from './planQaEvaluationCreates'
+import { planQaEvaluationCreates } from './planQaEvaluationCreates'
 import type { QaLastEditor } from './qaEvaluationRules'
 
-// No trusted usernames, so these tests cover the plain threshold rules.
-const config: QaEvaluationConfig = {
+const thresholds = {
   goodThreshold: 0.1,
   needsReviewThreshold: 0.2,
   absoluteDifferenceThreshold: 4,
-  trustedOsmUsernames: [],
-  referenceFrozenAt: new Date('2026-01-01T00:00:00Z'),
 }
 
-function getArea(
-  id: string,
-  relative: number | null,
-  previousRelative: number | null,
-  absoluteDifference: number | null,
-  lastEditors: QaLastEditor[],
-) {
-  return {
-    id,
-    relative,
-    previous_relative: previousRelative,
-    count_reference: 100,
-    count_current: 100,
-    absoluteDifference,
-    last_editors: lastEditors,
-  } satisfies QaAreaRow
+const total: QaIndicator = { key: 'total', label: 'Stellplätze', ...thresholds }
+const surface: QaIndicator = { key: 'surface', label: 'Belag', ...thresholds }
+const indicators = [total, surface]
+
+const referenceFrozenAt = new Date('2026-01-01T00:00:00Z')
+
+// No trusted usernames and no editors, so these tests cover the plain threshold rules.
+const withoutTrustedEditors = {
+  unit: 'Stellplätze',
+  lastEditorsByAreaId: new Map<string, QaLastEditor[]>(),
+  trustConfig: { trustedOsmUsernames: [], referenceFrozenAt },
 }
 
-function plan(
-  areas: QaAreaRow[],
-  previous: Record<string, QaPreviousEvaluation> = {},
-  configOverrides: Partial<QaEvaluationConfig> = {},
-) {
-  return planQaEvaluationCreates({
-    configId: 1,
-    config: { ...config, ...configOverrides },
-    areas,
-    previousByAreaId: new Map(Object.entries(previous)),
-  })
-}
+/** Against a reference of 100: `current` 100 → GOOD, 50 → PROBLEMATIC (deviation 0.5, difference above the absolute threshold). */
+const row = (areaId: string, indicatorKey: string, current: number) =>
+  ({
+    areaId,
+    indicatorKey,
+    reference: 100,
+    current,
+    difference: 100 - current,
+    deviation: (100 - current) / 100,
+    breakdown: indicatorKey === 'total' ? null : { asphalt: { reference: 100, current } },
+  }) satisfies QaIndicatorTableRow
 
-describe('planQaEvaluationCreates()', () => {
-  test('creates an evaluation for every area on first run', () => {
-    const result = plan([getArea('a', 1, 1, 0, []), getArea('b', 1.5, 1.5, 50, [])])
+const latest = (
+  areaId: string,
+  indicatorKey: string,
+  systemStatus: QaLatestEvaluationRow['systemStatus'],
+  userStatus: QaLatestEvaluationRow['userStatus'] = null,
+) => ({ areaId, indicatorKey, systemStatus, userStatus }) satisfies QaLatestEvaluationRow
 
-    expect(result.map(({ areaId, systemStatus }) => ({ areaId, systemStatus }))).toEqual([
-      { areaId: 'a', systemStatus: 'GOOD' },
-      { areaId: 'b', systemStatus: 'PROBLEMATIC' },
-    ])
-    expect(result[0]).toMatchObject({
-      configId: 1,
-      evaluatorType: 'SYSTEM',
-      userStatus: null,
-      body: null,
-      userId: null,
-      decisionData: { relative: 1, absoluteChange: 0, goodThreshold: 0.1 },
-    })
-  })
-
-  test('skips areas whose status did not change', () => {
-    const result = plan([getArea('a', 1, 1, 0, [])], {
-      a: { systemStatus: 'GOOD', userStatus: null },
+describe('planQaEvaluationCreates', () => {
+  test('first sighting: one row per indicator, in config order', () => {
+    const plan = planQaEvaluationCreates({
+      // Table order is surface-first on purpose: output must follow the config, not the table.
+      indicatorRows: [row('a1', 'surface', 50), row('a1', 'total', 100)],
+      latestRows: [],
+      indicators,
+      ...withoutTrustedEditors,
     })
 
-    expect(result).toEqual([])
+    expect(plan.creates.map((create) => create.indicatorKey)).toEqual(['total', 'surface'])
+    expect(plan.creates.map((create) => create.systemStatus)).toEqual(['GOOD', 'PROBLEMATIC'])
+    expect(plan).toMatchObject({ areas: 1, indicators: 2, created: 2, resets: 0 })
+    expect(plan.creates[0]!.decisionData).toEqual({
+      reference: 100,
+      current: 100,
+      difference: 0,
+      deviation: 0,
+      thresholds,
+    })
+    expect(plan.creates[1]!.decisionData).toMatchObject({
+      breakdown: { asphalt: { reference: 100, current: 50 } },
+    })
   })
-
-  test('skips areas whose relative changed but status stayed the same', () => {
-    const result = plan([getArea('a', 1.5, 1.6, 50, [])], {
-      a: { systemStatus: 'PROBLEMATIC', userStatus: null },
+  test('status change: only the indicator that moved gets a row', () => {
+    const plan = planQaEvaluationCreates({
+      indicatorRows: [
+        row('a1', 'total', 100),
+        row('a1', 'surface', 50),
+        row('a2', 'total', 100),
+        row('a2', 'surface', 100),
+      ],
+      latestRows: [
+        latest('a1', 'total', 'GOOD'),
+        latest('a1', 'surface', 'GOOD'),
+        latest('a2', 'total', 'GOOD'),
+        latest('a2', 'surface', 'GOOD'),
+      ],
+      indicators,
+      ...withoutTrustedEditors,
     })
 
-    expect(result).toEqual([])
+    expect(plan.creates).toHaveLength(1)
+    expect(plan.creates[0]).toMatchObject({
+      areaId: 'a1',
+      indicatorKey: 'surface',
+      systemStatus: 'PROBLEMATIC',
+    })
+    expect(plan).toMatchObject({ areas: 2, indicators: 4, created: 1, resets: 0 })
   })
 
-  test('creates an evaluation when the system status changed', () => {
-    const result = plan([getArea('a', 1.5, 1, 50, []), getArea('b', 1, 1, 0, [])], {
-      a: { systemStatus: 'GOOD', userStatus: null },
-      b: { systemStatus: 'GOOD', userStatus: null },
+  test('reset: a resettable user decision is cleared once the indicator becomes GOOD', () => {
+    const plan = planQaEvaluationCreates({
+      indicatorRows: [row('a1', 'total', 100)],
+      latestRows: [latest('a1', 'total', 'PROBLEMATIC', 'NOT_OK_DATA_ERROR')],
+      indicators,
+      ...withoutTrustedEditors,
     })
 
-    expect(result.map(({ areaId, systemStatus }) => ({ areaId, systemStatus }))).toEqual([
-      { areaId: 'a', systemStatus: 'PROBLEMATIC' },
-    ])
+    expect(plan.creates).toHaveLength(1)
+    expect(plan.creates[0]).toMatchObject({ indicatorKey: 'total', systemStatus: 'GOOD' })
+    expect(plan).toMatchObject({ created: 0, resets: 1 })
+  })
+  test('unknown indicator key in the table is reported and skipped', () => {
+    const plan = planQaEvaluationCreates({
+      indicatorRows: [row('a1', 'total', 100), row('a1', 'access', 50), row('a1', 'surface', 50)],
+      latestRows: [],
+      indicators,
+      ...withoutTrustedEditors,
+    })
+
+    expect(plan.unknownIndicatorKeys).toEqual(['access'])
+    expect(plan.creates.map((create) => create.indicatorKey)).toEqual(['total', 'surface'])
+    expect(plan.indicators).toBe(2)
   })
 
-  test('resets a NOT_OK user decision when the system becomes GOOD', () => {
-    const result = plan([getArea('a', 1, 0.6, 0, [])], {
-      a: { systemStatus: 'PROBLEMATIC', userStatus: 'NOT_OK_DATA_ERROR' },
+  test('config key missing from the table is reported and no status is invented', () => {
+    const plan = planQaEvaluationCreates({
+      indicatorRows: [row('a1', 'total', 100)],
+      // `surface` has a stale PROBLEMATIC row but no table row: it keeps that status untouched.
+      latestRows: [latest('a1', 'total', 'GOOD'), latest('a1', 'surface', 'PROBLEMATIC')],
+      indicators,
+      ...withoutTrustedEditors,
     })
 
-    expect(result).toHaveLength(1)
-    expect(result[0]).toMatchObject({ areaId: 'a', systemStatus: 'GOOD', userStatus: null })
-  })
-
-  test('never creates over an OK_STRUCTURAL_CHANGE user decision', () => {
-    const result = plan([getArea('a', 1, 0.4, 0, []), getArea('b', 1.5, 1, 50, [])], {
-      a: { systemStatus: 'PROBLEMATIC', userStatus: 'OK_STRUCTURAL_CHANGE' },
-      b: { systemStatus: 'GOOD', userStatus: 'OK_STRUCTURAL_CHANGE' },
-    })
-
-    expect(result).toEqual([])
+    expect(plan.missingIndicatorKeys).toEqual(['surface'])
+    expect(plan.creates).toEqual([])
+    expect(plan).toMatchObject({ areas: 1, indicators: 1, created: 0, resets: 0 })
   })
 })
 
-describe('planQaEvaluationCreates() — TRUSTED_EDITOR_CHANGE', () => {
-  const referenceFrozenAt = new Date('2026-01-01T00:00:00Z')
+describe('planQaEvaluationCreates — TRUSTED_EDITOR_CHANGE', () => {
   const afterCutoff = Math.floor(referenceFrozenAt.getTime() / 1000) + 3600
-  const beforeCutoff = Math.floor(referenceFrozenAt.getTime() / 1000) - 3600
-  const exactCutoff = Math.floor(referenceFrozenAt.getTime() / 1000)
 
-  const trustedConfig: Partial<QaEvaluationConfig> = {
-    trustedOsmUsernames: ['alice', 'bob'],
-    referenceFrozenAt,
-  }
+  // Surface with a wider tolerance than the total (4), so one cell's untrusted
+  // amount can sit above one indicator's threshold and below the other's.
+  const tolerantSurface: QaIndicator = { ...surface, absoluteDifferenceThreshold: 10 }
 
-  test('a trusted editor covering a PROBLEMATIC cell creates a TRUSTED_EDITOR_CHANGE row naming them', () => {
-    // relative 1.5 with absoluteDifference 50 (> threshold 4) => percent status PROBLEMATIC.
-    const area = getArea('a', 1.5, 1.5, 50, [
-      { osmUser: 'Alice', spaceCount: 50, updatedAt: afterCutoff },
-    ])
-
-    const result = plan([area], {}, trustedConfig)
-
-    expect(result).toHaveLength(1)
-    expect(result[0]).toMatchObject({
-      areaId: 'a',
-      systemStatus: 'TRUSTED_EDITOR_CHANGE',
-      userStatus: null,
-      decisionData: { relative: 1.5, absoluteChange: 50 },
+  const planWithEditors = (input: {
+    editors: QaLastEditor[]
+    indicatorRows?: QaIndicatorTableRow[]
+    planIndicators?: QaIndicator[]
+  }) =>
+    planQaEvaluationCreates({
+      indicatorRows: input.indicatorRows ?? [row('a1', 'total', 50)],
+      latestRows: [],
+      indicators: input.planIndicators ?? indicators,
+      unit: 'Stellplätze',
+      lastEditorsByAreaId: new Map([['a1', input.editors]]),
+      trustConfig: { trustedOsmUsernames: ['alice', 'bob'], referenceFrozenAt },
     })
-    expect(result[0]?.body).toContain('Alice')
-    expect(result[0]?.body).not.toContain('Bob')
+
+  test('a trusted editor covering a PROBLEMATIC indicator creates a row naming them', () => {
+    const plan = planWithEditors({
+      editors: [{ osmUser: 'Alice', amount: 50, updatedAt: afterCutoff }],
+    })
+
+    expect(plan.creates).toHaveLength(1)
+    expect(plan.creates[0]).toMatchObject({
+      areaId: 'a1',
+      indicatorKey: 'total',
+      systemStatus: 'TRUSTED_EDITOR_CHANGE',
+      decisionData: { difference: 50, deviation: 0.5 },
+    })
+    expect(plan.creates[0]!.body).toContain('Alice')
+    expect(plan.creates[0]!.body).toContain('seit dem 1.1.2026')
+    expect(plan.trustedEditorChanges).toBe(1)
   })
 
-  test('untrusted space count exactly at the threshold still passes', () => {
-    const area = getArea('a', 1.5, 1.5, 50, [
-      { osmUser: 'Alice', spaceCount: 46, updatedAt: afterCutoff },
-      { osmUser: 'Carol', spaceCount: 4, updatedAt: afterCutoff },
+  test('one editor list, per-indicator tolerance: total and surface differ', () => {
+    // Untrusted amount 6: above total's threshold (4), within surface's (10).
+    const plan = planWithEditors({
+      editors: [
+        { osmUser: 'Alice', amount: 44, updatedAt: afterCutoff },
+        { osmUser: 'Carol', amount: 6, updatedAt: afterCutoff },
+      ],
+      indicatorRows: [row('a1', 'total', 50), row('a1', 'surface', 50)],
+      planIndicators: [total, tolerantSurface],
+    })
+
+    expect(plan.creates.map((create) => [create.indicatorKey, create.systemStatus])).toEqual([
+      ['total', 'PROBLEMATIC'],
+      ['surface', 'TRUSTED_EDITOR_CHANGE'],
     ])
-
-    const result = plan([area], {}, trustedConfig)
-
-    expect(result[0]).toMatchObject({ systemStatus: 'TRUSTED_EDITOR_CHANGE' })
-    expect(result[0]?.body).toContain('4 Stellplätze')
-  })
-
-  test('untrusted space count above the threshold falls through to a plain PROBLEMATIC row', () => {
-    const area = getArea('a', 1.5, 1.5, 50, [
-      { osmUser: 'Alice', spaceCount: 45, updatedAt: afterCutoff },
-      { osmUser: 'Carol', spaceCount: 5, updatedAt: afterCutoff },
-    ])
-
-    const result = plan([area], {}, trustedConfig)
-
-    expect(result).toHaveLength(1)
-    expect(result[0]).toMatchObject({ systemStatus: 'PROBLEMATIC', userStatus: null, body: null })
-  })
-
-  test('null osmUser never counts as trusted, even for an anonymized extract', () => {
-    const area = getArea('a', 1.5, 1.5, 50, [
-      { osmUser: null, spaceCount: 50, updatedAt: afterCutoff },
-    ])
-
-    const result = plan([area], {}, trustedConfig)
-
-    expect(result[0]).toMatchObject({ systemStatus: 'PROBLEMATIC', userStatus: null, body: null })
-  })
-
-  test('edits before the freeze day are ignored, not counted trusted or untrusted', () => {
-    const area = getArea('a', 1.5, 1.5, 50, [
-      { osmUser: 'Alice', spaceCount: 50, updatedAt: beforeCutoff },
-    ])
-
-    const result = plan([area], {}, trustedConfig)
-
-    expect(result[0]).toMatchObject({ systemStatus: 'PROBLEMATIC', userStatus: null, body: null })
-  })
-
-  test('an edit exactly at 00:00 UTC of the freeze day counts', () => {
-    const area = getArea('a', 1.5, 1.5, 50, [
-      { osmUser: 'Alice', spaceCount: 0, updatedAt: exactCutoff },
-    ])
-
-    const result = plan([area], {}, trustedConfig)
-
-    expect(result[0]).toMatchObject({ systemStatus: 'TRUSTED_EDITOR_CHANGE' })
-  })
-
-  test('matches trusted usernames case-insensitively against the normalized config list', () => {
-    const area = getArea('a', 1.5, 1.5, 50, [
-      { osmUser: 'Alice', spaceCount: 0, updatedAt: afterCutoff },
-    ])
-
-    const result = plan([area], {}, trustedConfig)
-
-    expect(result[0]).toMatchObject({ systemStatus: 'TRUSTED_EDITOR_CHANGE' })
-    expect(result[0]?.body).toContain('Alice')
-  })
-
-  test('a plain SYSTEM PROBLEMATIC previous row becomes TRUSTED_EDITOR_CHANGE (first night after enabling)', () => {
-    const area = getArea('a', 1.5, 1.5, 50, [
-      { osmUser: 'Alice', spaceCount: 50, updatedAt: afterCutoff },
-    ])
-
-    const result = plan(
-      [area],
-      { a: { systemStatus: 'PROBLEMATIC', userStatus: null } },
-      trustedConfig,
-    )
-
-    expect(result).toHaveLength(1)
-    expect(result[0]).toMatchObject({ systemStatus: 'TRUSTED_EDITOR_CHANGE', userStatus: null })
-  })
-
-  test('a TRUSTED_EDITOR_CHANGE previous row that still passes creates nothing', () => {
-    const area = getArea('a', 1.5, 1.5, 50, [
-      { osmUser: 'Alice', spaceCount: 50, updatedAt: afterCutoff },
-    ])
-
-    const result = plan(
-      [area],
-      { a: { systemStatus: 'TRUSTED_EDITOR_CHANGE', userStatus: null } },
-      trustedConfig,
-    )
-
-    expect(result).toEqual([])
-  })
-
-  test('a TRUSTED_EDITOR_CHANGE previous row falls back to PROBLEMATIC once untrusted edits appear', () => {
-    const area = getArea('a', 1.5, 1.5, 50, [
-      { osmUser: 'Carol', spaceCount: 50, updatedAt: afterCutoff },
-    ])
-
-    const result = plan(
-      [area],
-      { a: { systemStatus: 'TRUSTED_EDITOR_CHANGE', userStatus: null } },
-      trustedConfig,
-    )
-
-    expect(result).toHaveLength(1)
-    expect(result[0]).toMatchObject({ systemStatus: 'PROBLEMATIC', userStatus: null, body: null })
-  })
-
-  test('a human NOT_OK_DATA_ERROR decision is never overridden, even while trusted editors pass', () => {
-    const area = getArea('a', 1.5, 1.5, 50, [
-      { osmUser: 'Alice', spaceCount: 50, updatedAt: afterCutoff },
-    ])
-
-    const result = plan(
-      [area],
-      { a: { systemStatus: 'PROBLEMATIC', userStatus: 'NOT_OK_DATA_ERROR' } },
-      trustedConfig,
-    )
-
-    expect(result).toEqual([])
-  })
-
-  test('a human OK_STRUCTURAL_CHANGE decision is never overridden, even while trusted editors pass', () => {
-    const area = getArea('a', 1.5, 1.5, 50, [
-      { osmUser: 'Alice', spaceCount: 50, updatedAt: afterCutoff },
-    ])
-
-    const result = plan(
-      [area],
-      { a: { systemStatus: 'PROBLEMATIC', userStatus: 'OK_STRUCTURAL_CHANGE' } },
-      trustedConfig,
-    )
-
-    expect(result).toEqual([])
-  })
-
-  test('absolute difference within threshold is GOOD regardless of editors', () => {
-    const area = getArea('a', 1.5, 1.5, 2, [
-      { osmUser: 'Carol', spaceCount: 999, updatedAt: afterCutoff },
-    ])
-
-    const result = plan([area], {}, trustedConfig)
-
-    expect(result).toHaveLength(1)
-    expect(result[0]).toMatchObject({ systemStatus: 'GOOD', userStatus: null, body: null })
+    expect(plan.creates[0]!.body).toBeNull()
+    expect(plan.creates[1]!.body).toContain('6 Stellplätze wurden zuletzt von anderen')
+    expect(plan.creates[1]!.body).toContain('zulässigen Differenz von 10')
+    expect(plan.trustedEditorChanges).toBe(1)
   })
 })

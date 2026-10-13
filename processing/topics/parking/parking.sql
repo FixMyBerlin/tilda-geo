@@ -23,8 +23,6 @@
 \i '/processing/topics/parking/custom_functions/trim_kerb_at_corner.sql'
 -- * … FOR INTERSECTIONS
 \i '/processing/topics/parking/custom_functions/estimate_capacity.sql'
-\i '/processing/topics/parking/custom_functions/explode_parkings.sql'
-\i '/processing/topics/parking/custom_functions/quantize_polygon.sql'
 \i '/processing/topics/parking/custom_functions/round_capacity.sql'
 \i '/processing/topics/parking/custom_functions/condition_category_priority.sql'
 \i '/processing/topics/parking/custom_functions/osm_ref.sql'
@@ -85,11 +83,8 @@
 \i '/processing/topics/parking/6_filter_parkings.sql'
 \i '/processing/topics/parking/7_finalize_parkings.sql'
 
--- CREATE QUANTIZED TABLES
-\i '/processing/topics/parking/8_create_quantized_tables.sql'
-
 -- QA
-\i '/processing/topics/parking/9_qa_parkings_euvm_voronoi.sql'
+\i '/processing/topics/parking/9_qa_parkings.sql'
 
 -- LABELS
 \i '/processing/topics/parking/10_create_labels.sql'

@@ -3,7 +3,7 @@ import type { QaEvaluatorType } from '@/prisma/generated/browser'
 import { QaEvaluationStatus, QaSystemStatus } from '@/prisma/generated/browser'
 
 // QA System Status Colors (from specification)
-const QA_SYSTEM_STATUS_COLORS = {
+export const QA_SYSTEM_STATUS_COLORS = {
   GOOD: '#009E73', // Green - no review needed
   NEEDS_REVIEW: '#E69F00', // Yellow - requires human evaluation
   PROBLEMATIC: '#D55E00', // Red - action needed
@@ -18,27 +18,6 @@ export const QA_USER_STATUS_COLORS = {
   NOT_OK_PROCESSING_ERROR: '#D55E00', // Red - user confirmed problem
   OK_QA_TOOLING_ERROR: '#0d9488', // Tailwind teal-600 — OK, distinct from other OK greens
 } as const satisfies Record<QaEvaluationStatus, `#${string}`>
-
-// System status to letter mapping for optimization
-export const SYSTEM_STATUS_TO_LETTER = {
-  GOOD: 'G', // Good
-  NEEDS_REVIEW: 'N', // Needs Review
-  PROBLEMATIC: 'P', // Problematic
-  TRUSTED_EDITOR_CHANGE: 'T', // Trusted editor change
-} as const satisfies Record<QaSystemStatus, string>
-
-// Letter to system status mapping for translation back
-
-// User status to letter mapping for optimization (only user status needed for filtering)
-export const USER_STATUS_TO_LETTER = {
-  OK_STRUCTURAL_CHANGE: 'S', // Structural
-  OK_REFERENCE_ERROR: 'R', // Reference
-  NOT_OK_DATA_ERROR: 'D', // Data
-  NOT_OK_PROCESSING_ERROR: 'P', // Processing
-  OK_QA_TOOLING_ERROR: 'QA', // QA Tooling Error
-} as const satisfies Record<QaEvaluationStatus, string>
-
-// Letter to user status mapping for translation back
 
 // System Status Configuration
 export const systemStatusConfig = {
@@ -114,6 +93,15 @@ export const evaluatorTypeConfig = {
     label: 'Benutzer',
   },
 } as const satisfies Record<QaEvaluatorType, object>
+
+/** The status pill for one indicator/area: the user's decision wins over the system's. */
+export const qaStatusPillConfig = ({
+  systemStatus,
+  userStatus,
+}: {
+  systemStatus: QaSystemStatus
+  userStatus: QaEvaluationStatus | null
+}) => (userStatus ? userStatusConfig[userStatus] : systemStatusConfig[systemStatus])
 
 // User Status Options for Form
 export const userStatusOptions = [

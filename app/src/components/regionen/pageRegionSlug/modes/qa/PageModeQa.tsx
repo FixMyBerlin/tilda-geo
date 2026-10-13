@@ -10,14 +10,17 @@ import { ModePanel } from '../ModePanel'
 import { modePanelMutedClassName } from '../modePanel.const'
 import { useModeDetailSelection } from '../useModeDetailSelection'
 import { QaDetail } from './detail/QaDetail'
+import { QaConfigInfo } from './QaConfigInfo'
 import {
   QA_DEFAULT_STATUS_KEY,
   QA_STATUS_FILTER_OPTIONS,
   QA_STATUS_SELECT_ALL,
+  resolvedQaIndicatorKeys,
   resolvedQaStatusSelectValue,
   zodQaStatusKey,
   type QaStatusKey,
 } from './qaConfigStyles'
+import { QaIndicatorDropdown } from './QaIndicatorDropdown'
 import { QaModeAreaList } from './QaModeAreaList'
 import { QaUserDropdown } from './QaUserDropdown'
 
@@ -31,11 +34,18 @@ export const PageModeQa = () => {
   const selectedKey = qaParamData.key || defaultConfig?.slug || ''
   const activeConfig = configs.find((config) => config.slug === selectedKey)
   const extent = qaParamData.extent ?? 'view'
+  const indicators = activeConfig?.indicators ?? []
+  const indicatorKeys = resolvedQaIndicatorKeys(
+    qaParamData.ind,
+    indicators.map((indicator) => indicator.key),
+  )
 
   const setConfig = (configSlug: string) => {
+    // Indicator keys belong to one config; keeping them would filter the new config's map to nothing.
     setQaParamData({
       ...qaParamData,
       key: configSlug,
+      ind: undefined,
       status: qaParamData.status ?? QA_DEFAULT_STATUS_KEY,
     })
   }
@@ -65,7 +75,7 @@ export const PageModeQa = () => {
     ? {
         title: `Bereich #${selected.id}`,
         onBack: clearModeDetail,
-        children: <QaDetail areaId={String(selected.id)} />,
+        children: <QaDetail key={String(selected.id)} areaId={String(selected.id)} />,
       }
     : undefined
 
@@ -73,6 +83,7 @@ export const PageModeQa = () => {
     <ModePanel
       title={activeConfig ? `QA: ${frenchQuote(activeConfig.label)}` : 'Qualitätssicherung'}
       detail={qaDetail}
+      actions={activeConfig && !selected ? <QaConfigInfo config={activeConfig} /> : undefined}
       collection={
         configs.length === 0 ? undefined : (
           <ModeCollectionSelect
@@ -116,7 +127,10 @@ export const PageModeQa = () => {
             onChange={setStatus}
           />
           {selectedKey && activeConfig ? (
-            <QaUserDropdown configId={activeConfig.id} regionSlug={region.slug} />
+            <>
+              <QaIndicatorDropdown indicators={indicators} />
+              <QaUserDropdown configId={activeConfig.id} regionSlug={region.slug} />
+            </>
           ) : null}
         </ModeFilterBar>
       }
@@ -127,6 +141,7 @@ export const PageModeQa = () => {
           regionSlug={region.slug}
           status={statusSelectValue}
           users={qaParamData.users}
+          indicatorKeys={qaParamData.ind && qaParamData.ind.length > 0 ? indicatorKeys : undefined}
           search={qaParamData.search ?? ''}
           extent={extent}
         />

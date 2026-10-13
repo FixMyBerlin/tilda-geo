@@ -6,6 +6,7 @@ import { DisclosureChevron } from '@/components/shared/DisclosureChevron/Disclos
 import { FileUploadDropzone } from '@/components/shared/form/fields/FileUploadDropzone'
 import { buttonStylesOnYellow } from '@/components/shared/links/styles'
 import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
+import { formatNumber } from '@/components/shared/utils/formatNumber'
 import {
   classifyImportFeatures,
   reviewFeatureCollectionSchema,
@@ -191,7 +192,7 @@ export const ReviewListGeojsonUploadModal = ({
           <p className="text-sm text-gray-700">
             {createdCount === 1
               ? '1 Eintrag wurde hinzugefügt.'
-              : `${createdCount} Einträge wurden hinzugefügt.`}
+              : `${formatNumber(createdCount)} Einträge wurden hinzugefügt.`}
           </p>
         ) : (
           <>
@@ -225,20 +226,21 @@ export const ReviewListGeojsonUploadModal = ({
             {classification ? (
               <div className="space-y-2">
                 <p className="text-sm text-gray-700">
-                  {neuCount} neu, {ignoredCount} ignoriert, {ohneIdCount} ohne ID
+                  {formatNumber(neuCount)} neu, {formatNumber(ignoredCount)} ignoriert,{' '}
+                  {formatNumber(ohneIdCount)} ohne ID
                 </p>
                 <ImportBucketDisclosure
-                  title={`Wird hinzugefügt (${neuCount})`}
+                  title={`Wird hinzugefügt (${formatNumber(neuCount)})`}
                   items={classification.neu}
                 />
                 <ImportBucketDisclosure
-                  title={`Wird ignoriert (${ignoredCount})`}
+                  title={`Wird ignoriert (${formatNumber(ignoredCount)})`}
                   description="Bestehende Einträge werden nicht überschrieben. Bearbeiten Sie sie in der Eintragsdetailansicht."
                   items={classification.ignoriert}
                 />
                 {ohneIdCount > 0 ? (
                   <ImportBucketDisclosure
-                    title={`Ohne ID – wird hinzugefügt (${ohneIdCount})`}
+                    title={`Ohne ID – wird hinzugefügt (${formatNumber(ohneIdCount)})`}
                     description="Diese Features haben keine ID in der Datei, daher vergibt TILDA eine. Ein erneuter Import der ursprünglichen Quelldatei fügt sie wieder hinzu, weil die Datei keine ID zum Abgleich hat. Ein Re-Import eines TILDA-Exports wird erkannt. Um das zu vermeiden, fügen Sie in der Quelldatei eine id hinzu."
                     items={classification.ohneId}
                   />

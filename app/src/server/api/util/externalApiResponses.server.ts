@@ -1,10 +1,9 @@
 import { z } from 'zod'
-import { externalApiCors } from '@/server/api/util/externalApiCors.server'
+import { externalApiCorsHeaders } from '@/server/api/util/externalApiCors.server'
 import { AuthorizationError } from '@/server/auth/errors'
 
 /** Machine-readable `error` values of the external notes API; see docs/External-Notes-API.md. */
 type ExternalApiErrorCode =
-  | 'origin_not_allowed'
   | 'rate_limited'
   | 'missing_token'
   | 'invalid_osm_token'
@@ -54,22 +53,14 @@ function toExternalApiError(error: unknown) {
 }
 
 /**
- * Runs one external notes API request: rejects origins that are not on the allow-list, turns the
- * handler's result into JSON, maps errors to `{ error, message }` and adds the CORS headers.
+ * Runs one external notes API request: turns the handler's result into JSON, maps errors to
+ * `{ error, message }` and adds the CORS headers.
  */
 export async function handleExternalApiRequest(
-  request: Request,
   handler: () => Promise<{ status: number; body: unknown }>,
 ) {
-  const cors = externalApiCors(request)
-  if (!cors.allowed) {
-    return Response.json(
-      errorBody(new ExternalApiError(403, 'origin_not_allowed', 'Origin not allowed')),
-      { status: 403 },
-    )
-  }
   // Answers depend on the Bearer token; they must never be served from a cache.
-  const headers = { ...cors.headers, 'Cache-Control': 'no-store' }
+  const headers = { ...externalApiCorsHeaders, 'Cache-Control': 'no-store' }
   try {
     const { status, body } = await handler()
     return Response.json(body, { status, headers })

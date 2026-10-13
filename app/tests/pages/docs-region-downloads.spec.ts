@@ -39,13 +39,15 @@ test.beforeAll(async () => {
     { slug: SLUG_DEACTIVATED, status: 'DEACTIVATED' },
   ]
   regionStatusRestore = []
+  const rows = await db.region.findMany({
+    where: { slug: { in: targets.map((target) => target.slug) } },
+    select: { slug: true, status: true },
+  })
+  // A database without the seed regions (a copy of staging, for example) cannot run this file.
+  test.skip(rows.length < targets.length, 'Needs the seed regions: run `bun run seed`.')
   for (const { slug, status } of targets) {
-    const row = await db.region.findUnique({ where: { slug }, select: { status: true } })
-    if (!row) {
-      throw new Error(
-        `E2E docs-region-downloads: region "${slug}" missing — run prisma migrate + seed.`,
-      )
-    }
+    const row = rows.find((row) => row.slug === slug)
+    if (!row) continue
     regionStatusRestore.push({ slug, status: row.status })
     await db.region.update({ where: { slug }, data: { status } })
   }
