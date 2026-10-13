@@ -1,20 +1,20 @@
 import { geoDataClient } from '@/server/prisma-client.server'
 
-// Planning module tile sources.
+// Planning module tile functions.
 //
-// Martin auto-publishes functions from the `public` schema (configs/martin.yaml),
-// so these MVT functions live in `public` but READ from the `planning` schema.
-// They take a `query_params json` 4th argument — Martin passes URL query params
-// as JSON, e.g. `…/planning_hexagons/{z}/{x}/{y}?run_id=42`.
+// The MVT functions live in the `planning` schema, NOT in `public`: Martin
+// auto-publishes every function in `public` (configs/martin.yaml) and would serve
+// them on the public tiles hosts without any session or region check. They are
+// called only by the authenticated app route
+// (app/src/server/planning/servePlanningTile.server.ts, docs/Permissions.md).
 //
 // Signatur und Rumpf müssen mit planning-worker/sql/martin_functions.sql
 // übereinstimmen: beide Seiten legen dieselben Funktionen an (App beim Start,
 // Worker beim Lauf). Abweichende Parameter-Defaults lässt Postgres bei
 // CREATE OR REPLACE nicht zu (42P13).
 //
-// A completed run is immutable, so its tiles are cacheable forever under the
-// run_id-keyed URL (see configs/nginx.conf `planning_cache` zone). A re-run
-// produces a new run_id → new URL → automatic cache busting.
+// Die `query_params json`-Signatur bleibt bewusst erhalten (Aufruf mit
+// `{"run_id": "<id>"}`), damit sich die Rümpfe nicht ändern müssen.
 
 // Defensive, idempotent DDL so the functions never reference missing tables, even
 // if the planning-worker has not run yet. Mirrors planning-worker/sql/schema.sql.
@@ -149,11 +149,19 @@ async function ensurePlanningSchema() {
   await geoDataClient.$executeRawUnsafe(
     `DROP FUNCTION IF EXISTS public.planning_areas(int, int, int, json);`,
   )
+  // Frühere Fassungen lagen in `public` und waren dadurch über Martin öffentlich
+  // abrufbar. Muss in lockstep mit planning-worker/sql/martin_functions.sql bleiben,
+  // sonst legt der jeweils andere Schreiber sie wieder an.
+  for (const name of ['hexagons', 'vegetation', 'carriageways', 'census']) {
+    await geoDataClient.$executeRawUnsafe(
+      `DROP FUNCTION IF EXISTS public.planning_${name}(int, int, int, json);`,
+    )
+  }
 }
 
 async function registerHexagonsFunction() {
   await geoDataClient.$executeRawUnsafe(`
-    CREATE OR REPLACE FUNCTION public.planning_hexagons(z integer, x integer, y integer, query_params json DEFAULT '{}')
+    CREATE OR REPLACE FUNCTION planning.planning_hexagons(z integer, x integer, y integer, query_params json DEFAULT '{}')
     RETURNS bytea AS $$
     DECLARE
       hex_mvt bytea;
@@ -220,53 +228,11 @@ async function registerHexagonsFunction() {
       RETURN NULLIF(COALESCE(hex_mvt, ''::bytea) || COALESCE(label_mvt, ''::bytea), ''::bytea);
     END
     $$ LANGUAGE plpgsql STABLE PARALLEL SAFE;`)
-  const spec = {
-    vector_layers: [
-      {
-        id: 'planning_hexagons',
-        fields: {
-          h3_id: 'text',
-          mce_gesamtscore: 'real',
-          score_bedarf: 'real',
-          score_bebauung: 'real',
-          score_radweg: 'real',
-          score_hangneigung: 'real',
-          score_oepnv: 'real',
-          score_zielorte: 'real',
-          score_vegetation: 'real',
-          score_kreuzung: 'real',
-          score_parken: 'real',
-          score_platz: 'real',
-          score_fussgaengerzone: 'real',
-          score_bestand: 'real',
-          score_eigendaten: 'real',
-          score_bewohnerbedarf: 'real',
-          cluster_area_m2: 'real',
-          eignungsklasse: 'text',
-          gebaeude: 'boolean',
-          fahrbahn: 'boolean',
-          eigendaten_ausschluss: 'boolean',
-        },
-      },
-      {
-        id: 'planning_hexagons_label',
-        fields: {
-          h3_id: 'text',
-          mce_gesamtscore: 'real',
-          score_bedarf: 'real',
-          score_bebauung: 'real',
-        },
-      },
-    ],
-  }
-  await geoDataClient.$executeRawUnsafe(
-    `COMMENT ON FUNCTION public.planning_hexagons IS '${JSON.stringify(spec)}';`,
-  )
 }
 
 async function registerVegetationFunction() {
   await geoDataClient.$executeRawUnsafe(`
-    CREATE OR REPLACE FUNCTION public.planning_vegetation(z integer, x integer, y integer, query_params json DEFAULT '{}')
+    CREATE OR REPLACE FUNCTION planning.planning_vegetation(z integer, x integer, y integer, query_params json DEFAULT '{}')
     RETURNS bytea AS $$
     DECLARE
       mvt bytea;
@@ -287,17 +253,11 @@ async function registerVegetationFunction() {
       RETURN mvt;
     END
     $$ LANGUAGE plpgsql STABLE PARALLEL SAFE;`)
-  const spec = {
-    vector_layers: [{ id: 'planning_vegetation', fields: { ndvi: 'real', flaeche_m2: 'real' } }],
-  }
-  await geoDataClient.$executeRawUnsafe(
-    `COMMENT ON FUNCTION public.planning_vegetation IS '${JSON.stringify(spec)}';`,
-  )
 }
 
 async function registerCarriagewaysFunction() {
   await geoDataClient.$executeRawUnsafe(`
-    CREATE OR REPLACE FUNCTION public.planning_carriageways(z integer, x integer, y integer, query_params json DEFAULT '{}')
+    CREATE OR REPLACE FUNCTION planning.planning_carriageways(z integer, x integer, y integer, query_params json DEFAULT '{}')
     RETURNS bytea AS $$
     DECLARE
       mvt bytea;
@@ -317,12 +277,6 @@ async function registerCarriagewaysFunction() {
       RETURN mvt;
     END
     $$ LANGUAGE plpgsql STABLE PARALLEL SAFE;`)
-  const spec = {
-    vector_layers: [{ id: 'planning_carriageways', fields: { width_m: 'real' } }],
-  }
-  await geoDataClient.$executeRawUnsafe(
-    `COMMENT ON FUNCTION public.planning_carriageways IS '${JSON.stringify(spec)}';`,
-  )
 }
 
 /**
@@ -344,7 +298,7 @@ async function registerCarriagewaysFunction() {
  */
 async function registerCensusFunction() {
   await geoDataClient.$executeRawUnsafe(`
-    CREATE OR REPLACE FUNCTION public.planning_census(z integer, x integer, y integer, query_params json DEFAULT '{}')
+    CREATE OR REPLACE FUNCTION planning.planning_census(z integer, x integer, y integer, query_params json DEFAULT '{}')
     RETURNS bytea AS $$
     DECLARE
       mvt bytea;
@@ -379,12 +333,6 @@ async function registerCensusFunction() {
       RETURN mvt;
     END
     $$ LANGUAGE plpgsql STABLE PARALLEL SAFE;`)
-  const spec = {
-    vector_layers: [{ id: 'planning_census', fields: { einwohner: 'real' } }],
-  }
-  await geoDataClient.$executeRawUnsafe(
-    `COMMENT ON FUNCTION public.planning_census IS '${JSON.stringify(spec)}';`,
-  )
 }
 
 export async function registerPlanningFunctions() {

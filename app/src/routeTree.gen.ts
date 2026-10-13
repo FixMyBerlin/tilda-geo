@@ -124,6 +124,7 @@ import { Route as ApiNotesRegionSlugFolderIdNoteIdRouteImport } from './routes/a
 import { Route as ApiAdminQaConfigsIdExportCsvRouteImport } from './routes/api/admin.qa-configs.$id.export-csv'
 import { Route as ApiPrivateBackgroundsSlugZXYRouteImport } from './routes/api/private-backgrounds.$slug.$z.$x.$y'
 import { Route as ApiNotesRegionSlugFolderIdNoteIdCommentsRouteImport } from './routes/api/notes.$regionSlug.$folderId.$noteId.comments'
+import { Route as ApiRegionsRegionSlugPlanningTilesLayerZXYRouteImport } from './routes/api/regions.$regionSlug.planning-tiles.$layer.$z.$x.$y'
 
 const RegionenRoute = RegionenRouteImport.update({
   id: '/regionen',
@@ -738,6 +739,12 @@ const ApiNotesRegionSlugFolderIdNoteIdCommentsRoute =
     path: '/comments',
     getParentRoute: () => ApiNotesRegionSlugFolderIdNoteIdRoute,
   } as any)
+const ApiRegionsRegionSlugPlanningTilesLayerZXYRoute =
+  ApiRegionsRegionSlugPlanningTilesLayerZXYRouteImport.update({
+    id: '/$regionSlug/planning-tiles/$layer/$z/$x/$y',
+    path: '/$regionSlug/planning-tiles/$layer/$z/$x/$y',
+    getParentRoute: () => ApiRegionsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -854,6 +861,7 @@ export interface FileRoutesByFullPath {
   '/api/notes/$regionSlug/$folderId/$noteId': typeof ApiNotesRegionSlugFolderIdNoteIdRouteWithChildren
   '/api/notes/$regionSlug/$folderId/$noteId/comments': typeof ApiNotesRegionSlugFolderIdNoteIdCommentsRoute
   '/api/private-backgrounds/$slug/$z/$x/$y': typeof ApiPrivateBackgroundsSlugZXYRoute
+  '/api/regions/$regionSlug/planning-tiles/$layer/$z/$x/$y': typeof ApiRegionsRegionSlugPlanningTilesLayerZXYRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -957,6 +965,7 @@ export interface FileRoutesByTo {
   '/api/notes/$regionSlug/$folderId/$noteId': typeof ApiNotesRegionSlugFolderIdNoteIdRouteWithChildren
   '/api/notes/$regionSlug/$folderId/$noteId/comments': typeof ApiNotesRegionSlugFolderIdNoteIdCommentsRoute
   '/api/private-backgrounds/$slug/$z/$x/$y': typeof ApiPrivateBackgroundsSlugZXYRoute
+  '/api/regions/$regionSlug/planning-tiles/$layer/$z/$x/$y': typeof ApiRegionsRegionSlugPlanningTilesLayerZXYRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1075,6 +1084,7 @@ export interface FileRoutesById {
   '/api/notes/$regionSlug/$folderId/$noteId': typeof ApiNotesRegionSlugFolderIdNoteIdRouteWithChildren
   '/api/notes/$regionSlug/$folderId/$noteId/comments': typeof ApiNotesRegionSlugFolderIdNoteIdCommentsRoute
   '/api/private-backgrounds/$slug/$z/$x/$y': typeof ApiPrivateBackgroundsSlugZXYRoute
+  '/api/regions/$regionSlug/planning-tiles/$layer/$z/$x/$y': typeof ApiRegionsRegionSlugPlanningTilesLayerZXYRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1193,6 +1203,7 @@ export interface FileRouteTypes {
     | '/api/notes/$regionSlug/$folderId/$noteId'
     | '/api/notes/$regionSlug/$folderId/$noteId/comments'
     | '/api/private-backgrounds/$slug/$z/$x/$y'
+    | '/api/regions/$regionSlug/planning-tiles/$layer/$z/$x/$y'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1296,6 +1307,7 @@ export interface FileRouteTypes {
     | '/api/notes/$regionSlug/$folderId/$noteId'
     | '/api/notes/$regionSlug/$folderId/$noteId/comments'
     | '/api/private-backgrounds/$slug/$z/$x/$y'
+    | '/api/regions/$regionSlug/planning-tiles/$layer/$z/$x/$y'
   id:
     | '__root__'
     | '/'
@@ -1413,6 +1425,7 @@ export interface FileRouteTypes {
     | '/api/notes/$regionSlug/$folderId/$noteId'
     | '/api/notes/$regionSlug/$folderId/$noteId/comments'
     | '/api/private-backgrounds/$slug/$z/$x/$y'
+    | '/api/regions/$regionSlug/planning-tiles/$layer/$z/$x/$y'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -2267,6 +2280,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiNotesRegionSlugFolderIdNoteIdCommentsRouteImport
       parentRoute: typeof ApiNotesRegionSlugFolderIdNoteIdRoute
     }
+    '/api/regions/$regionSlug/planning-tiles/$layer/$z/$x/$y': {
+      id: '/api/regions/$regionSlug/planning-tiles/$layer/$z/$x/$y'
+      path: '/$regionSlug/planning-tiles/$layer/$z/$x/$y'
+      fullPath: '/api/regions/$regionSlug/planning-tiles/$layer/$z/$x/$y'
+      preLoaderRoute: typeof ApiRegionsRegionSlugPlanningTilesLayerZXYRouteImport
+      parentRoute: typeof ApiRegionsRoute
+    }
   }
 }
 
@@ -2550,10 +2570,13 @@ const RegionenRouteWithChildren = RegionenRoute._addFileChildren(
 
 interface ApiRegionsRouteChildren {
   ApiRegionsRegionSlugUploadsCsvRoute: typeof ApiRegionsRegionSlugUploadsCsvRoute
+  ApiRegionsRegionSlugPlanningTilesLayerZXYRoute: typeof ApiRegionsRegionSlugPlanningTilesLayerZXYRoute
 }
 
 const ApiRegionsRouteChildren: ApiRegionsRouteChildren = {
   ApiRegionsRegionSlugUploadsCsvRoute: ApiRegionsRegionSlugUploadsCsvRoute,
+  ApiRegionsRegionSlugPlanningTilesLayerZXYRoute:
+    ApiRegionsRegionSlugPlanningTilesLayerZXYRoute,
 }
 
 const ApiRegionsRouteWithChildren = ApiRegionsRoute._addFileChildren(
