@@ -7,4 +7,7 @@ postgres:
   auto_bounds: calc
   auto_publish:
     from_schemas:
+      # Never add `planning` here: Martin has no session check and those tiles (Flächenfinder
+      # scores, census population) are member-only. They are served by the app route
+      # /api/regions/:slug/planning-tiles (docs/Permissions.md).
       - public
