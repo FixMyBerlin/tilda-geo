@@ -502,6 +502,15 @@ const data = {
           ARCore: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
         },
       },
+      width_confidence: {
+        name: 'Konfidenz der Breite',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          high: 'Hoch',
+          medium: 'Mittel',
+        },
+      },
       oneway: {
         name: 'Verkehrsrichtung',
         condition: 'contains',
@@ -2215,7 +2224,6 @@ const data = {
         format: {
           highway_default: 'Standard-Wert für diesen Straßentyp.',
           highway_default_and_oneway: 'Standard-Wert für diesen Straßentyp als Einbahnstraße.',
-          tag: 'Dieser Wert ist in OSM hinterlegt.',
         },
       },
       road_width_confidence: {
@@ -3101,7 +3109,6 @@ const data = {
         format: {
           highway_default: 'Standard-Wert für diesen Straßentyp.',
           highway_default_and_oneway: 'Standard-Wert für diesen Straßentyp als Einbahnstraße.',
-          tag: 'Dieser Wert ist in OSM hinterlegt.',
         },
       },
       road_width_confidence: {
@@ -3791,6 +3798,15 @@ const data = {
           ARCore: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
         },
       },
+      width_confidence: {
+        name: 'Konfidenz der Breite',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          high: 'Hoch',
+          medium: 'Mittel',
+        },
+      },
       oneway: {
         name: 'Verkehrsrichtung',
         condition: 'contains',
@@ -4403,6 +4419,15 @@ const data = {
         format: {
           ALKIS: 'Aus ALKIS Daten ausgemessen',
           ARCore: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
+        },
+      },
+      width_confidence: {
+        name: 'Konfidenz der Breite',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          high: 'Hoch',
+          medium: 'Mittel',
         },
       },
       surface: {

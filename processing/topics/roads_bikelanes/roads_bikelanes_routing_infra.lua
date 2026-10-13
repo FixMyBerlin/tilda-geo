@@ -3,7 +3,8 @@ local inclusion_rules = require('topics.roads_bikelanes.routing_infra.inclusion_
 local resolve_motor_road_context = require('topics.roads_bikelanes.routing_infra.resolve_motor_road_context')
 local routing_infra_generalization = require('topics.roads_bikelanes.routing_infra.routing_infra_generalization')
 local roads_bikelanes_tables = require('topics.roads_bikelanes.roads_bikelanes_tables')
-local road_width = require('topics.helper.road_width')
+local derive_width_with_fallback = require('topics.helper.derive_width_with_fallback')
+local width_for_segment = require('topics.roads_bikelanes.routing_infra.width_for_segment')
 
 local routing_infra_table = roads_bikelanes_tables.routing_infra_table
 
@@ -15,7 +16,7 @@ local side_sign_map = {
 
 -- Same attribute as `bikelanes.offset`: geometry stays on the centerline; this is only for
 -- visual `line-offset`. Prefer the value already computed on virtual bikelanes; otherwise
--- half `road_width` of the OSM way (`width`/`est_width`, then highway-class fallbacks).
+-- half the width of the OSM way (`width`/`est_width`, then the highway-class default).
 ---@param segment { side: SideKey|nil, tags: OsmTags, edge_oneway: string|nil, category: string|nil, road: string|nil }
 ---@param object_tags OsmTags
 ---@param side SideKey
@@ -27,7 +28,7 @@ local function offset_for_segment(segment, object_tags, side)
   if segment.tags.offset ~= nil then
     return segment.tags.offset
   end
-  return sign * road_width(object_tags) / 2
+  return sign * derive_width_with_fallback(object_tags).width / 2
 end
 
 ---@param segment { parent_id: string, source_table: string, source_id: string, side: SideKey|nil, tags: OsmTags, edge_oneway: string|nil, category: string|nil, road: string|nil }
@@ -62,9 +63,7 @@ local function build_public_tags(segment, motor_context, context)
   if segment.tags.smoothness then
     tags.smoothness = segment.tags.smoothness
   end
-  if segment.tags.width then
-    tags.width = segment.tags.width
-  end
+  tags.width = width_for_segment(segment, context.object_tags, side)
   if motor_context.maxspeed then
     tags.maxspeed = motor_context.maxspeed
   end

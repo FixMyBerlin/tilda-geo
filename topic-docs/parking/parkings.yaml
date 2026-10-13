@@ -211,27 +211,30 @@ attributes:
   - key: road_width
     format: meter
     label: Fahrbahnbreite
-    description: Breite der Fahrbahn, an dem der Parkraum liegt.
+    description: Breite der Fahrbahn, an der der Parkraum liegt. OSM-Tag `width` der Straße, sonst `est_width`, sonst ein Standard-Wert für den Straßentyp (siehe `road_width_confidence`).
   - key: road_width_source
     purpose: qa
     label: Herkunft der Fahrbahnbreite
+    description: Quellenangabe aus OSM (`source:width`, selten `width:source`), wenn die Breite aus OSM stammt. Für Standard-Werte einer der unten genannten Werte.
+    format: sanitized_strings
     values:
       - value: highway_default
         label: Standard-Wert für diesen Straßentyp.
       - value: highway_default_and_oneway
         label: Standard-Wert für diesen Straßentyp als Einbahnstraße.
-      - value: tag
-        label: Dieser Wert ist in OSM hinterlegt.
   - key: road_width_confidence
     purpose: qa
     label: Konfidenz der Fahrbahnbreite
     values:
       - value: high
         label: Hoch
+        description: Wert stammt aus dem OSM-Tag `width` der Straße.
       - value: medium
         label: Mittel
+        description: Geschätzter Wert. Er stammt aus dem OSM-Tag `est_width`, oder die Quellenangabe zu `width` nennt eine Schätzung (z. B. `source:width=estimated`).
       - value: low
         label: Niedrig
+        description: Standard-Wert für den Straßentyp, weil in OSM keine Breite erfasst ist.
   - key: side
     label: Straßenseite
     description: Seite des Parkraums relativ zur Linienrichtung der OSM-Geometrie.

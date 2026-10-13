@@ -1310,6 +1310,8 @@ const data = {
         key: 'width',
         type: 'meter',
         label: 'Breite',
+        description:
+          'Wert des OSM-Tags `width`. Fehlt er oder ist er nicht lesbar, der geschätzte Wert aus `est_width` (siehe `width_confidence`). Ohne Angabe in OSM bleibt die Breite leer.',
         values: [],
       },
       {
@@ -1323,6 +1325,8 @@ const data = {
         type: 'sanitized_strings',
         label: 'Quelle Breite',
         purpose: 'qa',
+        description:
+          'Quellenangabe aus OSM (`source:width`, selten `width:source`), für `width` und `est_width`. Nur gesetzt, wenn eine Breite gesetzt ist.',
         values: [
           {
             value: 'ALKIS',
@@ -1331,6 +1335,25 @@ const data = {
           {
             value: 'ARCore',
             label: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
+          },
+        ],
+      },
+      {
+        key: 'width_confidence',
+        type: 'string',
+        label: 'Konfidenz der Breite',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'high',
+            label: 'Hoch',
+            description: 'Wert stammt aus dem OSM-Tag `width`.',
+          },
+          {
+            value: 'medium',
+            label: 'Mittel',
+            description:
+              'Geschätzter Wert. Er stammt aus dem OSM-Tag `est_width`, oder die Quellenangabe zu `width` nennt eine Schätzung (z. B. `source:width=estimated`).',
           },
         ],
       },
@@ -3666,6 +3689,8 @@ const data = {
         key: 'width',
         type: 'meter',
         label: 'Breite',
+        description:
+          'Wert des OSM-Tags `width`. Fehlt er oder ist er nicht lesbar, der geschätzte Wert aus `est_width` (siehe `width_confidence`). Ohne Angabe in OSM bleibt die Breite leer.',
         values: [],
       },
       {
@@ -3673,6 +3698,8 @@ const data = {
         type: 'sanitized_strings',
         label: 'Quelle Breite',
         purpose: 'qa',
+        description:
+          'Quellenangabe aus OSM (`source:width`, selten `width:source`), für `width` und `est_width`. Nur gesetzt, wenn eine Breite gesetzt ist.',
         values: [
           {
             value: 'ALKIS',
@@ -5621,14 +5648,17 @@ const data = {
         key: 'road_width',
         type: 'meter',
         label: 'Fahrbahnbreite',
-        description: 'Breite der Fahrbahn, an dem der Parkraum liegt.',
+        description:
+          'Breite der Fahrbahn, an der der Parkraum liegt. OSM-Tag `width` der Straße, sonst `est_width`, sonst ein Standard-Wert für den Straßentyp (siehe `road_width_confidence`).',
         values: [],
       },
       {
         key: 'road_width_source',
-        type: 'string',
+        type: 'sanitized_strings',
         label: 'Herkunft der Fahrbahnbreite',
         purpose: 'qa',
+        description:
+          'Quellenangabe aus OSM (`source:width`, selten `width:source`), wenn die Breite aus OSM stammt. Für Standard-Werte einer der unten genannten Werte.',
         values: [
           {
             value: 'highway_default',
@@ -5637,10 +5667,6 @@ const data = {
           {
             value: 'highway_default_and_oneway',
             label: 'Standard-Wert für diesen Straßentyp als Einbahnstraße.',
-          },
-          {
-            value: 'tag',
-            label: 'Dieser Wert ist in OSM hinterlegt.',
           },
         ],
       },
@@ -5653,14 +5679,18 @@ const data = {
           {
             value: 'high',
             label: 'Hoch',
+            description: 'Wert stammt aus dem OSM-Tag `width` der Straße.',
           },
           {
             value: 'medium',
             label: 'Mittel',
+            description:
+              'Geschätzter Wert. Er stammt aus dem OSM-Tag `est_width`, oder die Quellenangabe zu `width` nennt eine Schätzung (z. B. `source:width=estimated`).',
           },
           {
             value: 'low',
             label: 'Niedrig',
+            description: 'Standard-Wert für den Straßentyp, weil in OSM keine Breite erfasst ist.',
           },
         ],
       },
@@ -8439,14 +8469,17 @@ const data = {
         key: 'road_width',
         type: 'meter',
         label: 'Fahrbahnbreite',
-        description: 'Breite der Fahrbahn, an dem der Parkraum liegt.',
+        description:
+          'Breite der Fahrbahn, an der der Parkraum liegt. OSM-Tag `width` der Straße, sonst `est_width`, sonst ein Standard-Wert für den Straßentyp (siehe `road_width_confidence`).',
         values: [],
       },
       {
         key: 'road_width_source',
-        type: 'string',
+        type: 'sanitized_strings',
         label: 'Herkunft der Fahrbahnbreite',
         purpose: 'qa',
+        description:
+          'Quellenangabe aus OSM (`source:width`, selten `width:source`), wenn die Breite aus OSM stammt. Für Standard-Werte einer der unten genannten Werte.',
         values: [
           {
             value: 'highway_default',
@@ -8455,10 +8488,6 @@ const data = {
           {
             value: 'highway_default_and_oneway',
             label: 'Standard-Wert für diesen Straßentyp als Einbahnstraße.',
-          },
-          {
-            value: 'tag',
-            label: 'Dieser Wert ist in OSM hinterlegt.',
           },
         ],
       },
@@ -8471,14 +8500,18 @@ const data = {
           {
             value: 'high',
             label: 'Hoch',
+            description: 'Wert stammt aus dem OSM-Tag `width` der Straße.',
           },
           {
             value: 'medium',
             label: 'Mittel',
+            description:
+              'Geschätzter Wert. Er stammt aus dem OSM-Tag `est_width`, oder die Quellenangabe zu `width` nennt eine Schätzung (z. B. `source:width=estimated`).',
           },
           {
             value: 'low',
             label: 'Niedrig',
+            description: 'Standard-Wert für den Straßentyp, weil in OSM keine Breite erfasst ist.',
           },
         ],
       },
@@ -10592,6 +10625,8 @@ const data = {
         key: 'width',
         type: 'meter',
         label: 'Breite',
+        description:
+          'Wert des OSM-Tags `width`. Fehlt er oder ist er nicht lesbar, der geschätzte Wert aus `est_width` (siehe `width_confidence`). Ohne Angabe in OSM bleibt die Breite leer.',
         values: [],
       },
       {
@@ -10605,6 +10640,8 @@ const data = {
         type: 'sanitized_strings',
         label: 'Quelle Breite',
         purpose: 'qa',
+        description:
+          'Quellenangabe aus OSM (`source:width`, selten `width:source`), für `width` und `est_width`. Nur gesetzt, wenn eine Breite gesetzt ist.',
         values: [
           {
             value: 'ALKIS',
@@ -10613,6 +10650,25 @@ const data = {
           {
             value: 'ARCore',
             label: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
+          },
+        ],
+      },
+      {
+        key: 'width_confidence',
+        type: 'string',
+        label: 'Konfidenz der Breite',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'high',
+            label: 'Hoch',
+            description: 'Wert stammt aus dem OSM-Tag `width`.',
+          },
+          {
+            value: 'medium',
+            label: 'Mittel',
+            description:
+              'Geschätzter Wert. Er stammt aus dem OSM-Tag `est_width`, oder die Quellenangabe zu `width` nennt eine Schätzung (z. B. `source:width=estimated`).',
           },
         ],
       },
@@ -11945,6 +12001,8 @@ const data = {
         key: 'width',
         type: 'meter',
         label: 'Breite',
+        description:
+          'Wert des OSM-Tags `width`. Fehlt er oder ist er nicht lesbar, der geschätzte Wert aus `est_width` (siehe `width_confidence`). Ohne Angabe in OSM bleibt die Breite leer.',
         values: [],
       },
       {
@@ -11952,6 +12010,8 @@ const data = {
         type: 'sanitized_strings',
         label: 'Quelle Breite',
         purpose: 'qa',
+        description:
+          'Quellenangabe aus OSM (`source:width`, selten `width:source`), für `width` und `est_width`. Nur gesetzt, wenn eine Breite gesetzt ist.',
         values: [
           {
             value: 'ALKIS',
@@ -11960,6 +12020,25 @@ const data = {
           {
             value: 'ARCore',
             label: 'Mit dem Handy-Metermaß von StreetComplete gemessen',
+          },
+        ],
+      },
+      {
+        key: 'width_confidence',
+        type: 'string',
+        label: 'Konfidenz der Breite',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'high',
+            label: 'Hoch',
+            description: 'Wert stammt aus dem OSM-Tag `width`.',
+          },
+          {
+            value: 'medium',
+            label: 'Mittel',
+            description:
+              'Geschätzter Wert. Er stammt aus dem OSM-Tag `est_width`, oder die Quellenangabe zu `width` nennt eine Schätzung (z. B. `source:width=estimated`).',
           },
         ],
       },
@@ -13375,7 +13454,7 @@ const data = {
         label: 'Linien-Offset',
         purpose: 'rendering',
         description:
-          'Wie `bikelanes.offset`: Geometrie bleibt auf der Mittellinie; der Wert ist nur für die Kartendarstellung (`line-offset`). Fehlt auf der Mittellinie (`self`). Sonst halbe Straßenbreite (`road_width`: OSM `width`/`est_width`, sonst Highway-Default), positiv = links, negativ = rechts. Bei Radinfrastruktur-Kanten (`source_table=bikelanes`) läuft die linke Linie gegen die OSM-Way-Richtung, die rechte mit ihr, analog zu `bikelanes`. Fahrbahn-Kanten haben keinen Versatz. Transformierte Bikelanes übernehmen den bereits berechneten Wert.',
+          'Wie `bikelanes.offset`: Geometrie bleibt auf der Mittellinie; der Wert ist nur für die Kartendarstellung (`line-offset`). Fehlt auf der Mittellinie (`self`). Sonst halbe Straßenbreite (OSM `width`/`est_width`, sonst Standard-Wert für den Straßentyp), positiv = links, negativ = rechts. Bei Radinfrastruktur-Kanten (`source_table=bikelanes`) läuft die linke Linie gegen die OSM-Way-Richtung, die rechte mit ihr, analog zu `bikelanes`. Fahrbahn-Kanten haben keinen Versatz. Transformierte Bikelanes übernehmen den bereits berechneten Wert.',
         chapterRefs: ['versetzte-geometrien'],
         values: [],
       },
@@ -13623,6 +13702,8 @@ const data = {
         key: 'width',
         type: 'meter',
         label: 'Breite',
+        description:
+          'OSM `width`, sonst `est_width`. Fahrbahn- und Weg-Kanten ohne Angabe in OSM erhalten einen Standard-Wert für den Straßentyp (wie `parkings.road_width`), damit Router immer eine Breite haben. Ob ein Wert gemessen, geschätzt oder ein Standard-Wert ist, steht nur in `roads` / `bikelanes` (`width_confidence`). Radinfrastruktur neben oder in der Fahrbahn (`left`/`right`, Mittellage) hat nur eine Breite, wenn sie in OSM erfasst ist.',
         values: [],
       },
       {

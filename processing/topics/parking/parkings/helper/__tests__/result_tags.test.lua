@@ -117,4 +117,48 @@ describe('`result_tags`', function()
       }, rewritten_tags)
     end)
   end)
+
+  describe('road_width', function()
+    it('uses the width of the road, not of the parking lane', function()
+      local results = transform_parkings({
+        tags = {
+          highway = 'residential',
+          width = '7.5',
+          ['source:width'] = 'ALKIS',
+          ['parking:left'] = 'lane',
+          ['parking:left:width'] = '2',
+        },
+        id = 1,
+        type = 'way',
+      })
+      local left = result_tags(results.left)
+      assert.are.equal(left.tags.road_width, 7.5)
+      assert.are.equal(left.tags.road_width_confidence, 'high')
+      assert.are.equal(left.tags.road_width_source, 'ALKIS')
+    end)
+
+    it('uses est_width of the road with medium confidence', function()
+      local results = transform_parkings({
+        tags = { highway = 'residential', est_width = '6', ['parking:left'] = 'lane' },
+        id = 1,
+        type = 'way',
+      })
+      local left = result_tags(results.left)
+      assert.are.equal(left.tags.road_width, 6)
+      assert.are.equal(left.tags.road_width_confidence, 'medium')
+      assert.are.equal(left.tags.road_width_source, nil)
+    end)
+
+    it('falls back to the default of the road class with low confidence', function()
+      local results = transform_parkings({
+        tags = { highway = 'secondary', ['parking:left'] = 'lane', ['parking:left:width'] = '2' },
+        id = 1,
+        type = 'way',
+      })
+      local left = result_tags(results.left)
+      assert.are.equal(left.tags.road_width, 14)
+      assert.are.equal(left.tags.road_width_confidence, 'low')
+      assert.are.equal(left.tags.road_width_source, 'highway_default')
+    end)
+  end)
 end)

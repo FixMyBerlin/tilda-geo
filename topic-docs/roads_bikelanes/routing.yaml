@@ -41,7 +41,7 @@ attributes:
   - key: offset
     ref: bikelanes.offset
     description: >-
-      Wie `bikelanes.offset`: Geometrie bleibt auf der Mittellinie; der Wert ist nur für die Kartendarstellung (`line-offset`). Fehlt auf der Mittellinie (`self`). Sonst halbe Straßenbreite (`road_width`: OSM `width`/`est_width`, sonst Highway-Default), positiv = links, negativ = rechts. Bei Radinfrastruktur-Kanten (`source_table=bikelanes`) läuft die linke Linie gegen die OSM-Way-Richtung, die rechte mit ihr, analog zu `bikelanes`. Fahrbahn-Kanten haben keinen Versatz. Transformierte Bikelanes übernehmen den bereits berechneten Wert.
+      Wie `bikelanes.offset`: Geometrie bleibt auf der Mittellinie; der Wert ist nur für die Kartendarstellung (`line-offset`). Fehlt auf der Mittellinie (`self`). Sonst halbe Straßenbreite (OSM `width`/`est_width`, sonst Standard-Wert für den Straßentyp), positiv = links, negativ = rechts. Bei Radinfrastruktur-Kanten (`source_table=bikelanes`) läuft die linke Linie gegen die OSM-Way-Richtung, die rechte mit ihr, analog zu `bikelanes`. Fahrbahn-Kanten haben keinen Versatz. Transformierte Bikelanes übernehmen den bereits berechneten Wert.
   - key: side
     label: Seite
     purpose: processing
@@ -102,6 +102,8 @@ attributes:
     ref: roads.smoothness
   - key: width
     ref: roads.width
+    description: >-
+      OSM `width`, sonst `est_width`. Fahrbahn- und Weg-Kanten ohne Angabe in OSM erhalten einen Standard-Wert für den Straßentyp (wie `parkings.road_width`), damit Router immer eine Breite haben. Ob ein Wert gemessen, geschätzt oder ein Standard-Wert ist, steht nur in `roads` / `bikelanes` (`width_confidence`). Radinfrastruktur neben oder in der Fahrbahn (`left`/`right`, Mittellage) hat nur eine Breite, wenn sie in OSM erfasst ist.
   - key: access_bicycle
     label: Zugang Radverkehr
     description: >-

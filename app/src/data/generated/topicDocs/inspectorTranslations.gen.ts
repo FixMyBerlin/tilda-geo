@@ -498,6 +498,12 @@ const data = {
   'atlas_bikelanes--tunnel=yes': 'Ja',
   'atlas_bikelanes--tunnel=yes--description':
     'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',
+  'atlas_bikelanes--width_confidence--key': 'Konfidenz der Breite',
+  'atlas_bikelanes--width_confidence=high': 'Hoch',
+  'atlas_bikelanes--width_confidence=high--description': 'Wert stammt aus dem OSM-Tag `width`.',
+  'atlas_bikelanes--width_confidence=medium': 'Mittel',
+  'atlas_bikelanes--width_confidence=medium--description':
+    'Geschätzter Wert. Er stammt aus dem OSM-Tag `est_width`, oder die Quellenangabe zu `width` nennt eine Schätzung (z. B. `source:width=estimated`).',
   'atlas_bikelanes--width_effective--key': 'Effektive Breite',
   'atlas_bikelanes--width_source--key': 'Quelle Breite',
   'atlas_bikelanes--width_source=ALKIS': 'Aus ALKIS Daten ausgemessen',
@@ -1477,6 +1483,12 @@ const data = {
   'atlas_roads--tunnel=yes': 'Ja',
   'atlas_roads--tunnel=yes--description':
     'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',
+  'atlas_roads--width_confidence--key': 'Konfidenz der Breite',
+  'atlas_roads--width_confidence=high': 'Hoch',
+  'atlas_roads--width_confidence=high--description': 'Wert stammt aus dem OSM-Tag `width`.',
+  'atlas_roads--width_confidence=medium': 'Mittel',
+  'atlas_roads--width_confidence=medium--description':
+    'Geschätzter Wert. Er stammt aus dem OSM-Tag `est_width`, oder die Quellenangabe zu `width` nennt eine Schätzung (z. B. `source:width=estimated`).',
   'atlas_roads--width_effective--key': 'Effektive Breite',
   'atlas_roads--width_source--key': 'Quelle Breite',
   'atlas_roads--width_source=ALKIS': 'Aus ALKIS Daten ausgemessen',
@@ -1807,6 +1819,13 @@ const data = {
   'atlas_roadsPathClasses--todos--key': 'Todo-Liste',
   'atlas_roadsPathClasses--traffic_sign--key': 'Beschilderung',
   'atlas_roadsPathClasses--traffic_sign=none': 'Unbeschildert',
+  'atlas_roadsPathClasses--width_confidence--key': 'Konfidenz der Breite',
+  'atlas_roadsPathClasses--width_confidence=high': 'Hoch',
+  'atlas_roadsPathClasses--width_confidence=high--description':
+    'Wert stammt aus dem OSM-Tag `width`.',
+  'atlas_roadsPathClasses--width_confidence=medium': 'Mittel',
+  'atlas_roadsPathClasses--width_confidence=medium--description':
+    'Geschätzter Wert. Er stammt aus dem OSM-Tag `est_width`, oder die Quellenangabe zu `width` nennt eine Schätzung (z. B. `source:width=estimated`).',
   'atlas_roadsPathClasses--width_source--key': 'Quelle Breite',
   'atlas_roadsPathClasses--width_source=ALKIS': 'Aus ALKIS Daten ausgemessen',
   'atlas_roadsPathClasses--width_source=ARCore':
@@ -2252,13 +2271,18 @@ const data = {
     'Einbahnstraße (getrennte Richtungsfahrbahnen)',
   'tilda_parkings_no--road_width_confidence--key': 'Konfidenz der Fahrbahnbreite',
   'tilda_parkings_no--road_width_confidence=high': 'Hoch',
+  'tilda_parkings_no--road_width_confidence=high--description':
+    'Wert stammt aus dem OSM-Tag `width` der Straße.',
   'tilda_parkings_no--road_width_confidence=low': 'Niedrig',
+  'tilda_parkings_no--road_width_confidence=low--description':
+    'Standard-Wert für den Straßentyp, weil in OSM keine Breite erfasst ist.',
   'tilda_parkings_no--road_width_confidence=medium': 'Mittel',
+  'tilda_parkings_no--road_width_confidence=medium--description':
+    'Geschätzter Wert. Er stammt aus dem OSM-Tag `est_width`, oder die Quellenangabe zu `width` nennt eine Schätzung (z. B. `source:width=estimated`).',
   'tilda_parkings_no--road_width_source--key': 'Herkunft der Fahrbahnbreite',
   'tilda_parkings_no--road_width_source=highway_default': 'Standard-Wert für diesen Straßentyp.',
   'tilda_parkings_no--road_width_source=highway_default_and_oneway':
     'Standard-Wert für diesen Straßentyp als Einbahnstraße.',
-  'tilda_parkings_no--road_width_source=tag': 'Dieser Wert ist in OSM hinterlegt.',
   'tilda_parkings_no--road_width--key': 'Fahrbahnbreite',
   'tilda_parkings_no--road--key': 'Straßentyp',
   'tilda_parkings_no--road=bicycle_road': 'Fahrradstraße',
@@ -2878,13 +2902,18 @@ const data = {
     'Einbahnstraße (getrennte Richtungsfahrbahnen)',
   'tilda_parkings--road_width_confidence--key': 'Konfidenz der Fahrbahnbreite',
   'tilda_parkings--road_width_confidence=high': 'Hoch',
+  'tilda_parkings--road_width_confidence=high--description':
+    'Wert stammt aus dem OSM-Tag `width` der Straße.',
   'tilda_parkings--road_width_confidence=low': 'Niedrig',
+  'tilda_parkings--road_width_confidence=low--description':
+    'Standard-Wert für den Straßentyp, weil in OSM keine Breite erfasst ist.',
   'tilda_parkings--road_width_confidence=medium': 'Mittel',
+  'tilda_parkings--road_width_confidence=medium--description':
+    'Geschätzter Wert. Er stammt aus dem OSM-Tag `est_width`, oder die Quellenangabe zu `width` nennt eine Schätzung (z. B. `source:width=estimated`).',
   'tilda_parkings--road_width_source--key': 'Herkunft der Fahrbahnbreite',
   'tilda_parkings--road_width_source=highway_default': 'Standard-Wert für diesen Straßentyp.',
   'tilda_parkings--road_width_source=highway_default_and_oneway':
     'Standard-Wert für diesen Straßentyp als Einbahnstraße.',
-  'tilda_parkings--road_width_source=tag': 'Dieser Wert ist in OSM hinterlegt.',
   'tilda_parkings--road_width--key': 'Fahrbahnbreite',
   'tilda_parkings--road--key': 'Straßentyp',
   'tilda_parkings--road=bicycle_road': 'Fahrradstraße',

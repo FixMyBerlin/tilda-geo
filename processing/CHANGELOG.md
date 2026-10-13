@@ -4,6 +4,20 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-10
 
+### Width: `roads`, `roadsPathClasses`, `bikelanes`, `routing`, `parkings`
+
+One rule for every dataset: OSM `width` → `high`; an estimate → `medium` (OSM `est_width`, or a `width` whose source says estimated, eg. `source:width=estimated`, `geschätzt …`); default of the highway class → `low`. The source is the mapper's `source:width` (rarely `width:source`), for `width` and `est_width` alike.
+
+- `roads`, `roadsPathClasses`, `bikelanes`: `width` falls back to `est_width` when `width` is missing or unparsable. New `width_confidence` (`high` | `medium`). No highway default: without a width in OSM the fields stay empty. `width_source` is only set together with `width`; `bikelanes` now sanitizes it like `roads`.
+- `bikelanes` todo `missing_width`: lists every way without a measured width. Ways that only have an estimate are `prio3`; `missing_width_surface_sett__mapillary` skips them.
+- `routing`: `width` is now always a number in meters (carriageway and path edges had the raw OSM string). Carriageway and path edges without a width in OSM get the highway default, same table as parking. Bike lanes beside or inside the carriageway (`left`/`right`, Mittellage) only have a `width` when it is mapped. No `width_confidence` in `routing`.
+- `parkings`, `parkings_no`: `road_width` is the width of the road. Before it was read from the unnested `parking:*` tags: `parking:side:width` (the parking lane) when present, else always 10 m, because the highway class was missing there. It now uses the road's `width`, then `est_width`, then the highway default.
+- `parkings`, `parkings_no`: `road_width_confidence` for the highway default is `low` (was `medium`); `medium` now means an estimate.
+- `parkings`, `parkings_no`: `road_width_source` no longer has the value `tag`. It holds the mapper's source text when there is one, or `highway_default` / `highway_default_and_oneway`.
+- Parking geometry (kerbs, offsets from the internal roads): roads with `est_width` use it instead of the highway default.
+- `offset` on `bikelanes` / `routing` without a width in OSM uses the same highway defaults as parking: oneway-aware and wider on main roads (eg. two-way `primary` 10 → 18 m road width, so ±5 → ±9 m); unknown highways 8 → 10 m.
+- Highway defaults: `motorway`, `trunk`, `trunk_link`, `path`, `bridleway`, `cycleway` and `steps` have their own values instead of 10 m. Values of the other classes are unchanged for parking.
+
 ### `parkings`
 
 - Tagged `capacity` of a parking line that is cut into several segments: the rounding remainder goes to the longest segment. When two segments have exactly the same length, the one with the lower segment id now gets it. Before, the choice was random, so `capacity` could move between the two segments from one run to the next. The sum per parking line is unchanged.
