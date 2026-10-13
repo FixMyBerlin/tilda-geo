@@ -451,15 +451,16 @@ local currentness_too_old__mapillary = BikelaneTodo.new({
 
 local missing_width = BikelaneTodo.new({
   id = 'missing_width',
-  desc = 'Ways without `width`',
+  desc = 'Ways without a measured `width`; estimates are listed with the lowest priority',
   todoTableOnly = true,
   priority =  function(object_tags, result_tags)
+    if result_tags.width ~= nil then return '3' end
     if object_tags.mapillary_coverage and result_tags.surface == 'sett' then return '1' end
     if object_tags.mapillary_coverage and result_tags.surface ~= nil then return '2' end
     return '3'
   end,
   conditions = function(object_tags, result_tags)
-    return result_tags.width == nil
+    return result_tags.width_confidence ~= 'high'
       and result_tags.category ~= 'cyclewayLink'
       and result_tags.category ~= 'crossing'
       and result_tags.category ~= 'pedestrianAreaBicycleYes'
@@ -475,6 +476,7 @@ local missing_width_surface_sett__mapillary = BikelaneTodo.new({
   priority = function(_, _) return '1' end,
   conditions = function(object_tags, result_tags)
     return object_tags.mapillary_coverage
+      and result_tags.width == nil
       and missing_width(object_tags, result_tags)
       and result_tags.surface == 'sett' -- When surface=sett, one can count the stones to get the width
   end

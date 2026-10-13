@@ -8,21 +8,21 @@ export const missing_width: CampaignType = {
   recommendedAction: 'streetcomplete',
   visibility: 'secondary',
   description:
-    'Diese Karte zeigt Wege, bei denen die Angabe zur Breite der Radinfrastruktur fehlt.',
+    'Diese Karte zeigt Wege, bei denen die Angabe zur Breite der Radinfrastruktur fehlt oder nur geschätzt ist.',
   task: '**Bitte ergänze die Breite der Radinfrastruktur `width`.**',
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=1v92rco.4o5g.4pt4ao&v=2',
   maprouletteChallenge: {
     enabled: false,
   },
   taskTemplate: `
-Diesem Weg fehlt eine Angabe zur Breite.
+Diesem Weg fehlt eine gemessene Angabe zur Breite.
 
 ## Aufgabe
 
 **Bitte ergänze die Breitenangabe.**
 
 * Nutze \`width\`, wenn du die Breite ausmessen kannst. Das geht mit einem Metermaß oder einer Handy-App.
-* Nutze \`est_width\`, wenn du nur einen Schätzwert eintragen kannst.
+* Nutze \`est_width\`, wenn du nur einen Schätzwert eintragen kannst. Der Weg bleibt dann mit niedriger Priorität in dieser Liste, bis er ausgemessen ist.
 
 Tipp: Android Nutzer:innen empfehlen wir [StreetComplete](https://streetcomplete.app/). Dort ist ein Messgerät direkt eingebaut.
 

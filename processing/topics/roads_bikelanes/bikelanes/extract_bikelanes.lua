@@ -2,8 +2,9 @@ require('topics.helper.time_utils')
 local bikelane_categories = require('topics.roads_bikelanes.bikelanes.bikelane_categories')
 local transformations = require('topics.roads_bikelanes.bikelanes.transformations')
 local merge_table = require('topics.helper.merge_table')
-local road_width = require('topics.helper.road_width')
+local derive_width_with_fallback = require('topics.helper.derive_width_with_fallback')
 local derive_surface = require('topics.helper.derive_surface')
+local derive_width = require('topics.helper.derive_width')
 local derive_smoothness = require('topics.helper.derive_smoothness')
 local bikelane_todo_categories = require('topics.roads_bikelanes.bikelanes.bikelane_todo_categories')
 local adjoining_of_vs_csv_todo = require('topics.roads_bikelanes.pseudo_tags_sidepath.adjoining_of_vs_csv_todo')
@@ -93,8 +94,6 @@ local function bikelanes(object_tags, object_geom)
           _infrastructureExists = true,
           prefix = transformed_tags._prefix,
           lifecycle = transformed_tags.lifecycle or SANITIZE_ROAD_TAGS.temporary(transformed_tags) or object_tags.lifecycle,
-          width = parse_length(transformed_tags.width),
-          width_source = transformed_tags['source:width'],
           width_effective = parse_length(transformed_tags['width:effective']),
           oneway = derive_oneway(transformed_tags, category),
           bridge = SANITIZE_TAGS.boolean_yes(object_tags.bridge),
@@ -136,6 +135,7 @@ local function bikelanes(object_tags, object_geom)
 
         merge_table(result_tags, derive_traffic_mode(transformed_tags, object_tags, category.id, transformed_tags._side))
         merge_table(result_tags, derive_traffic_signs(transformed_tags))
+        merge_table(result_tags, derive_width(transformed_tags))
         merge_table(result_tags, derive_bikelane_surface(transformed_tags, category))
         merge_table(result_tags, derive_bikelane_smoothness(transformed_tags, category))
         result_tags.description = SANITIZE_TAGS.safe_string(result_tags.description)
@@ -150,7 +150,7 @@ local function bikelanes(object_tags, object_geom)
           -- centerline). The geometry itself stays on the road centerline; this value
           -- is exported as the `offset` attribute and consumed purely visually by the
           -- map style (`line-offset`). See topic-doc chapter `versetzte-geometrien`.
-          result_tags.offset = side_sign_map[transformed_tags._side] * road_width(object_tags) / 2
+          result_tags.offset = side_sign_map[transformed_tags._side] * derive_width_with_fallback(object_tags).width / 2
         elseif HIGHWAYS.path_classes[transformed_tags.highway]
           or HIGHWAYS.sidepath_highway_classes[transformed_tags.highway] then
           merge_table(

@@ -2,7 +2,7 @@ local default_id = require('topics.helper.default_id')
 local metadata = require('topics.helper.metadata')
 local road_classification_road_value = require('topics.roads_bikelanes.roads.road_classification_road_value')
 local log = require('topics.helper.log')
-local road_width_tags = require('topics.parking.roads.helper.road_width_tags')
+local derive_width_with_fallback = require('topics.helper.derive_width_with_fallback')
 local capacity_tags = require('topics.parking.helper.capacity_tags')
 local THIS_OR_THAT = require('topics.parking.parkings.helper.this_or_that')
 local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
@@ -41,7 +41,8 @@ local SURFACE_TAGS = require('topics.parking.helper.surface_tags')
 local function result_tags_parkings(object)
   local id = default_id(object) .. '/' .. object.tags.side
 
-  local road_width_tags_result = road_width_tags(object.tags)
+  -- The road's tags: `object.tags` holds the unnested `parking:*` tags, where `width` is the width of the parking lane.
+  local road_width = derive_width_with_fallback(object._parent_tags)
   local capacity_tags_result = capacity_tags(object.tags)
   local surface_tags_result = SURFACE_TAGS.surface_tags_with_parent(object.tags, object._parent_tags)
   local conditional_categories_result = classify_parking_conditions(object.tags, 'assumed_free')
@@ -59,9 +60,9 @@ local function result_tags_parkings(object)
     -- Road properties
     road = road_classification_road_value(object._parent_tags),
     road_name = THIS_OR_THAT.value(SANITIZE_TAGS.road_name(object.tags), SANITIZE_TAGS.road_name(object._parent_tags)),
-    road_width = road_width_tags_result.value,
-    road_width_confidence = road_width_tags_result.confidence,
-    road_width_source = road_width_tags_result.source,
+    road_width = road_width.width,
+    road_width_confidence = road_width.width_confidence,
+    road_width_source = road_width.width_source,
     road_oneway = SANITIZE_TAGS.oneway_road(object._parent_tags),
     operator_type = operator_type_result.value,
     operator_type_source = operator_type_result.source,
