@@ -89,16 +89,17 @@ export async function servePlanningTile(request: Request, params: unknown) {
     tileQueries[layer]({ z: Number(tile.z), x: Number(tile.x), y: Number(tile.y), runId }),
   )
   const mvt = rows[0]?.mvt
-  if (!mvt || mvt.length === 0) return new Response(null, { status: 204 })
+  // `private`: member data, shared caches must not store it. The browser serves cached tiles
+  // without our check, so this is also how long they stay readable after sign-out or after a
+  // membership ends (same acceptance as private backgrounds). A run is immutable, so an empty
+  // tile is cached the same way as one with bytes.
+  const headers = {
+    'X-Content-Type-Options': 'nosniff',
+    'Cache-Control': 'private, max-age=604800',
+  }
+  if (!mvt || mvt.length === 0) return new Response(null, { status: 204, headers })
 
   return new Response(mvt as BodyInit, {
-    headers: {
-      'Content-Type': 'application/vnd.mapbox-vector-tile',
-      'X-Content-Type-Options': 'nosniff',
-      // `private`: member data, shared caches must not store it. The browser serves cached tiles
-      // without our check, so this is also how long they stay readable after sign-out or after a
-      // membership ends (same acceptance as private backgrounds). A run is immutable.
-      'Cache-Control': 'private, max-age=604800',
-    },
+    headers: { ...headers, 'Content-Type': 'application/vnd.mapbox-vector-tile' },
   })
 }

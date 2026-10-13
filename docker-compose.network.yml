@@ -60,6 +60,14 @@ services:
       traefik.http.routers.proxy.entrypoints: websecure
       traefik.http.routers.proxy.tls.certresolver: letsencrypt
       traefik.http.routers.proxy.tls: true
+      # Flächenfinder tiles are member-only. The cacheless host otherwise goes straight to
+      # Martin (docker-compose.yml, router `tiles`). This router wins for planning_* paths
+      # and nginx returns 403 (configs/nginx.conf). Other cacheless paths stay on Martin.
+      traefik.http.routers.proxy-block-planning.rule: Host(`${CACHELESS_URL}`) && PathRegexp(`^/[^/]*planning_`)
+      traefik.http.routers.proxy-block-planning.priority: 1000
+      traefik.http.routers.proxy-block-planning.entrypoints: websecure
+      traefik.http.routers.proxy-block-planning.tls.certresolver: letsencrypt
+      traefik.http.routers.proxy-block-planning.tls: true
     ports:
       - '4444:80'
     volumes:

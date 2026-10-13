@@ -128,6 +128,10 @@ describe('servePlanningTile', () => {
     findFirst.mockResolvedValue({ id: 42 })
     queryRaw.mockResolvedValue([{ mvt }])
 
-    expect((await servePlanningTile(requestFor(), params)).status).toBe(204)
+    const response = await servePlanningTile(requestFor(), params)
+
+    expect(response.status).toBe(204)
+    expect(response.headers.get('cache-control')).toBe('private, max-age=604800')
+    expect(response.headers.get('content-type')).toBeNull()
   })
 })
