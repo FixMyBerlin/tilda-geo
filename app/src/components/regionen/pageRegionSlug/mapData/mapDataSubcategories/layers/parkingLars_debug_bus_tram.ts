@@ -23,7 +23,7 @@ export const layers_parkingLars_debug_bus_tram: StyleLayer[] = [
     type: 'symbol',
     minzoom: 15,
     layout: {
-      'icon-image': 'bus_stop',
+      'icon-image': 'bus-stop',
       'icon-size': ['interpolate', ['linear'], ['zoom'], 15, 0, 22, 1.5],
     },
     paint: {},

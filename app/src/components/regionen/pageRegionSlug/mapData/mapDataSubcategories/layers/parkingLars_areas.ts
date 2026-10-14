@@ -27,7 +27,7 @@ export const layers_parkingLars_areas: StyleLayer[] = [
     paint: {
       'fill-color': 'rgba(0, 0, 0, 0)',
       'fill-opacity': 0.5,
-      'fill-pattern': ['match', ['get', 'access'], ['customers', 'private'], 'stripe_texture', ''],
+      'fill-pattern': ['match', ['get', 'access'], ['customers', 'private'], 'pattern-stripes', ''],
     },
   },
   {

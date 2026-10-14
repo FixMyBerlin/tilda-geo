@@ -70,7 +70,7 @@ export const layers_roads_plus_fusswege: StyleLayer[] = [
     },
     paint: {
       'line-opacity': 0.8,
-      'line-pattern': 'arrow-blue-dots-gap(1)',
+      'line-pattern': 'pattern-oneway-bicycle',
       'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3, 15, 5, 22, 10],
     },
   },
@@ -94,7 +94,7 @@ export const layers_roads_plus_fusswege: StyleLayer[] = [
     },
     paint: {
       'line-opacity': 0.7,
-      'line-pattern': 'arrow-grey-gap(1)',
+      'line-pattern': 'pattern-oneway',
       'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3, 15, 5, 22, 10],
     },
   },

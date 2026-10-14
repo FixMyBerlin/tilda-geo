@@ -50,7 +50,7 @@ const debugLayerSymbol = {
   type: 'symbol',
   paint: {},
   layout: {
-    'icon-image': 'rectangle-red-2',
+    'icon-image': 'label-box-red',
     'icon-allow-overlap': true,
     'icon-size': 1,
   },

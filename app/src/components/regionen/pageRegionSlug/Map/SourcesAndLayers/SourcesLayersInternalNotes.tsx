@@ -5,6 +5,7 @@ import {
   useHoveredListItem,
   useHoveredMapItemId,
 } from '@/components/regionen/pageRegionSlug/modes/mode-list-store'
+import { noteIconLayout } from '@/components/regionen/pageRegionSlug/modes/notes/noteIconLayout'
 import {
   noteHighlightCirclePaint,
   noteHighlightFilter,
@@ -94,20 +95,7 @@ export const LayersInternalNotes = () => {
         key={internalNotesLayerId}
         source={internalNotesSourceId}
         type="symbol"
-        layout={{
-          visibility: 'visible',
-          'icon-image': [
-            'match',
-            ['get', 'status'],
-            'closed',
-            'note-closed-intern' /* Checkmark */,
-            'open',
-            'note-open-intern' /* Questionmark */,
-            'note-open-intern' /* fallback */,
-          ],
-          'icon-size': ['interpolate', ['linear'], ['zoom'], 0, 0.3, 10, 0.5, 22, 0.5],
-          'icon-allow-overlap': true,
-        }}
+        layout={noteIconLayout('intern')}
       />
     </>
   )

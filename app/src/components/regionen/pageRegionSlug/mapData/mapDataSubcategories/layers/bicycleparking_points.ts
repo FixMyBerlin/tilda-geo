@@ -12,7 +12,7 @@ export const layers_bicycleparking_points: StyleLayer[] = [
         'parking',
         ['yes', 'partial'],
         'parking-garage',
-        'dot-11',
+        'dot',
       ],
     },
     paint: {},

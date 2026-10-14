@@ -9,5 +9,5 @@ The `style.json` is the base style from Maptiler. Do not edit it by hand.
 
 The `/api/map-style` route applies runtime overrides on top of it:
 
-- sprite URL → our sprite under `/map-style/sprite`
+- sprite URL → our sprite under `/map-style/sprite`, see [scripts/map-style](../../../../scripts/map-style/README.md)
 - `sky: {}` → enable MapLibre sky with style-spec defaults (for pitched/3D views)

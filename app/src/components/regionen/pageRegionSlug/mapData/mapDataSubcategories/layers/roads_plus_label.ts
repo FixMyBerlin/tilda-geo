@@ -17,7 +17,7 @@ export const layers_roads_plus_label: StyleLayer[] = [
     ],
     minzoom: 8,
     layout: {
-      'icon-image': 'rectangle-yellow-3',
+      'icon-image': 'label-box-yellow',
       'icon-padding': 6,
       'icon-rotation-alignment': 'viewport',
       'icon-size': 1.2,

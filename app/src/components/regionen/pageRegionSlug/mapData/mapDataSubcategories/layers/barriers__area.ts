@@ -15,7 +15,7 @@ export const layers_barriers__area: StyleLayer[] = [
     beforeId: 'atlas-app-beforeid-below-road',
     paint: {
       'fill-opacity': 0.5,
-      'fill-pattern': 'cross-hatch-barriers',
+      'fill-pattern': 'pattern-hatch',
       'fill-translate': [0, 0],
     },
   },

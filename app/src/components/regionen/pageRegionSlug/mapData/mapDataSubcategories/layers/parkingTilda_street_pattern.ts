@@ -34,7 +34,7 @@ export const layers_parkingTilda_street_pattern: StyleLayer[] = [
     paint: {
       'line-color': 'rgb(237, 237, 237)',
       'line-opacity': 0.67,
-      'line-pattern': 'parking_diagonal',
+      'line-pattern': 'pattern-parking-diagonal',
       'line-width': ['interpolate', ['linear'], ['zoom'], 15, 2, 20, 16],
     },
   },
@@ -50,7 +50,7 @@ export const layers_parkingTilda_street_pattern: StyleLayer[] = [
     paint: {
       'line-color': 'rgb(237, 237, 237)',
       'line-opacity': 0.67,
-      'line-pattern': 'parking_perpendicular',
+      'line-pattern': 'pattern-parking-perpendicular',
       'line-width': ['interpolate', ['linear'], ['zoom'], 15, 2, 20, 16],
     },
   },

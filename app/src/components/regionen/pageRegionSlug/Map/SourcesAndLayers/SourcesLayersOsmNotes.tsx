@@ -4,6 +4,7 @@ import {
   useHoveredListItem,
   useHoveredMapItemId,
 } from '@/components/regionen/pageRegionSlug/modes/mode-list-store'
+import { noteIconLayout } from '@/components/regionen/pageRegionSlug/modes/notes/noteIconLayout'
 import {
   noteHighlightCirclePaint,
   noteHighlightFilter,
@@ -98,20 +99,7 @@ export const LayersOsmNotes = () => {
           // However, we want to still show what we loaded, so the context is preserved.
           'icon-opacity': ['step', ['zoom'], 0.3, 10, 1],
         }}
-        layout={{
-          visibility: 'visible',
-          'icon-image': [
-            'match',
-            ['get', 'status'],
-            'closed',
-            'note-closed-osm' /* Checkmark */,
-            'open',
-            'note-open-osm' /* Questionmark */,
-            'note-open-osm' /* fallback */,
-          ],
-          'icon-size': ['interpolate', ['linear'], ['zoom'], 0, 0.3, 10, 0.5, 22, 0.5],
-          'icon-allow-overlap': true,
-        }}
+        layout={noteIconLayout('osm')}
       />
     </>
   )
