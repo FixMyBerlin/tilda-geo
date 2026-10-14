@@ -67,6 +67,8 @@ type AreaFormFieldsProps = {
   geometryStepTitle?: string
   /** The saved study area when an existing Gebiet is edited; "discard" goes back to it. */
   originalStudyArea?: StudyAreaGeometry | null
+  /** Editing: open with the polygon already editable on the map, without a click on "Gebiet bearbeiten". */
+  editGeometryOnOpen?: boolean
 }
 
 /** Shared fields for creating or editing a planungsgebiet. */
@@ -84,6 +86,7 @@ export const AreaFormFields = ({
   showUserData = true,
   geometryStepTitle = 'Geometrie des Gebiets',
   originalStudyArea = null,
+  editGeometryOnOpen = false,
 }: AreaFormFieldsProps) => {
   const { mainMap: map } = useMap()
   const { setBoundaryHighlightGeom, setDrawingActive, setDrawnGeometry } =
@@ -135,6 +138,25 @@ export const AreaFormFields = ({
     resetToOriginal()
   }
 
+  // Drawing starts from the area that is there, so it can be changed instead of redrawn.
+  const startDrawing = () => {
+    const current = effectiveStudyArea as GeoJSON.Geometry | null
+    const isPolygonal = current?.type === 'Polygon' || current?.type === 'MultiPolygon'
+    setDrawnGeometry(isPolygonal ? current : null)
+    onStudyAreaChange(null)
+    setBoundaryHighlightGeom(null)
+    setDrawingActive(true)
+  }
+
+  useEffect(
+    function startEditingOnOpen() {
+      if (editGeometryOnOpen) startDrawing()
+    },
+    // Only once per open form; later changes of the area must not restart the drawing.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [],
+  )
+
   const toggleDrawing = () => {
     if (drawingActive) {
       draw.cancel()
@@ -143,13 +165,7 @@ export const AreaFormFields = ({
       if (drawnGeometry) setBoundaryHighlightGeom(drawnGeometry)
       return
     }
-    // Drawing starts from the area that is there, so it can be changed instead of redrawn.
-    const current = effectiveStudyArea as GeoJSON.Geometry | null
-    const isPolygonal = current?.type === 'Polygon' || current?.type === 'MultiPolygon'
-    setDrawnGeometry(isPolygonal ? current : null)
-    onStudyAreaChange(null)
-    setBoundaryHighlightGeom(null)
-    setDrawingActive(true)
+    startDrawing()
   }
 
   // Throws the whole drawing away and starts a new one; undo can bring it back during the session.

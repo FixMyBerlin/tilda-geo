@@ -9,7 +9,6 @@ import {
 const base = {
   areaTitle: 'Mitte',
   variantTitle: 'Standard',
-  useCaseLabel: 'Fahrradboxen',
   h3Id: '8b1f',
 }
 
@@ -42,7 +41,6 @@ describe('buildSpaceFinderReviewProperties', () => {
       Gesamtscore: '72',
       Eignungsklasse: 'gut',
       'Clusterfläche (m²)': (1234).toLocaleString('de-DE'),
-      Nutzungsfall: 'Fahrradboxen',
       Planungsgebiet: 'Mitte',
       Variante: 'Standard',
       'H3-ID': '8b1f',
@@ -119,7 +117,6 @@ describe('buildSpaceFinderReviewProperties', () => {
   test('omits missing or invalid values', () => {
     const properties = buildSpaceFinderReviewProperties({
       ...base,
-      useCaseLabel: null,
       candidateProperties: { mce_gesamtscore: null, eignungsklasse: ' ', cluster_area_m2: 'x' },
     })
     expect(Object.keys(properties)).toEqual([

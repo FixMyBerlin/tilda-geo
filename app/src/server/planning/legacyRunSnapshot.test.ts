@@ -116,7 +116,6 @@ describe('runs from before several own datasets', () => {
       },
       areaTitle: 'Rixdorf',
       variantTitle: 'Standard',
-      useCaseLabel: null,
       h3Id: '8d1f18b21c56bbf',
       eigendatenNames: names,
     })

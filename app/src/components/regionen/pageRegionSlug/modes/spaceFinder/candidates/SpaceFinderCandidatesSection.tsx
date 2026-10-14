@@ -12,10 +12,12 @@ import {
   useSpaceFinderCandidateSelectActive,
   useSpaceFinderCandidates,
   useSpaceFinderCandidatesActions,
+  useSpaceFinderFocusedCandidateH3Id,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-candidates-store'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
+import { spaceFinderCandidateListItemId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersSpaceFinder'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { CollapsibleBox } from '@/components/shared/CollapsibleBox/CollapsibleBox'
 import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
@@ -62,8 +64,6 @@ export const SpaceFinderCandidateSelectionReset = () => {
   return null
 }
 
-const candidateListItemId = (h3Id: string) => `spaceFinder-candidate-${h3Id}`
-
 const candidateCentroid = (candidate: SpaceFinderCandidate): [number, number] => {
   const coordinates = centroid({
     type: 'Feature',
@@ -76,11 +76,13 @@ const candidateCentroid = (candidate: SpaceFinderCandidate): [number, number] =>
 const CandidateRow = ({
   candidate,
   index,
+  active,
   onFocus,
   onRemove,
 }: {
   candidate: SpaceFinderCandidate
   index: number
+  active: boolean
   onFocus: () => void
   onRemove: () => void
 }) => {
@@ -92,8 +94,9 @@ const CandidateRow = ({
 
   return (
     <ModeListItem
-      id={candidateListItemId(candidate.h3Id)}
+      id={spaceFinderCandidateListItemId(candidate.h3Id)}
       coordinates={candidateCentroid(candidate)}
+      active={active}
       onClick={onFocus}
       actions={
         <RemoveIconButton
@@ -145,29 +148,44 @@ export const SpaceFinderCandidatesSection = ({
   const [reviewListModalOpen, setReviewListModalOpen] = useState(false)
   const candidates = useSpaceFinderCandidates(runKey)
   const selectActive = useSpaceFinderCandidateSelectActive()
-  const { setSelectActive, removeCandidate, clearCandidates } = useSpaceFinderCandidatesActions()
+  const { setSelectActive, setFocusedH3Id, removeCandidate, clearCandidates } =
+    useSpaceFinderCandidatesActions()
+  const focusedH3Id = useSpaceFinderFocusedCandidateH3Id()
   const { clearInspectorFeatures } = useMapActions()
   const { setFeaturesParam } = useFeaturesParam()
   const { mainMap: map } = useMap()
   const { mapParam } = useMapParam()
 
+  // Close an open inspector — the candidate list takes its place in this same panel.
+  const closeInspector = () => {
+    clearInspectorFeatures()
+    setFeaturesParam(null)
+  }
+
+  // A click on a list row switches the selection tool on (so all candidates are outlined on the
+  // map), marks this candidate and moves the map there, at least at the zoom where the fine
+  // hexagons are shown.
   const focusCandidate = (candidate: SpaceFinderCandidate) => {
+    setSelectActive(true)
+    setFocusedH3Id(candidate.h3Id)
+    closeInspector()
     if (!map) return
     const [minLng, minLat, maxLng, maxLat] = bbox({
       type: 'Feature',
       geometry: candidate.geometry as GeoJSON.Geometry,
       properties: {},
     })
-    map.easeTo({ center: [(minLng + maxLng) / 2, (minLat + maxLat) / 2], duration: 500 })
+    map.easeTo({
+      center: [(minLng + maxLng) / 2, (minLat + maxLat) / 2],
+      zoom: Math.max(map.getZoom(), FINE_HEXAGON_MIN_ZOOM),
+      duration: 500,
+    })
   }
 
   const toggleSelect = () => {
     const next = !selectActive
     setSelectActive(next)
-    if (!next) return
-    // Close an open inspector — the candidate list takes its place in this same panel now.
-    clearInspectorFeatures()
-    setFeaturesParam(null)
+    if (next) closeInspector()
   }
 
   return (
@@ -226,6 +244,7 @@ export const SpaceFinderCandidatesSection = ({
               key={candidate.h3Id}
               candidate={candidate}
               index={index}
+              active={candidate.h3Id === focusedH3Id}
               onFocus={() => focusCandidate(candidate)}
               onRemove={() => runKey != null && removeCandidate(runKey, candidate.h3Id)}
             />

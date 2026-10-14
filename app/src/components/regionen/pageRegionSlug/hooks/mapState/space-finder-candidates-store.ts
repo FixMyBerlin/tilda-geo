@@ -51,7 +51,10 @@ type SpaceFinderCandidatesStore = {
    * recalculated variant starts with an empty list and switching variants never mixes lists.
    */
   candidatesByRun: Record<string, SpaceFinderCandidate[]>
+  /** Candidate the user clicked in the sidebar list; stays highlighted on the map. Not persisted. */
+  focusedH3Id: string | null
   actions: {
+    setFocusedH3Id: (h3Id: string | null) => void
     setSelectActive: (active: boolean) => void
     /** Adds the hexagon, or removes it if it is already selected. Returns `true` when added. */
     toggleCandidate: (runKey: string, candidate: SpaceFinderCandidate) => boolean
@@ -75,8 +78,11 @@ const useSpaceFinderCandidatesStore = create<SpaceFinderCandidatesStore>()(
     (set, get) => ({
       selectActive: false,
       candidatesByRun: {},
+      focusedH3Id: null,
       actions: {
-        setSelectActive: (active) => set({ selectActive: active }),
+        setFocusedH3Id: (h3Id) => set({ focusedH3Id: h3Id }),
+        setSelectActive: (active) =>
+          set(active ? { selectActive: true } : { selectActive: false, focusedH3Id: null }),
         toggleCandidate: (runKey, candidate) => {
           const candidates = get().candidatesByRun[runKey] ?? []
           const selected = candidates.some((c) => c.h3Id === candidate.h3Id)
@@ -151,6 +157,9 @@ export const useSpaceFinderCandidates = (runKey: string | null) =>
 
 export const useSpaceFinderCandidateSelectActive = () =>
   useSpaceFinderCandidatesStore((state) => state.selectActive)
+
+export const useSpaceFinderFocusedCandidateH3Id = () =>
+  useSpaceFinderCandidatesStore((state) => state.focusedH3Id)
 
 export const useSpaceFinderCandidatesActions = () =>
   useSpaceFinderCandidatesStore((state) => state.actions)

@@ -15,7 +15,9 @@ import {
 import {
   useSpaceFinderCandidateSelectActive,
   useSpaceFinderCandidates,
+  useSpaceFinderFocusedCandidateH3Id,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-candidates-store'
+import { useHoveredListItem } from '@/components/regionen/pageRegionSlug/modes/mode-list-store'
 import { appliedMinAreaM2 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderModeParam'
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
@@ -327,28 +329,65 @@ const UserObstaclesLayer = () => {
 // Vektor-Source. So bleibt die Markierung auch sichtbar, wenn ein Hexagon gerade
 // nicht in den gerenderten Kacheln liegt.
 //
-// Nur sichtbar, während das Auswahl-Werkzeug aktiv ist (`selectActive`). Ausschalten
-// des Toggles oder Zuklappen von »Auswahl« setzt `selectActive` auf false und blendet
-// die Markierung aus, ohne die Auswahl selbst zu löschen.
+// Alle Kandidaten sind nur sichtbar, während das Auswahl-Werkzeug aktiv ist (`selectActive`).
+// Ausschalten des Toggles oder Zuklappen von »Auswahl« setzt `selectActive` auf false und
+// blendet die Markierung aus, ohne die Auswahl selbst zu löschen.
+//
+// Der in der Liste angeklickte (`focusedH3Id`) und der dort überfahrene Kandidat bekommen
+// zusätzlich Füllung und dickeren Rand, auch wenn das Werkzeug gerade aus ist.
+const CANDIDATE_LIST_ITEM_ID_PREFIX = 'spaceFinder-candidate-'
+export const spaceFinderCandidateListItemId = (h3Id: string) =>
+  `${CANDIDATE_LIST_ITEM_ID_PREFIX}${h3Id}`
+
 const CandidateHighlightLayer = ({ runKey }: { runKey: string | null }) => {
   const selectActive = useSpaceFinderCandidateSelectActive()
   const candidates = useSpaceFinderCandidates(runKey)
-  if (!selectActive || !candidates.length) return null
+  const focusedH3Id = useSpaceFinderFocusedCandidateH3Id()
+  const hoveredId = useHoveredListItem()?.id
+  const hoveredH3Id = hoveredId?.startsWith(CANDIDATE_LIST_ITEM_ID_PREFIX)
+    ? hoveredId.slice(CANDIDATE_LIST_ITEM_ID_PREFIX.length)
+    : null
+
+  const emphasized = candidates.filter((c) => c.h3Id === focusedH3Id || c.h3Id === hoveredH3Id)
+  const outlined = selectActive ? candidates : emphasized
+  if (!outlined.length) return null
 
   return (
-    <Source
-      id="planning-candidates"
-      type="geojson"
-      data={featureCollection(
-        candidates.map((candidate) => feature(candidate.geometry, {}, { id: candidate.h3Id })),
+    <>
+      <Source
+        id="planning-candidates"
+        type="geojson"
+        data={featureCollection(
+          outlined.map((candidate) => feature(candidate.geometry, {}, { id: candidate.h3Id })),
+        )}
+      >
+        <Layer
+          id="planning-candidates-outline"
+          type="line"
+          paint={{ 'line-color': '#eab308', 'line-width': 2.5 }}
+        />
+      </Source>
+      {emphasized.length > 0 && (
+        <Source
+          id="planning-candidates-emphasis"
+          type="geojson"
+          data={featureCollection(
+            emphasized.map((candidate) => feature(candidate.geometry, {}, { id: candidate.h3Id })),
+          )}
+        >
+          <Layer
+            id="planning-candidates-emphasis-fill"
+            type="fill"
+            paint={{ 'fill-color': '#eab308', 'fill-opacity': 0.35 }}
+          />
+          <Layer
+            id="planning-candidates-emphasis-outline"
+            type="line"
+            paint={{ 'line-color': '#a16207', 'line-width': 4 }}
+          />
+        </Source>
       )}
-    >
-      <Layer
-        id="planning-candidates-outline"
-        type="line"
-        paint={{ 'line-color': '#eab308', 'line-width': 2.5 }}
-      />
-    </Source>
+    </>
   )
 }
 

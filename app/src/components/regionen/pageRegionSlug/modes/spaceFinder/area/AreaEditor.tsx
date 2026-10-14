@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { MAX_STUDY_AREA_KM2 } from '@/lib/planningStudyAreaLimit'
 import type { UserDataset } from '@/lib/planningUserGeojson'
@@ -9,7 +9,6 @@ import {
   planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
-import { useSpaceFinderBoundaryActions } from '../../../hooks/mapState/space-finder-boundary-store'
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import type { PlanningAreaVariantRow } from '../collection/spaceFinderCollectionOptions'
 import type { PlanningUseCase } from '../factors/spaceFinderDefaults'
@@ -34,23 +33,18 @@ const AreaEditorForm = ({
 }) => {
   const regionSlug = useRegionSlug()
   const queryClient = useQueryClient()
-  const { setBoundaryHighlightGeom } = useSpaceFinderBoundaryActions()
 
   const [title, setTitle] = useState(area.title)
   const [submitAttempted, setSubmitAttempted] = useState(false)
   const titleMissing = submitAttempted && title.trim().length === 0
   const [boundaryId, setBoundaryId] = useState<string | null>(null)
   const [studyArea, setStudyArea] = useState<unknown>(area.studyArea)
-  const [areaTab, setAreaTab] = useState<'search' | 'custom'>('search')
+  const [areaTab, setAreaTab] = useState<'search' | 'custom'>('custom')
   const [userDatasets, setUserDatasets] = useState<UserDataset[]>(area.userDatasets)
   const [useCase, setUseCase] = useState<PlanningUseCase>(
     (area.useCase as PlanningUseCase) ?? 'fahrradbox',
   )
   const [areaSizeM2, setAreaSizeM2] = useState<number | null>(area.areaSizeM2)
-
-  useEffect(() => {
-    setBoundaryHighlightGeom(area.studyArea as object, { filled: false })
-  }, [area.studyArea, setBoundaryHighlightGeom])
 
   const effectiveStudyArea = useEffectiveStudyArea(studyArea)
   const areaKm2 = useStudyAreaKm2(effectiveStudyArea)
@@ -125,6 +119,7 @@ const AreaEditorForm = ({
           onAreaSizeM2Change={setAreaSizeM2}
           geometryStepTitle="Geometrie des Gebiets"
           originalStudyArea={area.studyArea as StudyAreaGeometry | null}
+          editGeometryOnOpen
           titleMissing={titleMissing}
           showValidation={submitAttempted}
         />

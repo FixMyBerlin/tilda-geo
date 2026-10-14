@@ -9,7 +9,6 @@ import {
 import db from '@/server/db.server'
 import { authorizePlanningRegion } from '@/server/planning/authorizePlanningRegion.server'
 import { parseFactorConfigSnapshot } from '@/server/planning/factorConfigSchema'
-import { PLANNING_USE_CASE_LABELS } from '@/shared/regionen/planningScoreLabels.const'
 import { REVIEW_UPLOAD_MAX_FEATURES } from '@/shared/reviewLists/reviewEntryImport'
 import {
   buildSpaceFinderReviewProperties,
@@ -66,7 +65,7 @@ export async function createReviewEntriesFromSpaceFinder(
           id: true,
           title: true,
           area: {
-            select: { id: true, title: true, useCase: true, region: { select: { slug: true } } },
+            select: { id: true, title: true, region: { select: { slug: true } } },
           },
         },
       },
@@ -102,7 +101,6 @@ export async function createReviewEntriesFromSpaceFinder(
         candidateProperties: candidate.properties,
         areaTitle: area.title,
         variantTitle: variant.title,
-        useCaseLabel: PLANNING_USE_CASE_LABELS[area.useCase] ?? null,
         h3Id: candidate.h3Id,
         eigendatenNames,
       }),

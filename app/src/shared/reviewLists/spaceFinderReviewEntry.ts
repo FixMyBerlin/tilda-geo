@@ -79,14 +79,12 @@ export const buildSpaceFinderReviewProperties = ({
   candidateProperties,
   areaTitle,
   variantTitle,
-  useCaseLabel,
   h3Id,
   eigendatenNames,
 }: {
   candidateProperties: CandidateProperties
   areaTitle: string
   variantTitle: string
-  useCaseLabel: string | null
   h3Id: string
   /** Namen der Eigene-Daten-Datensätze des Laufs (ID → Name), falls vorhanden. */
   eigendatenNames?: EigendatenNames
@@ -106,7 +104,6 @@ export const buildSpaceFinderReviewProperties = ({
   if (clusterAreaM2 !== null) {
     properties['Clusterfläche (m²)'] = Math.round(clusterAreaM2).toLocaleString('de-DE')
   }
-  if (useCaseLabel) properties.Nutzungsfall = useCaseLabel
   properties.Planungsgebiet = areaTitle
   properties.Variante = variantTitle
   properties['H3-ID'] = h3Id
