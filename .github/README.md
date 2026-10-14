@@ -52,7 +52,7 @@
 | `VITE_APP_ORIGIN` | `vars.VITE_APP_ORIGIN` | yes | Public app origin. Must be listed in `app/src/components/shared/utils/appInstances.const.ts`. |
 | `VITE_APP_ENV` | `vars.VITE_APP_ENV` | yes | App environment for client/server behavior. |
 | `APP_URL` | `vars.APP_URL` | yes | Main app hostname used by Traefik labels. |
-| `SESSION_SECRET_KEY` | `secrets.SESSION_SECRET_KEY` | yes | Session signing secret. Sensitive. |
+| `SESSION_SECRET_KEY` | `secrets.SESSION_SECRET_KEY` | yes | Session signing secret. Also encrypts the stored OSM OAuth tokens: rotating it makes them unreadable until each user signs in again. Sensitive. |
 | `OSM_CLIENT_ID` | `secrets.OSM_CLIENT_ID` | yes | OSM OAuth client ID. Sensitive. |
 | `OSM_CLIENT_SECRET` | `secrets.OSM_CLIENT_SECRET` | yes | OSM OAuth client secret. Sensitive. |
 | `S3_KEY` | `secrets.S3_KEY` | yes | S3 access key. Sensitive. |
