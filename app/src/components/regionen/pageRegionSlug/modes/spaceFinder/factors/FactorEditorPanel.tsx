@@ -11,10 +11,18 @@ import {
 import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
 import { SegmentedChoice } from '@/components/shared/SegmentedChoice/SegmentedChoice'
 import { toastError } from '@/components/shared/toast/toastError'
+import {
+  type UserDataset,
+  userDatasetCoverage,
+  userDatasetCoverageMessage,
+} from '@/lib/planningUserGeojson'
 import { factorFingerprint, factorsDiffer } from '@/server/planning/factorFingerprint'
-import type { VariantFactorConfig } from '@/server/planning/mergeFactorConfig'
+import {
+  syncEigendatenWeights,
+  type VariantFactorConfig,
+} from '@/server/planning/mergeFactorConfig'
 import type { FactorConfig } from '@/server/planning/planning.functions'
-import { updatePlanningAreaFn, updatePlanningVariantFn } from '@/server/planning/planning.functions'
+import { updatePlanningVariantFn } from '@/server/planning/planning.functions'
 import {
   planningAreaQueryOptions,
   planningAreasQueryOptions,
@@ -22,7 +30,7 @@ import {
 } from '@/server/planning/planningQueryOptions'
 import { useSpaceFinderBoundaryActions } from '../../../hooks/mapState/space-finder-boundary-store'
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
-import { USER_GEOJSON_MODES, type UserGeojsonMode } from '../area/UserObstaclesField'
+import { USER_DATASET_MODE_OPTIONS, UserDatasetCoverageHint } from '../area/UserDatasetsField'
 import { spaceFinderGroupStyle, spaceFinderNumberInputClass } from '../spaceFinderPanelStyles'
 import { OepnvCategorySliders } from './OepnvCategorySliders'
 import { readOepnvShares, type OepnvShares } from './oepnvShares'
@@ -71,16 +79,86 @@ const groupHeadlineBaseClass =
 const groupHeadlineClass = twJoin(groupHeadlineBaseClass, 'border-gray-200 text-gray-800')
 
 /**
- * Wert-Text des Eigene-Daten-Chips im zugeklappten Faktoren-Kopf: bei Bonus/Abzug die Punkte in
- * Wirkrichtung, bei den Ausschluss-Modi gibt es keine Punkte — dort nur der Modus-Name.
+ * Wert-Text des Eigene-Daten-Chips im zugeklappten Faktoren-Kopf. Bei genau einem Datensatz: bei
+ * Bonus/Abzug die Punkte in Wirkrichtung, bei den Ausschluss-Modi nur der Modus-Name. Bei mehreren
+ * ist ein Wert allein nichtssagend — dort steht die Anzahl.
  */
 const eigendatenChipValue = (config: FactorConfig) => {
-  const mode = (config.user_geojson_mode ?? 'bonus') as UserGeojsonMode
+  const datasets = config.user_datasets ?? []
+  const [dataset] = datasets
+  if (datasets.length !== 1 || !dataset) return `${datasets.length} Datensätze`
+  const mode = dataset.mode
   if (mode === 'exclude_inside' || mode === 'exclude_outside') {
-    return USER_GEOJSON_MODES.find(([value]) => value === mode)?.[1] ?? mode
+    return USER_DATASET_MODE_OPTIONS.find(([value]) => value === mode)?.[1] ?? mode
   }
-  const points = weightToPoints(config.weights?.w_eigendaten)
+  const points = weightToPoints(config.eigendaten_weights?.[dataset.id])
   return `${mode === 'penalty' ? '−' : '+'}${points}`
+}
+
+/** Was ein Ausschluss-Modus bewirkt — dort gibt es keine Stärke, also steht das statt des Reglers. */
+const EIGENDATEN_EXCLUDE_TEXT: Partial<Record<UserDataset['mode'], string>> = {
+  exclude_inside: 'Flächen innerhalb dieses Datensatzes werden ausgeschlossen.',
+  exclude_outside: 'Nur Flächen innerhalb dieses Datensatzes bleiben zulässig.',
+}
+
+/**
+ * Ein Eigene-Daten-Datensatz im Faktoren-Block: Name, Modus (nur Anzeige — er gehört zum
+ * Planungsgebiet und wird dort eingestellt), Stärke bei Bonus/Abzug (gehört zur Variante) und der
+ * Hinweis, wenn Objekte außerhalb des Planungsgebiets liegen.
+ */
+const EigendatenDatasetBlock = ({
+  dataset,
+  studyArea,
+  weight,
+  setWeight,
+  readOnly,
+}: {
+  dataset: UserDataset
+  studyArea: GeoJSON.Geometry | null
+  weight: number | undefined
+  setWeight: (value: number) => void
+  readOnly: boolean
+}) => {
+  const coverageMessage = userDatasetCoverageMessage(
+    userDatasetCoverage(dataset.geojson, studyArea),
+  )
+  const isSoft = dataset.mode === 'bonus' || dataset.mode === 'penalty'
+  const modeLabel =
+    USER_DATASET_MODE_OPTIONS.find(([value]) => value === dataset.mode)?.[1] ?? dataset.mode
+  return (
+    <li className="space-y-1">
+      <div className="flex items-center justify-between gap-2 text-xs">
+        <span className="flex min-w-0 items-center gap-1.5">
+          <span className="min-w-0 truncate font-semibold text-gray-800" title={dataset.name}>
+            {dataset.name}
+          </span>
+          <span
+            className="shrink-0 rounded border border-gray-400 bg-white px-1.5 py-px text-[11px] font-semibold text-gray-800"
+            title="Der Modus gilt für alle Varianten und wird am Planungsgebiet eingestellt."
+          >
+            {modeLabel}
+          </span>
+        </span>
+        <span className="shrink-0 text-gray-500 tabular-nums">
+          {dataset.geojson.features.length.toLocaleString('de-DE')} Objekte
+        </span>
+      </div>
+      {coverageMessage && <UserDatasetCoverageHint message={coverageMessage} />}
+      {!isSoft && EIGENDATEN_EXCLUDE_TEXT[dataset.mode] && (
+        <p className="text-xs text-gray-500">{EIGENDATEN_EXCLUDE_TEXT[dataset.mode]}</p>
+      )}
+      {isSoft && (
+        <ModifierSlider
+          label="Stärke"
+          weight={weight}
+          direction={dataset.mode === 'penalty' ? 'negative' : 'positive'}
+          onChange={setWeight}
+          readOnly={readOnly}
+          info={<FactorInfo factorKey="w_eigendaten" />}
+        />
+      )}
+    </li>
+  )
 }
 
 /**
@@ -106,7 +184,7 @@ const GroupShareChips = ({ config }: { config: FactorConfig }) => {
           </span>
         </span>
       ))}
-      {config.user_geojson != null && (
+      {(config.user_datasets?.length ?? 0) > 0 && (
         <span
           className={twJoin(
             'rounded px-1.5 py-0.5 text-[11px] font-medium',
@@ -224,7 +302,7 @@ const FactorFields = ({
   setPlatzDirection,
   setZielortShares,
   setOepnvShares,
-  setUserGeojsonMode,
+  setEigendatenWeight,
   onReset,
   readOnly = false,
   parkingDataAvailable = true,
@@ -237,7 +315,7 @@ const FactorFields = ({
   setPlatzDirection: (value: 'positive' | 'negative') => void
   setZielortShares: (shares: ZielortShares) => void
   setOepnvShares: (shares: OepnvShares) => void
-  setUserGeojsonMode: (mode: UserGeojsonMode) => void
+  setEigendatenWeight: (id: string, value: number) => void
   onReset?: () => void
   readOnly?: boolean
   parkingDataAvailable?: boolean
@@ -246,7 +324,8 @@ const FactorFields = ({
   const vegetationDirection = config.vegetation_direction ?? 'negative'
   const platzDirection = config.platz_direction ?? 'positive'
   const directions = { vegetation: vegetationDirection, platz: platzDirection }
-  const eigendatenMode = (config.user_geojson_mode ?? 'bonus') as UserGeojsonMode
+  const userDatasets = config.user_datasets ?? []
+  const studyAreaGeometry = (config.study_area as GeoJSON.Geometry | undefined) ?? null
   const setWeightFromWeights = (key: string, value: number) =>
     setWeights({ ...weights, [key]: value })
   const shares = criterionShares(weights)
@@ -448,7 +527,7 @@ const FactorFields = ({
         ))}
       </div>
 
-      {config.user_geojson != null && (
+      {userDatasets.length > 0 && (
         <div
           className={twJoin(
             'rounded-r border-l-[3px] py-1.5 pr-1 pl-2',
@@ -463,25 +542,19 @@ const FactorFields = ({
               <InfoTooltip>{GROUP_HELP.eigendaten}</InfoTooltip>
             </span>
           </div>
-          <div className="mt-1">
-            <SegmentedChoice
-              options={USER_GEOJSON_MODES}
-              value={eigendatenMode}
-              onChange={setUserGeojsonMode}
-              disabled={readOnly}
-              className="grid grid-cols-2 gap-1.5"
-            />
-          </div>
-          {(eigendatenMode === 'bonus' || eigendatenMode === 'penalty') && (
-            <ModifierSlider
-              label="Stärke"
-              weight={weights.w_eigendaten}
-              direction={eigendatenMode === 'penalty' ? 'negative' : 'positive'}
-              onChange={(value) => setWeightFromWeights('w_eigendaten', value)}
-              readOnly={readOnly}
-              info={<FactorInfo factorKey="w_eigendaten" />}
-            />
-          )}
+          {/* Nur die Überschrift hat eine Linie; die Datensätze trennt der Abstand. */}
+          <ul className="mt-1.5 space-y-3">
+            {userDatasets.map((dataset) => (
+              <EigendatenDatasetBlock
+                key={dataset.id}
+                dataset={dataset}
+                studyArea={studyAreaGeometry}
+                weight={config.eigendaten_weights?.[dataset.id]}
+                setWeight={(value) => setEigendatenWeight(dataset.id, value)}
+                readOnly={readOnly}
+              />
+            ))}
+          </ul>
         </div>
       )}
 
@@ -585,15 +658,35 @@ const FactorEditorPanelForm = ({
     setOpen(!readOnly)
   }
 
+  // Gebietsfelder (Geometrie, eigene Daten, Nutzung, Größe) ändert nur das Gebietsformular; der
+  // Entwurf hier hält sie nur zur Anzeige. Kommt ein neuer Gebietsstand vom Server (z. B. ein
+  // weiterer Datensatz), wird er übernommen, ohne ungespeicherte Faktoren anzutasten.
+  const [syncedAreaConfig, setSyncedAreaConfig] = useState(factorConfig)
+  if (
+    syncedAreaConfig.study_area !== factorConfig.study_area ||
+    syncedAreaConfig.user_datasets !== factorConfig.user_datasets ||
+    syncedAreaConfig.use_case !== factorConfig.use_case ||
+    syncedAreaConfig.area_size_m2 !== factorConfig.area_size_m2
+  ) {
+    setSyncedAreaConfig(factorConfig)
+    // Stärken mitziehen wie auf dem Server (`syncEigendatenWeights`): neue Datensätze mit
+    // Startwert, entfernte raus, ungespeicherte Werte bleiben.
+    setConfig((c) =>
+      syncEigendatenWeights(
+        {
+          ...c,
+          study_area: factorConfig.study_area,
+          user_datasets: factorConfig.user_datasets,
+          use_case: factorConfig.use_case,
+          area_size_m2: factorConfig.area_size_m2,
+        },
+        factorConfig.user_datasets,
+      ),
+    )
+  }
+
   const toVariantConfig = (c: FactorConfig) => {
-    const {
-      study_area: _sa,
-      user_geojson: _ug,
-      user_geojson_mode: _ugm,
-      use_case: _uc,
-      area_size_m2: _as,
-      ...rest
-    } = c
+    const { study_area: _sa, user_datasets: _ud, use_case: _uc, area_size_m2: _as, ...rest } = c
     const stripped: VariantFactorConfig = rest
     return stripped
   }
@@ -691,22 +784,10 @@ const FactorEditorPanelForm = ({
   const setOepnvShares = (shares: OepnvShares) =>
     setConfig((c) => ({ ...c, oepnv_category_shares: shares }))
 
-  // `user_geojson_mode` gehört zum Planungsgebiet (nicht zur Variante, siehe `toVariantConfig`
-  // oben) — er geht deshalb an eine eigene Mutation und wirkt auf alle Varianten dieses
-  // Planungsgebiets, statt wie die Gewichte über den Auto-Save der Variante zu laufen.
-  const eigendatenModeMutation = useMutation({
-    mutationFn: (mode: UserGeojsonMode) =>
-      updatePlanningAreaFn({ data: { areaId, userGeojson: undefined, userGeojsonMode: mode } }),
-    onSuccess: () => {
-      queryClient.invalidateQueries(planningAreaQueryOptions(areaId))
-      queryClient.invalidateQueries(planningVariantQueryOptions(variantId))
-    },
-  })
-
-  const setUserGeojsonMode = (mode: UserGeojsonMode) => {
-    setConfig((c) => ({ ...c, user_geojson_mode: mode }))
-    eigendatenModeMutation.mutate(mode)
-  }
+  // Die Stärke je Datensatz ist Teil der Variante und läuft über deren Auto-Save. Name, Modus und
+  // Geometrie der Datensätze gehören zum Planungsgebiet und werden im Gebietsformular geändert.
+  const setEigendatenWeight = (id: string, value: number) =>
+    setConfig((c) => ({ ...c, eigendaten_weights: { ...c.eigendaten_weights, [id]: value } }))
 
   const resetWeightsToDefaults = () => {
     setConfig((c) => ({
@@ -717,9 +798,11 @@ const FactorEditorPanelForm = ({
       bewohnerbedarf_saettigung_ew:
         c.bewohnerbedarf_saettigung_auto_ew ?? c.bewohnerbedarf_saettigung_ew,
       bewohnerbedarf_saettigung_auto: c.bewohnerbedarf_saettigung_auto_ew != null,
+      // Standard heißt für Eigene Daten: die Startstärke je Datensatz.
+      eigendaten_weights: syncEigendatenWeights<VariantFactorConfig>({}, c.user_datasets)
+        .eigendaten_weights,
       study_area: c.study_area,
-      user_geojson: c.user_geojson,
-      user_geojson_mode: c.user_geojson_mode,
+      user_datasets: c.user_datasets,
       use_case: c.use_case,
       area_size_m2: c.area_size_m2,
     }))
@@ -733,9 +816,15 @@ const FactorEditorPanelForm = ({
   const canDiscard = factorsDiffer(config, discardBase)
 
   const discardChanges = () => {
+    // Der Variantenstand kommt komplett aus dem Bezugspunkt, nicht über den Entwurf gelegt: fehlt
+    // dort ein optionales Feld (z. B. `eigendaten_weights`, wenn beim Lauf noch keine Stärke
+    // gesetzt war), muss es auch im Entwurf wegfallen. Vom Entwurf bleiben nur die Gebietsfelder.
     const restored: FactorConfig = {
-      ...config,
       ...toVariantConfig(discardBase),
+      study_area: config.study_area,
+      user_datasets: config.user_datasets,
+      use_case: config.use_case,
+      area_size_m2: config.area_size_m2,
       min_area_m2: factorConfig.min_area_m2,
     }
     setConfig(restored)
@@ -783,7 +872,7 @@ const FactorEditorPanelForm = ({
             setPlatzDirection={setPlatzDirection}
             setZielortShares={setZielortShares}
             setOepnvShares={setOepnvShares}
-            setUserGeojsonMode={setUserGeojsonMode}
+            setEigendatenWeight={setEigendatenWeight}
             onReset={readOnly ? undefined : resetWeightsToDefaults}
             readOnly={readOnly}
             parkingDataAvailable={parkingDataAvailable}

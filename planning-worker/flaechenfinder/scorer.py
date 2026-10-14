@@ -16,6 +16,7 @@ from .config import (
     zielort_category_factors,
 )
 from .dem import DEMAdapter
+from .eigendaten import combine_eigendaten
 from .geometry import (
     buffer_by_geom_type,
     dist_to_union as _dist_to_union,
@@ -75,6 +76,8 @@ def aggregate_hexagons(hex_proj: gpd.GeoDataFrame, target_res: int = AGG_H3_RES)
     # ein Einzel-Flag pro Feingitter-Zelle nicht aussagekräftig.
     agg["fahrbahn"] = False
     agg["eigendaten_ausschluss"] = False
+    # Auch die Aufschlüsselung je Datensatz ist ein Feingitter-Detail.
+    agg["eigendaten_details"] = None
     agg["eignungsklasse"] = pd.cut(
         agg["mce_gesamtscore"], bins=_KLASSE_BINS, labels=_KLASSE_LABELS
     ).astype(str)
@@ -299,7 +302,8 @@ def run_flaechenfinder(
     osm_loader=None,
     vegetation_gdf=None,
     carriageway_gdf=None,
-    user_geojson=None,
+    user_datasets=None,
+    eigendaten_weights=None,
     progress_cb=None,
 ):
     """Berechnet das H3-Scoring-Gitter mit MCE-Score je Hexagon.
@@ -674,18 +678,20 @@ def run_flaechenfinder(
         del veg_proj
 
     # ── 12. Eigene Daten verschneiden ────────────────────────────
-    # Nutzer-Upload (factorConfig.user_geojson): Punkte/Linien werden gepuffert
-    # (1,5 m / 2,5 m), Flächen unverändert; Distanz je Hexagon zur Union. Die
-    # eigentliche Score-/Ausschluss-Ableitung passiert im MCE-Schritt. Ohne Datei
-    # bleibt abstand_eigendaten_m NaN (→ Faktor wirkungslos).
+    # Nutzer-Uploads (factorConfig.user_datasets): je Datensatz werden Punkte/Linien gepuffert
+    # (1,5 m / 2,5 m), Flächen bleiben unverändert; Distanz je Hexagon zur Union des Datensatzes.
+    # Die eigentliche Score-/Ausschluss-Ableitung passiert im MCE-Schritt. Ohne Datensätze bleibt
+    # `eigendaten_distances` leer (→ Faktor wirkungslos).
     _step(12)
-    hex_proj["abstand_eigendaten_m"] = np.nan
-    if user_geojson is not None:
+    eigendaten_distances: dict[str, pd.Series] = {}
+    for _dataset in user_datasets or []:
+        _ds_id = _dataset.get("id")
         try:
-            _feats = user_geojson.get("features", []) if isinstance(user_geojson, dict) else user_geojson
+            _geojson = _dataset.get("geojson") or {}
+            _feats = _geojson.get("features", []) if isinstance(_geojson, dict) else _geojson
             user_gdf = gpd.GeoDataFrame.from_features(_feats, crs="EPSG:4326")
         except Exception as exc:  # defensive: sanitisiert, aber nie dem Client trauen
-            print(f"   ⚠️  Eigene Daten unlesbar, übersprungen: {exc}")
+            print(f"   ⚠️  Eigene Daten „{_dataset.get('name')}“ unlesbar, übersprungen: {exc}")
             user_gdf = None
         if user_gdf is not None and len(user_gdf):
             user_gdf = user_gdf[user_gdf.geometry.notna() & ~user_gdf.geometry.is_empty]
@@ -693,7 +699,7 @@ def run_flaechenfinder(
             user_proj = buffer_by_geom_type(
                 user_gdf.to_crs("EPSG:25832"), USER_POINT_BUFFER_M, USER_LINE_BUFFER_M
             )
-            hex_proj["abstand_eigendaten_m"] = _dist_to_union(centroids, user_proj)
+            eigendaten_distances[_ds_id] = _dist_to_union(centroids, user_proj)
             del user_proj
         del user_gdf
 
@@ -991,40 +997,29 @@ def run_flaechenfinder(
         bestand_delta = 0.0
 
     # ── Eigene Daten: weicher Modifier ODER harter Ausschluss ────────────
-    # `user_geojson_mode` bestimmt die Wirkung der in Schritt 12 berechneten
-    # Distanz. Punkte/Linien sind bereits gepuffert, Flächen exakt – ein Hexagon
-    # gilt als „innerhalb", wenn seine Distanz zur (gepufferten) Union 0 ist.
-    #   bonus/penalty    → voller Zu-/Abschlag innerhalb, 0 außerhalb; Stärke
-    #                      w_eigendaten (× 100). EIGENE Kategorie: fließt in den
-    #                      Gesamtscore, aber NICHT in Bedarf/Bebauung.
+    # Jeder Datensatz bringt seinen Modus mit; die in Schritt 12 berechneten Distanzen sind
+    # bereits gepuffert (Punkte/Linien) bzw. exakt (Flächen) – ein Hexagon gilt als „innerhalb",
+    # wenn seine Distanz zur Union des Datensatzes 0 ist (siehe `eigendaten.combine_eigendaten`).
+    #   bonus/penalty    → voller Zu-/Abschlag innerhalb, 0 außerhalb; Stärke je Datensatz
+    #                      eigendaten_weights[id] (× 100). Mehrere Datensätze addieren sich.
+    #                      EIGENE Kategorie: fließt in den Gesamtscore, aber NICHT in
+    #                      Bedarf/Bebauung.
     #   exclude_inside   → Hexagon innerhalb → mce = 0
     #   exclude_outside  → Hexagon außerhalb → mce = 0 (erlaubte-Zonen-Maske)
-    # Harte Ausschlüsse nullen ausschließlich mce_gesamtscore (nicht Bedarf/Bebauung).
-    eigendaten_delta = 0.0
-    eigendaten_exclude = None
-    abstand_eig = hex_proj["abstand_eigendaten_m"]
-    has_eig = abstand_eig.notna().any()
-    inside_eig = abstand_eig.notna() & (abstand_eig <= 0)
-    eig_mode = use_case.user_geojson_mode
-    if has_eig and eig_mode == "exclude_inside":
-        eigendaten_exclude = inside_eig
-        hex_proj["score_eigendaten"] = np.nan
-    elif has_eig and eig_mode == "exclude_outside":
-        eigendaten_exclude = abstand_eig.notna() & ~inside_eig
-        hex_proj["score_eigendaten"] = np.nan
-    else:
-        w_eig = w.get("w_eigendaten", 0) or 0
-        if has_eig and w_eig > 0 and eig_mode in ("bonus", "penalty"):
-            sign = 1.0 if eig_mode == "bonus" else -1.0
-            effect = (w_eig * 100.0) * inside_eig.astype(float)
-            hex_proj["score_eigendaten"] = (sign * effect).round(1)
-            eigendaten_delta = sign * effect
-        else:
-            hex_proj["score_eigendaten"] = np.nan
+    # Harte Ausschlüsse (ODER über alle Datensätze) nullen ausschließlich mce_gesamtscore
+    # (nicht Bedarf/Bebauung).
+    eig_score, eigendaten_delta, eig_exclude, eig_details = combine_eigendaten(
+        user_datasets or [], eigendaten_distances, eigendaten_weights, hex_proj.index
+    )
+    eigendaten_exclude = eig_exclude if eig_exclude.any() else None
+    hex_proj["score_eigendaten"] = eig_score
+    # Je Hexagon, welcher Datensatz wie gewirkt hat (JSON-Text) – die Sidebar nennt damit die
+    # Datensätze beim Namen.
+    hex_proj["eigendaten_details"] = eig_details
 
     # Persistiertes Flag analog `gebaeude`/`fahrbahn` – erlaubt der Sidebar, den
     # Ausschlussgrund „Eigene Daten" anzuzeigen, auch wenn `score_eigendaten`
-    # in Ausschluss-Modi NaN ist (siehe oben).
+    # in reinen Ausschluss-Modi NaN ist (siehe oben).
     hex_proj["eigendaten_ausschluss"] = (
         eigendaten_exclude if eigendaten_exclude is not None
         else pd.Series(False, index=hex_proj.index)

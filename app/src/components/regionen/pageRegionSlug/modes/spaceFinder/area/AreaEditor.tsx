@@ -2,6 +2,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { MAX_STUDY_AREA_KM2 } from '@/lib/planningStudyAreaLimit'
+import type { UserDataset } from '@/lib/planningUserGeojson'
 import { updatePlanningAreaFn } from '@/server/planning/planning.functions'
 import {
   planningAreaQueryOptions,
@@ -15,7 +16,7 @@ import type { PlanningUseCase } from '../factors/spaceFinderDefaults'
 import type { PlanningVariantDetail } from '../spaceFinderVariantDetail'
 import { AreaFormFields, useEffectiveStudyArea, useStudyAreaKm2 } from './AreaFormFields'
 import type { StudyAreaGeometry } from './extractStudyAreaGeometry'
-import type { UserGeojsonMode } from './UserObstaclesField'
+import { userDatasetsValid } from './UserDatasetsField'
 
 type EditorArea = PlanningVariantDetail['area']
 
@@ -36,20 +37,16 @@ const AreaEditorForm = ({
   const { setBoundaryHighlightGeom } = useSpaceFinderBoundaryActions()
 
   const [title, setTitle] = useState(area.title)
+  const [submitAttempted, setSubmitAttempted] = useState(false)
+  const titleMissing = submitAttempted && title.trim().length === 0
   const [boundaryId, setBoundaryId] = useState<string | null>(null)
   const [studyArea, setStudyArea] = useState<unknown>(area.studyArea)
   const [areaTab, setAreaTab] = useState<'search' | 'custom'>('search')
-  const [userGeojson, setUserGeojson] = useState<GeoJSON.FeatureCollection | undefined>(
-    (area.userGeojson as GeoJSON.FeatureCollection | null) ?? undefined,
-  )
-  const [userGeojsonMode, setUserGeojsonMode] = useState<UserGeojsonMode>(
-    (area.userGeojsonMode as UserGeojsonMode) ?? 'bonus',
-  )
+  const [userDatasets, setUserDatasets] = useState<UserDataset[]>(area.userDatasets)
   const [useCase, setUseCase] = useState<PlanningUseCase>(
     (area.useCase as PlanningUseCase) ?? 'fahrradbox',
   )
   const [areaSizeM2, setAreaSizeM2] = useState<number | null>(area.areaSizeM2)
-  const [obstaclesDirty, setObstaclesDirty] = useState(false)
 
   useEffect(() => {
     setBoundaryHighlightGeom(area.studyArea as object, { filled: false })
@@ -61,10 +58,8 @@ const AreaEditorForm = ({
 
   const hasCompleteRuns = variants.some((v) => v.runs[0]?.status === 'COMPLETE')
   const geometryDirty = effectiveStudyArea != null && !jsonEqual(effectiveStudyArea, area.studyArea)
-  const obstaclesChanged =
-    obstaclesDirty ||
-    !jsonEqual(userGeojson ?? null, area.userGeojson ?? null) ||
-    userGeojsonMode !== ((area.userGeojsonMode as UserGeojsonMode) ?? 'bonus')
+  const obstaclesChanged = !jsonEqual(userDatasets, area.userDatasets)
+  const namesValid = userDatasetsValid(userDatasets)
   const useCaseChanged =
     useCase !== ((area.useCase as PlanningUseCase) ?? 'fahrradbox') ||
     areaSizeM2 !== area.areaSizeM2
@@ -76,8 +71,10 @@ const AreaEditorForm = ({
           areaId: area.id,
           title,
           studyArea: effectiveStudyArea!,
-          userGeojson: userGeojson ?? null,
-          userGeojsonMode,
+          userDatasets: userDatasets.map((dataset) => ({
+            ...dataset,
+            name: dataset.name.trim(),
+          })),
           useCase,
           areaSizeM2,
         },
@@ -91,6 +88,13 @@ const AreaEditorForm = ({
       onClose()
     },
   })
+
+  // Wie im Assistenten: Fehler erst nach dem Speichern-Versuch zeigen, dann am Feld markieren.
+  const handleSubmit = () => {
+    setSubmitAttempted(true)
+    if (title.trim().length === 0 || !namesValid) return
+    mutation.mutate()
+  }
 
   return (
     <div className="flex flex-col text-sm">
@@ -108,8 +112,7 @@ const AreaEditorForm = ({
             boundaryId,
             studyArea,
             areaTab,
-            userGeojson,
-            userGeojsonMode,
+            userDatasets,
             useCase,
             areaSizeM2,
           }}
@@ -117,18 +120,13 @@ const AreaEditorForm = ({
           onBoundaryIdChange={setBoundaryId}
           onStudyAreaChange={setStudyArea}
           onAreaTabChange={setAreaTab}
-          onUserGeojsonChange={(geojson) => {
-            setUserGeojson(geojson)
-            setObstaclesDirty(true)
-          }}
-          onUserGeojsonModeChange={(mode) => {
-            setUserGeojsonMode(mode)
-            setObstaclesDirty(true)
-          }}
+          onUserDatasetsChange={setUserDatasets}
           onUseCaseChange={setUseCase}
           onAreaSizeM2Change={setAreaSizeM2}
           geometryStepTitle="Geometrie des Gebiets"
           originalStudyArea={area.studyArea as StudyAreaGeometry | null}
+          titleMissing={titleMissing}
+          showValidation={submitAttempted}
         />
 
         {mutation.isError && (
@@ -139,7 +137,7 @@ const AreaEditorForm = ({
       <div className="flex items-center justify-between gap-2 px-3 pb-3">
         <button
           type="button"
-          onClick={() => mutation.mutate()}
+          onClick={handleSubmit}
           disabled={mutation.isPending || !effectiveStudyArea || areaTooLarge}
           className={twJoin(
             'rounded bg-gray-800 px-3 py-2 text-sm font-medium text-white hover:bg-gray-900 disabled:opacity-50',
@@ -148,6 +146,9 @@ const AreaEditorForm = ({
           {mutation.isPending ? 'Speichern…' : 'Gebiet speichern'}
         </button>
       </div>
+      {submitAttempted && (title.trim().length === 0 || !namesValid) && (
+        <p className="px-3 pb-3 text-xs text-red-600">Alle Felder ausfüllen</p>
+      )}
     </div>
   )
 }

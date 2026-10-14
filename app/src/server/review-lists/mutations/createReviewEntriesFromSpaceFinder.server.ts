@@ -8,6 +8,7 @@ import {
 } from '@/server/auth/memberCaller.server'
 import db from '@/server/db.server'
 import { authorizePlanningRegion } from '@/server/planning/authorizePlanningRegion.server'
+import { parseFactorConfigSnapshot } from '@/server/planning/factorConfigSchema'
 import { PLANNING_USE_CASE_LABELS } from '@/shared/regionen/planningScoreLabels.const'
 import { REVIEW_UPLOAD_MAX_FEATURES } from '@/shared/reviewLists/reviewEntryImport'
 import {
@@ -59,6 +60,7 @@ export async function createReviewEntriesFromSpaceFinder(
     where: { id: runId },
     select: {
       status: true,
+      factorConfigSnapshot: true,
       variant: {
         select: {
           id: true,
@@ -81,6 +83,13 @@ export async function createReviewEntriesFromSpaceFinder(
 
   if ('listId' in target) await assertListInRegion(target.listId, regionSlug)
 
+  // Namen der Eigene-Daten-Datensätze so, wie der Lauf gerechnet hat (Snapshot, nicht das heutige
+  // Gebiet), damit die Teilscores sie nennen können.
+  const snapshot = parseFactorConfigSnapshot(run.factorConfigSnapshot)
+  const eigendatenNames = Object.fromEntries(
+    (snapshot.user_datasets ?? []).map((dataset) => [dataset.id, dataset.name]),
+  )
+
   // Validate and normalize before anything is written (a new list must not stay empty on errors).
   const uniqueCandidates = [...new Map(candidates.map((c) => [c.h3Id, c])).values()]
   const entries = featureCollectionToEntries({
@@ -95,6 +104,7 @@ export async function createReviewEntriesFromSpaceFinder(
         variantTitle: variant.title,
         useCaseLabel: PLANNING_USE_CASE_LABELS[area.useCase] ?? null,
         h3Id: candidate.h3Id,
+        eigendatenNames,
       }),
     })),
   })

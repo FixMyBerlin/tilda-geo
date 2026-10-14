@@ -2,7 +2,6 @@ import {
   ArrowDownTrayIcon,
   ClipboardDocumentCheckIcon,
   SquaresPlusIcon,
-  XMarkIcon,
 } from '@heroicons/react/24/outline'
 import { bbox, centroid } from '@turf/turf'
 import { useEffect, useState } from 'react'
@@ -16,6 +15,7 @@ import {
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-candidates-store'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
+import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { CollapsibleBox } from '@/components/shared/CollapsibleBox/CollapsibleBox'
 import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
@@ -23,8 +23,11 @@ import { ModeListItem } from '../../ModeListItem'
 import {
   modePanelListMetaClassName,
   modePanelListTitleClassName,
+  modePanelSmallButtonClassName,
   modePanelTintHairlineTopClassName,
 } from '../../modePanel.const'
+import { FINE_HEXAGON_MIN_ZOOM } from '../planningHexagonResolution'
+import { RemoveIconButton } from '../RemoveIconButton'
 import { useSpaceFinderSelection } from '../useSpaceFinderSelection'
 import { candidateExportFileName, downloadCandidatesGeojson } from './spaceFinderCandidateExport'
 import { SpaceFinderReviewListModal } from './SpaceFinderReviewListModal'
@@ -93,14 +96,11 @@ const CandidateRow = ({
       coordinates={candidateCentroid(candidate)}
       onClick={onFocus}
       actions={
-        <button
-          type="button"
+        <RemoveIconButton
+          label={`Kandidat ${index + 1} entfernen`}
           onClick={onRemove}
-          aria-label={`Kandidat ${index + 1} entfernen`}
-          className="-mr-0.5 shrink-0 rounded p-0.5 text-gray-400 hover:bg-white hover:text-gray-800"
-        >
-          <XMarkIcon className="size-4" />
-        </button>
+          className="-mr-0.5"
+        />
       }
     >
       <div className="flex items-center gap-2">
@@ -141,14 +141,15 @@ export const SpaceFinderCandidatesSection = ({
   runId: number
 }) => {
   const regionSlug = useRegion().slug
-  const { variant } = useSpaceFinderSelection()
+  const { variant, candidateRunKey: runKey } = useSpaceFinderSelection()
   const [reviewListModalOpen, setReviewListModalOpen] = useState(false)
-  const candidates = useSpaceFinderCandidates(runId)
+  const candidates = useSpaceFinderCandidates(runKey)
   const selectActive = useSpaceFinderCandidateSelectActive()
   const { setSelectActive, removeCandidate, clearCandidates } = useSpaceFinderCandidatesActions()
   const { clearInspectorFeatures } = useMapActions()
   const { setFeaturesParam } = useFeaturesParam()
   const { mainMap: map } = useMap()
+  const { mapParam } = useMapParam()
 
   const focusCandidate = (candidate: SpaceFinderCandidate) => {
     if (!map) return
@@ -193,6 +194,25 @@ export const SpaceFinderCandidatesSection = ({
         {selectActive ? 'Auswahl beenden' : 'Kandidaten auswählen'}
       </button>
 
+      {/* Wie `QaZoomNotice`: unter Zoom 16 zeigt die Karte nur gemittelte grobe Zellen, die
+          RegionMap nicht als Kandidat annimmt. */}
+      {selectActive && (mapParam?.zoom ?? 0) < FINE_HEXAGON_MIN_ZOOM && (
+        <div className="flex items-start justify-between gap-3 rounded border border-yellow-200 bg-yellow-50 px-2 py-1.5">
+          <p className="text-xs text-yellow-900">
+            Kandidaten lassen sich ab Zoomstufe {FINE_HEXAGON_MIN_ZOOM} auswählen — vorher zeigt die
+            Karte Mittelwerte über mehrere Flächen.
+          </p>
+          <button
+            type="button"
+            className={twJoin(modePanelSmallButtonClassName, 'shrink-0 border-yellow-300 bg-white')}
+            disabled={!map}
+            onClick={() => map?.zoomTo(FINE_HEXAGON_MIN_ZOOM, { duration: 600 })}
+          >
+            Hineinzoomen
+          </button>
+        </div>
+      )}
+
       {candidates.length === 0 ? (
         <p className="text-sm text-gray-500">
           Klicke Hexagone auf der Karte an, um sie als Kandidaten für Abstellanlagen zu sammeln.
@@ -207,7 +227,7 @@ export const SpaceFinderCandidatesSection = ({
               candidate={candidate}
               index={index}
               onFocus={() => focusCandidate(candidate)}
-              onRemove={() => runId != null && removeCandidate(runId, candidate.h3Id)}
+              onRemove={() => runKey != null && removeCandidate(runKey, candidate.h3Id)}
             />
           ))}
         </ul>
@@ -238,7 +258,7 @@ export const SpaceFinderCandidatesSection = ({
         {candidates.length > 0 && (
           <button
             type="button"
-            onClick={() => runId != null && clearCandidates(runId)}
+            onClick={() => runKey != null && clearCandidates(runKey)}
             className="text-xs text-gray-500 hover:text-gray-800"
           >
             Auswahl leeren

@@ -60,6 +60,7 @@ import { useReviewDraw } from '../modes/reviewLists/drawing/useReviewDraw'
 import { useReviewDrawActive } from '../modes/reviewLists/useReviewDrawActive'
 import { SpaceFinderMapDrawing } from '../modes/spaceFinder/drawing/SpaceFinderMapDrawing'
 import { useSpaceFinderDraw } from '../modes/spaceFinder/drawing/useSpaceFinderDraw'
+import { isCoarseHexagon } from '../modes/spaceFinder/planningHexagonResolution'
 import { useSpaceFinderSelection } from '../modes/spaceFinder/useSpaceFinderSelection'
 import { useCurrentMode } from '../modes/useCurrentMode'
 import { useRegion } from '../regionUtils/useRegion'
@@ -139,7 +140,7 @@ export const RegionMap = () => {
   const spaceFinderDrawingActive = useSpaceFinderDrawingActive() && currentMode.isSpaceFinder
   const candidateSelectActive = useSpaceFinderCandidateSelectActive()
   const { toggleCandidate, setCandidateGeometry } = useSpaceFinderCandidatesActions()
-  const { runId: spaceFinderRunId } = useSpaceFinderSelection()
+  const { runId: spaceFinderRunId, candidateRunKey: spaceFinderRunKey } = useSpaceFinderSelection()
   const { providers: streetImageryProviders, setPhoto: setStreetImageryPhoto } =
     useStreetImageryParam()
   // "Öffnen in …" is armed: the next click opens that place (<LocationPickOnMap>), nothing else.
@@ -154,14 +155,22 @@ export const RegionMap = () => {
 
     // Flächenfinder-Auswahlwerkzeug (`SpaceFinderCandidatesSection`): solange es aktiv ist,
     // sammelt ein Klick auf ein Ergebnis-Hexagon Kandidaten, statt den Inspector zu öffnen.
-    // Ein Klick ins Leere lässt die Auswahl unangetastet.
+    // Ein Klick ins Leere lässt die Auswahl unangetastet. Grobe Zellen (unter Zoom 16) sind nur
+    // Mittelwerte über viele Flächen und taugen nicht als Kandidat — das Panel bittet ums Zoomen.
     if (currentMode.isSpaceFinder && candidateSelectActive) {
       const hexagon = features?.find((f) => f.sourceLayer === planningHexagonsSourceLayer)
       const h3Id = hexagon?.properties?.h3_id
-      if (hexagon && h3Id && spaceFinderRunId != null) {
+      if (
+        hexagon &&
+        h3Id &&
+        !isCoarseHexagon(h3Id) &&
+        spaceFinderRunId != null &&
+        spaceFinderRunKey != null
+      ) {
         const runId = spaceFinderRunId
+        const runKey = spaceFinderRunKey
         const candidateId = String(h3Id)
-        const added = toggleCandidate(runId, {
+        const added = toggleCandidate(runKey, {
           h3Id: candidateId,
           geometry: hexagon.geometry,
           properties: { ...hexagon.properties },
@@ -169,7 +178,7 @@ export const RegionMap = () => {
         // The tile geometry is clipped at tile borders; replace it with the full hexagon.
         if (added) {
           getPlanningHexagonGeomFn({ data: { runId, h3Id: candidateId } })
-            .then((geometry) => setCandidateGeometry(runId, candidateId, geometry))
+            .then((geometry) => setCandidateGeometry(runKey, candidateId, geometry))
             .catch((error) => console.error('Kandidaten-Geometrie nicht geladen', error))
         }
       }

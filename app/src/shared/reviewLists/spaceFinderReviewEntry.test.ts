@@ -47,8 +47,8 @@ describe('buildSpaceFinderReviewProperties', () => {
       Variante: 'Standard',
       'H3-ID': '8b1f',
       Teilscores_markdown:
-        'Bedarf 72 · Bebauung 55 · Radweg 80 · ÖPNV + Bikesharing 60; ' +
-        'Zu-/Abschläge: Vegetation −3 · Parken +2',
+        '- Bedarf 72\n- Bebauung 55\n- Radweg 80\n- ÖPNV + Bikesharing 60\n\n' +
+        'Zu-/Abschläge:\n- Vegetation −3\n- Parken +2',
       Prüfkriterien_markdown: SPACE_FINDER_CHECKLIST.map(
         (c, index) => `${index + 1}. ${c.label}`,
       ).join('\n'),
@@ -73,12 +73,40 @@ describe('buildSpaceFinderReviewProperties', () => {
     expect(free).not.toHaveProperty('Ausschluss')
   })
 
-  test('keeps the Teilscores on one line so the single-line editor does not break them', () => {
+  test('lists each Eigene-Daten dataset in the Teilscores, the exclusion stays short', () => {
+    const properties = buildSpaceFinderReviewProperties({
+      ...base,
+      eigendatenNames: { a: 'Wunschorte', b: 'Erlaubte Zonen' },
+      candidateProperties: {
+        eigendaten_ausschluss: true,
+        score_bedarf: 40,
+        score_eigendaten: 12,
+        eigendaten_details: JSON.stringify([
+          { id: 'a', p: 12 },
+          { id: 'b', x: 1 },
+        ]),
+      },
+    })
+    expect(properties.Ausschluss).toBe('Eigene Daten')
+    expect(properties.Teilscores_markdown).toContain(
+      '- Eigene Daten „Wunschorte“ +12\n- Eigene Daten „Erlaubte Zonen“ ausgeschlossen',
+    )
+  })
+
+  test('falls back to the plain label for runs without per-dataset details', () => {
+    const properties = buildSpaceFinderReviewProperties({
+      ...base,
+      candidateProperties: { eigendaten_ausschluss: true },
+    })
+    expect(properties.Ausschluss).toBe('Eigene Daten')
+  })
+
+  test('writes the Teilscores as a Markdown list, one value per line', () => {
     const properties = buildSpaceFinderReviewProperties({
       ...base,
       candidateProperties: { score_bedarf: 10, score_vegetation: 4 },
     })
-    expect(properties.Teilscores_markdown).not.toContain('\n')
+    expect(properties.Teilscores_markdown).toBe('- Bedarf 10\n\nZu-/Abschläge:\n- Vegetation +4')
   })
 
   test('adds the same checklist to every candidate as a numbered Markdown list', () => {

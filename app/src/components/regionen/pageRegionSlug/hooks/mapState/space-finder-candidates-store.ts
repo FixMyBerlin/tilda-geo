@@ -27,6 +27,17 @@ const PersistedCandidatesSchema = z.object({
  */
 export type SpaceFinderCandidate = z.infer<typeof SpaceFinderCandidateSchema>
 
+/**
+ * Store key of one `PlanningRun`: id plus creation time. The id alone is not unique for
+ * sessionStorage — the same origin (127.0.0.1:5173) serves different databases (main checkout,
+ * worktrees, a fresh seed or db-pull), and their run ids overlap. Without the timestamp a new run
+ * would show the candidates of an unrelated run with the same id.
+ */
+export const candidateRunKey = (run: { id: number; createdAt: Date | string }) =>
+  `${run.id}@${new Date(run.createdAt).getTime()}`
+
+const isRunKey = (key: string) => /^\d+@\d+$/.test(key)
+
 type SpaceFinderCandidatesStore = {
   /**
    * Whether the candidate-selection tool (button left of the map search) is active.
@@ -35,19 +46,19 @@ type SpaceFinderCandidatesStore = {
    */
   selectActive: boolean
   /**
-   * Selected hexagons per `PlanningRun` id, each in selection order (the order the sidebar list
-   * and export use). Keyed by run, not variant: candidates belong to exactly one result, so a
+   * Selected hexagons per run (`candidateRunKey`), each in selection order (the order the sidebar
+   * list and export use). Keyed by run, not variant: candidates belong to exactly one result, so a
    * recalculated variant starts with an empty list and switching variants never mixes lists.
    */
-  candidatesByRun: Record<number, SpaceFinderCandidate[]>
+  candidatesByRun: Record<string, SpaceFinderCandidate[]>
   actions: {
     setSelectActive: (active: boolean) => void
     /** Adds the hexagon, or removes it if it is already selected. Returns `true` when added. */
-    toggleCandidate: (runId: number, candidate: SpaceFinderCandidate) => boolean
+    toggleCandidate: (runKey: string, candidate: SpaceFinderCandidate) => boolean
     /** Swaps in the full hexagon outline once it is loaded (the tile geometry may be clipped). */
-    setCandidateGeometry: (runId: number, h3Id: string, geometry: GeoJSON.Geometry) => void
-    removeCandidate: (runId: number, h3Id: string) => void
-    clearCandidates: (runId: number) => void
+    setCandidateGeometry: (runKey: string, h3Id: string, geometry: GeoJSON.Geometry) => void
+    removeCandidate: (runKey: string, h3Id: string) => void
+    clearCandidates: (runKey: string) => void
   }
 }
 
@@ -66,38 +77,38 @@ const useSpaceFinderCandidatesStore = create<SpaceFinderCandidatesStore>()(
       candidatesByRun: {},
       actions: {
         setSelectActive: (active) => set({ selectActive: active }),
-        toggleCandidate: (runId, candidate) => {
-          const candidates = get().candidatesByRun[runId] ?? []
+        toggleCandidate: (runKey, candidate) => {
+          const candidates = get().candidatesByRun[runKey] ?? []
           const selected = candidates.some((c) => c.h3Id === candidate.h3Id)
           set((state) => ({
             candidatesByRun: {
               ...state.candidatesByRun,
-              [runId]: selected
+              [runKey]: selected
                 ? candidates.filter((c) => c.h3Id !== candidate.h3Id)
                 : [...candidates, candidate],
             },
           }))
           return !selected
         },
-        setCandidateGeometry: (runId, h3Id, geometry) =>
+        setCandidateGeometry: (runKey, h3Id, geometry) =>
           set((state) => ({
             candidatesByRun: {
               ...state.candidatesByRun,
-              [runId]: (state.candidatesByRun[runId] ?? []).map((c) =>
+              [runKey]: (state.candidatesByRun[runKey] ?? []).map((c) =>
                 c.h3Id === h3Id ? { ...c, geometry } : c,
               ),
             },
           })),
-        removeCandidate: (runId, h3Id) =>
+        removeCandidate: (runKey, h3Id) =>
           set((state) => ({
             candidatesByRun: {
               ...state.candidatesByRun,
-              [runId]: (state.candidatesByRun[runId] ?? []).filter((c) => c.h3Id !== h3Id),
+              [runKey]: (state.candidatesByRun[runKey] ?? []).filter((c) => c.h3Id !== h3Id),
             },
           })),
-        clearCandidates: (runId) =>
+        clearCandidates: (runKey) =>
           set((state) => {
-            const { [runId]: _cleared, ...candidatesByRun } = state.candidatesByRun
+            const { [runKey]: _cleared, ...candidatesByRun } = state.candidatesByRun
             return { candidatesByRun }
           }),
       },
@@ -120,11 +131,9 @@ const useSpaceFinderCandidatesStore = create<SpaceFinderCandidatesStore>()(
         if (!parsed.success) return currentState
         return {
           ...currentState,
+          // Older sessions keyed by the bare run id cannot be matched to a run safely — drop them.
           candidatesByRun: Object.fromEntries(
-            Object.entries(parsed.data.candidatesByRun).map(([runId, candidates]) => [
-              Number(runId),
-              candidates,
-            ]),
+            Object.entries(parsed.data.candidatesByRun).filter(([runKey]) => isRunKey(runKey)),
           ),
         }
       },
@@ -135,9 +144,9 @@ const useSpaceFinderCandidatesStore = create<SpaceFinderCandidatesStore>()(
 const noCandidates: SpaceFinderCandidate[] = []
 
 /** Candidates of one run; a stable empty array when there is no run or no selection yet. */
-export const useSpaceFinderCandidates = (runId: number | null) =>
+export const useSpaceFinderCandidates = (runKey: string | null) =>
   useSpaceFinderCandidatesStore((s) =>
-    runId == null ? noCandidates : (s.candidatesByRun[runId] ?? noCandidates),
+    runKey == null ? noCandidates : (s.candidatesByRun[runKey] ?? noCandidates),
   )
 
 export const useSpaceFinderCandidateSelectActive = () =>

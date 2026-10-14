@@ -41,13 +41,9 @@ const STEP_WEIGHT_KEYS: string[][] = [
   [], //                    14 Ergebnisse speichern
 ]
 
-// 0-basierter Index des Eigendaten-Schritts. Sonderbehandlung: bei Ausschluss-
-// Modi läuft er unabhängig vom Gewicht (sobald eine Datei vorliegt), ohne Datei
+// 0-basierter Index des Eigendaten-Schritts: läuft, sobald das Gebiet Datensätze hat, sonst
 // wird er übersprungen.
-const USER_OBSTACLES_STEP_INDEX = 11
-
-/** Präsenz + Modus des Eigendaten-Uploads (aus getPlanningJobFn). */
-export type UserObstaclesInfo = { present: boolean; mode: string | null }
+const USER_DATASETS_STEP_INDEX = 11
 
 // Der ausklappbare Block fasst alle Faktor-Schritte zusammen (1-basierte
 // Schrittnummern 3–12). Schritt 1/2 (Vegetationsvorphase, H3) und 13/14
@@ -85,7 +81,7 @@ function stepDisplay(
   i: number,
   currentStep: number,
   weights: Record<string, number> | undefined,
-  userObstacles?: UserObstaclesInfo,
+  hasUserDatasets?: boolean,
 ) {
   const step = i + 1
   const keys = STEP_WEIGHT_KEYS[i] ?? []
@@ -93,14 +89,9 @@ function stepDisplay(
   const weightZero = !structural && keys.every((k) => !(weights?.[k] ?? 0))
   const base = { done: step < currentStep, active: step === currentStep }
 
-  // Eigendaten-Schritt: die Distanzberechnung (scorer.py) läuft immer, sobald
-  // eine Datei vorliegt – unabhängig von Modus/Gewicht (die bestimmen erst im
-  // MCE-Schritt, ob sich die Distanz auf den Score auswirkt). Ohne Datei wird
-  // der Schritt übersprungen.
-  if (i === USER_OBSTACLES_STEP_INDEX) {
-    const present = userObstacles?.present ?? false
-    return { ...base, skipped: !present }
-  }
+  // Eigendaten-Schritt: die Distanzberechnung (scorer.py) läuft für jeden Datensatz,
+  // unabhängig von Modus und Stärke (die zählen erst im MCE-Schritt).
+  if (i === USER_DATASETS_STEP_INDEX) return { ...base, skipped: !hasUserDatasets }
 
   return { ...base, skipped: weightZero }
 }
@@ -161,13 +152,13 @@ const CollapsibleStepGroup = ({
   childIndices,
   currentStep,
   weights,
-  userObstacles,
+  hasUserDatasets,
 }: {
   label: string
   childIndices: number[]
   currentStep: number
   weights: Record<string, number> | undefined
-  userObstacles?: UserObstaclesInfo
+  hasUserDatasets?: boolean
 }) => {
   const firstStep = childIndices[0]! + 1
   const lastStep = childIndices[childIndices.length - 1]! + 1
@@ -219,7 +210,7 @@ const CollapsibleStepGroup = ({
             <StepRow
               key={SCORING_STEPS[i]}
               label={SCORING_STEPS[i]!}
-              d={stepDisplay(i, currentStep, weights, userObstacles)}
+              d={stepDisplay(i, currentStep, weights, hasUserDatasets)}
             />
           ))}
         </ol>
@@ -237,11 +228,11 @@ const CollapsibleStepGroup = ({
 export const SpaceFinderRunSteps = ({
   currentStep,
   weights,
-  userObstacles,
+  hasUserDatasets,
 }: {
   currentStep: number
   weights?: Record<string, number>
-  userObstacles?: UserObstaclesInfo
+  hasUserDatasets?: boolean
 }) => {
   const groupIndices = Array.from(
     { length: LOAD_GROUP.lastStep - LOAD_GROUP.firstStep + 1 },
@@ -262,7 +253,7 @@ export const SpaceFinderRunSteps = ({
               childIndices={groupIndices}
               currentStep={currentStep}
               weights={weights}
-              userObstacles={userObstacles}
+              hasUserDatasets={hasUserDatasets}
             />
           )
         }
@@ -273,7 +264,7 @@ export const SpaceFinderRunSteps = ({
             key={label}
             label={label}
             numbered={i + 1}
-            d={stepDisplay(i, currentStep, weights, userObstacles)}
+            d={stepDisplay(i, currentStep, weights, hasUserDatasets)}
           />
         )
       })}

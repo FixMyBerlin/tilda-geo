@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { frenchQuote } from '@/components/shared/text/Quotes'
 import { toastSuccess } from '@/components/shared/toast/toastSuccess'
 import { MAX_STUDY_AREA_KM2 } from '@/lib/planningStudyAreaLimit'
+import type { UserDataset } from '@/lib/planningUserGeojson'
 import { createPlanningAreaFn } from '@/server/planning/planning.functions'
 import {
   planningAreaQueryOptions,
@@ -12,7 +13,7 @@ import {
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import { DEFAULT_FACTOR_TEMPLATE, type PlanningUseCase } from '../factors/spaceFinderDefaults'
 import { AreaFormFields, useEffectiveStudyArea, useStudyAreaKm2 } from './AreaFormFields'
-import type { UserGeojsonMode } from './UserObstaclesField'
+import { userDatasetsValid } from './UserDatasetsField'
 
 /** Reduced wizard: name + geometry + eigene Daten. Creates area + first variant (no auto-run). */
 export const AreaWizard = ({
@@ -28,8 +29,7 @@ export const AreaWizard = ({
   const [boundaryId, setBoundaryId] = useState<string | null>(null)
   const [studyArea, setStudyArea] = useState<unknown>(null)
   const [areaTab, setAreaTab] = useState<'search' | 'custom'>('search')
-  const [userGeojson, setUserGeojson] = useState<GeoJSON.FeatureCollection | undefined>()
-  const [userGeojsonMode, setUserGeojsonMode] = useState<UserGeojsonMode>('bonus')
+  const [userDatasets, setUserDatasets] = useState<UserDataset[]>([])
   const [useCase, setUseCase] = useState<PlanningUseCase>('fahrradbox')
   const [areaSizeM2, setAreaSizeM2] = useState<number | null>(2)
 
@@ -49,8 +49,7 @@ export const AreaWizard = ({
           regionSlug,
           title,
           studyArea: effectiveStudyArea,
-          userGeojson,
-          userGeojsonMode,
+          userDatasets: userDatasets.map((dataset) => ({ ...dataset, name: dataset.name.trim() })),
           useCase,
           areaSizeM2,
           // Die gewählte Flächengröße belegt die Flächensuche der ersten Variante vor;
@@ -72,9 +71,11 @@ export const AreaWizard = ({
     },
   })
 
+  const namesValid = userDatasetsValid(userDatasets)
+
   const handleSubmit = () => {
     setSubmitAttempted(true)
-    if (title.trim().length === 0) return
+    if (title.trim().length === 0 || !namesValid) return
     mutation.mutate()
   }
 
@@ -86,8 +87,7 @@ export const AreaWizard = ({
           boundaryId,
           studyArea,
           areaTab,
-          userGeojson,
-          userGeojsonMode,
+          userDatasets,
           useCase,
           areaSizeM2,
         }}
@@ -95,11 +95,11 @@ export const AreaWizard = ({
         onBoundaryIdChange={setBoundaryId}
         onStudyAreaChange={setStudyArea}
         onAreaTabChange={setAreaTab}
-        onUserGeojsonChange={setUserGeojson}
-        onUserGeojsonModeChange={setUserGeojsonMode}
+        onUserDatasetsChange={setUserDatasets}
         onUseCaseChange={setUseCase}
         onAreaSizeM2Change={setAreaSizeM2}
         titleMissing={titleMissing}
+        showValidation={submitAttempted}
       />
 
       {mutation.isError && (
@@ -115,7 +115,7 @@ export const AreaWizard = ({
           {mutation.isPending ? 'Wird angelegt…' : 'Planungsgebiet anlegen'}
         </button>
       </div>
-      {(title.trim().length === 0 || !effectiveStudyArea) && (
+      {(title.trim().length === 0 || !effectiveStudyArea || !namesValid) && (
         <p className="px-3 pb-3 text-xs text-red-600">Alle Felder ausfüllen</p>
       )}
     </div>

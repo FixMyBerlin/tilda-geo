@@ -8,6 +8,7 @@ import {
   MODIFIER_MAX_POINTS,
   weightToPoints,
 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/weightScale'
+import { isCoarseHexagon } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/planningHexagonResolution'
 import { appliedMinAreaM2 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderModeParam'
 import {
   spaceFinderGroupBarStyle,
@@ -15,6 +16,7 @@ import {
 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderPanelStyles'
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
+import { parseEigendatenDetails } from '@/shared/regionen/planningEigendatenDetails'
 import { PLANNING_SCORE_LABELS as SCORE_LABELS } from '@/shared/regionen/planningScoreLabels.const'
 import { Disclosure } from './Disclosure/Disclosure'
 
@@ -97,10 +99,6 @@ const EXCLUSION_REASONS: { check: (props: Record<string, any>) => boolean; text:
   {
     check: (props) => props.score_hangneigung === 0,
     text: 'Diese Fläche ist zu steil (Hangneigung > 10°) – eine Bebauung ist hier nicht möglich.',
-  },
-  {
-    check: (props) => !!props.eigendaten_ausschluss,
-    text: 'Diese Fläche liegt im Ausschlussbereich eigener Daten.',
   },
 ]
 
@@ -194,8 +192,49 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
     return weightGroup ? groupShare(shares, weightGroup.criteria) : undefined
   }
 
+  // Eigene Daten: Namen und Stärken aus dem Lauf-Snapshot (so wie damals gerechnet), sonst aus der
+  // aktuellen Variante.
+  const datasetsById = new Map(
+    (snapshot?.user_datasets ?? variant?.factorConfig.user_datasets ?? []).map((dataset) => [
+      dataset.id,
+      dataset,
+    ]),
+  )
+  const datasetName = (id: string) => datasetsById.get(id)?.name ?? 'Eigene Daten'
+  // Ausschluss-Text je Modus: „Ausschluss außen“ trifft Flächen AUSSERHALB des Datensatzes.
+  const datasetExclusionText = (id: string) => {
+    const name = `„${datasetName(id)}“`
+    switch (datasetsById.get(id)?.mode) {
+      case 'exclude_inside':
+        return `Diese Fläche liegt innerhalb der eigenen Daten ${name} (Ausschluss innen).`
+      case 'exclude_outside':
+        return `Diese Fläche liegt außerhalb der eigenen Daten ${name} (Ausschluss außen).`
+      case 'bonus':
+      case 'penalty':
+      case undefined:
+        return `Diese Fläche ist durch die eigenen Daten ${name} ausgeschlossen.`
+    }
+  }
+  const datasetMax = (id: string) => weightToPoints(snapshot?.eigendaten_weights?.[id])
+
   const props = feature.properties
   if (!props) return null
+
+  // Grobe Zellen (Aggregat-Gitter unter Zoom 16) tragen nur Mittelwerte: keine Ausschlussgründe
+  // und keine Aufschlüsselung je Datensatz (siehe `aggregate_hexagons` im Worker).
+  const coarseCell = isCoarseHexagon(props.h3_id)
+  const eigendatenDetails = parseEigendatenDetails(props.eigendaten_details)
+  const eigendatenExcludedBy = eigendatenDetails.filter((detail) => detail.x != null)
+  const exclusionTexts = [
+    ...EXCLUSION_REASONS.filter((reason) => reason.check(props)).map((reason) => reason.text),
+    ...(props.eigendaten_ausschluss
+      ? eigendatenExcludedBy.length > 0
+        ? eigendatenExcludedBy.map((detail) => datasetExclusionText(detail.id))
+        : ['Diese Fläche liegt im Ausschlussbereich eigener Daten.']
+      : []),
+  ]
+  const showEigendaten =
+    eigendatenDetails.length > 0 || Math.round(props.score_eigendaten ?? 0) !== 0
 
   const gesamtscore: number | null = props.mce_gesamtscore ?? null
   const eignungsklasse: string | null = props.eignungsklasse ?? null
@@ -221,11 +260,18 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
           </div>
         </div>
 
-        {EXCLUSION_REASONS.filter((reason) => reason.check(props)).map((reason) => (
-          <div key={reason.text} className="rounded bg-amber-100 px-3 py-2 text-xs text-amber-900">
-            <strong>Hinweis:</strong> {reason.text}
+        {exclusionTexts.map((text) => (
+          <div key={text} className="rounded bg-amber-100 px-3 py-2 text-xs text-amber-900">
+            <strong>Hinweis:</strong> {text}
           </div>
         ))}
+
+        {coarseCell && (
+          <p className="rounded bg-gray-50 px-3 py-2 text-xs text-gray-600">
+            Grobe Ansicht: Die Werte sind über mehrere Flächen gemittelt. Ausschlussgründe und die
+            Wirkung einzelner Datensätze erscheinen beim Hineinzoomen.
+          </p>
+        )}
 
         {areaFilterOn && props.cluster_area_m2 != null && (
           <div className="flex items-center justify-between text-xs">
@@ -339,8 +385,9 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
           {/* Eigene Daten: eigene Kategorie (nicht in Bedarf/Bebauung), Amber (größter
               Farbabstand zu Blau/Lila auf dem Farbkreis, siehe spaceFinderPanelStyles.ts) —
               unabhängig von der Kartenlayer-Farbe der hochgeladenen Flächen (Violett).
-              Signierter Effekt in Punkten; NULL bei Ausschluss-Modi (dort wirkt der harte Cut). */}
-          {props.score_eigendaten != null && (
+              Je Datensatz eine Zeile: Zu-/Abschlag in Punkten oder „ausgeschlossen“ (harter Cut,
+              ohne Punkte). Ohne Aufschlüsselung (Alt-Läufe, grobe Zellen) nur der Gesamteffekt. */}
+          {showEigendaten && (
             <div
               className={twJoin(
                 'rounded-r border-l-[3px] py-1 pr-1 pl-2',
@@ -355,16 +402,46 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
               >
                 Eigene Daten
               </div>
-              <div className={twJoin(ROW_GRID, 'py-1.5 text-xs')}>
-                <span className="pr-3 text-gray-500">{SCORE_LABELS.score_eigendaten}</span>
-                <BarTrack
-                  pct={modifierBarPct(props.score_eigendaten, modifierMax('score_eigendaten'))}
-                  fillClassName={modifierFillClassName(props.score_eigendaten, 'eigendaten')}
-                />
-                <span className="col-span-2 text-right font-mono text-black">
-                  {formatModifierValue(props.score_eigendaten, modifierMax('score_eigendaten'))}
-                </span>
-              </div>
+              {eigendatenDetails.length > 0 ? (
+                // Je Datensatz eine Zeile mit seinem Namen; die Summe steht im Gesamtscore.
+                eigendatenDetails.map((detail) =>
+                  detail.p != null ? (
+                    <div key={detail.id} className={twJoin(ROW_GRID, 'py-1.5 text-xs')}>
+                      <span className="truncate pr-3 text-gray-500" title={datasetName(detail.id)}>
+                        {datasetName(detail.id)}
+                      </span>
+                      <BarTrack
+                        pct={modifierBarPct(detail.p, datasetMax(detail.id))}
+                        fillClassName={modifierFillClassName(detail.p, 'eigendaten')}
+                      />
+                      <span className="col-span-2 text-right font-mono text-black">
+                        {formatModifierValue(detail.p, datasetMax(detail.id))}
+                      </span>
+                    </div>
+                  ) : (
+                    <div key={detail.id} className={twJoin(ROW_GRID, 'py-1.5 text-xs')}>
+                      <span className="truncate pr-3 text-gray-500" title={datasetName(detail.id)}>
+                        {datasetName(detail.id)}
+                      </span>
+                      <span className="col-span-3 text-right font-semibold text-gray-800">
+                        ausgeschlossen
+                      </span>
+                    </div>
+                  ),
+                )
+              ) : (
+                // Läufe vor der Aufschlüsselung je Datensatz: nur der Gesamteffekt ist bekannt.
+                <div className={twJoin(ROW_GRID, 'py-1.5 text-xs')}>
+                  <span className="pr-3 text-gray-500">{SCORE_LABELS.score_eigendaten}</span>
+                  <BarTrack
+                    pct={modifierBarPct(props.score_eigendaten, modifierMax('score_eigendaten'))}
+                    fillClassName={modifierFillClassName(props.score_eigendaten, 'eigendaten')}
+                  />
+                  <span className="col-span-2 text-right font-mono text-black">
+                    {formatModifierValue(props.score_eigendaten, modifierMax('score_eigendaten'))}
+                  </span>
+                </div>
+              )}
             </div>
           )}
         </div>

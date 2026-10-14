@@ -12,8 +12,7 @@ def area(**overrides):
         "areaSizeM2": None,
         "censusSaettigungEw": None,
         "censusEwPerHa": None,
-        "userGeojson": None,
-        "userGeojsonMode": None,
+        "userDatasets": [],
     }
     row.update(overrides)
     return row
@@ -40,6 +39,19 @@ class TestMergeFactorConfig(unittest.TestCase):
         self.assertEqual(merged["bewohnerbedarf_saettigung_ew"], FALLBACK_SAETTIGUNG_EW)
         self.assertFalse(merged["bewohnerbedarf_saettigung_auto"])
         self.assertIsNone(merged["bewohnerbedarf_saettigung_auto_ew"])
+
+    def test_nimmt_alle_datensaetze_des_gebiets_in_den_merge(self):
+        datasets = [
+            {"id": "a", "name": "A", "mode": "bonus", "geojson": {"type": "FeatureCollection", "features": []}},
+            {"id": "b", "name": "B", "mode": "exclude_inside", "geojson": {"type": "FeatureCollection", "features": []}},
+        ]
+        merged = merge_factor_config({"eigendaten_weights": {"a": 0.2}}, area(userDatasets=datasets))
+        self.assertEqual(merged["user_datasets"], datasets)
+        self.assertEqual(merged["eigendaten_weights"], {"a": 0.2})
+
+    def test_ohne_datensaetze_im_gebiet_bleibt_kein_alter_stand_aus_dem_snapshot(self):
+        merged = merge_factor_config({"user_datasets": [{"id": "x"}]}, area())
+        self.assertNotIn("user_datasets", merged)
 
 
 if __name__ == "__main__":

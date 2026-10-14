@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest'
+import { parseFactorConfigSnapshot } from './factorConfigSchema'
 import {
   areaInputsDiffer,
   comparableRunSnapshot,
@@ -34,6 +35,44 @@ describe('comparableRunSnapshot', () => {
     const input = area({ censusSaettigungEw: 22 })
     const current = mergeFactorConfig(input, {})
     expect(factorsDiffer(current, comparableRunSnapshot(current, input))).toBe(false)
+  })
+})
+
+describe('Eigene Daten in Alt-Snapshots', () => {
+  const fc: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] }
+  const input = area({
+    userDatasets: [{ id: 'd1', name: 'Eigene Daten', mode: 'bonus', geojson: fc }],
+  })
+  const current = mergeFactorConfig(input, { eigendaten_weights: { d1: 0.3 } })
+  // Lauf aus der Zeit mit nur einem Upload: Datei + Modus + `weights.w_eigendaten`, gelesen wie
+  // alle Snapshots (`parseFactorConfigSnapshot` hebt ihn auf Datensätze).
+  const legacySnapshot = parseFactorConfigSnapshot({
+    study_area: input.studyArea,
+    use_case: 'fahrradbox',
+    area_size_m2: null,
+    user_geojson: fc,
+    user_geojson_mode: 'bonus',
+    weights: { w_eigendaten: 0.3 },
+  })
+
+  it('hält einen unveränderten Alt-Lauf nicht für veraltet', () => {
+    expect(factorsDiffer(current, comparableRunSnapshot(legacySnapshot, input))).toBe(false)
+    expect(areaInputsDiffer(current, legacySnapshot)).toBe(false)
+  })
+
+  it('erkennt eine geänderte Stärke gegen den Alt-Lauf', () => {
+    const changed = mergeFactorConfig(input, { eigendaten_weights: { d1: 0.5 } })
+    expect(factorsDiffer(changed, comparableRunSnapshot(legacySnapshot, input))).toBe(true)
+  })
+
+  it('erkennt einen zusätzlichen Datensatz als Gebietsänderung', () => {
+    const more = area({
+      userDatasets: [
+        ...input.userDatasets!,
+        { id: 'x', name: 'Neu', mode: 'penalty', geojson: fc },
+      ],
+    })
+    expect(areaInputsDiffer(mergeFactorConfig(more, {}), legacySnapshot)).toBe(true)
   })
 })
 

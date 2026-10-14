@@ -145,7 +145,7 @@ def _load_variant_config(conn, variant_id: int):
     """
     with conn.cursor() as cur:
         cur.execute(
-            """SELECT v."factorConfig", a."studyArea", a."userGeojson", a."userGeojsonMode",
+            """SELECT v."factorConfig", a."studyArea", a."userDatasets",
                       a."useCase", a."areaSizeM2", a."censusSaettigungEw", a."censusEwPerHa"
                FROM prisma."PlanningVariant" v
                JOIN prisma."PlanningArea" a ON a.id = v."areaId"
@@ -158,8 +158,7 @@ def _load_variant_config(conn, variant_id: int):
     (
         factor_config,
         study_area,
-        user_geojson,
-        user_geojson_mode,
+        user_datasets,
         use_case,
         area_size_m2,
         census_saettigung_ew,
@@ -169,8 +168,7 @@ def _load_variant_config(conn, variant_id: int):
         dict(factor_config),
         {
             "studyArea": study_area,
-            "userGeojson": user_geojson,
-            "userGeojsonMode": user_geojson_mode,
+            "userDatasets": user_datasets,
             "useCase": use_case,
             "areaSizeM2": area_size_m2,
             "censusSaettigungEw": census_saettigung_ew,
@@ -309,7 +307,8 @@ def process_job(conn, engine, job_id: int, variant_id: int):
         osm_loader=loader,
         vegetation_gdf=vegetation,
         carriageway_gdf=carriageways,
-        user_geojson=cfg.get("user_geojson"),
+        user_datasets=cfg.get("user_datasets"),
+        eigendaten_weights=cfg.get("eigendaten_weights"),
         progress_cb=_scoring_progress,
     )
 

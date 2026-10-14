@@ -9,13 +9,7 @@ import {
 type FactorLike = MergedFactorConfig | VariantFactorConfig | null | undefined
 
 /** Gebietsfelder — eigener Fingerprint, weil `stale` sowohl Gebiet- als auch Faktor-Writes setzt. */
-const AREA_KEYS = [
-  'study_area',
-  'user_geojson',
-  'user_geojson_mode',
-  'use_case',
-  'area_size_m2',
-] as const
+const AREA_KEYS = ['study_area', 'user_datasets', 'use_case', 'area_size_m2'] as const
 
 /**
  * Felder, die für „müssen die Faktoren neu berechnet werden?" nicht zählen:

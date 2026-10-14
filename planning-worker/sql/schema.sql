@@ -58,9 +58,9 @@ ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_fussgaenge
 -- der Faktor (w_bestand) im Szenario nicht gewichtet ist. Signierter Abzug (≤ 0).
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bestand real;
 
--- Eigene Flächen (Nutzer-Upload): signierter Effekt in Punkten (bonus > 0 /
--- penalty < 0) innerhalb der (gepufferten) Geometrie; NULL bei Ausschluss-Modi
--- oder wenn der Faktor (w_eigendaten) nicht gewichtet bzw. keine Datei geladen ist.
+-- Eigene Daten (Nutzer-Uploads): Summe der Zu-/Abschläge aller Bonus-/Abzug-Datensätze in
+-- Punkten innerhalb der (gepufferten) Geometrie; NULL, wenn kein solcher Datensatz mit Stärke > 0
+-- wirkt (nur Ausschluss-Datensätze oder keine Datensätze).
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_eigendaten real;
 
 -- Bewohnerbedarf (Zensus): Zuschlag in Punkten rund um bewohnte Gebäude, aus der
@@ -92,13 +92,18 @@ ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS gebaeude boolean
 -- Fein-Gitter (Res 13) gesetzt.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS fahrbahn boolean NOT NULL DEFAULT false;
 
--- Liegt das Hexagon im Ausschlussbereich eigener Flächen (Nutzer-Upload,
--- user_geojson_mode = exclude_inside/exclude_outside)? Nur dann gesetzt;
+-- Liegt das Hexagon im Ausschlussbereich eigener Flächen (Nutzer-Upload, Datensatz mit
+-- mode = exclude_inside/exclude_outside)? Nur dann gesetzt;
 -- solche Zellen sind hart ausgeschlossen (mce_gesamtscore = 0). Das Flag
 -- erlaubt der Sidebar, den Ausschlussgrund anzuzeigen, auch wenn
 -- score_eigendaten in diesem Modus NULL bleibt. Nur im Fein-Gitter (Res 13)
 -- gesetzt.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS eigendaten_ausschluss boolean NOT NULL DEFAULT false;
+
+-- Je Hexagon, welcher Eigene-Daten-Datensatz wie gewirkt hat: JSON-Text wie
+-- [{"id":"a","p":12.5},{"id":"b","x":1}] (p = Punkte, x = ausgeschlossen). NULL, wo kein
+-- Datensatz wirkt, auf dem Aggregat-Gitter und bei Alt-Läufen.
+ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS eigendaten_details text;
 
 -- Potentialflächen (aus Hexagonen abgeleitete Polygone) werden nicht mehr
 -- berechnet; Altbestand aus früheren Läufen aufräumen.

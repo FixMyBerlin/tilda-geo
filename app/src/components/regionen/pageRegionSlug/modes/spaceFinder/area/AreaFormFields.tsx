@@ -6,6 +6,7 @@ import { twJoin } from 'tailwind-merge'
 import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
 import { radioButtonClass } from '@/components/shared/SegmentedChoice/radioButtonClass'
 import { MAX_STUDY_AREA_KM2, studyAreaSizeKm2 } from '@/lib/planningStudyAreaLimit'
+import type { UserDataset } from '@/lib/planningUserGeojson'
 import {
   useSpaceFinderBoundaryActions,
   useSpaceFinderDrawnGeometry,
@@ -25,7 +26,7 @@ import {
 import { BoundaryPicker } from './BoundaryPicker'
 import type { StudyAreaGeometry } from './extractStudyAreaGeometry'
 import { GeoJsonUpload } from './GeoJsonUpload'
-import { UserObstaclesField, type UserGeojsonMode } from './UserObstaclesField'
+import { UserDatasetsField } from './UserDatasetsField'
 
 type AreaTab = 'search' | 'custom'
 
@@ -45,8 +46,7 @@ type AreaFormState = {
   boundaryId: string | null
   studyArea: unknown
   areaTab: AreaTab
-  userGeojson: GeoJSON.FeatureCollection | undefined
-  userGeojsonMode: UserGeojsonMode
+  userDatasets: UserDataset[]
   useCase: PlanningUseCase
   areaSizeM2: number | null
 }
@@ -57,11 +57,12 @@ type AreaFormFieldsProps = {
   onBoundaryIdChange: (id: string | null) => void
   onStudyAreaChange: (geom: unknown) => void
   onAreaTabChange: (tab: AreaTab) => void
-  onUserGeojsonChange: (geojson: GeoJSON.FeatureCollection | undefined) => void
-  onUserGeojsonModeChange: (mode: UserGeojsonMode) => void
+  onUserDatasetsChange: (datasets: UserDataset[]) => void
   onUseCaseChange: (useCase: PlanningUseCase) => void
   onAreaSizeM2Change: (value: number | null) => void
   titleMissing?: boolean
+  /** After a submit attempt: mark Eigene-Daten datasets without a name like the missing title. */
+  showValidation?: boolean
   showUserData?: boolean
   geometryStepTitle?: string
   /** The saved study area when an existing Gebiet is edited; "discard" goes back to it. */
@@ -75,11 +76,11 @@ export const AreaFormFields = ({
   onBoundaryIdChange,
   onStudyAreaChange,
   onAreaTabChange,
-  onUserGeojsonChange,
-  onUserGeojsonModeChange,
+  onUserDatasetsChange,
   onUseCaseChange,
   onAreaSizeM2Change,
   titleMissing = false,
+  showValidation = false,
   showUserData = true,
   geometryStepTitle = 'Geometrie des Gebiets',
   originalStudyArea = null,
@@ -188,10 +189,7 @@ export const AreaFormFields = ({
               aria-invalid={titleMissing}
               value={state.title}
               onChange={(e) => onTitleChange(e.target.value)}
-              className={twJoin(
-                spaceFinderPanelTitleInputClass,
-                titleMissing && 'border-red-500 focus:border-red-500 focus:ring-red-500',
-              )}
+              className={spaceFinderPanelTitleInputClass}
             />
           </label>
           {titleMissing && <p className="text-xs text-red-600">Bitte einen Namen angeben.</p>}
@@ -341,17 +339,11 @@ export const AreaFormFields = ({
               </span>
             </div>
             <div>
-              <UserObstaclesField
-                config={{
-                  user_geojson: state.userGeojson,
-                  user_geojson_mode: state.userGeojsonMode,
-                  weights: { w_eigendaten: 0.1 },
-                }}
-                setWeight={() => {}}
-                setUserGeojson={onUserGeojsonChange}
-                setUserGeojsonMode={onUserGeojsonModeChange}
-                showWeight={false}
-                showModePicker={false}
+              <UserDatasetsField
+                datasets={state.userDatasets}
+                onChange={onUserDatasetsChange}
+                studyArea={(effectiveStudyArea as GeoJSON.Geometry | null | undefined) ?? null}
+                showErrors={showValidation}
               />
             </div>
           </div>

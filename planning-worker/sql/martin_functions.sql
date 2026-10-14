@@ -45,6 +45,7 @@ BEGIN
             gebaeude,
             fahrbahn,
             eigendaten_ausschluss,
+            eigendaten_details,
             ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom
         FROM planning.scenario_hexagons
         WHERE run_id = run_id_val

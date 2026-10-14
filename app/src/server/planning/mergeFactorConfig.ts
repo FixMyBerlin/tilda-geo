@@ -1,8 +1,12 @@
+import { StoredUserDatasetsSchema, type UserDataset } from '@/lib/planningUserGeojson'
 import type { Prisma } from '@/prisma/generated/client'
 
 /** Variant assumptions without geometry (stored on PlanningVariant.factorConfig). */
 export type VariantFactorConfig = {
   name?: string
+  /** Stärke (0–1) je Eigene-Daten-Datensatz, Schlüssel = `UserDataset.id`. Wirkt nur bei den
+   * Modi Bonus/Abzug; Name, Modus und Geometrie gehören zum Planungsgebiet. */
+  eigendaten_weights?: Record<string, number>
   h3_resolution?: number
   dem_source?: 'srtm' | 'dgm1' | 'mapterhorn'
   weights?: Record<string, number>
@@ -34,8 +38,7 @@ export type VariantFactorConfig = {
 /** Area geometry, use-case, size, and optional user obstacles (stored on PlanningArea). */
 export type PlanningAreaInput = {
   studyArea: unknown
-  userGeojson?: unknown
-  userGeojsonMode?: string | null
+  userDatasets?: UserDataset[]
   useCase: string
   areaSizeM2: number | null
   /** Zensus-Vorschlag für `bewohnerbedarf_saettigung_ew`, je Planungsgebiet einmal ermittelt. */
@@ -65,8 +68,7 @@ const AUTO_SAETTIGUNG_KEYS = [
 /** Flat dict consumed by the Python worker and planning UI (area + variant merged). */
 export type MergedFactorConfig = VariantFactorConfig & {
   study_area?: object
-  user_geojson?: object
-  user_geojson_mode?: string
+  user_datasets?: UserDataset[]
   use_case?: string
   area_size_m2?: number | null
   /** true, solange die Sättigung aus dem Zensus-Vorschlag stammt und nicht von Hand gesetzt wurde. */
@@ -96,9 +98,46 @@ export const mergeFactorConfig = (area: PlanningAreaInput, variantConfig: Varian
     use_case: area.useCase,
     area_size_m2: area.areaSizeM2,
   }
-  if (area.userGeojson != null) merged.user_geojson = area.userGeojson as object
-  if (area.userGeojsonMode != null) merged.user_geojson_mode = area.userGeojsonMode
+  // `variantConfig` kann ein alter Snapshot mit Gebietsfeldern sein — das Gebiet gewinnt immer.
+  if (area.userDatasets != null && area.userDatasets.length > 0)
+    merged.user_datasets = area.userDatasets
+  else delete merged.user_datasets
   return merged
+}
+
+/**
+ * Hebt einen Lauf-Snapshot aus der Zeit mit nur einem Eigene-Daten-Upload (`user_geojson`,
+ * `user_geojson_mode`, `weights.w_eigendaten`) auf die heutige Form (`user_datasets` +
+ * `eigendaten_weights`, Datensatz-ID `d1` wie in der Migration). Neue Snapshots bleiben
+ * unverändert. Nur die App liest alte Snapshots; der Worker rechnet immer mit der aktuellen Config.
+ */
+export const normalizeLegacyEigendaten = <T extends MergedFactorConfig | VariantFactorConfig>(
+  config: T,
+) => {
+  const record = config as Record<string, unknown>
+  const legacy = record.user_geojson
+  const weights = (record.weights ?? {}) as Record<string, number>
+  const hasLegacyWeight = 'w_eigendaten' in weights
+  if (legacy == null && !hasLegacyWeight) return config
+
+  const { user_geojson: _g, user_geojson_mode: _m, weights: _w, ...rest } = record
+  const { w_eigendaten, ...restWeights } = weights
+  const next: Record<string, unknown> = { ...rest }
+  // Ein leeres `weights` bliebe sonst als `{}` stehen und unterschiede sich von „nicht gesetzt“.
+  if (Object.keys(restWeights).length > 0) next.weights = restWeights
+  if (legacy != null && next.user_datasets == null) {
+    next.user_datasets = [
+      {
+        id: 'd1',
+        name: 'Eigene Daten',
+        mode: (record.user_geojson_mode as string | undefined) ?? 'bonus',
+        geojson: legacy,
+      },
+    ]
+    if (next.eigendaten_weights == null && w_eigendaten != null)
+      next.eigendaten_weights = { d1: w_eigendaten }
+  }
+  return next as T
 }
 
 /**
@@ -115,18 +154,36 @@ export const stripAutoSaettigung = (config: MergedFactorConfig) => {
   return rest as VariantFactorConfig
 }
 
+/** Startstärke eines neuen Eigene-Daten-Datensatzes (10 Punkte), damit er sofort wirkt. */
+export const DEFAULT_EIGENDATEN_WEIGHT = 0.1
+
+/**
+ * Gleicht `eigendaten_weights` einer Varianten-Config mit den Datensätzen des Gebiets ab:
+ * Stärken entfernter Datensätze fliegen raus, neue Datensätze bekommen `DEFAULT_EIGENDATEN_WEIGHT`,
+ * vorhandene Werte (auch 0) bleiben. Ohne Datensätze fehlt das Feld ganz.
+ */
+export const syncEigendatenWeights = <T extends VariantFactorConfig>(
+  config: T,
+  datasets: Pick<UserDataset, 'id'>[] | undefined,
+) => {
+  const current = config.eigendaten_weights ?? {}
+  const next = Object.fromEntries(
+    (datasets ?? []).map(({ id }) => [id, current[id] ?? DEFAULT_EIGENDATEN_WEIGHT]),
+  )
+  return { ...config, eigendaten_weights: Object.keys(next).length > 0 ? next : undefined }
+}
+
 export const areaInputFromRow = (row: {
   studyArea: Prisma.JsonValue
-  userGeojson: Prisma.JsonValue | null
-  userGeojsonMode: string | null
+  /** Prisma-JSON oder schon mit `StoredUserDatasetsSchema` gelesen. */
+  userDatasets: unknown
   useCase: string
   areaSizeM2: number | null
   censusSaettigungEw?: number | null
   censusEwPerHa?: number | null
 }) => ({
   studyArea: row.studyArea,
-  userGeojson: row.userGeojson ?? undefined,
-  userGeojsonMode: row.userGeojsonMode,
+  userDatasets: StoredUserDatasetsSchema.parse(row.userDatasets),
   useCase: row.useCase,
   areaSizeM2: row.areaSizeM2,
   censusSaettigungEw: row.censusSaettigungEw ?? null,

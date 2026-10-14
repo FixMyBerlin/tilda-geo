@@ -80,7 +80,7 @@ export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId:
         <SpaceFinderRunSteps
           currentStep={currentStep}
           weights={data.weights}
-          userObstacles={{ present: data.userGeojsonPresent, mode: data.userGeojsonMode }}
+          hasUserDatasets={data.hasUserDatasets}
         />
       ) : null}
       {data.status === 'FAILED' && data.errorMessage ? (

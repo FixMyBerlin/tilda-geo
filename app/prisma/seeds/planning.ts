@@ -136,14 +136,22 @@ const ohneHangneigungFactorConfig: VariantFactorConfig = {
   },
 }
 
-/** Non-zero `w_eigendaten` so the Rixdorf obstacle squares actually move the score. */
+/** The Rixdorf "Eigene Daten" dataset (mode `bonus`); strength per variant in `eigendaten_weights`. */
+const RIXDORF_USER_DATASET_ID = 'hindernisse'
+const RIXDORF_USER_DATASETS = [
+  {
+    id: RIXDORF_USER_DATASET_ID,
+    name: 'Hindernisse',
+    mode: 'bonus' as const,
+    geojson: RIXDORF_USER_GEOJSON,
+  },
+]
+
+/** Non-zero strength so the Rixdorf obstacle squares actually move the score. */
 const rixdorfFactorConfig: VariantFactorConfig = {
   ...DEFAULT_FACTOR_TEMPLATE,
   name: 'Standard',
-  weights: {
-    ...DEFAULT_FACTOR_TEMPLATE.weights,
-    w_eigendaten: 0.3,
-  },
+  eigendaten_weights: { [RIXDORF_USER_DATASET_ID]: 0.3 },
 }
 
 /** Current (post-edit) config of the "veraltet" demo variant — threshold raised after the run below. */
@@ -243,8 +251,7 @@ const seedPlanning = async () => {
       createdById: creator.id,
       title: 'Rixdorf',
       studyArea: RIXDORF_STUDY_AREA as unknown as Prisma.InputJsonValue,
-      userGeojson: RIXDORF_USER_GEOJSON as unknown as Prisma.InputJsonValue,
-      userGeojsonMode: 'bonus',
+      userDatasets: RIXDORF_USER_DATASETS as unknown as Prisma.InputJsonValue,
       useCase: 'fahrradabstellanlage',
       areaSizeM2: 20,
       variants: {
@@ -279,8 +286,7 @@ const seedPlanning = async () => {
   // planning-worker container.
   const rixdorfAreaInput: PlanningAreaInput = areaInputFromRow({
     studyArea: RIXDORF_STUDY_AREA as unknown as Prisma.JsonValue,
-    userGeojson: RIXDORF_USER_GEOJSON as unknown as Prisma.JsonValue,
-    userGeojsonMode: 'bonus',
+    userDatasets: RIXDORF_USER_DATASETS as unknown as Prisma.JsonValue,
     useCase: 'fahrradabstellanlage',
     areaSizeM2: 20,
     censusSaettigungEw: null,

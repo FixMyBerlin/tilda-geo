@@ -1,7 +1,8 @@
-import { ArrowUpTrayIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { ArrowUpTrayIcon } from '@heroicons/react/24/outline'
 import { useEffect, useRef, useState } from 'react'
 import { Spinner } from '@/components/shared/Spinner/Spinner'
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
+import { RemoveIconButton } from '../RemoveIconButton'
 import { type StudyAreaGeometry, parseStudyAreaGeometry } from './extractStudyAreaGeometry'
 import {
   convertGeopackageToGeoJson,
@@ -212,14 +213,10 @@ export function GeoJsonUploadField<T>({
               >
                 {entry.fileName}
               </button>
-              <button
-                type="button"
+              <RemoveIconButton
+                label={`${entry.fileName} aus der Liste löschen`}
                 onClick={(e) => void deleteHistoryEntry(entry.id, e)}
-                className="shrink-0 text-gray-400 hover:text-red-600"
-                aria-label={`${entry.fileName} löschen`}
-              >
-                <XMarkIcon className="h-3.5 w-3.5" />
-              </button>
+              />
             </li>
           ))}
         </ul>

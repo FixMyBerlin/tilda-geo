@@ -1,3 +1,4 @@
+import { parseEigendatenDetails } from '@/shared/regionen/planningEigendatenDetails'
 import {
   PLANNING_CRITERION_SCORE_KEYS,
   PLANNING_MODIFIER_SCORE_KEYS,
@@ -9,6 +10,9 @@ import { SPACE_FINDER_CHECKLIST } from './spaceFinderChecklist.const'
 export const spaceFinderImportId = (h3Id: string) => `flaechenfinder:${h3Id}`
 
 type CandidateProperties = Record<string, unknown>
+
+/** Datensatz-ID → Name der Eigene-Daten-Datensätze, wie im Lauf gerechnet. */
+type EigendatenNames = Record<string, string>
 
 const asNumber = (value: unknown) =>
   typeof value === 'number' && Number.isFinite(value) ? value : null
@@ -22,6 +26,7 @@ const exclusionReasons = (props: CandidateProperties) => {
   if (props.gebaeude) reasons.push('Gebäude')
   if (props.fahrbahn) reasons.push('Straße')
   if (props.score_hangneigung === 0) reasons.push('Zu steil')
+  // Welcher Datensatz ausschließt, steht bei den Teilscores.
   if (props.eigendaten_ausschluss) reasons.push('Eigene Daten')
   return reasons
 }
@@ -30,13 +35,9 @@ const signedPoints = (value: number) => {
   const rounded = Math.round(value)
   return `${rounded > 0 ? '+' : rounded < 0 ? '−' : ''}${Math.abs(rounded)}`
 }
-
-/**
- * One line, no line breaks, so it survives the single-line attribute editor. Markdown only makes
- * the detail view wrap it. Criteria are 0–100, modifiers signed points.
- */
-const scoreBreakdown = (props: CandidateProperties) => {
+const scoreBreakdown = (props: CandidateProperties, names?: EigendatenNames) => {
   const label = (key: string) => PLANNING_SCORE_LABELS[key] ?? key
+  const details = parseEigendatenDetails(props.eigendaten_details)
   const scores = ['score_bedarf', 'score_bebauung', ...PLANNING_CRITERION_SCORE_KEYS].flatMap(
     (key) => {
       const value = asNumber(props[key])
@@ -44,12 +45,22 @@ const scoreBreakdown = (props: CandidateProperties) => {
     },
   )
   const modifiers = PLANNING_MODIFIER_SCORE_KEYS.flatMap((key) => {
+    // Eigene Daten: je Datensatz mit Namen — Punkte oder „ausgeschlossen“ (Alt-Läufe: Gesamtwert).
+    if (key === 'score_eigendaten' && details.length > 0) {
+      return details.flatMap((detail) => {
+        const name = `${label(key)} „${names?.[detail.id] ?? 'Eigene Daten'}“`
+        if (detail.x != null) return [`${name} ausgeschlossen`]
+        const points = Math.round(detail.p ?? 0)
+        return points === 0 ? [] : [`${name} ${signedPoints(points)}`]
+      })
+    }
     const value = asNumber(props[key])
     return value === null || Math.round(value) === 0 ? [] : [`${label(key)} ${signedPoints(value)}`]
   })
-  const parts = [scores.join(' · ')]
-  if (modifiers.length > 0) parts.push(`Zu-/Abschläge: ${modifiers.join(' · ')}`)
-  return parts.filter(Boolean).join('; ')
+  const list = (lines: string[]) => lines.map((line) => `- ${line}`).join('\n')
+  const parts = [list(scores)]
+  if (modifiers.length > 0) parts.push(`Zu-/Abschläge:\n${list(modifiers)}`)
+  return parts.filter(Boolean).join('\n\n')
 }
 
 /**
@@ -70,18 +81,21 @@ export const buildSpaceFinderReviewProperties = ({
   variantTitle,
   useCaseLabel,
   h3Id,
+  eigendatenNames,
 }: {
   candidateProperties: CandidateProperties
   areaTitle: string
   variantTitle: string
   useCaseLabel: string | null
   h3Id: string
+  /** Namen der Eigene-Daten-Datensätze des Laufs (ID → Name), falls vorhanden. */
+  eigendatenNames?: EigendatenNames
 }) => {
   const score = asNumber(candidateProperties.mce_gesamtscore)
   const clusterAreaM2 = asNumber(candidateProperties.cluster_area_m2)
   const eignungsklasse = candidateProperties.eignungsklasse
   const reasons = exclusionReasons(candidateProperties)
-  const breakdown = scoreBreakdown(candidateProperties)
+  const breakdown = scoreBreakdown(candidateProperties, eigendatenNames)
 
   const properties: Record<string, string> = {}
   if (score !== null) properties.Gesamtscore = String(Math.round(score))

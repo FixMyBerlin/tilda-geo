@@ -1,3 +1,4 @@
+import { feature, featureCollection } from '@turf/helpers'
 import { useEffect } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { formatDate } from '@/components/shared/date/formatDate'
@@ -60,11 +61,28 @@ export const SpaceFinderBody = ({
     return () => setVegetationAttribution(null)
   }, [variant, setVegetationAttribution])
 
-  const userGeojson = variant?.factorConfig.user_geojson
-  useEffect(() => {
-    setUserObstaclesGeom((userGeojson as object | undefined) ?? null)
-    return () => setUserObstaclesGeom(null)
-  }, [userGeojson, setUserObstaclesGeom])
+  // Alle Eigene-Daten-Datensätze als eine Kontroll-Ebene; der Name steht an jedem Objekt.
+  const userDatasets = variant?.factorConfig.user_datasets
+  useEffect(
+    function syncUserDatasetsToMapStore() {
+      if (!userDatasets || userDatasets.length === 0) {
+        setUserObstaclesGeom(null)
+        return
+      }
+      const collection = featureCollection(
+        userDatasets.flatMap((dataset) =>
+          dataset.geojson.features.map(({ geometry }) =>
+            feature(geometry, { dataset: dataset.name }),
+          ),
+        ),
+      )
+      setUserObstaclesGeom(collection)
+      return function clearUserDatasetsFromMapStore() {
+        setUserObstaclesGeom(null)
+      }
+    },
+    [userDatasets, setUserObstaclesGeom],
+  )
 
   if (!variant) return null
 

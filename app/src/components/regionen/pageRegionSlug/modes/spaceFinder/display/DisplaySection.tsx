@@ -18,8 +18,8 @@ import { ScoreModeSwitcher } from './ScoreModeSwitcher'
 export const DisplaySection = ({ variant }: { variant: PlanningVariantDetail }) => {
   const latestRun = variant.runs[0] ?? null
   const hasCompleteRun = latestRun?.status === 'COMPLETE'
-  const hasUserGeojson = variant.factorConfig.user_geojson != null
-  if (!hasCompleteRun && !hasUserGeojson) return null
+  const hasUserDatasets = (variant.factorConfig.user_datasets?.length ?? 0) > 0
+  if (!hasCompleteRun && !hasUserDatasets) return null
 
   const lastRunConfig = latestRun?.factorConfigSnapshot ?? null
   const factorConfig = variant.factorConfig
@@ -45,7 +45,7 @@ export const DisplaySection = ({ variant }: { variant: PlanningVariantDetail }) 
           {(lastRunConfig?.weights?.w_bewohnerbedarf ?? 0) > 0 && <CensusToggle />}
         </>
       )}
-      {hasUserGeojson && <UserObstaclesToggle />}
+      {hasUserDatasets && <UserObstaclesToggle />}
     </CollapsibleBox>
   )
 }

@@ -281,7 +281,7 @@ const BoundaryHighlightLayer = () => {
   )
 }
 
-// Kontroll-Layer für die hochgeladenen „Eigene Daten" (factorConfig.user_geojson).
+// Kontroll-Layer für die hochgeladenen „Eigene Daten" (alle Datensätze aus factorConfig.user_datasets).
 // Die Geometrie liegt clientseitig im Store (von `SpaceFinderBody` gesetzt); Punkte,
 // Linien und Flächen werden mit eigenen Layern dargestellt. Über den Schalter im
 // Panel (userObstaclesVisible) ein- und ausblendbar wie Vegetation/Fahrbahnen.
@@ -330,9 +330,9 @@ const UserObstaclesLayer = () => {
 // Nur sichtbar, während das Auswahl-Werkzeug aktiv ist (`selectActive`). Ausschalten
 // des Toggles oder Zuklappen von »Auswahl« setzt `selectActive` auf false und blendet
 // die Markierung aus, ohne die Auswahl selbst zu löschen.
-const CandidateHighlightLayer = ({ runId }: { runId: number | null }) => {
+const CandidateHighlightLayer = ({ runKey }: { runKey: string | null }) => {
   const selectActive = useSpaceFinderCandidateSelectActive()
-  const candidates = useSpaceFinderCandidates(runId)
+  const candidates = useSpaceFinderCandidates(runKey)
   if (!selectActive || !candidates.length) return null
 
   return (
@@ -353,7 +353,7 @@ const CandidateHighlightLayer = ({ runId }: { runId: number | null }) => {
 }
 
 export const SourcesLayersSpaceFinder = () => {
-  const { runId, variant } = useSpaceFinderSelection()
+  const { runId, candidateRunKey, variant } = useSpaceFinderSelection()
   const { spaceFinderMode } = useSpaceFinderModeParam()
   const minAreaDraft = useSpaceFinderMinAreaDraft()
   const scoreMode = spaceFinderMode.score ?? 'kombination'
@@ -429,7 +429,7 @@ export const SourcesLayersSpaceFinder = () => {
       )}
 
       {/* Nach den Hexagon-Layern, damit die gelbe Auswahl-Umrandung darüber liegt. */}
-      <CandidateHighlightLayer runId={runId} />
+      <CandidateHighlightLayer runKey={candidateRunKey} />
 
       <UserObstaclesLayer />
 

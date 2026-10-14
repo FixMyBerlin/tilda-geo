@@ -82,31 +82,6 @@ export const ReviewEntryDetail = ({ entryId }: Props) => {
             <TimeWithRelativeTooltip date={entry.createdAt} timeClassName="text-inherit" />
             {createdByName ? ` von ${createdByName}` : null}
           </p>
-          {spaceFinderOrigin ? (
-            <p className="flex flex-wrap items-center gap-x-2">
-              <span className="truncate">
-                {[spaceFinderOrigin.areaTitle, spaceFinderOrigin.variantTitle]
-                  .filter(Boolean)
-                  .join(' · ')}
-              </span>
-              {spaceFinderVariant && canOpenInSpaceFinder ? (
-                <Link
-                  from="/regionen/$regionSlug"
-                  to={modeRoutePaths.spaceFinder}
-                  params={{ regionSlug }}
-                  search={(prev) => ({ ...prev, space: { key: spaceFinderVariant.id } })}
-                  className="font-medium text-gray-700 underline"
-                >
-                  Im Flächenfinder öffnen
-                </Link>
-              ) : null}
-              {spaceFinderVariant &&
-              spaceFinderOrigin.runId != null &&
-              spaceFinderVariant.currentRunId !== spaceFinderOrigin.runId ? (
-                <span>(Variante wurde seitdem neu berechnet)</span>
-              ) : null}
-            </p>
-          ) : null}
           {wasUpdated ? (
             <p className="truncate">
               Zuletzt aktualisiert{' '}

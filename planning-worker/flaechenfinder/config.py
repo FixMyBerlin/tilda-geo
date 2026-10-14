@@ -224,20 +224,21 @@ class UseCaseConfig:
     # Explizite Werte: "bayern" | "bb" | "hessen"
     cir_source: str = "auto"
 
-    # Eigene Daten (Nutzer-Upload): wie die hochgeladene Geometrie in den Score
-    # eingeht. Die Geometrie selbst (factorConfig.user_geojson) liest der Worker
-    # separat aus dem Config-Dict, analog study_area. Stärke = weights["w_eigendaten"].
-    #   "bonus"           → weicher Zuschlag innerhalb des Puffers
-    #   "penalty"         → weicher Abzug innerhalb des Puffers
-    #   "exclude_inside"  → harter Ausschluss: Hexagon in der Geometrie → mce = 0
-    #   "exclude_outside" → harter Ausschluss: Hexagon außerhalb → mce = 0 (Maske)
-    user_geojson_mode: str = "bonus"
-
 
 # ── Puffer für Eigendaten-Geometrien (fest) ───────────────────────────────────
 # Punkte/Linien haben keine Fläche; sie werden vor dem Verschneiden gepuffert.
 USER_POINT_BUFFER_M = 1.5
 USER_LINE_BUFFER_M = 2.5
+
+# Eigene Daten (Nutzer-Uploads): jeder Datensatz `{id, name, mode, geojson}` des Planungsgebiets
+# (factorConfig.user_datasets) geht mit seinem Modus in den Score ein; die Stärke je Datensatz
+# steht in factorConfig.eigendaten_weights[id]. Der Worker liest Datensätze und Stärken separat
+# aus dem Config-Dict, analog study_area.
+#   "bonus"           → weicher Zuschlag innerhalb des Puffers
+#   "penalty"         → weicher Abzug innerhalb des Puffers
+#   "exclude_inside"  → harter Ausschluss: Hexagon in der Geometrie → mce = 0
+#   "exclude_outside" → harter Ausschluss: Hexagon außerhalb → mce = 0 (Maske)
+USER_DATASET_MODES = ("bonus", "penalty", "exclude_inside", "exclude_outside")
 
 
 # ── Defaults / Validierung ────────────────────────────────────────────────────
@@ -260,7 +261,6 @@ DEFAULT_WEIGHTS = {
     "w_fussgaengerzone": 0.0,  # Fußgängerzonen-Bonus (neutral per Default → non-breaking)
     "w_bestand": 0.0,          # Bestandsanlagen-Bedarfssenkung (neutral per Default → non-breaking)
     "w_bewohnerbedarf": 0.0,   # Bewohnerbedarf aus Zensusdaten; neutral per Default → non-breaking
-    "w_eigendaten": 0.0,       # Eigene Daten (Nutzer-Upload); neutral per Default → non-breaking
 }
 
 
@@ -305,6 +305,5 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
             cfg.get("oepnv_category_shares") or DEFAULT_OEPNV_CATEGORY_SHARES
         ),
         min_score_threshold=float(cfg.get("min_score_threshold", 60.0)),
-        user_geojson_mode=cfg.get("user_geojson_mode", "bonus"),
         exclude_carriageways=bool(cfg.get("exclude_carriageways", False)),
     )

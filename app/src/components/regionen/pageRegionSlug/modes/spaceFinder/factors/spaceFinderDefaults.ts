@@ -91,7 +91,7 @@ export const GROUP_HELP: Record<'bedarf' | 'bebauung' | 'eigendaten', string> = 
   bebauung:
     'Wo lässt sich baulich etwas errichten? Die Hangneigung bildet den Grund, Vegetation, Kreuzungen, Parkflächen und Plätze schieben danach Punkte. Gebäude und zu steile Lagen schließen die Fläche ganz aus — der Bedarf bleibt davon unberührt.',
   eigendaten:
-    'Ihre hochgeladenen Flächen greifen in den Gesamtscore ein, ohne Bedarf oder Bebauung zu verändern. Damit lassen sich Wunschstandorte, Tabuzonen oder eigene Planungen berücksichtigen.',
+    'Ihre hochgeladenen Datensätze greifen in den Gesamtscore ein, ohne Bedarf oder Bebauung zu verändern. Jeder Datensatz hat einen Namen und wirkt einzeln mit eigenem Modus und eigener Stärke — so lassen sich Wunschstandorte, Tabuzonen oder eigene Planungen nebeneinander berücksichtigen.',
 }
 
 /** Referenced from other panel texts (tooltips), so a rename here shows up there. */
@@ -120,7 +120,7 @@ export const FACTOR_HELP: Record<string, string> = {
   w_platz:
     '„Belebung bevorzugen" gibt Bonus auf Plätzen (place=square aus OpenStreetMap), „Platz freihalten" zieht dort Punkte ab. Liegt die Fläche direkt auf dem Platz, gibt es den vollen Effekt; außerhalb keinen. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen oder abgezogen werden.',
   w_eigendaten:
-    'Laden Sie eigene Punkte, Linien oder Flächen hoch. Bonus und Abzug verschieben den Gesamtscore innerhalb der Fläche; Ausschluss innen oder außen setzt ihn dort auf null. Punkte werden mit 1,5 m, Linien mit 2,5 m verbreitert. Das Gewicht gilt nur für Bonus und Abzug.',
+    'Laden Sie eigene Punkte, Linien oder Flächen hoch — auch mehrere Dateien, jede mit eigenem Namen. Bonus und Abzug verschieben den Gesamtscore innerhalb der Fläche, mehrere Datensätze addieren sich; Ausschluss innen oder außen setzt ihn dort auf null. Punkte werden mit 1,5 m, Linien mit 2,5 m verbreitert. Dateien und Modus legen Sie am Planungsgebiet fest (gilt für alle Varianten); die Stärke für Bonus und Abzug stellt jede Variante hier je Datensatz ein.',
   w_bewohnerbedarf:
     'Einwohnerzahlen aus dem Zensus 2022, auf einzelne Gebäude heruntergerechnet, heben den Bedarf dort, wo viele Menschen wohnen — unabhängig vom Alter. Jedes bewohnte Gebäude wirkt 20 m weit: direkt an der Gebäudekante mit seiner vollen Einwohnerzahl, auf halber Strecke nur noch zur Hälfte, ab 20 m gar nicht mehr. Ein Haus mit 100 Einwohnern zählt direkt daneben also 100, aus 10 m Entfernung 50. Mehrere Gebäude in Reichweite addieren sich. Der eingestellte Wert ist die Summe, ab der es den vollen Zuschlag gibt. Er wird je Planungsgebiet automatisch aus dem Zensus vorbelegt — so, dass ungefähr das dichteste Zehntel der bewohnten Fläche den vollen Zuschlag bekommt — und lässt sich überschreiben. Zur Einordnung: dichte Berliner Innenstadt landet bei etwa 20–25, ein Einfamilienhausgebiet bei etwa 5. Auf den Gebäuden selbst entsteht kein Bedarf, er beginnt erst unmittelbar daneben. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen.',
   min_score_threshold: `Nur Flächen ab diesem Gesamtscore zählen zur zusammenhängenden Kandidatenfläche. Der Filter „${MIN_AREA_FILTER_LABEL}“ im Panel nutzt diese Cluster. Der Score selbst ändert sich dadurch nicht.`,

@@ -69,7 +69,7 @@ export const useSpaceFinderCommands = ({
     mutationFn: (title: string) => {
       if (!selectedOption) throw new Error('Kein Planungsgebiet ausgewählt.')
       return updatePlanningAreaFn({
-        data: { areaId: selectedOption.areaId, title, userGeojson: undefined },
+        data: { areaId: selectedOption.areaId, title },
       })
     },
     onSuccess: async () => {

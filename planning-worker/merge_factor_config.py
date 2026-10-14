@@ -32,8 +32,10 @@ def merge_factor_config(variant_cfg: dict, area_row: dict) -> dict:
     merged["study_area"] = area_row["studyArea"]
     merged["use_case"] = area_row["useCase"]
     merged["area_size_m2"] = area_row.get("areaSizeM2")
-    if area_row.get("userGeojson") is not None:
-        merged["user_geojson"] = area_row["userGeojson"]
-    if area_row.get("userGeojsonMode") is not None:
-        merged["user_geojson_mode"] = area_row["userGeojsonMode"]
+    # Das Gebiet gewinnt immer: kein Datensatz im Gebiet = keiner im Merge.
+    user_datasets = area_row.get("userDatasets") or []
+    if user_datasets:
+        merged["user_datasets"] = user_datasets
+    else:
+        merged.pop("user_datasets", None)
     return merged

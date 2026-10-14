@@ -42,7 +42,8 @@ async function ensurePlanningSchema() {
       score_bewohnerbedarf    real,
       eignungsklasse          text,
       fahrbahn                boolean NOT NULL DEFAULT false,
-      eigendaten_ausschluss   boolean NOT NULL DEFAULT false
+      eigendaten_ausschluss   boolean NOT NULL DEFAULT false,
+      eigendaten_details      text
     );`)
   // Bestehende Tabellen nachrüsten (CREATE TABLE IF NOT EXISTS fügt keine Spalte hinzu).
   await geoDataClient.$executeRawUnsafe(
@@ -107,6 +108,12 @@ async function ensurePlanningSchema() {
   // diesem Modus NULL bleibt.
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS eigendaten_ausschluss boolean NOT NULL DEFAULT false;`,
+  )
+  // Je Hexagon, welcher Eigene-Daten-Datensatz wie gewirkt hat: JSON-Text wie
+  // [{"id":"a","p":12.5},{"id":"b","x":1}] (p = Punkte, x = ausgeschlossen). NULL, wo kein
+  // Datensatz wirkt, und bei Alt-Läufen.
+  await geoDataClient.$executeRawUnsafe(
+    `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS eigendaten_details text;`,
   )
   await geoDataClient.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS planning.scenario_vegetation (
@@ -188,6 +195,7 @@ async function registerHexagonsFunction() {
           gebaeude,
           fahrbahn,
           eigendaten_ausschluss,
+          eigendaten_details,
           ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom
         FROM planning.scenario_hexagons
         WHERE run_id = rid AND resolution = res_val AND (geom && bounds)
@@ -246,6 +254,7 @@ async function registerHexagonsFunction() {
           gebaeude: 'boolean',
           fahrbahn: 'boolean',
           eigendaten_ausschluss: 'boolean',
+          eigendaten_details: 'text',
         },
       },
       {

@@ -1,5 +1,9 @@
 import { z } from 'zod'
-import type { MergedFactorConfig, VariantFactorConfig } from './mergeFactorConfig'
+import {
+  type MergedFactorConfig,
+  normalizeLegacyEigendaten,
+  type VariantFactorConfig,
+} from './mergeFactorConfig'
 
 // ── factorConfig schemas ───────────────────────────────────────────────────────
 // Variant config: weights and thresholds — no geometry, use-case, or size.
@@ -10,6 +14,7 @@ export const VariantFactorConfigSchema = z
     h3_resolution: z.number().int().min(6).max(15).optional(),
     dem_source: z.enum(['srtm', 'dgm1', 'mapterhorn']).optional(),
     weights: z.record(z.string(), z.number()).optional(),
+    eigendaten_weights: z.record(z.string(), z.number().min(0).max(1)).optional(),
     vegetation_direction: z.enum(['positive', 'negative']).optional(),
     platz_direction: z.enum(['positive', 'negative']).optional(),
     cir_source: z.enum(['auto', 'bayern', 'bb', 'hessen']).optional(),
@@ -52,5 +57,6 @@ const VariantFactorConfigReadSchema = z
 export const parseVariantFactorConfig = (value: unknown) =>
   VariantFactorConfigReadSchema.parse(value) as VariantFactorConfig
 
+/** Run snapshot as stored; snapshots from the single-upload time are lifted to `user_datasets`. */
 export const parseFactorConfigSnapshot = (value: unknown) =>
-  VariantFactorConfigReadSchema.parse(value) as MergedFactorConfig
+  normalizeLegacyEigendaten(VariantFactorConfigReadSchema.parse(value) as MergedFactorConfig)

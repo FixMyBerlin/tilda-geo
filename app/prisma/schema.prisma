@@ -835,8 +835,14 @@ model PlanningArea {
   createdBy          User?             @relation("PlanningAreaCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   createdById        String?
   //
-  // GeoJSON geometry (EPSG:4326) and optional user-upload obstacles.
+  // GeoJSON geometry (EPSG:4326) and the user-uploaded "Eigene Daten" datasets:
+  // [{ id, name, mode: bonus|penalty|exclude_inside|exclude_outside, geojson: FeatureCollection }].
+  // The per-dataset strength lives per variant in factorConfig.eigendaten_weights[id].
   studyArea          Json
+  userDatasets       Json              @default("[]")
+  // Deprecated: the single upload before `userDatasets` (backfilled as dataset "d1"). No longer
+  // written or read by the app; kept so a planning-worker still on the old image keeps working
+  // during the rollout. Drop both in a follow-up migration once the new worker runs everywhere.
   userGeojson        Json?
   userGeojsonMode    String?
   // Shared by all variants of this area; merged into worker snapshots as use_case / area_size_m2.
