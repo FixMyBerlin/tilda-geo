@@ -10,13 +10,14 @@ Search uses the layout `validateSearch` (`regionSearchSchema`).
 
 Mode filters sit on that shared layout search (not on child `validateSearch`) so switching modes keeps one URL. Each mode owns **one JSON object**:
 
-| URL key   | Schema                    | Shape (compact: omit defaults)                                                                                           |
-| --------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `qa`      | `zodQaParam`              | `{ key, status?, users?, search?, extent? }`                                                                             |
-| `notes`   | `zodNotesModeParam`       | `{ key?, search?, extent?, completed?, commented?, notReacted?, user?, new? }` (`new` is a map-param string compose pin) |
-| `review`  | `zodReviewListsModeParam` | `{ key?, search?, extent?, status?, source?, new?, move? }`                                                              |
-| `sum`     | `zodCalculatorModeParam`  | `{ key?, filter?, style?, areas? }` (`key`: dataset; `filter`: tag values; `style`: tag to color by; `areas`: GeoJSON)   |
-| `measure` | `zodMeasureModeParam`     | `{ lines?, areas?, bg? }` (`lines`, `areas`: GeoJSON; `bg`: background picked while measuring)                           |
+| URL key   | Schema                    | Shape (compact: omit defaults)                                                                                                                                                                 |
+| --------- | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `qa`      | `zodQaParam`              | `{ key, status?, users?, search?, extent? }`                                                                                                                                                   |
+| `notes`   | `zodNotesModeParam`       | `{ key?, search?, extent?, completed?, commented?, notReacted?, user?, new? }` (`new` is a map-param string compose pin)                                                                       |
+| `review`  | `zodReviewListsModeParam` | `{ key?, search?, extent?, status?, source?, new?, move? }`                                                                                                                                    |
+| `space`   | `zodSpaceFinderModeParam` | `{ key?, score?, opacity?, minArea?, new?, edit? }` (`key` is the Variante id; the Gebiet is derived from it; `minArea: true` turns the Gesuchte-Fläche filter on, the m² stay on the variant) |
+| `sum`     | `zodCalculatorModeParam`  | `{ key?, filter?, style?, areas? }` (`key`: dataset; `filter`: tag values; `style`: tag to color by; `areas`: GeoJSON)                                                                         |
+| `measure` | `zodMeasureModeParam`     | `{ lines?, areas?, bg? }` (`lines`, `areas`: GeoJSON; `bg`: background picked while measuring)                                                                                                 |
 
 `optionalSearchJson` drops the whole object if the Zod object fails. Each field therefore uses `.catch` so a stale bookmark field (retired status, bad chip) does not wipe the rest. QA `key` stays strict — without it there is nothing to show.
 
@@ -32,7 +33,7 @@ Other encodings stay as they are: `map` (`zoom/lat/lng`), `config` (v2 compresse
 
 Geometry in the URL: a point is a `zoom/lat/lng` string (`map`, `notes.new`), a selected feature is the pipe-delimited `f`. Shapes are GeoJSON geometry, as in the database (`ReviewEntry.geometry`): `sum.areas`, `measure.lines`, `measure.areas`.
 
-`migrateUrl` writes `v` (today `4`) so the layout loader does not re-run category-config migrations on every client navigation. Old in-map QA query shapes are folded into `qa` on first load. Details: [`migrateUrl.ts`](../app/src/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/migrateUrl.ts).
+`migrateUrl` writes `v` (today `4`) so the layout loader does not re-run category-config migrations on every client navigation. Old in-map QA query shapes are folded into `qa` on first load. Migration `0004_calculator_mode` moves the old calculator `draw` areas into `sum.areas`. Details: [`migrateUrl.ts`](../app/src/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/migrateUrl.ts).
 
 ## Child mode routes
 
@@ -41,3 +42,4 @@ Geometry in the URL: a point is a `zoom/lat/lng` string (`map`, `notes.new`), a 
 - Hinweise, QA, and Summieren redirect to the region root when that mode is not available.
 - `qa.tsx` also redirects to the first config when `qa.key` is absent (`replace: true`).
 - Prüflisten does not hard-redirect on empty lists: members/admins need the page to create the first list. Guests are stopped by the parent loader.
+- `flaechenfinder.tsx` is member-only and also needs `spaceFinderEnabled`. Without the flag it redirects to the region root.

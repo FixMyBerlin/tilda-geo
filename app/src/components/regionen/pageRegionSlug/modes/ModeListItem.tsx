@@ -17,7 +17,7 @@ type Props = {
   active?: boolean
   onClick: () => void
   children: ReactNode
-  /** Controls below the row button so they are not nested inside it. */
+  /** Controls right of the row button, on the same line, so they are not nested inside it. */
   actions?: ReactNode
   /** Extra classes on the `<li>` (e.g. comment-style separators). */
   className?: string
@@ -42,6 +42,7 @@ export const ModeListItem = ({
   className,
   buttonClassName,
 }: Props) => {
+  const hasActions = actions != null
   const { ref, hoveredFromMap, onActivate, hoverHandlers } = useModeListRow<HTMLLIElement>(
     id,
     coordinates,
@@ -54,8 +55,14 @@ export const ModeListItem = ({
       ref={ref}
       className={twMerge(
         'list-none',
+        hasActions && 'flex items-center',
         modePanelListItemBorderClassName,
-        active ? modePanelListItemActiveClassName : '',
+        // Row-level so the hover fill also covers `actions`.
+        active
+          ? modePanelListItemActiveClassName
+          : hoveredFromMap
+            ? modePanelListItemHoveredClassName
+            : modePanelListItemHoverClassName,
         className,
       )}
       onMouseEnter={hoverHandlers.onMouseEnter}
@@ -68,18 +75,14 @@ export const ModeListItem = ({
         onBlur={hoverHandlers.onBlur}
         className={twMerge(
           'block w-full cursor-pointer px-4 py-3 text-left text-sm select-none',
-          active
-            ? ''
-            : hoveredFromMap
-              ? modePanelListItemHoveredClassName
-              : modePanelListItemHoverClassName,
+          hasActions && 'min-w-0 flex-1',
           buttonClassName,
         )}
         aria-current={active ? 'true' : undefined}
       >
         {children}
       </button>
-      {actions && <div className="px-4 pb-3">{actions}</div>}
+      {hasActions && <div className="flex shrink-0 items-center pr-4">{actions}</div>}
     </li>
   )
 }

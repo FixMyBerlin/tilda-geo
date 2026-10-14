@@ -17,6 +17,12 @@
       "headers": {
         "Authorization": "Bearer ${env:TILDA_GEO_ADMIN_API_TOKEN_PRD}"
       }
+    },
+    "tilda-geo-admin--FLAECHENFINDER": {
+      "url": "https://flaechenfinder.tilda-geo.de/mcp",
+      "headers": {
+        "Authorization": "Bearer ${env:TILDA_GEO_ADMIN_API_TOKEN_FLAECHENFINDER}"
+      }
     }
   }
 }

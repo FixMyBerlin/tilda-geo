@@ -21,6 +21,8 @@ local function result_tags_roads(object)
     is_driveway = is_driveway,
     has_parking = has_parking_check(object.tags),
     has_embedded_rails = object.tags.embedded_rails == 'tram',
+    bridge = SANITIZE_TAGS.boolean_yes(object.tags.bridge),
+    tunnel = SANITIZE_TAGS.boolean_yes(object.tags.tunnel),
     width = road_width_tags_result.value,
     width_confidence = road_width_tags_result.confidence,
     width_source = road_width_tags_result.source,

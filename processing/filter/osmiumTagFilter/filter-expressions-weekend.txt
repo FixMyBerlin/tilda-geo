@@ -5,3 +5,7 @@
 wr/landuse
 wr/building
 wr/leisure
+# Building entrances (`_building_entrances`). Those nodes are vertices of `wr/building` ways and
+# therefore already kept as referenced objects; listed explicitly so the table does not silently
+# depend on osmium's reference-completion default.
+n/entrance

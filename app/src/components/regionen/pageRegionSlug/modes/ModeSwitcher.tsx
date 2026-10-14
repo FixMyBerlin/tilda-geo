@@ -99,6 +99,7 @@ const ModeSwitcherNav = () => {
       availableModes.notes,
       availableModes.qa,
       availableModes.reviewLists,
+      availableModes.spaceFinder,
       availableModes.calculator,
       availableModes.measure,
     ],

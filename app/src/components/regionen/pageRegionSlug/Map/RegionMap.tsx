@@ -18,6 +18,11 @@ import type {
   ViewStateChangeEvent,
 } from 'react-map-gl/maplibre'
 import { AttributionControl, Map as MapGl, useMap } from 'react-map-gl/maplibre'
+import { useSpaceFinderDrawingActive } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-boundary-store'
+import {
+  useSpaceFinderCandidateSelectActive,
+  useSpaceFinderCandidatesActions,
+} from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-candidates-store'
 import {
   useMapActions,
   useMapInspectorFeatures,
@@ -31,6 +36,7 @@ import {
   interactivityConfiguration,
   type InteracitvityConfiguartion,
 } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/generalization/interacitvityConfiguartion'
+import { customMapIcons } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/customMapIcons.const'
 import { useMeasureDraw } from '@/components/regionen/pageRegionSlug/modes/measure/drawing/useMeasureDraw'
 import { MeasureMap } from '@/components/regionen/pageRegionSlug/modes/measure/MeasureMap'
 import { createInspectorFeatureKey } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/createInspectorFeatureKey'
@@ -41,6 +47,7 @@ import {
 } from '@/components/shared/utils/playwright'
 import { MAP_STYLE_URL } from '@/server/api/map-style/mapStyleUrl.const'
 import { SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
+import { getPlanningHexagonGeomFn } from '@/server/planning/planning.functions'
 import { CalculatorMap } from '../modes/calculator/CalculatorMap'
 import { useCalculatorDraw } from '../modes/calculator/drawing/useCalculatorDraw'
 import { useModeListActions } from '../modes/mode-list-store'
@@ -51,6 +58,10 @@ import { useNotesComposeActive } from '../modes/notes/useNotesComposeActive'
 import { ReviewMapDrawing } from '../modes/reviewLists/drawing/ReviewMapDrawing'
 import { useReviewDraw } from '../modes/reviewLists/drawing/useReviewDraw'
 import { useReviewDrawActive } from '../modes/reviewLists/useReviewDrawActive'
+import { SpaceFinderMapDrawing } from '../modes/spaceFinder/drawing/SpaceFinderMapDrawing'
+import { useSpaceFinderDraw } from '../modes/spaceFinder/drawing/useSpaceFinderDraw'
+import { isCoarseHexagon } from '../modes/spaceFinder/planningHexagonResolution'
+import { useSpaceFinderSelection } from '../modes/spaceFinder/useSpaceFinderSelection'
 import { useCurrentMode } from '../modes/useCurrentMode'
 import { useRegion } from '../regionUtils/useRegion'
 import {
@@ -64,6 +75,10 @@ import { AllLayers } from './SourcesAndLayers/AllLayers'
 import { AllSources } from './SourcesAndLayers/AllSources'
 import { MAPTERHORN_DEM_SOURCE_ID } from './SourcesAndLayers/mapterhornDem'
 import { SourcesLayersReviewEntries } from './SourcesAndLayers/SourcesLayersReviewEntries'
+import {
+  planningHexagonsSourceLayer,
+  SourcesLayersSpaceFinder,
+} from './SourcesAndLayers/SourcesLayersSpaceFinder'
 import { TerrainProfileHoverMarkerLayer } from './SourcesAndLayers/TerrainProfileHoverMarkerLayer'
 import { UpdateFeatureState } from './UpdateFeatureState'
 import { MASK_INTERACTIVE_LAYER_IDS } from './utils/maskLayerUtils'
@@ -121,15 +136,52 @@ export const RegionMap = () => {
   const { draw: reviewDraw } = useReviewDraw()
   const notesComposeActive = useNotesComposeActive()
   const reviewDrawActive = useReviewDrawActive()
+  const spaceFinderDraw = useSpaceFinderDraw()
+  const spaceFinderDrawingActive = useSpaceFinderDrawingActive() && currentMode.isSpaceFinder
+  const candidateSelectActive = useSpaceFinderCandidateSelectActive()
+  const { toggleCandidate, setCandidateGeometry } = useSpaceFinderCandidatesActions()
+  const { runId: spaceFinderRunId, candidateRunKey: spaceFinderRunKey } = useSpaceFinderSelection()
   const { providers: streetImageryProviders, setPhoto: setStreetImageryPhoto } =
     useStreetImageryParam()
   // "Öffnen in …" is armed: the next click opens that place (<LocationPickOnMap>), nothing else.
   const pickingLocation = useArmedLocationOpenerId() != null
 
   const handleClick = ({ features, ...event }: MapLayerMouseEvent) => {
-    if (reviewDrawActive) return
+    if (reviewDrawActive || spaceFinderDrawingActive) return
     if (pickingLocation) return
     if (containMaskFeature(features)) {
+      return
+    }
+
+    // Flächenfinder-Auswahlwerkzeug (`SpaceFinderCandidatesSection`): solange es aktiv ist,
+    // sammelt ein Klick auf ein Ergebnis-Hexagon Kandidaten, statt den Inspector zu öffnen.
+    // Ein Klick ins Leere lässt die Auswahl unangetastet. Grobe Zellen (unter Zoom 16) sind nur
+    // Mittelwerte über viele Flächen und taugen nicht als Kandidat — das Panel bittet ums Zoomen.
+    if (currentMode.isSpaceFinder && candidateSelectActive) {
+      const hexagon = features?.find((f) => f.sourceLayer === planningHexagonsSourceLayer)
+      const h3Id = hexagon?.properties?.h3_id
+      if (
+        hexagon &&
+        h3Id &&
+        !isCoarseHexagon(h3Id) &&
+        spaceFinderRunId != null &&
+        spaceFinderRunKey != null
+      ) {
+        const runId = spaceFinderRunId
+        const runKey = spaceFinderRunKey
+        const candidateId = String(h3Id)
+        const added = toggleCandidate(runKey, {
+          h3Id: candidateId,
+          geometry: hexagon.geometry,
+          properties: { ...hexagon.properties },
+        })
+        // The tile geometry is clipped at tile borders; replace it with the full hexagon.
+        if (added) {
+          getPlanningHexagonGeomFn({ data: { runId, h3Id: candidateId } })
+            .then((geometry) => setCandidateGeometry(runKey, candidateId, geometry))
+            .catch((error) => console.error('Kandidaten-Geometrie nicht geladen', error))
+        }
+      }
       return
     }
     const photo = clickedStreetImageryPhoto(features)
@@ -215,7 +267,12 @@ export const RegionMap = () => {
     cursor: drawCursor,
     onMouseMove: drawOnMouseMove,
     ...drawMapProps
-  } = { ...calculatorDraw.mapProps, ...measureDraw.mapProps, ...reviewDraw.mapProps }
+  } = {
+    ...calculatorDraw.mapProps,
+    ...measureDraw.mapProps,
+    ...reviewDraw.mapProps,
+    ...spaceFinderDraw.mapProps,
+  }
 
   const handleMouseMove = (event: MapLayerMouseEvent) => {
     drawOnMouseMove?.(event)
@@ -257,6 +314,31 @@ export const RegionMap = () => {
   }
 
   useEffect(
+    function registerCustomMapIcons() {
+      if (!mainMap) return
+
+      let cancelled = false
+      Object.values(customMapIcons).forEach(({ id, url }) => {
+        if (mainMap.hasImage(id)) return
+        mainMap
+          .loadImage(url)
+          .then(({ data }) => {
+            if (cancelled || mainMap.hasImage(id)) return
+            mainMap.addImage(id, data, { pixelRatio: 2 })
+          })
+          .catch((error: unknown) => {
+            console.error(`Failed to load custom map icon "${id}"`, error)
+          })
+      })
+
+      return function cleanupCustomMapIconsRegistration() {
+        cancelled = true
+      }
+    },
+    [mainMap],
+  )
+
+  useEffect(
     function subscribeToMissingStyleImages() {
       if (!mainMap || !isDev) return
 
@@ -290,13 +372,18 @@ export const RegionMap = () => {
     updateMapBounds(mainMap?.getBounds() || null)
   }
 
-  // In the Summieren and Messen modes, or while notes compose or review drawing is active, no layers are interactive:
+  // In the Summieren and Messen modes, while notes compose or review drawing is active, or while the
+  // Flächenfinder study area is drawn, no layers are interactive:
   // clicking/hovering the data does nothing and the inspector can't open
   // (queryRenderedFeatures returns none). This replaces a special-case guard in the click
   // handler with the map's own interactivity mechanism.
   const computedInteractiveLayerIds = useInteractiveLayers()
   const interactiveLayerIds =
-    currentMode.isCalculator || currentMode.isMeasure || notesComposeActive || reviewDrawActive
+    currentMode.isCalculator ||
+    currentMode.isMeasure ||
+    notesComposeActive ||
+    reviewDrawActive ||
+    spaceFinderDrawingActive
       ? NO_INTERACTIVE_LAYERS
       : [
           ...computedInteractiveLayerIds,
@@ -364,6 +451,12 @@ export const RegionMap = () => {
       <AllLayers />
       <SearchResultLayers />
       <NotesNewRelatedGeometry />
+      {currentMode.isSpaceFinder && (
+        <>
+          <SourcesLayersSpaceFinder />
+          <SpaceFinderMapDrawing />
+        </>
+      )}
       {/* Last in tree + moveLayer: stay above remounted highlights. Do not use this layer as beforeId. */}
       <TerrainProfileHoverMarkerLayer />
       <SourcesLayersReviewEntries />

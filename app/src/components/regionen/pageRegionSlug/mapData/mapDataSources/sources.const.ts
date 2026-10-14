@@ -11,6 +11,7 @@ type TildaSourceId =
   | 'atlas_bikelanes'
   | 'atlas_bikeroutes'
   | 'atlas_boundaries'
+  | 'atlas_busStopsAndBikeSharing'
   | 'atlas_landuse'
   | 'atlas_places'
   | 'atlas_poiClassification'
@@ -262,6 +263,24 @@ export const sources: MapDataSource<SourcesId>[] = [
       enabled: true,
       highlightingKey: 'id',
       documentedKeys: ['name', 'category'],
+    },
+  },
+  {
+    id: 'atlas_busStopsAndBikeSharing',
+    // Bundles the `bus_stop` category from `publicTransport` with the `bicycle_rental`
+    // POIs from `poiClassification` for the combined "Bushaltestelle + Bikesharing" toggle.
+    tileTables: ['publicTransport', 'poiClassification'],
+    minzoom: SIMPLIFY_MIN_ZOOM,
+    maxzoom: SIMPLIFY_MAX_ZOOM,
+    attributionHtml:
+      '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
+    licence: 'ODbL',
+    promoteId: 'id',
+    osmIdConfig: { osmTypeId: 'id' },
+    inspector: {
+      enabled: true,
+      highlightingKey: 'id',
+      documentedKeys: ['name', 'category', 'type'],
     },
   },
   {

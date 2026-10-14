@@ -68,6 +68,7 @@ import { Route as RegionenRegionSlugQaRouteImport } from './routes/regionen/$reg
 import { Route as RegionenRegionSlugPrueflistenRouteImport } from './routes/regionen/$regionSlug/prueflisten'
 import { Route as RegionenRegionSlugMessenRouteImport } from './routes/regionen/$regionSlug/messen'
 import { Route as RegionenRegionSlugHinweiseRouteImport } from './routes/regionen/$regionSlug/hinweise'
+import { Route as RegionenRegionSlugFlaechenfinderRouteImport } from './routes/regionen/$regionSlug/flaechenfinder'
 import { Route as ApiUploadsCreateRouteImport } from './routes/api/uploads.create'
 import { Route as ApiUploadsSlugRouteImport } from './routes/api/uploads.$slug'
 import { Route as ApiSignInOsmRouteImport } from './routes/api/sign-in.osm'
@@ -426,6 +427,12 @@ const RegionenRegionSlugHinweiseRoute =
   RegionenRegionSlugHinweiseRouteImport.update({
     id: '/hinweise',
     path: '/hinweise',
+    getParentRoute: () => RegionenRegionSlugRouteRoute,
+  } as any)
+const RegionenRegionSlugFlaechenfinderRoute =
+  RegionenRegionSlugFlaechenfinderRouteImport.update({
+    id: '/flaechenfinder',
+    path: '/flaechenfinder',
     getParentRoute: () => RegionenRegionSlugRouteRoute,
   } as any)
 const ApiUploadsCreateRoute = ApiUploadsCreateRouteImport.update({
@@ -805,6 +812,7 @@ export interface FileRoutesByFullPath {
   '/api/sign-in/osm': typeof ApiSignInOsmRoute
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
+  '/regionen/$regionSlug/flaechenfinder': typeof RegionenRegionSlugFlaechenfinderRoute
   '/regionen/$regionSlug/hinweise': typeof RegionenRegionSlugHinweiseRoute
   '/regionen/$regionSlug/messen': typeof RegionenRegionSlugMessenRoute
   '/regionen/$regionSlug/prueflisten': typeof RegionenRegionSlugPrueflistenRoute
@@ -907,6 +915,7 @@ export interface FileRoutesByTo {
   '/api/sign-in/osm': typeof ApiSignInOsmRoute
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
+  '/regionen/$regionSlug/flaechenfinder': typeof RegionenRegionSlugFlaechenfinderRoute
   '/regionen/$regionSlug/hinweise': typeof RegionenRegionSlugHinweiseRoute
   '/regionen/$regionSlug/messen': typeof RegionenRegionSlugMessenRoute
   '/regionen/$regionSlug/prueflisten': typeof RegionenRegionSlugPrueflistenRoute
@@ -1024,6 +1033,7 @@ export interface FileRoutesById {
   '/api/sign-in/osm': typeof ApiSignInOsmRoute
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
+  '/regionen/$regionSlug/flaechenfinder': typeof RegionenRegionSlugFlaechenfinderRoute
   '/regionen/$regionSlug/hinweise': typeof RegionenRegionSlugHinweiseRoute
   '/regionen/$regionSlug/messen': typeof RegionenRegionSlugMessenRoute
   '/regionen/$regionSlug/prueflisten': typeof RegionenRegionSlugPrueflistenRoute
@@ -1141,6 +1151,7 @@ export interface FileRouteTypes {
     | '/api/sign-in/osm'
     | '/api/uploads/$slug'
     | '/api/uploads/create'
+    | '/regionen/$regionSlug/flaechenfinder'
     | '/regionen/$regionSlug/hinweise'
     | '/regionen/$regionSlug/messen'
     | '/regionen/$regionSlug/prueflisten'
@@ -1243,6 +1254,7 @@ export interface FileRouteTypes {
     | '/api/sign-in/osm'
     | '/api/uploads/$slug'
     | '/api/uploads/create'
+    | '/regionen/$regionSlug/flaechenfinder'
     | '/regionen/$regionSlug/hinweise'
     | '/regionen/$regionSlug/messen'
     | '/regionen/$regionSlug/prueflisten'
@@ -1359,6 +1371,7 @@ export interface FileRouteTypes {
     | '/api/sign-in/osm'
     | '/api/uploads/$slug'
     | '/api/uploads/create'
+    | '/regionen/$regionSlug/flaechenfinder'
     | '/regionen/$regionSlug/hinweise'
     | '/regionen/$regionSlug/messen'
     | '/regionen/$regionSlug/prueflisten'
@@ -1860,6 +1873,13 @@ declare module '@tanstack/react-router' {
       path: '/hinweise'
       fullPath: '/regionen/$regionSlug/hinweise'
       preLoaderRoute: typeof RegionenRegionSlugHinweiseRouteImport
+      parentRoute: typeof RegionenRegionSlugRouteRoute
+    }
+    '/regionen/$regionSlug/flaechenfinder': {
+      id: '/regionen/$regionSlug/flaechenfinder'
+      path: '/flaechenfinder'
+      fullPath: '/regionen/$regionSlug/flaechenfinder'
+      preLoaderRoute: typeof RegionenRegionSlugFlaechenfinderRouteImport
       parentRoute: typeof RegionenRegionSlugRouteRoute
     }
     '/api/uploads/create': {
@@ -2486,6 +2506,7 @@ const PreviewRouteWithChildren =
   PreviewRoute._addFileChildren(PreviewRouteChildren)
 
 interface RegionenRegionSlugRouteRouteChildren {
+  RegionenRegionSlugFlaechenfinderRoute: typeof RegionenRegionSlugFlaechenfinderRoute
   RegionenRegionSlugHinweiseRoute: typeof RegionenRegionSlugHinweiseRoute
   RegionenRegionSlugMessenRoute: typeof RegionenRegionSlugMessenRoute
   RegionenRegionSlugPrueflistenRoute: typeof RegionenRegionSlugPrueflistenRoute
@@ -2496,6 +2517,8 @@ interface RegionenRegionSlugRouteRouteChildren {
 
 const RegionenRegionSlugRouteRouteChildren: RegionenRegionSlugRouteRouteChildren =
   {
+    RegionenRegionSlugFlaechenfinderRoute:
+      RegionenRegionSlugFlaechenfinderRoute,
     RegionenRegionSlugHinweiseRoute: RegionenRegionSlugHinweiseRoute,
     RegionenRegionSlugMessenRoute: RegionenRegionSlugMessenRoute,
     RegionenRegionSlugPrueflistenRoute: RegionenRegionSlugPrueflistenRoute,

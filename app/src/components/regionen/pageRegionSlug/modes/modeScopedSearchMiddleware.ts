@@ -4,6 +4,7 @@ import {
 } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/featuresParamCodec'
 import { compactNotesModeParam } from '@/components/regionen/pageRegionSlug/modes/notes/notesModeParam'
 import { compactReviewListsModeParam } from '@/components/regionen/pageRegionSlug/modes/reviewLists/reviewListsModeParam'
+import { compactSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderModeParam'
 import type { RegionSearch } from '@/shared/regionen/regionSearchSchemas'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 import { filterUrlFeaturesForMode } from './modeScopedSelection'
@@ -16,6 +17,7 @@ import type { RegionMode } from './useCurrentMode'
 export const stripModeScopedSearch = (search: RegionSearch, mode: RegionMode) => {
   const notesKey = searchParamsRegistry.notes
   const reviewKey = searchParamsRegistry.review
+  const spaceKey = searchParamsRegistry.space
   const featuresKey = searchParamsRegistry.f
   let next = search
 
@@ -33,6 +35,19 @@ export const stripModeScopedSearch = (search: RegionSearch, mode: RegionMode) =>
         ...search[reviewKey],
         new: undefined,
         move: undefined,
+      }),
+    }
+  }
+
+  // `space.key` (the active Planungsgebiet/Variante) stays so users come back to the same
+  // configuration; only the transient wizard/editor flags are mode-scoped (D3).
+  if (mode !== 'spaceFinder' && (search[spaceKey]?.new || search[spaceKey]?.edit)) {
+    next = {
+      ...next,
+      [spaceKey]: compactSpaceFinderModeParam({
+        ...search[spaceKey],
+        new: undefined,
+        edit: undefined,
       }),
     }
   }

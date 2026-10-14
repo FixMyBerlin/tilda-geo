@@ -36,6 +36,14 @@ export const modePanelSectionClassName = 'border-b border-white/80 px-4 py-2'
 
 export const modePanelFooterClassName = 'border-t border-white/80 px-4 py-2 text-xs text-gray-500'
 
+/**
+ * Sticky primary-action footer (e.g. Flächenfinder »Berechnen« / »Neu berechnen«). Solid white
+ * (not the tint wash) and a stronger border so the action stays legible below a long scrolled
+ * body — distinct from the muted outside-viewport hint footer above (`modePanelFooterClassName`),
+ * which can render at the same time.
+ */
+export const modePanelActionFooterClassName = 'shrink-0 border-t border-gray-200 bg-white px-4 py-3'
+
 export const modePanelTitleClassName = 'text-sm font-semibold text-gray-900'
 
 /** Inverted header row (list, collection trigger, detail). 50px matches Prüflisten (`py-2` + `size-8.5`). */

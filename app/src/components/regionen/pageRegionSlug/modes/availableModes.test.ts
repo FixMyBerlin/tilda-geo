@@ -2,13 +2,17 @@ import { describe, expect, test } from 'vitest'
 import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { deriveAvailableModes, isMemberOnlyMode } from './availableModes'
 
-type RegionFields = Pick<TRegion, 'notesOsm' | 'notesInternal' | 'categories'>
+type RegionFields = Pick<
+  TRegion,
+  'notesOsm' | 'notesInternal' | 'categories' | 'spaceFinderEnabled'
+>
 
 const region = (overrides: Partial<RegionFields>) => {
   return {
     notesOsm: false,
     notesInternal: false,
     categories: [],
+    spaceFinderEnabled: false,
     ...overrides,
   } satisfies RegionFields
 }
@@ -47,6 +51,26 @@ describe('deriveAvailableModes()', () => {
     ).toBe(true)
   })
 
+  test('spaceFinder mode requires spaceFinderEnabled AND manage rights (D8)', () => {
+    expect(
+      deriveAvailableModes({ region: region({}), qaConfigsCount: 0, canManage: true }).spaceFinder,
+    ).toBe(false)
+    expect(
+      deriveAvailableModes({
+        region: region({ spaceFinderEnabled: true }),
+        qaConfigsCount: 0,
+        canManage: false,
+      }).spaceFinder,
+    ).toBe(false)
+    expect(
+      deriveAvailableModes({
+        region: region({ spaceFinderEnabled: true }),
+        qaConfigsCount: 0,
+        canManage: true,
+      }).spaceFinder,
+    ).toBe(true)
+  })
+
   test('calculator mode requires a category with a dataset that can be summed', () => {
     const calculator = (categories: RegionFields['categories']) =>
       deriveAvailableModes({ region: region({ categories }), qaConfigsCount: 0 }).calculator
@@ -59,9 +83,10 @@ describe('deriveAvailableModes()', () => {
 })
 
 describe('isMemberOnlyMode()', () => {
-  test('QA and Prüflisten are always member-only', () => {
+  test('QA, Prüflisten and Flächenfinder are always member-only', () => {
     expect(isMemberOnlyMode('qa', region({}))).toBe(true)
     expect(isMemberOnlyMode('reviewLists', region({}))).toBe(true)
+    expect(isMemberOnlyMode('spaceFinder', region({}))).toBe(true)
   })
 
   test('Summieren is open to everyone who can see the region', () => {

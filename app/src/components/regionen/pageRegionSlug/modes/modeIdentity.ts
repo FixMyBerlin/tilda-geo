@@ -4,6 +4,7 @@ import {
   CheckBadgeIcon,
   ClipboardDocumentCheckIcon,
   MapIcon,
+  Squares2X2Icon,
 } from '@heroicons/react/24/outline'
 import type { ComponentType, SVGProps } from 'react'
 import { RulerIcon } from './measure/RulerIcon'
@@ -89,6 +90,22 @@ export const modeIdentity = {
       invertedMutedClassName: 'text-white/80',
       tintClassName: 'bg-teal-600/10',
       tintEmphasisClassName: 'bg-teal-600/20',
+    },
+  },
+  spaceFinder: {
+    label: 'Flächenfinder',
+    shortLabel: 'Flächen',
+    icon: Squares2X2Icon,
+    compact: false,
+    accent: {
+      className: 'bg-emerald-700',
+      textClassName: 'text-emerald-700',
+      hex: '#047857',
+      rgb: [4, 120, 87],
+      invertedFgClassName: 'text-white',
+      invertedMutedClassName: 'text-white/80',
+      tintClassName: 'bg-emerald-700/10',
+      tintEmphasisClassName: 'bg-emerald-700/20',
     },
   },
   calculator: {

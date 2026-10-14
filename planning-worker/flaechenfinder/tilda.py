@@ -1,0 +1,127 @@
+import geopandas as gpd
+from shapely.geometry.base import BaseGeometry
+
+
+class TildaLoader:
+    """Lädt Radwege aus tildas PostGIS (`public.bikelanes`).
+
+    Wrappt einen PostgisLoader; die Scoring-Funktion bleibt unverändert.
+    """
+
+    def __init__(self, postgis_loader):
+        self._loader = postgis_loader
+        self._cache = None
+
+    def load_cycleways(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
+        if self._cache is not None:
+            return self._cache
+        try:
+            gdf = self._loader.load_cycleways(study_area_geom)
+            gdf = gdf[gdf.geometry.geom_type.isin(["LineString", "MultiLineString"])].copy()
+            self._cache = gdf
+            print(f"   ✓ Radwege: {len(gdf)} Features aus public.bikelanes")
+            return gdf
+        except Exception as e:
+            print(f"   ⚠️  Radweg-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
+    def load_buildings(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
+        try:
+            return self._loader.load_buildings(study_area_geom)
+        except Exception as e:
+            print(f"   ⚠️  Gebäude-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
+    def load_building_entrances(
+        self,
+        study_area_geom: BaseGeometry,
+        kinds: tuple[str, ...] = ("yes", "main", "home", "staircase"),
+    ) -> gpd.GeoDataFrame:
+        """Gebäudeeingänge (Default `entrance=yes`/`main`/`home`/`staircase`) als Punkte.
+
+        Noch von keinem Faktor genutzt: gedacht als Ansatzpunkt, den Bewohnerbedarf künftig
+        am Eingang statt am Gebäude entstehen zu lassen.
+        """
+        try:
+            gdf = self._loader.load_building_entrances(study_area_geom, kinds)
+            return gdf[gdf.geometry.geom_type == "Point"].copy() if len(gdf) else gdf
+        except Exception as e:
+            print(f"   ⚠️  Gebäudeeingangs-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
+    def load_intersection_corners(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
+        """Bordstein-Eckpunkte an Straßenkreuzungen (für den Kreuzungs-Bonus)."""
+        try:
+            gdf = self._loader.load_intersection_corners(study_area_geom)
+            return gdf[gdf.geometry.geom_type == "Point"].copy() if len(gdf) else gdf
+        except Exception as e:
+            print(f"   ⚠️  Kreuzungs-Ecken-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
+    def load_pedestrian_intersection_corners(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
+        """Bordstein-Ecken, wo eine Straße auf eine Fußgängerzone trifft."""
+        try:
+            gdf = self._loader.load_pedestrian_intersection_corners(study_area_geom)
+            return gdf[gdf.geometry.geom_type == "Point"].copy() if len(gdf) else gdf
+        except Exception as e:
+            print(f"   ⚠️  Fußgängerzonen-Ecken-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
+    def load_car_parking(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
+        """KFZ-Parkflächen (Linien + Polygone) als Umwidmungs-Kandidaten."""
+        try:
+            return self._loader.load_car_parking(study_area_geom)
+        except Exception as e:
+            print(f"   ⚠️  KFZ-Parkflächen-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
+    def load_squares(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
+        """Platzflächen (place=square) für den Platz-Bonus/Abschlag."""
+        try:
+            gdf = self._loader.load_squares(study_area_geom)
+            return gdf[gdf.geometry.geom_type.isin(["Polygon", "MultiPolygon"])].copy() if len(gdf) else gdf
+        except Exception as e:
+            print(f"   ⚠️  Platz-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
+    def load_bicycle_parking(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
+        """Bestehende Fahrradabstellanlagen (für den Bestands-Bedarfsfaktor)."""
+        try:
+            return self._loader.load_bicycle_parking(study_area_geom)
+        except Exception as e:
+            print(f"   ⚠️  Bestands-Radabstellanlagen-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
+    def load_census_population(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
+        """Zensus-Einwohnerpunkte (für den Bewohnerbedarf-Faktor)."""
+        try:
+            return self._loader.load_census_population(study_area_geom)
+        except Exception as e:
+            print(f"   ⚠️  Zensus-Einwohner-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
+    def load_target_locations(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
+        """Zielort-Punkte aus public.poiClassification (für den Zielorte-Bonus)."""
+        try:
+            return self._loader.load_target_locations(study_area_geom)
+        except Exception as e:
+            print(f"   ⚠️  Zielort-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
+    def load_roads(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
+        """Straßen-Linien mit Breite (für den Fahrbahnen-Ausschluss)."""
+        try:
+            gdf = self._loader.load_roads(study_area_geom)
+            return gdf[gdf.geometry.geom_type.isin(["LineString", "MultiLineString"])].copy() if len(gdf) else gdf
+        except Exception as e:
+            print(f"   ⚠️  Straßen-Abfrage fehlgeschlagen: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
+    @staticmethod
+    def score_cycleway_proximity(dist_m: float, max_dist_m: float) -> float:
+        """0–100: < 20 m → 100, linear bis max_dist_m → 0, darüber 0."""
+        if dist_m <= 20:
+            return 100.0
+        if dist_m >= max_dist_m:
+            return 0.0
+        return max(0.0, 100.0 * (1.0 - (dist_m - 20) / (max_dist_m - 20)))

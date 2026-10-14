@@ -1,0 +1,902 @@
+import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from '@headlessui/react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useEffect, useEffectEvent, useState } from 'react'
+import { toast } from 'sonner'
+import { twJoin } from 'tailwind-merge'
+import { CollapsibleBoxChevron } from '@/components/shared/CollapsibleBox/CollapsibleBox'
+import {
+  collapsibleBoxClass,
+  collapsibleBoxHeaderClass,
+} from '@/components/shared/CollapsibleBox/collapsibleBoxStyles'
+import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
+import { SegmentedChoice } from '@/components/shared/SegmentedChoice/SegmentedChoice'
+import { toastError } from '@/components/shared/toast/toastError'
+import {
+  type UserDataset,
+  userDatasetCoverage,
+  userDatasetCoverageMessage,
+} from '@/lib/planningUserGeojson'
+import { factorFingerprint, factorsDiffer } from '@/server/planning/factorFingerprint'
+import {
+  syncEigendatenWeights,
+  type VariantFactorConfig,
+} from '@/server/planning/mergeFactorConfig'
+import type { FactorConfig } from '@/server/planning/planning.functions'
+import { updatePlanningVariantFn } from '@/server/planning/planning.functions'
+import {
+  planningAreaQueryOptions,
+  planningAreasQueryOptions,
+  planningVariantQueryOptions,
+} from '@/server/planning/planningQueryOptions'
+import { useSpaceFinderBoundaryActions } from '../../../hooks/mapState/space-finder-boundary-store'
+import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
+import { USER_DATASET_MODE_OPTIONS, UserDatasetCoverageHint } from '../area/UserDatasetsField'
+import { spaceFinderGroupStyle, spaceFinderNumberInputClass } from '../spaceFinderPanelStyles'
+import { OepnvCategorySliders } from './OepnvCategorySliders'
+import { readOepnvShares, type OepnvShares } from './oepnvShares'
+import {
+  DEFAULT_FACTOR_TEMPLATE,
+  FACTOR_HELP,
+  FACTOR_PARAMS,
+  GROUP_HELP,
+  MIN_SCORE_THRESHOLD_LABEL,
+  PARKING_DATA_DEPENDENT_KEYS,
+  WEIGHT_GROUPS,
+  WEIGHT_LABELS,
+} from './spaceFinderDefaults'
+import {
+  criterionShares,
+  groupShare,
+  modifierPointRange,
+  resolveModifierDirection,
+  weightToPoints,
+  weightToStep,
+} from './weightScale'
+import {
+  ComingSoonFactorRow,
+  CriterionSlider,
+  ModifierSlider,
+  UnavailableFactorRow,
+  WeightScaleLegend,
+} from './WeightSlider'
+import { ZielortCategorySliders } from './ZielortCategorySliders'
+import { readZielortShares, type ZielortShares } from './zielortShares'
+
+/** Hinweis unter den Parkdaten-abhängigen Faktoren, wenn `parkingDataAvailable` false ist —
+ * siehe [[PARKING_DATA_DEPENDENT_KEYS]] in spaceFinderDefaults.ts. */
+const PARKING_DATA_HINT = 'Keine Parkdaten für dieses Gebiet verfügbar — Faktor hier deaktiviert.'
+
+const FactorInfo = ({ factorKey, extra }: { factorKey: string; extra?: string }) => {
+  const text = [FACTOR_HELP[factorKey], extra].filter(Boolean).join(' ')
+  if (!text) return null
+  return <InfoTooltip>{text}</InfoTooltip>
+}
+
+/** Basis der Blocküberschriften; die Farbe kommt je Block dazu (Faktorgruppen farbig, Rest grau). */
+const groupHeadlineBaseClass =
+  'flex items-baseline justify-between gap-2 border-b pb-0.5 text-sm font-bold'
+
+const groupHeadlineClass = twJoin(groupHeadlineBaseClass, 'border-gray-200 text-gray-800')
+
+/**
+ * Wert-Text des Eigene-Daten-Chips im zugeklappten Faktoren-Kopf. Bei genau einem Datensatz: bei
+ * Bonus/Abzug die Punkte in Wirkrichtung, bei den Ausschluss-Modi nur der Modus-Name. Bei mehreren
+ * ist ein Wert allein nichtssagend — dort steht die Anzahl.
+ */
+const eigendatenChipValue = (config: FactorConfig) => {
+  const datasets = config.user_datasets ?? []
+  const [dataset] = datasets
+  if (datasets.length !== 1 || !dataset) return `${datasets.length} Datensätze`
+  const mode = dataset.mode
+  if (mode === 'exclude_inside' || mode === 'exclude_outside') {
+    return USER_DATASET_MODE_OPTIONS.find(([value]) => value === mode)?.[1] ?? mode
+  }
+  const points = weightToPoints(config.eigendaten_weights?.[dataset.id])
+  return `${mode === 'penalty' ? '−' : '+'}${points}`
+}
+
+/** Was ein Ausschluss-Modus bewirkt — dort gibt es keine Stärke, also steht das statt des Reglers. */
+const EIGENDATEN_EXCLUDE_TEXT: Partial<Record<UserDataset['mode'], string>> = {
+  exclude_inside: 'Flächen innerhalb dieses Datensatzes werden ausgeschlossen.',
+  exclude_outside: 'Nur Flächen innerhalb dieses Datensatzes bleiben zulässig.',
+}
+
+/**
+ * Ein Eigene-Daten-Datensatz im Faktoren-Block: Name, Modus (nur Anzeige — er gehört zum
+ * Planungsgebiet und wird dort eingestellt), Stärke bei Bonus/Abzug (gehört zur Variante) und der
+ * Hinweis, wenn Objekte außerhalb des Planungsgebiets liegen.
+ */
+const EigendatenDatasetBlock = ({
+  dataset,
+  studyArea,
+  weight,
+  setWeight,
+  readOnly,
+}: {
+  dataset: UserDataset
+  studyArea: GeoJSON.Geometry | null
+  weight: number | undefined
+  setWeight: (value: number) => void
+  readOnly: boolean
+}) => {
+  const coverageMessage = userDatasetCoverageMessage(
+    userDatasetCoverage(dataset.geojson, studyArea),
+  )
+  const isSoft = dataset.mode === 'bonus' || dataset.mode === 'penalty'
+  const modeLabel =
+    USER_DATASET_MODE_OPTIONS.find(([value]) => value === dataset.mode)?.[1] ?? dataset.mode
+  return (
+    <li className="space-y-1">
+      <div className="flex items-center justify-between gap-2 text-xs">
+        <span className="flex min-w-0 items-center gap-1.5">
+          <span className="min-w-0 truncate font-semibold text-gray-800" title={dataset.name}>
+            {dataset.name}
+          </span>
+          <span
+            className="shrink-0 rounded border border-gray-400 bg-white px-1.5 py-px text-[11px] font-semibold text-gray-800"
+            title="Der Modus gilt für alle Varianten und wird am Planungsgebiet eingestellt."
+          >
+            {modeLabel}
+          </span>
+        </span>
+        <span className="shrink-0 text-gray-500 tabular-nums">
+          {dataset.geojson.features.length.toLocaleString('de-DE')} Objekte
+        </span>
+      </div>
+      {coverageMessage && <UserDatasetCoverageHint message={coverageMessage} />}
+      {!isSoft && EIGENDATEN_EXCLUDE_TEXT[dataset.mode] && (
+        <p className="text-xs text-gray-500">{EIGENDATEN_EXCLUDE_TEXT[dataset.mode]}</p>
+      )}
+      {isSoft && (
+        <ModifierSlider
+          label="Stärke"
+          weight={weight}
+          direction={dataset.mode === 'penalty' ? 'negative' : 'positive'}
+          onChange={setWeight}
+          readOnly={readOnly}
+          info={<FactorInfo factorKey="w_eigendaten" />}
+        />
+      )}
+    </li>
+  )
+}
+
+/**
+ * Anteil beider Faktorgruppen am Grundscore als farbige Chips — die Kurzfassung der
+ * Gruppenüberschriften für den zugeklappten Faktoren-Kopf. Sind eigene Daten hochgeladen, kommt
+ * ihr Chip (Amber, wie der Eigene-Daten-Block) dazu, damit ihr Effekt auch zugeklappt sichtbar ist.
+ */
+const GroupShareChips = ({ config }: { config: FactorConfig }) => {
+  const shares = criterionShares(config.weights)
+  return (
+    <div className="flex w-full items-center gap-1.5">
+      {WEIGHT_GROUPS.map((group) => (
+        <span
+          key={group.key}
+          className={twJoin(
+            'rounded px-1.5 py-0.5 text-[11px] font-medium',
+            spaceFinderGroupStyle[group.key].chip,
+          )}
+        >
+          {group.label}{' '}
+          <span className="font-bold tabular-nums">
+            {Math.round(groupShare(shares, group.criteria))} %
+          </span>
+        </span>
+      ))}
+      {(config.user_datasets?.length ?? 0) > 0 && (
+        <span
+          className={twJoin(
+            'rounded px-1.5 py-0.5 text-[11px] font-medium',
+            spaceFinderGroupStyle.eigendaten.chip,
+          )}
+        >
+          Eigene Daten <span className="font-bold tabular-nums">{eigendatenChipValue(config)}</span>
+        </span>
+      )}
+    </div>
+  )
+}
+
+/**
+ * Herkunftshinweis unter der Bewohnerbedarf-Sättigung. Der Wert wird je Planungsgebiet einmal aus
+ * dem Zensus geschätzt (siehe `censusSaettigung.server.ts`) und gilt für alle seine Varianten,
+ * solange ihn niemand überschreibt — deshalb zwei Zustände: „automatisch ermittelt" und
+ * „von Hand gesetzt, Vorschlag war X".
+ */
+const AutoSaettigungHint = ({
+  config,
+  restoreAuto,
+  readOnly,
+}: {
+  config: FactorConfig
+  restoreAuto: () => void
+  readOnly: boolean
+}) => {
+  const auto = config.bewohnerbedarf_saettigung_auto_ew
+  if (auto == null) return null
+
+  const ewProHa = config.bewohnerbedarf_ew_pro_ha
+  if (config.bewohnerbedarf_saettigung_auto) {
+    return (
+      <p className="text-[11px] leading-snug text-gray-500">
+        Automatisch aus dem Zensus im Planungsgebiet ermittelt
+        {ewProHa ? ` (${ewProHa.toLocaleString('de-DE')} EW/ha)` : ''} — überschreibbar.
+      </p>
+    )
+  }
+  return (
+    <p className="text-[11px] leading-snug text-gray-500">
+      Von Hand gesetzt. Zensus-Vorschlag: {auto}.{' '}
+      {!readOnly && (
+        <button
+          type="button"
+          onClick={restoreAuto}
+          className="font-medium text-gray-600 underline hover:text-gray-900"
+        >
+          Wieder automatisch
+        </button>
+      )}
+    </p>
+  )
+}
+
+const FactorParamInputs = ({
+  factorKey,
+  config,
+  weight,
+  setField,
+  restoreAutoSaettigung,
+  readOnly,
+}: {
+  factorKey: string
+  config: FactorConfig
+  weight: number | undefined
+  setField: (key: keyof FactorConfig, value: number | boolean) => void
+  restoreAutoSaettigung: () => void
+  readOnly: boolean
+}) => {
+  const params = FACTOR_PARAMS[factorKey]
+  if (!params) return null
+
+  const weightOff = weightToStep(weight) === 0 && weightToPoints(weight) === 0
+
+  return params.map(({ key, label, step, min, alwaysEditable }) => {
+    const disabled = readOnly || (weightOff && !alwaysEditable)
+    return (
+      <div key={String(key)} className="space-y-0.5">
+        <label className="flex items-center justify-between gap-2 text-xs text-gray-600">
+          <span className={disabled ? 'text-gray-400' : ''}>{label}</span>
+          <input
+            type="number"
+            step={step}
+            min={min}
+            value={Number(config[key] ?? 0)}
+            disabled={disabled}
+            onChange={(e) => {
+              const value = Number(e.target.value)
+              setField(key, min != null ? Math.max(min, value) : value)
+            }}
+            className={spaceFinderNumberInputClass}
+          />
+        </label>
+        {key === 'bewohnerbedarf_saettigung_ew' && !disabled && (
+          <AutoSaettigungHint
+            config={config}
+            restoreAuto={restoreAutoSaettigung}
+            readOnly={readOnly}
+          />
+        )}
+      </div>
+    )
+  })
+}
+
+/** Gewichte-/Schwellen-Formularfelder (ohne Geometrie / eigene Daten). */
+const FactorFields = ({
+  config,
+  setWeights,
+  setField,
+  restoreAutoSaettigung,
+  setVegetationDirection,
+  setPlatzDirection,
+  setZielortShares,
+  setOepnvShares,
+  setEigendatenWeight,
+  onReset,
+  readOnly = false,
+  parkingDataAvailable = true,
+}: {
+  config: FactorConfig
+  setWeights: (weights: Record<string, number>) => void
+  setField: (key: keyof FactorConfig, value: number | boolean) => void
+  restoreAutoSaettigung: () => void
+  setVegetationDirection: (value: 'positive' | 'negative') => void
+  setPlatzDirection: (value: 'positive' | 'negative') => void
+  setZielortShares: (shares: ZielortShares) => void
+  setOepnvShares: (shares: OepnvShares) => void
+  setEigendatenWeight: (id: string, value: number) => void
+  onReset?: () => void
+  readOnly?: boolean
+  parkingDataAvailable?: boolean
+}) => {
+  const weights = config.weights ?? {}
+  const vegetationDirection = config.vegetation_direction ?? 'negative'
+  const platzDirection = config.platz_direction ?? 'positive'
+  const directions = { vegetation: vegetationDirection, platz: platzDirection }
+  const userDatasets = config.user_datasets ?? []
+  const studyAreaGeometry = (config.study_area as GeoJSON.Geometry | undefined) ?? null
+  const setWeightFromWeights = (key: string, value: number) =>
+    setWeights({ ...weights, [key]: value })
+  const shares = criterionShares(weights)
+  const points = modifierPointRange(weights, directions)
+  const zielortShares = readZielortShares(config.zielort_category_shares)
+  // Offen/zu der Zielort-Arten liegt hier, weil davon die Hervorhebung der ganzen Zielorte-Zeile
+  // abhängt (siehe unten) — nicht nur der Inhalt unterhalb des Reglers.
+  const [zielortCategoriesOpen, setZielortCategoriesOpen] = useState(false)
+  const oepnvShares = readOepnvShares(config.oepnv_category_shares)
+  // Gleiches Muster wie bei Zielorte, nur am Kriterien-Regler w_transit statt am Modifier w_target.
+  const [oepnvCategoriesOpen, setOepnvCategoriesOpen] = useState(false)
+
+  return (
+    <>
+      <div>
+        <div className="mb-1 font-semibold">Gewichtung der Faktoren</div>
+        {!readOnly && <WeightScaleLegend />}
+        {onReset && (
+          <button
+            type="button"
+            onClick={onReset}
+            className="mb-1 text-xs font-medium text-gray-500 hover:text-gray-800"
+          >
+            Auf Standardwerte zurücksetzen
+          </button>
+        )}
+        {WEIGHT_GROUPS.map((group) => (
+          // Farbiger Streifen + zarte Tönung je Gruppe: im langen Formular ist sonst nicht auf
+          // einen Blick zu sehen, wo Bedarf aufhört und Bebauung anfängt. Gleiche Farben wie die
+          // Anteil-Chips im zugeklappten Kopf.
+          <div
+            key={group.key}
+            className={twJoin(
+              'mt-3 rounded-r border-l-[3px] py-1.5 pr-1 pl-2 first:mt-0',
+              spaceFinderGroupStyle[group.key].block,
+            )}
+          >
+            <div
+              className={twJoin(groupHeadlineBaseClass, spaceFinderGroupStyle[group.key].headline)}
+            >
+              <span className="flex items-center gap-1">
+                {group.label}
+                <InfoTooltip>{GROUP_HELP[group.key]}</InfoTooltip>
+              </span>
+              <span className="text-xs font-normal text-gray-500 tabular-nums">
+                {Math.round(groupShare(shares, group.criteria))} % des Grundscores
+              </span>
+            </div>
+
+            <div className="mt-1 text-sm font-semibold tracking-wide text-black uppercase">
+              Kriterien
+            </div>
+            {group.criteria.map((key) => {
+              const criterionSlider = (
+                <CriterionSlider
+                  label={WEIGHT_LABELS[key] ?? key}
+                  weight={weights[key]}
+                  sharePct={shares[key] ?? 0}
+                  onChange={(value) => setWeightFromWeights(key, value)}
+                  readOnly={readOnly}
+                  info={<FactorInfo factorKey={key} />}
+                  nested={
+                    <>
+                      <FactorParamInputs
+                        factorKey={key}
+                        config={config}
+                        weight={weights[key]}
+                        setField={setField}
+                        restoreAutoSaettigung={restoreAutoSaettigung}
+                        readOnly={readOnly}
+                      />
+                      {/* Die Gruppen-Aufteilung hängt am ÖPNV-Regler: sie verteilt dessen Anteil
+                          auf ÖPNV und Bikesharing, ohne die übrigen Faktoren zu berühren. */}
+                      {key === 'w_transit' && (
+                        <OepnvCategorySliders
+                          shares={oepnvShares}
+                          onChange={setOepnvShares}
+                          open={oepnvCategoriesOpen}
+                          onOpenChange={setOepnvCategoriesOpen}
+                          disabled={readOnly || weightToStep(weights[key]) === 0}
+                        />
+                      )}
+                    </>
+                  }
+                />
+              )
+              // Aufgeklappt gehören ÖPNV-Regler und Arten-Regler sichtbar zusammen, gleiches
+              // Muster wie bei Zielorte weiter unten.
+              if (key === 'w_transit' && oepnvCategoriesOpen) {
+                return (
+                  <div
+                    key={key}
+                    className="-mx-1 my-1 rounded border border-gray-300 bg-white px-2 py-0.5 shadow-sm"
+                  >
+                    {criterionSlider}
+                  </div>
+                )
+              }
+              return <div key={key}>{criterionSlider}</div>
+            })}
+            {group.comingSoon?.map((key) => (
+              <ComingSoonFactorRow
+                key={key}
+                label={WEIGHT_LABELS[key] ?? key}
+                info={<FactorInfo factorKey={key} />}
+              />
+            ))}
+
+            <div className="mt-1.5 text-sm font-semibold tracking-wide text-black uppercase">
+              Zu- und Abschläge
+            </div>
+            {group.modifiers.map(({ key, direction }) => {
+              const dataUnavailable =
+                !parkingDataAvailable && PARKING_DATA_DEPENDENT_KEYS.includes(key)
+              if (dataUnavailable) {
+                return (
+                  <UnavailableFactorRow
+                    key={key}
+                    label={WEIGHT_LABELS[key] ?? key}
+                    info={<FactorInfo factorKey={key} extra={PARKING_DATA_HINT} />}
+                  />
+                )
+              }
+              const slider = (
+                <ModifierSlider
+                  label={WEIGHT_LABELS[key] ?? key}
+                  weight={weights[key]}
+                  direction={resolveModifierDirection(direction, directions)}
+                  onChange={(value) => setWeightFromWeights(key, value)}
+                  readOnly={readOnly}
+                  info={<FactorInfo factorKey={key} />}
+                  nested={
+                    <>
+                      {key === 'w_vegetation' && (
+                        <SegmentedChoice
+                          options={
+                            [
+                              ['negative', 'Grün schützen'],
+                              ['positive', 'Grün bevorzugen'],
+                            ] as const
+                          }
+                          value={vegetationDirection}
+                          onChange={setVegetationDirection}
+                          disabled={readOnly || weightToPoints(weights[key]) === 0}
+                        />
+                      )}
+                      {key === 'w_platz' && (
+                        <SegmentedChoice
+                          options={
+                            [
+                              ['negative', 'Platz freihalten'],
+                              ['positive', 'Belebung bevorzugen'],
+                            ] as const
+                          }
+                          value={platzDirection}
+                          onChange={setPlatzDirection}
+                          disabled={readOnly || weightToPoints(weights[key]) === 0}
+                        />
+                      )}
+                      <FactorParamInputs
+                        factorKey={key}
+                        config={config}
+                        weight={weights[key]}
+                        setField={setField}
+                        restoreAutoSaettigung={restoreAutoSaettigung}
+                        readOnly={readOnly}
+                      />
+                      {/* Die Kategorie-Aufteilung hängt am Zielorte-Regler: sie verteilt dessen
+                          Punkte auf die vier Zielort-Arten, ohne die übrigen Faktoren zu berühren. */}
+                      {key === 'w_target' && (
+                        <ZielortCategorySliders
+                          shares={zielortShares}
+                          onChange={setZielortShares}
+                          open={zielortCategoriesOpen}
+                          onOpenChange={setZielortCategoriesOpen}
+                          disabled={readOnly || weightToPoints(weights[key]) === 0}
+                        />
+                      )}
+                    </>
+                  }
+                />
+              )
+              // Aufgeklappt gehören Zielorte-Regler und Arten-Regler sichtbar zusammen: die weiße
+              // Karte hebt beide gemeinsam aus dem getönten Gruppenblock heraus, statt die Arten
+              // als lose Regler unter dem Faktor stehen zu lassen.
+              if (key === 'w_target' && zielortCategoriesOpen) {
+                return (
+                  <div
+                    key={key}
+                    className="-mx-1 my-1 rounded border border-gray-300 bg-white px-2 py-0.5 shadow-sm"
+                  >
+                    {slider}
+                  </div>
+                )
+              }
+              return <div key={key}>{slider}</div>
+            })}
+          </div>
+        ))}
+      </div>
+
+      {userDatasets.length > 0 && (
+        <div
+          className={twJoin(
+            'rounded-r border-l-[3px] py-1.5 pr-1 pl-2',
+            spaceFinderGroupStyle.eigendaten.block,
+          )}
+        >
+          <div
+            className={twJoin(groupHeadlineBaseClass, spaceFinderGroupStyle.eigendaten.headline)}
+          >
+            <span className="flex items-center gap-1">
+              Eigene Daten
+              <InfoTooltip>{GROUP_HELP.eigendaten}</InfoTooltip>
+            </span>
+          </div>
+          {/* Nur die Überschrift hat eine Linie; die Datensätze trennt der Abstand. */}
+          <ul className="mt-1.5 space-y-3">
+            {userDatasets.map((dataset) => (
+              <EigendatenDatasetBlock
+                key={dataset.id}
+                dataset={dataset}
+                studyArea={studyAreaGeometry}
+                weight={config.eigendaten_weights?.[dataset.id]}
+                setWeight={(value) => setEigendatenWeight(dataset.id, value)}
+                readOnly={readOnly}
+              />
+            ))}
+          </ul>
+        </div>
+      )}
+
+      <p className="text-[11px] text-gray-500">
+        Zu- und Abschläge zusammen: max.{' '}
+        <span className="font-semibold text-black">+{points.plus}</span> /{' '}
+        <span className="font-semibold text-black">−{points.minus}</span> Punkte auf den Grundscore.
+      </p>
+
+      <div>
+        <div className={groupHeadlineClass}>
+          <span>Allgemein</span>
+        </div>
+        <div className="mt-1 space-y-2">
+          <label className="flex items-center justify-between gap-2 text-xs text-gray-600">
+            <div className="flex items-center gap-1">
+              {MIN_SCORE_THRESHOLD_LABEL}
+              <InfoTooltip>{FACTOR_HELP.min_score_threshold}</InfoTooltip>
+            </div>
+            <input
+              type="number"
+              step={5}
+              value={Number(config.min_score_threshold ?? 0)}
+              disabled={readOnly}
+              onChange={(e) => setField('min_score_threshold', Number(e.target.value))}
+              className={spaceFinderNumberInputClass}
+            />
+          </label>
+          <label className="flex items-center gap-1 text-xs text-gray-600">
+            <input
+              type="checkbox"
+              checked={config.exclude_carriageways ?? false}
+              disabled={readOnly || !parkingDataAvailable}
+              onChange={(e) => setField('exclude_carriageways', e.target.checked)}
+              className="rounded border-gray-300"
+            />
+            <span className={!parkingDataAvailable ? 'text-gray-400' : undefined}>
+              Fahrbahnen ausschließen
+            </span>
+            <InfoTooltip>
+              {parkingDataAvailable
+                ? 'Straßenflächen werden anhand ihrer erfassten oder geschätzten Breite als Fläche berechnet und aus den Hexagonen ausgeschlossen — dort ist keine Bebauung möglich, unabhängig von den übrigen Faktoren.'
+                : PARKING_DATA_HINT}
+            </InfoTooltip>
+          </label>
+        </div>
+      </div>
+    </>
+  )
+}
+
+/** Wie lange nach der letzten Reglerbewegung gewartet wird, bevor gespeichert wird. */
+const AUTOSAVE_DELAY_MS = 700
+
+/**
+ * Edits a variant's factorConfig. Read-only while a job is in flight.
+ *
+ * Änderungen speichern sich selbst (siehe Auto-Save unten) — es gibt keinen Speichern-Button.
+ * `lastRunConfig` ist der eingefrorene Faktorenstand des letzten Laufs
+ * (`PlanningRun.factorConfigSnapshot`) und dient als Bezugspunkt für „Änderungen verwerfen".
+ */
+export const FactorEditorPanel = (props: {
+  variantId: number
+  areaId: number
+  factorConfig: FactorConfig
+  lastRunConfig?: FactorConfig | null
+  readOnly?: boolean
+  defaultOpen?: boolean
+  parkingDataAvailable?: boolean
+}) => <FactorEditorPanelForm key={props.variantId} {...props} />
+
+const FactorEditorPanelForm = ({
+  variantId,
+  areaId,
+  factorConfig,
+  lastRunConfig,
+  readOnly = false,
+  defaultOpen = true,
+  parkingDataAvailable = true,
+}: {
+  variantId: number
+  areaId: number
+  factorConfig: FactorConfig
+  lastRunConfig?: FactorConfig | null
+  readOnly?: boolean
+  defaultOpen?: boolean
+  parkingDataAvailable?: boolean
+}) => {
+  const regionSlug = useRegionSlug()
+  const queryClient = useQueryClient()
+  const [config, setConfig] = useState<FactorConfig>(factorConfig)
+  const [open, setOpen] = useState(defaultOpen)
+  const [prevReadOnly, setPrevReadOnly] = useState(readOnly)
+  const { setFactorSavePending } = useSpaceFinderBoundaryActions()
+  // Fingerprint des Stands, der zuletzt an den Server geschickt wurde — der Vergleich mit dem
+  // aktuellen Entwurf steuert Auto-Save, Verwerfen-Button und die Sperre von „Neu berechnen".
+  const [savedFingerprint, setSavedFingerprint] = useState(() => factorFingerprint(factorConfig))
+
+  if (readOnly !== prevReadOnly) {
+    setPrevReadOnly(readOnly)
+    setOpen(!readOnly)
+  }
+
+  // Gebietsfelder (Geometrie, eigene Daten, Nutzung, Größe) ändert nur das Gebietsformular; der
+  // Entwurf hier hält sie nur zur Anzeige. Kommt ein neuer Gebietsstand vom Server (z. B. ein
+  // weiterer Datensatz), wird er übernommen, ohne ungespeicherte Faktoren anzutasten.
+  const [syncedAreaConfig, setSyncedAreaConfig] = useState(factorConfig)
+  if (
+    syncedAreaConfig.study_area !== factorConfig.study_area ||
+    syncedAreaConfig.user_datasets !== factorConfig.user_datasets ||
+    syncedAreaConfig.use_case !== factorConfig.use_case ||
+    syncedAreaConfig.area_size_m2 !== factorConfig.area_size_m2
+  ) {
+    setSyncedAreaConfig(factorConfig)
+    // Stärken mitziehen wie auf dem Server (`syncEigendatenWeights`): neue Datensätze mit
+    // Startwert, entfernte raus, ungespeicherte Werte bleiben.
+    setConfig((c) =>
+      syncEigendatenWeights(
+        {
+          ...c,
+          study_area: factorConfig.study_area,
+          user_datasets: factorConfig.user_datasets,
+          use_case: factorConfig.use_case,
+          area_size_m2: factorConfig.area_size_m2,
+        },
+        factorConfig.user_datasets,
+      ),
+    )
+  }
+
+  const toVariantConfig = (c: FactorConfig) => {
+    const { study_area: _sa, user_datasets: _ud, use_case: _uc, area_size_m2: _as, ...rest } = c
+    const stripped: VariantFactorConfig = rest
+    return stripped
+  }
+
+  const mutation = useMutation({
+    mutationFn: (next: FactorConfig) =>
+      updatePlanningVariantFn({
+        data: {
+          variantId,
+          // `min_area_m2` wird außerhalb dieses Formulars (Flächensuche-Filter) gepflegt —
+          // immer der frische Prop-Wert, damit der lokale Entwurf ihn nicht zurückdreht.
+          factorConfig: toVariantConfig({ ...next, min_area_m2: factorConfig.min_area_m2 }),
+        },
+      }),
+    onSuccess: () => {
+      toast.success('Faktoren gespeichert', { id: 'planning-factors-saved' })
+      queryClient.invalidateQueries(planningVariantQueryOptions(variantId))
+      queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
+      queryClient.invalidateQueries(planningAreaQueryOptions(areaId))
+    },
+    onError: (error) => {
+      // Fingerprint verwerfen: der Server hat den Stand nicht — die nächste Änderung soll wieder
+      // einen vollständigen Speicherversuch auslösen, und „Neu berechnen" bleibt gesperrt.
+      setSavedFingerprint('')
+      toastError(error, 'Faktoren konnten nicht gespeichert werden')
+    },
+  })
+
+  const { mutate } = mutation
+  const save = (next: FactorConfig) => {
+    setSavedFingerprint(factorFingerprint(next))
+    mutate(next)
+  }
+  const saveDraft = useEffectEvent((next: FactorConfig) => {
+    save(next)
+  })
+
+  const unsavedFactors = factorFingerprint(config) !== savedFingerprint
+
+  // Auto-Save: jede Faktorenänderung speichert sich nach kurzer Ruhepause von selbst. Der Timer
+  // fasst das Ziehen eines Reglers zu einem einzigen Schreibvorgang zusammen.
+  useEffect(
+    function autosaveUnsavedFactors() {
+      if (readOnly || !unsavedFactors) return
+      const timeout = setTimeout(() => saveDraft(config), AUTOSAVE_DELAY_MS)
+      return function cancelAutosave() {
+        clearTimeout(timeout)
+      }
+    },
+    [config, readOnly, unsavedFactors],
+  )
+
+  // Solange etwas ungespeichert ist oder gerade geschrieben wird, darf keine Berechnung starten.
+  useEffect(
+    function syncFactorSavePendingToMapStore() {
+      setFactorSavePending(unsavedFactors || mutation.isPending)
+      return function clearFactorSavePending() {
+        setFactorSavePending(false)
+      }
+    },
+    [unsavedFactors, mutation.isPending, setFactorSavePending],
+  )
+
+  const setWeights = (weights: Record<string, number>) => setConfig((c) => ({ ...c, weights }))
+
+  const setField = (key: keyof FactorConfig, value: number | boolean) =>
+    setConfig((c) => ({
+      ...c,
+      [key]: value,
+      // Der Zensus-Vorschlag gilt nur, solange das Feld unangetastet ist — sobald jemand eine Zahl
+      // eintippt, wird sie als Nutzerwert in der Variante gespeichert (siehe `stripAutoSaettigung`).
+      ...(key === 'bewohnerbedarf_saettigung_ew' && { bewohnerbedarf_saettigung_auto: false }),
+    }))
+
+  const restoreAutoSaettigung = () =>
+    setConfig((c) =>
+      c.bewohnerbedarf_saettigung_auto_ew == null
+        ? c
+        : {
+            ...c,
+            bewohnerbedarf_saettigung_ew: c.bewohnerbedarf_saettigung_auto_ew,
+            bewohnerbedarf_saettigung_auto: true,
+          },
+    )
+
+  const setVegetationDirection = (value: 'positive' | 'negative') =>
+    setConfig((c) => ({ ...c, vegetation_direction: value }))
+
+  const setPlatzDirection = (value: 'positive' | 'negative') =>
+    setConfig((c) => ({ ...c, platz_direction: value }))
+
+  const setZielortShares = (shares: ZielortShares) =>
+    setConfig((c) => ({ ...c, zielort_category_shares: shares }))
+
+  const setOepnvShares = (shares: OepnvShares) =>
+    setConfig((c) => ({ ...c, oepnv_category_shares: shares }))
+
+  // Die Stärke je Datensatz ist Teil der Variante und läuft über deren Auto-Save. Name, Modus und
+  // Geometrie der Datensätze gehören zum Planungsgebiet und werden im Gebietsformular geändert.
+  const setEigendatenWeight = (id: string, value: number) =>
+    setConfig((c) => ({ ...c, eigendaten_weights: { ...c.eigendaten_weights, [id]: value } }))
+
+  const resetWeightsToDefaults = () => {
+    setConfig((c) => ({
+      ...c,
+      ...DEFAULT_FACTOR_TEMPLATE,
+      // Standard heißt für die Sättigung: zurück auf den Zensus-Vorschlag des Gebiets. Nur wo es
+      // keinen gibt, bleibt der Wert aus dem Worker-Default stehen.
+      bewohnerbedarf_saettigung_ew:
+        c.bewohnerbedarf_saettigung_auto_ew ?? c.bewohnerbedarf_saettigung_ew,
+      bewohnerbedarf_saettigung_auto: c.bewohnerbedarf_saettigung_auto_ew != null,
+      // Standard heißt für Eigene Daten: die Startstärke je Datensatz.
+      eigendaten_weights: syncEigendatenWeights<VariantFactorConfig>({}, c.user_datasets)
+        .eigendaten_weights,
+      study_area: c.study_area,
+      user_datasets: c.user_datasets,
+      use_case: c.use_case,
+      area_size_m2: c.area_size_m2,
+    }))
+  }
+
+  // Bezugspunkt für „Änderungen verwerfen": der Faktorenstand, mit dem der letzte Lauf gerechnet
+  // hat. Vor dem ersten Lauf gibt es keinen Snapshot — dann gilt der Stand beim Öffnen der
+  // Variante (danach bleibt nur „Auf Standardwerte zurücksetzen").
+  const [openedWithConfig] = useState(factorConfig)
+  const discardBase = lastRunConfig ?? openedWithConfig
+  const canDiscard = factorsDiffer(config, discardBase)
+
+  const discardChanges = () => {
+    // Der Variantenstand kommt komplett aus dem Bezugspunkt, nicht über den Entwurf gelegt: fehlt
+    // dort ein optionales Feld (z. B. `eigendaten_weights`, wenn beim Lauf noch keine Stärke
+    // gesetzt war), muss es auch im Entwurf wegfallen. Vom Entwurf bleiben nur die Gebietsfelder.
+    const restored: FactorConfig = {
+      ...toVariantConfig(discardBase),
+      study_area: config.study_area,
+      user_datasets: config.user_datasets,
+      use_case: config.use_case,
+      area_size_m2: config.area_size_m2,
+      min_area_m2: factorConfig.min_area_m2,
+    }
+    setConfig(restored)
+    save(restored) // sofort, nicht erst nach der Auto-Save-Pause
+  }
+
+  return (
+    <Disclosure as="div" className={collapsibleBoxClass(open)}>
+      <DisclosureButton
+        onClick={() => setOpen((v) => !v)}
+        className={collapsibleBoxHeaderClass(open, !open)}
+      >
+        <div className="flex w-full items-center gap-2">
+          <span className="flex-1">Faktoren</span>
+          <CollapsibleBoxChevron open={open} />
+        </div>
+        {/* Zugeklappt ist nicht zu sehen, wie die Gewichte stehen — die zweite Zeile zeigt
+            deshalb den Anteil beider Gruppen am Grundscore (wie die Gruppenüberschriften im
+            geöffneten Formular). */}
+        {!open && <GroupShareChips config={config} />}
+      </DisclosureButton>
+
+      <Transition
+        show={open}
+        enter="transition duration-100 ease-out"
+        enterFrom="transform scale-95 opacity-0"
+        enterTo="transform scale-100 opacity-100"
+        leave="transition duration-75 ease-out"
+        leaveFrom="transform scale-100 opacity-100"
+        leaveTo="transform scale-95 opacity-0"
+      >
+        <DisclosurePanel static className="flex flex-col gap-3 p-2.5 text-sm">
+          {readOnly && (
+            <p className="rounded bg-gray-50 px-2 py-1.5 text-xs text-gray-500">
+              Faktoren gesperrt — Berechnung wurde gestartet.
+            </p>
+          )}
+
+          <FactorFields
+            config={config}
+            setWeights={setWeights}
+            setField={setField}
+            restoreAutoSaettigung={restoreAutoSaettigung}
+            setVegetationDirection={setVegetationDirection}
+            setPlatzDirection={setPlatzDirection}
+            setZielortShares={setZielortShares}
+            setOepnvShares={setOepnvShares}
+            setEigendatenWeight={setEigendatenWeight}
+            onReset={readOnly ? undefined : resetWeightsToDefaults}
+            readOnly={readOnly}
+            parkingDataAvailable={parkingDataAvailable}
+          />
+
+          {!readOnly && (
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={discardChanges}
+                disabled={!canDiscard}
+                className="rounded border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-default disabled:opacity-40"
+              >
+                Änderungen verwerfen
+              </button>
+              <span className="text-xs text-gray-500">
+                {unsavedFactors || mutation.isPending
+                  ? 'Speichern…'
+                  : 'Änderungen werden automatisch gespeichert'}
+              </span>
+            </div>
+          )}
+        </DisclosurePanel>
+      </Transition>
+    </Disclosure>
+  )
+}

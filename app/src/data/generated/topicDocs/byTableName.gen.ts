@@ -10239,6 +10239,10 @@ const data = {
         label: 'Art',
         values: [
           {
+            value: 'bus_stop',
+            label: 'Bushaltestelle',
+          },
+          {
             value: 'ferry_station',
             label: 'Fähranleger',
           },

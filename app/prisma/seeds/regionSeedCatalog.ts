@@ -62,6 +62,7 @@ const baseRegionConfig = {
   notesOsm: true,
   notesInternal: false,
   showSearch: false,
+  spaceFinderEnabled: false,
   logoWhiteBackgroundRequired: false,
   headerLogoId: null,
   bbox: null,
@@ -393,7 +394,10 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       mapLat: 52.4918,
       mapLng: 13.4261,
       mapZoom: 13.5,
-      categories: ['parkingLars'],
+      // `poi` added for the Flächenfinder dev seeds (`prisma/seeds/planning.ts`): its bus-stop +
+      // bike-sharing sub-layer (one of the Flächenfinder's scoring inputs) only shows up when the
+      // region has the `poi` category assigned.
+      categories: ['parkingLars', 'poi'],
       backgroundSources: [...cityParkraumBackgroundSources],
       // Text-only welcome (no hero image).
       welcome: regionWelcomeDemoSpecToWriteInput(regionWelcomeDemoSpecs.parkraum, null),
