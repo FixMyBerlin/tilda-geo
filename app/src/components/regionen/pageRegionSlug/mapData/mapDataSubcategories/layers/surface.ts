@@ -1,5 +1,7 @@
+import type { ExpressionSpecification, FilterSpecification } from 'maplibre-gl'
 import type { FileMapDataSubcategoryStyleLegend } from '../../types'
 import { legendSurfaceBad, legendSurfaceDefault } from '../subcat_surface_roads.const'
+import type { StyleLayer } from './utils/types'
 
 const smoothnessColor = [
   'match',
@@ -15,16 +17,60 @@ const smoothnessColor = [
   ['excellent'],
   '#37f644',
   '#000000',
-] as const
+] satisfies ExpressionSpecification
 
-const filterAll = ['has', 'smoothness'] as const
-const filterBad = ['match', ['get', 'smoothness'], ['bad', 'very_bad'], true, false] as const
+const filterAll = ['has', 'smoothness'] satisfies FilterSpecification
+const filterBad = [
+  'match',
+  ['get', 'smoothness'],
+  ['bad', 'very_bad'],
+  true,
+  false,
+] satisfies FilterSpecification
 
 // Same fade-in as the `roads_smooth_*` line layers
-const lineOpacity = ['interpolate', ['linear'], ['zoom'], 9.9, 0, 10, 0.1, 10.3, 0.9] as const
-const badLineWidth = ['interpolate', ['linear'], ['zoom'], 10, 1, 14, 2, 16, 3] as const
-const areaFillOpacity = ['interpolate', ['linear'], ['zoom'], 9.9, 0, 10.3, 0.35, 16, 0.5] as const
-const areaOutlineWidth = ['interpolate', ['linear'], ['zoom'], 12, 1, 16, 2.5] as const
+const lineOpacity = [
+  'interpolate',
+  ['linear'],
+  ['zoom'],
+  9.9,
+  0,
+  10,
+  0.1,
+  10.3,
+  0.9,
+] satisfies ExpressionSpecification
+const badLineWidth = [
+  'interpolate',
+  ['linear'],
+  ['zoom'],
+  10,
+  1,
+  14,
+  2,
+  16,
+  3,
+] satisfies ExpressionSpecification
+const areaFillOpacity = [
+  'interpolate',
+  ['linear'],
+  ['zoom'],
+  9.9,
+  0,
+  10.3,
+  0.35,
+  16,
+  0.5,
+] satisfies ExpressionSpecification
+const areaOutlineWidth = [
+  'interpolate',
+  ['linear'],
+  ['zoom'],
+  12,
+  1,
+  16,
+  2.5,
+] satisfies ExpressionSpecification
 
 const asAreaLegends = (legends: FileMapDataSubcategoryStyleLegend[]) =>
   legends.map(({ id, name, style }) => ({
@@ -50,7 +96,7 @@ export function surfaceLineBadLayers() {
         'line-width': badLineWidth,
       },
     },
-  ]
+  ] satisfies StyleLayer[]
 }
 
 export function surfaceAreaLayers({ badOnly }: { badOnly: boolean }) {
@@ -76,5 +122,5 @@ export function surfaceAreaLayers({ badOnly }: { badOnly: boolean }) {
         ...(badOnly ? { 'line-dasharray': [1, 1] } : {}),
       },
     },
-  ]
+  ] satisfies StyleLayer[]
 }

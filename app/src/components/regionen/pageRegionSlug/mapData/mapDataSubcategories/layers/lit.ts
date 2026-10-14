@@ -1,3 +1,4 @@
+import type { ExpressionSpecification } from 'maplibre-gl'
 import type { FileMapDataSubcategoryStyleLegend } from '../../types'
 import type { StyleLayer } from './utils/types'
 
@@ -12,13 +13,73 @@ const litSpecialLegendDesc = [
   'Alles außer `lit=yes` / `lit=no`, z.B. `automatic`, `interval`, zeitliche Angaben.',
 ]
 
-const lineWidth = ['interpolate', ['linear'], ['zoom'], 12, 3, 14, 5, 18, 12] as const
-const lineOpacityLit = ['interpolate', ['linear'], ['zoom'], 13, 1, 18, 0.6] as const
-const lineOpacityDim = ['interpolate', ['linear'], ['zoom'], 13, 0.8, 18, 0.6] as const
-const hitareaLineWidth = ['interpolate', ['linear'], ['zoom'], 9, 1, 14.1, 10, 22, 12] as const
-const radinfraMissingLineWidth = ['interpolate', ['linear'], ['zoom'], 12, 1, 22, 4] as const
-const areaFillOpacity = ['interpolate', ['linear'], ['zoom'], 11, 0.35, 16, 0.5] as const
-const areaOutlineWidth = ['interpolate', ['linear'], ['zoom'], 12, 1, 16, 2.5] as const
+const lineWidth = [
+  'interpolate',
+  ['linear'],
+  ['zoom'],
+  12,
+  3,
+  14,
+  5,
+  18,
+  12,
+] satisfies ExpressionSpecification
+const lineOpacityLit = [
+  'interpolate',
+  ['linear'],
+  ['zoom'],
+  13,
+  1,
+  18,
+  0.6,
+] satisfies ExpressionSpecification
+const lineOpacityDim = [
+  'interpolate',
+  ['linear'],
+  ['zoom'],
+  13,
+  0.8,
+  18,
+  0.6,
+] satisfies ExpressionSpecification
+const hitareaLineWidth = [
+  'interpolate',
+  ['linear'],
+  ['zoom'],
+  9,
+  1,
+  14.1,
+  10,
+  22,
+  12,
+] satisfies ExpressionSpecification
+const radinfraMissingLineWidth = [
+  'interpolate',
+  ['linear'],
+  ['zoom'],
+  12,
+  1,
+  22,
+  4,
+] satisfies ExpressionSpecification
+const areaFillOpacity = [
+  'interpolate',
+  ['linear'],
+  ['zoom'],
+  11,
+  0.35,
+  16,
+  0.5,
+] satisfies ExpressionSpecification
+const areaOutlineWidth = [
+  'interpolate',
+  ['linear'],
+  ['zoom'],
+  12,
+  1,
+  16,
+  2.5,
+] satisfies ExpressionSpecification
 
 export const litLineLegends: FileMapDataSubcategoryStyleLegend[] = [
   {
@@ -125,7 +186,7 @@ export function litLineLayers() {
         'line-width': hitareaLineWidth,
       },
     },
-  ]
+  ] satisfies StyleLayer[]
 }
 
 function litLineMissingLayersRadinfra() {
@@ -233,5 +294,5 @@ export function litAreaLayers() {
         'fill-opacity': 0,
       },
     },
-  ]
+  ] satisfies StyleLayer[]
 }

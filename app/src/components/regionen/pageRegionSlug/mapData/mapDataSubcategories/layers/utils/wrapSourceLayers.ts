@@ -43,5 +43,5 @@ export const wrapSourceLayers = ({
       ...(minzoom !== undefined ? { minzoom } : {}),
       ...(maxzoom !== undefined ? { maxzoom } : {}),
     }
-  }) as FileMapDataSubcategoryStyleLayer[]
+  }) satisfies FileMapDataSubcategoryStyleLayer[]
 }

@@ -5,6 +5,7 @@ import {
   lowZoomLineWidthPx,
   withBikelaneVisualLineOffset,
 } from './bikelaneLineOffset'
+import type { StyleLayer } from './types'
 
 const INTERACTIVE_MINZOOM = interactivityConfiguration.bikelanes.minzoom
 
@@ -92,7 +93,7 @@ describe('withBikelaneVisualLineOffset', () => {
       id: 'label',
       type: 'symbol',
       layout: { 'symbol-placement': 'line-center' },
-    }
+    } satisfies StyleLayer
     expect(withBikelaneVisualLineOffset([symbol])).toEqual([symbol])
   })
 })

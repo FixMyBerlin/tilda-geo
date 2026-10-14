@@ -135,11 +135,11 @@ export const bikelaneVisualLineOffset = (lineWidth: unknown) => {
 export const withBikelaneVisualLineOffset = (layers: StyleLayer[]): StyleLayer[] =>
   layers.map((layer) => {
     if (layer.type !== 'line') return layer
-    const paint = (layer.paint ?? {}) as Record<string, unknown>
+    const paint = layer.paint ?? {}
     // Override (not add to) any `line-offset` of the layer — the data-driven offset
     // is the single source of truth for the sideways shift (compact below minzoom, meters above).
     return {
       ...layer,
       paint: { ...paint, 'line-offset': bikelaneVisualLineOffset(paint['line-width']) },
-    } as StyleLayer
+    } satisfies StyleLayer
   })

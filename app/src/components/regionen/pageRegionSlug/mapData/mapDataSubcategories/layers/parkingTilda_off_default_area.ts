@@ -3,6 +3,7 @@
 // `processing/topics/parking/helper/condition_category_primary.lua` needs a colour here.
 // The priority order lives in that Lua file; the order of this `==` cascade does not matter.
 
+import type { ExpressionSpecification } from 'maplibre-gl'
 import type { StyleLayer } from './utils/types'
 
 const conditionCategoryPrimaryFillColor = [
@@ -50,7 +51,7 @@ const conditionCategoryPrimaryFillColor = [
   ['==', ['get', 'condition_category_primary'], 'assumed_free'],
   '#16A34A',
   '#4B5563',
-]
+] satisfies ExpressionSpecification
 
 export const layers_parkingTilda_off_default_area: StyleLayer[] = [
   {
