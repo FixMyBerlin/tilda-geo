@@ -45,6 +45,6 @@ Für niedrige Zoomstufen (z < 16) werden die feinen Res-13-Hexagone zusätzlich
 per `aggregate_hexagons()` auf H3-Res. 11 (`AGG_H3_RES`) zusammengefasst – reine
 Mittelwertbildung der Score-Spalten je `h3.cell_to_parent`, `eignungsklasse` wird
 daraus neu abgeleitet. Kein Re-Scoring, keine Spatial-Joins. Die Zoom-Verzweigung
-(`z >= 16 → Res 13, sonst Res 11`) muss mit der Martin-Funktion
-`planning_hexagons` in [`sql/martin_functions.sql`](sql/martin_functions.sql)
+(`z >= 16 → Res 13, sonst Res 11`) muss mit der Tile-Funktion
+`planning.planning_hexagons` in [`sql/martin_functions.sql`](sql/martin_functions.sql)
 übereinstimmen.

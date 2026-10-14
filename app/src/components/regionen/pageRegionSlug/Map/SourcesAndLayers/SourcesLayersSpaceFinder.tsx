@@ -19,6 +19,7 @@ import { appliedMinAreaM2 } from '@/components/regionen/pageRegionSlug/modes/spa
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
+import { getAppBaseUrl } from '@/components/shared/utils/getAppBaseUrl'
 import { planningTilesPath } from '@/server/planning/planningTilesPath'
 import {
   PLANNING_SCORE_PROPERTY,
@@ -45,7 +46,7 @@ export const planningHexagonsLayerId = 'planning-hexagons'
  */
 const planningOverlayFloorLayerId = 'planning-overlay-floor'
 const planningOverlayCeilingLayerId = 'planning-overlay-ceiling'
-/** MVT layer name of the Martin function source (see registerPlanningFunctions.server.ts). */
+/** MVT layer name of the `planning_hexagons` tile function (see registerPlanningFunctions.server.ts). */
 export const planningHexagonsSourceLayer = 'planning_hexagons'
 /**
  * Eigener Punkt-Layer mit dem Hexagon-Mittelpunkt, je Hexagon in genau einer
@@ -68,7 +69,7 @@ const HEXAGON_LABEL_MIN_ZOOM = 18
 // Renders the immutable result of one PlanningRun from the authenticated app route
 // `/api/regions/:slug/planning-tiles/:layer/{z}/{x}/{y}?run_id=N` (see planningTilesPath). Scores
 // and census population are member-only, so the tiles do not come from Martin's public hosts. A
-// run is immutable; the route answers with a private 7-day browser cache.
+// finished run is immutable; the route answers with a private 7-day browser cache.
 //
 // When the active variant has no run yet (`runId` from `useSpaceFinderSelection`), this renders
 // nothing — this component only mounts inside the Flächenfinder mode anyway (`RegionMap`).
@@ -184,7 +185,7 @@ const hexagonLabelLayerProps = (property: string) => ({
 // Zensus-Einwohnerpunkte (Faktor „Bewohnerbedarf"). Die Kacheln kommen direkt aus
 // `data.census_population_point`, auf die Bounding-Box des Planungsgebiets
 // beschränkt — es liegt nichts pro Lauf im planning-Schema (siehe die
-// Martin-Funktion `planning_census`). Ein Punkt sitzt in aller Regel auf dem
+// Tile-Funktion `planning.planning_census`). Ein Punkt sitzt in aller Regel auf dem
 // Gebäudemittelpunkt und trägt dessen Einwohnerzahl.
 const planningCensusSourceId = 'planning-census-source'
 
@@ -378,10 +379,11 @@ export const SourcesLayersSpaceFinder = () => {
       </>
     )
 
-  const hexagonsUrl = planningTilesPath(regionSlug, 'hexagons', runId)
-  const vegetationUrl = planningTilesPath(regionSlug, 'vegetation', runId)
-  const carriagewaysUrl = planningTilesPath(regionSlug, 'carriageways', runId)
-  const censusUrl = planningTilesPath(regionSlug, 'census', runId)
+  // MapLibre needs absolute tile URLs (same as private backgrounds in useRegionBackgrounds).
+  const hexagonsUrl = getAppBaseUrl(planningTilesPath(regionSlug, 'hexagons', runId))
+  const vegetationUrl = getAppBaseUrl(planningTilesPath(regionSlug, 'vegetation', runId))
+  const carriagewaysUrl = getAppBaseUrl(planningTilesPath(regionSlug, 'carriageways', runId))
+  const censusUrl = getAppBaseUrl(planningTilesPath(regionSlug, 'census', runId))
   const fillLayerProps = hexagonFillLayerProps(
     PLANNING_SCORE_PROPERTY[scoreMode],
     scoreMode,

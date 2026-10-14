@@ -82,8 +82,9 @@ einzelner WMS-Ausfall alle Folgeläufe derselben Variante leer halten.
 
 - Tabelle `planning.scenario_vegetation` (`run_id`, `geom` MultiPolygon/3857, `ndvi`,
   `flaeche_m2`) – pro Lauf, unveränderlich. Schema: [`sql/schema.sql`](sql/schema.sql).
-- Martin-Tile-Funktion `public.planning_vegetation(z,x,y,{run_id})` – siehe
-  [`sql/martin_functions.sql`](sql/martin_functions.sql).
+- Tile-Funktion `planning.planning_vegetation(z,x,y,{run_id})` – siehe
+  [`sql/martin_functions.sql`](sql/martin_functions.sql). Nicht über Martin publiziert; die App
+  liefert die Kacheln nur an Mitglieder aus (`/api/regions/:slug/planning-tiles/vegetation/...`).
 - `score_vegetation` ist zusätzlich Spalte in `planning.scenario_hexagons` und Teil der
   `planning_hexagons`-Tile (Sidebar-Inspektion).
 

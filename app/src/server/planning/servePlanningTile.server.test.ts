@@ -11,7 +11,7 @@ vi.mock('@/server/db.server', () => ({ default: { planningRun: { findFirst } } }
 vi.mock('@/server/prisma-client.server', () => ({ geoDataClient: { $queryRaw: queryRaw } }))
 vi.mock('@/server/auth/session.server', () => ({ getAppSession }))
 
-import { servePlanningTile } from './servePlanningTile.server'
+import { clearPlanningTileAccessCache, servePlanningTile } from './servePlanningTile.server'
 
 const params = { regionSlug: 'berlin', layer: 'hexagons', z: '15', x: '17603', y: '10747' }
 const requestFor = (query = '?run_id=42') =>
@@ -23,6 +23,7 @@ beforeEach(() => {
   getAppSession.mockReset()
   findFirst.mockReset()
   queryRaw.mockReset()
+  clearPlanningTileAccessCache()
 })
 
 afterEach(() => {
@@ -45,6 +46,12 @@ describe('servePlanningTile', () => {
     ['missing run_id', params, ''],
     ['non-numeric run_id', params, '?run_id=abc'],
     ['bad slug', { ...params, regionSlug: 'Berlin; --' }, '?run_id=42'],
+    ['run_id above int4', params, '?run_id=2147483648'],
+    ['run_id 0', params, '?run_id=0'],
+    ['z above 30', { ...params, z: '31' }, '?run_id=42'],
+    ['x outside the zoom', { ...params, z: '3', x: '8' }, '?run_id=42'],
+    ['y outside the zoom', { ...params, z: '3', y: '8' }, '?run_id=42'],
+    ['exponent notation', { ...params, x: '1e3' }, '?run_id=42'],
   ])('%s gets 400 without any query', async (_name, p, query) => {
     getAppSession.mockResolvedValue(member)
 
@@ -62,6 +69,7 @@ describe('servePlanningTile', () => {
     expect(findFirst).toHaveBeenCalledWith({
       where: {
         id: 42,
+        status: { in: ['COMPLETE', 'EMPTY'] },
         variant: {
           area: {
             region: {
@@ -121,6 +129,20 @@ describe('servePlanningTile', () => {
     await servePlanningTile(requestFor(), { ...params, layer: 'census' })
 
     expect(queryRaw.mock.calls[0]?.[0].strings.join('?')).toContain('planning.planning_census(')
+  })
+
+  test('the check is reused for further tiles of the same run, denials are not', async () => {
+    getAppSession.mockResolvedValue(member)
+    findFirst.mockResolvedValueOnce(null).mockResolvedValue({ id: 42 })
+    queryRaw.mockResolvedValue([{ mvt: new Uint8Array([1]) }])
+
+    expect((await servePlanningTile(requestFor(), params)).status).toBe(403)
+    expect((await servePlanningTile(requestFor(), params)).status).toBe(200)
+    expect((await servePlanningTile(requestFor(), { ...params, x: '17604' })).status).toBe(200)
+    expect(findFirst).toHaveBeenCalledTimes(2)
+
+    await servePlanningTile(requestFor('?run_id=43'), params)
+    expect(findFirst).toHaveBeenCalledTimes(3)
   })
 
   test.each([[null], [new Uint8Array()]])('empty tile %# gives 204', async (mvt) => {
