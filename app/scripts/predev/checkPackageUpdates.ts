@@ -1,28 +1,14 @@
-import path from 'node:path'
-import { TZDate } from '@date-fns/tz'
-import { isSameWeek } from 'date-fns'
+import { oncePerWeek } from './oncePerWeek'
 import { logErr, logOk, logSkip, logWarn } from './predevLog'
 
-const TZ = 'Europe/Berlin'
-const LAST_CHECKED_PATH = path.join(import.meta.dir, '.lastchecked')
+const week = oncePerWeek('.lastchecked')
 
 const label = 'Package updates'
 
 export async function checkPackageUpdates() {
   try {
-    const now = new TZDate(new Date(), TZ)
-
-    let lastChecked: TZDate | null = null
-    try {
-      const content = await Bun.file(LAST_CHECKED_PATH).text()
-      const trimmed = content.trim()
-      if (trimmed) lastChecked = new TZDate(new Date(trimmed), TZ)
-    } catch {
-      // no file or invalid
-    }
-
-    if (lastChecked && isSameWeek(now, lastChecked, { weekStartsOn: 0 })) {
-      const lastDate = lastChecked.toISOString().slice(0, 10)
+    const lastDate = await week.lastRunThisWeek()
+    if (lastDate) {
       logSkip(label, `skipped (last checked ${lastDate}, next check after Sunday evening)`)
       return
     }
@@ -38,7 +24,7 @@ export async function checkPackageUpdates() {
     ])
     await proc.exited
 
-    await Bun.write(LAST_CHECKED_PATH, new Date().toISOString())
+    await week.markRun()
 
     const hasUpdates = /→|outdated|upgrade/i.test(stdout) || /→|outdated|upgrade/i.test(stderr)
     if (hasUpdates) {
