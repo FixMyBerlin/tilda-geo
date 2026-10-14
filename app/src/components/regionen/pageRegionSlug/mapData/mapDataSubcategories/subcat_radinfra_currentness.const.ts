@@ -13,8 +13,6 @@ const timestamp3YearsAgo = getUnixTime(startOfYear(subYears(new Date(), 3))) // 
 const timestamp6YearsAgo = getUnixTime(startOfYear(subYears(new Date(), 6))) // 6 years ago (Jan 1)
 const timestamp10YearsAgo = getUnixTime(startOfYear(subYears(new Date(), 10))) // 10 years ago (Jan 1)
 
-// This used to be at app/src/regionen/[regionSlug]/_mapData/mapDataSubcategories/mapboxStyles/groups/radinfra_currentness.ts
-// But since we need to have JS in here, it now moved here.
 const bikelanesCurrentLayers: MapboxStyleLayer[] = [
   {
     type: 'line',

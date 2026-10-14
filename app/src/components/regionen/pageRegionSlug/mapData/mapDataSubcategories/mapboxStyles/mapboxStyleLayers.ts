@@ -18,7 +18,7 @@ export type MapboxStyleLayersProps = {
     | ['==', '$type', 'Polygon' | 'Point' | 'LineString']
 }
 
-/** @desc Takes the layers we extract from Mapbox with `bun run mapbox-styles-update` (which are stripped down to just the style information) and adds the source-information that is only present in our app. It also allows to use the same layers with differend `additionalFilter`.  */
+/** @desc Takes layers that hold just the style information and adds the source-information. It also allows to use the same layers with different `additionalFilter`. */
 export const mapboxStyleLayers = ({
   layers,
   source,

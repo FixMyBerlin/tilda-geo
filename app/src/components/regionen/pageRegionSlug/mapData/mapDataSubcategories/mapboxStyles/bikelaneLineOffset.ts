@@ -124,9 +124,8 @@ export const bikelaneVisualLineOffset = (lineWidth: unknown) => {
 
 /**
  * Apply {@link bikelaneVisualLineOffset} to every `line` layer, replacing any `line-offset`
- * that Mapbox Studio baked into the layer (a small per-layer nudge that used to sit on top of
- * the former database shift and is now redundant). The data-driven offset is the single source
- * of truth for the sideways shift. Non-line layers are returned unchanged.
+ * the layer defines itself. The data-driven offset is the single source of truth for the
+ * sideways shift. Non-line layers are returned unchanged.
  *
  * Call this on the `layers` of every bikelane subcategory that renders lines, before handing
  * them to `mapboxStyleLayers` — e.g. `subcat_bikelanes`, `subcat_radinfra_*`,
@@ -137,7 +136,7 @@ export const withBikelaneVisualLineOffset = (layers: MapboxStyleLayer[]): Mapbox
   layers.map((layer) => {
     if (layer.type !== 'line') return layer
     const paint = (layer.paint ?? {}) as Record<string, unknown>
-    // Override (not add to) any `line-offset` Mapbox Studio baked in — the data-driven offset
+    // Override (not add to) any `line-offset` of the layer — the data-driven offset
     // is the single source of truth for the sideways shift (compact below minzoom, meters above).
     return {
       ...layer,

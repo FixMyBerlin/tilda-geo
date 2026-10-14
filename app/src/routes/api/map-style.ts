@@ -6,8 +6,8 @@ export const Route = createFileRoute('/api/map-style')({
   server: {
     handlers: {
       GET: () => {
-        // style.json is overwritten by `bun run mapbox-styles-update` — keep app-only
-        // MapLibre overrides here (sprite URL, sky), not in that downloaded file.
+        // style.json is the downloaded base style — keep app-only
+        // MapLibre overrides here (sprite URL, sky), not in that file.
         return Response.json({
           ...data,
           sprite: `${process.env.VITE_APP_ORIGIN}/map-style/sprite`,

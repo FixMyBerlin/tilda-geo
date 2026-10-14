@@ -292,9 +292,7 @@ Bikelane-Geometrien liegen in den Daten auf der **Straßen-Mittellinie**. Der se
 
 ### Andere Layer: zoom-interpolierte Pixelwerte (nicht metergenau)
 
-Die MapLibre-Styles kommen aus Mapbox Studio und werden per `bun run mapbox-styles-update` generiert — siehe [`app/scripts/MapboxStyles/README.md`](../app/scripts/MapboxStyles/README.md).
-
-Typisches Muster in den generierten Layer-Dateien:
+Typisches Muster in den Layer-Dateien:
 
 ```typescript
 // app/src/components/regionen/.../mapboxStyles/groups/atlas_bikelane_presence.ts
@@ -402,7 +400,6 @@ MapLibre-API-Äquivalent zur Laufzeit: `map.getZoom()` + `MercatorCoordinate.fro
 
 | Pfad                                                                                                                                                                                  | Inhalt                                                                                 |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| [`app/scripts/MapboxStyles/README.md`](../app/scripts/MapboxStyles/README.md)                                                                                                         | Style-Workflow (Mapbox Studio → MapLibre)                                              |
 | [`app/scripts/MapLibreToMasterportal/`](../app/scripts/MapLibreToMasterportal/)                                                                                                       | Konvertierung MapLibre → Masterportal (Pixelbreiten werden bei festem Zoom ausgelesen) |
 | [`processing/topics/helper/road_width.lua`](../processing/topics/helper/road_width.lua)                                                                                               | Straßenbreite in Metern (Bikespuren)                                                   |
 | [`processing/topics/parking/roads/helper/road_width_tags.lua`](../processing/topics/parking/roads/helper/road_width_tags.lua)                                                         | `road_width`-Attribut für Parken                                                       |
@@ -415,5 +412,4 @@ MapLibre-API-Äquivalent zur Laufzeit: `map.getZoom()` + `MercatorCoordinate.fro
 ## Offene Punkte
 
 - **Breitengrad pro Feature:** Für Deutschland reicht oft φ ≈ 51° als Konstante; für NRW vs. Bayern kann man ~1–2 % Abweichung erwarten.
-- **Mapbox Studio:** Expressions mit `road_width` lassen sich dort testen, bevor `mapbox-styles-update` läuft.
 - **Masterportal-Export:** [`MapLibreToMasterportal`](../app/scripts/MapLibreToMasterportal/lib/mapboxLayerToMasterportal.ts) liest `line-width` bei einem festen Zoom aus — meterbasierte Styles müssten dort ggf. separat behandelt werden.

@@ -88,5 +88,4 @@ docker compose --profile frontend up
 
 All [helper scripts](./scripts) run with [bun](https://bun.sh/).
 
-- **Update mapbox styles** – See [/scripts/MapboxStyles/README.md](./scripts/MapboxStyles/README.md).
 - **Update datasets** – See [/datasets/README.md](./datasets/README.md) (or StaticDatasets README) for processing and updating external datasets.
