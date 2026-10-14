@@ -33,7 +33,7 @@ const METRIC_SRID = Prisma.raw('25832')
 /** Quell-CRS von `data.census_population_point` und `public._buildings`. */
 const SOURCE_SRID = Prisma.raw('5243')
 
-/** Notbremse: das Gebiet ist auf 15 km² begrenzt (dort ~1 s), aber eine Anfrage im
+/** Notbremse: das Gebiet ist auf 25 km² begrenzt, aber eine Anfrage im
  * Anlege-Dialog darf unter keinen Umständen hängen bleiben. Prisma bricht die Transaktion sonst
  * schon nach seinen eigenen 5 s ab, bevor das Statement-Timeout überhaupt greifen könnte. */
 const STATEMENT_TIMEOUT_MS = Prisma.raw('30000')

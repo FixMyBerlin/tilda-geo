@@ -10,6 +10,33 @@ import {
   useSpaceFinderVegetationVisible,
 } from '../../../hooks/mapState/space-finder-boundary-store'
 
+/** Schalter-Optik der Anzeige-Zeilen; `onColorClass` färbt ihn im eingeschalteten Zustand. */
+export const ToggleSwitch = ({
+  checked,
+  onChange,
+  onColorClass,
+}: {
+  checked: boolean
+  onChange: (checked: boolean) => void
+  onColorClass: string
+}) => (
+  <Switch
+    checked={checked}
+    onChange={onChange}
+    className={twJoin(
+      'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors',
+      checked ? onColorClass : 'bg-gray-300',
+    )}
+  >
+    <span
+      className={twJoin(
+        'inline-block size-4 translate-y-0.5 rounded-full bg-white transition-transform',
+        checked ? 'translate-x-[1.125rem]' : 'translate-x-0.5',
+      )}
+    />
+  </Switch>
+)
+
 /**
  * Ein/Aus-Schalter für einen der Kontroll-Layer der Karte (Vegetation, Fahrbahnen,
  * Eigene Daten). Die Schalterfarbe entspricht der Layer-Farbe in der Karte,
@@ -33,21 +60,7 @@ const LayerToggle = ({
       {label}
       {info && <InfoTooltip>{info}</InfoTooltip>}
     </span>
-    <Switch
-      checked={checked}
-      onChange={onChange}
-      className={twJoin(
-        'relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors',
-        checked ? onColorClass : 'bg-gray-300',
-      )}
-    >
-      <span
-        className={twJoin(
-          'inline-block size-4 translate-y-0.5 rounded-full bg-white transition-transform',
-          checked ? 'translate-x-[1.125rem]' : 'translate-x-0.5',
-        )}
-      />
-    </Switch>
+    <ToggleSwitch checked={checked} onChange={onChange} onColorClass={onColorClass} />
   </label>
 )
 

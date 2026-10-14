@@ -54,7 +54,7 @@ type SpaceFinderBoundaryStore = {
    */
   factorSavePending: boolean
   /**
-   * Square meters being typed into „Gesuchte Fläche“, before blur saves them on the variant.
+   * Square meters being typed into „Fläche suchen“, before blur saves them on the variant.
    * `null`: the map uses `factorConfig.min_area_m2`. `0`: the field was cleared, so the map
    * does not fall back to the saved number. The URL only stores whether the filter is on.
    */

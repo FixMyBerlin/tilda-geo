@@ -5,7 +5,7 @@ import { PLANNING_SCORE_MODES } from '@/shared/regionen/planningScoreMode.const'
  * Single JSON param for the Flächenfinder mode (`space`). `key` is the active `PlanningVariant` id —
  * the planungsgebiet is always derived from it (D7: `useSpaceFinderSelection`), there is no
  * separate area key. `score` and `opacity` control the hexagon result layer (`opacity` 0 also hides
- * it — replaces the old separate visibility flag). `minArea: true` turns the "Gesuchte Fläche"
+ * it — replaces the old separate visibility flag). `minArea: true` turns the "Fläche suchen"
  * filter on; absent means off. The square meters live on the variant (`factorConfig.min_area_m2`),
  * not in the URL — a draft in the space-finder store covers the value while it is being typed.
  * `new` is the create wizard (new Planungsgebiet or new Variante); `edit` opens the Planungsgebiet editor.

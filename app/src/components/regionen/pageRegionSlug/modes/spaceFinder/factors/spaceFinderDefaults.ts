@@ -96,7 +96,7 @@ export const GROUP_HELP: Record<'bedarf' | 'bebauung' | 'eigendaten', string> = 
 
 /** Referenced from other panel texts (tooltips), so a rename here shows up there. */
 export const MIN_SCORE_THRESHOLD_LABEL = 'Mindest-Score (Flächensuche)'
-export const MIN_AREA_FILTER_LABEL = 'Gesuchte Fläche (m²)'
+export const MIN_AREA_FILTER_LABEL = 'Fläche suchen'
 
 export const FACTOR_HELP: Record<string, string> = {
   w_cyclepath:

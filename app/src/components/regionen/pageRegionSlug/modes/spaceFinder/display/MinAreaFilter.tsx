@@ -10,6 +10,7 @@ import { planningVariantQueryOptions } from '@/server/planning/planningQueryOpti
 import { MIN_AREA_FILTER_LABEL, MIN_SCORE_THRESHOLD_LABEL } from '../factors/spaceFinderDefaults'
 import { spaceFinderNumberInputClass } from '../spaceFinderPanelStyles'
 import { useSpaceFinderModeParam } from '../useSpaceFinderModeParam'
+import { ToggleSwitch } from './LayerToggles'
 
 /**
  * Zielgrößen-Filter der Flächensuche. Die Quadratmeter gehören zur Variante
@@ -18,7 +19,7 @@ import { useSpaceFinderModeParam } from '../useSpaceFinderModeParam'
  * `space.minArea: true` schaltet den Filter nur an (fehlend = aus). Der Entwurf im Store
  * gilt, solange getippt wird, damit die Karte vor dem Speichern reagiert und eine geleerte
  * Zahl nicht auf den gespeicherten Wert zurückfällt. Der lokale Zustand hält die Zahl auch
- * sichtbar, während der Filter per Checkbox ausgeschaltet ist.
+ * sichtbar, während der Filter per Schalter ausgeschaltet ist.
  */
 const MinAreaFilterForm = ({
   variantId,
@@ -36,7 +37,7 @@ const MinAreaFilterForm = ({
   const { setMinAreaDraft } = useSpaceFinderBoundaryActions()
   const filterOn = spaceFinderMode.minArea === true
   const [minArea, setLocalMinArea] = useState(savedMinArea)
-  // Checkbox an, aber noch keine Zahl > 0: der Filter gilt noch nicht, das Feld muss trotzdem
+  // Schalter an, aber noch keine Zahl > 0: der Filter gilt noch nicht, das Feld muss trotzdem
   // freigegeben sein — sonst kommt man ohne gespeicherten Wert nie hinein und das Feld sperrt
   // sich, sobald man die Zahl zum Neueintippen löscht.
   const [awaitingValue, setAwaitingValue] = useState(() => filterOn && savedMinArea <= 0)
@@ -94,42 +95,50 @@ const MinAreaFilterForm = ({
   }
 
   return (
-    <div className="flex items-center justify-between gap-2 rounded border border-gray-200 px-2.5 py-2 text-sm">
-      <span className="flex items-center gap-1">
-        <label className="flex items-center gap-2 font-medium text-gray-800">
-          <input
-            type="checkbox"
-            checked={checked}
-            onChange={(e) => setFilterOn(e.target.checked)}
-            className="rounded border-gray-300"
-          />
+    <div className="space-y-2 rounded border border-gray-200 px-2.5 py-2 text-sm">
+      <div className="flex items-center justify-between gap-2">
+        <span className="flex items-center gap-1 font-medium text-gray-800">
           {MIN_AREA_FILTER_LABEL}
-        </label>
-        {/* Outside the label so opening the tooltip does not toggle the checkbox. */}
-        <InfoTooltip>
-          Hebt zusammenhängende Flächen hervor, die mindestens so groß sind wie angegeben. Als
-          zusammenhängend zählen benachbarte Hexagone ab dem „{MIN_SCORE_THRESHOLD_LABEL}“
-          {clusterMinScore != null ? ` (${clusterMinScore})` : ''} aus den Faktoren. Alle anderen
-          Hexagone werden abgedunkelt. Nur eine Anzeige in der Karte — die Berechnung ändert sich
-          dadurch nicht.
-        </InfoTooltip>
-      </span>
-      <input
-        type="number"
-        min={0}
-        step={5}
-        placeholder={checked ? 'm²' : 'aus'}
-        disabled={!checked}
-        value={minArea > 0 ? minArea : ''}
-        onChange={(e) =>
-          setMinArea(e.target.value === '' ? 0 : Math.max(0, Number(e.target.value)))
-        }
-        onBlur={save}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') e.currentTarget.blur()
-        }}
-        className={spaceFinderNumberInputClass}
-      />
+          <InfoTooltip>
+            Hebt zusammenhängende Flächen hervor, die mindestens so groß sind wie angegeben. Als
+            zusammenhängend zählen benachbarte Hexagone ab dem „{MIN_SCORE_THRESHOLD_LABEL}“
+            {clusterMinScore != null ? ` (${clusterMinScore})` : ''} aus den Faktoren. Alle anderen
+            Hexagone werden abgedunkelt. Nur eine Anzeige in der Karte — die Berechnung ändert sich
+            dadurch nicht.
+          </InfoTooltip>
+        </span>
+        <ToggleSwitch checked={checked} onChange={setFilterOn} onColorClass="bg-gray-800" />
+      </div>
+      {checked && (
+        <>
+          <label className="flex items-center justify-between gap-2 text-xs text-gray-600">
+            Mindestgröße in m²
+            <input
+              type="number"
+              min={0}
+              step={5}
+              placeholder="m²"
+              value={minArea > 0 ? minArea : ''}
+              onChange={(e) =>
+                setMinArea(e.target.value === '' ? 0 : Math.max(0, Number(e.target.value)))
+              }
+              onBlur={save}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') e.currentTarget.blur()
+              }}
+              className={spaceFinderNumberInputClass}
+            />
+          </label>
+          {clusterMinScore != null && (
+            <p className="text-xs text-gray-500">
+              Gesucht wird ab einem Score von{' '}
+              <span className="font-semibold text-gray-800">{clusterMinScore}</span>. Ändern lässt
+              sich das in den Faktoren der Variante unter Allgemein ›{' '}
+              {`„${MIN_SCORE_THRESHOLD_LABEL}“`} — wirksam nach der nächsten Berechnung.
+            </p>
+          )}
+        </>
+      )}
     </div>
   )
 }
