@@ -1,10 +1,25 @@
 const data = {
   atlas_bicycleParking: {
     keys: {
+      stand_type: 'Aus `bicycle_parking=*`.',
+      rental_type: 'Aus `bicycle_rental=*`.',
+      geometry_transform:
+        'Gesetzt, wenn ein OSM-Objekt nach Art aufgeteilt und die Lage der Teile geschätzt wurde.',
       mapillary: 'Mapillary-Foto-ID für dieses Feature.',
       traffic_sign: 'Verkehrszeichennummer, mit der dieses Feature ausgeschildert ist.',
     },
-    values: {},
+    values: {
+      kind: {
+        bicycle_parking: '`amenity=bicycle_parking`',
+        cargo_bike_parking:
+          '`amenity=bicycle_parking` mit `cargo_bike=designated` oder `capacity:cargo_bike`',
+        small_electric_vehicle_parking:
+          '`amenity=small_electric_vehicle_parking`, `amenity=kick-scooter_parking`',
+        bicycle_rental: '`amenity=bicycle_rental`, ohne Fahrradverleih-Läden',
+        mobility_hub:
+          '`amenity=mobility_hub`. Eine Fläche, in der Stellplätze und Verleihstationen liegen; beim Summieren zählt sie nicht mit.',
+      },
+    },
   },
   atlas_bikelanes: {
     keys: {

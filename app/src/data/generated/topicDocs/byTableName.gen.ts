@@ -267,7 +267,9 @@ const data = {
     topic: 'bicycleParking',
     tableName: 'bicycleParking_points',
     sourceIds: ['atlas_bicycleParking'],
-    title: 'Fahrradstellplätze',
+    title: 'Fahrrad- & Mikromobilitätsparken',
+    summary:
+      'Abstellanlagen für Fahrräder, Lastenräder, E-Scooter und andere Kleinstfahrzeuge sowie Bikesharing- und Mobilitätsstationen aus OpenStreetMap. Jedes Objekt ist eine Art (`kind`) mit der Anzahl ihrer Stellplätze.',
     groups: [
       {
         id: 'atlas',
@@ -276,15 +278,45 @@ const data = {
     ],
     attributes: [
       {
-        key: 'capacity',
-        type: 'number',
-        label: 'Anzahl Fahrrad-Stellplätze',
-        values: [],
+        key: 'kind',
+        type: 'string',
+        label: 'Art',
+        values: [
+          {
+            value: 'bicycle_parking',
+            label: 'Fahrradstellplätze',
+            description: '`amenity=bicycle_parking`',
+          },
+          {
+            value: 'cargo_bike_parking',
+            label: 'Lastenrad-Stellplätze',
+            description:
+              '`amenity=bicycle_parking` mit `cargo_bike=designated` oder `capacity:cargo_bike`',
+            chapterRefs: ['aufgeteilte-objekte'],
+          },
+          {
+            value: 'small_electric_vehicle_parking',
+            label: 'E-Scooter- / Kleinstfahrzeug-Parkplätze',
+            description: '`amenity=small_electric_vehicle_parking`, `amenity=kick-scooter_parking`',
+          },
+          {
+            value: 'bicycle_rental',
+            label: 'Bikesharing-Stationen',
+            description: '`amenity=bicycle_rental`, ohne Fahrradverleih-Läden',
+          },
+          {
+            value: 'mobility_hub',
+            label: 'Mobilitätsstationen',
+            description:
+              '`amenity=mobility_hub`. Eine Fläche, in der Stellplätze und Verleihstationen liegen; beim Summieren zählt sie nicht mit.',
+          },
+        ],
       },
       {
-        key: 'capacity:cargo_bike',
+        key: 'capacity',
         type: 'number',
-        label: 'Anzahl Lastenfahrrad-Stellplätze',
+        label: 'Anzahl Stellplätze',
+        chapterRefs: ['aufgeteilte-objekte'],
         values: [],
       },
       {
@@ -301,12 +333,20 @@ const data = {
             label: 'Kund:innen',
           },
           {
+            value: 'members',
+            label: 'Mitglieder',
+          },
+          {
             value: 'permissive',
             label: 'Öffentliche Nutzung geduldet',
           },
           {
             value: 'private',
             label: 'Privat',
+          },
+          {
+            value: 'no',
+            label: 'Kein Zugang',
           },
         ],
       },
@@ -361,6 +401,10 @@ const data = {
             value: 'yes',
             label: 'Zugelassen',
           },
+          {
+            value: 'designated',
+            label: 'Nur Lastenräder',
+          },
         ],
       },
       {
@@ -379,9 +423,10 @@ const data = {
         ],
       },
       {
-        key: 'bicycle_parking',
+        key: 'stand_type',
         type: 'string',
-        label: 'Fahrradabstellanlage',
+        label: 'Art der Abstellanlage',
+        description: 'Aus `bicycle_parking=*`.',
         values: [
           {
             value: 'stands',
@@ -400,16 +445,119 @@ const data = {
             label: 'Wandhalter',
           },
           {
-            value: 'shed',
-            label: 'Unterstand',
+            value: 'rack',
+            label: 'Fahrradständer',
+          },
+          {
+            value: 'safe_loops',
+            label: 'Sicherheitsbügel',
+          },
+          {
+            value: 'ground_slots',
+            label: 'Bodenschlitze',
+          },
+          {
+            value: 'anchors',
+            label: 'Bodenanker',
+          },
+          {
+            value: 'lean_and_stick',
+            label: 'Anlehnhilfe',
+          },
+          {
+            value: 'handlebar_holder',
+            label: 'Lenkerhalter',
+          },
+          {
+            value: 'upright_stands',
+            label: 'Vertikalparker',
           },
           {
             value: 'two-tier',
             label: 'Doppelstockparker',
           },
           {
+            value: 'shed',
+            label: 'Unterstand',
+          },
+          {
+            value: 'building',
+            label: 'Fahrradparkhaus',
+          },
+          {
             value: 'lockers',
             label: 'Fahrradboxen',
+          },
+          {
+            value: 'streetpod',
+            label: 'Streetpod',
+          },
+          {
+            value: 'smart_dock',
+            label: 'Smart-Dock',
+          },
+          {
+            value: 'floor',
+            label: 'Abstellfläche ohne Halter',
+          },
+        ],
+      },
+      {
+        key: 'rental_type',
+        type: 'string',
+        label: 'Art der Verleihstation',
+        description: 'Aus `bicycle_rental=*`.',
+        values: [
+          {
+            value: 'docking_station',
+            label: 'Station mit Andockpunkten',
+          },
+          {
+            value: 'dropoff_point',
+            label: 'Abstellfläche (Free-Floating-Zone)',
+          },
+          {
+            value: 'key_dispensing_machine',
+            label: 'Schlüsselautomat',
+          },
+        ],
+      },
+      {
+        key: 'network',
+        type: 'sanitized_strings',
+        label: 'Netz / Verbund',
+        values: [],
+      },
+      {
+        key: 'in_mobility_hub',
+        type: 'string',
+        label: 'In Mobilitätsstation',
+        values: [
+          {
+            value: 'yes',
+            label: 'Innerhalb einer Mobilitätsstation',
+          },
+        ],
+      },
+      {
+        key: 'geometry_transform',
+        type: 'string',
+        label: 'Geometrie geschätzt',
+        description:
+          'Gesetzt, wenn ein OSM-Objekt nach Art aufgeteilt und die Lage der Teile geschätzt wurde.',
+        chapterRefs: ['aufgeteilte-objekte'],
+        values: [
+          {
+            value: 'area_split',
+            label: 'Fläche nach Stellplätzen geteilt',
+          },
+          {
+            value: 'line_halves',
+            label: 'Linie in der Mitte geteilt',
+          },
+          {
+            value: 'point_offset',
+            label: 'Nebeneinander gesetzt',
           },
         ],
       },
@@ -442,40 +590,64 @@ const data = {
             label: 'Grünstreifen',
           },
           {
-            value: 'lane',
-            label: 'Fahrbahn',
-          },
-          {
             value: 'kerb_extension',
             label: 'Gehwegvorstreckung',
-          },
-          {
-            value: 'parking_lot',
-            label: 'Parkplatz',
-          },
-          {
-            value: 'street_side',
-            label: 'Straßenrand',
-          },
-          {
-            value: 'school_ground',
-            label: 'Schulgelände',
-          },
-          {
-            value: 'private_property',
-            label: 'Privatgrund',
           },
           {
             value: 'pedestrian_area',
             label: 'Fußgängerbereich',
           },
           {
+            value: 'lane',
+            label: 'Fahrbahn',
+          },
+          {
+            value: 'street_side',
+            label: 'Straßenrand',
+          },
+          {
+            value: 'shoulder',
+            label: 'Seitenstreifen',
+          },
+          {
+            value: 'traffic_island',
+            label: 'Verkehrsinsel',
+          },
+          {
+            value: 'parklet',
+            label: 'Parklet',
+          },
+          {
             value: 'park',
             label: 'Park',
           },
           {
+            value: 'school_ground',
+            label: 'Schulgelände',
+          },
+          {
+            value: 'playground',
+            label: 'Spielplatz',
+          },
+          {
+            value: 'parking_lot',
+            label: 'Parkplatz',
+          },
+          {
             value: 'parking',
             label: 'Parkfläche',
+          },
+          {
+            value: 'driveway',
+            label: 'Zufahrt',
+          },
+          {
+            value: 'private_property',
+            label: 'Privatgrund',
+          },
+          {
+            value: 'public_property',
+            label: 'Öffentliches Gelände',
           },
         ],
       },
@@ -692,22 +864,15 @@ const data = {
         label: 'Maximaldauer',
         values: [],
       },
+    ],
+    chapters: [
       {
-        key: 'osm_capacity',
-        type: 'sanitized_strings',
-        label: 'OSM Kapazität (roh, Testdaten)',
-        purpose: 'qa',
-        values: [],
-      },
-      {
-        key: 'osm_capacity:cargo_bike',
-        type: 'sanitized_strings',
-        label: 'OSM Kapazität Lastenrad (roh, Testdaten)',
-        purpose: 'qa',
-        values: [],
+        id: 'aufgeteilte-objekte',
+        title: 'Aufgeteilte Objekte und geschätzte Geometrie',
+        markdown:
+          'In OpenStreetMap ist eine Abstellanlage manchmal als ein Objekt erfasst, obwohl sie Stellplätze verschiedener Art hat, zum Beispiel 10 Stellplätze, davon 2 für Lastenräder (`capacity=10`, `capacity:cargo_bike=2`). TILDA zeigt jede Art als eigenes Objekt mit eigener Anzahl: 8 Fahrradstellplätze und 2 Lastenrad-Stellplätze. Das zweite Objekt hat dieselbe OSM-ID mit der Art als Zusatz (`way/123/cargo_bike_parking`).\n\nWo die Lastenrad-Stellplätze genau stehen, steht nicht in OpenStreetMap. TILDA schätzt deshalb die Lage beider Teile:\n\n- **Fläche:** Die Fläche wird quer zu ihrer Längsachse geteilt. Dabei stehen die Bügel in einer Reihe, ein Fahrradbügel alle 1,2 m und ein Lastenradbügel alle 2 m, je 2 Räder pro Bügel; jeder Teil bekommt so viel von der Länge, wie seine Stellplätze brauchen.\n- **Linie:** Die Linie wird in der Mitte geteilt; jeder Teil liegt in der Mitte seiner Hälfte.\n- **Punkt:** Die beiden Teile werden in Ost–West-Richtung nebeneinander gesetzt.\n\nDas Merkmal `geometry_transform` nennt, welcher Fall angewendet wurde; im Inspektor erscheint dazu ein Hinweis. Genauer wird es, wenn die Lastenrad-Stellplätze in OpenStreetMap als eigenes Objekt erfasst werden.\n',
       },
     ],
-    chapters: [],
   },
   bikelanes: {
     topic: 'roads_bikelanes',
