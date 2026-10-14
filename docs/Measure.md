@@ -38,7 +38,7 @@ which tables a dataset reads.
 | `parking`         | `street` → `parkings` (lines), `off_street` → `off_street_parking_areas` | `capacity`, `area`                     |
 | `bikelanes`       | `bikelanes` → `bikelanes`                                                | `length`, `length_directions` (meters) |
 | `roads`           | `roads` → `roads`, `paths` → `roadsPathClasses`                          | `length`, `length_directions` (meters) |
-| `bicycle_parking` | `points` → `bicycleParking_points`, `areas` → `bicycleParking_areas`     | `capacity`                             |
+| `bicycle_parking` | `points` → `bicycleParking_points`                                       | `capacity`                             |
 
 A new dataset is one more function. Callers add what is theirs: QA filters parking
 by `operator_type` and moves bikelanes to their street side; Summieren groups by the tags of its

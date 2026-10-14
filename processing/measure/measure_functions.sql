@@ -94,11 +94,10 @@ CREATE OR REPLACE FUNCTION tilda_measure_bicycle_parking(extent geometry)
 RETURNS TABLE (part TEXT, id TEXT, geom geometry, tags JSONB, meta JSONB)
 LANGUAGE sql STABLE PARALLEL SAFE
 AS $$
+  -- Every bicycle parking is a point here; one mapped as an area is the point at its centroid.
+  -- `bicycleParking_areas` holds the same features a second time, as their outline for the map.
   SELECT 'points', id, geom, jsonb_build_object('capacity', 1) || tags, meta
     FROM public."bicycleParking_points" WHERE geom && extent
-  UNION ALL
-  SELECT 'areas', id, geom, jsonb_build_object('capacity', 1) || tags, meta
-    FROM public."bicycleParking_areas" WHERE geom && extent
 $$;
 
 -- Summieren: the amounts of `datasets` inside the areas a user drew, one row per area, part and

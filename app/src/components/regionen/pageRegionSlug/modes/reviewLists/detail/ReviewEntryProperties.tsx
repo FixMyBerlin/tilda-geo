@@ -1,7 +1,7 @@
 import { inheritLinkStyles } from '@/components/shared/links/styles'
-import { Markdown } from '@/components/shared/text/Markdown'
+import { MarkdownAttributeValue } from '@/components/shared/text/MarkdownAttributeValue'
+import { parseMarkdownKey } from '@/components/shared/text/markdownKey'
 import type { ReviewEntryDisplayProperties } from '@/shared/reviewLists/reviewEntryImport'
-import { parseReviewEntryPropertyKey } from './reviewEntryMarkdownKey'
 import { SvgMarkdown } from './SvgMarkdown'
 
 type Props = { properties: ReviewEntryDisplayProperties }
@@ -16,7 +16,7 @@ export const ReviewEntryProperties = ({ properties }: Props) => {
       <h3 className="mb-1.5 text-xs font-medium text-gray-900">Attribute des Eintrags</h3>
       <dl className="divide-y divide-gray-950/10 overflow-hidden rounded-md border border-gray-950/10 text-xs">
         {entries.map(([key, value]) => {
-          const { label, isMarkdown } = parseReviewEntryPropertyKey(key)
+          const { label, isMarkdown } = parseMarkdownKey(key)
           return (
             <div
               key={key}
@@ -30,9 +30,9 @@ export const ReviewEntryProperties = ({ properties }: Props) => {
               </dt>
               {isMarkdown ? (
                 <dd className="min-w-0">
-                  <Markdown
+                  <MarkdownAttributeValue
                     markdown={value}
-                    className="text-xs leading-normal wrap-anywhere text-gray-900 prose-p:my-1 prose-ol:my-1 prose-ul:my-1 prose-li:my-0 [&>*:first-child]:mt-0 [&>*:last-child]:mb-0"
+                    className="text-xs leading-normal text-gray-900"
                     linkClassNameOverwrite={inheritLinkStyles}
                   />
                 </dd>

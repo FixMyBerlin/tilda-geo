@@ -36,21 +36,20 @@ Authorization: Bearer <OSM access token>
 
 Every error is JSON `{ "error": "<code>", "message": "<English text>" }`; `invalid_input` adds `info` with the fields.
 
-| Status | `error`              | Meaning                                                          | What the client does                   |
-| ------ | -------------------- | ---------------------------------------------------------------- | -------------------------------------- |
-| 401    | `missing_token`      | No `Authorization: Bearer` header                                | Log in                                 |
-| 401    | `invalid_osm_token`  | Session: OSM rejected the token                                  | Log in to OSM again                    |
-| 403    | `no_tilda_user`      | Session: this OSM account has no TILDA account yet               | "Sign in to TILDA once"                |
-| 502    | `osm_unavailable`    | Session: OSM could not be asked                                  | Retry later                            |
-| 401    | `invalid_token`      | Unknown TILDA token                                              | Request a new session                  |
-| 401    | `token_expired`      | TILDA token expired                                              | Request a new session, repeat the call |
-| 403    | `not_member`         | The user is not a member of the region (and not an admin)        | "Ask for access to the region"         |
-| 404    | `region_not_found`   | Unknown or deactivated region                                    | Config error                           |
-| 404    | `folder_not_found`   | The folder is not linked to this region                          | Config error                           |
-| 404    | `note_not_found`     | The note is not in this folder                                   | Reload the list                        |
-| 400    | `invalid_input`      | Body, query or path parameter not valid                          | Fix the request                        |
-| 403    | `origin_not_allowed` | Browser origin not on the allow-list (sent without CORS headers) | Config error on the TILDA side         |
-| 429    | `rate_limited`       | More than 20 failed auth attempts per minute from this IP        | Wait a minute                          |
+| Status | `error`             | Meaning                                                   | What the client does                   |
+| ------ | ------------------- | --------------------------------------------------------- | -------------------------------------- |
+| 401    | `missing_token`     | No `Authorization: Bearer` header                         | Log in                                 |
+| 401    | `invalid_osm_token` | Session: OSM rejected the token                           | Log in to OSM again                    |
+| 403    | `no_tilda_user`     | Session: this OSM account has no TILDA account yet        | "Sign in to TILDA once"                |
+| 502    | `osm_unavailable`   | Session: OSM could not be asked                           | Retry later                            |
+| 401    | `invalid_token`     | Unknown TILDA token                                       | Request a new session                  |
+| 401    | `token_expired`     | TILDA token expired                                       | Request a new session, repeat the call |
+| 403    | `not_member`        | The user is not a member of the region (and not an admin) | "Ask for access to the region"         |
+| 404    | `region_not_found`  | Unknown or deactivated region                             | Config error                           |
+| 404    | `folder_not_found`  | The folder is not linked to this region                   | Config error                           |
+| 404    | `note_not_found`    | The note is not in this folder                            | Reload the list                        |
+| 400    | `invalid_input`     | Body, query or path parameter not valid                   | Fix the request                        |
+| 429    | `rate_limited`      | More than 20 failed auth attempts per minute from this IP | Wait a minute                          |
 
 ## Endpoints
 
@@ -150,11 +149,10 @@ Answer: `200` with the note as in "Read". Any member may resolve and reopen.
 
 ## CORS
 
-Only these routes answer cross-origin requests from a browser, and only for the origins listed in `externalApiOrigins` (`app/src/components/shared/utils/appInstances.const.ts`; exact origins, no wildcards, the same list on every deployment).
+Only these routes answer cross-origin requests from a browser. Any origin may call them (`Access-Control-Allow-Origin: *`); the token and the member checks behind it are the access check.
 
 - Preflight (`OPTIONS`): `204` with `Access-Control-Allow-Methods: GET, POST, PATCH, OPTIONS` and `Access-Control-Allow-Headers: Authorization, Content-Type`.
 - No cookies are used: send requests without `credentials`.
-- Requests without an `Origin` header (curl, scripts) are not restricted by the allow-list; they still need a valid token.
 
 ## Example (browser)
 
@@ -184,4 +182,3 @@ await fetch(`${base}/42`, { method: 'PATCH', headers, body: JSON.stringify({ res
 
 - Table `ExternalApiToken` (hash, user, scope, expiry). Expired rows are deleted whenever a new token is issued. To end all external sessions of a user, delete their rows.
 - Writes appear in the audit log with the user and `changeSource: EXTERNAL_API`.
-- A new browser client needs its origin added to `externalApiOrigins` and a deploy.

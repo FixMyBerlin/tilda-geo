@@ -4,7 +4,7 @@ Route `/regionen/<region>/summieren`. Product description: [docs/Modes-Concept-S
 
 ## The rule
 
-Every feature keeps its own geometry and carries amounts (numeric tags: `capacity`, `area`, `length` in meters). An area gets the share of a feature that lies inside it: a point all or nothing, a line by length, a polygon by area. The sum is `share × amount`, computed on the server in PostGIS, so it does not depend on the zoom or on what the map shows, and it can be fractional (89.6 parking spaces). The same rule is used by QA and Statistik: [`processing/measure/measure_functions.sql`](../../../../../../../processing/measure/measure_functions.sql).
+Every feature keeps its own geometry and carries amounts (numeric tags: `capacity`, `area`, `length` in meters). An area gets the share of a feature that lies inside it: a point all or nothing, a line by length, a polygon by area. The sum is `share × amount`, computed on the server in PostGIS, so it does not depend on the zoom or on what the map shows, and it can be fractional (89.6 parking spaces). The panel shows parking spaces as whole numbers, rounded down (`utils/roundCapacity.ts`); each row is rounded on its own, so the rows of a group can add up to less than the total. The same rule is used by QA and Statistik: [`processing/measure/measure_functions.sql`](../../../../../../../processing/measure/measure_functions.sql).
 
 ## Parts
 
@@ -13,7 +13,7 @@ Every feature keeps its own geometry and carries amounts (numeric tags: `capacit
 - `server/calculator/` — `getCalculatorSumsFn({ regionSlug, datasetId, areas })`. Everyone who can see the region may call it. The server takes tables, tags and amounts from the dataset definition, which the region must offer; nothing of the SQL comes from the client. `sumMeasureFeatures` runs one query: every polygon of `areas` is an area (`part-0`, …), plus `combined`, their union, so an overlap is not counted twice. It returns one row per area, part and combination of group-by values: `{ area, properties, sums }`. The query is stopped after 30 seconds (`status: 'timeout'`), which the panel shows as "area too large".
 - `useCalculatorQuery.ts` — TanStack Query on that function, keyed by region, dataset and `sum.areas`. While new areas are summed the rows before stay ("Wird summiert …").
 - `utils/calculateMetricSummaries.ts` — totals and breakdown from the rows: filter, groups and ratios are computed in the browser, so a click on a filter needs no request.
-- `CalculatorMap.tsx` — mounted by `RegionMap` only in this mode:
+- `CalculatorMap.tsx` — mounted by `RegionMap` only in this mode. The layers of the categories are hidden meanwhile (`LayersAtlasGeo`), so the map shows only what is summed; the layer controls say so:
   - `SourcesLayersCalculator` — the features of the dataset from the tiles of the part sources: lines, areas (fill and outline) or points. What does not match the filter is dimmed.
   - `CalculatorAreasMask` — dims the map outside the drawn areas: one polygon over the world with the areas cut out, above the dataset and below the drawing.
   - the drawing surface.

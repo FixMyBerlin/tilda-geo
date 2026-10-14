@@ -15,6 +15,7 @@ import type { useCalculatorDatasets } from './useCalculatorDatasets'
 import { useCalculatorQuery } from './useCalculatorQuery'
 import { calculateMetricSummaryForAreas } from './utils/calculateMetricSummaries'
 import { useCalculatorStyleColors } from './utils/calculatorStyleColors'
+import { roundCapacity } from './utils/roundCapacity'
 
 type Props = {
   dataset: NonNullable<ReturnType<typeof useCalculatorDatasets>['activeDataset']>
@@ -22,9 +23,7 @@ type Props = {
   onToggleFilter: (key: string, value: string) => void
 }
 
-// A feature counts with the share that lies inside an area, so the sums can be fractional.
-const oneDecimal = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 1 })
-const squareMeters = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 })
+const wholeNumber = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 })
 const kilometers = new Intl.NumberFormat('de-DE', {
   style: 'unit',
   unit: 'kilometer',
@@ -37,10 +36,10 @@ const formatSum = (metric: CalculatorMetric | null, sum: number) => {
     case 'length_directions':
       return kilometers.format(sum / 1000)
     case 'area':
-      return `${squareMeters.format(sum)} m²`
+      return `${wholeNumber.format(sum)} m²`
     case 'capacity':
     case null:
-      return oneDecimal.format(sum)
+      return wholeNumber.format(roundCapacity(sum))
   }
 }
 const percentFormatter = new Intl.NumberFormat('de-DE', {

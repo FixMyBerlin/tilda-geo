@@ -8,9 +8,9 @@ export const Route = createFileRoute('/api/auth/osm-token')({
   ssr: false,
   server: {
     handlers: {
-      OPTIONS: ({ request }) => externalApiPreflightResponse(request),
+      OPTIONS: () => externalApiPreflightResponse(),
       POST: ({ request }) =>
-        handleExternalApiRequest(request, async () => ({
+        handleExternalApiRequest(async () => ({
           status: 201,
           body: await exchangeOsmToken(request),
         })),

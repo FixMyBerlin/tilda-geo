@@ -9,6 +9,7 @@ import { useBackgroundParam } from '@/components/regionen/pageRegionSlug/hooks/u
 import { useCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/useCategoriesConfig'
 import { getMapDataSourceTilesUrl } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/getMapDataSourceTilesUrl'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
+import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
 import { createSourceKeyAtlasGeo } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
 import { getCachelessTilesUrl } from '@/components/shared/utils/getCachelessTilesUrl'
 import { mapLayerOrderQueryOptions } from '@/server/map-layer-order/mapLayerOrderQueryOptions'
@@ -78,6 +79,9 @@ export const LayersAtlasGeo = () => {
   // Loaded by the region route before the map mounts. The layers have to mount in their final
   // order, so nothing renders without it.
   const { data: layerOrder } = useQuery(mapLayerOrderQueryOptions())
+  // The Summieren mode shows the dataset that is summed with its own layers. A category on top
+  // of it would show other data, or the same data a second time in another style.
+  const { isCalculator } = useCurrentMode()
 
   if (!categoriesConfig?.length || !layerOrder) return null
 
@@ -86,6 +90,7 @@ export const LayersAtlasGeo = () => {
     layerOrder,
     backgroundParam,
     debugLayerStyles,
+    hidden: isCalculator,
   })
 
   return (
