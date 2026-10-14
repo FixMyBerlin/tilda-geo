@@ -13,6 +13,8 @@ The icons that layers use as `icon-image`, `fill-pattern` and `line-pattern`.
 - One SVG file per icon in [`icons`](./icons). The file name is the icon id.
 - `bun run map-sprite-build` builds `public/map-style/sprite(@2x).png|json` and the overview above.
   Commit the SVG and the built files together.
+- The build also writes a hash of the sprite files to `src/server/api/map-style/spriteVersion.const.ts`.
+  `/api/map-style` adds it to the sprite URL (`sprite?v=<hash>`), so browsers load a new sprite on the next page load.
 - The `width` and `height` of the `<svg>` are the size of the icon on the map in pixels.
   Patterns repeat, so draw them to continue over the edges.
 - Ids are kebab-case. Repeating patterns (`fill-pattern`, `line-pattern`) start with `pattern-`.
