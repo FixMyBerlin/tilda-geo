@@ -27,6 +27,8 @@ A caller sums `share × amount`. Nothing is converted into points.
 
 Summieren does that in `tilda_measure_sum`: the amounts of one or more datasets inside the drawn
 areas, grouped by tag values. The app only passes the dataset names, the areas and the tags.
+Features without a number for a metric are not in its sum; `missing` counts them per metric, and
+Summieren shows them in a column next to the sums (e.g. bicycle parking without `capacity`).
 
 ## Datasets
 

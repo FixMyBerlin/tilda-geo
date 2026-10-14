@@ -2,14 +2,14 @@ import { FunnelIcon, TrashIcon } from '@heroicons/react/20/solid'
 import { twJoin } from 'tailwind-merge'
 import { ConditionalFormattedKey } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/ConditionalFormattedKey'
 import { modePanelTintHairlineTopClassName } from '../modePanel.const'
-import {
-  type CalculatorDataset,
-  type CalculatorMetric,
-  calculatorTranslationSourceId,
-} from './calculatorDatasets.const'
+import { type CalculatorDataset, calculatorTranslationSourceId } from './calculatorDatasets.const'
 import { CalculatorGroupValue } from './CalculatorGroupValue'
 import type { CalculatorFilter } from './calculatorModeParam'
-import type { calculateMetricSummaryForAreas } from './utils/calculateMetricSummaries'
+import type {
+  CalculatorAmounts,
+  CalculatorColumn,
+  calculateMetricSummaryForAreas,
+} from './utils/calculateMetricSummaries'
 import {
   calculatorStyleOtherColor,
   type CalculatorStyleColors,
@@ -24,17 +24,15 @@ type CalculatorAreaSummary = CalculatorSummary['byArea'][number]['summary']
  * to keep call sites tidy.
  */
 export type CalculatorBreakdownData = {
-  sumKeys: CalculatorDataset['sumKeys']
   /** The sources of the dataset; their translations name the tags and values. */
   parts: CalculatorDataset['parts']
-  metrics: CalculatorMetric[]
-  selectedMetric: CalculatorMetric | null
-  selectedMetricLabel: string
   summary: CalculatorSummary | null
+  columnLabel: (column: CalculatorColumn) => string
+  /** Tooltip of a column header, where the label alone does not say enough. */
+  columnTitle: (column: CalculatorColumn) => string | undefined
   displayMode: CalculatorDisplayMode
   /** New areas are being summed; the values shown are those of the areas before. */
   isUpdating: boolean
-  onSelectMetric: (metric: CalculatorMetric) => void
   onSetDisplayMode: (mode: CalculatorDisplayMode) => void
   onDeleteArea: (key: string) => void
   /** Tag values the sum is narrowed to (`sum.filter`). */
@@ -42,8 +40,10 @@ export type CalculatorBreakdownData = {
   onToggleFilter: (key: string, value: string) => void
   /** Colors of the active style: its group shows them as dots, which is the legend of the map. */
   styleColors: CalculatorStyleColors | undefined
-  formatNumber: (value: number) => string
-  formatMetricValue: (sum: number, ratio: number) => string
+  /** A total, always as a number. */
+  formatAmount: (column: CalculatorColumn, value: number) => string
+  /** A value of a group: a number or its share of the column, depending on `displayMode`. */
+  formatValue: (column: CalculatorColumn, value: number, ratio: number) => string
 }
 
 const toggleClassName = (active: boolean) =>
@@ -52,98 +52,94 @@ const toggleClassName = (active: boolean) =>
     active ? 'bg-fuchsia-700 text-white' : 'bg-white text-gray-700 hover:bg-gray-50',
   )
 
-/** Metric selector (when >1 metric) + value/percent display-mode toggle. */
-const MetricControls = ({
-  metrics,
-  selectedMetric,
-  sumKeys,
+/** The value/percent display-mode toggle. */
+const DisplayModeToggle = ({
   displayMode,
-  onSelectMetric,
   onSetDisplayMode,
-}: Pick<
-  CalculatorBreakdownData,
-  'metrics' | 'selectedMetric' | 'sumKeys' | 'displayMode' | 'onSelectMetric' | 'onSetDisplayMode'
->) => {
-  if (metrics.length === 0) return null
-
-  return (
-    <div
-      className={twJoin(
-        'flex items-center',
-        metrics.length > 1 ? 'justify-between gap-2' : 'justify-end',
-      )}
-    >
-      {metrics.length > 1 && (
-        <div className="inline-flex overflow-hidden rounded border border-gray-300">
-          {metrics.map((metric) => (
-            <button
-              key={metric}
-              type="button"
-              onClick={() => onSelectMetric(metric)}
-              className={twJoin(
-                'border-r border-gray-300 last:border-r-0',
-                toggleClassName(selectedMetric === metric),
-              )}
-            >
-              {sumKeys[metric] ?? metric}
-            </button>
-          ))}
-        </div>
-      )}
-
-      <div className="inline-flex overflow-hidden rounded border border-gray-300">
-        <button
-          type="button"
-          onClick={() => onSetDisplayMode('value')}
-          className={twJoin('border-r border-gray-300', toggleClassName(displayMode === 'value'))}
-          aria-label="Zahlenansicht"
-        >
-          #
-        </button>
-        <button
-          type="button"
-          onClick={() => onSetDisplayMode('percent')}
-          className={toggleClassName(displayMode === 'percent')}
-          aria-label="Prozentansicht"
-        >
-          %
-        </button>
-      </div>
+}: Pick<CalculatorBreakdownData, 'displayMode' | 'onSetDisplayMode'>) => (
+  <div className="flex justify-end">
+    <div className="inline-flex overflow-hidden rounded border border-gray-300">
+      <button
+        type="button"
+        onClick={() => onSetDisplayMode('value')}
+        className={twJoin('border-r border-gray-300', toggleClassName(displayMode === 'value'))}
+        aria-label="Zahlenansicht"
+      >
+        #
+      </button>
+      <button
+        type="button"
+        onClick={() => onSetDisplayMode('percent')}
+        className={toggleClassName(displayMode === 'percent')}
+        aria-label="Prozentansicht"
+      >
+        %
+      </button>
     </div>
-  )
-}
+  </div>
+)
 
-/** One drawn area: its total + the grouped per-value rows. */
+/** Counts are short; areas and lengths carry a unit. */
+const columnWidthClassName = (column: CalculatorColumn) =>
+  column === 'area' || column === 'length_directions' ? 'w-20' : 'w-16'
+
+/** The number cells of a row: one per column, `–` where the row has no value. */
+const AmountCells = ({
+  columns,
+  amounts,
+  format,
+}: {
+  columns: CalculatorColumn[]
+  amounts: CalculatorAmounts
+  format: (column: CalculatorColumn, value: number) => string
+}) =>
+  columns.map((column) => {
+    const value = amounts[column]
+    return (
+      <span
+        key={column}
+        className={twJoin(columnWidthClassName(column), 'shrink-0 text-right tabular-nums')}
+      >
+        {value === undefined ? '–' : format(column, value)}
+      </span>
+    )
+  })
+
+/** One drawn area: its totals + the grouped per-value rows. */
 const AreaSummary = ({
   areaSummary,
   label,
+  columns,
   parts,
   onDelete,
   filter,
   onToggleFilter,
   styleColors,
-  formatNumber,
-  formatMetricValue,
+  formatAmount,
+  formatValue,
 }: {
   areaSummary: CalculatorAreaSummary
   label: string
+  columns: CalculatorColumn[]
   parts: CalculatorDataset['parts']
   onDelete: () => void
   filter: CalculatorFilter
   onToggleFilter: (key: string, value: string) => void
   styleColors: CalculatorStyleColors | undefined
-  formatNumber: (value: number) => string
-  formatMetricValue: (sum: number, ratio: number) => string
+  formatAmount: CalculatorBreakdownData['formatAmount']
+  formatValue: CalculatorBreakdownData['formatValue']
 }) => (
   <div className={twJoin('group px-4 py-3', modePanelTintHairlineTopClassName)}>
-    <div className="mb-2 flex items-center justify-between gap-2">
-      <div className="flex items-center gap-1">
-        <strong className="text-sm">{label}</strong>
+    <div className="mb-2 flex items-center justify-between gap-2 text-sm">
+      <div className="flex min-w-0 flex-1 items-center gap-1">
+        <strong>{label}</strong>
         <button type="button" onClick={onDelete} aria-label="Fläche löschen" title="Fläche löschen">
           <TrashIcon className="size-4 text-gray-400 hover:text-gray-700" />
         </button>
       </div>
-      <strong className="text-sm tabular-nums">{formatNumber(areaSummary.total)}</strong>
+      <strong className="contents">
+        <AmountCells columns={columns} amounts={areaSummary.totals} format={formatAmount} />
+      </strong>
     </div>
 
     {areaSummary.groups.map((group) => (
@@ -171,7 +167,7 @@ const AreaSummary = ({
                     : 'Nur diese Werte summieren'
               }
               className={twJoin(
-                'group/row -mr-1 flex w-[calc(100%+0.25rem)] min-w-0 cursor-pointer justify-between gap-2 rounded-sm py-0.5 pr-1 pl-2 text-left text-xs tabular-nums transition-colors',
+                'group/row -mr-1 flex w-[calc(100%+0.25rem)] min-w-0 cursor-pointer justify-between gap-2 rounded-sm py-0.5 pr-1 pl-2 text-left text-xs transition-colors',
                 selected
                   ? 'bg-white font-semibold text-fuchsia-800'
                   : 'text-gray-600 hover:bg-white/60',
@@ -209,7 +205,13 @@ const AreaSummary = ({
                   <FunnelIcon className="size-3" />
                 </span>
               </span>
-              <span>{formatMetricValue(groupValue.sum, groupValue.ratio)}</span>
+              <AmountCells
+                columns={columns}
+                amounts={groupValue.amounts}
+                format={(column, value) =>
+                  formatValue(column, value, groupValue.ratios[column] ?? 0)
+                }
+              />
             </button>
           )
         })}
@@ -219,13 +221,14 @@ const AreaSummary = ({
 )
 
 /**
- * The calculator breakdown (metric controls + per-area summaries + combined total). Only
- * rendered once an area is summed.
+ * The calculator breakdown (display mode + column headers + per-area summaries + combined total).
+ * Only rendered once an area is summed.
  * Presentational only — all data/handlers come from CalculatorResult via `data`. Styled for
  * the tinted mode panel (desktop column and mobile dock).
  */
 export const CalculatorBreakdown = ({ data }: { data: CalculatorBreakdownData }) => {
-  const { summary, selectedMetric, selectedMetricLabel, metrics } = data
+  const { summary } = data
+  const columns = summary?.columns ?? []
 
   return (
     // While new sums load, the last ones stay in place, faded: nothing in the panel moves.
@@ -237,19 +240,28 @@ export const CalculatorBreakdown = ({ data }: { data: CalculatorBreakdownData })
       )}
     >
       <div className="space-y-2 px-4 py-3">
-        <MetricControls
-          metrics={metrics}
-          selectedMetric={selectedMetric}
-          sumKeys={data.sumKeys}
+        <DisplayModeToggle
           displayMode={data.displayMode}
-          onSelectMetric={data.onSelectMetric}
           onSetDisplayMode={data.onSetDisplayMode}
         />
+        {columns.length > 0 && (
+          <div className="flex items-end justify-end gap-2 text-xs font-semibold text-gray-700">
+            {columns.map((column) => (
+              <span
+                key={column}
+                className={twJoin(columnWidthClassName(column), 'shrink-0 text-right')}
+                title={data.columnTitle(column)}
+              >
+                {data.columnLabel(column)}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
 
-      {!selectedMetric || !summary ? (
+      {!summary || columns.length === 0 ? (
         <div className={twJoin('px-4 py-3 text-gray-600', modePanelTintHairlineTopClassName)}>
-          Keine Werte für {metrics.join(' / ') || 'Metriken'} gefunden
+          Keine Werte gefunden
         </div>
       ) : (
         <>
@@ -257,28 +269,31 @@ export const CalculatorBreakdown = ({ data }: { data: CalculatorBreakdownData })
             <AreaSummary
               key={key}
               areaSummary={areaSummary}
-              label={`${selectedMetricLabel}${summary.byArea.length > 1 ? ` Fläche ${index + 1}` : ''}`}
+              label={summary.byArea.length > 1 ? `Fläche ${index + 1}` : 'Summe'}
+              columns={columns}
               parts={data.parts}
               onDelete={() => data.onDeleteArea(key)}
               filter={data.filter}
               styleColors={data.styleColors}
               onToggleFilter={data.onToggleFilter}
-              formatNumber={data.formatNumber}
-              formatMetricValue={data.formatMetricValue}
+              formatAmount={data.formatAmount}
+              formatValue={data.formatValue}
             />
           ))}
 
           {summary.byArea.length > 1 && (
             <div
               className={twJoin(
-                'px-4 py-3 text-sm font-semibold',
+                'flex items-center justify-between gap-2 px-4 py-3 text-sm font-semibold',
                 modePanelTintHairlineTopClassName,
               )}
             >
-              <div className="flex items-center justify-between gap-2">
-                <span>{selectedMetricLabel} Kombiniert</span>
-                <span className="tabular-nums">{data.formatNumber(summary.combined.total)}</span>
-              </div>
+              <span className="min-w-0 flex-1">Kombiniert</span>
+              <AmountCells
+                columns={columns}
+                amounts={summary.combined.totals}
+                format={data.formatAmount}
+              />
             </div>
           )}
         </>

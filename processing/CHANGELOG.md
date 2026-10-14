@@ -4,6 +4,10 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-10
 
+### Summieren: `tilda_measure_sum`
+
+- New column `missing`: per metric, the number of features without a number for it (they are not in `sums`). Summieren shows them in a column of their own.
+
 ### `bicycleParking_points`, `bicycleParking_areas`
 
 - New `kind` tag, the first key of the row: `bicycle_parking`, `cargo_bike_parking` (`cargo_bike=designated`, or only `capacity:cargo_bike` without normal spaces), `small_electric_vehicle_parking` (`small_electric_vehicle_parking`, `kick-scooter_parking`), `mobility_hub` and `bicycle_rental` (not `shop` or `virtual`). Multipolygon relations of these kinds are added as areas with a centroid point, so `bicycleParking_areas.geom` is a multipolygon now.

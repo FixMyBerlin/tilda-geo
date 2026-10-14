@@ -13,7 +13,7 @@ import type { CalculatorFilter } from './calculatorModeParam'
  */
 export const calculatorPartKey = 'part'
 
-/** The amounts a feature can carry; the order the panel offers them in. */
+/** The amounts a feature can carry; the order of the columns of the panel. */
 export const calculatorMetricOrder = ['capacity', 'objects', 'area', 'length_directions'] as const
 
 export type CalculatorMetric = (typeof calculatorMetricOrder)[number]

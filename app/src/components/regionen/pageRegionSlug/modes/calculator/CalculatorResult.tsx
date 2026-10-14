@@ -8,12 +8,15 @@ import {
   type CalculatorBreakdownData,
   type CalculatorDisplayMode,
 } from './CalculatorBreakdown'
-import { type CalculatorMetric, calculatorMetricOrder } from './calculatorDatasets.const'
+import { calculatorMetricOrder } from './calculatorDatasets.const'
 import type { CalculatorFilter } from './calculatorModeParam'
 import { useCalculatorDraw } from './drawing/useCalculatorDraw'
 import type { useCalculatorDatasets } from './useCalculatorDatasets'
 import { useCalculatorQuery } from './useCalculatorQuery'
-import { calculateMetricSummaryForAreas } from './utils/calculateMetricSummaries'
+import {
+  type CalculatorColumn,
+  calculateMetricSummaryForAreas,
+} from './utils/calculateMetricSummaries'
 import { useCalculatorStyleColors } from './utils/calculatorStyleColors'
 import { roundCapacity } from './utils/roundCapacity'
 
@@ -30,18 +33,18 @@ const kilometers = new Intl.NumberFormat('de-DE', {
   minimumFractionDigits: 1,
   maximumFractionDigits: 1,
 })
-/** A sum as the panel shows it, with its unit. Lengths are meters in the data. */
-const formatSum = (metric: CalculatorMetric | null, sum: number) => {
-  switch (metric) {
+/** An amount as the panel shows it, with its unit. Lengths are meters in the data. */
+const formatAmount = (column: CalculatorColumn, value: number) => {
+  switch (column) {
     case 'length_directions':
-      return kilometers.format(sum / 1000)
+      return kilometers.format(value / 1000)
     case 'area':
-      return `${wholeNumber.format(sum)} m²`
+      return `${wholeNumber.format(value)} m²`
     case 'objects':
-      return wholeNumber.format(sum)
+    case 'missing':
+      return wholeNumber.format(value)
     case 'capacity':
-    case null:
-      return wholeNumber.format(roundCapacity(sum))
+      return wholeNumber.format(roundCapacity(value))
   }
 }
 const percentFormatter = new Intl.NumberFormat('de-DE', {
@@ -61,29 +64,20 @@ export const CalculatorResult = ({ dataset, filter, onToggleFilter }: Props) => 
 
   const { drawAreas } = useCalculatorAreas()
   const draw = useCalculatorDraw()
-  const [preferredMetric, setPreferredMetric] = useState<CalculatorMetric | null>(null)
   const [displayMode, setDisplayMode] = useState<CalculatorDisplayMode>('value')
 
-  const orderedConfiguredMetrics = calculatorMetricOrder.filter((metric) => metric in sumKeys)
+  const metrics = calculatorMetricOrder.filter((metric) => metric in sumKeys)
+  const [firstMetric] = metrics
 
-  const selectedMetric =
-    preferredMetric && orderedConfiguredMetrics.includes(preferredMetric)
-      ? preferredMetric
-      : (orderedConfiguredMetrics[0] ?? null)
-  const selectedMetricLabel = selectedMetric ? (sumKeys[selectedMetric] ?? 'Anzahl') : 'Anzahl'
-  const formatMetricValue = (sum: number, ratio: number) =>
-    displayMode === 'percent' ? percentFormatter.format(ratio) : formatSum(selectedMetric, sum)
-
-  const summary =
-    selectedMetric && data
-      ? calculateMetricSummaryForAreas({
-          rows: data.rows,
-          areaIds: drawAreas.map((area) => area.id),
-          metric: selectedMetric,
-          groupByKeys,
-          filter,
-        })
-      : null
+  const summary = data
+    ? calculateMetricSummaryForAreas({
+        rows: data.rows,
+        areaIds: drawAreas.map((area) => area.id),
+        metrics,
+        groupByKeys,
+        filter,
+      })
+    : null
 
   const handleDelete = (key: string) => {
     // Through the drawing surface, so a deleted area can be brought back with undo.
@@ -106,22 +100,23 @@ export const CalculatorResult = ({ dataset, filter, onToggleFilter }: Props) => 
   }
 
   const breakdownData: CalculatorBreakdownData = {
-    sumKeys,
     parts,
-    metrics: orderedConfiguredMetrics,
-    selectedMetric,
-    selectedMetricLabel,
     summary,
+    columnLabel: (column) => (column === 'missing' ? 'ohne Angabe' : (sumKeys[column] ?? column)),
+    columnTitle: (column) =>
+      column === 'missing' && firstMetric
+        ? `Ohne Wert für „${sumKeys[firstMetric]}“, darin nicht enthalten`
+        : undefined,
     displayMode,
     isUpdating: isPlaceholderData,
-    onSelectMetric: setPreferredMetric,
     onSetDisplayMode: setDisplayMode,
     onDeleteArea: handleDelete,
     filter,
     onToggleFilter,
     styleColors,
-    formatNumber: (value) => formatSum(selectedMetric, value),
-    formatMetricValue,
+    formatAmount,
+    formatValue: (column, value, ratio) =>
+      displayMode === 'percent' ? percentFormatter.format(ratio) : formatAmount(column, value),
   }
 
   return (

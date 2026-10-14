@@ -112,8 +112,12 @@ $$;
 --   measured on their union, so a feature in an overlap counts once.
 -- * `properties`: `{tag: value}` of the `group_by` tags, a missing tag is ''
 -- * `sums`: `{metric: amount}` for the numeric tags named in `metrics`
-CREATE OR REPLACE FUNCTION tilda_measure_sum(datasets TEXT[], areas_geojson TEXT, group_by TEXT[], metrics TEXT[])
-RETURNS TABLE (area INT, part TEXT, properties JSONB, sums JSONB)
+-- * `missing`: `{metric: count}` of the features without a number for that metric (only counts > 0);
+--   they are not in `sums`, the UI tells how many are left out
+-- Dropped first: CREATE OR REPLACE cannot change the columns of an existing function.
+DROP FUNCTION IF EXISTS tilda_measure_sum(TEXT[], TEXT, TEXT[], TEXT[]);
+CREATE FUNCTION tilda_measure_sum(datasets TEXT[], areas_geojson TEXT, group_by TEXT[], metrics TEXT[])
+RETURNS TABLE (area INT, part TEXT, properties JSONB, sums JSONB, missing JSONB)
 LANGUAGE plpgsql
 STABLE
 AS $$
@@ -152,24 +156,31 @@ BEGIN
         shares.part,
         grouped.properties,
         metric.key,
-        SUM(shares.share * (shares.tags ->> metric.key)::NUMERIC) AS amount
+        SUM(CASE WHEN jsonb_typeof(shares.tags -> metric.key) = 'number'
+          THEN shares.share * (shares.tags ->> metric.key)::NUMERIC END) AS amount,
+        COUNT(*) FILTER (WHERE jsonb_typeof(shares.tags -> metric.key) IS DISTINCT FROM 'number') AS missing
       FROM shares
       CROSS JOIN LATERAL (
         SELECT COALESCE(jsonb_object_agg(key, COALESCE(btrim(shares.tags ->> key), '')), '{}') AS properties
         FROM unnest($2) AS key
       ) AS grouped
       CROSS JOIN unnest($3) AS metric (key)
-      WHERE shares.share > 0 AND jsonb_typeof(shares.tags -> metric.key) = 'number'
+      WHERE shares.share > 0
       GROUP BY 1, 2, 3, 4
     ),
     sums AS (
-      SELECT amounts.area, amounts.part, amounts.properties, jsonb_object_agg(amounts.key, amounts.amount) AS sums
+      SELECT
+        amounts.area,
+        amounts.part,
+        amounts.properties,
+        COALESCE(jsonb_object_agg(amounts.key, amounts.amount) FILTER (WHERE amounts.amount IS NOT NULL), '{}') AS sums,
+        COALESCE(jsonb_object_agg(amounts.key, amounts.missing) FILTER (WHERE amounts.missing > 0), '{}') AS missing
       FROM amounts
       GROUP BY 1, 2, 3
     )
     SELECT * FROM sums
     UNION ALL
-    SELECT NULL, sums.part, sums.properties, sums.sums FROM sums WHERE (SELECT COUNT(*) FROM polygons) = 1
+    SELECT NULL, sums.part, sums.properties, sums.sums, sums.missing FROM sums WHERE (SELECT COUNT(*) FROM polygons) = 1
   $sql$, features)
   USING areas_geojson, group_by, metrics;
 END;
