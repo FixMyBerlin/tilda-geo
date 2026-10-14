@@ -1772,6 +1772,14 @@ const data = {
         values: [],
       },
       {
+        key: 'route_relations',
+        type: 'string',
+        label: 'Routen',
+        description: 'Routen und Netze, zu denen der Weg gehört.',
+        chapterRefs: ['routen'],
+        values: [],
+      },
+      {
         key: 'description',
         type: 'sanitized_strings',
         label: 'Hinweis aus OSM',
@@ -2179,6 +2187,12 @@ const data = {
         title: 'Angrenzende Straße (`adjoining_*`)',
         markdown:
           '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
+      },
+      {
+        id: 'routen',
+        title: 'Routen und Netze (`route_relations`)',
+        markdown:
+          '`route_relations` sagt, zu welchen Routen und Netzen ein Weg gehört. Alles über die Route selbst (Name, Ref, Netzebene, Farbe, Verlauf) steht nicht am Weg, sondern in den Routen-Tabellen.\n\n## Format\n\nGruppen sind mit `;` getrennt, innerhalb einer Gruppe stehen Name und Einträge mit `:`, mehrere Einträge mit `,`:\n\n`bicycle:2788485,12138805;bus:1234567;radnetz_berlin:Vorrangnetz`\n\n- **OSM-Routen:** Gruppe ist der OSM-Wert `route=*` (`bicycle`, `mtb`, `bus`, `foot`, `hiking`), Einträge sind OSM-Relation-IDs. Name, Ref und Netz stehen in den Tabellen `bikeroutes`, `mtbroutes`, `busroutes`, `footroutes` und `hikingroutes`.\n- **Netze aus externen Daten:** eine Gruppe je Netz mit genau einer Klasse je Linie. Heute `radnetz_berlin` (Radnetz Berlin aus infraVelo) mit `Vorrangnetz`, `Ergänzungsnetz` oder `Sonstiges`. Ein Weg und seine Seiten (z. B. `cycleway/left`) können verschiedene Klassen haben.\n',
       },
       {
         id: 'versetzte-geometrien',
@@ -2611,6 +2625,12 @@ const data = {
           '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
       },
       {
+        id: 'routen',
+        title: 'Routen und Netze (`route_relations`)',
+        markdown:
+          '`route_relations` sagt, zu welchen Routen und Netzen ein Weg gehört. Alles über die Route selbst (Name, Ref, Netzebene, Farbe, Verlauf) steht nicht am Weg, sondern in den Routen-Tabellen.\n\n## Format\n\nGruppen sind mit `;` getrennt, innerhalb einer Gruppe stehen Name und Einträge mit `:`, mehrere Einträge mit `,`:\n\n`bicycle:2788485,12138805;bus:1234567;radnetz_berlin:Vorrangnetz`\n\n- **OSM-Routen:** Gruppe ist der OSM-Wert `route=*` (`bicycle`, `mtb`, `bus`, `foot`, `hiking`), Einträge sind OSM-Relation-IDs. Name, Ref und Netz stehen in den Tabellen `bikeroutes`, `mtbroutes`, `busroutes`, `footroutes` und `hikingroutes`.\n- **Netze aus externen Daten:** eine Gruppe je Netz mit genau einer Klasse je Linie. Heute `radnetz_berlin` (Radnetz Berlin aus infraVelo) mit `Vorrangnetz`, `Ergänzungsnetz` oder `Sonstiges`. Ein Weg und seine Seiten (z. B. `cycleway/left`) können verschiedene Klassen haben.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
@@ -2619,7 +2639,7 @@ const data = {
     ],
   },
   bikeroutes: {
-    topic: 'bikeroutes',
+    topic: 'routes',
     tableName: 'bikeroutes',
     sourceIds: ['atlas_bikeroutes'],
     title: 'Fahrradrouten',
@@ -3229,6 +3249,12 @@ const data = {
           '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
       },
       {
+        id: 'routen',
+        title: 'Routen und Netze (`route_relations`)',
+        markdown:
+          '`route_relations` sagt, zu welchen Routen und Netzen ein Weg gehört. Alles über die Route selbst (Name, Ref, Netzebene, Farbe, Verlauf) steht nicht am Weg, sondern in den Routen-Tabellen.\n\n## Format\n\nGruppen sind mit `;` getrennt, innerhalb einer Gruppe stehen Name und Einträge mit `:`, mehrere Einträge mit `,`:\n\n`bicycle:2788485,12138805;bus:1234567;radnetz_berlin:Vorrangnetz`\n\n- **OSM-Routen:** Gruppe ist der OSM-Wert `route=*` (`bicycle`, `mtb`, `bus`, `foot`, `hiking`), Einträge sind OSM-Relation-IDs. Name, Ref und Netz stehen in den Tabellen `bikeroutes`, `mtbroutes`, `busroutes`, `footroutes` und `hikingroutes`.\n- **Netze aus externen Daten:** eine Gruppe je Netz mit genau einer Klasse je Linie. Heute `radnetz_berlin` (Radnetz Berlin aus infraVelo) mit `Vorrangnetz`, `Ergänzungsnetz` oder `Sonstiges`. Ein Weg und seine Seiten (z. B. `cycleway/left`) können verschiedene Klassen haben.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
@@ -3315,6 +3341,162 @@ const data = {
         key: 'category_district',
         type: 'string',
         label: 'Kreiskategorie',
+        values: [],
+      },
+    ],
+    chapters: [],
+  },
+  busroutes: {
+    topic: 'routes',
+    tableName: 'busroutes',
+    sourceIds: [],
+    title: 'Buslinien',
+    summary:
+      'OSM-Relationen mit `type=route` und `route=bus`. Noch ohne Kartenebene; die Wege der Routen verweisen über `route_relations` hierher.',
+    groups: [],
+    attributes: [
+      {
+        key: 'route',
+        type: 'string',
+        label: 'Routentyp (`route=*`)',
+        values: [],
+      },
+      {
+        key: 'name',
+        type: 'sanitized_strings',
+        label: 'Name',
+        values: [],
+      },
+      {
+        key: 'ref',
+        type: 'sanitized_strings',
+        label: 'Referenz',
+        values: [],
+      },
+      {
+        key: 'network',
+        type: 'sanitized_strings',
+        label: 'Netz (`network=*`)',
+        values: [],
+      },
+      {
+        key: 'operator',
+        type: 'sanitized_strings',
+        label: 'Betreiber',
+        values: [],
+      },
+      {
+        key: 'from',
+        type: 'sanitized_strings',
+        label: 'Start',
+        values: [],
+      },
+      {
+        key: 'to',
+        type: 'sanitized_strings',
+        label: 'Ziel',
+        values: [],
+      },
+      {
+        key: 'route_description',
+        type: 'sanitized_strings',
+        label: 'Freitext zur Route',
+        values: [],
+      },
+      {
+        key: 'colours',
+        type: 'string',
+        label: 'Farben (mit `/` getrennt)',
+        values: [],
+      },
+      {
+        key: 'website',
+        type: 'sanitized_strings',
+        label: 'Website',
+        values: [],
+      },
+      {
+        key: 'wikipedia',
+        type: 'sanitized_strings',
+        label: 'Wikipedia',
+        values: [],
+      },
+    ],
+    chapters: [],
+  },
+  footroutes: {
+    topic: 'routes',
+    tableName: 'footroutes',
+    sourceIds: [],
+    title: 'Spazier- und Lehrpfade',
+    summary:
+      'OSM-Relationen mit `type=route` und `route=foot`. Noch ohne Kartenebene; die Wege der Routen verweisen über `route_relations` hierher.',
+    groups: [],
+    attributes: [
+      {
+        key: 'route',
+        type: 'string',
+        label: 'Routentyp (`route=*`)',
+        values: [],
+      },
+      {
+        key: 'name',
+        type: 'sanitized_strings',
+        label: 'Name',
+        values: [],
+      },
+      {
+        key: 'ref',
+        type: 'sanitized_strings',
+        label: 'Referenz',
+        values: [],
+      },
+      {
+        key: 'network',
+        type: 'sanitized_strings',
+        label: 'Netz (`network=*`)',
+        values: [],
+      },
+      {
+        key: 'operator',
+        type: 'sanitized_strings',
+        label: 'Betreiber',
+        values: [],
+      },
+      {
+        key: 'from',
+        type: 'sanitized_strings',
+        label: 'Start',
+        values: [],
+      },
+      {
+        key: 'to',
+        type: 'sanitized_strings',
+        label: 'Ziel',
+        values: [],
+      },
+      {
+        key: 'route_description',
+        type: 'sanitized_strings',
+        label: 'Freitext zur Route',
+        values: [],
+      },
+      {
+        key: 'colours',
+        type: 'string',
+        label: 'Farben (mit `/` getrennt)',
+        values: [],
+      },
+      {
+        key: 'website',
+        type: 'sanitized_strings',
+        label: 'Website',
+        values: [],
+      },
+      {
+        key: 'wikipedia',
+        type: 'sanitized_strings',
+        label: 'Wikipedia',
         values: [],
       },
     ],
@@ -3951,12 +4133,96 @@ const data = {
           '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
       },
       {
+        id: 'routen',
+        title: 'Routen und Netze (`route_relations`)',
+        markdown:
+          '`route_relations` sagt, zu welchen Routen und Netzen ein Weg gehört. Alles über die Route selbst (Name, Ref, Netzebene, Farbe, Verlauf) steht nicht am Weg, sondern in den Routen-Tabellen.\n\n## Format\n\nGruppen sind mit `;` getrennt, innerhalb einer Gruppe stehen Name und Einträge mit `:`, mehrere Einträge mit `,`:\n\n`bicycle:2788485,12138805;bus:1234567;radnetz_berlin:Vorrangnetz`\n\n- **OSM-Routen:** Gruppe ist der OSM-Wert `route=*` (`bicycle`, `mtb`, `bus`, `foot`, `hiking`), Einträge sind OSM-Relation-IDs. Name, Ref und Netz stehen in den Tabellen `bikeroutes`, `mtbroutes`, `busroutes`, `footroutes` und `hikingroutes`.\n- **Netze aus externen Daten:** eine Gruppe je Netz mit genau einer Klasse je Linie. Heute `radnetz_berlin` (Radnetz Berlin aus infraVelo) mit `Vorrangnetz`, `Ergänzungsnetz` oder `Sonstiges`. Ein Weg und seine Seiten (z. B. `cycleway/left`) können verschiedene Klassen haben.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
           'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
       },
     ],
+  },
+  hikingroutes: {
+    topic: 'routes',
+    tableName: 'hikingroutes',
+    sourceIds: [],
+    title: 'Wanderwege',
+    summary:
+      'OSM-Relationen mit `type=route` und `route=hiking`. Noch ohne Kartenebene; die Wege der Routen verweisen über `route_relations` hierher.',
+    groups: [],
+    attributes: [
+      {
+        key: 'route',
+        type: 'string',
+        label: 'Routentyp (`route=*`)',
+        values: [],
+      },
+      {
+        key: 'name',
+        type: 'sanitized_strings',
+        label: 'Name',
+        values: [],
+      },
+      {
+        key: 'ref',
+        type: 'sanitized_strings',
+        label: 'Referenz',
+        values: [],
+      },
+      {
+        key: 'network',
+        type: 'sanitized_strings',
+        label: 'Netz (`network=*`)',
+        values: [],
+      },
+      {
+        key: 'operator',
+        type: 'sanitized_strings',
+        label: 'Betreiber',
+        values: [],
+      },
+      {
+        key: 'from',
+        type: 'sanitized_strings',
+        label: 'Start',
+        values: [],
+      },
+      {
+        key: 'to',
+        type: 'sanitized_strings',
+        label: 'Ziel',
+        values: [],
+      },
+      {
+        key: 'route_description',
+        type: 'sanitized_strings',
+        label: 'Freitext zur Route',
+        values: [],
+      },
+      {
+        key: 'colours',
+        type: 'string',
+        label: 'Farben (mit `/` getrennt)',
+        values: [],
+      },
+      {
+        key: 'website',
+        type: 'sanitized_strings',
+        label: 'Website',
+        values: [],
+      },
+      {
+        key: 'wikipedia',
+        type: 'sanitized_strings',
+        label: 'Wikipedia',
+        values: [],
+      },
+    ],
+    chapters: [],
   },
   landuse: {
     topic: 'landuse',
@@ -4125,6 +4391,84 @@ const data = {
         key: 'operator',
         type: 'sanitized_strings',
         label: 'Betreiber',
+        values: [],
+      },
+    ],
+    chapters: [],
+  },
+  mtbroutes: {
+    topic: 'routes',
+    tableName: 'mtbroutes',
+    sourceIds: [],
+    title: 'Mountainbike-Routen',
+    summary:
+      'OSM-Relationen mit `type=route` und `route=mtb`. Noch ohne Kartenebene; die Wege der Routen verweisen über `route_relations` hierher.',
+    groups: [],
+    attributes: [
+      {
+        key: 'route',
+        type: 'string',
+        label: 'Routentyp (`route=*`)',
+        values: [],
+      },
+      {
+        key: 'name',
+        type: 'sanitized_strings',
+        label: 'Name',
+        values: [],
+      },
+      {
+        key: 'ref',
+        type: 'sanitized_strings',
+        label: 'Referenz',
+        values: [],
+      },
+      {
+        key: 'network',
+        type: 'sanitized_strings',
+        label: 'Netz (`network=*`)',
+        values: [],
+      },
+      {
+        key: 'operator',
+        type: 'sanitized_strings',
+        label: 'Betreiber',
+        values: [],
+      },
+      {
+        key: 'from',
+        type: 'sanitized_strings',
+        label: 'Start',
+        values: [],
+      },
+      {
+        key: 'to',
+        type: 'sanitized_strings',
+        label: 'Ziel',
+        values: [],
+      },
+      {
+        key: 'route_description',
+        type: 'sanitized_strings',
+        label: 'Freitext zur Route',
+        values: [],
+      },
+      {
+        key: 'colours',
+        type: 'string',
+        label: 'Farben (mit `/` getrennt)',
+        values: [],
+      },
+      {
+        key: 'website',
+        type: 'sanitized_strings',
+        label: 'Website',
+        values: [],
+      },
+      {
+        key: 'wikipedia',
+        type: 'sanitized_strings',
+        label: 'Wikipedia',
         values: [],
       },
     ],
@@ -10724,6 +11068,14 @@ const data = {
         values: [],
       },
       {
+        key: 'route_relations',
+        type: 'string',
+        label: 'Routen',
+        description: 'Routen und Netze, zu denen der Weg gehört.',
+        chapterRefs: ['routen'],
+        values: [],
+      },
+      {
         key: 'traffic_sign',
         type: 'sanitized_strings',
         label: 'Beschilderung',
@@ -11588,6 +11940,12 @@ const data = {
           '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
       },
       {
+        id: 'routen',
+        title: 'Routen und Netze (`route_relations`)',
+        markdown:
+          '`route_relations` sagt, zu welchen Routen und Netzen ein Weg gehört. Alles über die Route selbst (Name, Ref, Netzebene, Farbe, Verlauf) steht nicht am Weg, sondern in den Routen-Tabellen.\n\n## Format\n\nGruppen sind mit `;` getrennt, innerhalb einer Gruppe stehen Name und Einträge mit `:`, mehrere Einträge mit `,`:\n\n`bicycle:2788485,12138805;bus:1234567;radnetz_berlin:Vorrangnetz`\n\n- **OSM-Routen:** Gruppe ist der OSM-Wert `route=*` (`bicycle`, `mtb`, `bus`, `foot`, `hiking`), Einträge sind OSM-Relation-IDs. Name, Ref und Netz stehen in den Tabellen `bikeroutes`, `mtbroutes`, `busroutes`, `footroutes` und `hikingroutes`.\n- **Netze aus externen Daten:** eine Gruppe je Netz mit genau einer Klasse je Linie. Heute `radnetz_berlin` (Radnetz Berlin aus infraVelo) mit `Vorrangnetz`, `Ergänzungsnetz` oder `Sonstiges`. Ein Weg und seine Seiten (z. B. `cycleway/left`) können verschiedene Klassen haben.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
@@ -11856,6 +12214,14 @@ const data = {
         label: 'Mapillary für Verkehrszeichen',
         description:
           'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
+        values: [],
+      },
+      {
+        key: 'route_relations',
+        type: 'string',
+        label: 'Routen',
+        description: 'Routen und Netze, zu denen der Weg gehört.',
+        chapterRefs: ['routen'],
         values: [],
       },
       {
@@ -12794,6 +13160,12 @@ const data = {
           '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
       },
       {
+        id: 'routen',
+        title: 'Routen und Netze (`route_relations`)',
+        markdown:
+          '`route_relations` sagt, zu welchen Routen und Netzen ein Weg gehört. Alles über die Route selbst (Name, Ref, Netzebene, Farbe, Verlauf) steht nicht am Weg, sondern in den Routen-Tabellen.\n\n## Format\n\nGruppen sind mit `;` getrennt, innerhalb einer Gruppe stehen Name und Einträge mit `:`, mehrere Einträge mit `,`:\n\n`bicycle:2788485,12138805;bus:1234567;radnetz_berlin:Vorrangnetz`\n\n- **OSM-Routen:** Gruppe ist der OSM-Wert `route=*` (`bicycle`, `mtb`, `bus`, `foot`, `hiking`), Einträge sind OSM-Relation-IDs. Name, Ref und Netz stehen in den Tabellen `bikeroutes`, `mtbroutes`, `busroutes`, `footroutes` und `hikingroutes`.\n- **Netze aus externen Daten:** eine Gruppe je Netz mit genau einer Klasse je Linie. Heute `radnetz_berlin` (Radnetz Berlin aus infraVelo) mit `Vorrangnetz`, `Ergänzungsnetz` oder `Sonstiges`. Ein Weg und seine Seiten (z. B. `cycleway/left`) können verschiedene Klassen haben.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
@@ -13677,6 +14049,12 @@ const data = {
           '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
       },
       {
+        id: 'routen',
+        title: 'Routen und Netze (`route_relations`)',
+        markdown:
+          '`route_relations` sagt, zu welchen Routen und Netzen ein Weg gehört. Alles über die Route selbst (Name, Ref, Netzebene, Farbe, Verlauf) steht nicht am Weg, sondern in den Routen-Tabellen.\n\n## Format\n\nGruppen sind mit `;` getrennt, innerhalb einer Gruppe stehen Name und Einträge mit `:`, mehrere Einträge mit `,`:\n\n`bicycle:2788485,12138805;bus:1234567;radnetz_berlin:Vorrangnetz`\n\n- **OSM-Routen:** Gruppe ist der OSM-Wert `route=*` (`bicycle`, `mtb`, `bus`, `foot`, `hiking`), Einträge sind OSM-Relation-IDs. Name, Ref und Netz stehen in den Tabellen `bikeroutes`, `mtbroutes`, `busroutes`, `footroutes` und `hikingroutes`.\n- **Netze aus externen Daten:** eine Gruppe je Netz mit genau einer Klasse je Linie. Heute `radnetz_berlin` (Radnetz Berlin aus infraVelo) mit `Vorrangnetz`, `Ergänzungsnetz` oder `Sonstiges`. Ein Weg und seine Seiten (z. B. `cycleway/left`) können verschiedene Klassen haben.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
@@ -13733,6 +14111,12 @@ const data = {
         title: 'Angrenzende Straße (`adjoining_*`)',
         markdown:
           '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
+      },
+      {
+        id: 'routen',
+        title: 'Routen und Netze (`route_relations`)',
+        markdown:
+          '`route_relations` sagt, zu welchen Routen und Netzen ein Weg gehört. Alles über die Route selbst (Name, Ref, Netzebene, Farbe, Verlauf) steht nicht am Weg, sondern in den Routen-Tabellen.\n\n## Format\n\nGruppen sind mit `;` getrennt, innerhalb einer Gruppe stehen Name und Einträge mit `:`, mehrere Einträge mit `,`:\n\n`bicycle:2788485,12138805;bus:1234567;radnetz_berlin:Vorrangnetz`\n\n- **OSM-Routen:** Gruppe ist der OSM-Wert `route=*` (`bicycle`, `mtb`, `bus`, `foot`, `hiking`), Einträge sind OSM-Relation-IDs. Name, Ref und Netz stehen in den Tabellen `bikeroutes`, `mtbroutes`, `busroutes`, `footroutes` und `hikingroutes`.\n- **Netze aus externen Daten:** eine Gruppe je Netz mit genau einer Klasse je Linie. Heute `radnetz_berlin` (Radnetz Berlin aus infraVelo) mit `Vorrangnetz`, `Ergänzungsnetz` oder `Sonstiges`. Ein Weg und seine Seiten (z. B. `cycleway/left`) können verschiedene Klassen haben.\n',
       },
       {
         id: 'versetzte-geometrien',

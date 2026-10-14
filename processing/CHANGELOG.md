@@ -4,6 +4,14 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-10
 
+### `roads`, `roadsPathClasses`, `bikelanes`: `route_relations`
+
+- New key `route_relations`: the OSM route relations a way belongs to, grouped by `route=*`, e.g. `bicycle:2788485,12138805;bus:1234567`. Route types: `bicycle`, `mtb`, `bus`, `foot`, `hiking`. Also the Berlin cycling network from infraVelo as pseudo relation per line, e.g. `radnetz_berlin:Vorrangnetz`, from the infravelo-radnetz repo. Why and how: [topics/roads_bikelanes/route_relations/README.md](topics/roads_bikelanes/route_relations/README.md).
+
+### Topic `bikeroutes` renamed to `routes`; new tables `mtbroutes`, `busroutes`, `footroutes`, `hikingroutes`
+
+- The topic now writes one table per route type. `bikeroutes` keeps its name and content. The error table is now `routes_errors` (was `bikeroutes_errors`). Use `PROCESS_ONLY_TOPICS=routes` instead of `bikeroutes`.
+
 ### `roads`, `routing`, `bikelanes`
 
 - Fix: `maxspeed` is now read from `zone:maxspeed` (e.g. `DE:30`, `30`) and from `source:maxspeed=DE:zone:30` (colon form) when the way has no `maxspeed` tag. Before, these values gave no `maxspeed`.

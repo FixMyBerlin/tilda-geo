@@ -717,6 +717,7 @@ const data = {
           },
         },
       },
+      route_relations: 'Routen',
       description: 'Hinweis aus OSM',
       operator_type: {
         name: 'Betreibertyp',
@@ -1308,6 +1309,36 @@ const data = {
       category_district: 'Kreiskategorie',
     },
   },
+  busroutes: {
+    gfiAttributes: {
+      route: 'Routentyp (`route=*`)',
+      name: 'Name',
+      ref: 'Referenz',
+      network: 'Netz (`network=*`)',
+      operator: 'Betreiber',
+      from: 'Start',
+      to: 'Ziel',
+      route_description: 'Freitext zur Route',
+      colours: 'Farben (mit `/` getrennt)',
+      website: 'Website',
+      wikipedia: 'Wikipedia',
+    },
+  },
+  footroutes: {
+    gfiAttributes: {
+      route: 'Routentyp (`route=*`)',
+      name: 'Name',
+      ref: 'Referenz',
+      network: 'Netz (`network=*`)',
+      operator: 'Betreiber',
+      from: 'Start',
+      to: 'Ziel',
+      route_description: 'Freitext zur Route',
+      colours: 'Farben (mit `/` getrennt)',
+      website: 'Website',
+      wikipedia: 'Wikipedia',
+    },
+  },
   highwayAreas: {
     gfiAttributes: {
       road: {
@@ -1611,6 +1642,21 @@ const data = {
       },
     },
   },
+  hikingroutes: {
+    gfiAttributes: {
+      route: 'Routentyp (`route=*`)',
+      name: 'Name',
+      ref: 'Referenz',
+      network: 'Netz (`network=*`)',
+      operator: 'Betreiber',
+      from: 'Start',
+      to: 'Ziel',
+      route_description: 'Freitext zur Route',
+      colours: 'Farben (mit `/` getrennt)',
+      website: 'Website',
+      wikipedia: 'Wikipedia',
+    },
+  },
   landuse: {
     gfiAttributes: {
       landuse: {
@@ -1661,6 +1707,21 @@ const data = {
       },
       name: 'Name',
       operator: 'Betreiber',
+    },
+  },
+  mtbroutes: {
+    gfiAttributes: {
+      route: 'Routentyp (`route=*`)',
+      name: 'Name',
+      ref: 'Referenz',
+      network: 'Netz (`network=*`)',
+      operator: 'Betreiber',
+      from: 'Start',
+      to: 'Ziel',
+      route_description: 'Freitext zur Route',
+      colours: 'Farben (mit `/` getrennt)',
+      website: 'Website',
+      wikipedia: 'Wikipedia',
     },
   },
   off_street_parking_areas: {
@@ -3886,6 +3947,7 @@ const data = {
           },
         },
       },
+      route_relations: 'Routen',
       traffic_sign: {
         name: 'Beschilderung',
         condition: 'contains',
@@ -4345,6 +4407,7 @@ const data = {
           },
         },
       },
+      route_relations: 'Routen',
       traffic_sign: {
         name: 'Beschilderung',
         condition: 'contains',

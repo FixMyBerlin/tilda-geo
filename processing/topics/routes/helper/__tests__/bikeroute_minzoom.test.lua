@@ -1,5 +1,5 @@
 describe('bikeroutes minzoom', function()
-  local minzoom = require('topics.bikeroutes.helper.minzoom')
+  local minzoom = require('topics.routes.helper.bikeroute_minzoom')
 
   it('returns 5 for national and international routes', function()
     assert.are.same(minzoom({ network = 'ncn' }), 5)

@@ -45,4 +45,28 @@ describe('load_merged_pseudo_tags', function()
     assert.are.equal(merged[22].adjoining_road, 'secondary')
     assert.are.equal(merged[22].adjoining_maxspeed, '50')
   end)
+  it('merges radnetz_berlin rows per id suffix and translates V/E/S', function()
+    os.execute('mkdir -p /data/pseudoTagsData')
+    assert(io.open('/data/pseudoTagsData/mapillary_coverage.csv', 'w')):close()
+    assert(io.open('/data/pseudoTagsData/is_sidepath_estimation.csv', 'w')):close()
+    finally(function() os.remove('/data/pseudoTagsData/infravelo_netz.csv') end)
+
+    local f = assert(io.open('/data/pseudoTagsData/infravelo_netz.csv', 'w'))
+    f:write('osm_id,id_suffix,infravelo_netz\n')
+    f:write('812944114,,V\n')
+    f:write('4425411,cycleway/left,E\n')
+    f:write('4425411,cycleway/right,S\n')
+    f:write('99,,X\n')
+    f:close()
+
+    local merged = load_merged_pseudo_tags():get()
+
+    assert.are.same({ [''] = 'Vorrangnetz' }, merged[812944114].radnetz_berlin)
+    assert.are.same(
+      { ['cycleway/left'] = 'Ergänzungsnetz', ['cycleway/right'] = 'Sonstiges' },
+      merged[4425411].radnetz_berlin
+    )
+    assert.is_nil(merged[4425411].radnetz_berlin[''])
+    assert.is_nil(merged[99])
+  end)
 end)

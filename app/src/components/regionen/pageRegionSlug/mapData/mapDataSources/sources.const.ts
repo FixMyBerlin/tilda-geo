@@ -80,6 +80,7 @@ export const sources: MapDataSource<SourcesId>[] = [
         'surface_color__if_present',
         'description__if_present',
         'length',
+        'composit_route_relations',
         // Last: links to photos, not a property of the object.
         'composit_mapillary',
       ],
@@ -144,6 +145,7 @@ export const sources: MapDataSource<SourcesId>[] = [
         'width',
         'length',
         'description__if_present',
+        'composit_route_relations',
         // Last: links to photos, not a property of the object.
         'composit_mapillary',
       ],
@@ -205,6 +207,7 @@ export const sources: MapDataSource<SourcesId>[] = [
         'width',
         'length',
         'description__if_present',
+        'composit_route_relations',
         // Last: links to photos, not a property of the object.
         'composit_mapillary',
       ],

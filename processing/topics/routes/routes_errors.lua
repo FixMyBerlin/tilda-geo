@@ -10,7 +10,7 @@ if type(osm2pgsql) ~= 'table' or osm2pgsql.define_table == nil then
 end
 
 local db_table = osm2pgsql.define_table({
-  name = 'bikeroutes_errors',
+  name = 'routes_errors',
   ids = { type = 'any', id_column = 'osm_id', type_column = 'osm_type' },
   columns = {
     -- We cannot use our own id system here because the uniquess index fails.
