@@ -1,0 +1,42 @@
+import type { MapboxStyleLayer } from './utils/types'
+
+export const mapboxStyleGroupLayers_atlas_boundaries_names: MapboxStyleLayer[] = [
+  {
+    id: 'name_category_municipality',
+    type: 'symbol',
+    filter: ['has', 'category_municipality'],
+    layout: {
+      'text-field': [
+        'concat',
+        ['to-string', ['get', 'name_prefix']],
+        ' ',
+        ['to-string', ['get', 'name']],
+      ],
+      'text-size': 12,
+    },
+    paint: {
+      'text-color': '#bc6a2f',
+      'text-halo-color': '#ffffff',
+      'text-halo-width': 1,
+    },
+  },
+  {
+    id: 'name_category_district',
+    type: 'symbol',
+    filter: ['has', 'category_district'],
+    layout: {
+      'text-field': [
+        'concat',
+        ['to-string', ['get', 'name_prefix']],
+        ' ',
+        ['to-string', ['get', 'name']],
+      ],
+      'text-size': 14,
+    },
+    paint: {
+      'text-color': '#bc6a2f',
+      'text-halo-color': '#ffffff',
+      'text-halo-width': 2,
+    },
+  },
+]

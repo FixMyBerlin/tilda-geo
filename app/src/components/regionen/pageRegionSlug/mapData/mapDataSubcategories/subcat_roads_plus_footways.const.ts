@@ -1,7 +1,7 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_atlas_roads_plus_fusswege } from './mapboxStyles/groups/atlas_roads_plus_fusswege'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
-import { structureIconLayers } from './mapboxStyles/structureIconLayers'
+import { mapboxStyleGroupLayers_atlas_roads_plus_fusswege } from './layers/roads_plus_fusswege'
+import { structureIconLayers } from './layers/structureIconLayers'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const subcatId = 'roads_plus_footways'
 const source = 'atlas_roadsPathClasses'

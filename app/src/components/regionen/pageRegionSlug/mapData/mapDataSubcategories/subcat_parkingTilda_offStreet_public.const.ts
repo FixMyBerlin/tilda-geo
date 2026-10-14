@@ -1,12 +1,12 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_park_off_default_area } from './mapboxStyles/groups/park_off_default_area'
-import { mapboxStyleGroupLayers_park_off_default_points } from './mapboxStyles/groups/park_off_default_points'
-import { mapboxStyleGroupLayers_park_off_kind_area } from './mapboxStyles/groups/park_off_kind_area'
-import { mapboxStyleGroupLayers_park_off_labels } from './mapboxStyles/groups/park_off_labels'
-import { mapboxStyleGroupLayers_park_off_surface_area } from './mapboxStyles/groups/park_off_surface_area'
-import type { MapboxStyleLayersProps } from './mapboxStyles/mapboxStyleLayers'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_park_off_default_area } from './layers/parkingTilda_off_default_area'
+import { mapboxStyleGroupLayers_park_off_default_points } from './layers/parkingTilda_off_default_points'
+import { mapboxStyleGroupLayers_park_off_kind_area } from './layers/parkingTilda_off_kind_area'
+import { mapboxStyleGroupLayers_park_off_labels } from './layers/parkingTilda_off_labels'
+import { mapboxStyleGroupLayers_park_off_surface_area } from './layers/parkingTilda_off_surface_area'
+import type { MapboxStyleLayersProps } from './layers/utils/mapboxStyleLayers'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 import {
   parkingTildaOffStreetDefaultLegends,
   parkingTildaOffStreetKindLegends,

@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_atlas_bikelanes_plus_signs } from './mapboxStyles/groups/atlas_bikelanes_plus_signs'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_atlas_bikelanes_plus_signs } from './layers/bikelanes_plus_signs'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const subcatId = 'bikelanes_plus_signs'
 const source = 'atlas_bikelanes'

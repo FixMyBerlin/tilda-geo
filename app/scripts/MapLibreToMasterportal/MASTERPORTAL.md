@@ -154,11 +154,11 @@ Symbologie-Regeln mit `legendValue` sind in den Style-Regeln für Straßenraum-L
 
 ## 5. Style-Inhalt pro GPKG-Layer
 
-| styleId                     | Mapbox-Quelle (tilda-geo)                                | Beschreibung                                                                                 |
-| --------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------- |
-| `parking_public_on_street`  | `park_street_default` + `park_street_pattern` (parallel) | Linienfarben nach `condition_category`; paralleles Strichelmuster für `orientation=parallel` |
-| `parking_public_off_street` | `park_off_default_area`                                  | Polygonfüllung und -umriss nach `condition_category`                                         |
-| `parking_public_no_parking` | `park_street_no`                                         | Orange gestrichelt (`no_parking`), rot gestrichelt (`no_stopping`)                           |
+| styleId                     | Layer-Datei (tilda-geo)                                                  | Beschreibung                                                                                 |
+| --------------------------- | ------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------- |
+| `parking_public_on_street`  | `parkingTilda_street_default` + `parkingTilda_street_pattern` (parallel) | Linienfarben nach `condition_category`; paralleles Strichelmuster für `orientation=parallel` |
+| `parking_public_off_street` | `parkingTilda_off_default_area`                                          | Polygonfüllung und -umriss nach `condition_category`                                         |
+| `parking_public_no_parking` | `parkingTilda_street_no`                                                 | Orange gestrichelt (`no_parking`), rot gestrichelt (`no_stopping`)                           |
 
 Die Farbzuordnung für `condition_category` folgt der MapLibre-Prioritätsreihenfolge (`index-of` auf semikolongetrennte Werte → Masterportal-Regel mit `condition: "contains"`).
 
@@ -168,15 +168,15 @@ Die Farbzuordnung für `condition_category` folgt der MapLibre-Prioritätsreihen
 
 Für den Abgleich mit der Live-Karte auf tilda-geo.de erzeugt der Konverter zusätzlich `parkbeschraenkungen.json` mit **7** Styles:
 
-| styleId                                               | Quelle (Mapbox-Gruppe)           | Geometrie  | Beschreibung                                 |
-| ----------------------------------------------------- | -------------------------------- | ---------- | -------------------------------------------- |
-| `tilda_parkings_parkbeschraenkungen_line`             | `park_street_default`            | Linie      | Farben nach `condition_category`             |
-| `tilda_parkings_parkbeschraenkungen_pattern_parallel` | `park_street_pattern` (parallel) | Linie      | Hellgraue Strichelung                        |
-| `tilda_parkings_separate_shadow`                      | `park_street_areas_shadow`       | Polygon    | Schattenflächen separat erfasster Parkplätze |
-| `tilda_parkings_labels`                               | `park_street_label`              | Punkt/Text | Kapazitätszahl                               |
-| `tilda_off_street_parkbeschraenkungen_area`           | `park_off_default_area`          | Polygon    | Füllung + Umriss                             |
-| `tilda_off_street_points`                             | `park_off_default_points`        | Punkt      | Garagen-/Parkhaus-Eingänge                   |
-| `tilda_off_street_labels`                             | `park_off_labels`                | Punkt/Text | Kapazitätszahl                               |
+| styleId                                               | Quelle (Layer-Datei)                     | Geometrie  | Beschreibung                                 |
+| ----------------------------------------------------- | ---------------------------------------- | ---------- | -------------------------------------------- |
+| `tilda_parkings_parkbeschraenkungen_line`             | `parkingTilda_street_default`            | Linie      | Farben nach `condition_category`             |
+| `tilda_parkings_parkbeschraenkungen_pattern_parallel` | `parkingTilda_street_pattern` (parallel) | Linie      | Hellgraue Strichelung                        |
+| `tilda_parkings_separate_shadow`                      | `parkingTilda_street_areas_shadow`       | Polygon    | Schattenflächen separat erfasster Parkplätze |
+| `tilda_parkings_labels`                               | `parkingTilda_street_label`              | Punkt/Text | Kapazitätszahl                               |
+| `tilda_off_street_parkbeschraenkungen_area`           | `parkingTilda_off_default_area`          | Polygon    | Füllung + Umriss                             |
+| `tilda_off_street_points`                             | `parkingTilda_off_default_points`        | Punkt      | Garagen-/Parkhaus-Eingänge                   |
+| `tilda_off_street_labels`                             | `parkingTilda_off_labels`                | Punkt/Text | Kapazitätszahl                               |
 
 Die OpenLayers-Preview (`preview/serve.ts`) nutzt dieses Tile-Bundle — **nicht** die GPKG-Styles.
 
@@ -194,7 +194,7 @@ Die OpenLayers-Preview (`preview/serve.ts`) nutzt dieses Tile-Bundle — **nicht
 
 ### Straßenraum
 
-4. **Nur Features mit `capacity`** — Die Hauptlinien (`park_street_default`) filtern in MapLibre auf `['has', 'capacity']`. Features ohne Kapazität werden nicht gezeichnet.
+4. **Nur Features mit `capacity`** — Die Hauptlinien (`parkingTilda_street_default`) filtern in MapLibre auf `['has', 'capacity']`. Features ohne Kapazität werden nicht gezeichnet.
 
 5. **Diagonale/senkrechte Muster fehlen** — MapLibre nutzt `line-pattern`-Sprites. Masterportal unterstützt das nicht; nur das parallele Strichelmuster ist als `lineStrokeDash` übernommen.
 
@@ -220,7 +220,7 @@ Die OpenLayers-Preview (`preview/serve.ts`) nutzt dieses Tile-Bundle — **nicht
 
 13. **1:1 mit Topic-Docs** — Jeder `condition_category`-Token aus der Mapbox-Farbkaskade erhält einen eigenen `legendValue`. Die tilda-geo-App gruppiert manche Kategorien in der Sidebar anders.
 
-14. **`no_standing` Warnung** — Token in Topic-Docs, aber keine Farbe in `park_street_default.ts`. Warnung in `conversion-meta.json`.
+14. **`no_standing` Warnung** — Token in Topic-Docs, aber keine Farbe in `parkingTilda_street_default.ts`. Warnung in `conversion-meta.json`.
 
 15. **Preview-Legende dedupliziert** — Opazitäts-Varianten erzeugen mehrere Regeln mit gleichem `legendValue`; die Preview zeigt jeden Text nur einmal.
 
@@ -228,10 +228,10 @@ Die OpenLayers-Preview (`preview/serve.ts`) nutzt dieses Tile-Bundle — **nicht
 
 ## 8. Bewusst nicht konvertierte Mapbox-Layer
 
-| Layer                                 | Grund                                                  |
-| ------------------------------------- | ------------------------------------------------------ |
-| `park_street_pattern` → diagonal      | `line-pattern` Sprite, nicht in Masterportal abbildbar |
-| `park_street_pattern` → perpendicular | `line-pattern` Sprite, nicht in Masterportal abbildbar |
+| Layer                                         | Grund                                                  |
+| --------------------------------------------- | ------------------------------------------------------ |
+| `parkingTilda_street_pattern` → diagonal      | `line-pattern` Sprite, nicht in Masterportal abbildbar |
+| `parkingTilda_street_pattern` → perpendicular | `line-pattern` Sprite, nicht in Masterportal abbildbar |
 
 ---
 

@@ -1,8 +1,8 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_atlas_places } from './mapboxStyles/groups/atlas_places'
-import { mapboxStyleGroupLayers_atlas_placescircle } from './mapboxStyles/groups/atlas_placescircle'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_atlas_places } from './layers/places'
+import { mapboxStyleGroupLayers_atlas_placescircle } from './layers/placescircle'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const subcatId = 'poiPlaces'
 export type SubcatPoiPlacesId = typeof subcatId

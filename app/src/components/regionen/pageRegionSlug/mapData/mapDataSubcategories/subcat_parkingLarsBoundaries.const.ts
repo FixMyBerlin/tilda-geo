@@ -1,7 +1,7 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_parking_boundaries } from './mapboxStyles/groups/parking_boundaries'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_parking_boundaries } from './layers/parkingLars_boundaries'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const subcatId = 'parkingBoundaries'
 const source = 'lars_parking_stats'

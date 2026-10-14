@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
-import { litAbsentAreaDataLegend, litAreaLayers, litAreaLegends } from './manualStyles/lit'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { litAbsentAreaDataLegend, litAreaLayers, litAreaLegends } from './layers/lit'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const subcatId = 'lit_highway_areas'
 const source = 'tilda_highwayAreas'

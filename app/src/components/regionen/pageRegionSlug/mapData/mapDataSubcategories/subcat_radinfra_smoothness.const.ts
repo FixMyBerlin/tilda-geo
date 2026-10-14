@@ -1,7 +1,7 @@
 import type { FileMapDataSubcategory, FileMapDataSubcategoryStyleLegend } from '../types'
-import { withBikelaneVisualLineOffset } from './mapboxStyles/bikelaneLineOffset'
-import { mapboxStyleGroupLayers_radinfra_smoothness } from './mapboxStyles/groups/radinfra_smoothness'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_radinfra_smoothness } from './layers/radinfra_smoothness'
+import { withBikelaneVisualLineOffset } from './layers/utils/bikelaneLineOffset'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 import { legendSurfaceDefault } from './subcat_surface_roads.const'
 
 const subcatId = 'bikelanes'

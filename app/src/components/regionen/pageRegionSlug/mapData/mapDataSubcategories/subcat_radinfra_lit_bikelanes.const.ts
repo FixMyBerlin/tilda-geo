@@ -3,8 +3,8 @@ import {
   litLineCompletenessLayersRadinfra,
   litLineLegends,
   litMissingDataLegendRadinfra,
-} from './manualStyles/lit'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+} from './layers/lit'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const subcatId = 'lit_bikelanes'
 const source = 'atlas_bikelanes'

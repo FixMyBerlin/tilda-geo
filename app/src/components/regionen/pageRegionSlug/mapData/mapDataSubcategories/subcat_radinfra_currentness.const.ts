@@ -1,8 +1,8 @@
 import { getUnixTime, startOfYear, subYears } from 'date-fns'
 import type { FileMapDataSubcategory, FileMapDataSubcategoryStyleLegend } from '../types'
-import { withBikelaneVisualLineOffset } from './mapboxStyles/bikelaneLineOffset'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
-import type { MapboxStyleLayer } from './mapboxStyles/types'
+import { withBikelaneVisualLineOffset } from './layers/utils/bikelaneLineOffset'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
+import type { MapboxStyleLayer } from './layers/utils/types'
 
 const subcatId = 'bikelanes'
 const source = 'atlas_bikelanes'

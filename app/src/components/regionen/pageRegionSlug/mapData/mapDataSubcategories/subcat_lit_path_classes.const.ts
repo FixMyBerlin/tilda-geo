@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
-import { litAbsentDataLegend, litLineLayers, litLineLegends } from './manualStyles/lit'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { litAbsentDataLegend, litLineLayers, litLineLegends } from './layers/lit'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const subcatId = 'lit_path_classes'
 const source = 'atlas_roadsPathClasses'

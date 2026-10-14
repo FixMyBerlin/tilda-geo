@@ -1,8 +1,8 @@
 import type { FileMapDataSubcategory, FileMapDataSubcategoryStyleLegend } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_atlas_roads_smooth_all } from './mapboxStyles/groups/atlas_roads_smooth_all'
-import { mapboxStyleGroupLayers_atlas_roads_smooth_bad } from './mapboxStyles/groups/atlas_roads_smooth_bad'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_atlas_roads_smooth_all } from './layers/roads_smooth_all'
+import { mapboxStyleGroupLayers_atlas_roads_smooth_bad } from './layers/roads_smooth_bad'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const subcatId = 'surfaceRoads'
 const source = 'atlas_roads'

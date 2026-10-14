@@ -1,0 +1,29 @@
+import type { MapboxStyleLayer } from './utils/types'
+
+export const mapboxStyleGroupLayers_park_street_no: MapboxStyleLayer[] = [
+  {
+    id: 'no_parking_no_stopping',
+    type: 'line',
+    filter: ['match', ['get', 'parking'], ['no_stopping', 'no_parking'], true, false],
+    paint: {
+      'line-color': [
+        'match',
+        ['get', 'parking'],
+        ['no_parking'],
+        'rgb(249, 115, 22)',
+        ['no_stopping'],
+        'rgb(235, 0, 0)',
+        'rgb(189, 189, 189)',
+      ],
+      'line-dasharray': [1, 0.75],
+      'line-opacity': [
+        'match',
+        ['get', 'highway'],
+        ['secondary', 'construction', 'pedestrian'],
+        0.25,
+        1,
+      ],
+      'line-width': ['interpolate', ['linear'], ['zoom'], 15, 1, 20, 8],
+    },
+  },
+]

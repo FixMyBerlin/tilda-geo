@@ -1,7 +1,7 @@
-import { mapboxStyleGroupLayers_park_off_default_area } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/park_off_default_area'
-import { mapboxStyleGroupLayers_park_street_default } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/park_street_default'
-import { mapboxStyleGroupLayers_park_street_no } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/park_street_no'
-import { mapboxStyleGroupLayers_park_street_pattern } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/park_street_pattern'
+import { mapboxStyleGroupLayers_park_off_default_area } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/parkingTilda_off_default_area'
+import { mapboxStyleGroupLayers_park_street_default } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/parkingTilda_street_default'
+import { mapboxStyleGroupLayers_park_street_no } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/parkingTilda_street_no'
+import { mapboxStyleGroupLayers_park_street_pattern } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/parkingTilda_street_pattern'
 import {
   loadConditionCategoryLabels,
   validateLegendLabels,
@@ -77,7 +77,7 @@ export const buildParkingPublicGpkgStyles = (options: ParkingPublicGpkgProfileOp
       styleId: 'parking_public_on_street',
       geometryType: 'LineString',
       gpkgFile: GPKG_FILE,
-      mapboxSourceFiles: ['park_street_default.ts', 'park_street_pattern.ts'],
+      mapboxSourceFiles: ['parkingTilda_street_default.ts', 'parkingTilda_street_pattern.ts'],
       notes: [
         'Entspricht gefiltertem parkings-Export (nicht-privat); parallel-Muster nur für orientation=parallel',
         'Keine Kapazitäts-Labels, keine separaten Schatten-Flächen (nicht im GPKG)',
@@ -88,7 +88,7 @@ export const buildParkingPublicGpkgStyles = (options: ParkingPublicGpkgProfileOp
       styleId: 'parking_public_off_street',
       geometryType: 'Polygon',
       gpkgFile: GPKG_FILE,
-      mapboxSourceFiles: ['park_off_default_area.ts'],
+      mapboxSourceFiles: ['parkingTilda_off_default_area.ts'],
       notes: ['Nur öffentliche Flächen; keine Garagen-Punkte oder Kapazitäts-Labels im GPKG'],
     },
     {
@@ -96,7 +96,7 @@ export const buildParkingPublicGpkgStyles = (options: ParkingPublicGpkgProfileOp
       styleId: 'parking_public_no_parking',
       geometryType: 'MultiLineString',
       gpkgFile: GPKG_FILE,
-      mapboxSourceFiles: ['park_street_no.ts'],
+      mapboxSourceFiles: ['parkingTilda_street_no.ts'],
       notes: ['parkings_no mit parking in (no_parking, no_stopping), nicht-privat'],
     },
   ]

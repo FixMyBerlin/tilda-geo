@@ -1,9 +1,9 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { withBikelaneVisualLineOffset } from './mapboxStyles/bikelaneLineOffset'
-import { mapboxStyleGroupLayers_atlas_bikelanes_smooth_bad } from './mapboxStyles/groups/atlas_bikelanes_smooth_bad'
-import { mapboxStyleGroupLayers_atlas_bikelanes_smooth_default } from './mapboxStyles/groups/atlas_bikelanes_smooth_default'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_atlas_bikelanes_smooth_bad } from './layers/bikelanes_smooth_bad'
+import { mapboxStyleGroupLayers_atlas_bikelanes_smooth_default } from './layers/bikelanes_smooth_default'
+import { withBikelaneVisualLineOffset } from './layers/utils/bikelaneLineOffset'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 import { legendSurfaceBad, legendSurfaceDefault } from './subcat_surface_roads.const'
 
 const subcatId = 'surfaceBikelanes'

@@ -1,0 +1,20 @@
+import type { MapboxStyleLayer } from './utils/types'
+
+export const mapboxStyleGroupLayers_atlas_bicycleparking_points: MapboxStyleLayer[] = [
+  {
+    id: 'bicycleparking-points',
+    type: 'symbol',
+    layout: {
+      'icon-image': [
+        'match',
+        ['get', 'covered'],
+        ['no', 'implicit_no'],
+        'parking',
+        ['yes', 'partial'],
+        'parking-garage',
+        'dot-11',
+      ],
+    },
+    paint: {},
+  },
+]

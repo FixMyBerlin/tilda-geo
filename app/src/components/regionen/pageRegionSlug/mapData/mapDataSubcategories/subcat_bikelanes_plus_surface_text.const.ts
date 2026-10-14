@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_atlas_bikelanes_plus_surfaces } from './mapboxStyles/groups/atlas_bikelanes_plus_surfaces'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_atlas_bikelanes_plus_surfaces } from './layers/bikelanes_plus_surfaces'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const subcatId = 'bikelanes_plus_surface_smoothness'
 const source = 'atlas_bikelanes'

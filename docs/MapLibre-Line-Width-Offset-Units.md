@@ -265,7 +265,7 @@ Bikelane-Geometrien liegen in den Daten auf der **Straßen-Mittellinie**. Der se
 
    `road_width` kommt aus [`processing/topics/helper/road_width.lua`](../processing/topics/helper/road_width.lua) (OSM-`width`-Tag oder Highway-Fallback in Metern). Das `offset`-Attribut ist vorzeichenbehaftet: positiv = links, negativ = rechts der Mittellinie (halbe Straßenbreite).
 
-2. **Visueller Versatz (MapLibre Style):** [`app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/bikelaneLineOffset.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/bikelaneLineOffset.ts)
+2. **Visueller Versatz (MapLibre Style):** [`app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/utils/bikelaneLineOffset.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/utils/bikelaneLineOffset.ts)
 
    ```typescript
    // z < minzoom (aktuell 9): + halbe Strichstärke für `…/left` und `…/right`
@@ -295,14 +295,14 @@ Bikelane-Geometrien liegen in den Daten auf der **Straßen-Mittellinie**. Der se
 Typisches Muster in den Layer-Dateien:
 
 ```typescript
-// app/src/components/regionen/.../mapboxStyles/groups/atlas_bikelane_presence.ts
+// app/src/components/regionen/.../layers/bikelane_presence.ts
 'line-offset': ['step', ['zoom'], 1, 14, 4, 16, 8],
 'line-width': ['interpolate', ['linear'], ['zoom'], 8, 1, 16, 4],
 ```
 
 Das sind **handkalibrierte Pixelstops**, die grob mit Zoom skalieren, aber **nicht** an `road_width` oder andere Meter-Attribute gebunden sind. Die Werte bei Zoom 16 (Offset ±8 px ≈ 6 m bei 51° N) passen ungefähr zu einer typischen Wohnstraßenbreite — sind aber nicht datengetrieben.
 
-Das `width`-Attribut in Styles wie [`radinfra_width.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/radinfra_width.ts) steuert nur die **Farbe** (Interpolation über `["get", "width"]` in Metern), nicht die Linienbreite auf der Karte.
+Das `width`-Attribut in Styles wie [`radinfra_width.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/radinfra_width.ts) steuert nur die **Farbe** (Interpolation über `["get", "width"]` in Metern), nicht die Linienbreite auf der Karte.
 
 ### Parken: Meter in der Geometrie (PostGIS)
 
@@ -334,7 +334,7 @@ Bikespuren nutzten diesen Ansatz früher (`ST_OffsetCurve` in `2_move_bikelanes.
 
 ### Option B: Style-Expressions mit Meter-Attribut (Bikespuren)
 
-`line-offset` aus `["get", "offset"]` ableiten, mit `interpolate`/`exponential` über `zoom` und Referenz-Breitengrad — implementiert in [`bikelaneLineOffset.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/bikelaneLineOffset.ts).
+`line-offset` aus `["get", "offset"]` ableiten, mit `interpolate`/`exponential` über `zoom` und Referenz-Breitengrad — implementiert in [`bikelaneLineOffset.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/utils/bikelaneLineOffset.ts).
 
 - **Vorteil:** eine Zentroidlinie, dynamische Darstellung
 - **Nachteil:** komplexe Expressions; Genauigkeit variiert mit Latitude; Performance bei vielen Layern testen
@@ -398,14 +398,14 @@ MapLibre-API-Äquivalent zur Laufzeit: `map.getZoom()` + `MercatorCoordinate.fro
 
 ### TILDA Geo (Repo)
 
-| Pfad                                                                                                                                                                                  | Inhalt                                                                                 |
-| ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| [`app/scripts/MapLibreToMasterportal/`](../app/scripts/MapLibreToMasterportal/)                                                                                                       | Konvertierung MapLibre → Masterportal (Pixelbreiten werden bei festem Zoom ausgelesen) |
-| [`processing/topics/helper/road_width.lua`](../processing/topics/helper/road_width.lua)                                                                                               | Straßenbreite in Metern (Bikespuren)                                                   |
-| [`processing/topics/parking/roads/helper/road_width_tags.lua`](../processing/topics/parking/roads/helper/road_width_tags.lua)                                                         | `road_width`-Attribut für Parken                                                       |
-| [`app/.../mapboxStyles/bikelaneLineOffset.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/bikelaneLineOffset.ts)                         | Datengetriebener `line-offset` für Bikespuren (Meter → Pixel)                          |
-| [`app/.../mapboxStyles/groups/atlas_bikelane_presence.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/atlas_bikelane_presence.ts) | Beispiel: pixelbasierte `line-offset`-Stops (nicht datengetrieben)                     |
-| [`app/package.json`](../app/package.json)                                                                                                                                             | `maplibre-gl@6.0.0`, `@maplibre/maplibre-gl-style-spec@^26.2.1`                        |
+| Pfad                                                                                                                                                          | Inhalt                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| [`app/scripts/MapLibreToMasterportal/`](../app/scripts/MapLibreToMasterportal/)                                                                               | Konvertierung MapLibre → Masterportal (Pixelbreiten werden bei festem Zoom ausgelesen) |
+| [`processing/topics/helper/road_width.lua`](../processing/topics/helper/road_width.lua)                                                                       | Straßenbreite in Metern (Bikespuren)                                                   |
+| [`processing/topics/parking/roads/helper/road_width_tags.lua`](../processing/topics/parking/roads/helper/road_width_tags.lua)                                 | `road_width`-Attribut für Parken                                                       |
+| [`app/.../layers/utils/bikelaneLineOffset.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/utils/bikelaneLineOffset.ts) | Datengetriebener `line-offset` für Bikespuren (Meter → Pixel)                          |
+| [`app/.../layers/bikelane_presence.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/bikelane_presence.ts)               | Beispiel: pixelbasierte `line-offset`-Stops (nicht datengetrieben)                     |
+| [`app/package.json`](../app/package.json)                                                                                                                     | `maplibre-gl@6.0.0`, `@maplibre/maplibre-gl-style-spec@^26.2.1`                        |
 
 ---
 

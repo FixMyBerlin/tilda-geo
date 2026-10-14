@@ -1,8 +1,8 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_atlas_pois_default } from './mapboxStyles/groups/atlas_pois_default'
-import { mapboxStyleGroupLayers_atlas_pois_education } from './mapboxStyles/groups/atlas_pois_education'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_atlas_pois_default } from './layers/pois_default'
+import { mapboxStyleGroupLayers_atlas_pois_education } from './layers/pois_education'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const subcatId = 'poi'
 const source = 'atlas_poiClassification'

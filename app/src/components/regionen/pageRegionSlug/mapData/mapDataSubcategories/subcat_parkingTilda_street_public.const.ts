@@ -1,14 +1,14 @@
 import type { FileMapDataSubcategory, FileMapDataSubcategoryStyleLegend } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_park_street_areas_shadow } from './mapboxStyles/groups/park_street_areas_shadow'
-import { mapboxStyleGroupLayers_park_street_default } from './mapboxStyles/groups/park_street_default'
-import { mapboxStyleGroupLayers_park_street_kind } from './mapboxStyles/groups/park_street_kind'
-import { mapboxStyleGroupLayers_park_street_label } from './mapboxStyles/groups/park_street_label'
-import { mapboxStyleGroupLayers_park_street_pattern } from './mapboxStyles/groups/park_street_pattern'
-import { mapboxStyleGroupLayers_park_street_surface } from './mapboxStyles/groups/park_street_surface'
-import type { MapboxStyleLayersProps } from './mapboxStyles/mapboxStyleLayers'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
-import { parkingTildaEdgesLayersByStyle } from './parkingTildaEdgesLayers.const'
+import { mapboxStyleGroupLayers_park_street_areas_shadow } from './layers/parkingTilda_street_areas_shadow'
+import { mapboxStyleGroupLayers_park_street_default } from './layers/parkingTilda_street_default'
+import { mapboxStyleGroupLayers_park_street_kind } from './layers/parkingTilda_street_kind'
+import { mapboxStyleGroupLayers_park_street_label } from './layers/parkingTilda_street_label'
+import { mapboxStyleGroupLayers_park_street_pattern } from './layers/parkingTilda_street_pattern'
+import { mapboxStyleGroupLayers_park_street_surface } from './layers/parkingTilda_street_surface'
+import { parkingTildaEdgesLayersByStyle } from './layers/parkingTildaEdgesLayers.const'
+import type { MapboxStyleLayersProps } from './layers/utils/mapboxStyleLayers'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 import {
   parkingTildaStreetDefaultLegends,
   parkingTildaStreetKindLegends,

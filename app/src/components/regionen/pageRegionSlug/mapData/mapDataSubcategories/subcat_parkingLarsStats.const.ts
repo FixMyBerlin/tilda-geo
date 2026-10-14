@@ -1,8 +1,8 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_parking_stats } from './mapboxStyles/groups/parking_stats'
-import { mapboxStyleGroupLayers_parking_stats_length } from './mapboxStyles/groups/parking_stats_length'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_parking_stats } from './layers/parkingLars_stats'
+import { mapboxStyleGroupLayers_parking_stats_length } from './layers/parkingLars_stats_length'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const subcatId = 'parkingStats'
 const source = 'lars_parking_stats'

@@ -1,9 +1,9 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_atlas_maxspeed_above40 } from './mapboxStyles/groups/atlas_maxspeed_above40'
-import { mapboxStyleGroupLayers_atlas_maxspeed_all } from './mapboxStyles/groups/atlas_maxspeed_all'
-import { mapboxStyleGroupLayers_atlas_maxspeed_below30 } from './mapboxStyles/groups/atlas_maxspeed_below30'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_atlas_maxspeed_above40 } from './layers/maxspeed_above40'
+import { mapboxStyleGroupLayers_atlas_maxspeed_all } from './layers/maxspeed_all'
+import { mapboxStyleGroupLayers_atlas_maxspeed_below30 } from './layers/maxspeed_below30'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const subcatId = 'maxspeed'
 const source = 'atlas_roads'

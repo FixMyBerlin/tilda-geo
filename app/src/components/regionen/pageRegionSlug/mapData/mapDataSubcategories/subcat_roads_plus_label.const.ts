@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_atlas_roads_plus_label } from './mapboxStyles/groups/atlas_roads_plus_label'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_atlas_roads_plus_label } from './layers/roads_plus_label'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const subcatId = 'roads_plus_label'
 const source = 'atlas_roads'

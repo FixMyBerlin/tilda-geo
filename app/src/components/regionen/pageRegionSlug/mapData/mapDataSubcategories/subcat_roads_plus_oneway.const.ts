@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_atlas_roads_plus_oneway } from './mapboxStyles/groups/atlas_roads_plus_oneway'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_atlas_roads_plus_oneway } from './layers/roads_plus_oneway'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const subcatId = 'roads_plus_oneway'
 const source = 'atlas_roads'

@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_atlas_bikelanes_plus_bikesuitability } from './mapboxStyles/groups/atlas_bikelanes_plus_bikesuitability'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_atlas_bikelanes_plus_bikesuitability } from './layers/bikelanes_plus_bikesuitability'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const subcatId = 'bikelanes_plus_bikesuitability'
 const source = 'atlas_bikeSuitability'

@@ -1,7 +1,7 @@
 import type { FileMapDataSubcategory, FileMapDataSubcategoryStyleLegend } from '../types'
-import { withBikelaneVisualLineOffset } from './mapboxStyles/bikelaneLineOffset'
-import { mapboxStyleGroupLayers_radinfra_traffic_signs } from './mapboxStyles/groups/radinfra_traffic_signs'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_radinfra_traffic_signs } from './layers/radinfra_traffic_signs'
+import { withBikelaneVisualLineOffset } from './layers/utils/bikelaneLineOffset'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const subcatId = 'bikelanes'
 const source = 'atlas_bikelanes'

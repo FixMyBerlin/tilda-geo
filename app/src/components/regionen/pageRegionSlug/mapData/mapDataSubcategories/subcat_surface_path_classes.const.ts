@@ -1,8 +1,8 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { surfaceLineBadLayers } from './manualStyles/surface'
-import { mapboxStyleGroupLayers_atlas_roads_smooth_all } from './mapboxStyles/groups/atlas_roads_smooth_all'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_atlas_roads_smooth_all } from './layers/roads_smooth_all'
+import { surfaceLineBadLayers } from './layers/surface'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 import { legendSurfaceBad, legendSurfaceDefault } from './subcat_surface_roads.const'
 
 const subcatId = 'surfacePathClasses'

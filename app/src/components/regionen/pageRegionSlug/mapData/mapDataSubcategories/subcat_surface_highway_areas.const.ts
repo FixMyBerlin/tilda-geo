@@ -4,8 +4,8 @@ import {
   surfaceAreaLayers,
   surfaceAreaLegendsBad,
   surfaceAreaLegendsDefault,
-} from './manualStyles/surface'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+} from './layers/surface'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const subcatId = 'surfaceHighwayAreas'
 const source = 'tilda_highwayAreas'

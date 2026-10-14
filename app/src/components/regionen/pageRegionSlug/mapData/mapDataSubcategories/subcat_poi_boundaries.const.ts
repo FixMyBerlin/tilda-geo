@@ -1,8 +1,8 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_atlas_boundaries } from './mapboxStyles/groups/atlas_boundaries'
-import { mapboxStyleGroupLayers_atlas_boundaries_names } from './mapboxStyles/groups/atlas_boundaries_names'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_atlas_boundaries } from './layers/boundaries'
+import { mapboxStyleGroupLayers_atlas_boundaries_names } from './layers/boundaries_names'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const topiId = 'poiBoundaries'
 export type SubcatPoiBoundariesId = typeof topiId

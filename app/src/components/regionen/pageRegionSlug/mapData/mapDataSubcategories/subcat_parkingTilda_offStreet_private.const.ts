@@ -1,5 +1,5 @@
 import type { FileMapDataSubcategory } from '../types'
-import type { MapboxStyleLayersProps } from './mapboxStyles/mapboxStyleLayers'
+import type { MapboxStyleLayersProps } from './layers/utils/mapboxStyleLayers'
 import { createSharedOffStreetStyles } from './subcat_parkingTilda_offStreet_public.const'
 
 const subcatId = 'parkingTildaOffStreetPrivate'

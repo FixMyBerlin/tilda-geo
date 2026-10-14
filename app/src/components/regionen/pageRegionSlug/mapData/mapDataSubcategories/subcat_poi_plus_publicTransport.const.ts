@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_atlas_ziele_plus_publictransport } from './mapboxStyles/groups/atlas_ziele_plus_publictransport'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_atlas_ziele_plus_publictransport } from './layers/ziele_plus_publictransport'
 
 const tpoicId = 'poiPlusPublicTransport'
 const source = 'atlas_publicTransport'

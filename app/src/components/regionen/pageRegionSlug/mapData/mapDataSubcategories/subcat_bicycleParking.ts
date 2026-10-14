@@ -1,8 +1,8 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_atlas_bicycleparking_areas } from './mapboxStyles/groups/atlas_bicycleparking_areas'
-import { mapboxStyleGroupLayers_atlas_bicycleparking_points } from './mapboxStyles/groups/atlas_bicycleparking_points'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_atlas_bicycleparking_areas } from './layers/bicycleparking_areas'
+import { mapboxStyleGroupLayers_atlas_bicycleparking_points } from './layers/bicycleparking_points'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const subcatId = 'bicycleParking'
 const source = 'atlas_bicycleParking'

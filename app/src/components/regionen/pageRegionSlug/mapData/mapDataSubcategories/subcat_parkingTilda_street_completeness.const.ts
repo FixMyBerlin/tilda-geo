@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_park_street_completeness } from './mapboxStyles/groups/park_street_completeness'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { mapboxStyleGroupLayers_park_street_completeness } from './layers/parkingTilda_street_completeness'
+import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
 
 const subcatId = 'parkingTildaMissing'
 const source = 'tilda_parkings_no'
