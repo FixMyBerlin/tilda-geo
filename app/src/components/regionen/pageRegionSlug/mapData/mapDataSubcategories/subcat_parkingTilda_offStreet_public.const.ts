@@ -1,12 +1,12 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_park_off_default_area } from './layers/parkingTilda_off_default_area'
-import { mapboxStyleGroupLayers_park_off_default_points } from './layers/parkingTilda_off_default_points'
-import { mapboxStyleGroupLayers_park_off_kind_area } from './layers/parkingTilda_off_kind_area'
-import { mapboxStyleGroupLayers_park_off_labels } from './layers/parkingTilda_off_labels'
-import { mapboxStyleGroupLayers_park_off_surface_area } from './layers/parkingTilda_off_surface_area'
-import type { MapboxStyleLayersProps } from './layers/utils/mapboxStyleLayers'
-import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
+import { layers_parkingTilda_off_default_area } from './layers/parkingTilda_off_default_area'
+import { layers_parkingTilda_off_default_points } from './layers/parkingTilda_off_default_points'
+import { layers_parkingTilda_off_kind_area } from './layers/parkingTilda_off_kind_area'
+import { layers_parkingTilda_off_labels } from './layers/parkingTilda_off_labels'
+import { layers_parkingTilda_off_surface_area } from './layers/parkingTilda_off_surface_area'
+import type { WrapSourceLayersProps } from './layers/utils/wrapSourceLayers'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 import {
   parkingTildaOffStreetDefaultLegends,
   parkingTildaOffStreetKindLegends,
@@ -26,7 +26,7 @@ export type SubcatParkingTildaOffStreetStyleIds =
   // Legacy values for old url configs:
   | 'conditional'
 
-const publicFilter: MapboxStyleLayersProps['additionalFilter'] = [
+const publicFilter: WrapSourceLayersProps['additionalFilter'] = [
   'match',
   ['get', 'operator_type'],
   ['public'],
@@ -34,22 +34,22 @@ const publicFilter: MapboxStyleLayersProps['additionalFilter'] = [
   false,
 ]
 
-const createOffStreetStyleLayers = (filter: MapboxStyleLayersProps['additionalFilter']) =>
+const createOffStreetStyleLayers = (filter: WrapSourceLayersProps['additionalFilter']) =>
   [
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_off_default_area,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_off_default_area,
       additionalFilter: filter,
       source,
       sourceLayer,
     }),
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_off_default_points,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_off_default_points,
       additionalFilter: filter,
       source,
       sourceLayer: sourceLayerPoint,
     }),
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_off_labels,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_off_labels,
       additionalFilter: filter,
       source,
       sourceLayer: sourceLayerLabel,
@@ -57,22 +57,22 @@ const createOffStreetStyleLayers = (filter: MapboxStyleLayersProps['additionalFi
     }),
   ] satisfies FileMapDataSubcategory['styles'][number]['layers']
 
-const createOffStreetSurfaceStyleLayers = (filter: MapboxStyleLayersProps['additionalFilter']) =>
+const createOffStreetSurfaceStyleLayers = (filter: WrapSourceLayersProps['additionalFilter']) =>
   [
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_off_surface_area,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_off_surface_area,
       additionalFilter: filter,
       source,
       sourceLayer,
     }),
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_off_default_points,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_off_default_points,
       additionalFilter: filter,
       source,
       sourceLayer: sourceLayerPoint,
     }),
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_off_labels,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_off_labels,
       additionalFilter: filter,
       source,
       sourceLayer: sourceLayerLabel,
@@ -80,22 +80,22 @@ const createOffStreetSurfaceStyleLayers = (filter: MapboxStyleLayersProps['addit
     }),
   ] satisfies FileMapDataSubcategory['styles'][number]['layers']
 
-const createOffStreetKindStyleLayers = (filter: MapboxStyleLayersProps['additionalFilter']) =>
+const createOffStreetKindStyleLayers = (filter: WrapSourceLayersProps['additionalFilter']) =>
   [
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_off_kind_area,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_off_kind_area,
       additionalFilter: filter,
       source,
       sourceLayer,
     }),
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_off_default_points,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_off_default_points,
       additionalFilter: filter,
       source,
       sourceLayer: sourceLayerPoint,
     }),
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_off_labels,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_off_labels,
       additionalFilter: filter,
       source,
       sourceLayer: sourceLayerLabel,
@@ -103,7 +103,7 @@ const createOffStreetKindStyleLayers = (filter: MapboxStyleLayersProps['addition
     }),
   ] satisfies FileMapDataSubcategory['styles'][number]['layers']
 
-export const createSharedOffStreetStyles = (filter: MapboxStyleLayersProps['additionalFilter']) =>
+export const createSharedOffStreetStyles = (filter: WrapSourceLayersProps['additionalFilter']) =>
   [
     defaultStyleHidden,
     {

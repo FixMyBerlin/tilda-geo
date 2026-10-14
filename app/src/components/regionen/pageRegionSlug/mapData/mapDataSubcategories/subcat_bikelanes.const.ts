@@ -1,11 +1,11 @@
 import type { FileMapDataSubcategory, FileMapDataSubcategoryStyle } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_atlas_bikelanes_default } from './layers/bikelanes_default'
-import { mapboxStyleGroupLayers_atlas_bikelanes_details } from './layers/bikelanes_details'
-import { mapboxStyleGroupLayers_atlas_bikelanes_widths } from './layers/bikelanes_widths'
+import { layers_bikelanes_default } from './layers/bikelanes_default'
+import { layers_bikelanes_details } from './layers/bikelanes_details'
+import { layers_bikelanes_widths } from './layers/bikelanes_widths'
 import { structureIconLayers } from './layers/structureIconLayers'
 import { withBikelaneVisualLineOffset } from './layers/utils/bikelaneLineOffset'
-import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 import { bikelanesWidthLegend } from './subcat_radinfra_width.const'
 
 const subcatId = 'bikelanes'
@@ -26,8 +26,8 @@ export const bikelanesDefaultStyle: FileMapDataSubcategoryStyle = {
   id: 'default',
   name: 'Führungsform einfach',
   layers: [
-    ...mapboxStyleLayers({
-      layers: withBikelaneVisualLineOffset(mapboxStyleGroupLayers_atlas_bikelanes_default),
+    ...wrapSourceLayers({
+      layers: withBikelaneVisualLineOffset(layers_bikelanes_default),
       source,
       sourceLayer,
     }),
@@ -99,8 +99,8 @@ export const bikelanesDetailsStyle: FileMapDataSubcategoryStyle = {
   id: 'details',
   name: 'Führungsform details',
   layers: [
-    ...mapboxStyleLayers({
-      layers: withBikelaneVisualLineOffset(mapboxStyleGroupLayers_atlas_bikelanes_details),
+    ...wrapSourceLayers({
+      layers: withBikelaneVisualLineOffset(layers_bikelanes_details),
       source,
       sourceLayer,
     }),
@@ -224,8 +224,8 @@ const bikelanesWidthStyle: FileMapDataSubcategoryStyle = {
   id: 'width',
   name: 'Breite RVA',
   layers: [
-    ...mapboxStyleLayers({
-      layers: withBikelaneVisualLineOffset(mapboxStyleGroupLayers_atlas_bikelanes_widths),
+    ...wrapSourceLayers({
+      layers: withBikelaneVisualLineOffset(layers_bikelanes_widths),
       source,
       sourceLayer,
     }),

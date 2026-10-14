@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_park_off_surface_area: MapboxStyleLayer[] = [
+export const layers_parkingTilda_off_surface_area: StyleLayer[] = [
   {
     id: 'off_surface_bg',
     type: 'fill',

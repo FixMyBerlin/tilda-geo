@@ -22,7 +22,7 @@ export const subcat_signs: FileMapDataSubcategory = {
         source,
         sourceLayer: sourceLayer,
       }),
-      // layers: mapboxStyleLayers({
+      // layers: wrapSourceLayers({
       //   group: 'atlas_bikeparking_points',
       //   source,
       //   sourceLayer,

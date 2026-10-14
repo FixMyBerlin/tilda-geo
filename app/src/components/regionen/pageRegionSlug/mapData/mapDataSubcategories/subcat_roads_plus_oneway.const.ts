@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_atlas_roads_plus_oneway } from './layers/roads_plus_oneway'
-import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
+import { layers_roads_plus_oneway } from './layers/roads_plus_oneway'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'roads_plus_oneway'
 const source = 'atlas_roads'
@@ -16,8 +16,8 @@ export const subcat_roads_plus_oneway: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Einbahnstraßen',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_atlas_roads_plus_oneway,
+      layers: wrapSourceLayers({
+        layers: layers_roads_plus_oneway,
         source,
         sourceLayer,
         additionalFilter: [

@@ -1,6 +1,6 @@
 import type { ExpressionSpecification } from 'maplibre-gl'
 import { interactivityConfiguration } from '../../../mapDataSources/generalization/interacitvityConfiguartion'
-import type { MapboxStyleLayer } from './types'
+import type { StyleLayer } from './types'
 
 /**
  * Visual sideways offset for bikelane lines.
@@ -128,11 +128,11 @@ export const bikelaneVisualLineOffset = (lineWidth: unknown) => {
  * sideways shift. Non-line layers are returned unchanged.
  *
  * Call this on the `layers` of every bikelane subcategory that renders lines, before handing
- * them to `mapboxStyleLayers` — e.g. `subcat_bikelanes`, `subcat_radinfra_*`,
+ * them to `wrapSourceLayers` — e.g. `subcat_bikelanes`, `subcat_radinfra_*`,
  * `subcat_surface_bikelane`. It is a no-op on symbol/text-only subcategories, so it is safe
  * (but pointless) to wrap those too.
  */
-export const withBikelaneVisualLineOffset = (layers: MapboxStyleLayer[]): MapboxStyleLayer[] =>
+export const withBikelaneVisualLineOffset = (layers: StyleLayer[]): StyleLayer[] =>
   layers.map((layer) => {
     if (layer.type !== 'line') return layer
     const paint = (layer.paint ?? {}) as Record<string, unknown>
@@ -141,5 +141,5 @@ export const withBikelaneVisualLineOffset = (layers: MapboxStyleLayer[]): Mapbox
     return {
       ...layer,
       paint: { ...paint, 'line-offset': bikelaneVisualLineOffset(paint['line-width']) },
-    } as MapboxStyleLayer
+    } as StyleLayer
   })

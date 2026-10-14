@@ -1,9 +1,9 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_atlas_bikelanes_smooth_bad } from './layers/bikelanes_smooth_bad'
-import { mapboxStyleGroupLayers_atlas_bikelanes_smooth_default } from './layers/bikelanes_smooth_default'
+import { layers_bikelanes_smooth_bad } from './layers/bikelanes_smooth_bad'
+import { layers_bikelanes_smooth_default } from './layers/bikelanes_smooth_default'
 import { withBikelaneVisualLineOffset } from './layers/utils/bikelaneLineOffset'
-import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 import { legendSurfaceBad, legendSurfaceDefault } from './subcat_surface_roads.const'
 
 const subcatId = 'surfaceBikelanes'
@@ -22,8 +22,8 @@ export const subcat_surface_bikelane: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      layers: mapboxStyleLayers({
-        layers: withBikelaneVisualLineOffset(mapboxStyleGroupLayers_atlas_bikelanes_smooth_default),
+      layers: wrapSourceLayers({
+        layers: withBikelaneVisualLineOffset(layers_bikelanes_smooth_default),
         source,
         sourceLayer,
       }),
@@ -32,8 +32,8 @@ export const subcat_surface_bikelane: FileMapDataSubcategory = {
     {
       id: 'bad',
       name: 'Nur schlechte Oberflächen',
-      layers: mapboxStyleLayers({
-        layers: withBikelaneVisualLineOffset(mapboxStyleGroupLayers_atlas_bikelanes_smooth_bad),
+      layers: wrapSourceLayers({
+        layers: withBikelaneVisualLineOffset(layers_bikelanes_smooth_bad),
         source,
         sourceLayer,
       }),

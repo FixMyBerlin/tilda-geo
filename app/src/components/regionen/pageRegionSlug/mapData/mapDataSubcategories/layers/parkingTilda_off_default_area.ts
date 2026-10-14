@@ -3,7 +3,7 @@
 // `processing/topics/parking/helper/condition_category_primary.lua` needs a colour here.
 // The priority order lives in that Lua file; the order of this `==` cascade does not matter.
 
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
 const conditionCategoryPrimaryFillColor = [
   'case',
@@ -52,7 +52,7 @@ const conditionCategoryPrimaryFillColor = [
   '#4B5563',
 ]
 
-export const mapboxStyleGroupLayers_park_off_default_area: MapboxStyleLayer[] = [
+export const layers_parkingTilda_off_default_area: StyleLayer[] = [
   {
     id: 'off_type_bg',
     type: 'fill',

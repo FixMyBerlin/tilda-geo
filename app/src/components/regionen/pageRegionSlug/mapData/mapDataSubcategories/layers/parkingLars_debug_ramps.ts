@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_parking_debug_ramps: MapboxStyleLayer[] = [
+export const layers_parkingLars_debug_ramps: StyleLayer[] = [
   {
     id: 'parking-ramps-area',
     type: 'fill',

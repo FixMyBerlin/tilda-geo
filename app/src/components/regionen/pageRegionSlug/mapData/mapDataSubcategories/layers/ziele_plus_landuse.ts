@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_atlas_ziele_plus_landuse: MapboxStyleLayer[] = [
+export const layers_ziele_plus_landuse: StyleLayer[] = [
   {
     id: 'tarmac-landuse-test-datensatz-0r36t3',
     type: 'fill',

@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_atlas_roads_plus_label: MapboxStyleLayer[] = [
+export const layers_roads_plus_label: StyleLayer[] = [
   {
     id: 'sign_label-roads',
     type: 'symbol',

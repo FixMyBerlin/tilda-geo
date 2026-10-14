@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
-import { mapboxStyleGroupLayers_atlas_ziele_plus_landuse } from './layers/ziele_plus_landuse'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
+import { layers_ziele_plus_landuse } from './layers/ziele_plus_landuse'
 
 const subcatId = 'poiPlusLanduse'
 export type SubcatPoiPlusLanduseId = typeof subcatId
@@ -15,8 +15,8 @@ export const subcat_poi_plus_landuse: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_atlas_ziele_plus_landuse,
+      layers: wrapSourceLayers({
+        layers: layers_ziele_plus_landuse,
         source: 'atlas_landuse',
         sourceLayer: 'landuse',
       }),

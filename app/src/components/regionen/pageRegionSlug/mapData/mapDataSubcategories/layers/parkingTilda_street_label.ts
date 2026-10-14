@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_park_street_label: MapboxStyleLayer[] = [
+export const layers_parkingTilda_street_label: StyleLayer[] = [
   {
     id: 'street_park_label',
     type: 'symbol',

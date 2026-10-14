@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_parking_boundaries: MapboxStyleLayer[] = [
+export const layers_parkingLars_boundaries: StyleLayer[] = [
   {
     id: 'line-border-1',
     type: 'line',

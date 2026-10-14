@@ -1,7 +1,7 @@
 import type { MapDataCategoryId } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/MapDataCategoryId'
 import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
-import { mapboxStyleLayers } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/utils/mapboxStyleLayers'
-import type { MapboxStyleLayer } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/utils/types'
+import type { StyleLayer } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/utils/types'
+import { wrapSourceLayers } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/utils/wrapSourceLayers'
 import type { FileMapDataSubcategoryStyleLayer } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { translations } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/translations.const'
 import type { CalculatorFilter } from './calculatorModeParam'
@@ -65,13 +65,13 @@ const lineLayers = (color: string) =>
         'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1, 16, 3],
       },
     },
-  ] satisfies MapboxStyleLayer[]
+  ] satisfies StyleLayer[]
 
 const areaLayers = (color: string) =>
   [
     { id: 'fill', type: 'fill', paint: { 'fill-color': color } },
     { id: 'outline', type: 'line', paint: { 'line-color': color, 'line-width': 1 } },
-  ] satisfies MapboxStyleLayer[]
+  ] satisfies StyleLayer[]
 
 const pointLayers = (color: string) =>
   [
@@ -85,7 +85,7 @@ const pointLayers = (color: string) =>
         'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 1, 17, 4],
       },
     },
-  ] satisfies MapboxStyleLayer[]
+  ] satisfies StyleLayer[]
 
 const part = ({
   sourceLayer,
@@ -94,11 +94,11 @@ const part = ({
 }: Omit<CalculatorDatasetPart, 'layers'> & {
   /** The table of the part, which is its layer in the tiles of the source. */
   sourceLayer: string
-  layers: MapboxStyleLayer[]
+  layers: StyleLayer[]
 }) =>
   ({
     ...rest,
-    layers: mapboxStyleLayers({ layers, source: rest.sourceId, sourceLayer }),
+    layers: wrapSourceLayers({ layers, source: rest.sourceId, sourceLayer }),
   }) satisfies CalculatorDatasetPart
 
 /**

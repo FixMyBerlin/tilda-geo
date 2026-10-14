@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_atlas_boundaries: MapboxStyleLayer[] = [
+export const layers_boundaries: StyleLayer[] = [
   {
     id: 'category_municipality_gemeinden',
     type: 'line',

@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_atlas_bikelane_presence: MapboxStyleLayer[] = [
+export const layers_bikelane_presence: StyleLayer[] = [
   {
     id: 'hitarea-bikelane-presence',
     type: 'line',

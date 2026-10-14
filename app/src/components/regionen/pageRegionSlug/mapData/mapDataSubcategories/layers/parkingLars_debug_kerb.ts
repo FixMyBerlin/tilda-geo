@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_parking_debug_kerb: MapboxStyleLayer[] = [
+export const layers_parkingLars_debug_kerb: StyleLayer[] = [
   {
     id: 'buffer-kerb-intersection-area',
     type: 'fill',

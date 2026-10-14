@@ -1,11 +1,11 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_atlas_roads_all } from './layers/roads_all'
-import { mapboxStyleGroupLayers_atlas_roads_mainstreets } from './layers/roads_mainstreets'
-import { mapboxStyleGroupLayers_atlas_roads_mainstreets_classified } from './layers/roads_mainstreets_classified'
-import { mapboxStyleGroupLayers_atlas_roads_sidestreets } from './layers/roads_sidestreets'
+import { layers_roads_all } from './layers/roads_all'
+import { layers_roads_mainstreets } from './layers/roads_mainstreets'
+import { layers_roads_mainstreets_classified } from './layers/roads_mainstreets_classified'
+import { layers_roads_sidestreets } from './layers/roads_sidestreets'
 import { structureIconLayers } from './layers/structureIconLayers'
-import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'roads'
 const source = 'atlas_roads'
@@ -26,8 +26,8 @@ export const subcat_roads: FileMapDataSubcategory = {
       id: 'default',
       name: 'Alle',
       layers: [
-        ...mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_atlas_roads_all,
+        ...wrapSourceLayers({
+          layers: layers_roads_all,
           source,
           sourceLayer,
         }),
@@ -70,8 +70,8 @@ export const subcat_roads: FileMapDataSubcategory = {
       id: 'sidestreets',
       name: 'Nur Nebenstraßen',
       layers: [
-        ...mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_atlas_roads_sidestreets,
+        ...wrapSourceLayers({
+          layers: layers_roads_sidestreets,
           source,
           sourceLayer,
         }),
@@ -104,8 +104,8 @@ export const subcat_roads: FileMapDataSubcategory = {
       id: 'mainstreets',
       name: 'Nur Hauptstraßen',
       layers: [
-        ...mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_atlas_roads_mainstreets,
+        ...wrapSourceLayers({
+          layers: layers_roads_mainstreets,
           source,
           sourceLayer,
         }),
@@ -128,8 +128,8 @@ export const subcat_roads: FileMapDataSubcategory = {
       id: 'classified',
       name: 'Klassifizierung',
       layers: [
-        ...mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_atlas_roads_mainstreets_classified,
+        ...wrapSourceLayers({
+          layers: layers_roads_mainstreets_classified,
           source,
           sourceLayer,
         }),

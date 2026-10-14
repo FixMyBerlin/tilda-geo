@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_park_street_areas_shadow: MapboxStyleLayer[] = [
+export const layers_parkingTilda_street_areas_shadow: StyleLayer[] = [
   {
     id: 'area-color',
     type: 'fill',

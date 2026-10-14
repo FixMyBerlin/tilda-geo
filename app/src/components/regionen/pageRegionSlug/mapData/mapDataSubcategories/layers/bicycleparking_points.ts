@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_atlas_bicycleparking_points: MapboxStyleLayer[] = [
+export const layers_bicycleparking_points: StyleLayer[] = [
   {
     id: 'bicycleparking-points',
     type: 'symbol',

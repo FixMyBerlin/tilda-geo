@@ -1,8 +1,8 @@
 import { getUnixTime, startOfYear, subYears } from 'date-fns'
 import type { FileMapDataSubcategory, FileMapDataSubcategoryStyleLegend } from '../types'
 import { withBikelaneVisualLineOffset } from './layers/utils/bikelaneLineOffset'
-import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
-import type { MapboxStyleLayer } from './layers/utils/types'
+import type { StyleLayer } from './layers/utils/types'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'bikelanes'
 const source = 'atlas_bikelanes'
@@ -13,7 +13,7 @@ const timestamp3YearsAgo = getUnixTime(startOfYear(subYears(new Date(), 3))) // 
 const timestamp6YearsAgo = getUnixTime(startOfYear(subYears(new Date(), 6))) // 6 years ago (Jan 1)
 const timestamp10YearsAgo = getUnixTime(startOfYear(subYears(new Date(), 10))) // 10 years ago (Jan 1)
 
-const bikelanesCurrentLayers: MapboxStyleLayer[] = [
+const bikelanesCurrentLayers: StyleLayer[] = [
   {
     type: 'line',
     id: 'current-colors',
@@ -107,7 +107,7 @@ export const subcat_radinfra_currentness: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'RVA Aktualität', // field hidden
-      layers: mapboxStyleLayers({
+      layers: wrapSourceLayers({
         layers: withBikelaneVisualLineOffset(bikelanesCurrentLayers),
         source,
         sourceLayer,

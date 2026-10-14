@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_atlas_bikelanes_details: MapboxStyleLayer[] = [
+export const layers_bikelanes_details: StyleLayer[] = [
   {
     id: 'needsClarification-details',
     type: 'line',

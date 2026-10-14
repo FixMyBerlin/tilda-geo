@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_atlas_maxspeed_above40: MapboxStyleLayer[] = [
+export const layers_maxspeed_above40: StyleLayer[] = [
   {
     id: 'maxspeed-groessergleich40',
     type: 'line',

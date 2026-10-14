@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_parking_parkinglines_completeness: MapboxStyleLayer[] = [
+export const layers_parkingLars_parkinglines_completeness: StyleLayer[] = [
   {
     id: 'capacity_status-segment_too_small',
     type: 'line',

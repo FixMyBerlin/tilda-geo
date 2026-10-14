@@ -1,5 +1,5 @@
 import type { FileMapDataSubcategoryStyleLegend } from '../../types'
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
 const litColors = {
   yes: '#f8c52a',
@@ -158,7 +158,7 @@ function litLineMissingLayersRadinfra() {
         'line-width': hitareaLineWidth,
       },
     },
-  ] satisfies MapboxStyleLayer[]
+  ] satisfies StyleLayer[]
 }
 
 export function litLineCompletenessLayersRadinfra() {

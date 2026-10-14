@@ -1,5 +1,5 @@
 import type { FileMapDataSubcategory } from '../types'
-import type { MapboxStyleLayersProps } from './layers/utils/mapboxStyleLayers'
+import type { WrapSourceLayersProps } from './layers/utils/wrapSourceLayers'
 import {
   attachParkingTildaEdges,
   createSharedStreetStyles,
@@ -11,7 +11,7 @@ const source = 'tilda_parkings'
 export type SubcatParkingTildaPrivateId = typeof subcatId
 export type SubcatParkingTildaPrivateStyleIds = 'default' | 'surface' | 'kind'
 
-const privateFilter: MapboxStyleLayersProps['additionalFilter'] = [
+const privateFilter: WrapSourceLayersProps['additionalFilter'] = [
   'match',
   ['get', 'operator_type'],
   ['private'],

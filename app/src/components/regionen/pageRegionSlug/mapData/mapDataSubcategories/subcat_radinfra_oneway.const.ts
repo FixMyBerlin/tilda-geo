@@ -1,7 +1,7 @@
 import type { FileMapDataSubcategory, FileMapDataSubcategoryStyleLegend } from '../types'
-import { mapboxStyleGroupLayers_radinfra_oneway } from './layers/radinfra_oneway'
+import { layers_radinfra_oneway } from './layers/radinfra_oneway'
 import { withBikelaneVisualLineOffset } from './layers/utils/bikelaneLineOffset'
-import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'bikelanes'
 const source = 'atlas_bikelanes'
@@ -72,8 +72,8 @@ export const subcat_radinfra_oneway: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Verkehrsrichtung', // field hidden
-      layers: mapboxStyleLayers({
-        layers: withBikelaneVisualLineOffset(mapboxStyleGroupLayers_radinfra_oneway),
+      layers: wrapSourceLayers({
+        layers: withBikelaneVisualLineOffset(layers_radinfra_oneway),
         source,
         sourceLayer,
       }),

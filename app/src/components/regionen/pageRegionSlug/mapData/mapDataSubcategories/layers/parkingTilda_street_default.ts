@@ -3,9 +3,9 @@
 // `processing/topics/parking/helper/condition_category_primary.lua` needs a colour here.
 // The priority order lives in that Lua file; the order of this `==` cascade does not matter.
 
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_park_street_default: MapboxStyleLayer[] = [
+export const layers_parkingTilda_street_default: StyleLayer[] = [
   {
     id: 'street parking lines',
     type: 'line',

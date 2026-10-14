@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_atlas_pois_default: MapboxStyleLayer[] = [
+export const layers_pois_default: StyleLayer[] = [
   {
     id: 'pois-classification',
     type: 'circle',

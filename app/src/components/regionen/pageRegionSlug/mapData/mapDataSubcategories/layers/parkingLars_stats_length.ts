@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_parking_stats_length: MapboxStyleLayer[] = [
+export const layers_parkingLars_stats_length: StyleLayer[] = [
   {
     id: 'area-0-to-100 copy',
     type: 'fill',

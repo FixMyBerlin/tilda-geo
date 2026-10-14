@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_atlas_bikelane_presence } from './layers/bikelane_presence'
-import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
+import { layers_bikelane_presence } from './layers/bikelane_presence'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'bikelanes_plus_presence'
 const source = 'atlas_bikelanesPresence'
@@ -26,8 +26,8 @@ export const subcat_bikelanes_plus_presence: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Vollständigkeit',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_atlas_bikelane_presence,
+      layers: wrapSourceLayers({
+        layers: layers_bikelane_presence,
         source,
         sourceLayer,
       }),

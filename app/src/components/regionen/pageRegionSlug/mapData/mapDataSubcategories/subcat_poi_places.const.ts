@@ -1,8 +1,8 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_atlas_places } from './layers/places'
-import { mapboxStyleGroupLayers_atlas_placescircle } from './layers/placescircle'
-import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
+import { layers_places } from './layers/places'
+import { layers_placescircle } from './layers/placescircle'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'poiPlaces'
 export type SubcatPoiPlacesId = typeof subcatId
@@ -18,8 +18,8 @@ export const subcat_poi_places: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Siedlungszentren Name',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_atlas_places,
+      layers: wrapSourceLayers({
+        layers: layers_places,
         source: 'atlas_places',
         sourceLayer: 'places',
       }),
@@ -34,8 +34,8 @@ export const subcat_poi_places: FileMapDataSubcategory = {
     {
       id: 'circle',
       name: 'Siedlungszentren EW-Zahl',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_atlas_placescircle,
+      layers: wrapSourceLayers({
+        layers: layers_placescircle,
         source: 'atlas_places',
         sourceLayer: 'places',
       }),

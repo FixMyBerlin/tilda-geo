@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_radinfra_campaign: MapboxStyleLayer[] = [
+export const layers_radinfra_campaign: StyleLayer[] = [
   {
     id: 'mapillary_presence_border',
     type: 'line',

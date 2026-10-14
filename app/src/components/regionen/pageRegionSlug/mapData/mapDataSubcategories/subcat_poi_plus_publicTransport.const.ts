@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
-import { mapboxStyleGroupLayers_atlas_ziele_plus_publictransport } from './layers/ziele_plus_publictransport'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
+import { layers_ziele_plus_publictransport } from './layers/ziele_plus_publictransport'
 
 const tpoicId = 'poiPlusPublicTransport'
 const source = 'atlas_publicTransport'
@@ -17,8 +17,8 @@ export const subcat_poi_plus_publicTransport: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_atlas_ziele_plus_publictransport,
+      layers: wrapSourceLayers({
+        layers: layers_ziele_plus_publictransport,
         source,
         sourceLayer,
       }),

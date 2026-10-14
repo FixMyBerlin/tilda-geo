@@ -1,6 +1,6 @@
 import type { SourcesId } from '../../mapDataSources/sources.const'
 import type { FileMapDataSubcategoryStyleLayer } from '../../types'
-import { mapboxStyleLayers } from './utils/mapboxStyleLayers'
+import { wrapSourceLayers } from './utils/wrapSourceLayers'
 
 type StructureIconLayersProps = {
   source: SourcesId
@@ -13,7 +13,7 @@ type StructureIconLayersProps = {
  * clicks hit the underlying line layer.
  */
 export const structureIconLayers = ({ source, sourceLayer }: StructureIconLayersProps) =>
-  mapboxStyleLayers({
+  wrapSourceLayers({
     source,
     sourceLayer,
     interactive: false,

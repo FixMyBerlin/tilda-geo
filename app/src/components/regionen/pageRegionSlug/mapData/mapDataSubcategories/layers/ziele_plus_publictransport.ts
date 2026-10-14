@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_atlas_ziele_plus_publictransport: MapboxStyleLayer[] = [
+export const layers_ziele_plus_publictransport: StyleLayer[] = [
   {
     id: 'publictransport',
     type: 'symbol',

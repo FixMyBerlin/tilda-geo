@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_atlas_bikelanes_smooth_default: MapboxStyleLayer[] = [
+export const layers_bikelanes_smooth_default: StyleLayer[] = [
   {
     id: 'smoothness-all',
     type: 'line',

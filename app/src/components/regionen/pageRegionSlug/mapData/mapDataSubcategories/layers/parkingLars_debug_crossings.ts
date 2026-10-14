@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_parking_debug_crossings: MapboxStyleLayer[] = [
+export const layers_parkingLars_debug_crossings: StyleLayer[] = [
   {
     id: 'buffer-pedestrian-crossings-area',
     type: 'fill',

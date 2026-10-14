@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
 import { litAbsentDataLegend, litLineLayers, litLineLegends } from './layers/lit'
-import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'lit_bikelanes'
 const source = 'atlas_bikelanes'
@@ -18,7 +18,7 @@ export const subcat_lit_bikelanes: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Beleuchtung',
-      layers: mapboxStyleLayers({
+      layers: wrapSourceLayers({
         layers: litLineLayers(),
         source,
         sourceLayer,

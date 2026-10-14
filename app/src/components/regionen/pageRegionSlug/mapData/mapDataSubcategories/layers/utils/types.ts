@@ -1,5 +1,5 @@
-/** A layer with just the style information; `mapboxStyleLayers` adds source and id. */
-export type MapboxStyleLayer = {
+/** A layer with just the style information; `wrapSourceLayers` adds source and id. */
+export type StyleLayer = {
   beforeId?: unknown
   filter?: unknown
   id: unknown

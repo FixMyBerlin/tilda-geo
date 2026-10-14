@@ -2,10 +2,10 @@ import { flattenFilterArrays } from '@/components/regionen/pageRegionSlug/Map/So
 import { wrapFilterWithAll } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/utils/filterUtils/wrapFilterWithAll'
 import type { SourcesId } from '../../../mapDataSources/sources.const'
 import type { FileMapDataSubcategoryStyleLayer } from '../../../types'
-import type { MapboxStyleLayer } from './types'
+import type { StyleLayer } from './types'
 
-export type MapboxStyleLayersProps = {
-  layers: MapboxStyleLayer[]
+export type WrapSourceLayersProps = {
+  layers: StyleLayer[]
   source: SourcesId
   sourceLayer: string
   idPrefix?: string
@@ -19,7 +19,7 @@ export type MapboxStyleLayersProps = {
 }
 
 /** @desc Takes layers that hold just the style information and adds the source-information. It also allows to use the same layers with different `additionalFilter`. */
-export const mapboxStyleLayers = ({
+export const wrapSourceLayers = ({
   layers,
   source,
   sourceLayer,
@@ -28,7 +28,7 @@ export const mapboxStyleLayers = ({
   minzoom,
   maxzoom,
   additionalFilter,
-}: MapboxStyleLayersProps) => {
+}: WrapSourceLayersProps) => {
   return layers.map((layer) => {
     const layerFilter = layer.filter as unknown[] | undefined
     return {

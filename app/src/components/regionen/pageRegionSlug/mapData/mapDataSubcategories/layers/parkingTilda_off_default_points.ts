@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_park_off_default_points: MapboxStyleLayer[] = [
+export const layers_parkingTilda_off_default_points: StyleLayer[] = [
   {
     id: 'off-street-point',
     type: 'circle',

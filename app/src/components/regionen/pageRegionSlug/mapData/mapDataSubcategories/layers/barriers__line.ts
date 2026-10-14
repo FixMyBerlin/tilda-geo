@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_atlas_barriers__line: MapboxStyleLayer[] = [
+export const layers_barriers__line: StyleLayer[] = [
   {
     id: 'barriers-motorway',
     type: 'line',

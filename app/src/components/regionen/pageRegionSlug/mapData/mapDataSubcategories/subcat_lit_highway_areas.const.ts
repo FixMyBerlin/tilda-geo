@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
 import { litAbsentAreaDataLegend, litAreaLayers, litAreaLegends } from './layers/lit'
-import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'lit_highway_areas'
 const source = 'tilda_highwayAreas'
@@ -19,7 +19,7 @@ export const subcat_lit_highway_areas: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Beleuchtung',
-      layers: mapboxStyleLayers({
+      layers: wrapSourceLayers({
         layers: litAreaLayers(),
         source,
         sourceLayer,

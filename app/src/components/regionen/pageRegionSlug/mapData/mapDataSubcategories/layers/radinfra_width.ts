@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_radinfra_width: MapboxStyleLayer[] = [
+export const layers_radinfra_width: StyleLayer[] = [
   {
     id: 'width-missing',
     type: 'line',

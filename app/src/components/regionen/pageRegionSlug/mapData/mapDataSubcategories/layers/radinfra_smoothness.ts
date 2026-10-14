@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_radinfra_smoothness: MapboxStyleLayer[] = [
+export const layers_radinfra_smoothness: StyleLayer[] = [
   {
     id: 'smooth-missing',
     type: 'line',

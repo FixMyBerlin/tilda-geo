@@ -1,4 +1,4 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
 // KEEP IN SYNC: values from `processing/topics/parking/helper/condition_category_primary.lua`
 // (priority order lives there), colours from `parkingTilda_street_default.ts` / `parkingTilda_off_default_area.ts`.
@@ -234,7 +234,7 @@ const parkingTildaEdgesLayers = (
     parkingTildaEdgesGuideLayer('right', operatorType),
     parkingTildaEdgesSymbolLayer('left', operatorType),
     parkingTildaEdgesSymbolLayer('right', operatorType),
-  ] satisfies MapboxStyleLayer[]
+  ] satisfies StyleLayer[]
 
 export const parkingTildaEdgesLayersByStyle = (operatorType: ParkingTildaEdgesOperatorType) =>
   ({
@@ -243,4 +243,4 @@ export const parkingTildaEdgesLayersByStyle = (operatorType: ParkingTildaEdgesOp
     ),
     surface: parkingTildaEdgesLayers(operatorType, (side) => surfaceLineColor(`surface_${side}`)),
     kind: parkingTildaEdgesLayers(operatorType, (side) => parkingKindLineColor(`parking_${side}`)),
-  }) satisfies Record<'default' | 'surface' | 'kind', MapboxStyleLayer[]>
+  }) satisfies Record<'default' | 'surface' | 'kind', StyleLayer[]>

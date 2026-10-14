@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_atlas_roads_all: MapboxStyleLayer[] = [
+export const layers_roads_all: StyleLayer[] = [
   {
     id: 'roadclassification-nomainstreet copy',
     type: 'line',

@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_radinfra_traffic_signs: MapboxStyleLayer[] = [
+export const layers_radinfra_traffic_signs: StyleLayer[] = [
   {
     id: 'hitarea-missing-sign',
     type: 'line',

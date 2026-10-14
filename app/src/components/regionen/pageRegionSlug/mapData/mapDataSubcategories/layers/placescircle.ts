@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_atlas_placescircle: MapboxStyleLayer[] = [
+export const layers_placescircle: StyleLayer[] = [
   {
     id: 'circle-place-circle',
     type: 'circle',

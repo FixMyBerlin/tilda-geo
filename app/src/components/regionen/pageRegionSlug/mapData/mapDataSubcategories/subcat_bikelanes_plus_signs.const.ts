@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_atlas_bikelanes_plus_signs } from './layers/bikelanes_plus_signs'
-import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
+import { layers_bikelanes_plus_signs } from './layers/bikelanes_plus_signs'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'bikelanes_plus_signs'
 const source = 'atlas_bikelanes'
@@ -17,8 +17,8 @@ export const subcat_bikelanes_plus_signs: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Verkehrszeichen',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_atlas_bikelanes_plus_signs,
+      layers: wrapSourceLayers({
+        layers: layers_bikelanes_plus_signs,
         source,
         sourceLayer,
       }),

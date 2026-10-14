@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_atlas_bikelanes_plus_signs: MapboxStyleLayer[] = [
+export const layers_bikelanes_plus_signs: StyleLayer[] = [
   {
     id: 'trafficsigns',
     type: 'symbol',

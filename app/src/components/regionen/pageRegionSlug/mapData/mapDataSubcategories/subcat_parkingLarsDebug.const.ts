@@ -1,13 +1,13 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_parking_debug_bus_tram } from './layers/parkingLars_debug_bus_tram'
-import { mapboxStyleGroupLayers_parking_debug_crossings } from './layers/parkingLars_debug_crossings'
-import { mapboxStyleGroupLayers_parking_debug_driveways } from './layers/parkingLars_debug_driveways'
-import { mapboxStyleGroupLayers_parking_debug_kerb } from './layers/parkingLars_debug_kerb'
-import { mapboxStyleGroupLayers_parking_debug_parking_points } from './layers/parkingLars_debug_parking_points'
-import { mapboxStyleGroupLayers_parking_debug_parking_poly } from './layers/parkingLars_debug_parking_poly'
-import { mapboxStyleGroupLayers_parking_debug_ramps } from './layers/parkingLars_debug_ramps'
-import { mapboxStyleGroupLayers_parking_obstacles } from './layers/parkingLars_obstacles'
-import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
+import { layers_parkingLars_debug_bus_tram } from './layers/parkingLars_debug_bus_tram'
+import { layers_parkingLars_debug_crossings } from './layers/parkingLars_debug_crossings'
+import { layers_parkingLars_debug_driveways } from './layers/parkingLars_debug_driveways'
+import { layers_parkingLars_debug_kerb } from './layers/parkingLars_debug_kerb'
+import { layers_parkingLars_debug_parking_points } from './layers/parkingLars_debug_parking_points'
+import { layers_parkingLars_debug_parking_poly } from './layers/parkingLars_debug_parking_poly'
+import { layers_parkingLars_debug_ramps } from './layers/parkingLars_debug_ramps'
+import { layers_parkingLars_obstacles } from './layers/parkingLars_obstacles'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'parkingDebug'
 const source = 'lars_parking_debug'
@@ -25,50 +25,50 @@ export const subcat_parkingLarsDebug: FileMapDataSubcategory = {
       id: 'default',
       name: 'Standard',
       layers: [
-        mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_parking_debug_parking_points,
+        wrapSourceLayers({
+          layers: layers_parkingLars_debug_parking_points,
           source,
           sourceLayer: 'processing.buffer_amenity_parking_points', // Separate Auto- und Fahrradflächen
         }),
-        mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_parking_debug_parking_poly,
+        wrapSourceLayers({
+          layers: layers_parkingLars_debug_parking_poly,
           source,
           sourceLayer: 'processing.buffer_amenity_parking_poly', // Separate Auto- und Fahrradflächen
         }),
-        mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_parking_debug_driveways,
+        wrapSourceLayers({
+          layers: layers_parkingLars_debug_driveways,
           source,
           sourceLayer: 'processing.buffer_driveways',
         }),
-        mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_parking_debug_kerb,
+        wrapSourceLayers({
+          layers: layers_parkingLars_debug_kerb,
           source,
           sourceLayer: 'processing.buffer_kerb_intersections',
         }),
-        mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_parking_debug_crossings,
+        wrapSourceLayers({
+          layers: layers_parkingLars_debug_crossings,
           source,
           sourceLayer: 'processing.buffer_pedestrian_crossings',
         }),
-        mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_parking_debug_bus_tram,
+        wrapSourceLayers({
+          layers: layers_parkingLars_debug_bus_tram,
           source,
           sourceLayer: 'processing.buffer_pt_bus',
           idPrefix: 'bus',
         }),
-        mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_parking_debug_bus_tram,
+        wrapSourceLayers({
+          layers: layers_parkingLars_debug_bus_tram,
           source,
           sourceLayer: 'processing.buffer_pt_tram',
           idPrefix: 'tram',
         }),
-        mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_parking_debug_ramps,
+        wrapSourceLayers({
+          layers: layers_parkingLars_debug_ramps,
           source,
           sourceLayer: 'processing.buffer_ramps',
         }),
-        mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_parking_obstacles,
+        wrapSourceLayers({
+          layers: layers_parkingLars_obstacles,
           source,
           sourceLayer: 'processing.buffer_obstacle',
         }),

@@ -5,7 +5,7 @@ import {
   surfaceAreaLegendsBad,
   surfaceAreaLegendsDefault,
 } from './layers/surface'
-import { mapboxStyleLayers } from './layers/utils/mapboxStyleLayers'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'surfaceHighwayAreas'
 const source = 'tilda_highwayAreas'
@@ -25,7 +25,7 @@ export const subcat_surface_highway_areas: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      layers: mapboxStyleLayers({
+      layers: wrapSourceLayers({
         layers: surfaceAreaLayers({ badOnly: false }),
         source,
         sourceLayer,
@@ -36,7 +36,7 @@ export const subcat_surface_highway_areas: FileMapDataSubcategory = {
     {
       id: 'bad',
       name: 'Nur schlechte Oberflächen',
-      layers: mapboxStyleLayers({
+      layers: wrapSourceLayers({
         layers: surfaceAreaLayers({ badOnly: true }),
         source,
         sourceLayer,

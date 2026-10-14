@@ -1,6 +1,6 @@
-import type { MapboxStyleLayer } from './utils/types'
+import type { StyleLayer } from './utils/types'
 
-export const mapboxStyleGroupLayers_atlas_bikelanes_widths: MapboxStyleLayer[] = [
+export const layers_bikelanes_widths: StyleLayer[] = [
   {
     id: 'widths-lines-incomplete',
     type: 'line',
