@@ -16,20 +16,36 @@ export const PLANNING_SCORE_LABELS: Record<string, string> = {
   score_bewohnerbedarf: 'Bewohnerbedarf (Zensus)',
 }
 
-/** 0–100 sub-scores (weighted average into Bedarf / Bebauung). */
-export const PLANNING_CRITERION_SCORE_KEYS = ['score_radweg', 'score_oepnv', 'score_hangneigung']
-
-/** Signed point bonuses/maluses on top of the criteria. */
-export const PLANNING_MODIFIER_SCORE_KEYS = [
-  'score_fussgaengerzone',
-  'score_bewohnerbedarf',
-  'score_zielorte',
-  'score_bestand',
-  'score_vegetation',
-  'score_platz',
-  'score_kreuzung',
-  'score_parken',
-  'score_eigendaten',
+/**
+ * The score breakdown of a hexagon in display order: per group (Bedarf, Bebauung) the 0–100
+ * criteria (weighted average into the group score), then the signed point bonuses/maluses on top.
+ * Shared by the hexagon inspector and the Prüfliste take-over so both show the same hierarchy.
+ */
+export const PLANNING_SCORE_GROUPS: {
+  /** Same keys as `WEIGHT_GROUPS` — ties the breakdown to the variant weights and group colors. */
+  key: 'bedarf' | 'bebauung'
+  label: string
+  /** Persisted sub-score of the whole group. */
+  scoreKey: string
+  criteria: string[]
+  modifiers: string[]
+  /** Announced but not yet integrated criteria (no data on the hexagon). */
+  comingSoon?: string[]
+}[] = [
+  {
+    key: 'bedarf',
+    label: 'Bedarf',
+    scoreKey: 'score_bedarf',
+    criteria: ['score_radweg', 'score_oepnv'],
+    modifiers: ['score_fussgaengerzone', 'score_bewohnerbedarf', 'score_zielorte', 'score_bestand'],
+  },
+  {
+    key: 'bebauung',
+    label: 'Bebauung',
+    scoreKey: 'score_bebauung',
+    criteria: ['score_hangneigung'],
+    modifiers: ['score_vegetation', 'score_platz', 'score_kreuzung', 'score_parken'],
+  },
 ]
 
 /** German labels for `PlanningArea.useCase`. */

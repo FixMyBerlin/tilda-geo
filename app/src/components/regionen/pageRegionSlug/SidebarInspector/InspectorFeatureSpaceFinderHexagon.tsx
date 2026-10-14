@@ -17,46 +17,22 @@ import {
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
 import { parseEigendatenDetails } from '@/shared/regionen/planningEigendatenDetails'
-import { PLANNING_SCORE_LABELS as SCORE_LABELS } from '@/shared/regionen/planningScoreLabels.const'
+import {
+  PLANNING_SCORE_GROUPS,
+  PLANNING_SCORE_LABELS as SCORE_LABELS,
+} from '@/shared/regionen/planningScoreLabels.const'
 import { Disclosure } from './Disclosure/Disclosure'
 
 type Props = {
   feature: StoreFeaturesInspector['inspectorFeatures'][number]
 }
 
-// Per-hexagon factor breakdown grouped by the two probabilities (Issue #3415).
-// `scoreKey` is the persisted sub-score for the whole group. Innerhalb der Gruppe
-// unterscheiden sich die beiden Faktorarten auch in der Anzeige, weil sie andere
-// Werte halten (mirrors scorer.py):
+// Per-hexagon factor breakdown grouped by the two probabilities (Issue #3415), see
+// `PLANNING_SCORE_GROUPS`. Innerhalb der Gruppe unterscheiden sich die beiden Faktorarten auch in
+// der Anzeige, weil sie andere Werte halten (mirrors scorer.py):
 //   criteria  → 0–100-Teilscore, gewichteter Durchschnitt → Balken
 //   modifiers → Zu-/Abschlag in Punkten (kann negativ sein) → Balken relativ zum Maximaleffekt
-const SCORE_GROUPS: {
-  // Gruppenschlüssel wie in WEIGHT_GROUPS — verbindet die Sidebar mit den Gewichten der Variante
-  // und mit den Gruppenfarben (`spaceFinderGroupStyle`) des Flächenfinder-Panels.
-  key: 'bedarf' | 'bebauung'
-  label: string
-  scoreKey: string
-  criteria: string[]
-  modifiers: string[]
-  // Angekündigte, aber noch nicht integrierte Kriterien (keine Daten am Hexagon) — werden nur als
-  // deaktivierte Zeile mit "bald verfügbar"-Hinweis angezeigt.
-  comingSoon?: string[]
-}[] = [
-  {
-    key: 'bedarf',
-    label: 'Bedarf',
-    scoreKey: 'score_bedarf',
-    criteria: ['score_radweg', 'score_oepnv'],
-    modifiers: ['score_fussgaengerzone', 'score_bewohnerbedarf', 'score_zielorte', 'score_bestand'],
-  },
-  {
-    key: 'bebauung',
-    label: 'Bebauung',
-    scoreKey: 'score_bebauung',
-    criteria: ['score_hangneigung'],
-    modifiers: ['score_vegetation', 'score_platz', 'score_kreuzung', 'score_parken'],
-  },
-]
+const SCORE_GROUPS = PLANNING_SCORE_GROUPS
 
 // `score_*` (Ergebnis pro Hexagon) → `w_*` (Gewicht der Variante) — nötig, um den maximal
 // möglichen Effekt (`weightToPoints`) für den Anteils-Balken zu bestimmen (mirrors weightScale.ts).

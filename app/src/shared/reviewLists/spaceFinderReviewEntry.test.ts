@@ -45,8 +45,8 @@ describe('buildSpaceFinderReviewProperties', () => {
       Variante: 'Standard',
       'H3-ID': '8b1f',
       Teilscores_markdown:
-        '- Bedarf 72\n- Bebauung 55\n- Radweg 80\n- ÖPNV + Bikesharing 60\n\n' +
-        'Zu-/Abschläge:\n- Vegetation −3\n- Parken +2',
+        '**Bedarf 72**\n\n- Radweg 80\n- ÖPNV + Bikesharing 60\n\n' +
+        '**Bebauung 55**\n\n- Zu- und Abschläge\n  - Vegetation −3\n  - Plätze 0\n  - Parken +2',
       Prüfkriterien_markdown: SPACE_FINDER_CHECKLIST.map(
         (c, index) => `${index + 1}. ${c.label}`,
       ).join('\n'),
@@ -87,7 +87,7 @@ describe('buildSpaceFinderReviewProperties', () => {
     })
     expect(properties.Ausschluss).toBe('Eigene Daten')
     expect(properties.Teilscores_markdown).toContain(
-      '- Eigene Daten „Wunschorte“ +12\n- Eigene Daten „Erlaubte Zonen“ ausgeschlossen',
+      '**Eigene Daten**\n\n- „Wunschorte“ +12\n- „Erlaubte Zonen“ ausgeschlossen',
     )
   })
 
@@ -104,7 +104,9 @@ describe('buildSpaceFinderReviewProperties', () => {
       ...base,
       candidateProperties: { score_bedarf: 10, score_vegetation: 4 },
     })
-    expect(properties.Teilscores_markdown).toBe('- Bedarf 10\n\nZu-/Abschläge:\n- Vegetation +4')
+    expect(properties.Teilscores_markdown).toBe(
+      '**Bedarf 10**\n\n**Bebauung**\n\n- Zu- und Abschläge\n  - Vegetation +4',
+    )
   })
 
   test('adds the same checklist to every candidate as a numbered Markdown list', () => {

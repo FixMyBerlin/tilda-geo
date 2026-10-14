@@ -1,5 +1,4 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link } from '@tanstack/react-router'
 import { twMerge } from 'tailwind-merge'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
@@ -16,7 +15,6 @@ import { formatUserDisplayName } from '@/shared/userDisplayName'
 import { reviewCommentDraftId } from '../../composerDrafts/composerDraftIds'
 import { ModeCommentComposer } from '../../ModeCommentComposer'
 import { modePanelMutedClassName, modePanelTintHairlineTopClassName } from '../../modePanel.const'
-import { modeRoutePaths } from '../../useCurrentMode'
 import { REVIEW_ENTRY_MOVE_COLOR, REVIEW_ENTRY_MOVE_COLOR_LABEL } from '../reviewEntryMapColors'
 import { REVIEW_ENTRY_SOURCE_DETAIL_LABEL } from '../reviewEntrySourceLabel'
 import { STATUS_LABEL } from '../reviewListsModeFilters'
@@ -29,7 +27,6 @@ type Props = { entryId: number }
 export const ReviewEntryDetail = ({ entryId }: Props) => {
   const regionSlug = useRegionSlug()
   const region = useRegion()
-  const canOpenInSpaceFinder = region.spaceFinderEnabled
   const { move: isMoveArmed } = useReviewListsModeValue()
   const queryClient = useQueryClient()
 
@@ -68,9 +65,6 @@ export const ReviewEntryDetail = ({ entryId }: Props) => {
 
   const createdByName = formatUserDisplayName(entry.createdBy)
   const updatedByName = formatUserDisplayName(entry.updatedBy)
-  const spaceFinderOrigin =
-    entry.source === 'SPACE_FINDER' ? parseSpaceFinderSourceMeta(entry.sourceMeta) : null
-  const spaceFinderVariant = entry.spaceFinderVariant
   const wasUpdated = new Date(entry.updatedAt).getTime() !== new Date(entry.createdAt).getTime()
 
   return (

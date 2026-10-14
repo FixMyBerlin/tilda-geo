@@ -1,7 +1,6 @@
 import { parseEigendatenDetails } from '@/shared/regionen/planningEigendatenDetails'
 import {
-  PLANNING_CRITERION_SCORE_KEYS,
-  PLANNING_MODIFIER_SCORE_KEYS,
+  PLANNING_SCORE_GROUPS,
   PLANNING_SCORE_LABELS,
 } from '@/shared/regionen/planningScoreLabels.const'
 import { SPACE_FINDER_CHECKLIST } from './spaceFinderChecklist.const'
@@ -35,32 +34,54 @@ const signedPoints = (value: number) => {
   const rounded = Math.round(value)
   return `${rounded > 0 ? '+' : rounded < 0 ? '−' : ''}${Math.abs(rounded)}`
 }
+/**
+ * The Teilscores in the order and hierarchy of the hexagon inspector: per group (Bedarf, Bebauung)
+ * its score, the criteria (0–100) and under "Zu- und Abschläge" the signed points; then one line
+ * per Eigene-Daten dataset. Values the run did not compute are left out. It needs line breaks, so
+ * the single-line attribute editor flattens it when someone edits and saves the attributes (known,
+ * accepted for now).
+ */
 const scoreBreakdown = (props: CandidateProperties, names?: EigendatenNames) => {
   const label = (key: string) => PLANNING_SCORE_LABELS[key] ?? key
-  const details = parseEigendatenDetails(props.eigendaten_details)
-  const scores = ['score_bedarf', 'score_bebauung', ...PLANNING_CRITERION_SCORE_KEYS].flatMap(
-    (key) => {
+  const blocks: string[] = []
+
+  for (const group of PLANNING_SCORE_GROUPS) {
+    const groupScore = asNumber(props[group.scoreKey])
+    const criteria = group.criteria.flatMap((key) => {
       const value = asNumber(props[key])
-      return value === null ? [] : [`${label(key)} ${Math.round(value)}`]
-    },
-  )
-  const modifiers = PLANNING_MODIFIER_SCORE_KEYS.flatMap((key) => {
-    // Eigene Daten: je Datensatz mit Namen — Punkte oder „ausgeschlossen“ (Alt-Läufe: Gesamtwert).
-    if (key === 'score_eigendaten' && details.length > 0) {
-      return details.flatMap((detail) => {
-        const name = `${label(key)} „${names?.[detail.id] ?? 'Eigene Daten'}“`
-        if (detail.x != null) return [`${name} ausgeschlossen`]
-        const points = Math.round(detail.p ?? 0)
-        return points === 0 ? [] : [`${name} ${signedPoints(points)}`]
-      })
-    }
-    const value = asNumber(props[key])
-    return value === null || Math.round(value) === 0 ? [] : [`${label(key)} ${signedPoints(value)}`]
-  })
-  const list = (lines: string[]) => lines.map((line) => `- ${line}`).join('\n')
-  const parts = [list(scores)]
-  if (modifiers.length > 0) parts.push(`Zu-/Abschläge:\n${list(modifiers)}`)
-  return parts.filter(Boolean).join('\n\n')
+      return value === null ? [] : [`- ${label(key)} ${Math.round(value)}`]
+    })
+    const modifiers = group.modifiers.flatMap((key) => {
+      const value = asNumber(props[key])
+      return value === null ? [] : [`  - ${label(key)} ${signedPoints(value)}`]
+    })
+    if (groupScore === null && criteria.length === 0 && modifiers.length === 0) continue
+    const lines = [`**${group.label}${groupScore === null ? '' : ` ${Math.round(groupScore)}`}**`]
+    if (criteria.length > 0 || modifiers.length > 0) lines.push('')
+    lines.push(...criteria)
+    if (modifiers.length > 0) lines.push('- Zu- und Abschläge', ...modifiers)
+    blocks.push(lines.join('\n'))
+  }
+
+  // Eigene Daten: je Datensatz mit Namen — Punkte oder „ausgeschlossen“ (Alt-Läufe: Gesamtwert).
+  const details = parseEigendatenDetails(props.eigendaten_details)
+  const total = asNumber(props.score_eigendaten)
+  const eigendaten =
+    details.length > 0
+      ? details.map((detail) => {
+          const name = `„${names?.[detail.id] ?? 'Eigene Daten'}“`
+          return detail.x != null
+            ? `- ${name} ausgeschlossen`
+            : `- ${name} ${signedPoints(detail.p ?? 0)}`
+        })
+      : total === null
+        ? []
+        : [`- ${label('score_eigendaten')} ${signedPoints(total)}`]
+  if (eigendaten.length > 0) {
+    blocks.push([`**${label('score_eigendaten')}**`, '', ...eigendaten].join('\n'))
+  }
+
+  return blocks.join('\n\n')
 }
 
 /**
