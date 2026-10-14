@@ -4,6 +4,19 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-10
 
+### `bicycleParking_points`, `bicycleParking_areas`
+
+- New `kind` tag, the first key of the row: `bicycle_parking`, `cargo_bike_parking` (`cargo_bike=designated`, or only `capacity:cargo_bike` without normal spaces), `small_electric_vehicle_parking` (`small_electric_vehicle_parking`, `kick-scooter_parking`), `mobility_hub` and `bicycle_rental` (not `shop` or `virtual`). Multipolygon relations of these kinds are added as areas with a centroid point, so `bicycleParking_areas.geom` is a multipolygon now.
+- One row per kind. An OSM object with normal and cargo spaces (`capacity` and `capacity:cargo_bike`) gives two rows: `bicycle_parking` with `capacity` = total minus cargo spaces, and `cargo_bike_parking` with `capacity` = cargo spaces (`cargo_bike=designated` without cargo spaces gives one `cargo_bike_parking` with the total). The row ids: the first row keeps the object id (`way/123`), the others add the kind (`way/123/cargo_bike_parking`). `capacity:cargo_bike` is no longer a tag of the rows.
+- Removed `osm_capacity` and `osm_capacity:cargo_bike`. A `capacity` or `capacity:cargo_bike` that is not a number is reported in `bicycleParking_errors`.
+- Geometry of a split object is placed per kind, `tags.geometry_transform` says how: `area_split` (outline cut across its long axis by the length the stands need, a bicycle stand every 1.2 m and a cargo bike stand every 2.0 m, 2 bikes each; the bicycle part on the min end, each point on its part), `line_halves` (open way cut in the middle, each point in the middle of its half; the line is kept in the internal table `_bicycleParking_lines`) and `point_offset` (node: the bicycle part 1 m west, the cargo bike part 1 m east).
+- `bicycle_parking` (the type of stand) is renamed to `stand_type`, so it does not read like `kind`. It accepts more values of the wiki (e.g. `rack`, `safe_loops`, `building`, `floor`), which were logged as errors before.
+- New tags: `network`, `rental_type` (from `bicycle_rental`: `docking_station`, `dropoff_point`, `key_dispensing_machine`), `in_mobility_hub=yes` on the points and areas inside a mobility hub area.
+- `position` is read from `<amenity>:position` (e.g. `small_electric_vehicle_parking:position`) before `bicycle_parking:position` and `position`. New values: `shoulder`, `traffic_island`, `parklet`, `playground`, `driveway`, `public_property`.
+- `cargo_bike=designated` is kept as `access_cargo_bike` (before it was logged as an error). `access` allows `members` and `no`.
+- A parking without `capacity` has no `capacity`. There is no estimate.
+- Summieren: a mobility hub is not counted as a parking (the parkings inside it are). New amount `objects` (1 per row); a parking without `capacity` counts only there, no longer as 1 space. The cargo spaces of a split object are counted under `cargo_bike_parking`.
+
 ### `roads`, `roadsPathClasses`, `bikelanes`: `route_relations`
 
 - New key `route_relations`: the OSM route relations a way belongs to, grouped by `route=*`, e.g. `bicycle:2788485,12138805;bus:1234567`. Route types: `bicycle`, `mtb`, `bus`, `foot`, `hiking`. Also the Berlin cycling network from infraVelo as pseudo relation per line, e.g. `radnetz_berlin:Vorrangnetz`, from the infravelo-radnetz repo. Why and how: [topics/roads_bikelanes/route_relations/README.md](topics/roads_bikelanes/route_relations/README.md).
