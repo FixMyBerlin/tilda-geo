@@ -1,7 +1,10 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { layers_bicycleparking_areas } from './layers/bicycleparking_areas'
-import { layers_bicycleparking_points } from './layers/bicycleparking_points'
+import {
+  bicycleParkingAreaLayers,
+  bicycleParkingLegends,
+  bicycleParkingPointLayers,
+} from './layers/bicycleParking'
 import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'bicycleParking'
@@ -11,7 +14,7 @@ export type SubcatBicycleParkingStyleIds = 'default' | 'witharea'
 
 export const subcat_bicycleParking: FileMapDataSubcategory = {
   id: subcatId,
-  name: 'Fahrradstellplätze',
+  name: 'Fahrrad- & Mikromobilitätsparken',
   ui: 'dropdown',
   sourceId: source,
   styles: [
@@ -21,34 +24,20 @@ export const subcat_bicycleParking: FileMapDataSubcategory = {
       name: 'Standard',
       layers: [
         ...wrapSourceLayers({
-          layers: layers_bicycleparking_areas,
+          layers: bicycleParkingAreaLayers(),
           source,
           sourceLayer: 'bicycleParking_areas',
+          interactive: false,
+          idPrefix: 'bicycleParking_areas',
         }),
         ...wrapSourceLayers({
-          layers: layers_bicycleparking_points,
+          layers: bicycleParkingPointLayers(),
           source,
           sourceLayer: 'bicycleParking_points',
+          idPrefix: 'bicycleParking_points',
         }),
       ],
-      // legends: [
-      //   {
-      //     id: 'children',
-      //     name: 'Kindergarten',
-      //     style: {
-      //       type: 'circle',
-      //       color: 'rgb(119, 23, 171)',
-      //     },
-      //   },
-      //   {
-      //     id: 'older',
-      //     name: 'Schule bis Uni',
-      //     style: {
-      //       type: 'circle',
-      //       color: 'hsl(209, 76%, 38%)',
-      //     },
-      //   },
-      // ],
+      legends: bicycleParkingLegends,
     },
   ],
 }

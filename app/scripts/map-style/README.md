@@ -32,5 +32,7 @@ The icons that layers use as `icon-image`, `fill-pattern` and `line-pattern`.
   `lifecycle-construction` is "person-digging" from [Font Awesome Free](https://fontawesome.com/license/free) (CC BY 4.0),
   `lifecycle-blocked` is "no-symbol" from [Heroicons](https://github.com/tailwindlabs/heroicons) (MIT).
 - `u-bahn`, `s-bahn`: redrawn. The logos are trademarks; we use them to mark stations.
-- `bus-stop`: redrawn after the official German bus stop sign. `bike-share` is drawn in the same way.
+- `bus-stop`: redrawn after the official German bus stop sign.
+- `bicycle-parking`, `bike-share`: the glyphs of the iD presets, [Temaki](https://github.com/rapideditor/temaki) `bicycle_parked` and `bicycle_rental`, CC0, on a badge in the colour of the kind. `cargo-bike-parking`: Maki `bicycle` with a box. `scooter-parking` (a kick scooter) and `mobility-hub` are drawn for TILDA in the same badge.
+- `ring-missing`: drawn for TILDA, a dotted ring around an icon whose data is missing (radinfra).
 - Everything else: drawn for TILDA.

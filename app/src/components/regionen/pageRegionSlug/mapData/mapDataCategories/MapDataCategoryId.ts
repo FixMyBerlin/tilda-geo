@@ -25,4 +25,5 @@ export type MapDataCategoryId =
   | 'radinfra_lit'
   | 'radinfra_width'
   | 'radinfra_oneway'
+  | 'radinfra_bicycleParking'
   | 'radinfra_campagins'

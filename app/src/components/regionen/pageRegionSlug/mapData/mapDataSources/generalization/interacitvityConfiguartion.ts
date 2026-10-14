@@ -73,9 +73,9 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
     stylingKeys: ['birdge', 'tunnel', 'railway', 'highway'],
     minzoom: 5,
   },
-  bicycleParking_areas: { stylingKeys: [], minzoom: 9 },
+  bicycleParking_areas: { stylingKeys: ['kind', 'capacity'], minzoom: 9 },
   bicycleParking_points: {
-    stylingKeys: ['covered'],
+    stylingKeys: ['kind', 'covered', 'capacity'],
     minzoom: 9,
   },
   bikeroutes: {

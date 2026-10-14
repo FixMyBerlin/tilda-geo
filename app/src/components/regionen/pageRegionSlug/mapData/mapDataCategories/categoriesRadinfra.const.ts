@@ -1,6 +1,7 @@
 import { subcat_bikelanes_plus_routes } from '../mapDataSubcategories/subcat_bikelanes_plus_routes.const'
 import { subcat_bikelanes_plus_surface_text } from '../mapDataSubcategories/subcat_bikelanes_plus_surface_text.const'
 import { subcat_bikelanes_plus_width_text } from '../mapDataSubcategories/subcat_bikelanes_plus_width_text.const'
+import { subcat_radinfra_bicycleParking } from '../mapDataSubcategories/subcat_radinfra_bicycleParking.const'
 import { subcat_radinfra_bikelanes } from '../mapDataSubcategories/subcat_radinfra_bikelanes.const'
 import { subcat_radinfra_campaigns } from '../mapDataSubcategories/subcat_radinfra_campaigns.const'
 import { subcat_radinfra_currentness } from '../mapDataSubcategories/subcat_radinfra_currentness.const'
@@ -68,6 +69,12 @@ export const categoriesRadinfra: StaticMapDataCategory[] = [
     name: 'Verkehrszeichen',
     desc: 'Ausschilderung der Infrastruktur',
     subcategories: [{ ...subcat_radinfra_trafficSigns, defaultStyle: 'default' }],
+  },
+  {
+    id: 'radinfra_bicycleParking',
+    name: 'Fahrradparken',
+    desc: 'Fehlt die Anzahl der Stellplätze?',
+    subcategories: [{ ...subcat_radinfra_bicycleParking, defaultStyle: 'default' }],
   },
   {
     id: 'radinfra_currentness',

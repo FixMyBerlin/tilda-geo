@@ -14,7 +14,7 @@ import type { CalculatorFilter } from './calculatorModeParam'
 export const calculatorPartKey = 'part'
 
 /** The amounts a feature can carry; the order the panel offers them in. */
-export const calculatorMetricOrder = ['capacity', 'area', 'length_directions'] as const
+export const calculatorMetricOrder = ['capacity', 'objects', 'area', 'length_directions'] as const
 
 export type CalculatorMetric = (typeof calculatorMetricOrder)[number]
 
@@ -178,18 +178,21 @@ const calculatorDatasets: CalculatorDataset[] = [
   },
   {
     id: 'bicycle_parking',
-    name: 'Fahrradstellplätze',
+    name: 'Fahrrad- & Mikromobilitätsparken',
     categoryIds: ['bicycleParking'],
     measureDatasets: ['bicycle_parking'],
-    sumKeys: { capacity: 'Stellplätze' },
+    sumKeys: { capacity: 'Stellplätze', objects: 'Anlagen' },
     // Only the points: a bicycle parking mapped as an area is in `bicycleParking_points` as well,
-    // as the point at its centroid.
+    // as the point at its centroid. Each row is one kind with its own capacity: a mixed OSM object
+    // is split into one row per kind, so the sum groups by `kind`. Mobility hubs are not summed
+    // (the measure SQL excludes them): they contain the stands, which are summed on their own.
+    // A row without `capacity` counts only as an object, not as stands.
     parts: [
       part({
         id: 'points',
         sourceId: 'atlas_bicycleParking',
         sourceLayer: 'bicycleParking_points',
-        groupByKeys: ['bicycle_parking', 'covered', 'access'],
+        groupByKeys: ['kind', 'stand_type', 'covered', 'access'],
         layers: pointLayers(partColors[0]),
       }),
     ],

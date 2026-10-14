@@ -1,14 +1,13 @@
 import { SwatchIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { IntlProvider } from 'react-intl'
 import { ConditionalFormattedKey } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/ConditionalFormattedKey'
-import { ConditionalFormattedValue } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/ConditionalFormattedValue'
 import { translations } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/translations.const'
 import { MotionAutoHeight } from '@/components/shared/motion/MotionAutoHeight'
 import { ModeFilterSelect } from '../ModeFilterSelect'
 import { modePanelFilterControlClassName } from '../modePanel.const'
 import { type CalculatorDataset, calculatorTranslationSourceId } from './calculatorDatasets.const'
+import { CalculatorGroupValue } from './CalculatorGroupValue'
 import type { CalculatorFilter } from './calculatorModeParam'
-import { calculatorMissingGroupValueLabel } from './utils/calculateMetricSummaries'
 
 const defaultStyleValue = 'default'
 
@@ -77,11 +76,7 @@ export const CalculatorFilterBar = ({
                 />
                 :{' '}
                 <span className="font-semibold">
-                  <ConditionalFormattedValue
-                    sourceId={calculatorTranslationSourceId(parts, key, value)}
-                    tagKey={key}
-                    tagValue={value || calculatorMissingGroupValueLabel}
-                  />
+                  <CalculatorGroupValue parts={parts} tagKey={key} value={value} />
                 </span>
               </span>
               <XMarkIcon className="size-3.5 shrink-0" aria-hidden />

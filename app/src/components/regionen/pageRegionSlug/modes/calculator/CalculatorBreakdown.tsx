@@ -1,13 +1,13 @@
 import { FunnelIcon, TrashIcon } from '@heroicons/react/20/solid'
 import { twJoin } from 'tailwind-merge'
 import { ConditionalFormattedKey } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/ConditionalFormattedKey'
-import { ConditionalFormattedValue } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/ConditionalFormattedValue'
 import { modePanelTintHairlineTopClassName } from '../modePanel.const'
 import {
   type CalculatorDataset,
   type CalculatorMetric,
   calculatorTranslationSourceId,
 } from './calculatorDatasets.const'
+import { CalculatorGroupValue } from './CalculatorGroupValue'
 import type { CalculatorFilter } from './calculatorModeParam'
 import type { calculateMetricSummaryForAreas } from './utils/calculateMetricSummaries'
 import {
@@ -194,10 +194,10 @@ const AreaSummary = ({
                   className="min-w-0 truncate [&_span]:truncate"
                   title={groupValue.value.length > 20 ? groupValue.value : undefined}
                 >
-                  <ConditionalFormattedValue
-                    sourceId={calculatorTranslationSourceId(parts, group.key, groupValue.value)}
+                  <CalculatorGroupValue
+                    parts={parts}
                     tagKey={group.key}
-                    tagValue={groupValue.value}
+                    value={groupValue.filterValue}
                   />
                 </span>
                 {/* What a click does: add or remove the filter. */}

@@ -37,6 +37,8 @@ const formatSum = (metric: CalculatorMetric | null, sum: number) => {
       return kilometers.format(sum / 1000)
     case 'area':
       return `${wholeNumber.format(sum)} m²`
+    case 'objects':
+      return wholeNumber.format(sum)
     case 'capacity':
     case null:
       return wholeNumber.format(roundCapacity(sum))

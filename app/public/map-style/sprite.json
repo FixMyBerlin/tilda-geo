@@ -34,16 +34,16 @@
     "y": 0,
     "pixelRatio": 1
   },
-  "bike-share": {
+  "bus-stop": {
     "width": 32,
     "height": 32,
     "x": 197,
     "y": 0,
     "pixelRatio": 1
   },
-  "bus-stop": {
-    "width": 32,
-    "height": 32,
+  "ring-missing": {
+    "width": 30,
+    "height": 30,
     "x": 0,
     "y": 49,
     "pixelRatio": 1
@@ -51,7 +51,7 @@
   "pattern-oneway": {
     "width": 132,
     "height": 21,
-    "x": 33,
+    "x": 31,
     "y": 49,
     "pixelRatio": 1
   },
@@ -59,168 +59,203 @@
     "width": 127,
     "height": 21,
     "x": 0,
-    "y": 82,
+    "y": 80,
+    "pixelRatio": 1
+  },
+  "bicycle-parking": {
+    "width": 20,
+    "height": 20,
+    "x": 128,
+    "y": 80,
+    "pixelRatio": 1
+  },
+  "bike-share": {
+    "width": 20,
+    "height": 20,
+    "x": 149,
+    "y": 80,
     "pixelRatio": 1
   },
   "bridge": {
     "width": 20,
     "height": 20,
-    "x": 128,
-    "y": 82,
+    "x": 170,
+    "y": 80,
+    "pixelRatio": 1
+  },
+  "cargo-bike-parking": {
+    "width": 20,
+    "height": 20,
+    "x": 191,
+    "y": 80,
     "pixelRatio": 1
   },
   "chevron-double-right": {
     "width": 20,
     "height": 20,
-    "x": 149,
-    "y": 82,
+    "x": 212,
+    "y": 80,
     "pixelRatio": 1
   },
   "ferry": {
     "width": 20,
     "height": 20,
-    "x": 170,
-    "y": 82,
+    "x": 233,
+    "y": 80,
     "pixelRatio": 1
   },
   "lifecycle-blocked": {
     "width": 20,
     "height": 20,
-    "x": 191,
-    "y": 82,
+    "x": 0,
+    "y": 102,
     "pixelRatio": 1
   },
   "lifecycle-construction": {
     "width": 20,
     "height": 20,
-    "x": 212,
-    "y": 82,
+    "x": 21,
+    "y": 102,
+    "pixelRatio": 1
+  },
+  "mobility-hub": {
+    "width": 20,
+    "height": 20,
+    "x": 42,
+    "y": 102,
     "pixelRatio": 1
   },
   "museum": {
     "width": 20,
     "height": 20,
-    "x": 233,
-    "y": 82,
+    "x": 63,
+    "y": 102,
     "pixelRatio": 1
   },
   "parking": {
     "width": 20,
     "height": 20,
-    "x": 0,
-    "y": 104,
+    "x": 84,
+    "y": 102,
     "pixelRatio": 1
   },
   "parking-garage": {
     "width": 20,
     "height": 20,
-    "x": 21,
-    "y": 104,
+    "x": 105,
+    "y": 102,
     "pixelRatio": 1
   },
   "s-bahn": {
     "width": 20,
     "height": 20,
-    "x": 42,
-    "y": 104,
+    "x": 126,
+    "y": 102,
+    "pixelRatio": 1
+  },
+  "scooter-parking": {
+    "width": 20,
+    "height": 20,
+    "x": 147,
+    "y": 102,
     "pixelRatio": 1
   },
   "tram": {
     "width": 20,
     "height": 20,
-    "x": 63,
-    "y": 104,
+    "x": 168,
+    "y": 102,
     "pixelRatio": 1
   },
   "tunnel": {
     "width": 20,
     "height": 20,
-    "x": 84,
-    "y": 104,
+    "x": 189,
+    "y": 102,
     "pixelRatio": 1
   },
   "cross": {
     "width": 19,
     "height": 19,
-    "x": 105,
-    "y": 104,
+    "x": 210,
+    "y": 102,
     "pixelRatio": 1
   },
   "pattern-stripes": {
     "width": 19,
     "height": 19,
-    "x": 125,
-    "y": 104,
+    "x": 230,
+    "y": 102,
     "pixelRatio": 1
   },
   "pattern-parking-diagonal": {
     "width": 46,
     "height": 17,
-    "x": 145,
-    "y": 104,
+    "x": 0,
+    "y": 123,
     "pixelRatio": 1
   },
   "pattern-parking-perpendicular": {
     "width": 46,
     "height": 17,
-    "x": 192,
-    "y": 104,
+    "x": 47,
+    "y": 123,
     "pixelRatio": 1
   },
   "circle-11": {
     "width": 17,
     "height": 17,
-    "x": 239,
-    "y": 104,
+    "x": 94,
+    "y": 123,
     "pixelRatio": 1
   },
   "train": {
     "width": 17,
     "height": 17,
-    "x": 0,
-    "y": 125,
+    "x": 112,
+    "y": 123,
     "pixelRatio": 1
   },
   "u-bahn": {
     "width": 17,
     "height": 17,
-    "x": 18,
-    "y": 125,
+    "x": 130,
+    "y": 123,
     "pixelRatio": 1
   },
   "label-box-blue": {
     "width": 20,
     "height": 14,
-    "x": 36,
-    "y": 125,
+    "x": 148,
+    "y": 123,
     "pixelRatio": 1
   },
   "label-box-green": {
     "width": 20,
     "height": 14,
-    "x": 57,
-    "y": 125,
+    "x": 169,
+    "y": 123,
     "pixelRatio": 1
   },
   "label-box-red": {
     "width": 20,
     "height": 14,
-    "x": 78,
-    "y": 125,
+    "x": 190,
+    "y": 123,
     "pixelRatio": 1
   },
   "label-box-yellow": {
     "width": 26,
     "height": 14,
-    "x": 99,
-    "y": 125,
+    "x": 211,
+    "y": 123,
     "pixelRatio": 1
   },
   "dot": {
     "width": 11,
     "height": 11,
-    "x": 126,
-    "y": 125,
+    "x": 238,
+    "y": 123,
     "pixelRatio": 1
   }
 }
