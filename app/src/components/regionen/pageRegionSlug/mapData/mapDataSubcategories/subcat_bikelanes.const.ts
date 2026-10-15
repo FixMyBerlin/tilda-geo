@@ -3,9 +3,9 @@ import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
 import { layers_bikelanes_default } from './layers/bikelanes_default'
 import { layers_bikelanes_details } from './layers/bikelanes_details'
 import { layers_bikelanes_widths } from './layers/bikelanes_widths'
-import { structureIconLayers } from './layers/structureIconLayers'
 import { withBikelaneVisualLineOffset } from './layers/utils/bikelaneLineOffset'
 import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
+import { wayIconLayers } from './layers/wayIconLayers'
 import { bikelanesWidthLegend } from './subcat_radinfra_width.const'
 
 const subcatId = 'bikelanes'
@@ -20,7 +20,11 @@ export type SubcatBikelanesStyleIds =
   | 'freshness'
   | 'bikelane_oneway_arrows'
 
-const structureIcons = structureIconLayers({ source, sourceLayer })
+const wayIcons = wayIconLayers({
+  source,
+  sourceLayer,
+  transformLayers: withBikelaneVisualLineOffset,
+})
 
 export const bikelanesDefaultStyle: FileMapDataSubcategoryStyle = {
   id: 'default',
@@ -31,7 +35,7 @@ export const bikelanesDefaultStyle: FileMapDataSubcategoryStyle = {
       source,
       sourceLayer,
     }),
-    ...structureIcons,
+    ...wayIcons,
   ],
   legends: [
     {
@@ -104,7 +108,7 @@ export const bikelanesDetailsStyle: FileMapDataSubcategoryStyle = {
       source,
       sourceLayer,
     }),
-    ...structureIcons,
+    ...wayIcons,
   ],
   legends: [
     {
@@ -229,7 +233,7 @@ const bikelanesWidthStyle: FileMapDataSubcategoryStyle = {
       source,
       sourceLayer,
     }),
-    ...structureIcons,
+    ...wayIcons,
   ],
   legends: bikelanesWidthLegend,
 }

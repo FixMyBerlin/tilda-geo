@@ -286,7 +286,10 @@ Bikelane-Geometrien liegen in den Daten auf der **Straßen-Mittellinie**. Der se
    **Einschränkungen:**
    - Meter→Pixel-Kalibrierung bei Referenz-Breitengrad ~52,5° (Mitte Deutschland); Abweichung grob ±9 % an den Rändern Deutschlands.
    - MapLibre `line-offset` ist positiv nach **rechts** relativ zur Linienrichtung. Linke abgeleitete Geometrien sind gegen die OSM-Way-Richtung gedreht, rechte nicht. Beide Seiten werden deshalb um `|offset|` nach rechts ihrer eigenen Linie versetzt (Rechtsverkehr). Das Attribut `offset` selbst bleibt vorzeichenbehaftet (`+` links / `-` rechts der OSM-Way-Richtung).
-   - Nur `line`-Layer können versetzt werden. Symbol-/Text-Layer mit `symbol-placement: line-center` (Breiten-, Oberflächen-, Verkehrszeichen-Beschriftungen) bleiben auf der Mittellinie.
+   - Symbol-Layer haben kein `line-offset`. Texte entlang der Linie (`symbol-placement: line` / `line-center`, z. B. Breiten- und Oberflächen-Beschriftung) bekommen denselben Versatz über `text-offset` (`bikelaneVisualTextOffset`, in em, also geteilt durch `text-size`). Bei Text entlang der Linie wirkt `text-offset` y senkrecht zur Linie und bleibt auf der richtigen Seite, auch wenn MapLibre den Text aufrecht dreht.
+   - Icons brauchen dafür denselben Weg: Sie stehen als `['image', …]` im `text-field` (Brücke, Tunnel, Baustelle in `wayIconLayers.ts`). `icon-offset` wirkt mit `icon-rotation-alignment: viewport` nur in Bildschirm-Richtung, und mit `map` landet das Icon beim Aufrecht-Drehen auf der falschen Seite.
+   - MapLibre lässt Text entlang einer Linie weg, wenn die Linie kürzer als der Text ist. Der Stil rechnet deshalb je Zoomstufe aus dem Attribut `length` (Meter), ob die Icons passen; der Layer-Filter blendet zu kurze Wege aus, bis sie beim Hineinzoomen lang genug sind.
+   - Verkehrszeichen (`bikelanes_plus_signs`) stehen als Punkt-Symbol an den Linien-Stützpunkten und bleiben auf der Mittellinie.
 
    Mehr Kontext: Topic-Doc-Kapitel [`versetzte-geometrien`](../topic-docs/roads_bikelanes/chapters/versetzte-geometrien.md), [`processing/CHANGELOG.md`](../processing/CHANGELOG.md).
 

@@ -28,6 +28,9 @@ The icons that layers use as `icon-image`, `fill-pattern` and `line-pattern`.
 - `bridge`, `tunnel`, `parking`, `parking-garage`, `museum`, `ferry`, `tram` and the glyph of `train`:
   [Maki](https://github.com/mapbox/maki), CC0.
 - `note-*`: the same paths as the Inspector icons in `SidebarInspector/icons`.
+- `lifecycle-*`: the same paths as the lifecycle row in the Inspector (`TagsTableRowLifecycle`):
+  `lifecycle-construction` is "person-digging" from [Font Awesome Free](https://fontawesome.com/license/free) (CC BY 4.0),
+  `lifecycle-blocked` is "no-symbol" from [Heroicons](https://github.com/tailwindlabs/heroicons) (MIT).
 - `u-bahn`, `s-bahn`: redrawn. The logos are trademarks; we use them to mark stations.
 - `bus-stop`: redrawn after the official German bus stop sign. `bike-share` is drawn in the same way.
 - Everything else: drawn for TILDA.

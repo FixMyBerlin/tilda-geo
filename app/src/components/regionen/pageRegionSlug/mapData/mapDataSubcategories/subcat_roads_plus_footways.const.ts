@@ -1,7 +1,7 @@
 import type { FileMapDataSubcategory } from '../types'
 import { layers_roads_plus_fusswege } from './layers/roads_plus_fusswege'
-import { structureIconLayers } from './layers/structureIconLayers'
 import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
+import { wayIconLayers } from './layers/wayIconLayers'
 
 const subcatId = 'roads_plus_footways'
 const source = 'atlas_roadsPathClasses'
@@ -23,7 +23,7 @@ export const subcat_roads_plus_footways: FileMapDataSubcategory = {
           source,
           sourceLayer,
         }),
-        ...structureIconLayers({ source, sourceLayer }),
+        ...wayIconLayers({ source, sourceLayer }),
       ],
       legends: [
         {

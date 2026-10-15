@@ -1,5 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
 import { layers_bikelanes_plus_surfaces } from './layers/bikelanes_plus_surfaces'
+import { withBikelaneVisualLineOffset } from './layers/utils/bikelaneLineOffset'
 import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'bikelanes_plus_surface_smoothness'
@@ -18,7 +19,7 @@ export const subcat_bikelanes_plus_surface_text: FileMapDataSubcategory = {
       id: 'default',
       name: 'Oberfläche (Text)',
       layers: wrapSourceLayers({
-        layers: layers_bikelanes_plus_surfaces,
+        layers: withBikelaneVisualLineOffset(layers_bikelanes_plus_surfaces),
         source,
         sourceLayer,
       }),

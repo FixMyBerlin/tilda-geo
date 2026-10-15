@@ -83,129 +83,143 @@
     "y": 164,
     "pixelRatio": 2
   },
-  "museum": {
+  "lifecycle-blocked": {
     "width": 40,
     "height": 40,
     "x": 382,
     "y": 164,
     "pixelRatio": 2
   },
-  "parking": {
+  "lifecycle-construction": {
     "width": 40,
     "height": 40,
     "x": 424,
     "y": 164,
     "pixelRatio": 2
   },
-  "parking-garage": {
+  "museum": {
     "width": 40,
     "height": 40,
     "x": 466,
     "y": 164,
     "pixelRatio": 2
   },
-  "s-bahn": {
+  "parking": {
     "width": 40,
     "height": 40,
     "x": 0,
+    "y": 208,
+    "pixelRatio": 2
+  },
+  "parking-garage": {
+    "width": 40,
+    "height": 40,
+    "x": 42,
+    "y": 208,
+    "pixelRatio": 2
+  },
+  "s-bahn": {
+    "width": 40,
+    "height": 40,
+    "x": 84,
     "y": 208,
     "pixelRatio": 2
   },
   "tram": {
     "width": 40,
     "height": 40,
-    "x": 42,
+    "x": 126,
     "y": 208,
     "pixelRatio": 2
   },
   "tunnel": {
     "width": 40,
     "height": 40,
-    "x": 84,
+    "x": 168,
     "y": 208,
     "pixelRatio": 2
   },
   "cross": {
     "width": 38,
     "height": 38,
-    "x": 126,
+    "x": 210,
     "y": 208,
     "pixelRatio": 2
   },
   "pattern-stripes": {
     "width": 38,
     "height": 38,
-    "x": 166,
+    "x": 250,
     "y": 208,
     "pixelRatio": 2
   },
   "pattern-parking-diagonal": {
     "width": 92,
     "height": 35,
-    "x": 206,
+    "x": 290,
     "y": 208,
     "pixelRatio": 2
   },
   "pattern-parking-perpendicular": {
     "width": 92,
     "height": 35,
-    "x": 300,
+    "x": 384,
     "y": 208,
     "pixelRatio": 2
   },
   "circle-11": {
     "width": 34,
     "height": 34,
-    "x": 394,
+    "x": 478,
     "y": 208,
     "pixelRatio": 2
   },
   "train": {
     "width": 34,
     "height": 34,
-    "x": 430,
-    "y": 208,
+    "x": 0,
+    "y": 250,
     "pixelRatio": 2
   },
   "u-bahn": {
     "width": 34,
     "height": 34,
-    "x": 466,
-    "y": 208,
+    "x": 36,
+    "y": 250,
     "pixelRatio": 2
   },
   "label-box-blue": {
     "width": 40,
     "height": 28,
-    "x": 0,
+    "x": 72,
     "y": 250,
     "pixelRatio": 2
   },
   "label-box-green": {
     "width": 40,
     "height": 28,
-    "x": 42,
+    "x": 114,
     "y": 250,
     "pixelRatio": 2
   },
   "label-box-red": {
     "width": 40,
     "height": 28,
-    "x": 84,
+    "x": 156,
     "y": 250,
     "pixelRatio": 2
   },
   "label-box-yellow": {
     "width": 52,
     "height": 28,
-    "x": 126,
+    "x": 198,
     "y": 250,
     "pixelRatio": 2
   },
   "dot": {
     "width": 22,
     "height": 22,
-    "x": 180,
+    "x": 252,
     "y": 250,
     "pixelRatio": 2
   }

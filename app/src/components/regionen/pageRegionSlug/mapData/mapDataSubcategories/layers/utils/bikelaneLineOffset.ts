@@ -33,9 +33,11 @@ import type { StyleLayer } from './types'
  * - The meter→pixel factor depends on latitude (`cos φ`). We bake in a reference latitude
  *   (~52.5°, center of Germany). Away from it the on-screen offset is off by roughly ±9%
  *   across Germany — sub-pixel where the offset is small, acceptable when zoomed in.
- * - Only `line` layers can be offset this way. Symbol/text layers placed along the line
- *   (`symbol-placement: 'line-center'`, e.g. width/surface/traffic-sign labels) cannot be
- *   perpendicular-offset via the style and stay on the centerline.
+ * - Symbol layers have no `line-offset`. Labels and icons placed along the line
+ *   (`symbol-placement: 'line'` / `'line-center'`) get the same shift through `text-offset`,
+ *   see {@link bikelaneVisualTextOffset}. Icons go into `text-field` as `['image', …]`
+ *   sections for this: `icon-offset` would land on the wrong side whenever MapLibre turns
+ *   the symbol upright, `text-offset` stays on the right side of the line.
  * - `['zoom']` may only be the input of a top-level `interpolate`/`step`, so the compact
  *   low-zoom nudge cannot nest the layer's own zoom-driven `line-width`. We take half of
  *   the clamped low-zoom width (first interpolate/step output) instead.
@@ -58,7 +60,7 @@ const metersPerPixelAtZoom0 =
  * `offset` attribute stays signed relative to the OSM way (`+` left / `-` right); only
  * its magnitude is used here.
  */
-const pixelsPerMeterAtZoom = (zoom: number) => 2 ** zoom / metersPerPixelAtZoom0
+export const pixelsPerMeterAtZoom = (zoom: number) => 2 ** zoom / metersPerPixelAtZoom0
 
 const MIN_ZOOM_STOP = 0
 const MAX_ZOOM_STOP = 24
@@ -122,24 +124,109 @@ export const bikelaneVisualLineOffset = (lineWidth: unknown) => {
   ] satisfies ExpressionSpecification
 }
 
+/** Value of a number or a linear `['interpolate', ['linear'], ['zoom'], …]` at `zoom`. */
+export const zoomValue = (value: unknown, zoom: number) => {
+  if (typeof value === 'number') return value
+  if (!Array.isArray(value) || value[0] !== 'interpolate') {
+    throw new Error(
+      `zoomValue: expected a number or a linear zoom interpolate, got ${JSON.stringify(value)}`,
+    )
+  }
+  const stops = value.slice(3) as number[]
+  if (zoom <= stops[0]!) return stops[1]!
+  for (let i = 2; i < stops.length; i += 2) {
+    const [z0, v0, z1, v1] = [stops[i - 2]!, stops[i - 1]!, stops[i]!, stops[i + 1]!]
+    if (zoom <= z1) return v0 + ((v1 - v0) * (zoom - z0)) / (z1 - z0)
+  }
+  return stops.at(-1)!
+}
+
+/** Symbol expressions get one stop per zoom level up to here; above it they keep the last value. */
+export const SYMBOL_MAX_STEP_ZOOM = 19
+
+/** Largest `|offset|` in meters the linear feature interpolation below covers exactly. */
+const MAX_OFFSET_M = 100
+
 /**
- * Apply {@link bikelaneVisualLineOffset} to every `line` layer, replacing any `line-offset`
- * the layer defines itself. The data-driven offset is the single source of truth for the
- * sideways shift. Non-line layers are returned unchanged.
+ * `text-offset` that moves a label or icon placed along the line onto the shifted bikelane
+ * line, on top of the layer's own `text-offset` (`baseOffsetEm`).
  *
- * Call this on the `layers` of every bikelane subcategory that renders lines, before handing
- * them to `wrapSourceLayers` — e.g. `subcat_bikelanes`, `subcat_radinfra_*`,
- * `subcat_surface_bikelane`. It is a no-op on symbol/text-only subcategories, so it is safe
- * (but pointless) to wrap those too.
+ * `text-offset` is in ems, so the pixel shift is divided by the `text-size` at each zoom.
+ * One stop per zoom level: in between, base-2 interpolation follows the meter→pixel curve
+ * exactly while the text size changes only slightly. With `symbol-placement: 'line'` /
+ * `'line-center'` a positive y moves the symbol to the right of the line direction, the
+ * same side `line-offset` uses; it stays there when MapLibre turns the label upright.
+ */
+export const bikelaneVisualTextOffset = (
+  textSize: unknown,
+  minzoom: number,
+  baseOffsetEm: [number, number] = [0, 0],
+) => {
+  const [x, y] = baseOffsetEm
+  const stop = (zoom: number) => {
+    const emPerMeter = pixelsPerMeterAtZoom(zoom) / zoomValue(textSize, zoom)
+    return [
+      'interpolate',
+      ['linear'],
+      offsetMetersAbs,
+      0,
+      ['literal', [x, y]],
+      MAX_OFFSET_M,
+      ['literal', [x, y + MAX_OFFSET_M * emPerMeter]],
+    ] satisfies ExpressionSpecification
+  }
+  const zooms = [
+    ...Array.from({ length: SYMBOL_MAX_STEP_ZOOM - minzoom + 1 }, (_, i) => minzoom + i),
+    MAX_ZOOM_STOP,
+  ]
+  return [
+    'interpolate',
+    ['exponential', 2],
+    ['zoom'],
+    ...zooms.flatMap((zoom) => [zoom, stop(zoom)]),
+  ] as ExpressionSpecification
+}
+
+const isTextAlongLine = (layer: StyleLayer) =>
+  layer.type === 'symbol' &&
+  layer.layout?.['text-field'] !== undefined &&
+  ['line', 'line-center'].includes(String(layer.layout?.['symbol-placement']))
+
+/**
+ * Apply the bikelane sideways shift to every layer that can take it:
+ * - `line` layers get {@link bikelaneVisualLineOffset}, replacing any `line-offset` the layer
+ *   defines itself. The data-driven offset is the single source of truth for the shift
+ *   (compact below minzoom, meters above).
+ * - `symbol` layers with text placed along the line get {@link bikelaneVisualTextOffset} on top
+ *   of their own `text-offset`. They need a `text-size` that is a number or a linear zoom interpolate.
+ *
+ * Call this on the `layers` of every bikelane subcategory, before handing them to
+ * `wrapSourceLayers` — e.g. `subcat_bikelanes`, `subcat_bikelanes_plus_*`, `subcat_radinfra_*`,
+ * `subcat_surface_bikelane`. Other layers are returned unchanged.
  */
 export const withBikelaneVisualLineOffset = (layers: StyleLayer[]): StyleLayer[] =>
   layers.map((layer) => {
-    if (layer.type !== 'line') return layer
-    const paint = layer.paint ?? {}
-    // Override (not add to) any `line-offset` of the layer — the data-driven offset
-    // is the single source of truth for the sideways shift (compact below minzoom, meters above).
-    return {
-      ...layer,
-      paint: { ...paint, 'line-offset': bikelaneVisualLineOffset(paint['line-width']) },
-    } satisfies StyleLayer
+    if (layer.type === 'line') {
+      const paint = layer.paint ?? {}
+      return {
+        ...layer,
+        paint: { ...paint, 'line-offset': bikelaneVisualLineOffset(paint['line-width']) },
+      } satisfies StyleLayer
+    }
+    if (layer.type === 'symbol' && isTextAlongLine(layer)) {
+      const layout = layer.layout ?? {}
+      const ownOffset = layout['text-offset'] as [number, number] | undefined
+      return {
+        ...layer,
+        layout: {
+          ...layout,
+          'text-offset': bikelaneVisualTextOffset(
+            layout['text-size'] ?? 16,
+            Math.max(layer.minzoom ?? 0, INTERACTIVE_MINZOOM),
+            ownOffset,
+          ),
+        },
+      } satisfies StyleLayer
+    }
+    return layer
   })

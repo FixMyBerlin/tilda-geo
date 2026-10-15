@@ -31,16 +31,23 @@ const imageIds = (expression: unknown): string[] => {
   }
 }
 
+/** Images inside a `text-field`, like `['format', ['image', 'bridge'], {}]`. Other text is skipped. */
+const textFieldImageIds = (expression: unknown): string[] => {
+  if (!Array.isArray(expression)) return []
+  if (expression[0] === 'image') return imageIds(expression)
+  return expression.slice(1).flatMap(textFieldImageIds)
+}
+
 type Layer = { id: string; layout?: Record<string, unknown>; paint?: Record<string, unknown> }
 
 const usedImageIds = (layers: Layer[]) =>
   layers.flatMap((layer) =>
-    IMAGE_PROPERTIES.flatMap((property) =>
-      imageIds(layer.layout?.[property] ?? layer.paint?.[property]).map((imageId) => ({
-        layerId: layer.id,
-        imageId,
-      })),
-    ),
+    [
+      ...IMAGE_PROPERTIES.flatMap((property) =>
+        imageIds(layer.layout?.[property] ?? layer.paint?.[property]),
+      ),
+      ...textFieldImageIds(layer.layout?.['text-field']),
+    ].map((imageId) => ({ layerId: layer.id, imageId })),
   )
 
 describe('map sprite', () => {

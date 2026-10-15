@@ -8,4 +8,4 @@ Den empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorz
 
 Die Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.
 
-**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.
+**HINWEIS:** Der visuelle Versatz wirkt auf Linien-Ebenen und auf Beschriftungen und Icons entlang der Linie (Breite, Oberfläche, Brücke, Tunnel, Baustelle; sehr kurze Wege zeigen ihr Icon erst beim Hineinzoomen). Verkehrsschild-Beschriftungen liegen weiter auf der Mittellinie.

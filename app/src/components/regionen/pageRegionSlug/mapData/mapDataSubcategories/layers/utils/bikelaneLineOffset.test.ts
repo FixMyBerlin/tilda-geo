@@ -1,9 +1,12 @@
+import { createExpression } from '@maplibre/maplibre-gl-style-spec'
 import { describe, expect, test } from 'vitest'
 import { interactivityConfiguration } from '../../../mapDataSources/generalization/interacitvityConfiguartion'
 import {
   bikelaneVisualLineOffset,
+  bikelaneVisualTextOffset,
   lowZoomLineWidthPx,
   withBikelaneVisualLineOffset,
+  zoomValue,
 } from './bikelaneLineOffset'
 import type { StyleLayer } from './types'
 
@@ -88,13 +91,68 @@ describe('withBikelaneVisualLineOffset', () => {
     expect(asRecord(line?.paint)['line-offset']).toEqual(bikelaneVisualLineOffset(lineWidth))
   })
 
-  test('leaves symbol layers unchanged', () => {
+  test('moves symbols placed along the line, keeping their own text-offset', () => {
+    const [label] = withBikelaneVisualLineOffset([
+      {
+        id: 'label',
+        type: 'symbol',
+        minzoom: 12,
+        layout: {
+          'symbol-placement': 'line-center',
+          'text-field': ['get', 'width'],
+          'text-size': 12,
+          'text-offset': [0, 0.5],
+        },
+      },
+    ])
+    expect(asRecord(label?.layout)['text-offset']).toEqual(
+      bikelaneVisualTextOffset(12, 12, [0, 0.5]),
+    )
+  })
+
+  test('leaves point symbols unchanged', () => {
     const symbol = {
-      id: 'label',
+      id: 'poi',
       type: 'symbol',
-      layout: { 'symbol-placement': 'line-center' },
+      layout: { 'icon-image': 'dot' },
     } satisfies StyleLayer
     expect(withBikelaneVisualLineOffset([symbol])).toEqual([symbol])
+  })
+})
+
+describe('bikelaneVisualTextOffset', () => {
+  const evaluate = (expression: unknown, zoom: number, offset: number | undefined) => {
+    const parsed = createExpression(expression, 'layers[0].layout.text-offset')
+    if (parsed.result !== 'success') throw new Error(JSON.stringify(parsed.value))
+    return parsed.value.evaluate({ zoom }, {
+      type: 2,
+      properties: offset === undefined ? {} : { offset },
+    } as never) as [number, number]
+  }
+
+  test('moves the symbol as far as the line, in ems of the text size', () => {
+    const textSize = ['interpolate', ['linear'], ['zoom'], 14, 16.8, 18, 24]
+    const lineOffset = bikelaneVisualLineOffset(1.5)
+    for (const zoom of [14, 16, 18]) {
+      const linePx = evaluate(lineOffset, zoom, -5) as unknown as number
+      const [x, y] = evaluate(bikelaneVisualTextOffset(textSize, 14), zoom, -5)
+      expect(x).toBe(0)
+      expect(y * zoomValue(textSize, zoom)).toBeCloseTo(linePx, 1)
+    }
+  })
+
+  test('adds the layer offset and keeps it without `offset`', () => {
+    expect(evaluate(bikelaneVisualTextOffset(12, 12, [0, 0.5]), 15, undefined)).toEqual([0, 0.5])
+  })
+})
+
+describe('zoomValue', () => {
+  test('reads numbers and linear zoom interpolations', () => {
+    const size = ['interpolate', ['linear'], ['zoom'], 12, 8, 22, 18]
+    expect(zoomValue(7, 15)).toBe(7)
+    expect(zoomValue(size, 10)).toBe(8)
+    expect(zoomValue(size, 17)).toBe(13)
+    expect(zoomValue(size, 23)).toBe(18)
   })
 })
 

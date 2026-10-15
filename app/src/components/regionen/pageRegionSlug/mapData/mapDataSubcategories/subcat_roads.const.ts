@@ -4,8 +4,8 @@ import { layers_roads_all } from './layers/roads_all'
 import { layers_roads_mainstreets } from './layers/roads_mainstreets'
 import { layers_roads_mainstreets_classified } from './layers/roads_mainstreets_classified'
 import { layers_roads_sidestreets } from './layers/roads_sidestreets'
-import { structureIconLayers } from './layers/structureIconLayers'
 import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
+import { wayIconLayers } from './layers/wayIconLayers'
 
 const subcatId = 'roads'
 const source = 'atlas_roads'
@@ -13,7 +13,7 @@ const sourceLayer = 'roads'
 export type SubcatRoadsId = typeof subcatId
 export type SubcatRoadsStyleIds = 'default' | 'sidestreets' | 'mainstreets' | 'classified'
 
-const structureIcons = structureIconLayers({ source, sourceLayer })
+const wayIcons = wayIconLayers({ source, sourceLayer })
 
 export const subcat_roads: FileMapDataSubcategory = {
   id: subcatId,
@@ -31,7 +31,7 @@ export const subcat_roads: FileMapDataSubcategory = {
           source,
           sourceLayer,
         }),
-        ...structureIcons,
+        ...wayIcons,
       ],
       legends: [
         {
@@ -75,7 +75,7 @@ export const subcat_roads: FileMapDataSubcategory = {
           source,
           sourceLayer,
         }),
-        ...structureIcons,
+        ...wayIcons,
       ],
       legends: [
         {
@@ -109,7 +109,7 @@ export const subcat_roads: FileMapDataSubcategory = {
           source,
           sourceLayer,
         }),
-        ...structureIcons,
+        ...wayIcons,
       ],
       legends: [
         {
@@ -133,7 +133,7 @@ export const subcat_roads: FileMapDataSubcategory = {
           source,
           sourceLayer,
         }),
-        ...structureIcons,
+        ...wayIcons,
       ],
       legends: [
         {
