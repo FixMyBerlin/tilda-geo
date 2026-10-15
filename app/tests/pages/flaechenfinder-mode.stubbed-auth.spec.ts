@@ -4,9 +4,12 @@ import { cleanupStubbedSessionData, createStubbedAdminSession } from '../fixture
 import { expectNoConsoleErrors } from '../utils/console'
 import { waitForMapLoad } from '../utils/maps'
 
-// Seed region with `spaceFinderEnabled` on and two Planungsgebiete (`seedPlanning`: Schillerkiez, Rixdorf).
-const REGION = 'parkraum'
+// Seed regions with `spaceFinderEnabled` on: `dev-flaechenfinder` has two Planungsgebiete
+// (`seedPlanning`: Schillerkiez, Herrfurthplatz (mit Eigenen Daten)), `dev-flaechenfinder-empty` has none.
+const REGION = 'dev-flaechenfinder'
+const EMPTY_REGION = 'dev-flaechenfinder-empty'
 const MODE_URL = `/regionen/${REGION}/flaechenfinder`
+const EMPTY_MODE_URL = `/regionen/${EMPTY_REGION}/flaechenfinder`
 const REAL_EMAIL_PREFIX = 'e2e-flaechenfinder-'
 
 const withStubbedAdmin = async (
@@ -48,6 +51,18 @@ test.describe('Flächenfinder mode (stubbed admin login)', () => {
       await waitForMapLoad(page)
       // The first area is opened on entry; the other one sits in the collection dropdown.
       await expect(page.getByText('Schillerkiez').first()).toBeVisible({ timeout: 30_000 })
+    })
+  })
+
+  test('shows the empty state in a region without Planungsgebiete', async ({ page }, testInfo) => {
+    test.setTimeout(60_000)
+    await withStubbedAdmin(page, testInfo, 'flaechenfinder-empty', async () => {
+      await page.goto(EMPTY_MODE_URL)
+      expect(new URL(page.url()).pathname).toBe(EMPTY_MODE_URL)
+      await waitForMapLoad(page)
+      await expect(
+        page.getByText('Noch kein Planungsgebiet in dieser Region.').first(),
+      ).toBeVisible({ timeout: 30_000 })
     })
   })
 })

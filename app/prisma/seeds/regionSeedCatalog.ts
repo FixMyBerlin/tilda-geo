@@ -98,9 +98,37 @@ const withDownloads = (
   exports,
 })
 
+const parkraumRegionConfig = {
+  ...baseRegionConfig,
+  promoted: true,
+  status: RegionStatus.PUBLIC,
+  product: RegionProduct.parkraum,
+  mapLat: 52.4918,
+  mapLng: 13.4261,
+  mapZoom: 13.5,
+  categories: ['parkingLars'],
+  backgroundSources: [...cityParkraumBackgroundSources],
+  // Text-only welcome (no hero image).
+  welcome: regionWelcomeDemoSpecToWriteInput(regionWelcomeDemoSpecs.parkraum, null),
+} satisfies Omit<RegionWriteInput, 'slug' | 'name' | 'fullName'>
+
+/** `parkraum` with the Flächenfinder on, centered on the Planungsgebiete in `planning.ts`. */
+const flaechenfinderDevRegionConfig = {
+  ...parkraumRegionConfig,
+  promoted: false,
+  spaceFinderEnabled: true,
+  mapLat: 52.4771,
+  mapLng: 13.4241,
+  mapZoom: 15,
+  // `poi`: bus stops + bike sharing are Flächenfinder scoring inputs and only show with it.
+  categories: ['parkingLars', 'poi'],
+  welcome: null,
+} satisfies Omit<RegionWriteInput, 'slug' | 'name' | 'fullName'>
+
 /**
  * Seed regions for local / CI:
- * - `dev-*` — status/download fixtures (no production client names)
+ * - `dev-*` — status/download/feature fixtures (no production client names); `dev-flaechenfinder*` is `parkraum` with the Flächenfinder on
+ * - `dev-template-*` — mirror a production product setup (map, categories, backgrounds)
  * - production-like PUBLIC regions — radinfra / bb-kampagne / parkraum for E2E and local
  */
 export const seedRegionCatalog: SeedRegionEntry[] = [
@@ -309,6 +337,26 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
       categories: [...minimalCategories],
     },
   },
+  // Flächenfinder test regions: `parkraum` setup (Neukölln) with the mode switched on.
+  // Planungsgebiete are seeded in `planning.ts`.
+  {
+    slug: 'dev-flaechenfinder',
+    config: {
+      ...flaechenfinderDevRegionConfig,
+      slug: 'dev-flaechenfinder',
+      name: 'Flächenfinder (Dev)',
+      fullName: 'Dev-Region: Flächenfinder mit Planungsgebieten rund um den Herrfurthplatz',
+    },
+  },
+  {
+    slug: 'dev-flaechenfinder-empty',
+    config: {
+      ...flaechenfinderDevRegionConfig,
+      slug: 'dev-flaechenfinder-empty',
+      name: 'Flächenfinder leer (Dev)',
+      fullName: 'Dev-Region: Flächenfinder ohne Planungsgebiete (Empty State)',
+    },
+  },
 
   // —— Production-like PUBLIC (logos via admin) ——
   {
@@ -384,23 +432,10 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
   {
     slug: 'parkraum',
     config: {
-      ...baseRegionConfig,
+      ...parkraumRegionConfig,
       slug: 'parkraum',
       name: 'Parkraum',
       fullName: 'Parkraumanalyse',
-      promoted: true,
-      status: RegionStatus.PUBLIC,
-      product: RegionProduct.parkraum,
-      mapLat: 52.4918,
-      mapLng: 13.4261,
-      mapZoom: 13.5,
-      // `poi` added for the Flächenfinder dev seeds (`prisma/seeds/planning.ts`): its bus-stop +
-      // bike-sharing sub-layer (one of the Flächenfinder's scoring inputs) only shows up when the
-      // region has the `poi` category assigned.
-      categories: ['parkingLars', 'poi'],
-      backgroundSources: [...cityParkraumBackgroundSources],
-      // Text-only welcome (no hero image).
-      welcome: regionWelcomeDemoSpecToWriteInput(regionWelcomeDemoSpecs.parkraum, null),
     },
   },
   {

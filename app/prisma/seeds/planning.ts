@@ -1,32 +1,31 @@
 import { DEFAULT_FACTOR_TEMPLATE } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/spaceFinderDefaults'
 import { sanitizeUserGeojson } from '@/lib/planningUserGeojson'
 import type { Prisma } from '@/prisma/generated/client'
-import { PlanningJobStatus, PlanningRunStatus } from '@/prisma/generated/client'
-import {
-  areaInputFromRow,
-  mergeFactorConfig,
-  type PlanningAreaInput,
-  type VariantFactorConfig,
-} from '@/server/planning/mergeFactorConfig'
+import type { VariantFactorConfig } from '@/server/planning/mergeFactorConfig'
 import db from '../../src/server/db.server'
 
 /**
- * Flächenfinder (planning module) dev seeds — a few realistic Planungsgebiete in Neukölln so
- * `bun run dev` has a good testing case straight away: `/regionen/parkraum/flaechenfinder`.
+ * Flächenfinder (planning module) dev seeds — realistic Planungsgebiete around the Herrfurthplatz
+ * in Neukölln so `bun run dev` has a good testing case straight away:
+ * `/regionen/dev-flaechenfinder/flaechenfinder`.
  *
- * Region: `parkraum` (see `regionSeedCatalog.ts`) — its map already centers on Neukölln
- * (`mapLat`/`mapLng` sit inside the Schillerkiez) and its backgrounds include
- * `parkraumkarte_neukoelln`. `spaceFinderEnabled` is `false` for every seed region
- * (`baseRegionConfig`), so it is switched on for this region here.
+ * Region: `dev-flaechenfinder` (see `regionSeedCatalog.ts`) — `parkraum` setup with
+ * `spaceFinderEnabled` on. `dev-flaechenfinder-empty` is configured alike but gets no data, so the
+ * empty state ("Noch kein Planungsgebiet in dieser Region.") can be tested.
+ *
+ * Runs: none — every variant starts "noch nicht berechnet". Results come from "Berechnen" with the
+ * local `planning-worker`.
  *
  * Geometry: local OSM processing data (bun run seed's geo-bootstrap) only exists inside the tiny
  * bbox `seed-herrfurthplatz` (`app/scripts/processing-generate-command/bboxPresets.ts`,
  * 13.4209256,52.4763157,13.4272212,52.4779464 — Herrfurthplatz/Schillerpromenade). Both study
- * areas below overlap that bbox so a real `planning-worker` run there has actual inputs to score.
+ * areas below contain that bbox and the Eigene Daten lie inside it, so a real `planning-worker`
+ * run has actual inputs to score.
  */
 
-const PLANNING_REGION_SLUG = 'parkraum'
+const PLANNING_REGION_SLUG = 'dev-flaechenfinder'
 const PLANNING_CREATOR_EMAIL = 'tobias@fixmycity.de'
+const HERRFURTHPLATZ_AREA_TITLE = 'Herrfurthplatz (mit Eigenen Daten)'
 
 // ── Geometry ─────────────────────────────────────────────────────────────────
 
@@ -52,33 +51,33 @@ const SCHILLERKIEZ_STUDY_AREA: GeoJSON.Polygon = {
 }
 
 /**
- * Second Planungsgebiet, just east of Schillerkiez — its west edge overlaps the bbox above (so it
- * still has real OSM inputs), extending toward the wider Neukölln/Rixdorf area. ~0.4 km².
+ * Second, smaller Planungsgebiet hugging the `seed-herrfurthplatz` bbox (13.4209256,52.4763157 –
+ * 13.4272212,52.4779464) with a margin, so it contains all inputs. ~0.25 km².
  */
-const RIXDORF_STUDY_AREA: GeoJSON.Polygon = {
+const HERRFURTHPLATZ_STUDY_AREA: GeoJSON.Polygon = {
   type: 'Polygon',
   coordinates: [
     [
-      [13.4355, 52.477],
-      [13.433743, 52.479121],
-      [13.4295, 52.48],
-      [13.425257, 52.479121],
-      [13.4235, 52.477],
-      [13.425257, 52.474879],
-      [13.4295, 52.474],
-      [13.433743, 52.474879],
-      [13.4355, 52.477],
+      [13.4195, 52.4771],
+      [13.4202, 52.476],
+      [13.424, 52.4755],
+      [13.428, 52.476],
+      [13.4287, 52.4771],
+      [13.428, 52.4783],
+      [13.424, 52.4788],
+      [13.4202, 52.4783],
+      [13.4195, 52.4771],
     ],
   ],
 }
 
-/** Three small "obstacle/bonus" squares inside `RIXDORF_STUDY_AREA`, to exercise Eigene Daten. */
-const RIXDORF_USER_GEOJSON = sanitizeUserGeojson({
+/** Three small "obstacle/bonus" squares inside the `seed-herrfurthplatz` bbox, to exercise Eigene Daten. */
+const HERRFURTHPLATZ_USER_GEOJSON = sanitizeUserGeojson({
   type: 'FeatureCollection',
   features: [
-    squareFeature(13.429, 52.4775),
-    squareFeature(13.431, 52.4765),
-    squareFeature(13.427, 52.4768),
+    squareFeature(13.4225, 52.4772),
+    squareFeature(13.424, 52.4767),
+    squareFeature(13.4257, 52.4775),
   ],
 })
 
@@ -127,50 +126,33 @@ const oepnvNahFactorConfig: VariantFactorConfig = {
   },
 }
 
-const ohneHangneigungFactorConfig: VariantFactorConfig = {
-  ...DEFAULT_FACTOR_TEMPLATE,
-  name: 'Ohne Hangneigung',
-  weights: {
-    ...DEFAULT_FACTOR_TEMPLATE.weights,
-    w_slope: 0,
-  },
-}
-
-/** The Rixdorf "Eigene Daten" dataset (mode `bonus`); strength per variant in `eigendaten_weights`. */
-const RIXDORF_USER_DATASET_ID = 'hindernisse'
-const RIXDORF_USER_DATASETS = [
+/** The Herrfurthplatz "Eigene Daten" dataset (mode `bonus`); strength per variant in `eigendaten_weights`. */
+const HERRFURTHPLATZ_USER_DATASET_ID = 'hindernisse'
+const HERRFURTHPLATZ_USER_DATASETS = [
   {
-    id: RIXDORF_USER_DATASET_ID,
+    id: HERRFURTHPLATZ_USER_DATASET_ID,
     name: 'Hindernisse',
     mode: 'bonus' as const,
-    geojson: RIXDORF_USER_GEOJSON,
+    geojson: HERRFURTHPLATZ_USER_GEOJSON,
   },
 ]
 
-/** Non-zero strength so the Rixdorf obstacle squares actually move the score. */
-const rixdorfFactorConfig: VariantFactorConfig = {
+/** Non-zero strength so the Herrfurthplatz squares actually move the score. */
+const herrfurthplatzFactorConfig: VariantFactorConfig = {
   ...DEFAULT_FACTOR_TEMPLATE,
   name: 'Standard',
-  eigendaten_weights: { [RIXDORF_USER_DATASET_ID]: 0.3 },
+  eigendaten_weights: { [HERRFURTHPLATZ_USER_DATASET_ID]: 0.3 },
 }
 
-/** Current (post-edit) config of the "veraltet" demo variant — threshold raised after the run below. */
-const staleDemoCurrentFactorConfig: VariantFactorConfig = {
+/** Stricter threshold and a stronger Eigene Daten bonus than "Standard". */
+const hoehereSchwelleFactorConfig: VariantFactorConfig = {
   ...DEFAULT_FACTOR_TEMPLATE,
-  name: 'Alte Berechnung',
+  name: 'Höhere Schwelle',
   min_score_threshold: 65,
-}
-
-/** Config as it was when the fake run "completed" — lower threshold, matches the frozen snapshot. */
-const staleDemoRunFactorConfig: VariantFactorConfig = {
-  ...DEFAULT_FACTOR_TEMPLATE,
-  name: 'Alte Berechnung',
-  min_score_threshold: 60,
+  eigendaten_weights: { [HERRFURTHPLATZ_USER_DATASET_ID]: 0.5 },
 }
 
 // ── Seed ─────────────────────────────────────────────────────────────────────
-
-const daysAgo = (days: number) => new Date(Date.now() - days * 24 * 60 * 60 * 1000)
 
 const seedPlanning = async () => {
   const region = await db.region.findFirst({ where: { slug: PLANNING_REGION_SLUG } })
@@ -189,20 +171,21 @@ const seedPlanning = async () => {
     return
   }
 
-  // `spaceFinderEnabled` is `false` for every seeded region (`baseRegionConfig`); only this one
-  // gets it switched on.
-  // FMC admins (ADMIN role, e.g. `creator`) and the region's own seeded admins/all-regions user
-  // (`memberships.ts`) already have access to this member-only mode — no extra membership rows
-  // needed here (`hasPermissions = role === 'ADMIN' || membership` in `regions.functions.ts`).
+  // `spaceFinderEnabled` comes from the region catalog. FMC admins (ADMIN role, e.g. `creator`) and
+  // the region's own seeded admins/all-regions user (`memberships.ts`) already have access to this
+  // member-only mode (`hasPermissions = role === 'ADMIN' || membership` in `regions.functions.ts`).
   if (!region.spaceFinderEnabled) {
-    await db.region.update({ where: { id: region.id }, data: { spaceFinderEnabled: true } })
+    console.log(
+      `⚠️ Skipping planning seed - region "${PLANNING_REGION_SLUG}" has spaceFinderEnabled off (regionSeedCatalog)`,
+    )
+    return
   }
 
   // Scoped, idempotent: safe to re-run `seedPlanning()` on its own without a full `bun run seed`.
   // Cascades to variants/runs/jobs (`onDelete: Cascade` in schema.prisma).
   await db.planningArea.deleteMany({ where: { regionId: region.id } })
 
-  // ── a) Schillerkiez — 3 variants, no runs (user clicks "Berechnen" themselves) ──────────────
+  // ── a) Schillerkiez — "Standard" + "Nur ÖPNV-nah" ────────────────────────────────────────
   const schillerkiez = await db.planningArea.create({
     data: {
       regionId: region.id,
@@ -223,35 +206,25 @@ const seedPlanning = async () => {
     },
     select: { id: true, variants: { select: { id: true } } },
   })
-  const schillerkiezStandardVariantId = schillerkiez.variants[0]!.id
 
   await db.planningVariant.create({
     data: {
       areaId: schillerkiez.id,
       createdById: creator.id,
-      parentId: schillerkiezStandardVariantId,
+      parentId: schillerkiez.variants[0]!.id,
       title: 'Nur ÖPNV-nah',
       factorConfig: oepnvNahFactorConfig as Prisma.InputJsonValue,
     },
   })
-  await db.planningVariant.create({
-    data: {
-      areaId: schillerkiez.id,
-      createdById: creator.id,
-      parentId: schillerkiezStandardVariantId,
-      title: 'Ohne Hangneigung',
-      factorConfig: ohneHangneigungFactorConfig as Prisma.InputJsonValue,
-    },
-  })
 
-  // ── b) Rixdorf — 1 variant with Eigene Daten, + c) a 2nd variant demoing "veraltet" ─────────
-  const rixdorf = await db.planningArea.create({
+  // ── b) Herrfurthplatz — Eigene Daten, "Standard" + "Höhere Schwelle" ─────────────────────────
+  const herrfurthplatz = await db.planningArea.create({
     data: {
       regionId: region.id,
       createdById: creator.id,
-      title: 'Rixdorf',
-      studyArea: RIXDORF_STUDY_AREA as unknown as Prisma.InputJsonValue,
-      userDatasets: RIXDORF_USER_DATASETS as unknown as Prisma.InputJsonValue,
+      title: HERRFURTHPLATZ_AREA_TITLE,
+      studyArea: HERRFURTHPLATZ_STUDY_AREA as unknown as Prisma.InputJsonValue,
+      userDatasets: HERRFURTHPLATZ_USER_DATASETS as unknown as Prisma.InputJsonValue,
       useCase: 'fahrradabstellanlage',
       areaSizeM2: 20,
       variants: {
@@ -259,7 +232,7 @@ const seedPlanning = async () => {
           {
             createdById: creator.id,
             title: 'Standard',
-            factorConfig: rixdorfFactorConfig as Prisma.InputJsonValue,
+            factorConfig: herrfurthplatzFactorConfig as Prisma.InputJsonValue,
           },
         ],
       },
@@ -267,69 +240,21 @@ const seedPlanning = async () => {
     select: { id: true, variants: { select: { id: true } } },
   })
 
-  const staleDemoVariant = await db.planningVariant.create({
+  await db.planningVariant.create({
     data: {
-      areaId: rixdorf.id,
+      areaId: herrfurthplatz.id,
       createdById: creator.id,
-      title: 'Alte Berechnung (veraltet)',
-      factorConfig: staleDemoCurrentFactorConfig as Prisma.InputJsonValue,
-    },
-    select: { id: true },
-  })
-
-  // Simulate history: a run completed 3 days ago at threshold 60, then the user raised the
-  // threshold to 65 afterwards (`min_score_threshold` above) without re-running — exactly what
-  // `updatePlanningVariantFn` + `markRunsStaleForVariant` would produce. No real hexagon tiles are
-  // written (`planning.scenario_hexagons` stays empty for this run): the map layer for it is just
-  // empty, same as any run without matches — the "veraltet" banner/badge are pure DB-field reads
-  // (`PlanningRun.stale`, and a live factorConfig/snapshot diff), so this is safe without the
-  // planning-worker container.
-  const rixdorfAreaInput: PlanningAreaInput = areaInputFromRow({
-    studyArea: RIXDORF_STUDY_AREA as unknown as Prisma.JsonValue,
-    userDatasets: RIXDORF_USER_DATASETS as unknown as Prisma.JsonValue,
-    useCase: 'fahrradabstellanlage',
-    areaSizeM2: 20,
-    censusSaettigungEw: null,
-    censusEwPerHa: null,
-  })
-  const staleDemoRunSnapshot = mergeFactorConfig(rixdorfAreaInput, staleDemoRunFactorConfig)
-
-  const runCreatedAt = daysAgo(3)
-  const staleDemoRun = await db.planningRun.create({
-    data: {
-      variantId: staleDemoVariant.id,
-      createdAt: runCreatedAt,
-      factorConfigSnapshot: staleDemoRunSnapshot as Prisma.InputJsonValue,
-      status: PlanningRunStatus.COMPLETE,
-      stale: true,
-      hexCount: 1842,
-      vegCount: 913,
-      cirAttribution: 'CIR Berlin 2023',
-    },
-    select: { id: true },
-  })
-  await db.planningVariant.update({
-    where: { id: staleDemoVariant.id },
-    data: { currentRunId: staleDemoRun.id },
-  })
-  await db.planningJob.create({
-    data: {
-      variantId: staleDemoVariant.id,
-      createdAt: runCreatedAt,
-      status: PlanningJobStatus.DONE,
-      startedAt: runCreatedAt,
-      finishedAt: new Date(runCreatedAt.getTime() + 3 * 60_000),
-      resultRunId: staleDemoRun.id,
-      progress: 100,
+      parentId: herrfurthplatz.variants[0]!.id,
+      title: 'Höhere Schwelle',
+      factorConfig: hoehereSchwelleFactorConfig as Prisma.InputJsonValue,
     },
   })
 
-  // ── d) empty-state region ────────────────────────────────────────────────────────────────
-  // `bb-kampagne` (Brandenburg) and the `dev-*` fixtures deliberately keep no Planungsgebiete, so
-  // their `/flaechenfinder` shows the empty state ("Noch keine Planungsgebiete").
+  // ── c) empty-state region ────────────────────────────────────────────────────────────────
+  // `dev-flaechenfinder-empty` deliberately keeps no Planungsgebiete (empty state).
 
   console.log(
-    `✅ Seeded Flächenfinder: 2 Planungsgebiete (Schillerkiez, Rixdorf) in region "${PLANNING_REGION_SLUG}"`,
+    `✅ Seeded Flächenfinder: 2 Planungsgebiete (Schillerkiez, ${HERRFURTHPLATZ_AREA_TITLE}) in region "${PLANNING_REGION_SLUG}"`,
   )
 }
 

@@ -7,8 +7,8 @@ import { cleanupStubbedSessionData, createStubbedUserSession } from '../fixtures
 const PUBLIC_REGION = 'radinfra'
 // PUBLIC region with internal notes only, so Hinweise is member-only.
 const INTERNAL_NOTES_REGION = 'woldegk'
-// Seed region with `spaceFinderEnabled` on (`seedPlanning`). `PUBLIC_REGION` has it off (default).
-const SPACE_FINDER_REGION = 'parkraum'
+// Seed region with `spaceFinderEnabled` on. `PUBLIC_REGION` has it off (default).
+const SPACE_FINDER_REGION = 'dev-flaechenfinder'
 const REAL_EMAIL_PREFIX = 'e2e-modes-access-'
 
 const withStubbedUser = async (
