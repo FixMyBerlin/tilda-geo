@@ -3,6 +3,7 @@ groups:
     label: Parkraum-Prozessierung
     tables:
       - parkings
+      - parkings_labels
       - parkings_edges
       - parkings_no
       - parkings_cutouts

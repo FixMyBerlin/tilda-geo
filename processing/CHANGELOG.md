@@ -20,6 +20,11 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 - Fix: a bicycle parking mapped as an area was summed twice, as the area and as the point at its centroid. `tilda_measure_bicycle_parking` now reads `bicycleParking_points` only.
 
+### `parkings_edges_labels` (new), `parkings_labels`
+
+- New point table `parkings_edges_labels`: one point at the middle of each `parkings_edges` line with capacity, minzoom 14. Keys: `capacity_*`, `capacity_private_*`, `operator_type_*`, `angle` (upright text angle along the edge, degrees for MapLibre `text-rotate`) and `flipped` (true when the text was turned by 180°, so the edge's left side is below the text). The map shows the capacity per edge once instead of repeating it along the line.
+- `parkings_labels`: new key `angle`, the upright text angle along the parking line.
+
 ### `parkings`
 
 - Tagged `capacity` of a parking line that is cut into several segments: the rounding remainder goes to the longest segment. When two segments have exactly the same length, the one with the lower segment id now gets it. Before, the choice was random, so `capacity` could move between the two segments from one run to the next. The sum per parking line is unchanged.

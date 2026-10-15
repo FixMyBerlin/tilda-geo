@@ -24,6 +24,7 @@ export type TableId =
   | 'todos_lines'
   | 'parkings'
   | 'parkings_edges'
+  | 'parkings_edges_labels'
   | 'parkings_labels'
   | 'parkings_cutouts'
   | 'parkings_separate'

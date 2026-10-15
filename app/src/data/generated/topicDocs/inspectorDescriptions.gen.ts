@@ -202,6 +202,10 @@ const data = {
   },
   tilda_parkings: {
     keys: {
+      capacity: 'Geschätzte oder explizit erfasste Anzahl von Stellplätzen.',
+      area: 'Fläche des durch parkende Fahrzeuge auf diesem Parkraumabschnitt belegten Raumes in Quadratmetern.',
+      angle:
+        'Drehung der Beschriftung in Grad (im Uhrzeigersinn, 0 = Osten), entlang der Linie (Parklinie bzw. Kante) und so gewendet, dass der Text nie auf dem Kopf steht (−90 bis 90). Nur zur Darstellung.',
       name: 'Name der Straße, übernommen vom längsten OSM-Way der Kante.',
       highway: 'Wert des OSM-Tags `highway` ohne weitere Normalisierung.',
       road: 'Art der Straße, an dem der Parkraum liegt.',
@@ -236,7 +240,6 @@ const data = {
       start_node: 'OSM-Node-ID am Anfang der Kante. Zusammen mit `end_node` die Objekt-ID.',
       end_node: 'OSM-Node-ID am Ende der Kante. Zusammen mit `start_node` die Objekt-ID.',
       parking: 'Lage oder Art des Parkraums im Straßenland.',
-      capacity: 'Geschätzte oder explizit erfasste Anzahl von Stellplätzen.',
       capacity_source: 'Herkunft der Stellplatzanzahl inklusive Schätz- oder Umverteilungslogik.',
       orientation: 'Ausrichtung der Fahrzeuge im Straßenland zur Verkehrsrichtung.',
       condition_category_primary:
@@ -254,7 +257,6 @@ const data = {
       road_oneway: 'Verkehrsrichtung der Straße, an dem der Parkraum liegt.',
       road_width: 'Breite der Fahrbahn, an dem der Parkraum liegt.',
       side: 'Seite des Parkraums relativ zur Linienrichtung der OSM-Geometrie.',
-      area: 'Fläche des durch parkende Fahrzeuge auf diesem Parkraumabschnitt belegten Raumes in Quadratmetern.',
       surface: 'Oberflächenbelag des Parkraumabschnitts.',
       direction: 'Vorgesehene oder ausgeschilderte Fahrzeugrichtung beim Einparken.',
       location: 'Besondere Lagemerkmale des Parkraums im Straßenland.',

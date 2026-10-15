@@ -122,6 +122,7 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
     ],
     minzoom: 14,
   },
+  parkings_edges_labels: { stylingKeys: [], minzoom: 0 },
   parkings_labels: { stylingKeys: [], minzoom: 11 },
   parkings_cutouts: { stylingKeys: [], minzoom: 11 },
   parkings_separate: { stylingKeys: [], minzoom: 0 },

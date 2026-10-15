@@ -2937,6 +2937,54 @@ const data = {
       },
     },
   },
+  parkings_labels: {
+    gfiAttributes: {
+      capacity: {
+        name: 'Stellplatzanzahl',
+        type: 'number',
+      },
+      operator_type: {
+        name: 'Betreibertyp',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          private: 'Privat',
+          public: 'Öffentlich',
+        },
+      },
+      operator_type_source: {
+        name: 'Herkunft des Betreibertyps',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          default_fallback: 'Annahme bei fehlender Angabe.',
+          driveway_inference: 'Annahme bei fehlender Angabe wenn eine Einfahrt erkannt wurde.',
+          manual_overwrite_list: 'Anhand einer manuellen Korrekturliste in TILDA.',
+          parent_highway_tag: 'Explizite Angabe aus OSM an der zugeordneten Straße.',
+          tag: 'Explizite Angabe aus OSM.',
+        },
+      },
+      operator_type_confidence: {
+        name: 'Konfidenz des Betreibertyps',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          high: 'Hoch',
+          medium: 'Mittel',
+          low: 'Niedrig',
+        },
+      },
+      area: {
+        name: 'Fläche',
+        type: 'number',
+        suffix: 'm²',
+      },
+      angle: {
+        name: 'Textwinkel',
+        type: 'number',
+      },
+    },
+  },
   parkings_no: {
     gfiAttributes: {
       parking: {

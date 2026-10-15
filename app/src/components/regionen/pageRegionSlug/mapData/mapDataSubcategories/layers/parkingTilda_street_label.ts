@@ -10,12 +10,9 @@ export const layers_parkingTilda_street_label: StyleLayer[] = [
       'text-field': ['to-string', ['get', 'capacity']],
       'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
       'text-ignore-placement': true,
-      'text-rotate': [
-        'case',
-        ['>', ['get', 'angle'], 90],
-        ['-', ['get', 'angle'], 180],
-        ['get', 'angle'],
-      ],
+      // `angle` is upright along the parking line (`processing/topics/parking/10_create_labels.sql`)
+      'text-rotate': ['to-number', ['get', 'angle'], 0],
+      'text-rotation-alignment': 'map',
       'text-size': ['interpolate', ['linear'], ['zoom'], 15.99, 0, 16, 8, 20, 20],
     },
     paint: {

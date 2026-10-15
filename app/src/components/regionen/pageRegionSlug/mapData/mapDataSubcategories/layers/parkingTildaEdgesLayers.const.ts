@@ -172,6 +172,11 @@ const parkingTildaEdgesLineLayer = (
     },
   }) satisfies StyleLayer
 
+// Guide line offset and label size per zoom stop (px). The label offset is derived from both.
+const guideOffsetPx = { 14: 8, 16: 14.4 } as const
+const labelTextSizePx = { 14: 10, 16: 12 } as const
+const labelGapPx = 2
+
 const parkingTildaEdgesGuideLayer = (
   side: 'left' | 'right',
   operatorType: ParkingTildaEdgesOperatorType,
@@ -193,9 +198,9 @@ const parkingTildaEdgesGuideLayer = (
         ['linear'],
         ['zoom'],
         14,
-        signedOffset(side, 8),
+        signedOffset(side, guideOffsetPx[14]),
         16,
-        signedOffset(side, 14.4),
+        signedOffset(side, guideOffsetPx[16]),
       ],
       'line-color': parkingTildaEdgesGuideColor(operatorType),
       'line-dasharray': [0.15, 1.35],
@@ -204,7 +209,24 @@ const parkingTildaEdgesGuideLayer = (
     },
   }) satisfies StyleLayer
 
-const parkingTildaEdgesSymbolLayer = (
+// Source layer `parkings_edges_labels`: one point at the middle of each edge, so the number shows once.
+// `angle` keeps the text upright along the edge; when the text was turned (`flipped`), the edge's
+// left side is below the text. The text is anchored at its street-facing edge and pushed outwards
+// past the guide line. MapLibre evaluates zoom expressions in layout properties once per tile
+// (integer zoom), so each step uses the offset needed at the end of its zoom range, where the guide
+// line is farthest out. The offset is in em, so the guide offset (px) is divided by the text size.
+const atZoom = (stops: { 14: number; 16: number }, zoom: number) =>
+  stops[14] + ((stops[16] - stops[14]) * (zoom - 14)) / 2
+
+const labelRadialOffsetEm = (zoom: 15 | 16) =>
+  (atZoom(guideOffsetPx, zoom) + labelGapPx) / atZoom(labelTextSizePx, zoom)
+
+const parkingTildaEdgesLabelAbove = (side: 'left' | 'right') =>
+  (side === 'left'
+    ? ['!=', ['get', 'flipped'], true]
+    : ['==', ['get', 'flipped'], true]) satisfies ExpressionSpecification
+
+const parkingTildaEdgesLabelLayer = (
   side: 'left' | 'right',
   operatorType: ParkingTildaEdgesOperatorType,
 ) =>
@@ -216,13 +238,27 @@ const parkingTildaEdgesSymbolLayer = (
     interactive: false,
     filter: parkingTildaEdgesSideFilter(side, operatorType),
     layout: {
-      'symbol-placement': 'line',
       'text-field': ['to-string', ['get', parkingTildaEdgesCapacityKey(side, operatorType)]],
       'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
-      'text-keep-upright': false,
+      'text-rotate': ['to-number', ['get', 'angle'], 0],
       'text-rotation-alignment': 'map',
-      'text-offset': [0, signedOffset(side, 1.08)],
-      'text-size': ['interpolate', ['linear'], ['zoom'], 14, 10, 16, 12],
+      'text-anchor': ['case', parkingTildaEdgesLabelAbove(side), 'bottom', 'top'],
+      'text-radial-offset': [
+        'step',
+        ['zoom'],
+        labelRadialOffsetEm(15),
+        15,
+        labelRadialOffsetEm(16),
+      ],
+      'text-size': [
+        'interpolate',
+        ['linear'],
+        ['zoom'],
+        14,
+        labelTextSizePx[14],
+        16,
+        labelTextSizePx[16],
+      ],
     },
     paint: {
       'text-color': parkingTildaEdgesLabelColor(operatorType),
@@ -240,8 +276,12 @@ const parkingTildaEdgesLayers = (
     parkingTildaEdgesLineLayer('right', operatorType, lineColor('right')),
     parkingTildaEdgesGuideLayer('left', operatorType),
     parkingTildaEdgesGuideLayer('right', operatorType),
-    parkingTildaEdgesSymbolLayer('left', operatorType),
-    parkingTildaEdgesSymbolLayer('right', operatorType),
+  ] satisfies StyleLayer[]
+
+export const parkingTildaEdgesLabelLayers = (operatorType: ParkingTildaEdgesOperatorType) =>
+  [
+    parkingTildaEdgesLabelLayer('left', operatorType),
+    parkingTildaEdgesLabelLayer('right', operatorType),
   ] satisfies StyleLayer[]
 
 export const parkingTildaEdgesLayersByStyle = (operatorType: ParkingTildaEdgesOperatorType) =>

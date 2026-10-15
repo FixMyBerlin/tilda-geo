@@ -6,7 +6,10 @@ import { layers_parkingTilda_street_kind } from './layers/parkingTilda_street_ki
 import { layers_parkingTilda_street_label } from './layers/parkingTilda_street_label'
 import { layers_parkingTilda_street_pattern } from './layers/parkingTilda_street_pattern'
 import { layers_parkingTilda_street_surface } from './layers/parkingTilda_street_surface'
-import { parkingTildaEdgesLayersByStyle } from './layers/parkingTildaEdgesLayers.const'
+import {
+  parkingTildaEdgesLabelLayers,
+  parkingTildaEdgesLayersByStyle,
+} from './layers/parkingTildaEdgesLayers.const'
 import type { WrapSourceLayersProps } from './layers/utils/wrapSourceLayers'
 import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 import {
@@ -175,6 +178,12 @@ export const attachParkingTildaEdges = (
   edgesLegend: typeof parkingTildaPublicDefaultLegend | typeof parkingTildaPrivateDefaultLegend,
 ) => {
   const layersByStyle = parkingTildaEdgesLayersByStyle(operatorType)
+  const edgeLabelLayers = wrapSourceLayers({
+    layers: parkingTildaEdgesLabelLayers(operatorType),
+    source,
+    sourceLayer: 'parkings_edges_labels',
+    interactive: false,
+  })
   return styles.map((style) => {
     if (style.id === 'default' || style.id === 'surface' || style.id === 'kind') {
       const edgeLayers = wrapSourceLayers({
@@ -185,7 +194,7 @@ export const attachParkingTildaEdges = (
       })
       return {
         ...style,
-        layers: [...edgeLayers, ...style.layers],
+        layers: [...edgeLayers, ...edgeLabelLayers, ...style.layers],
         legends: [edgesLegend, ...(style.legends ?? [])],
       }
     }

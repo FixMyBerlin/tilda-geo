@@ -2583,6 +2583,7 @@ const data = {
   'tilda_parkings--access=private': 'Privat',
   'tilda_parkings--access=public': 'Öffentlich (explizit)',
   'tilda_parkings--access=residents': 'Nur mit Bewohnerparkausweis',
+  'tilda_parkings--angle--key': 'Textwinkel',
   'tilda_parkings--area_confidence--key': 'Konfidenz der Flächenangabe',
   'tilda_parkings--area_confidence=high': 'Hoch',
   'tilda_parkings--area_confidence=low': 'Niedrig',

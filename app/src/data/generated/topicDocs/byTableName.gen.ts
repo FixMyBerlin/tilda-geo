@@ -5322,7 +5322,7 @@ const data = {
         id: 'kanten',
         title: 'Straßenkanten',
         markdown:
-          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n',
+          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n\nDie Zahl steht einmal pro Kante, in der Mitte der Linie. Dafür gibt es eine eigene Punkt-Tabelle `parkings_edges_labels` (nur für die Karte, ab Zoom 14) mit den Kapazitäts- und Operator-Werten der Kante. `angle` dreht die Zahl entlang der Straße, sodass sie nie auf dem Kopf steht. `flipped` sagt, ob der Text dafür um 180° gewendet wurde; dann liegt die linke Straßenseite unter dem Text, und die Karte setzt die linke und rechte Zahl entsprechend.\n',
       },
     ],
   },
@@ -6539,7 +6539,7 @@ const data = {
         id: 'kanten',
         title: 'Straßenkanten',
         markdown:
-          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n',
+          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n\nDie Zahl steht einmal pro Kante, in der Mitte der Linie. Dafür gibt es eine eigene Punkt-Tabelle `parkings_edges_labels` (nur für die Karte, ab Zoom 14) mit den Kapazitäts- und Operator-Werten der Kante. `angle` dreht die Zahl entlang der Straße, sodass sie nie auf dem Kopf steht. `flipped` sagt, ob der Text dafür um 180° gewendet wurde; dann liegt die linke Straßenseite unter dem Text, und die Karte setzt die linke und rechte Zahl entsprechend.\n',
       },
     ],
   },
@@ -7156,7 +7156,7 @@ const data = {
         id: 'kanten',
         title: 'Straßenkanten',
         markdown:
-          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n',
+          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n\nDie Zahl steht einmal pro Kante, in der Mitte der Linie. Dafür gibt es eine eigene Punkt-Tabelle `parkings_edges_labels` (nur für die Karte, ab Zoom 14) mit den Kapazitäts- und Operator-Werten der Kante. `angle` dreht die Zahl entlang der Straße, sodass sie nie auf dem Kopf steht. `flipped` sagt, ob der Text dafür um 180° gewendet wurde; dann liegt die linke Straßenseite unter dem Text, und die Karte setzt die linke und rechte Zahl entsprechend.\n',
       },
     ],
   },
@@ -8115,7 +8115,131 @@ const data = {
         id: 'kanten',
         title: 'Straßenkanten',
         markdown:
-          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n',
+          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n\nDie Zahl steht einmal pro Kante, in der Mitte der Linie. Dafür gibt es eine eigene Punkt-Tabelle `parkings_edges_labels` (nur für die Karte, ab Zoom 14) mit den Kapazitäts- und Operator-Werten der Kante. `angle` dreht die Zahl entlang der Straße, sodass sie nie auf dem Kopf steht. `flipped` sagt, ob der Text dafür um 180° gewendet wurde; dann liegt die linke Straßenseite unter dem Text, und die Karte setzt die linke und rechte Zahl entsprechend.\n',
+      },
+    ],
+  },
+  parkings_labels: {
+    topic: 'parking',
+    tableName: 'parkings_labels',
+    sourceIds: ['tilda_parkings'],
+    title: 'Straßenparken Beschriftung',
+    summary:
+      'Ein Punkt in der Mitte jeder Parklinie aus `parkings`, für die Beschriftung mit der Stellplatzzahl ab Zoom 16. Die Werte stammen aus der Parklinie.',
+    groups: [
+      {
+        id: 'parking',
+        label: 'Parkraum-Prozessierung',
+      },
+    ],
+    attributes: [
+      {
+        key: 'capacity',
+        type: 'number',
+        label: 'Stellplatzanzahl',
+        description: 'Geschätzte oder explizit erfasste Anzahl von Stellplätzen.',
+        chapterRefs: ['capacity-calculation'],
+        values: [],
+      },
+      {
+        key: 'operator_type',
+        type: 'string',
+        label: 'Betreibertyp',
+        values: [
+          {
+            value: 'private',
+            label: 'Privat',
+          },
+          {
+            value: 'public',
+            label: 'Öffentlich',
+          },
+        ],
+      },
+      {
+        key: 'operator_type_source',
+        type: 'string',
+        label: 'Herkunft des Betreibertyps',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'default_fallback',
+            label: 'Annahme bei fehlender Angabe.',
+          },
+          {
+            value: 'driveway_inference',
+            label: 'Annahme bei fehlender Angabe wenn eine Einfahrt erkannt wurde.',
+          },
+          {
+            value: 'manual_overwrite_list',
+            label: 'Anhand einer manuellen Korrekturliste in TILDA.',
+          },
+          {
+            value: 'parent_highway_tag',
+            label: 'Explizite Angabe aus OSM an der zugeordneten Straße.',
+          },
+          {
+            value: 'tag',
+            label: 'Explizite Angabe aus OSM.',
+          },
+        ],
+      },
+      {
+        key: 'operator_type_confidence',
+        type: 'string',
+        label: 'Konfidenz des Betreibertyps',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'high',
+            label: 'Hoch',
+          },
+          {
+            value: 'medium',
+            label: 'Mittel',
+          },
+          {
+            value: 'low',
+            label: 'Niedrig',
+          },
+        ],
+      },
+      {
+        key: 'area',
+        type: 'square_meter',
+        label: 'Fläche',
+        description:
+          'Fläche des durch parkende Fahrzeuge auf diesem Parkraumabschnitt belegten Raumes in Quadratmetern.',
+        values: [],
+      },
+      {
+        key: 'angle',
+        type: 'number',
+        label: 'Textwinkel',
+        purpose: 'rendering',
+        description:
+          'Drehung der Beschriftung in Grad (im Uhrzeigersinn, 0 = Osten), entlang der Linie (Parklinie bzw. Kante) und so gewendet, dass der Text nie auf dem Kopf steht (−90 bis 90). Nur zur Darstellung.',
+        values: [],
+      },
+    ],
+    chapters: [
+      {
+        id: 'capacity-calculation',
+        title: 'Berechnung der Kapazität',
+        markdown:
+          'Kapazitätswerte stammen je nach Datenlage aus unterschiedlichen Quellen:\n\n- Direkte OSM-Tag-Angaben (`capacity`, inkl. Schätzungsvarianten)\n- Flächen- und ausrichtungsbasierte Schätzung\n- Längen- und ausrichtungsbasierte Schätzung\n- Konservative Standardannahmen bei fehlenden Angaben\n\nBei Segmenten mit alternierendem Parken wird die Kapazität reduziert, um realistische Manövrierverluste abzubilden.\n\nDie genaue Herleitung ist im Feld `capacity_source` nachvollziehbar dokumentiert.\n',
+      },
+      {
+        id: 'condition-category',
+        title: 'Parkbeschränkung',
+        markdown:
+          'Unter dem Wert "Parkbeschränkungen" (`condition_category`) wird eine Semikolon getrennte Liste ausgeliefert die verschiedene Parkbeschränkungen beschreibt.\n\nBeispiele:\n\n| Wert                                                      | Übersetzung                                                                       |\n| --------------------------------------------------------- | --------------------------------------------------------------------------------- |\n| `access_restriction (agricultural)`                       | Zugangsbeschränkung (Land-/Forstwirtschaftlicher Verkehr)                         |\n| `access_restriction (no, Tu 15:00-18:00)`                 | Zugangsbeschränkung (kein Zugang, Dienstag 15:00-18:00)                           |\n| `access_restriction (Mo-Fr 04:30-20:00, PH off)`          | Zugangsbeschränkung (Montag-Freitag 04:30-20:00, Feiertag ausgenommen)            |\n| `disabled (except emergency)`                             | Behindertenparkplatz (ausgenommen Einsatz-/Krankenfahrzeuge)                      |\n| `paid (stay > 1 hour)`                                    | Nur mit Parkschein (Parkdauer > 1 Stunde)                                         |\n| `time_limited (2 days)`                                   | Höchstparkdauer (2 Tage)                                                          |\n| `time_limited (4 hours) (08:00-18:00)`                    | Höchstparkdauer (4 Stunden) (08:00-18:00)                                         |\n| `vehicle_restriction (only motorcar, motorcycle)`         | Beschränkung auf Fahrzeugklassen (nur Pkw, Motorräder)                            |\n| `vehicle_restriction (only delivery) (Mo-Sa 07:00-20:00)` | Beschränkung auf Fahrzeugklassen (nur Lieferverkehr) (Montag-Samstag 07:00-20:00) |\n\nIn der TILDA Inspektor-Ansicht werden diese Werte übersetzt dargestellt. In der Attributtabelle sind sie aber nur beispielhaft in ihrer einfachsten Form angegeben. Ebenso kann die Masterportal-Übersetzungs-Tabelle dieser Werte leider nicht übersetzen.\n',
+      },
+      {
+        id: 'kanten',
+        title: 'Straßenkanten',
+        markdown:
+          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n\nDie Zahl steht einmal pro Kante, in der Mitte der Linie. Dafür gibt es eine eigene Punkt-Tabelle `parkings_edges_labels` (nur für die Karte, ab Zoom 14) mit den Kapazitäts- und Operator-Werten der Kante. `angle` dreht die Zahl entlang der Straße, sodass sie nie auf dem Kopf steht. `flipped` sagt, ob der Text dafür um 180° gewendet wurde; dann liegt die linke Straßenseite unter dem Text, und die Karte setzt die linke und rechte Zahl entsprechend.\n',
       },
     ],
   },
@@ -9309,7 +9433,7 @@ const data = {
         id: 'kanten',
         title: 'Straßenkanten',
         markdown:
-          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n',
+          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n\nDie Zahl steht einmal pro Kante, in der Mitte der Linie. Dafür gibt es eine eigene Punkt-Tabelle `parkings_edges_labels` (nur für die Karte, ab Zoom 14) mit den Kapazitäts- und Operator-Werten der Kante. `angle` dreht die Zahl entlang der Straße, sodass sie nie auf dem Kopf steht. `flipped` sagt, ob der Text dafür um 180° gewendet wurde; dann liegt die linke Straßenseite unter dem Text, und die Karte setzt die linke und rechte Zahl entsprechend.\n',
       },
     ],
   },
