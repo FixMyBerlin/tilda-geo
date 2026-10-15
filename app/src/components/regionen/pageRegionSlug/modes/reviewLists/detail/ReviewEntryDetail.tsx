@@ -1,6 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { twMerge } from 'tailwind-merge'
-import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { TimeWithRelativeTooltip } from '@/components/shared/date/TimeWithRelativeTooltip'
 import { buttonStyles, buttonStylesOnYellow } from '@/components/shared/links/styles'
@@ -10,7 +9,6 @@ import {
   getReviewEntryFn,
   updateReviewEntryFn,
 } from '@/server/review-lists/review-lists.functions'
-import { parseSpaceFinderSourceMeta } from '@/shared/reviewLists/spaceFinderReviewEntry'
 import { formatUserDisplayName } from '@/shared/userDisplayName'
 import { reviewCommentDraftId } from '../../composerDrafts/composerDraftIds'
 import { ModeCommentComposer } from '../../ModeCommentComposer'
@@ -26,7 +24,7 @@ type Props = { entryId: number }
 
 export const ReviewEntryDetail = ({ entryId }: Props) => {
   const regionSlug = useRegionSlug()
-  const region = useRegion()
+
   const { move: isMoveArmed } = useReviewListsModeValue()
   const queryClient = useQueryClient()
 
