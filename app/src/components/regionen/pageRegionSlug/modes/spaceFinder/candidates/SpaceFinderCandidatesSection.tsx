@@ -185,7 +185,12 @@ export const SpaceFinderCandidatesSection = ({
   const toggleSelect = () => {
     const next = !selectActive
     setSelectActive(next)
-    if (next) closeInspector()
+    if (!next) return
+    closeInspector()
+    // Below zoom 16 only coarse cells are shown, which cannot be selected — zoom in right away.
+    if (map && map.getZoom() < FINE_HEXAGON_MIN_ZOOM) {
+      map.zoomTo(FINE_HEXAGON_MIN_ZOOM, { duration: 600 })
+    }
   }
 
   return (
