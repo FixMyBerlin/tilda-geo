@@ -53,7 +53,7 @@ Step 1: All our LUA tables have a `minzoom` column. The default value is 0, whic
 
 For roads, for example, we can decide in LUA, based on the object tags, to set a different `minzoom`:
 
-Example: [`processing/…/RoadGeneralization.lua`](`processing/topics/roads_bikelanes/roads/RoadGeneralization.lua`) has a list of highway values that get `minzoom=11`.
+Example: [`processing/…/road_generalization.lua`](../processing/topics/roads_bikelanes/roads/road_generalization.lua) has a list of highway values that get `minzoom=11`.
 
 Step 2: Our [generalizationFunction](app/src/registerSQLFunctions/registerGeneralizationFunctions.ts) uses this `minzoom` to filter the rows (see `WHERE (geom && ST_TileEnvelope(z, x, y)) AND z >= minzoom`).
 
