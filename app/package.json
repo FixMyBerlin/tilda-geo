@@ -150,7 +150,7 @@
     "jsts": "2.12.1",
     "jsurl2": "2.2.0",
     "mapillary-js": "4.1.2",
-    "maplibre-gl": "6.11.2",
+    "maplibre-gl": "6.13.0",
     "motion": "^12.40.0",
     "nitro": "npm:nitro-nightly@latest",
     "pg": "8.22.0",
@@ -241,7 +241,7 @@
     "node": ">=26.0.0"
   },
   "patchedDependencies": {
-    "maplibre-gl@6.11.2": "patches/maplibre-gl@6.11.2.patch"
+    "maplibre-gl@6.13.0": "patches/maplibre-gl@6.13.0.patch"
   },
   "prisma": {
     "schema": "prisma/schema.prisma"
