@@ -209,7 +209,7 @@
     "husky": "9.1.7",
     "jsdom": "29.1.1",
     "knip": "6.41.0",
-    "oxc-transform-react": "^0.145.0",
+    "oxc-transform-react": "^0.153.0",
     "oxfmt": "0.72.0",
     "oxlint": "1.87.0",
     "oxlint-tsgolint": "7.0.2004",
