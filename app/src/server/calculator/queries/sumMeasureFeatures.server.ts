@@ -26,6 +26,8 @@ type SumRow = {
   part: string
   properties: Record<string, string>
   sums: Record<string, number>
+  /** Per metric, the number of features without a value; they are not in `sums`. */
+  missing: Record<string, number>
 }
 
 const isStatementTimeout = (error: unknown) =>
@@ -42,7 +44,7 @@ export async function sumMeasureFeatures({ datasets, areas, groupByKeys, metrics
       async (tx) => {
         await tx.$executeRaw`SELECT set_config('statement_timeout', ${String(STATEMENT_TIMEOUT_MS)}, TRUE)`
         return tx.$queryRaw<SumRow[]>`
-          SELECT area, part, properties, sums
+          SELECT area, part, properties, sums, missing
           FROM tilda_measure_sum(${datasets}::text[], ${JSON.stringify(areas)}, ${groupByKeys}::text[], ${metrics}::text[])
         `
       },
@@ -50,10 +52,11 @@ export async function sumMeasureFeatures({ datasets, areas, groupByKeys, metrics
     )
     return {
       status: 'ok' as const,
-      rows: rows.map(({ area, part, properties, sums }) => ({
+      rows: rows.map(({ area, part, properties, sums, missing }) => ({
         area: area === null ? calculatorCombinedAreaId : calculatorAreaId(area),
         properties: { ...properties, [calculatorPartKey]: part },
         sums,
+        missing,
       })),
     }
   } catch (error) {

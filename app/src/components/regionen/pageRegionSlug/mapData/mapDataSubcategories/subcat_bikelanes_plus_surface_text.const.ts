@@ -1,6 +1,7 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_atlas_bikelanes_plus_surfaces } from './mapboxStyles/groups/atlas_bikelanes_plus_surfaces'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { layers_bikelanes_plus_surfaces } from './layers/bikelanes_plus_surfaces'
+import { withBikelaneVisualLineOffset } from './layers/utils/bikelaneLineOffset'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'bikelanes_plus_surface_smoothness'
 const source = 'atlas_bikelanes'
@@ -17,8 +18,8 @@ export const subcat_bikelanes_plus_surface_text: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Oberfläche (Text)',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_atlas_bikelanes_plus_surfaces,
+      layers: wrapSourceLayers({
+        layers: withBikelaneVisualLineOffset(layers_bikelanes_plus_surfaces),
         source,
         sourceLayer,
       }),

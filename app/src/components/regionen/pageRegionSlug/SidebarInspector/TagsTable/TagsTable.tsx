@@ -25,6 +25,10 @@ import {
   tableKeyRoadBikelanes,
 } from './compositTableRows/TagsTableRowCompositRoadBikelanes'
 import {
+  TagsTableRowCompositRouteRelations,
+  tableKeyRouteRelations,
+} from './compositTableRows/TagsTableRowCompositRouteRelations'
+import {
   TagsTableRowCompositSurfaceSmoothness,
   tableKeySurfaceSmoothness,
 } from './compositTableRows/TagsTableRowCompositSurfaceSmoothness'
@@ -151,6 +155,16 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
               case tableKeyMapillary: {
                 return (
                   <TagsTableRowCompositMapillary
+                    key={cleanedKey}
+                    sourceId={sourceId}
+                    tagKey={cleanedKey}
+                    properties={properties}
+                  />
+                )
+              }
+              case tableKeyRouteRelations: {
+                return (
+                  <TagsTableRowCompositRouteRelations
                     key={cleanedKey}
                     sourceId={sourceId}
                     tagKey={cleanedKey}

@@ -11,5 +11,6 @@
 \i '/processing/topics/roads_bikelanes/3_cleanup_todos_lines.sql'
 \i '/processing/topics/roads_bikelanes/4_hide_network_noise.sql'
 \i '/processing/topics/roads_bikelanes/5_qa_bikelanes.sql'
+\i '/processing/topics/roads_bikelanes/6_route_relations.sql'
 
 DO $$ BEGIN RAISE NOTICE 'FINISH topics/roads_bikelanes/roads_bikelanes.sql at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;

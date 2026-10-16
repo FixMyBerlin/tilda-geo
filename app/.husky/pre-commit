@@ -6,4 +6,5 @@ set -e
 ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT/app"
 
-bun run format
+# --bun: run oxfmt's `#!/usr/bin/env node` bin with Bun, not whatever node is on PATH.
+bun --bun run format

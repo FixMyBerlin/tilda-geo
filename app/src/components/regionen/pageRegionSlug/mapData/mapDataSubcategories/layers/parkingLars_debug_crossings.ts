@@ -1,0 +1,21 @@
+import type { StyleLayer } from './utils/types'
+
+export const layers_parkingLars_debug_crossings: StyleLayer[] = [
+  {
+    id: 'buffer-pedestrian-crossings-area',
+    type: 'fill',
+    paint: {
+      'fill-color': 'rgba(33, 196, 93, 0.7)',
+    },
+  },
+  {
+    id: 'buffer-pedestrian-crossings-border',
+    type: 'line',
+    minzoom: 16.5,
+    paint: {
+      'line-color': 'rgb(0, 0, 0)',
+      'line-dasharray': [2, 2],
+      'line-opacity': 0.7,
+    },
+  },
+]

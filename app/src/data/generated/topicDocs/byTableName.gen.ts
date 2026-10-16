@@ -267,7 +267,9 @@ const data = {
     topic: 'bicycleParking',
     tableName: 'bicycleParking_points',
     sourceIds: ['atlas_bicycleParking'],
-    title: 'Fahrradstellplätze',
+    title: 'Fahrrad- & Mikromobilitätsparken',
+    summary:
+      'Abstellanlagen für Fahrräder, Lastenräder, E-Scooter und andere Kleinstfahrzeuge sowie Bikesharing- und Mobilitätsstationen aus OpenStreetMap. Jedes Objekt ist eine Art (`kind`) mit der Anzahl ihrer Stellplätze.',
     groups: [
       {
         id: 'atlas',
@@ -276,15 +278,45 @@ const data = {
     ],
     attributes: [
       {
-        key: 'capacity',
-        type: 'number',
-        label: 'Anzahl Fahrrad-Stellplätze',
-        values: [],
+        key: 'kind',
+        type: 'string',
+        label: 'Art',
+        values: [
+          {
+            value: 'bicycle_parking',
+            label: 'Fahrradstellplätze',
+            description: '`amenity=bicycle_parking`',
+          },
+          {
+            value: 'cargo_bike_parking',
+            label: 'Lastenrad-Stellplätze',
+            description:
+              '`amenity=bicycle_parking` mit `cargo_bike=designated` oder `capacity:cargo_bike`',
+            chapterRefs: ['aufgeteilte-objekte'],
+          },
+          {
+            value: 'small_electric_vehicle_parking',
+            label: 'E-Scooter- / Kleinstfahrzeug-Parkplätze',
+            description: '`amenity=small_electric_vehicle_parking`, `amenity=kick-scooter_parking`',
+          },
+          {
+            value: 'bicycle_rental',
+            label: 'Bikesharing-Stationen',
+            description: '`amenity=bicycle_rental`, ohne Fahrradverleih-Läden',
+          },
+          {
+            value: 'mobility_hub',
+            label: 'Mobilitätsstationen',
+            description:
+              '`amenity=mobility_hub`. Eine Fläche, in der Stellplätze und Verleihstationen liegen; beim Summieren zählt sie nicht mit.',
+          },
+        ],
       },
       {
-        key: 'capacity:cargo_bike',
+        key: 'capacity',
         type: 'number',
-        label: 'Anzahl Lastenfahrrad-Stellplätze',
+        label: 'Anzahl Stellplätze',
+        chapterRefs: ['aufgeteilte-objekte'],
         values: [],
       },
       {
@@ -301,12 +333,20 @@ const data = {
             label: 'Kund:innen',
           },
           {
+            value: 'members',
+            label: 'Mitglieder',
+          },
+          {
             value: 'permissive',
             label: 'Öffentliche Nutzung geduldet',
           },
           {
             value: 'private',
             label: 'Privat',
+          },
+          {
+            value: 'no',
+            label: 'Kein Zugang',
           },
         ],
       },
@@ -361,6 +401,10 @@ const data = {
             value: 'yes',
             label: 'Zugelassen',
           },
+          {
+            value: 'designated',
+            label: 'Nur Lastenräder',
+          },
         ],
       },
       {
@@ -379,9 +423,10 @@ const data = {
         ],
       },
       {
-        key: 'bicycle_parking',
+        key: 'stand_type',
         type: 'string',
-        label: 'Fahrradabstellanlage',
+        label: 'Art der Abstellanlage',
+        description: 'Aus `bicycle_parking=*`.',
         values: [
           {
             value: 'stands',
@@ -400,16 +445,119 @@ const data = {
             label: 'Wandhalter',
           },
           {
-            value: 'shed',
-            label: 'Unterstand',
+            value: 'rack',
+            label: 'Fahrradständer',
+          },
+          {
+            value: 'safe_loops',
+            label: 'Sicherheitsbügel',
+          },
+          {
+            value: 'ground_slots',
+            label: 'Bodenschlitze',
+          },
+          {
+            value: 'anchors',
+            label: 'Bodenanker',
+          },
+          {
+            value: 'lean_and_stick',
+            label: 'Anlehnhilfe',
+          },
+          {
+            value: 'handlebar_holder',
+            label: 'Lenkerhalter',
+          },
+          {
+            value: 'upright_stands',
+            label: 'Vertikalparker',
           },
           {
             value: 'two-tier',
             label: 'Doppelstockparker',
           },
           {
+            value: 'shed',
+            label: 'Unterstand',
+          },
+          {
+            value: 'building',
+            label: 'Fahrradparkhaus',
+          },
+          {
             value: 'lockers',
             label: 'Fahrradboxen',
+          },
+          {
+            value: 'streetpod',
+            label: 'Streetpod',
+          },
+          {
+            value: 'smart_dock',
+            label: 'Smart-Dock',
+          },
+          {
+            value: 'floor',
+            label: 'Abstellfläche ohne Halter',
+          },
+        ],
+      },
+      {
+        key: 'rental_type',
+        type: 'string',
+        label: 'Art der Verleihstation',
+        description: 'Aus `bicycle_rental=*`.',
+        values: [
+          {
+            value: 'docking_station',
+            label: 'Station mit Andockpunkten',
+          },
+          {
+            value: 'dropoff_point',
+            label: 'Abstellfläche (Free-Floating-Zone)',
+          },
+          {
+            value: 'key_dispensing_machine',
+            label: 'Schlüsselautomat',
+          },
+        ],
+      },
+      {
+        key: 'network',
+        type: 'sanitized_strings',
+        label: 'Netz / Verbund',
+        values: [],
+      },
+      {
+        key: 'in_mobility_hub',
+        type: 'string',
+        label: 'In Mobilitätsstation',
+        values: [
+          {
+            value: 'yes',
+            label: 'Innerhalb einer Mobilitätsstation',
+          },
+        ],
+      },
+      {
+        key: 'geometry_transform',
+        type: 'string',
+        label: 'Geometrie geschätzt',
+        description:
+          'Gesetzt, wenn ein OSM-Objekt nach Art aufgeteilt und die Lage der Teile geschätzt wurde.',
+        chapterRefs: ['aufgeteilte-objekte'],
+        values: [
+          {
+            value: 'area_split',
+            label: 'Fläche nach Stellplätzen geteilt',
+          },
+          {
+            value: 'line_halves',
+            label: 'Linie in der Mitte geteilt',
+          },
+          {
+            value: 'point_offset',
+            label: 'Nebeneinander gesetzt',
           },
         ],
       },
@@ -442,40 +590,64 @@ const data = {
             label: 'Grünstreifen',
           },
           {
-            value: 'lane',
-            label: 'Fahrbahn',
-          },
-          {
             value: 'kerb_extension',
             label: 'Gehwegvorstreckung',
-          },
-          {
-            value: 'parking_lot',
-            label: 'Parkplatz',
-          },
-          {
-            value: 'street_side',
-            label: 'Straßenrand',
-          },
-          {
-            value: 'school_ground',
-            label: 'Schulgelände',
-          },
-          {
-            value: 'private_property',
-            label: 'Privatgrund',
           },
           {
             value: 'pedestrian_area',
             label: 'Fußgängerbereich',
           },
           {
+            value: 'lane',
+            label: 'Fahrbahn',
+          },
+          {
+            value: 'street_side',
+            label: 'Straßenrand',
+          },
+          {
+            value: 'shoulder',
+            label: 'Seitenstreifen',
+          },
+          {
+            value: 'traffic_island',
+            label: 'Verkehrsinsel',
+          },
+          {
+            value: 'parklet',
+            label: 'Parklet',
+          },
+          {
             value: 'park',
             label: 'Park',
           },
           {
+            value: 'school_ground',
+            label: 'Schulgelände',
+          },
+          {
+            value: 'playground',
+            label: 'Spielplatz',
+          },
+          {
+            value: 'parking_lot',
+            label: 'Parkplatz',
+          },
+          {
             value: 'parking',
             label: 'Parkfläche',
+          },
+          {
+            value: 'driveway',
+            label: 'Zufahrt',
+          },
+          {
+            value: 'private_property',
+            label: 'Privatgrund',
+          },
+          {
+            value: 'public_property',
+            label: 'Öffentliches Gelände',
           },
         ],
       },
@@ -692,22 +864,15 @@ const data = {
         label: 'Maximaldauer',
         values: [],
       },
+    ],
+    chapters: [
       {
-        key: 'osm_capacity',
-        type: 'sanitized_strings',
-        label: 'OSM Kapazität (roh, Testdaten)',
-        purpose: 'qa',
-        values: [],
-      },
-      {
-        key: 'osm_capacity:cargo_bike',
-        type: 'sanitized_strings',
-        label: 'OSM Kapazität Lastenrad (roh, Testdaten)',
-        purpose: 'qa',
-        values: [],
+        id: 'aufgeteilte-objekte',
+        title: 'Aufgeteilte Objekte und geschätzte Geometrie',
+        markdown:
+          'In OpenStreetMap ist eine Abstellanlage manchmal als ein Objekt erfasst, obwohl sie Stellplätze verschiedener Art hat, zum Beispiel 10 Stellplätze, davon 2 für Lastenräder (`capacity=10`, `capacity:cargo_bike=2`). TILDA zeigt jede Art als eigenes Objekt mit eigener Anzahl: 8 Fahrradstellplätze und 2 Lastenrad-Stellplätze. Das zweite Objekt hat dieselbe OSM-ID mit der Art als Zusatz (`way/123/cargo_bike_parking`).\n\nWo die Lastenrad-Stellplätze genau stehen, steht nicht in OpenStreetMap. TILDA schätzt deshalb die Lage beider Teile:\n\n- **Fläche:** Die Fläche wird quer zu ihrer Längsachse geteilt. Dabei stehen die Bügel in einer Reihe, ein Fahrradbügel alle 1,2 m und ein Lastenradbügel alle 2 m, je 2 Räder pro Bügel; jeder Teil bekommt so viel von der Länge, wie seine Stellplätze brauchen.\n- **Linie:** Die Linie wird in der Mitte geteilt; jeder Teil liegt in der Mitte seiner Hälfte.\n- **Punkt:** Die beiden Teile werden in Ost–West-Richtung nebeneinander gesetzt.\n\nDas Merkmal `geometry_transform` nennt, welcher Fall angewendet wurde; im Inspektor erscheint dazu ein Hinweis. Genauer wird es, wenn die Lastenrad-Stellplätze in OpenStreetMap als eigenes Objekt erfasst werden.\n',
       },
     ],
-    chapters: [],
   },
   bikelanes: {
     topic: 'roads_bikelanes',
@@ -1772,6 +1937,14 @@ const data = {
         values: [],
       },
       {
+        key: 'route_relations',
+        type: 'string',
+        label: 'Routen',
+        description: 'Routen und Netze, zu denen der Weg gehört.',
+        chapterRefs: ['routen'],
+        values: [],
+      },
+      {
         key: 'description',
         type: 'sanitized_strings',
         label: 'Hinweis aus OSM',
@@ -2181,10 +2354,16 @@ const data = {
           '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
       },
       {
+        id: 'routen',
+        title: 'Routen und Netze (`route_relations`)',
+        markdown:
+          '`route_relations` sagt, zu welchen Routen und Netzen ein Weg gehört. Alles über die Route selbst (Name, Ref, Netzebene, Farbe, Verlauf) steht nicht am Weg, sondern in den Routen-Tabellen.\n\n## Format\n\nGruppen sind mit `;` getrennt, innerhalb einer Gruppe stehen Name und Einträge mit `:`, mehrere Einträge mit `,`:\n\n`bicycle:2788485,12138805;bus:1234567;radnetz_berlin:Vorrangnetz`\n\n- **OSM-Routen:** Gruppe ist der OSM-Wert `route=*` (`bicycle`, `mtb`, `bus`, `foot`, `hiking`), Einträge sind OSM-Relation-IDs. Name, Ref und Netz stehen in den Tabellen `bikeroutes`, `mtbroutes`, `busroutes`, `footroutes` und `hikingroutes`.\n- **Netze aus externen Daten:** eine Gruppe je Netz mit genau einer Klasse je Linie. Heute `radnetz_berlin` (Radnetz Berlin aus infraVelo) mit `Vorrangnetz`, `Ergänzungsnetz` oder `Sonstiges`. Ein Weg und seine Seiten (z. B. `cycleway/left`) können verschiedene Klassen haben.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt auf Linien-Ebenen und auf Beschriftungen und Icons entlang der Linie (Breite, Oberfläche, Brücke, Tunnel, Baustelle; sehr kurze Wege zeigen ihr Icon erst beim Hineinzoomen). Verkehrsschild-Beschriftungen liegen weiter auf der Mittellinie.\n',
       },
     ],
   },
@@ -2611,15 +2790,21 @@ const data = {
           '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
       },
       {
+        id: 'routen',
+        title: 'Routen und Netze (`route_relations`)',
+        markdown:
+          '`route_relations` sagt, zu welchen Routen und Netzen ein Weg gehört. Alles über die Route selbst (Name, Ref, Netzebene, Farbe, Verlauf) steht nicht am Weg, sondern in den Routen-Tabellen.\n\n## Format\n\nGruppen sind mit `;` getrennt, innerhalb einer Gruppe stehen Name und Einträge mit `:`, mehrere Einträge mit `,`:\n\n`bicycle:2788485,12138805;bus:1234567;radnetz_berlin:Vorrangnetz`\n\n- **OSM-Routen:** Gruppe ist der OSM-Wert `route=*` (`bicycle`, `mtb`, `bus`, `foot`, `hiking`), Einträge sind OSM-Relation-IDs. Name, Ref und Netz stehen in den Tabellen `bikeroutes`, `mtbroutes`, `busroutes`, `footroutes` und `hikingroutes`.\n- **Netze aus externen Daten:** eine Gruppe je Netz mit genau einer Klasse je Linie. Heute `radnetz_berlin` (Radnetz Berlin aus infraVelo) mit `Vorrangnetz`, `Ergänzungsnetz` oder `Sonstiges`. Ein Weg und seine Seiten (z. B. `cycleway/left`) können verschiedene Klassen haben.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt auf Linien-Ebenen und auf Beschriftungen und Icons entlang der Linie (Breite, Oberfläche, Brücke, Tunnel, Baustelle; sehr kurze Wege zeigen ihr Icon erst beim Hineinzoomen). Verkehrsschild-Beschriftungen liegen weiter auf der Mittellinie.\n',
       },
     ],
   },
   bikeroutes: {
-    topic: 'bikeroutes',
+    topic: 'routes',
     tableName: 'bikeroutes',
     sourceIds: ['atlas_bikeroutes'],
     title: 'Fahrradrouten',
@@ -3229,10 +3414,16 @@ const data = {
           '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
       },
       {
+        id: 'routen',
+        title: 'Routen und Netze (`route_relations`)',
+        markdown:
+          '`route_relations` sagt, zu welchen Routen und Netzen ein Weg gehört. Alles über die Route selbst (Name, Ref, Netzebene, Farbe, Verlauf) steht nicht am Weg, sondern in den Routen-Tabellen.\n\n## Format\n\nGruppen sind mit `;` getrennt, innerhalb einer Gruppe stehen Name und Einträge mit `:`, mehrere Einträge mit `,`:\n\n`bicycle:2788485,12138805;bus:1234567;radnetz_berlin:Vorrangnetz`\n\n- **OSM-Routen:** Gruppe ist der OSM-Wert `route=*` (`bicycle`, `mtb`, `bus`, `foot`, `hiking`), Einträge sind OSM-Relation-IDs. Name, Ref und Netz stehen in den Tabellen `bikeroutes`, `mtbroutes`, `busroutes`, `footroutes` und `hikingroutes`.\n- **Netze aus externen Daten:** eine Gruppe je Netz mit genau einer Klasse je Linie. Heute `radnetz_berlin` (Radnetz Berlin aus infraVelo) mit `Vorrangnetz`, `Ergänzungsnetz` oder `Sonstiges`. Ein Weg und seine Seiten (z. B. `cycleway/left`) können verschiedene Klassen haben.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt auf Linien-Ebenen und auf Beschriftungen und Icons entlang der Linie (Breite, Oberfläche, Brücke, Tunnel, Baustelle; sehr kurze Wege zeigen ihr Icon erst beim Hineinzoomen). Verkehrsschild-Beschriftungen liegen weiter auf der Mittellinie.\n',
       },
     ],
   },
@@ -3315,6 +3506,162 @@ const data = {
         key: 'category_district',
         type: 'string',
         label: 'Kreiskategorie',
+        values: [],
+      },
+    ],
+    chapters: [],
+  },
+  busroutes: {
+    topic: 'routes',
+    tableName: 'busroutes',
+    sourceIds: [],
+    title: 'Buslinien',
+    summary:
+      'OSM-Relationen mit `type=route` und `route=bus`. Noch ohne Kartenebene; die Wege der Routen verweisen über `route_relations` hierher.',
+    groups: [],
+    attributes: [
+      {
+        key: 'route',
+        type: 'string',
+        label: 'Routentyp (`route=*`)',
+        values: [],
+      },
+      {
+        key: 'name',
+        type: 'sanitized_strings',
+        label: 'Name',
+        values: [],
+      },
+      {
+        key: 'ref',
+        type: 'sanitized_strings',
+        label: 'Referenz',
+        values: [],
+      },
+      {
+        key: 'network',
+        type: 'sanitized_strings',
+        label: 'Netz (`network=*`)',
+        values: [],
+      },
+      {
+        key: 'operator',
+        type: 'sanitized_strings',
+        label: 'Betreiber',
+        values: [],
+      },
+      {
+        key: 'from',
+        type: 'sanitized_strings',
+        label: 'Start',
+        values: [],
+      },
+      {
+        key: 'to',
+        type: 'sanitized_strings',
+        label: 'Ziel',
+        values: [],
+      },
+      {
+        key: 'route_description',
+        type: 'sanitized_strings',
+        label: 'Freitext zur Route',
+        values: [],
+      },
+      {
+        key: 'colours',
+        type: 'string',
+        label: 'Farben (mit `/` getrennt)',
+        values: [],
+      },
+      {
+        key: 'website',
+        type: 'sanitized_strings',
+        label: 'Website',
+        values: [],
+      },
+      {
+        key: 'wikipedia',
+        type: 'sanitized_strings',
+        label: 'Wikipedia',
+        values: [],
+      },
+    ],
+    chapters: [],
+  },
+  footroutes: {
+    topic: 'routes',
+    tableName: 'footroutes',
+    sourceIds: [],
+    title: 'Spazier- und Lehrpfade',
+    summary:
+      'OSM-Relationen mit `type=route` und `route=foot`. Noch ohne Kartenebene; die Wege der Routen verweisen über `route_relations` hierher.',
+    groups: [],
+    attributes: [
+      {
+        key: 'route',
+        type: 'string',
+        label: 'Routentyp (`route=*`)',
+        values: [],
+      },
+      {
+        key: 'name',
+        type: 'sanitized_strings',
+        label: 'Name',
+        values: [],
+      },
+      {
+        key: 'ref',
+        type: 'sanitized_strings',
+        label: 'Referenz',
+        values: [],
+      },
+      {
+        key: 'network',
+        type: 'sanitized_strings',
+        label: 'Netz (`network=*`)',
+        values: [],
+      },
+      {
+        key: 'operator',
+        type: 'sanitized_strings',
+        label: 'Betreiber',
+        values: [],
+      },
+      {
+        key: 'from',
+        type: 'sanitized_strings',
+        label: 'Start',
+        values: [],
+      },
+      {
+        key: 'to',
+        type: 'sanitized_strings',
+        label: 'Ziel',
+        values: [],
+      },
+      {
+        key: 'route_description',
+        type: 'sanitized_strings',
+        label: 'Freitext zur Route',
+        values: [],
+      },
+      {
+        key: 'colours',
+        type: 'string',
+        label: 'Farben (mit `/` getrennt)',
+        values: [],
+      },
+      {
+        key: 'website',
+        type: 'sanitized_strings',
+        label: 'Website',
+        values: [],
+      },
+      {
+        key: 'wikipedia',
+        type: 'sanitized_strings',
+        label: 'Wikipedia',
         values: [],
       },
     ],
@@ -3951,12 +4298,96 @@ const data = {
           '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
       },
       {
+        id: 'routen',
+        title: 'Routen und Netze (`route_relations`)',
+        markdown:
+          '`route_relations` sagt, zu welchen Routen und Netzen ein Weg gehört. Alles über die Route selbst (Name, Ref, Netzebene, Farbe, Verlauf) steht nicht am Weg, sondern in den Routen-Tabellen.\n\n## Format\n\nGruppen sind mit `;` getrennt, innerhalb einer Gruppe stehen Name und Einträge mit `:`, mehrere Einträge mit `,`:\n\n`bicycle:2788485,12138805;bus:1234567;radnetz_berlin:Vorrangnetz`\n\n- **OSM-Routen:** Gruppe ist der OSM-Wert `route=*` (`bicycle`, `mtb`, `bus`, `foot`, `hiking`), Einträge sind OSM-Relation-IDs. Name, Ref und Netz stehen in den Tabellen `bikeroutes`, `mtbroutes`, `busroutes`, `footroutes` und `hikingroutes`.\n- **Netze aus externen Daten:** eine Gruppe je Netz mit genau einer Klasse je Linie. Heute `radnetz_berlin` (Radnetz Berlin aus infraVelo) mit `Vorrangnetz`, `Ergänzungsnetz` oder `Sonstiges`. Ein Weg und seine Seiten (z. B. `cycleway/left`) können verschiedene Klassen haben.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt auf Linien-Ebenen und auf Beschriftungen und Icons entlang der Linie (Breite, Oberfläche, Brücke, Tunnel, Baustelle; sehr kurze Wege zeigen ihr Icon erst beim Hineinzoomen). Verkehrsschild-Beschriftungen liegen weiter auf der Mittellinie.\n',
       },
     ],
+  },
+  hikingroutes: {
+    topic: 'routes',
+    tableName: 'hikingroutes',
+    sourceIds: [],
+    title: 'Wanderwege',
+    summary:
+      'OSM-Relationen mit `type=route` und `route=hiking`. Noch ohne Kartenebene; die Wege der Routen verweisen über `route_relations` hierher.',
+    groups: [],
+    attributes: [
+      {
+        key: 'route',
+        type: 'string',
+        label: 'Routentyp (`route=*`)',
+        values: [],
+      },
+      {
+        key: 'name',
+        type: 'sanitized_strings',
+        label: 'Name',
+        values: [],
+      },
+      {
+        key: 'ref',
+        type: 'sanitized_strings',
+        label: 'Referenz',
+        values: [],
+      },
+      {
+        key: 'network',
+        type: 'sanitized_strings',
+        label: 'Netz (`network=*`)',
+        values: [],
+      },
+      {
+        key: 'operator',
+        type: 'sanitized_strings',
+        label: 'Betreiber',
+        values: [],
+      },
+      {
+        key: 'from',
+        type: 'sanitized_strings',
+        label: 'Start',
+        values: [],
+      },
+      {
+        key: 'to',
+        type: 'sanitized_strings',
+        label: 'Ziel',
+        values: [],
+      },
+      {
+        key: 'route_description',
+        type: 'sanitized_strings',
+        label: 'Freitext zur Route',
+        values: [],
+      },
+      {
+        key: 'colours',
+        type: 'string',
+        label: 'Farben (mit `/` getrennt)',
+        values: [],
+      },
+      {
+        key: 'website',
+        type: 'sanitized_strings',
+        label: 'Website',
+        values: [],
+      },
+      {
+        key: 'wikipedia',
+        type: 'sanitized_strings',
+        label: 'Wikipedia',
+        values: [],
+      },
+    ],
+    chapters: [],
   },
   landuse: {
     topic: 'landuse',
@@ -4125,6 +4556,84 @@ const data = {
         key: 'operator',
         type: 'sanitized_strings',
         label: 'Betreiber',
+        values: [],
+      },
+    ],
+    chapters: [],
+  },
+  mtbroutes: {
+    topic: 'routes',
+    tableName: 'mtbroutes',
+    sourceIds: [],
+    title: 'Mountainbike-Routen',
+    summary:
+      'OSM-Relationen mit `type=route` und `route=mtb`. Noch ohne Kartenebene; die Wege der Routen verweisen über `route_relations` hierher.',
+    groups: [],
+    attributes: [
+      {
+        key: 'route',
+        type: 'string',
+        label: 'Routentyp (`route=*`)',
+        values: [],
+      },
+      {
+        key: 'name',
+        type: 'sanitized_strings',
+        label: 'Name',
+        values: [],
+      },
+      {
+        key: 'ref',
+        type: 'sanitized_strings',
+        label: 'Referenz',
+        values: [],
+      },
+      {
+        key: 'network',
+        type: 'sanitized_strings',
+        label: 'Netz (`network=*`)',
+        values: [],
+      },
+      {
+        key: 'operator',
+        type: 'sanitized_strings',
+        label: 'Betreiber',
+        values: [],
+      },
+      {
+        key: 'from',
+        type: 'sanitized_strings',
+        label: 'Start',
+        values: [],
+      },
+      {
+        key: 'to',
+        type: 'sanitized_strings',
+        label: 'Ziel',
+        values: [],
+      },
+      {
+        key: 'route_description',
+        type: 'sanitized_strings',
+        label: 'Freitext zur Route',
+        values: [],
+      },
+      {
+        key: 'colours',
+        type: 'string',
+        label: 'Farben (mit `/` getrennt)',
+        values: [],
+      },
+      {
+        key: 'website',
+        type: 'sanitized_strings',
+        label: 'Website',
+        values: [],
+      },
+      {
+        key: 'wikipedia',
+        type: 'sanitized_strings',
+        label: 'Wikipedia',
         values: [],
       },
     ],
@@ -4978,7 +5487,7 @@ const data = {
         id: 'kanten',
         title: 'Straßenkanten',
         markdown:
-          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n',
+          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n\nDie Zahl steht einmal pro Kante, in der Mitte der Linie. Dafür gibt es eine eigene Punkt-Tabelle `parkings_edges_labels` (nur für die Karte, ab Zoom 14) mit den Kapazitäts- und Operator-Werten der Kante. `angle` dreht die Zahl entlang der Straße, sodass sie nie auf dem Kopf steht. `flipped` sagt, ob der Text dafür um 180° gewendet wurde; dann liegt die linke Straßenseite unter dem Text, und die Karte setzt die linke und rechte Zahl entsprechend.\n',
       },
     ],
   },
@@ -6195,7 +6704,7 @@ const data = {
         id: 'kanten',
         title: 'Straßenkanten',
         markdown:
-          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n',
+          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n\nDie Zahl steht einmal pro Kante, in der Mitte der Linie. Dafür gibt es eine eigene Punkt-Tabelle `parkings_edges_labels` (nur für die Karte, ab Zoom 14) mit den Kapazitäts- und Operator-Werten der Kante. `angle` dreht die Zahl entlang der Straße, sodass sie nie auf dem Kopf steht. `flipped` sagt, ob der Text dafür um 180° gewendet wurde; dann liegt die linke Straßenseite unter dem Text, und die Karte setzt die linke und rechte Zahl entsprechend.\n',
       },
     ],
   },
@@ -6812,7 +7321,7 @@ const data = {
         id: 'kanten',
         title: 'Straßenkanten',
         markdown:
-          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n',
+          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n\nDie Zahl steht einmal pro Kante, in der Mitte der Linie. Dafür gibt es eine eigene Punkt-Tabelle `parkings_edges_labels` (nur für die Karte, ab Zoom 14) mit den Kapazitäts- und Operator-Werten der Kante. `angle` dreht die Zahl entlang der Straße, sodass sie nie auf dem Kopf steht. `flipped` sagt, ob der Text dafür um 180° gewendet wurde; dann liegt die linke Straßenseite unter dem Text, und die Karte setzt die linke und rechte Zahl entsprechend.\n',
       },
     ],
   },
@@ -7771,7 +8280,131 @@ const data = {
         id: 'kanten',
         title: 'Straßenkanten',
         markdown:
-          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n',
+          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n\nDie Zahl steht einmal pro Kante, in der Mitte der Linie. Dafür gibt es eine eigene Punkt-Tabelle `parkings_edges_labels` (nur für die Karte, ab Zoom 14) mit den Kapazitäts- und Operator-Werten der Kante. `angle` dreht die Zahl entlang der Straße, sodass sie nie auf dem Kopf steht. `flipped` sagt, ob der Text dafür um 180° gewendet wurde; dann liegt die linke Straßenseite unter dem Text, und die Karte setzt die linke und rechte Zahl entsprechend.\n',
+      },
+    ],
+  },
+  parkings_labels: {
+    topic: 'parking',
+    tableName: 'parkings_labels',
+    sourceIds: ['tilda_parkings'],
+    title: 'Straßenparken Beschriftung',
+    summary:
+      'Ein Punkt in der Mitte jeder Parklinie aus `parkings`, für die Beschriftung mit der Stellplatzzahl ab Zoom 16. Die Werte stammen aus der Parklinie.',
+    groups: [
+      {
+        id: 'parking',
+        label: 'Parkraum-Prozessierung',
+      },
+    ],
+    attributes: [
+      {
+        key: 'capacity',
+        type: 'number',
+        label: 'Stellplatzanzahl',
+        description: 'Geschätzte oder explizit erfasste Anzahl von Stellplätzen.',
+        chapterRefs: ['capacity-calculation'],
+        values: [],
+      },
+      {
+        key: 'operator_type',
+        type: 'string',
+        label: 'Betreibertyp',
+        values: [
+          {
+            value: 'private',
+            label: 'Privat',
+          },
+          {
+            value: 'public',
+            label: 'Öffentlich',
+          },
+        ],
+      },
+      {
+        key: 'operator_type_source',
+        type: 'string',
+        label: 'Herkunft des Betreibertyps',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'default_fallback',
+            label: 'Annahme bei fehlender Angabe.',
+          },
+          {
+            value: 'driveway_inference',
+            label: 'Annahme bei fehlender Angabe wenn eine Einfahrt erkannt wurde.',
+          },
+          {
+            value: 'manual_overwrite_list',
+            label: 'Anhand einer manuellen Korrekturliste in TILDA.',
+          },
+          {
+            value: 'parent_highway_tag',
+            label: 'Explizite Angabe aus OSM an der zugeordneten Straße.',
+          },
+          {
+            value: 'tag',
+            label: 'Explizite Angabe aus OSM.',
+          },
+        ],
+      },
+      {
+        key: 'operator_type_confidence',
+        type: 'string',
+        label: 'Konfidenz des Betreibertyps',
+        purpose: 'qa',
+        values: [
+          {
+            value: 'high',
+            label: 'Hoch',
+          },
+          {
+            value: 'medium',
+            label: 'Mittel',
+          },
+          {
+            value: 'low',
+            label: 'Niedrig',
+          },
+        ],
+      },
+      {
+        key: 'area',
+        type: 'square_meter',
+        label: 'Fläche',
+        description:
+          'Fläche des durch parkende Fahrzeuge auf diesem Parkraumabschnitt belegten Raumes in Quadratmetern.',
+        values: [],
+      },
+      {
+        key: 'angle',
+        type: 'number',
+        label: 'Textwinkel',
+        purpose: 'rendering',
+        description:
+          'Drehung der Beschriftung in Grad (im Uhrzeigersinn, 0 = Osten), entlang der Linie (Parklinie bzw. Kante) und so gewendet, dass der Text nie auf dem Kopf steht (−90 bis 90). Nur zur Darstellung.',
+        values: [],
+      },
+    ],
+    chapters: [
+      {
+        id: 'capacity-calculation',
+        title: 'Berechnung der Kapazität',
+        markdown:
+          'Kapazitätswerte stammen je nach Datenlage aus unterschiedlichen Quellen:\n\n- Direkte OSM-Tag-Angaben (`capacity`, inkl. Schätzungsvarianten)\n- Flächen- und ausrichtungsbasierte Schätzung\n- Längen- und ausrichtungsbasierte Schätzung\n- Konservative Standardannahmen bei fehlenden Angaben\n\nBei Segmenten mit alternierendem Parken wird die Kapazität reduziert, um realistische Manövrierverluste abzubilden.\n\nDie genaue Herleitung ist im Feld `capacity_source` nachvollziehbar dokumentiert.\n',
+      },
+      {
+        id: 'condition-category',
+        title: 'Parkbeschränkung',
+        markdown:
+          'Unter dem Wert "Parkbeschränkungen" (`condition_category`) wird eine Semikolon getrennte Liste ausgeliefert die verschiedene Parkbeschränkungen beschreibt.\n\nBeispiele:\n\n| Wert                                                      | Übersetzung                                                                       |\n| --------------------------------------------------------- | --------------------------------------------------------------------------------- |\n| `access_restriction (agricultural)`                       | Zugangsbeschränkung (Land-/Forstwirtschaftlicher Verkehr)                         |\n| `access_restriction (no, Tu 15:00-18:00)`                 | Zugangsbeschränkung (kein Zugang, Dienstag 15:00-18:00)                           |\n| `access_restriction (Mo-Fr 04:30-20:00, PH off)`          | Zugangsbeschränkung (Montag-Freitag 04:30-20:00, Feiertag ausgenommen)            |\n| `disabled (except emergency)`                             | Behindertenparkplatz (ausgenommen Einsatz-/Krankenfahrzeuge)                      |\n| `paid (stay > 1 hour)`                                    | Nur mit Parkschein (Parkdauer > 1 Stunde)                                         |\n| `time_limited (2 days)`                                   | Höchstparkdauer (2 Tage)                                                          |\n| `time_limited (4 hours) (08:00-18:00)`                    | Höchstparkdauer (4 Stunden) (08:00-18:00)                                         |\n| `vehicle_restriction (only motorcar, motorcycle)`         | Beschränkung auf Fahrzeugklassen (nur Pkw, Motorräder)                            |\n| `vehicle_restriction (only delivery) (Mo-Sa 07:00-20:00)` | Beschränkung auf Fahrzeugklassen (nur Lieferverkehr) (Montag-Samstag 07:00-20:00) |\n\nIn der TILDA Inspektor-Ansicht werden diese Werte übersetzt dargestellt. In der Attributtabelle sind sie aber nur beispielhaft in ihrer einfachsten Form angegeben. Ebenso kann die Masterportal-Übersetzungs-Tabelle dieser Werte leider nicht übersetzen.\n',
+      },
+      {
+        id: 'kanten',
+        title: 'Straßenkanten',
+        markdown:
+          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n\nDie Zahl steht einmal pro Kante, in der Mitte der Linie. Dafür gibt es eine eigene Punkt-Tabelle `parkings_edges_labels` (nur für die Karte, ab Zoom 14) mit den Kapazitäts- und Operator-Werten der Kante. `angle` dreht die Zahl entlang der Straße, sodass sie nie auf dem Kopf steht. `flipped` sagt, ob der Text dafür um 180° gewendet wurde; dann liegt die linke Straßenseite unter dem Text, und die Karte setzt die linke und rechte Zahl entsprechend.\n',
       },
     ],
   },
@@ -8965,7 +9598,7 @@ const data = {
         id: 'kanten',
         title: 'Straßenkanten',
         markdown:
-          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n',
+          '`parkings_edges` fasst das Parknetz zwischen Knotenpunkten (OSM-Knoten, an denen nicht genau zwei Kanten zusammenlaufen) zu einer Linie zusammen. Das Netz sind dieselben OSM-Ways, für die TILDA Straßenparken erzeugt (`has_parking`: normale Straßen sowie Einfahrten/`highway=service` mit expliziten `parking:*`-Tags).\n\nDie Objekt-ID ist das Paar `start_node`-`end_node`. Liegen zwei Kanten auf demselben Knotenpaar (parallele Geometrien), erhält die zweite einen Suffix.\n\nKapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen Stellplätze, deren Parklinie auf **dieser** Kante liegt (Straßenparken auf der Bordsteinlinie sowie separat erfasste Parkflächen, deren Linie auf der Polygonkante liegt). Ein OSM-Way, der an einer Kreuzung in mehrere Kanten zerfällt, gibt jeder Kante nur die Stellplätze auf diesem Abschnitt, nicht einen Längenanteil der gesamten Way-Kapazität. `capacity_private_*` ist die private Summe, wenn vorhanden. Einträge in `parkings_no` zählen nicht.\n\nSeparat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.\n\nPro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.\n\nDie Zahl steht einmal pro Kante, in der Mitte der Linie. Dafür gibt es eine eigene Punkt-Tabelle `parkings_edges_labels` (nur für die Karte, ab Zoom 14) mit den Kapazitäts- und Operator-Werten der Kante. `angle` dreht die Zahl entlang der Straße, sodass sie nie auf dem Kopf steht. `flipped` sagt, ob der Text dafür um 180° gewendet wurde; dann liegt die linke Straßenseite unter dem Text, und die Karte setzt die linke und rechte Zahl entsprechend.\n',
       },
     ],
   },
@@ -10724,6 +11357,14 @@ const data = {
         values: [],
       },
       {
+        key: 'route_relations',
+        type: 'string',
+        label: 'Routen',
+        description: 'Routen und Netze, zu denen der Weg gehört.',
+        chapterRefs: ['routen'],
+        values: [],
+      },
+      {
         key: 'traffic_sign',
         type: 'sanitized_strings',
         label: 'Beschilderung',
@@ -11588,10 +12229,16 @@ const data = {
           '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
       },
       {
+        id: 'routen',
+        title: 'Routen und Netze (`route_relations`)',
+        markdown:
+          '`route_relations` sagt, zu welchen Routen und Netzen ein Weg gehört. Alles über die Route selbst (Name, Ref, Netzebene, Farbe, Verlauf) steht nicht am Weg, sondern in den Routen-Tabellen.\n\n## Format\n\nGruppen sind mit `;` getrennt, innerhalb einer Gruppe stehen Name und Einträge mit `:`, mehrere Einträge mit `,`:\n\n`bicycle:2788485,12138805;bus:1234567;radnetz_berlin:Vorrangnetz`\n\n- **OSM-Routen:** Gruppe ist der OSM-Wert `route=*` (`bicycle`, `mtb`, `bus`, `foot`, `hiking`), Einträge sind OSM-Relation-IDs. Name, Ref und Netz stehen in den Tabellen `bikeroutes`, `mtbroutes`, `busroutes`, `footroutes` und `hikingroutes`.\n- **Netze aus externen Daten:** eine Gruppe je Netz mit genau einer Klasse je Linie. Heute `radnetz_berlin` (Radnetz Berlin aus infraVelo) mit `Vorrangnetz`, `Ergänzungsnetz` oder `Sonstiges`. Ein Weg und seine Seiten (z. B. `cycleway/left`) können verschiedene Klassen haben.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt auf Linien-Ebenen und auf Beschriftungen und Icons entlang der Linie (Breite, Oberfläche, Brücke, Tunnel, Baustelle; sehr kurze Wege zeigen ihr Icon erst beim Hineinzoomen). Verkehrsschild-Beschriftungen liegen weiter auf der Mittellinie.\n',
       },
     ],
   },
@@ -11856,6 +12503,14 @@ const data = {
         label: 'Mapillary für Verkehrszeichen',
         description:
           'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
+        values: [],
+      },
+      {
+        key: 'route_relations',
+        type: 'string',
+        label: 'Routen',
+        description: 'Routen und Netze, zu denen der Weg gehört.',
+        chapterRefs: ['routen'],
         values: [],
       },
       {
@@ -12794,10 +13449,16 @@ const data = {
           '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
       },
       {
+        id: 'routen',
+        title: 'Routen und Netze (`route_relations`)',
+        markdown:
+          '`route_relations` sagt, zu welchen Routen und Netzen ein Weg gehört. Alles über die Route selbst (Name, Ref, Netzebene, Farbe, Verlauf) steht nicht am Weg, sondern in den Routen-Tabellen.\n\n## Format\n\nGruppen sind mit `;` getrennt, innerhalb einer Gruppe stehen Name und Einträge mit `:`, mehrere Einträge mit `,`:\n\n`bicycle:2788485,12138805;bus:1234567;radnetz_berlin:Vorrangnetz`\n\n- **OSM-Routen:** Gruppe ist der OSM-Wert `route=*` (`bicycle`, `mtb`, `bus`, `foot`, `hiking`), Einträge sind OSM-Relation-IDs. Name, Ref und Netz stehen in den Tabellen `bikeroutes`, `mtbroutes`, `busroutes`, `footroutes` und `hikingroutes`.\n- **Netze aus externen Daten:** eine Gruppe je Netz mit genau einer Klasse je Linie. Heute `radnetz_berlin` (Radnetz Berlin aus infraVelo) mit `Vorrangnetz`, `Ergänzungsnetz` oder `Sonstiges`. Ein Weg und seine Seiten (z. B. `cycleway/left`) können verschiedene Klassen haben.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt auf Linien-Ebenen und auf Beschriftungen und Icons entlang der Linie (Breite, Oberfläche, Brücke, Tunnel, Baustelle; sehr kurze Wege zeigen ihr Icon erst beim Hineinzoomen). Verkehrsschild-Beschriftungen liegen weiter auf der Mittellinie.\n',
       },
     ],
   },
@@ -13677,10 +14338,16 @@ const data = {
           '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
       },
       {
+        id: 'routen',
+        title: 'Routen und Netze (`route_relations`)',
+        markdown:
+          '`route_relations` sagt, zu welchen Routen und Netzen ein Weg gehört. Alles über die Route selbst (Name, Ref, Netzebene, Farbe, Verlauf) steht nicht am Weg, sondern in den Routen-Tabellen.\n\n## Format\n\nGruppen sind mit `;` getrennt, innerhalb einer Gruppe stehen Name und Einträge mit `:`, mehrere Einträge mit `,`:\n\n`bicycle:2788485,12138805;bus:1234567;radnetz_berlin:Vorrangnetz`\n\n- **OSM-Routen:** Gruppe ist der OSM-Wert `route=*` (`bicycle`, `mtb`, `bus`, `foot`, `hiking`), Einträge sind OSM-Relation-IDs. Name, Ref und Netz stehen in den Tabellen `bikeroutes`, `mtbroutes`, `busroutes`, `footroutes` und `hikingroutes`.\n- **Netze aus externen Daten:** eine Gruppe je Netz mit genau einer Klasse je Linie. Heute `radnetz_berlin` (Radnetz Berlin aus infraVelo) mit `Vorrangnetz`, `Ergänzungsnetz` oder `Sonstiges`. Ein Weg und seine Seiten (z. B. `cycleway/left`) können verschiedene Klassen haben.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt auf Linien-Ebenen und auf Beschriftungen und Icons entlang der Linie (Breite, Oberfläche, Brücke, Tunnel, Baustelle; sehr kurze Wege zeigen ihr Icon erst beim Hineinzoomen). Verkehrsschild-Beschriftungen liegen weiter auf der Mittellinie.\n',
       },
     ],
   },
@@ -13735,10 +14402,16 @@ const data = {
           '`adjoining_road` und `adjoining_maxspeed` sind Indikatoren für die Gefährdung durch nahen Kfz-Verkehr, auch wenn der Weg selbstständig geführt ist, aber in der Nähe einer Kfz-Straße liegt. Sie nennen Klasse und zulässige Höchstgeschwindigkeit der Kfz-Straße, deren Verkehr für diesen Weg relevant ist. Sie sagen **nicht**, ob der Weg zu dieser Straße gehört. Zwischen beiden kann zum Beispiel ein Graben, eine Baumreihe oder eine Lärmschutzwand liegen.\n\n- Bei begleitenden Wegen ist das die **parallele** Straße.\n- Bei Querungen ist das die **gequerte** Straße.\n- Bei Fahrradstraßen und Fußgängerzonen mit Rad frei gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n- Bei Infrastruktur, die auf der Fahrbahn geführt wird (beispielsweise Schutzstreifen, Radfahrstreifen, Bussonderfahrstreifen), gibt es keine `adjoining_*`-Attribute. Die Daten stehen bereits unter `road` / `maxspeed`.\n\n## Die Schätzung\n\nDie Sidepath-Schätzung setzt Checkpoints entlang der Wege (Gehwege, Radwege, Pfade, Treppen und Wirtschaftswege) und sucht Straßen im Umkreis von **22 m**. Eine Kfz-Straße gilt als nahe, wenn sie an der Mehrheit dieser Checkpoints innerhalb von 22 m liegt.\n\nDiese 22 m gelten als Luftlinie und unterscheiden nicht, ob der Weg direkt an der Fahrbahn liegt oder beispielsweise durch eine Hecke von ihr getrennt ist.\n\nJe ein Checkpoint sitzt nahe am Start und nahe am Ende, um 20 m eingerückt, damit Kreuzungen nicht mitzählen. Zusätzlich liegt immer ein Mittelpunkt auf dem Weg. Wege kürzer als 40 m erhalten nur diesen Mittelpunkt.\n\nQuerungen nutzen keine Checkpoints. Die CSV nimmt die Kfz-Straße, die die Geometrie schneidet (bei mehreren die höchste Klasse).\n\n## Quellen\n\nDer Wert ist immer ein TILDA-`roads.road`.\n\n1. **Querungen:** nur die CSV (gequerte Straße). OSM `is_sidepath:of` benennt dort meist die parallele Elternstraße, nicht die gequerte Fahrbahn.\n2. **Sonst, wenn `is_sidepath:of` eine nutzbare Straßenklasse ist:** dieser Wert. Eine Kartierung kann die Schätzung damit überschreiben. Der Tag kennt nur OSM-`highway`-Klassen ohne Untertags. `trunk`/`trunk_link`, Tippfehler und Straßennamen fallen weg. `residential_priority_road` entsteht aus `:of` nicht; wenn beide Quellen da sind, bleibt der gröbere `:of`-Wert (`residential`).\n3. **Sonst:** TILDA-`roads.road` aus dem **vorherigen** Processing-Lauf (CSV).\n\n`adjoining_maxspeed` gehört zur CSV-Klasse und wird nur übernommen, wenn dieselbe Klasse veröffentlicht wird.\n\n## Leseregel auf `routing`\n\n`adjoining_road` auf routing ist **derselbe Wert wie auf `bikelanes`**. Auf `side=left`/`right` (Infrastruktur auf der Fahrbahn) ist das Feld leer; die Straßenklasse steht dort auf `road` bzw. `parent_road`. Auf `side=self` (Wege, Querungen) gilt `adjoining_road`.\n',
       },
       {
+        id: 'routen',
+        title: 'Routen und Netze (`route_relations`)',
+        markdown:
+          '`route_relations` sagt, zu welchen Routen und Netzen ein Weg gehört. Alles über die Route selbst (Name, Ref, Netzebene, Farbe, Verlauf) steht nicht am Weg, sondern in den Routen-Tabellen.\n\n## Format\n\nGruppen sind mit `;` getrennt, innerhalb einer Gruppe stehen Name und Einträge mit `:`, mehrere Einträge mit `,`:\n\n`bicycle:2788485,12138805;bus:1234567;radnetz_berlin:Vorrangnetz`\n\n- **OSM-Routen:** Gruppe ist der OSM-Wert `route=*` (`bicycle`, `mtb`, `bus`, `foot`, `hiking`), Einträge sind OSM-Relation-IDs. Name, Ref und Netz stehen in den Tabellen `bikeroutes`, `mtbroutes`, `busroutes`, `footroutes` und `hikingroutes`.\n- **Netze aus externen Daten:** eine Gruppe je Netz mit genau einer Klasse je Linie. Heute `radnetz_berlin` (Radnetz Berlin aus infraVelo) mit `Vorrangnetz`, `Ergänzungsnetz` oder `Sonstiges`. Ein Weg und seine Seiten (z. B. `cycleway/left`) können verschiedene Klassen haben.\n',
+      },
+      {
         id: 'versetzte-geometrien',
         title: 'Versetzte Geometrien',
         markdown:
-          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt nur auf Linien-Ebenen. Symbol- bzw. Text-Ebenen, die entlang der Linie platziert werden (z. B. Breiten-, Oberflächen- oder Verkehrsschild-Beschriftungen), liegen auf der Mittellinie und werden nicht seitlich versetzt.\n',
+          'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Referenzlinie), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nDie Linienrichtung bleibt die Fahrtrichtung bei Rechtsverkehr. Rechte abgeleitete Geometrien laufen in OSM-Way-Richtung, linke werden umgekehrt (gegen die OSM-Way-Richtung). Richtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich weiter auf die OSM-Way-Richtung.\n\n**HINWEIS:** Der visuelle Versatz wirkt auf Linien-Ebenen und auf Beschriftungen und Icons entlang der Linie (Breite, Oberfläche, Brücke, Tunnel, Baustelle; sehr kurze Wege zeigen ihr Icon erst beim Hineinzoomen). Verkehrsschild-Beschriftungen liegen weiter auf der Mittellinie.\n',
       },
     ],
   },

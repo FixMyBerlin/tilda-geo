@@ -3,9 +3,9 @@ import { createIsomorphicFn } from '@tanstack/react-start'
 type LogErrorContext = string | { componentStack?: string }
 
 export const logError = createIsomorphicFn()
-  .server((error: Error, context?: LogErrorContext) => {
+  .server((error: unknown, context?: LogErrorContext) => {
     console.error('[SERVER ERROR]', context ?? '', error)
   })
-  .client((error: Error, context?: LogErrorContext) => {
+  .client((error: unknown, context?: LogErrorContext) => {
     console.error('[CLIENT ERROR]', context ?? '', error)
   })

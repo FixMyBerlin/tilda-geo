@@ -11,3 +11,5 @@ Kapazität je Seite: `capacity_left` / `capacity_right` sind die öffentlichen S
 Separat erfasste Parkflächen (Quelle `separate_parking_areas`, also als Fläche kartierte `street_side`- und `lane`-Buchten) werden im Umkreis von 6 m dem nächsten Bordstein zugeordnet; liegt jedes Teilstück einer Parklinie unter 20 % ihrer Länge, bleibt das längste Teilstück erhalten.
 
 Pro Straßenseite gewinnt der Operator mit mehr Stellplätzen (bei Gleichstand öffentlich). `operator_type_*` sowie Beschränkung, Lage und Oberfläche stammen nur aus dieser Gruppe. Die Karte zeigt die Hilfslinie und die Zahl in der passenden Unterkategorie.
+
+Die Zahl steht einmal pro Kante, in der Mitte der Linie. Dafür gibt es eine eigene Punkt-Tabelle `parkings_edges_labels` (nur für die Karte, ab Zoom 14) mit den Kapazitäts- und Operator-Werten der Kante. `angle` dreht die Zahl entlang der Straße, sodass sie nie auf dem Kopf steht. `flipped` sagt, ob der Text dafür um 180° gewendet wurde; dann liegt die linke Straßenseite unter dem Text, und die Karte setzt die linke und rechte Zahl entsprechend.

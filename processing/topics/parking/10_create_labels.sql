@@ -1,6 +1,6 @@
 -- WHAT IT DOES:
 -- Create label points for parking visualization.
--- * parkings (lines): point at 50% along line
+-- * parkings (lines): point at 50% along line, `angle` follows the line (upright, see `line_label_angle.sql`)
 -- * parkings_separate (areas): point on surface
 -- INPUT: parkings (linestring), parkings_separate (polygon)
 -- OUTPUT: parkings_labels (point), parkings_separate_labels (point)
@@ -19,7 +19,8 @@ SELECT
     'operator_type', tags ->> 'operator_type',
     'operator_type_source', tags ->> 'operator_type_source',
     'operator_type_confidence', tags ->> 'operator_type_confidence',
-    'area', ROUND(NULLIF(tags->>'area','')::numeric, 2)
+    'area', ROUND(NULLIF(tags->>'area','')::numeric, 2),
+    'angle', ROUND(tilda_upright_label_angle(tilda_line_label_angle(geom, 0.5))::numeric, 1)
     /* sql-formatter-enable */
   ) AS tags,
   '{}'::jsonb AS meta,

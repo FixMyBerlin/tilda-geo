@@ -80,6 +80,7 @@ export const sources: MapDataSource<SourcesId>[] = [
         'surface_color__if_present',
         'description__if_present',
         'length',
+        'composit_route_relations',
         // Last: links to photos, not a property of the object.
         'composit_mapillary',
       ],
@@ -144,6 +145,7 @@ export const sources: MapDataSource<SourcesId>[] = [
         'width',
         'length',
         'description__if_present',
+        'composit_route_relations',
         // Last: links to photos, not a property of the object.
         'composit_mapillary',
       ],
@@ -205,6 +207,7 @@ export const sources: MapDataSource<SourcesId>[] = [
         'width',
         'length',
         'description__if_present',
+        'composit_route_relations',
         // Last: links to photos, not a property of the object.
         'composit_mapillary',
       ],
@@ -338,11 +341,18 @@ export const sources: MapDataSource<SourcesId>[] = [
       enabled: true,
       highlightingKey: 'id',
       documentedKeys: [
+        'kind',
         'capacity',
-        'capacity:cargo_bike__if_present',
         'access',
         'covered',
+        'name__if_present',
+        'operator__if_present',
         'operator_type__if_present',
+        'network__if_present',
+        'stand_type__if_present',
+        'rental_type__if_present',
+        'position__if_present',
+        'in_mobility_hub__if_present',
         'lit__if_present',
         'description__if_present',
         // Last: links to photos, not a property of the object.

@@ -9,7 +9,6 @@ import { DEFAULT_TILES_PORT } from './envDefaultPorts'
 import { databaseEnvSchema } from './envSchema.database'
 
 const environmentValues = z.enum(['development', 'staging', 'production'])
-const mapboxToken = z.string().regex(/^pk\./)
 const requiredString = z.string().min(1)
 
 const envViteSchema = z.object({
@@ -42,8 +41,6 @@ const envServerSchema = z.object({
 const envAppSchemaPart = envViteSchema.extend(envServerSchema.shape)
 
 const envScriptOnlySchemaPart = z.object({
-  MAPBOX_STYLE_ACCESS_TOKEN: mapboxToken,
-  MAPBOX_PARKING_STYLE_ACCESS_TOKEN: mapboxToken,
   S3_UPLOAD_FOLDER: z.enum(['production', 'staging', 'localdev']),
   /** Local `.env` only: `bun run static-datasets-update -- --env=staging` requires this (no fallback to ATLAS_API_KEY). */
   ATLAS_API_KEY_STAGING: z.string().optional(),

@@ -58,6 +58,18 @@ osm2pgsql.define_table({
   },
 })
 
+-- Edge labels (filled by SQL in 11_create_edges.sql)
+osm2pgsql.define_table({
+  name = 'parkings_edges_labels',
+  columns = {
+    { column = 'id',   type = 'text', not_null = true },
+    { column = 'tags', type = 'jsonb' },
+    { column = 'meta', type = 'jsonb' },
+    { column = 'geom', type = 'point', projection = 3857 },
+    { column = 'minzoom', type = 'integer', not_null = true },
+  },
+})
+
 -- Labels (filled by SQL in 10_create_labels.sql)
 osm2pgsql.define_table({
   name = 'parkings_labels',

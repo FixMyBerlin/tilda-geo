@@ -1,7 +1,7 @@
 import type { MapDataCategoryId } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/MapDataCategoryId'
 import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
-import { mapboxStyleLayers } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/mapboxStyleLayers'
-import type { MapboxStyleLayer } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/types'
+import type { StyleLayer } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/utils/types'
+import { wrapSourceLayers } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/utils/wrapSourceLayers'
 import type { FileMapDataSubcategoryStyleLayer } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { translations } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/translations.const'
 import type { CalculatorFilter } from './calculatorModeParam'
@@ -13,8 +13,8 @@ import type { CalculatorFilter } from './calculatorModeParam'
  */
 export const calculatorPartKey = 'part'
 
-/** The amounts a feature can carry; the order the panel offers them in. */
-export const calculatorMetricOrder = ['capacity', 'area', 'length_directions'] as const
+/** The amounts a feature can carry; the order of the columns of the panel. */
+export const calculatorMetricOrder = ['capacity', 'objects', 'area', 'length_directions'] as const
 
 export type CalculatorMetric = (typeof calculatorMetricOrder)[number]
 
@@ -65,13 +65,13 @@ const lineLayers = (color: string) =>
         'line-width': ['interpolate', ['linear'], ['zoom'], 10, 1, 16, 3],
       },
     },
-  ] satisfies MapboxStyleLayer[]
+  ] satisfies StyleLayer[]
 
 const areaLayers = (color: string) =>
   [
     { id: 'fill', type: 'fill', paint: { 'fill-color': color } },
     { id: 'outline', type: 'line', paint: { 'line-color': color, 'line-width': 1 } },
-  ] satisfies MapboxStyleLayer[]
+  ] satisfies StyleLayer[]
 
 const pointLayers = (color: string) =>
   [
@@ -85,7 +85,7 @@ const pointLayers = (color: string) =>
         'circle-radius': ['interpolate', ['linear'], ['zoom'], 10, 1, 17, 4],
       },
     },
-  ] satisfies MapboxStyleLayer[]
+  ] satisfies StyleLayer[]
 
 const part = ({
   sourceLayer,
@@ -94,11 +94,11 @@ const part = ({
 }: Omit<CalculatorDatasetPart, 'layers'> & {
   /** The table of the part, which is its layer in the tiles of the source. */
   sourceLayer: string
-  layers: MapboxStyleLayer[]
+  layers: StyleLayer[]
 }) =>
   ({
     ...rest,
-    layers: mapboxStyleLayers({ layers, source: rest.sourceId, sourceLayer }),
+    layers: wrapSourceLayers({ layers, source: rest.sourceId, sourceLayer }),
   }) satisfies CalculatorDatasetPart
 
 /**
@@ -178,18 +178,21 @@ const calculatorDatasets: CalculatorDataset[] = [
   },
   {
     id: 'bicycle_parking',
-    name: 'Fahrradstellplätze',
+    name: 'Fahrrad- & Mikromobilitätsparken',
     categoryIds: ['bicycleParking'],
     measureDatasets: ['bicycle_parking'],
-    sumKeys: { capacity: 'Stellplätze' },
+    sumKeys: { capacity: 'Stellplätze', objects: 'Anlagen' },
     // Only the points: a bicycle parking mapped as an area is in `bicycleParking_points` as well,
-    // as the point at its centroid.
+    // as the point at its centroid. Each row is one kind with its own capacity: a mixed OSM object
+    // is split into one row per kind, so the sum groups by `kind`. Mobility hubs are not summed
+    // (the measure SQL excludes them): they contain the stands, which are summed on their own.
+    // A row without `capacity` counts only as an object, not as stands.
     parts: [
       part({
         id: 'points',
         sourceId: 'atlas_bicycleParking',
         sourceLayer: 'bicycleParking_points',
-        groupByKeys: ['bicycle_parking', 'covered', 'access'],
+        groupByKeys: ['kind', 'stand_type', 'covered', 'access'],
         layers: pointLayers(partColors[0]),
       }),
     ],

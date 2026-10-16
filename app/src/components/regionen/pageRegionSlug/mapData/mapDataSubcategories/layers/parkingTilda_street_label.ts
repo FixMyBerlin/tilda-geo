@@ -1,0 +1,37 @@
+import type { StyleLayer } from './utils/types'
+
+export const layers_parkingTilda_street_label: StyleLayer[] = [
+  {
+    id: 'street_park_label',
+    type: 'symbol',
+    minzoom: 15,
+    layout: {
+      'text-allow-overlap': true,
+      'text-field': ['to-string', ['get', 'capacity']],
+      'text-font': ['Open Sans Regular', 'Arial Unicode MS Regular'],
+      'text-ignore-placement': true,
+      // `angle` is upright along the parking line (`processing/topics/parking/10_create_labels.sql`)
+      'text-rotate': ['to-number', ['get', 'angle'], 0],
+      'text-rotation-alignment': 'map',
+      'text-size': ['interpolate', ['linear'], ['zoom'], 15.99, 0, 16, 8, 20, 20],
+    },
+    paint: {
+      'icon-opacity': ['interpolate', ['linear'], ['zoom'], 0, 0, 14, 0, 15, 1],
+      'text-color': [
+        'match',
+        ['get', 'operator_type'],
+        ['private'],
+        'rgba(61, 61, 61, 0.6)',
+        '#3c3c3c',
+      ],
+      'text-halo-color': [
+        'match',
+        ['get', 'operator_type'],
+        ['private'],
+        'rgba(255, 255, 255, 0.6)',
+        'rgb(255, 255, 255)',
+      ],
+      'text-halo-width': ['interpolate', ['linear'], ['zoom'], 15.99, 0, 16, 2, 20, 3],
+    },
+  },
+]

@@ -24,6 +24,8 @@ attributes:
     ref: bikelanes.mapillary_backward
   - key: mapillary_traffic_sign
     ref: bikelanes.mapillary_traffic_sign
+  - key: route_relations
+    ref: bikelanes.route_relations
   - key: traffic_sign
     ref: roads.traffic_sign
   - key: description

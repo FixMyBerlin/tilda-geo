@@ -32,7 +32,7 @@ export default function RegionError({ error, reset, previewRegionSlug }: RegionE
               Ein Fehler ist aufgetreten
             </h1>
             <p className="mt-2 text-base text-gray-500">Leider ist ein Fehler aufgetreten.</p>
-            {isDev && error?.message && (
+            {isDev && error instanceof Error && error.message && (
               <p className="mt-2 font-mono text-sm text-gray-600" role="alert">
                 {error.message}
               </p>

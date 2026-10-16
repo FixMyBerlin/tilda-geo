@@ -88,7 +88,7 @@ _BESCHREIBUNG:_
 
 > TODO
 
-_JSON:_ (Von Mapbox Studio Kopiert pro Layer)
+_JSON:_ (MapLibre-Layer, pro Layer)
 ```
 
 TODO

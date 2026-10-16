@@ -29,7 +29,7 @@ const bboxLoerrach: TopicConfigBbox = [7.63351, 47.5919, 7.72901, 47.67736]
 
 const config = [
   { id: 'roads_bikelanes', bboxes: null, schedule: 'nightly' },
-  { id: 'bikeroutes', bboxes: null, schedule: 'nightly' },
+  { id: 'routes', bboxes: null, schedule: 'nightly' },
   { id: 'bicycleParking', bboxes: null, schedule: 'nightly' },
   { id: 'trafficSigns', bboxes: null, schedule: 'nightly' },
   { id: 'boundaries', bboxes: null, schedule: 'nightly' },

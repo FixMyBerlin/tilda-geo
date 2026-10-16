@@ -13,6 +13,7 @@ import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCu
 import { createSourceKeyAtlasGeo } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
 import { getCachelessTilesUrl } from '@/components/shared/utils/getCachelessTilesUrl'
 import { mapLayerOrderQueryOptions } from '@/server/map-layer-order/mapLayerOrderQueryOptions'
+import { LayersRouteRelationHighlight } from '../../routeRelations/LayersRouteRelationHighlight'
 import { LayerHighlight } from './LayerHighlight'
 import { buildAtlasLayerEntries } from './sortLayers/buildAtlasLayerEntries'
 
@@ -102,6 +103,7 @@ export const LayersAtlasGeo = () => {
       {layerEntries.map(({ highlightLayerId, layerProps }) => (
         <LayerHighlight key={highlightLayerId} {...layerProps} id={highlightLayerId} />
       ))}
+      <LayersRouteRelationHighlight layerEntries={layerEntries} />
     </>
   )
 }

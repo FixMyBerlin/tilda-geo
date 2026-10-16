@@ -1,7 +1,7 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_parking_boundaries } from './mapboxStyles/groups/parking_boundaries'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { layers_parkingLars_boundaries } from './layers/parkingLars_boundaries'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'parkingBoundaries'
 const source = 'lars_parking_stats'
@@ -23,8 +23,8 @@ export const subcat_parkingLarsBoundaries: FileMapDataSubcategory = {
     {
       id: 'boundaries-admin-level-4',
       name: 'Stadt',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_parking_boundaries,
+      layers: wrapSourceLayers({
+        layers: layers_parkingLars_boundaries,
         source,
         sourceLayer,
         additionalFilter: ['match', ['get', 'admin_level'], ['4'], true, false],
@@ -33,8 +33,8 @@ export const subcat_parkingLarsBoundaries: FileMapDataSubcategory = {
     {
       id: 'boundaries-admin-level-9',
       name: 'Bezirke',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_parking_boundaries,
+      layers: wrapSourceLayers({
+        layers: layers_parkingLars_boundaries,
         source,
         sourceLayer,
         additionalFilter: ['match', ['get', 'admin_level'], ['9'], true, false],
@@ -43,8 +43,8 @@ export const subcat_parkingLarsBoundaries: FileMapDataSubcategory = {
     {
       id: 'default', // 'boundaries-admin-level-10',
       name: 'Stadtteile',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_parking_boundaries,
+      layers: wrapSourceLayers({
+        layers: layers_parkingLars_boundaries,
         source,
         sourceLayer,
         additionalFilter: ['match', ['get', 'admin_level'], ['10'], true, false],

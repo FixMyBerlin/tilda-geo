@@ -4,7 +4,7 @@
 
 export const topicIds = [
   'roads_bikelanes',
-  'bikeroutes',
+  'routes',
   'bicycleParking',
   'trafficSigns',
   'boundaries',
@@ -22,7 +22,7 @@ export type TopicSchedule = 'nightly' | 'weekend'
 
 export const topicScheduleById = {
   roads_bikelanes: 'nightly',
-  bikeroutes: 'nightly',
+  routes: 'nightly',
   bicycleParking: 'nightly',
   trafficSigns: 'nightly',
   boundaries: 'nightly',

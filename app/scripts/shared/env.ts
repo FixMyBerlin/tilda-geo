@@ -16,7 +16,3 @@ export const staticDatasetsS3CredentialsSchema = envFullSchema.pick({
 export const maprouletteSchema = envFullSchema.pick({
   MAPROULETTE_API_KEY: true,
 })
-
-export const mapboxTilesetsSchema = envFullSchema.pick({
-  ATLAS_API_KEY: true,
-})

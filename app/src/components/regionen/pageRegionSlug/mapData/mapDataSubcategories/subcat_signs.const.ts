@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { debugLayerStyles } from './mapboxStyles/debugLayerStyles'
+import { debugLayerStyles } from './layers/debugLayerStyles'
 
 const subcatId = 'signs'
 const source = 'atlas_trafficSigns'
@@ -22,7 +22,7 @@ export const subcat_signs: FileMapDataSubcategory = {
         source,
         sourceLayer: sourceLayer,
       }),
-      // layers: mapboxStyleLayers({
+      // layers: wrapSourceLayers({
       //   group: 'atlas_bikeparking_points',
       //   source,
       //   sourceLayer,

@@ -1,7 +1,7 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_atlas_roads_plus_fusswege } from './mapboxStyles/groups/atlas_roads_plus_fusswege'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
-import { structureIconLayers } from './mapboxStyles/structureIconLayers'
+import { layers_roads_plus_fusswege } from './layers/roads_plus_fusswege'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
+import { wayIconLayers } from './layers/wayIconLayers'
 
 const subcatId = 'roads_plus_footways'
 const source = 'atlas_roadsPathClasses'
@@ -18,12 +18,12 @@ export const subcat_roads_plus_footways: FileMapDataSubcategory = {
       id: 'default',
       name: 'Fußweg, Pfad, Sonderweg, u.a.',
       layers: [
-        ...mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_atlas_roads_plus_fusswege,
+        ...wrapSourceLayers({
+          layers: layers_roads_plus_fusswege,
           source,
           sourceLayer,
         }),
-        ...structureIconLayers({ source, sourceLayer }),
+        ...wayIconLayers({ source, sourceLayer }),
       ],
       legends: [
         {

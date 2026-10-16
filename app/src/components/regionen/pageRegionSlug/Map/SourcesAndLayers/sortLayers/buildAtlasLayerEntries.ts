@@ -1,4 +1,5 @@
 import type { MapDataCategoryConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
+import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
 import {
   createLayerKeyAtlasGeo,
@@ -47,6 +48,7 @@ export function buildAtlasLayerEntries({
     string,
     {
       layer: AtlasStyleLayer
+      sourceId: SourcesId
       sourceKey: string
       position: LayerPosition
       visible: boolean
@@ -76,6 +78,7 @@ export function buildAtlasLayerEntries({
           }
           layers.set(layerId, {
             layer,
+            sourceId: sourceData.id,
             sourceKey,
             position: layerPosition({
               layer,
@@ -89,8 +92,12 @@ export function buildAtlasLayerEntries({
     }
   }
 
-  const entries = Array.from(layers, ([layerId, { visible, ...layerConfig }]) => ({
+  const entries = Array.from(layers, ([layerId, { visible, sourceId, ...layerConfig }]) => ({
     layerId,
+    sourceId,
+    sourceKey: layerConfig.sourceKey,
+    sourceLayer: layerConfig.layer['source-layer'],
+    visible,
     position: layerConfig.position,
     // All styles of a subcategory are mounted at once and reuse style layer ids like
     // "structure-icons", so the highlight id comes from the unique layer key.
