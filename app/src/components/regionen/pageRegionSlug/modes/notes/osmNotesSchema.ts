@@ -34,7 +34,7 @@ const osmApiNoteSchema = z.object({
   closed_at: osmApiDateSchemaNullish, // ONLY when `status=closed`
   comment_url: z.url().nullish(), // ONLY when `status=open` `https://api.openstreetmap.org/api/0.6/notes/${number}/comment.json`
   reopen_url: z.url().nullish(), // ONLY when `status=closed` `https://api.openstreetmap.org/api/0.6/notes/${number}/reopen.json`
-  close_url: z.url().nullish(), // ONLY when `status=closed` `https://api.openstreetmap.org/api/0.6/notes/${number}/close.json`
+  close_url: z.url().nullish(), // ONLY when `status=open` `https://api.openstreetmap.org/api/0.6/notes/${number}/close.json`
   comments: z.array(osmNotesCommentSchema),
 })
 
