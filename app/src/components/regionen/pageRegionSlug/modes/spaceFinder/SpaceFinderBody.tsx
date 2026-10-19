@@ -38,8 +38,7 @@ const StatusSection = ({ variant }: { variant: PlanningVariantDetail }) => {
 
 /**
  * Flächenfinder panel body (D5): status line, Faktoren, Anzeige and Auswahl as
- * collapsible sections, not a list. Anzeige appears before the first run only when
- * Eigene Daten are uploaded (that layer toggle alone); the rest needs a complete run.
+ * collapsible sections, not a list. Anzeige needs a complete run and is hidden before.
  */
 export const SpaceFinderBody = ({
   variant,
