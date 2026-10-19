@@ -468,7 +468,11 @@ export function RegionForm(props: Props) {
             </div>
           </AdminFormSection>
 
-          <AdminFormSection id="spaceFinder" title={sectionLabels.spaceFinder}>
+          <AdminFormSection
+            id="spaceFinder"
+            title={sectionLabels.spaceFinder}
+            description="Zusätzlich die Kategorie „poi“ (Orte, Ziele, Grenzen) unter „Kategorien“ aktivieren, sonst können die Zielorte, Haltestellen und Bikesharing, die in die Berechnung eingehen, in der Karte nicht angezeigt werden."
+          >
             <RadioGroup
               inline
               form={form}

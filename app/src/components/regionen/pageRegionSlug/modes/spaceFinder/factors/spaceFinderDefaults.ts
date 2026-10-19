@@ -103,7 +103,7 @@ export const FACTOR_HELP: Record<string, string> = {
   w_transit:
     'Haltestellen von U-Bahn, Straßenbahn, Bus und Bahn sowie Bikesharing-Stationen in der Nähe heben den Bedarf. Je näher, desto höher; Bahnhöfe wirken weiter als Haltestellen, Bushaltestellen und Bikesharing am kleinräumigsten. Das Gewicht bestimmt den Anteil am Grundscore. Unter „ÖPNV-Arten“ steht das Verhältnis von ÖPNV und Bikesharing zueinander: zusammen immer 100 %, wirksam nur in diesem Faktor.',
   w_target:
-    'Gebäude mit Alltagszielen (Grundversorgung, Bildung, Einkauf, Freizeit aus OpenStreetMap) heben den Bedarf in ihrer Nähe — unabhängig davon, wie viele Zielorte in einem Gebäude liegen. Schon ein einzelnes solches Gebäude direkt an der Gebäudekante löst den vollen Zuschlag aus; mit zunehmendem Abstand nimmt er linear ab und ist ab 20 m verbraucht. Auf den Gebäuden selbst entsteht kein Bedarf, er beginnt erst unmittelbar daneben. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen. Unter „Zielort-Arten“ steht das Verhältnis der vier Arten zueinander: zusammen immer 100 %, wirksam nur in diesem Faktor.',
+    'Gebäude mit Alltagszielen (Grundversorgung, Bildung, Einkauf, Freizeit) heben den Bedarf direkt daneben; der Zuschlag nimmt bis 20 m Abstand linear ab. Das Gewicht bestimmt die maximalen Punkte, „Zielort-Arten“ das Verhältnis der vier Arten (zusammen 100 %). Sichtbar in der Karte unter „Orte, Ziele, Grenzen“ → „Quellen & Ziele“.',
   w_fussgaengerzone:
     'An Ecken, wo eine normale Straße auf eine Fußgängerzone trifft, ist der Bedarf besonders hoch. Der volle Zuschlag liegt rund 5–8 m von der Ecke; bis zum Radius fällt er auf null. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen.',
   w_bestand:
