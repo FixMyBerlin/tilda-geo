@@ -473,16 +473,23 @@ export function RegionForm(props: Props) {
             title={sectionLabels.spaceFinder}
             description="Zusätzlich die Kategorie „poi“ (Orte, Ziele, Grenzen) unter „Kategorien“ aktivieren, sonst können die Zielorte, Haltestellen und Bikesharing, die in die Berechnung eingehen, in der Karte nicht angezeigt werden."
           >
-            <RadioGroup
-              inline
-              form={form}
-              name="spaceFinderEnabled"
-              label="Flächenfinder aktiv"
-              items={[
-                { value: 'true', label: 'Ja' },
-                { value: 'false', label: 'Nein' },
-              ]}
-            />
+            <div className={choiceOptionListClassName}>
+              <form.Field name="spaceFinderEnabled">
+                {(field) => (
+                  <ChoiceCheckbox
+                    id="spaceFinderEnabled"
+                    name={field.name}
+                    checked={field.state.value === 'true'}
+                    ariaLabel="Flächenfinder aktiv"
+                    label="Flächenfinder aktiv"
+                    onBlur={field.handleBlur}
+                    onChange={(checked) =>
+                      field.handleChange((_prev) => (checked ? 'true' : 'false') as typeof _prev)
+                    }
+                  />
+                )}
+              </form.Field>
+            </div>
           </AdminFormSection>
         </AdminFormLayout>
       )}
