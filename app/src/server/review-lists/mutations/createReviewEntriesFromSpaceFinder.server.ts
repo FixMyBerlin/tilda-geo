@@ -82,8 +82,8 @@ export async function createReviewEntriesFromSpaceFinder(
 
   if ('listId' in target) await assertListInRegion(target.listId, regionSlug)
 
-  // Namen der Eigene-Daten-Datensätze so, wie der Lauf gerechnet hat (Snapshot, nicht das heutige
-  // Gebiet), damit die Teilscores sie nennen können.
+  // Names of the "Eigene Daten" datasets as the run computed them (snapshot, not today's area),
+  // so the Teilscores can name them.
   const snapshot = parseFactorConfigSnapshot(run.factorConfigSnapshot)
   const eigendatenNames = Object.fromEntries(
     (snapshot.user_datasets ?? []).map((dataset) => [dataset.id, dataset.name]),

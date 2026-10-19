@@ -1,110 +1,110 @@
-# Vegetationsflächen (NDVI)
+# Vegetation areas (NDVI)
 
-On-demand-Erkennung von Vegetationsflächen aus CIR-Luftbildern für das Planungsmodul.
-Pro Planungslauf werden die Flächen berechnet, als eigener Karten-Layer ausgeliefert
-und – sofern als Faktor gewichtet – in den Hexagon-Gesamtscore eingerechnet.
+On-demand detection of vegetation areas from CIR aerial imagery for the planning module.
+Each planning run computes the areas, serves them as a separate map layer and – if
+weighted as a factor – includes them in the hexagon total score.
 
-Kerncode: [`flaechenfinder/vegetation.py`](flaechenfinder/vegetation.py).
+Core code: [`flaechenfinder/vegetation.py`](flaechenfinder/vegetation.py).
 
-## Funktionsweise
+## How it works
 
-1. **Kacheln bestimmen** – aus der Bounding-Box des Studiengebiets werden die
-   überdeckenden CIR-DOP-Kacheln abgeleitet. Kachelraster, CRS und Dateiname
-   kommen aus der jeweiligen Quelle (siehe unten), nicht aus `vegetation.py`.
-2. **NDVI je Kachel** – `NDVI = (NIR − Rot) / (NIR + Rot)` (Band 1 = NIR, Band 2 = Rot),
-   Maske `NDVI > NDVI_MIN`, morphologisches Closing, Polygonisierung, Vereinfachung,
-   Entfernen kleiner Löcher/Flächen.
-3. **Zusammenführen & Clippen** auf das Studiengebiet → GeoDataFrame (EPSG:25832) mit
+1. **Determine tiles** – the CIR DOP tiles covering the study area's bounding box are
+   derived. Tile grid, CRS and file name come from the respective source (see below),
+   not from `vegetation.py`.
+2. **NDVI per tile** – `NDVI = (NIR − Red) / (NIR + Red)` (band 1 = NIR, band 2 = red),
+   mask `NDVI > NDVI_MIN`, morphological closing, polygonization, simplification,
+   removal of small holes/areas.
+3. **Merge & clip** to the study area → GeoDataFrame (EPSG:25832) with
    `geometry`, `ndvi`, `flaeche_m2`.
 
-### Parameter (1:1 aus dem Standalone-Flächenfinder)
+### Parameters (1:1 from the standalone Flächenfinder)
 
-| Parameter             | Wert | Bedeutung                                  |
-| --------------------- | ---- | ------------------------------------------ |
-| `NDVI_MIN`            | 0.1  | Schwellwert Vegetation (≥ Wiese/Buschwerk) |
-| `MORPH_CLOSING_ITER`  | 3    | Lücken ≤ 0,6 m schließen                   |
-| `SIMPLIFY_TOLERANZ_M` | 0.5  | Geometrie-Vereinfachung                    |
-| `MIN_LOCH_M2`         | 20.0 | kleinere Innenlöcher schließen             |
-| `MIN_FLAECHE_M2`      | 5.0  | kleinere Polygone verwerfen                |
+| Parameter             | Value | Meaning                                |
+| --------------------- | ----- | -------------------------------------- |
+| `NDVI_MIN`            | 0.1   | Vegetation threshold (≥ meadow/shrubs) |
+| `MORPH_CLOSING_ITER`  | 3     | Close gaps ≤ 0.6 m                     |
+| `SIMPLIFY_TOLERANZ_M` | 0.5   | Geometry simplification                |
+| `MIN_LOCH_M2`         | 20.0  | Fill smaller interior holes            |
+| `MIN_FLAECHE_M2`      | 5.0   | Drop smaller polygons                  |
 
-## Datenquellen
+## Data sources
 
-Kacheln werden zur Laufzeit per **WMS GetMap** bezogen; jede Quelle ist ein
+Tiles are fetched at runtime via **WMS GetMap**; each source is a
 `CirSource` in [`flaechenfinder/cir_sources.py`](flaechenfinder/cir_sources.py).
-Überall NIR = Band 1, Rot = Band 2, Bodenauflösung 0,2 m.
+Everywhere NIR = band 1, red = band 2, ground resolution 0.2 m.
 
-| Quelle                       | `cir_source` | CRS        | Kachel | Bild         | Format |
+| Source                       | `cir_source` | CRS        | Tile   | Image        | Format |
 | ---------------------------- | ------------ | ---------- | ------ | ------------ | ------ |
 | Bayern DOP20 CIR             | `bayern`     | EPSG:25832 | 1000 m | 5000×5000 px | TIFF   |
 | Brandenburg/Berlin DOP20 CIR | `bb`         | EPSG:25833 | 1000 m | 5000×5000 px | PNG    |
 | Hessen DOP20 CIR             | `hessen`     | EPSG:25832 | 500 m  | 2500×2500 px | TIFF   |
 
-`cir_source: "auto"` (Default) wählt anhand des Studiengebiet-Zentroiden:
-Hessen-Bounding-Box → Hessen, sonst < 12° O → Bayern, ≥ 12° O → Brandenburg/Berlin.
+`cir_source: "auto"` (default) picks by the study area centroid:
+Hessen bounding box → Hessen, otherwise < 12° E → Bayern, ≥ 12° E → Brandenburg/Berlin.
 
-> **Hessen: 500-m-Raster ist Pflicht.** Der MapServer hinter dem HVBG-WMS begrenzt
-> `WIDTH`/`HEIGHT` hart auf **3000 px** und antwortet darüber mit einer
-> ServiceException statt mit einem Bild. Ein 1000-m-Raster bei 0,2 m wären 5000 px –
-> damit schlägt _jede_ Kachel fehl und die Vegetation bleibt landesweit leer.
+> **Hessen: the 500 m grid is mandatory.** The MapServer behind the HVBG WMS hard-limits
+> `WIDTH`/`HEIGHT` to **3000 px** and above that returns a ServiceException instead of
+> an image. A 1000 m grid at 0.2 m would be 5000 px – _every_ tile would fail and
+> vegetation would stay empty statewide.
 
-Heruntergeladene Kacheln werden im Volume `planning_cir` (`/cir`) **gecacht** und
-nicht erneut geladen. Außerhalb der abgedeckten Länder gibt es keine Kacheln →
-Vegetation bleibt leer, das übrige Scoring läuft normal weiter.
+Downloaded tiles are **cached** in the `planning_cir` volume (`/cir`) and not fetched
+again. Outside the covered states there are no tiles → vegetation stays empty, the
+rest of the scoring runs normally.
 
-Pro km² fallen ~100–200 MB an – der erste Lauf eines größeren Gebiets lädt
-entsprechend viel. Ein fehlgeschlagener Lauf wird **nicht** als Cache-Treffer
-wiederverwendet (siehe `_find_reusable_vegetation` in `worker.py`), sonst würde ein
-einzelner WMS-Ausfall alle Folgeläufe derselben Variante leer halten.
+Each km² takes ~100–200 MB – the first run for a larger area downloads accordingly.
+A failed run is **not** reused as a cache hit (see `_find_reusable_vegetation` in
+`worker.py`); otherwise a single WMS outage would keep all later runs of the same
+variant empty.
 
-## Scoring-Integration
+## Scoring integration
 
-- Gewicht `w_vegetation`, Richtung `vegetation_direction` und Toleranzschwelle
-  `vegetation_penalty_threshold_pct` im `factorConfig` des Szenarios
-  (siehe [`flaechenfinder/config.py`](flaechenfinder/config.py)).
-- Vegetation ist **kein additiver Teilscore** mehr, sondern ein **stufenloser
-  Abzug/Bonus** auf den Grundscore (gewichteter Durchschnitt der Kriterien):
-  - **Rampe:** unter `vegetation_penalty_threshold_pct` % Bedeckung (Default 20 %)
-    kein Effekt; darüber linearer Anstieg bis zum Maximum bei 100 % Bedeckung.
-  - **Maximaler Effekt** in Punkten = `w_vegetation × 100` (z. B. `0.3` → bis ±30).
-  - **Richtung:** `negative` (Default) → Abzug (Grünflächen schützen);
-    `positive` → Bonus (Bebauung auf Grün erwünscht).
-  - **Gesamtscore:** `mce_gesamtscore = clamp(base ± Effekt, 0, 100)` – fällt also
-    **nie unter 0** und steigt nie über 100.
-- `score_vegetation` hält den **tatsächlich angewandten Effekt in Punkten**, mit
-  Vorzeichen (`−w_vegetation × 100 … +w_vegetation × 100`); kein additiver
-  0–100-Teilscore, sondern ein Zu-/Abschlag wie `score_bestand`.
-- **Performance:** Der Bedeckungsgrad je Hexagon (Verschneidung Hexagone × Vegetation
-  via Spatial-Join) wird **nur berechnet, wenn `w_vegetation > 0`**. Bei Gewicht 0 dient
-  die Vegetation nur als Anzeige-Layer; `score_vegetation` ist dann `NULL`
-  (Sidebar zeigt „–").
+- Weight `w_vegetation`, direction `vegetation_direction` and tolerance threshold
+  `vegetation_penalty_threshold_pct` in the scenario's `factorConfig`
+  (see [`flaechenfinder/config.py`](flaechenfinder/config.py)).
+- Vegetation is **no longer an additive sub-score** but a **continuous
+  penalty/bonus** on the base score (weighted average of the criteria):
+  - **Ramp:** below `vegetation_penalty_threshold_pct` % coverage (default 20 %)
+    no effect; above it a linear increase up to the maximum at 100 % coverage.
+  - **Maximum effect** in points = `w_vegetation × 100` (e.g. `0.3` → up to ±30).
+  - **Direction:** `negative` (default) → penalty (protect green areas);
+    `positive` → bonus (building on green is desired).
+  - **Total score:** `mce_gesamtscore = clamp(base ± effect, 0, 100)` – so it
+    **never drops below 0** and never exceeds 100.
+- `score_vegetation` holds the **actually applied effect in points**, signed
+  (`−w_vegetation × 100 … +w_vegetation × 100`); not an additive 0–100 sub-score
+  but a bonus/penalty like `score_bestand`.
+- **Performance:** coverage per hexagon (intersection hexagons × vegetation via
+  spatial join) is **only computed when `w_vegetation > 0`**. With weight 0 the
+  vegetation is only a display layer; `score_vegetation` is then `NULL`
+  (sidebar shows „–").
 
-## Speicherung & Tiles
+## Storage & tiles
 
-- Tabelle `planning.scenario_vegetation` (`run_id`, `geom` MultiPolygon/3857, `ndvi`,
-  `flaeche_m2`) – pro Lauf, unveränderlich. Schema: [`sql/schema.sql`](sql/schema.sql).
-- Martin-Tile-Funktion `public.planning_vegetation(z,x,y,{run_id})` – siehe
+- Table `planning.scenario_vegetation` (`run_id`, `geom` MultiPolygon/3857, `ndvi`,
+  `flaeche_m2`) – per run, immutable. Schema: [`sql/schema.sql`](sql/schema.sql).
+- Martin tile function `public.planning_vegetation(z,x,y,{run_id})` – see
   [`sql/martin_functions.sql`](sql/martin_functions.sql).
-- `score_vegetation` ist zusätzlich Spalte in `planning.scenario_hexagons` und Teil der
-  `planning_hexagons`-Tile (Sidebar-Inspektion).
+- `score_vegetation` is also a column in `planning.scenario_hexagons` and part of the
+  `planning_hexagons` tile (sidebar inspection).
 
 ## Frontend
 
-- **Layer-Toggle** „Vegetationsflächen" im Planungs-Panel (transienter View-State im
-  Zustand-Store `vegetationVisible` in [`space-finder-boundary-store.ts`](../app/src/components/regionen/pageRegionSlug/hooks/mapState/space-finder-boundary-store.ts), bewusst **nicht** in der URL).
-- **Faktor-Editor**: Gewicht „Vegetation" + Richtungs-Umschalter (Grün schützen / bevorzugen).
-- **Sidebar-Inspektion**: `score_vegetation` als Teilscore beim Gesamtscore.
+- **Layer toggle** "Vegetationsflächen" in the planning panel (transient view state in
+  the Zustand store `vegetationVisible` in [`space-finder-boundary-store.ts`](../app/src/components/regionen/pageRegionSlug/hooks/mapState/space-finder-boundary-store.ts), deliberately **not** in the URL).
+- **Factor editor**: weight "Vegetation" + direction toggle ("Grün schützen" / "bevorzugen").
+- **Sidebar inspection**: `score_vegetation` as a Teilscore next to the total score.
 
-## Konfiguration (Env)
+## Configuration (env)
 
-| Variable                          | Default              | Zweck                           |
-| --------------------------------- | -------------------- | ------------------------------- |
-| `PLANNING_CIR_DIR`                | `/cir`               | Cache-Verzeichnis der Kacheln   |
-| `PLANNING_CIR_DOWNLOAD`           | `1`                  | Auto-Download (`0` = nur Cache) |
-| `PLANNING_CIR_WMS_URL`            | Bayern-WMS           | WMS-Endpunkt                    |
-| `PLANNING_CIR_WMS_LAYER`          | `by_dop20cir_bayern` | WMS-Layer                       |
-| `PLANNING_CIR_DOWNLOAD_TIMEOUT_S` | `180`                | Timeout je Kachel               |
+| Variable                          | Default              | Purpose                          |
+| --------------------------------- | -------------------- | -------------------------------- |
+| `PLANNING_CIR_DIR`                | `/cir`               | Tile cache directory             |
+| `PLANNING_CIR_DOWNLOAD`           | `1`                  | Auto-download (`0` = cache only) |
+| `PLANNING_CIR_WMS_URL`            | Bayern WMS           | WMS endpoint                     |
+| `PLANNING_CIR_WMS_LAYER`          | `by_dop20cir_bayern` | WMS layer                        |
+| `PLANNING_CIR_DOWNLOAD_TIMEOUT_S` | `180`                | Timeout per tile                 |
 
-## Abhängigkeiten
+## Dependencies
 
-`rasterio` (CIR-Kacheln lesen), `scipy` (Closing), `geopandas`/`shapely` (Geometrien).
-Das Image benötigt `libexpat1` (GDAL-Laufzeit) – siehe `planning-worker.Dockerfile`.
+`rasterio` (read CIR tiles), `scipy` (closing), `geopandas`/`shapely` (geometries).
+The image needs `libexpat1` (GDAL runtime) – see `planning-worker.Dockerfile`.

@@ -1,37 +1,37 @@
-# MCE-Scoring
+# MCE scoring
 
-Wie aus dem H3-Hexagon-Gitter der Gesamtscore je Hexagon berechnet wird.
-Kerncode: [`flaechenfinder/scorer.py`](flaechenfinder/scorer.py)
+How the total score per hexagon is computed from the H3 hexagon grid.
+Core code: [`flaechenfinder/scorer.py`](flaechenfinder/scorer.py)
 (`run_flaechenfinder()`).
 
-## Ablauf
+## Steps
 
-1. **H3-Gitter generieren** – das Studiengebiet wird mit H3-Hexagonen in Res. 13
-   (`BASE_H3_RES`) überdeckt (`h3.geo_to_cells`).
-2. **Teilscores je Hexagon** (0–100, aus Distanz zu Layern bzw. Attributen):
-   - `score_radweg` – Nähe zu `public.bikelanes`
-   - `score_zielorte` – Nähe zu den im Szenario konfigurierten `targets`
-   - `score_hangneigung` – DEM-Hangneigung (`slope_score`)
-   - `score_oepnv` – Nähe zu ÖPNV-Haltestellen und Bikesharing. Zwei Gruppen: „ÖPNV" (max. über
-     5 Typen: U-Bahn-Eingang, Straßenbahn, Bus, Bahnhof, Bahnhofsgebäude) und „Bikesharing"
-     (eigener Typ, gleicher Radius wie Bushaltestellen). Ihr Verhältnis zueinander ist über
-     `oepnv_category_shares` einstellbar (Summe 100 %, normiert aufs Maximum); kombiniert wird
-     mit der bei diesem Anteil gewichteten Summe, gekappt bei 100 (siehe
+1. **Generate the H3 grid** – the study area is covered with H3 hexagons at res. 13
+   (`BASE_H3_RES`) (`h3.geo_to_cells`).
+2. **Sub-scores per hexagon** (0–100, from distance to layers or attributes):
+   - `score_radweg` – proximity to `public.bikelanes`
+   - `score_zielorte` – proximity to the `targets` configured in the scenario
+   - `score_hangneigung` – DEM slope (`slope_score`)
+   - `score_oepnv` – proximity to public transport stops and bike sharing. Two groups: "ÖPNV" (max.
+     over 5 types: subway entrance, tram, bus, station, station building) and "Bikesharing"
+     (own type, same radius as bus stops). Their ratio is adjustable via
+     `oepnv_category_shares` (sum 100 %, normalized to the maximum); they are combined as the
+     sum weighted by these shares, capped at 100 (see
      `oepnv_category_factors`/`scorer.py`)
-3. **Basis-Score** – gewichtete Summe der Teilscores (`weights` im
-   `factorConfig`, siehe [`flaechenfinder/config.py`](flaechenfinder/config.py)).
-4. **Vegetations-Effekt** – kein additiver Teilscore, sondern stufenloser
-   Abzug/Bonus auf den Basis-Score (Details: [`VEGETATION.md`](VEGETATION.md)).
-   `mce_gesamtscore = clamp(base ± Effekt, 0, 100)`.
-5. **Harte Ausschlüsse** – unabhängig vom gewichteten Score wird `mce_gesamtscore`
-   auf 0 gesetzt, wenn eines zutrifft:
-   - Hangneigung zu steil (`score_hangneigung == 0`)
-   - Radweg weiter als `max_cyclepath_dist_m` entfernt (Default 150 m)
-   - Gebäudeüberschneidung (`gebaeude`)
-6. **Klassifikation** – `eignungsklasse` wird aus `mce_gesamtscore` gebinnt
+3. **Base score** – weighted sum of the sub-scores (`weights` in the
+   `factorConfig`, see [`flaechenfinder/config.py`](flaechenfinder/config.py)).
+4. **Vegetation effect** – not an additive sub-score but a continuous
+   penalty/bonus on the base score (details: [`VEGETATION.md`](VEGETATION.md)).
+   `mce_gesamtscore = clamp(base ± effect, 0, 100)`.
+5. **Hard exclusions** – regardless of the weighted score, `mce_gesamtscore`
+   is set to 0 if any of these applies:
+   - slope too steep (`score_hangneigung == 0`)
+   - cycleway farther away than `max_cyclepath_dist_m` (default 150 m)
+   - building overlap (`gebaeude`)
+6. **Classification** – `eignungsklasse` is binned from `mce_gesamtscore`
    (`_KLASSE_BINS`/`_KLASSE_LABELS`):
 
-   | Score  | Klasse         |
+   | Score  | Class          |
    | ------ | -------------- |
    | 0      | ausgeschlossen |
    | 0–40   | schlecht       |
@@ -39,12 +39,11 @@ Kerncode: [`flaechenfinder/scorer.py`](flaechenfinder/scorer.py)
    | 60–80  | gut            |
    | 80–100 | sehr gut       |
 
-## Zoom-Aggregation (Darstellung)
+## Zoom aggregation (display)
 
-Für niedrige Zoomstufen (z < 16) werden die feinen Res-13-Hexagone zusätzlich
-per `aggregate_hexagons()` auf H3-Res. 11 (`AGG_H3_RES`) zusammengefasst – reine
-Mittelwertbildung der Score-Spalten je `h3.cell_to_parent`, `eignungsklasse` wird
-daraus neu abgeleitet. Kein Re-Scoring, keine Spatial-Joins. Die Zoom-Verzweigung
-(`z >= 16 → Res 13, sonst Res 11`) muss mit der Martin-Funktion
-`planning_hexagons` in [`sql/martin_functions.sql`](sql/martin_functions.sql)
-übereinstimmen.
+For low zoom levels (z < 16) the fine res-13 hexagons are additionally
+aggregated to H3 res. 11 (`AGG_H3_RES`) via `aggregate_hexagons()` – a plain
+mean of the score columns per `h3.cell_to_parent`; `eignungsklasse` is derived
+again from that. No re-scoring, no spatial joins. The zoom branch
+(`z >= 16 → res 13, otherwise res 11`) must match the Martin function
+`planning_hexagons` in [`sql/martin_functions.sql`](sql/martin_functions.sql).

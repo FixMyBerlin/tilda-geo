@@ -10,9 +10,9 @@ import {
 } from './weightScale'
 
 /**
- * Erklärt beide Rechenarten einmal über dem Faktorenblock: Kriterien teilen sich den Grundscore,
- * Zu-/Abschläge verschieben ihn danach. Ohne diese Unterscheidung ist nicht ablesbar, warum die
- * einen in Prozent und die anderen in Punkten eingestellt werden.
+ * Explains both calculation kinds once above the factor block: criteria share the base score,
+ * modifiers (bonuses/penalties) shift it afterwards. Without this distinction it is unclear why
+ * some are set in percent and others in points.
  */
 export const WeightScaleLegend = () => (
   <div className="mb-2 space-y-1 rounded border border-gray-200 bg-gray-50 px-2 py-1.5 text-[11px] leading-tight text-gray-500">
@@ -28,7 +28,7 @@ export const WeightScaleLegend = () => (
   </div>
 )
 
-/** Wert-Chip rechts neben dem Faktornamen; bei 0 gedämpft mit Hinweis „geht nicht ein“. */
+/** Value chip to the right of the factor name; muted at 0 with the hint „geht nicht ein“. */
 const FactorBadge = ({
   value,
   muted,
@@ -87,9 +87,9 @@ const FactorRow = ({
 )
 
 /**
- * Platzhalter für einen angekündigten, aber noch nicht integrierten Faktor (z. B. Bewohnerbedarf
- * aus Zensusdaten). Zeigt Label, Info-Tooltip und einen "bald verfügbar"-Hinweis statt eines
- * Reglers — der Faktor lässt sich noch nicht einstellen und fließt in keinen Score ein.
+ * Placeholder for an announced but not yet integrated factor (e.g. resident demand from census
+ * data). Shows label, info tooltip and a "bald verfügbar" hint instead of a slider — the factor
+ * cannot be configured yet and does not feed into any score.
  */
 export const ComingSoonFactorRow = ({ label, info }: { label: string; info?: React.ReactNode }) => (
   <FactorRow
@@ -107,10 +107,10 @@ export const ComingSoonFactorRow = ({ label, info }: { label: string; info?: Rea
 )
 
 /**
- * Zeile für einen Faktor, der grundsätzlich implementiert ist, aber für dieses Planungsgebiet
- * keine Datengrundlage hat (z. B. Parken/Kreuzungen/Fußgängerzonen außerhalb der
- * Parking-Topic-Bboxen, siehe `parkingDataAvailability.server.ts`). Wie `ComingSoonFactorRow`,
- * nur mit anderem Hinweistext — der Faktor ist implementiert, nur hier ohne Daten.
+ * Row for a factor that is implemented but has no data for this Planungsgebiet (e.g.
+ * parking/intersections/pedestrian zones outside the parking topic bboxes, see
+ * `parkingDataAvailability.server.ts`). Like `ComingSoonFactorRow`, just with a different hint
+ * text — the factor is implemented, only without data here.
  */
 export const UnavailableFactorRow = ({
   label,
@@ -134,9 +134,9 @@ export const UnavailableFactorRow = ({
 )
 
 /**
- * Ein Kriterium: Wichtigkeit 0–10 als Regler, angezeigt wird der daraus abgeleitete Anteil am
- * Grundscore. Die Regler sind voneinander unabhängig — wird einer erhöht, sinken die Anteile der
- * übrigen automatisch, weil der Scorer durch die Gewichtssumme teilt.
+ * A criterion: importance 0–10 as a slider; shown is the derived share of the base score. The
+ * sliders are independent — raising one automatically lowers the others' shares because the
+ * scorer divides by the weight sum.
  */
 export const CriterionSlider = ({
   label,
@@ -189,9 +189,9 @@ export const CriterionSlider = ({
 }
 
 /**
- * Ein Zu-/Abschlag: eingestellt wird direkt der maximale Effekt in Punkten, den der Faktor auf
- * den Grundscore addiert (`positive`) bzw. von ihm abzieht (`negative`) — genau die Größe, mit
- * der scorer.py rechnet (`w × 100`).
+ * A modifier (bonus/penalty): set directly as the maximum effect in points that the factor adds
+ * to (`positive`) or subtracts from (`negative`) the base score — exactly the quantity scorer.py
+ * uses (`w × 100`).
  */
 export const ModifierSlider = ({
   label,

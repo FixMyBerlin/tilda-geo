@@ -1,13 +1,11 @@
-"""PostGIS-Datenquelle für den Flächenfinder.
+"""PostGIS data source for the Flächenfinder.
 
-Ersetzt den PBF-basierten OsmPbfLoader: liest Eingangsgeometrien direkt aus
-tildas bereits prozessiertem `public`-Schema (EPSG:3857). Damit entfällt das
-Parsen des 4,4 GB großen OSM-PBF und es werden dieselben Daten wie im tilda-Viewer
-genutzt.
+Replaces the PBF-based OsmPbfLoader: reads input geometries directly from
+tilda's already processed `public` schema (EPSG:3857). This avoids parsing the
+4.4 GB OSM PBF and uses the same data as the tilda viewer.
 
-Modularer Erweiterungspunkt: `_TRANSIT_TAG_MAP` bildet OSM-Tag-Dicts auf
-DB-Kategorien in `public."publicTransport"` ab. Für nicht zugeordnete Tags
-wird ein leeres GeoDataFrame zurückgegeben.
+Extension point: `_TRANSIT_TAG_MAP` maps OSM tag dicts to DB categories in
+`public."publicTransport"`. Unmapped tags return an empty GeoDataFrame.
 """
 from __future__ import annotations
 
@@ -66,9 +64,9 @@ class PostgisLoader:
         self._cache: dict = {}
 
     def _read_table(self, table: str, polygon_4326: BaseGeometry, where: str = "") -> gpd.GeoDataFrame:
-        """Liest Geometrien einer `public`-Tabelle, die die Studienfläche schneiden.
+        """Read geometries of a `public` table that intersect the study area.
 
-        `polygon_4326` ist in EPSG:4326; `public.*.geom` liegt in EPSG:3857.
+        `polygon_4326` is in EPSG:4326; `public.*.geom` is in EPSG:3857.
         """
         cache_key = (table, where, tuple(round(b, 6) for b in polygon_4326.bounds))
         if cache_key in self._cache:
@@ -86,14 +84,14 @@ class PostgisLoader:
             if gdf.crs is None:
                 gdf = gdf.set_crs("EPSG:3857")
             self._cache[cache_key] = gdf
-            print(f"   ✓ PostGIS: {len(gdf)} Features aus public.{table}")
+            print(f"   ✓ PostGIS: {len(gdf)} features from public.{table}")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS-Abfrage public.{table} fehlgeschlagen: {e}")
+            print(f"   ⚠️  PostGIS query public.{table} failed: {e}")
             return _empty()
 
     def load_buildings(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
-        """Gebäudepolygone aus `public._buildings` (EPSG:5243 → gibt EPSG:4326 zurück)."""
+        """Building polygons from `public._buildings` (EPSG:5243 → returns EPSG:4326)."""
         wkt = polygon_4326.wkt
         sql = f"""
             SELECT ST_Transform(geom, 4326) AS geom
@@ -104,18 +102,18 @@ class PostgisLoader:
             gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
             if gdf.crs is None:
                 gdf = gdf.set_crs("EPSG:4326")
-            print(f"   ✓ PostGIS: {len(gdf)} Gebäude aus public._buildings")
+            print(f"   ✓ PostGIS: {len(gdf)} buildings from public._buildings")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS-Abfrage public._buildings fehlgeschlagen: {e}")
+            print(f"   ⚠️  PostGIS query public._buildings failed: {e}")
             return _empty("EPSG:4326")
 
     def load_train_station_buildings(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
-        """Bahnhofsgebäude (building=train_station) aus `public._buildings_train_station`.
+        """Train station buildings (building=train_station) from `public._buildings_train_station`.
 
-        Prozessierungsseitige `_`-Tabelle (siehe processing/topics/landcover/buildings/
-        buildings_train_station.lua), EPSG:5243 wie `_buildings`. Eigene Tabelle statt
-        `_buildings`, da diese keine Tags speichert und Gebäude < 100 m² herausfiltert.
+        Processing-side `_` table (see processing/topics/landcover/buildings/
+        buildings_train_station.lua), EPSG:5243 like `_buildings`. Separate table instead of
+        `_buildings` because that one stores no tags and drops buildings < 100 m².
         """
         wkt = polygon_4326.wkt
         sql = f"""
@@ -127,10 +125,10 @@ class PostgisLoader:
             gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
             if gdf.crs is None:
                 gdf = gdf.set_crs("EPSG:4326")
-            print(f"   ✓ PostGIS: {len(gdf)} Bahnhofsgebäude aus public._buildings_train_station")
+            print(f"   ✓ PostGIS: {len(gdf)} train station buildings from public._buildings_train_station")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS-Abfrage public._buildings_train_station fehlgeschlagen: {e}")
+            print(f"   ⚠️  PostGIS query public._buildings_train_station failed: {e}")
             return _empty("EPSG:4326")
 
     def load_building_entrances(
@@ -138,17 +136,17 @@ class PostgisLoader:
         polygon_4326: BaseGeometry,
         kinds: tuple[str, ...] = ("yes", "main", "home", "staircase"),
     ) -> gpd.GeoDataFrame:
-        """Gebäudeeingänge (`entrance=*`) aus `public._building_entrances`.
+        """Building entrances (`entrance=*`) from `public._building_entrances`.
 
-        Prozessierungsseitige `_`-Tabelle (siehe processing/topics/landcover/buildings/
-        building_entrances.lua), EPSG:5243 wie `_buildings`. Die Tabelle enthält alle
-        entrance-Werte; `kinds` filtert daraus. Default sind die für Bewohner relevanten
-        Eingänge: `yes`/`main` plus `home`/`staircase`, die in DE an Wohnblöcken den
-        Regelfall bilden. `kinds=()` liefert alle (inkl. `service`, `emergency`).
+        Processing-side `_` table (see processing/topics/landcover/buildings/
+        building_entrances.lua), EPSG:5243 like `_buildings`. The table holds all
+        entrance values; `kinds` filters them. Default is the entrances relevant to
+        residents: `yes`/`main` plus `home`/`staircase`, which are the norm on residential
+        blocks in Germany. `kinds=()` returns all (incl. `service`, `emergency`).
 
-        Gibt `geom` (EPSG:4326) und die Spalte `entrance` zurück. Die Tabelle entsteht im
-        Weekend-Topic `landcover`; fehlt sie (Instanz ohne landcover-Lauf), kommt ein leeres
-        GeoDataFrame zurück – wie bei `load_train_station_buildings`.
+        Returns `geom` (EPSG:4326) and the `entrance` column. The table is built by the
+        weekend topic `landcover`; if it is missing (instance without a landcover run), an
+        empty GeoDataFrame is returned – like `load_train_station_buildings`.
         """
         wkt = polygon_4326.wkt
         kind_filter = ""
@@ -164,47 +162,46 @@ class PostgisLoader:
             gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
             if gdf.crs is None:
                 gdf = gdf.set_crs("EPSG:4326")
-            print(f"   ✓ PostGIS: {len(gdf)} Gebäudeeingänge aus public._building_entrances")
+            print(f"   ✓ PostGIS: {len(gdf)} building entrances from public._building_entrances")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS-Abfrage public._building_entrances fehlgeschlagen: {e}")
+            print(f"   ⚠️  PostGIS query public._building_entrances failed: {e}")
             return _empty("EPSG:4326")
 
     def load_cycleways(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
-        """Radwege aus `public.bikelanes` (ersetzt den PBF-Pfad)."""
+        """Cycleways from `public.bikelanes` (replaces the PBF path)."""
         gdf = self._read_table("bikelanes", polygon_4326)
         return gdf.to_crs("EPSG:4326") if len(gdf) else _empty("EPSG:4326")
 
     def load_subway_entrances(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
-        """U-Bahn-Eingänge (railway=subway_entrance) aus `public._publicTransport_entrances`.
+        """Subway entrances (railway=subway_entrance) from `public._publicTransport_entrances`.
 
-        Prozessierungsseitige `_`-Tabelle (siehe processing/topics/publicTransport/
-        public_transport_entrances.lua), EPSG:3857 wie die publicTransport-Haupttabelle.
-        Ersetzt den früheren Stopgap, der stattdessen den Stationspunkt
-        (category='subway_station') gescort hat.
+        Processing-side `_` table (see processing/topics/publicTransport/
+        public_transport_entrances.lua), EPSG:3857 like the main publicTransport table.
+        Replaces the earlier stopgap that scored the station point
+        (category='subway_station') instead.
         """
         gdf = self._read_table("_publicTransport_entrances", polygon_4326)
         return gdf.to_crs("EPSG:4326") if len(gdf) else _empty("EPSG:4326")
 
     def load_squares(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
-        """Platzflächen (place=square) aus `public._places_squares` (für den Platz-Bonus/Abschlag).
+        """Square areas (place=square) from `public._places_squares` (for the square bonus/penalty).
 
-        Prozessierungsseitige `_`-Tabelle (siehe processing/topics/places/places_squares.lua),
-        EPSG:3857 wie die publicTransport-Haupttabelle. MVP: nur geschlossene Ways, keine
-        Multipolygon-Relationen (analog zur Fußgängerzonen-MVP-Entscheidung).
+        Processing-side `_` table (see processing/topics/places/places_squares.lua),
+        EPSG:3857 like the main publicTransport table. MVP: closed ways only, no
+        multipolygon relations (same as the pedestrian zone MVP decision).
         """
         gdf = self._read_table("_places_squares", polygon_4326)
         return gdf.to_crs("EPSG:4326") if len(gdf) else _empty("EPSG:4326")
 
     def load_bikesharing(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
-        """Bikesharing-Stationen (`*=bicycle_rental`) aus `public."poiClassification"`.
+        """Bike sharing stations (`*=bicycle_rental`) from `public."poiClassification"`.
 
-        Bikesharing liegt nicht in `publicTransport`, sondern als POI in
-        `poiClassification` – deshalb eigener Loader statt eines Eintrags in
-        `_TRANSIT_TAG_MAP`. Gefiltert wird über `tags->>'type'`, das das Topic als
-        `<osm-key>-bicycle_rental` ablegt (siehe processing/topics/poiClassification/
-        helper/result_tags.lua); dieselben drei Werte filtert auch der Kartenlayer
-        (`subcat_poi_plus_busStops.const.ts`).
+        Bike sharing is not in `publicTransport` but a POI in `poiClassification` –
+        hence a separate loader instead of an entry in `_TRANSIT_TAG_MAP`. Filters on
+        `tags->>'type'`, which the topic stores as `<osm-key>-bicycle_rental` (see
+        processing/topics/poiClassification/helper/result_tags.lua); the map layer
+        filters the same three values (`subcat_poi_plus_busStops.const.ts`).
         """
         types = ("amenity-bicycle_rental", "tourism-bicycle_rental", "leisure-bicycle_rental")
         types_sql = ", ".join(f"'{_sql_literal(t)}'" for t in types)
@@ -215,21 +212,21 @@ class PostgisLoader:
     def load_intersection_corners(
         self, polygon_4326: BaseGeometry, road_classes: list[str] | None = None
     ) -> gpd.GeoDataFrame:
-        """Bordstein-Eckpunkte an Straßenkreuzungen (für den Kreuzungs-Bonus).
+        """Kerb corner points at road intersections (for the intersection bonus).
 
-        Wiederverwendet die vom Parking-Topic berechneten Ecken:
-        `_parking_intersection_corners` ist der Schnittpunkt der beiden Kerbs
-        (= um die halbe – aus OSM `width` bzw. Klassen-Fallback approximierte –
-        Straßenbreite versetzten Mittellinien = Außenkanten) an Kreuzungsknoten.
-        Wir filtern auf die gewünschten Straßenklassen: BEIDE an der Ecke
-        beteiligten Straßen müssen in `road_classes` liegen.
+        Reuses the corners computed by the parking topic:
+        `_parking_intersection_corners` is the intersection of the two kerbs
+        (= centrelines offset by half the road width – approximated from OSM `width`
+        or a class fallback – i.e. the outer edges) at intersection nodes.
+        We filter on the requested road classes: BOTH roads at the corner
+        must be in `road_classes`.
 
-        Abhängigkeit: die `_parking_*`-Tabellen existieren nur, wenn das
-        Parking-Topic für die Region prozessiert wurde. Fehlen sie, wird ein
-        leeres GeoDataFrame zurückgegeben (der Faktor trägt dann 0 bei) – analog
-        zum graceful Fallback bei fehlenden CIR-Kacheln in der Vegetation.
+        Dependency: the `_parking_*` tables only exist if the parking topic was
+        processed for the region. If missing, an empty GeoDataFrame is returned
+        (the factor then contributes 0) – like the graceful fallback for missing
+        CIR tiles in vegetation.
 
-        Geometrie liegt in EPSG:5243; Rückgabe in EPSG:4326.
+        Geometry is in EPSG:5243; returned in EPSG:4326.
         """
         classes = road_classes or [
             "primary", "secondary", "tertiary", "residential", "living_street",
@@ -251,31 +248,30 @@ class PostgisLoader:
             gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
             if gdf.crs is None:
                 gdf = gdf.set_crs("EPSG:4326")
-            print(f"   ✓ PostGIS: {len(gdf)} Kreuzungs-Ecken aus _parking_intersection_corners")
+            print(f"   ✓ PostGIS: {len(gdf)} intersection corners from _parking_intersection_corners")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS-Abfrage _parking_intersection_corners fehlgeschlagen: {e}")
+            print(f"   ⚠️  PostGIS query _parking_intersection_corners failed: {e}")
             return _empty("EPSG:4326")
 
     def load_pedestrian_intersection_corners(
         self, polygon_4326: BaseGeometry, road_classes: list[str] | None = None
     ) -> gpd.GeoDataFrame:
-        """Bordstein-Ecken, wo eine Straße auf eine Fußgängerzone trifft.
+        """Kerb corners where a road meets a pedestrian zone.
 
-        Wie `load_intersection_corners`, aber mit anderem Klassen-Filter: an der
-        Ecke muss die EINE beteiligte Straße in `road_classes` (die üblichen
-        Straßenkategorien) liegen und die ANDERE eine Fußgängerzone
-        (`tags->>'road' = 'pedestrian'`) sein. Reine Fußgängerzonen-Ecken (beide
-        Seiten `pedestrian`) und normale Straßenkreuzungen werden ausgeschlossen.
+        Like `load_intersection_corners`, but with a different class filter: ONE
+        road at the corner must be in `road_classes` (the usual road categories)
+        and the OTHER a pedestrian zone (`tags->>'road' = 'pedestrian'`).
+        Pure pedestrian zone corners (both sides `pedestrian`) and regular road
+        intersections are excluded.
 
-        Datengrundlage: lineare `highway=pedestrian` liegen in `_parking_roads`
-        (nur `area=yes`-Polygone fehlen) und erzeugen über den regulären
-        Kerb-/Kreuzungs-Mechanismus des Parking-Topics Ecken in
-        `_parking_intersection_corners`. Der Ecken-Datensatz selbst muss dafür
-        nicht geändert werden.
+        Data basis: linear `highway=pedestrian` ways are in `_parking_roads`
+        (only `area=yes` polygons are missing) and produce corners in
+        `_parking_intersection_corners` via the parking topic's regular
+        kerb/intersection mechanism. The corner dataset itself needs no changes.
 
-        Abhängigkeit + Fallback identisch zu `load_intersection_corners`.
-        Geometrie liegt in EPSG:5243; Rückgabe in EPSG:4326.
+        Dependency + fallback same as `load_intersection_corners`.
+        Geometry is in EPSG:5243; returned in EPSG:4326.
         """
         classes = road_classes or [
             "primary", "secondary", "tertiary", "residential", "living_street",
@@ -299,31 +295,30 @@ class PostgisLoader:
             gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
             if gdf.crs is None:
                 gdf = gdf.set_crs("EPSG:4326")
-            print(f"   ✓ PostGIS: {len(gdf)} Fußgängerzonen-Ecken aus _parking_intersection_corners")
+            print(f"   ✓ PostGIS: {len(gdf)} pedestrian zone corners from _parking_intersection_corners")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS-Abfrage _parking_intersection_corners (Fußgängerzone) fehlgeschlagen: {e}")
+            print(f"   ⚠️  PostGIS query _parking_intersection_corners (pedestrian zone) failed: {e}")
             return _empty("EPSG:4326")
 
     def load_roads(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
-        """Straßen-Linien mit Breite (für den Fahrbahnen-Ausschluss).
+        """Road lines with width (for the carriageway exclusion).
 
-        Liest ALLE Zeilen aus `public._parking_roads` (inkl. Service-Wegen/
-        Zufahrten/Tracks, keine Klassenfilterung) mit der bereits vom
-        Parking-Topic berechneten Breite (`tags->>'width'`, siehe
-        `road_width_tags.lua` — löst OSM-`width`-Tag oder einen
-        Highway-Typ/Oneway-Fallback auf, ist praktisch immer gesetzt).
+        Reads ALL rows from `public._parking_roads` (incl. service ways/
+        driveways/tracks, no class filter) with the width already computed by
+        the parking topic (`tags->>'width'`, see `road_width_tags.lua` — resolves
+        the OSM `width` tag or a highway type/oneway fallback, practically always set).
 
-        Brücken/Tunnel (`tags->>'bridge'`/`tags->>'tunnel'` = 'yes', siehe
-        `result_tags.lua`) werden ausgeschlossen: dort liegt die Fahrbahn nicht
-        auf der Oberfläche, eine Bebauung darunter/daneben ist grundsätzlich
-        möglich. `IS DISTINCT FROM 'yes'` statt `<> 'yes'`, da beide Tags meist
-        fehlen (NULL) und `NULL <> 'yes'` wieder NULL ergäbe (Zeile fiele aus
-        dem WHERE raus statt eingeschlossen zu bleiben).
+        Bridges/tunnels (`tags->>'bridge'`/`tags->>'tunnel'` = 'yes', see
+        `result_tags.lua`) are excluded: the carriageway is not at ground level
+        there, so building beneath/next to it is possible in principle.
+        `IS DISTINCT FROM 'yes'` instead of `<> 'yes'` because both tags are
+        usually missing (NULL) and `NULL <> 'yes'` yields NULL (the row would
+        drop out of the WHERE instead of staying included).
 
-        Abhängigkeit + Fallback identisch zu `load_intersection_corners`:
-        `_parking_roads` existiert nur, wenn das Parking-Topic für die Region
-        prozessiert wurde. Geometrie liegt in EPSG:5243; Rückgabe in EPSG:4326.
+        Dependency + fallback same as `load_intersection_corners`:
+        `_parking_roads` only exists if the parking topic was processed for the
+        region. Geometry is in EPSG:5243; returned in EPSG:4326.
         """
         wkt = polygon_4326.wkt
         sql = f"""
@@ -337,42 +332,42 @@ class PostgisLoader:
             gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
             if gdf.crs is None:
                 gdf = gdf.set_crs("EPSG:4326")
-            print(f"   ✓ PostGIS: {len(gdf)} Straßen aus _parking_roads")
+            print(f"   ✓ PostGIS: {len(gdf)} roads from _parking_roads")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS-Abfrage _parking_roads fehlgeschlagen: {e}")
+            print(f"   ⚠️  PostGIS query _parking_roads failed: {e}")
             return _empty("EPSG:4326")
 
     def load_car_parking(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
-        """KFZ-Parkflächen als Umwidmungs-Kandidaten (für den Parken-Bonus).
+        """Car parking as conversion candidates (for the parking bonus).
 
-        Wiederverwendet die vom Parking-Topic berechneten öffentlichen Tabellen:
-        `public.parkings` (On-Street-Parkstreifen als Linien) und
-        `public.parkings_separate` (Off-Street-Parkflächen als Polygone), als
-        Union. Es zählt nur tatsächlich vorhandenes/erlaubtes Parken: für die
-        Linien `capacity > 0` und kein Halte-/Parkverbot (`condition_category`
-        ≠ no_parking/no_stopping/no_standing); für die Flächen fehlt meist ein
-        `capacity`-Tag, daher zählen sie schon ohne den Tag (nur ein explizit
-        gesetztes `capacity` ≤ 0 schließt aus). Beide Geometrietypen werden
-        zusätzlich nach `access` gefiltert: `no` und `customers` sind
-        ausgeschlossen (nicht öffentlich nutzbar für eine Umwidmung).
+        Reuses the public tables computed by the parking topic:
+        `public.parkings` (on-street parking lanes as lines) and
+        `public.parkings_separate` (off-street parking areas as polygons), as a
+        union. Only parking that actually exists/is allowed counts: for the
+        lines `capacity > 0` and no stopping/parking ban (`condition_category`
+        ≠ no_parking/no_stopping/no_standing); the areas mostly lack a
+        `capacity` tag, so they count without it (only an explicitly set
+        `capacity` ≤ 0 excludes them). Both geometry types are also filtered
+        by `access`: `no` and `customers` are excluded (not publicly usable
+        for a conversion).
 
-        Der `capacity`-JSONB-Wert ist nicht garantiert numerisch, daher wird per
-        Regex auf eine Zahl geprüft, bevor gecastet wird (sonst würfe der Cast).
-        Wichtig: `NULLIF(...) ~ regex` liefert bei fehlendem Tag SQL-`NULL`
-        (nicht `FALSE`), daher braucht die Fläche-Bedingung eine explizite
-        `IS NULL`-Klausel statt eines simplen `NOT`.
+        The `capacity` JSONB value is not guaranteed numeric, so a regex checks
+        for a number before casting (the cast would throw otherwise).
+        Note: `NULLIF(...) ~ regex` yields SQL `NULL` (not `FALSE`) for a
+        missing tag, so the area condition needs an explicit
+        `IS NULL` clause instead of a plain `NOT`.
 
-        Abhängigkeit: die `parkings*`-Tabellen existieren nur, wenn das
-        Parking-Topic für die Region prozessiert wurde. Fehlen sie, wird ein
-        leeres GeoDataFrame zurückgegeben (der Faktor trägt dann 0 bei) – analog
-        zum graceful Fallback bei den Kreuzungs-Ecken.
+        Dependency: the `parkings*` tables only exist if the parking topic was
+        processed for the region. If missing, an empty GeoDataFrame is returned
+        (the factor then contributes 0) – like the graceful fallback for the
+        intersection corners.
 
-        Geometrie liegt in EPSG:3857; Rückgabe in EPSG:4326.
+        Geometry is in EPSG:3857; returned in EPSG:4326.
         """
         wkt = polygon_4326.wkt
         bbox = f"ST_Transform(ST_GeomFromText('{wkt}', 4326), 3857)"
-        # Nur numerische capacity-Werte casten; sonst als 0 behandeln.
+        # Only cast numeric capacity values; treat others as 0.
         cap_num = "NULLIF(tags->>'capacity', '') ~ '^[0-9]+(\\.[0-9]+)?$'"
         access_ok = "COALESCE(tags->>'access', '') NOT IN ('no', 'customers')"
         sql = f"""
@@ -394,33 +389,33 @@ class PostgisLoader:
             gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
             if gdf.crs is None:
                 gdf = gdf.set_crs("EPSG:4326")
-            print(f"   ✓ PostGIS: {len(gdf)} KFZ-Parkflächen aus parkings/parkings_separate")
+            print(f"   ✓ PostGIS: {len(gdf)} car parking features from parkings/parkings_separate")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS-Abfrage parkings/parkings_separate fehlgeschlagen: {e}")
+            print(f"   ⚠️  PostGIS query parkings/parkings_separate failed: {e}")
             return _empty("EPSG:4326")
 
     def load_bicycle_parking(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
-        """Bestehende Fahrradabstellanlagen (für den Bestands-Bedarfsfaktor).
+        """Existing bicycle parking (for the existing-supply demand factor).
 
-        Liest `public."bicycleParking_points"` – die Punkt-Tabelle des
-        bicycleParking-Topics. Sie ist der Superset „eine Anlage = ein Punkt":
-        OSM-Knoten (`amenity=bicycle_parking`) UND die Zentroide der Flächen aus
-        `bicycleParking_areas` emittieren hierher. Es zählen bewusst ALLE
-        erfassten Anlagen (kein Typ-/Kapazitätsfilter).
+        Reads `public."bicycleParking_points"` – the point table of the
+        bicycleParking topic. It is the superset "one facility = one point":
+        OSM nodes (`amenity=bicycle_parking`) AND the centroids of the areas from
+        `bicycleParking_areas` are emitted here. Deliberately ALL recorded
+        facilities count (no type/capacity filter).
 
-        Die (optionale) Kapazität wird als numerische Spalte `capacity`
-        zurückgegeben – der Scorer leitet daraus die Reichweite je Anlage ab
-        (Durchmesser = capacity/2). Der JSONB-Wert ist nicht garantiert
-        numerisch, daher wird per Regex geprüft, bevor gecastet wird (sonst würfe
-        der Cast); fehlt/ungültig → NULL (→ NaN → Default-Reichweite).
+        The (optional) capacity is returned as numeric column `capacity` – the
+        scorer derives each facility's reach from it (diameter = capacity/2).
+        The JSONB value is not guaranteed numeric, so a regex checks before
+        casting (the cast would throw otherwise); missing/invalid → NULL
+        (→ NaN → default reach).
 
-        Abhängigkeit: die `bicycleParking_*`-Tabellen existieren nur, wenn das
-        bicycleParking-Topic für die Region prozessiert wurde. Fehlen sie, wird
-        ein leeres GeoDataFrame zurückgegeben (der Faktor trägt dann 0 bei) –
-        analog zum graceful Fallback bei den KFZ-Parkflächen.
+        Dependency: the `bicycleParking_*` tables only exist if the
+        bicycleParking topic was processed for the region. If missing, an empty
+        GeoDataFrame is returned (the factor then contributes 0) – like the
+        graceful fallback for car parking.
 
-        Geometrie liegt in EPSG:3857; Rückgabe in EPSG:4326.
+        Geometry is in EPSG:3857; returned in EPSG:4326.
         """
         wkt = polygon_4326.wkt
         bbox = f"ST_Transform(ST_GeomFromText('{wkt}', 4326), 3857)"
@@ -436,34 +431,33 @@ class PostgisLoader:
             gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
             if gdf.crs is None:
                 gdf = gdf.set_crs("EPSG:4326")
-            print(f"   ✓ PostGIS: {len(gdf)} Bestands-Radabstellanlagen aus bicycleParking_points")
+            print(f"   ✓ PostGIS: {len(gdf)} existing bicycle parking facilities from bicycleParking_points")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS-Abfrage bicycleParking_points fehlgeschlagen: {e}")
+            print(f"   ⚠️  PostGIS query bicycleParking_points failed: {e}")
             return _empty("EPSG:4326")
 
     def load_census_population(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
-        """Zensus-Einwohnerpunkte für den Bewohnerbedarf-Faktor.
+        """Census population points for the resident demand factor.
 
-        Liest `data.census_population_point` – die auf Gebäude disaggregierten
-        Einwohnerzahlen des Zensus 2022 (Destatis, siehe
-        `data-schema/census_population_point/spec.yaml`). Ein Punkt liegt in aller
-        Regel auf dem Gebäudemittelpunkt (`cluster_typ='gebaeude_mitte'`, 99,5 %);
-        der Rest sitzt auf der Mitte der 100-m-Rasterzelle, wenn die Bevölkerung
-        keinem Gebäude zugeordnet werden konnte.
+        Reads `data.census_population_point` – the 2022 census population counts
+        disaggregated to buildings (Destatis, see
+        `data-schema/census_population_point/spec.yaml`). A point usually sits on
+        the building centre (`cluster_typ='gebaeude_mitte'`, 99.5 %); the rest
+        sits on the centre of the 100 m grid cell when the population could not
+        be assigned to a building.
 
-        Zurückgegeben wird nur `total` (Gesamteinwohner) – die Altersgruppen-
-        spalten der Tabelle bleiben bewusst ungenutzt, der Bedarf entsteht
-        altersunabhängig.
+        Only `total` (total residents) is returned – the table's age group
+        columns are deliberately unused; demand is age-independent.
 
-        Die Tabelle liegt in EPSG:5243 und deckt ganz Deutschland ab (~24 Mio.
-        Punkte); der Bbox-Filter läuft deshalb im Quell-CRS über den GiST-Index.
-        Rückgabe in EPSG:4326.
+        The table is in EPSG:5243 and covers all of Germany (~24 M points); the
+        bbox filter therefore runs in the source CRS using the GiST index.
+        Returned in EPSG:4326.
 
-        Abhängigkeit: die Tabelle existiert nur, wenn das Data-Schema auf dieser
-        Umgebung importiert wurde (siehe data-schema/README.md). Fehlt sie, wird
-        ein leeres GeoDataFrame zurückgegeben und der Faktor trägt 0 bei – analog
-        zum graceful Fallback der übrigen Loader.
+        Dependency: the table only exists if the data schema was imported on
+        this environment (see data-schema/README.md). If missing, an empty
+        GeoDataFrame is returned and the factor contributes 0 – like the
+        graceful fallback of the other loaders.
         """
         wkt = polygon_4326.wkt
         sql = f"""
@@ -476,29 +470,29 @@ class PostgisLoader:
             gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
             if gdf.crs is None:
                 gdf = gdf.set_crs("EPSG:4326")
-            print(f"   ✓ PostGIS: {len(gdf)} Zensuspunkte aus data.census_population_point")
+            print(f"   ✓ PostGIS: {len(gdf)} census points from data.census_population_point")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS-Abfrage data.census_population_point fehlgeschlagen: {e}")
+            print(f"   ⚠️  PostGIS query data.census_population_point failed: {e}")
             return _empty("EPSG:4326")
 
     def load_target_locations(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
-        """Zielort-Punkte für den Zielorte-Bonus.
+        """Target location points for the "Zielorte" bonus.
 
-        Liest `public."poiClassification"` – die tilda-weite POI-Klassifizierung
-        (processing/topics/poiClassification), die jeden relevanten OSM-Punkt
-        (shop=*/amenity=*/tourism=*/leisure=*) in genau eine von vier Kategorien
-        einsortiert: Grundversorgung, Bildung, Einkauf, Freizeit. Alle vier werden gelesen;
-        die Kategorie kommt als Spalte `category` mit, weil ihr Verhältnis zueinander
-        einstellbar ist (`zielort_category_shares` in config.py).
+        Reads `public."poiClassification"` – tilda's POI classification
+        (processing/topics/poiClassification), which sorts every relevant OSM point
+        (shop=*/amenity=*/tourism=*/leisure=*) into exactly one of four categories:
+        Grundversorgung, Bildung, Einkauf, Freizeit. All four are read; the category
+        is returned as column `category` because their ratio is configurable
+        (`zielort_category_shares` in config.py).
 
-        Geometrie liegt in EPSG:3857 (osm2pgsql-Default, wie `bicycleParking_points`);
-        Rückgabe in EPSG:4326.
+        Geometry is in EPSG:3857 (osm2pgsql default, like `bicycleParking_points`);
+        returned in EPSG:4326.
 
-        Abhängigkeit: die Tabelle existiert nur, wenn das poiClassification-Topic für
-        die Region prozessiert wurde. Fehlt sie, wird ein leeres GeoDataFrame
-        zurückgegeben und der Faktor trägt 0 bei – analog zum graceful Fallback der
-        übrigen Loader.
+        Dependency: the table only exists if the poiClassification topic was
+        processed for the region. If missing, an empty GeoDataFrame is returned
+        and the factor contributes 0 – like the graceful fallback of the other
+        loaders.
         """
         wkt = polygon_4326.wkt
         bbox = f"ST_Transform(ST_GeomFromText('{wkt}', 4326), 3857)"
@@ -513,17 +507,17 @@ class PostgisLoader:
             gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
             if gdf.crs is None:
                 gdf = gdf.set_crs("EPSG:4326")
-            print(f"   ✓ PostGIS: {len(gdf)} Zielorte aus public.poiClassification")
+            print(f"   ✓ PostGIS: {len(gdf)} target locations from public.poiClassification")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS-Abfrage public.poiClassification fehlgeschlagen: {e}")
+            print(f"   ⚠️  PostGIS query public.poiClassification failed: {e}")
             return _empty("EPSG:4326")
 
     def features_from_polygon(self, polygon_4326: BaseGeometry, tags: dict) -> gpd.GeoDataFrame:
-        """Drop-in-Ersatz für OsmPbfLoader.features_from_polygon().
+        """Drop-in replacement for OsmPbfLoader.features_from_polygon().
 
-        Mappt OSM-Tag-Dicts auf `public."publicTransport"` (categories via JSONB).
-        Nicht zugeordnete Tags geben ein leeres GeoDataFrame zurück.
+        Maps OSM tag dicts to `public."publicTransport"` (categories via JSONB).
+        Unmapped tags return an empty GeoDataFrame.
         """
         categories = _match_transit_tags(tags)
         if not categories:

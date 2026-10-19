@@ -10,7 +10,7 @@ import {
   useSpaceFinderVegetationVisible,
 } from '../../../hooks/mapState/space-finder-boundary-store'
 
-/** Schalter-Optik der Anzeige-Zeilen; `onColorClass` färbt ihn im eingeschalteten Zustand. */
+/** Switch look of the display rows; `onColorClass` colours it when on. */
 export const ToggleSwitch = ({
   checked,
   onChange,
@@ -38,9 +38,9 @@ export const ToggleSwitch = ({
 )
 
 /**
- * Ein/Aus-Schalter für einen der Kontroll-Layer der Karte (Vegetation, Fahrbahnen,
- * Eigene Daten). Die Schalterfarbe entspricht der Layer-Farbe in der Karte,
- * siehe SourcesLayersSpaceFinder.
+ * On/off switch for one of the map's control layers (Vegetation, Fahrbahnen,
+ * Eigene Daten). The switch colour matches the layer colour on the map,
+ * see SourcesLayersSpaceFinder.
  */
 const LayerToggle = ({
   label,

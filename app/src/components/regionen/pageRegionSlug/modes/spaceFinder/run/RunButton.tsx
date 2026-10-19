@@ -41,8 +41,8 @@ export const RunButton = ({
 
   const isInFlight = status === 'running'
   const hasFinishedRun = spaceFinderRunNeedsRerun(status, latestJob?.status)
-  // Faktoren speichern sich automatisch; bis das durch ist, würde der Lauf serverseitig noch
-  // mit dem alten Stand rechnen (siehe FactorEditorPanel).
+  // Factors save automatically; until that is done, the run would still compute server-side
+  // with the old state (see FactorEditorPanel).
   const factorSavePending = useSpaceFinderFactorSavePending()
 
   const label = mutation.isPending

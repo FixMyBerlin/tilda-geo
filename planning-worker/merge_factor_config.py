@@ -1,18 +1,18 @@
-"""Spiegel von `app/src/server/planning/mergeFactorConfig.ts`.
+"""Mirror of `app/src/server/planning/mergeFactorConfig.ts`.
 
-Fallback 30 muss `UseCaseConfig.bewohnerbedarf_saettigung_ew` in
-`flaechenfinder/config.py` und `FALLBACK_SAETTIGUNG_EW` in der TS-Datei entsprechen.
+Fallback 30 must match `UseCaseConfig.bewohnerbedarf_saettigung_ew` in
+`flaechenfinder/config.py` and `FALLBACK_SAETTIGUNG_EW` in the TS file.
 """
 
-# Spiegel von FALLBACK_SAETTIGUNG_EW in mergeFactorConfig.ts / Default in config.py.
+# Mirror of FALLBACK_SAETTIGUNG_EW in mergeFactorConfig.ts / default in config.py.
 FALLBACK_SAETTIGUNG_EW = 30
 
 
 def merge_factor_config(variant_cfg: dict, area_row: dict) -> dict:
-    """Merged Varianten-JSON mit Gebietsfeldern inkl. Zensus-Sättigung.
+    """Merge variant JSON with area fields incl. census saturation.
 
-    Semantik 1:1 zu `mergeFactorConfig` (TS): fehlt `bewohnerbedarf_saettigung_ew`
-    in der Variante, gilt `censusSaettigungEw`, sonst Fallback 30.
+    Same semantics as `mergeFactorConfig` (TS): if the variant lacks
+    `bewohnerbedarf_saettigung_ew`, `censusSaettigungEw` applies, otherwise fallback 30.
     """
     suggestion = area_row.get("censusSaettigungEw")
     stored = variant_cfg.get("bewohnerbedarf_saettigung_ew")
@@ -32,7 +32,7 @@ def merge_factor_config(variant_cfg: dict, area_row: dict) -> dict:
     merged["study_area"] = area_row["studyArea"]
     merged["use_case"] = area_row["useCase"]
     merged["area_size_m2"] = area_row.get("areaSizeM2")
-    # Das Gebiet gewinnt immer: kein Datensatz im Gebiet = keiner im Merge.
+    # The area always wins: no dataset in the area = none in the merge.
     user_datasets = area_row.get("userDatasets") or []
     if user_datasets:
         merged["user_datasets"] = user_datasets

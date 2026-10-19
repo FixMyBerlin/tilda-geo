@@ -3,8 +3,8 @@ import { DEFAULT_ZIELORT_SHARES, ZIELORT_CATEGORIES } from './zielortCategories'
 import type { ZielortShares } from './zielortShares'
 
 /**
- * Bindet die generische `CategorySliders` (siehe dort für Verhalten/Begründung) an die vier
- * Zielort-Kategorien. Reiner Wiring-Wrapper, keine eigene Logik.
+ * Binds the generic `CategorySliders` (see there for behavior and rationale) to the four
+ * target location categories. Pure wiring wrapper, no logic of its own.
  */
 export const ZielortCategorySliders = ({
   shares,

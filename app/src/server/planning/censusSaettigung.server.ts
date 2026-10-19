@@ -3,59 +3,58 @@ import db from '@/server/db.server'
 import { geoDataClient } from '@/server/prisma-client.server'
 
 /**
- * Vorschlag für `bewohnerbedarf_saettigung_ew` aus den Zensusdaten des Planungsgebiets.
+ * Suggests `bewohnerbedarf_saettigung_ew` from the census data of the Planungsgebiet.
  *
- * Der Parameter ist KEINE Dichte, sondern der Sättigungswert der gewichteten Nachbarschaftssumme
- * je Hexagon: Σ Einwohner × (1 − Abstand/20 m), gemessen ab der Gebäudekante (siehe
- * `flaechenfinder/scorer.py`, Schritt 5 und 13). Aus einer Dichte in EW/ha lässt er sich nicht
- * verlässlich ableiten — an drei echten Läufen gemessen schwankt das Verhältnis um Faktor 2,3,
- * weil die Bruttodichte davon abhängt, wie viel Park, Gewerbe und Wasser im gezeichneten Polygon
- * liegt. Wir schätzen deshalb direkt dieselbe Größe: Rasterprobe über das Gebiet, Zensuspunkte
- * auf die OSM-Gebäude aggregiert, dieselbe Rampe. Gegen die zurückgerechneten Verteilungen der
- * Läufe traf das p50/p75/p90 auf wenige Prozent.
+ * The parameter is NOT a density but the saturation value of the weighted neighborhood sum per
+ * hexagon: Σ residents × (1 − distance/20 m), measured from the building edge (see
+ * `flaechenfinder/scorer.py`, steps 5 and 13). It cannot be derived reliably from a density in
+ * residents/ha — measured on three real runs the ratio varies by a factor of 2.3, because gross
+ * density depends on how much park, commercial and water lies in the drawn polygon. So we
+ * estimate the same quantity directly: grid sample over the area, census points aggregated onto
+ * OSM buildings, same ramp. Against the back-calculated distributions of those runs, p50/p75/p90
+ * matched within a few percent.
  *
- * Vorgeschlagen wird das p90: das oberste Zehntel der bewohnten Fläche bekommt den vollen
- * Zuschlag, der Rest differenziert über die volle Spanne. Der Wert ist ein Startwert — die UI
- * zeigt ihn als automatisch ermittelt an und lässt ihn überschreiben.
+ * We suggest p90: the top tenth of the inhabited area gets the full bonus, the rest is spread
+ * over the full range. The value is a starting point — the UI shows it as auto-detected and
+ * lets the user override it.
  */
 
-/** Rasterweite der Stichprobe. 40 m statt der 20 m des H3-Rasters: im Test wich das p75 bei
- * 15 km² dichtem Berlin um 0,8 % ab, die Laufzeit sank von 2,2 s auf 0,9 s. */
+/** Sample grid spacing. 40 m instead of the 20 m H3 grid: in a test on 15 km² of dense Berlin
+ * p75 differed by 0.8 %, runtime dropped from 2.2 s to 0.9 s. */
 const SAMPLE_GRID_M = Prisma.raw('40')
 
-/** Reichweite des Faktors ab Gebäudekante — muss `UseCaseConfig.bewohnerbedarf_radius_m` in
- * `flaechenfinder/config.py` entsprechen (dort bewusst nicht UI-einstellbar). */
+/** Reach of the factor from the building edge — must match `UseCaseConfig.bewohnerbedarf_radius_m`
+ * in `flaechenfinder/config.py` (deliberately not configurable in the UI there). */
 const DEMAND_RADIUS_M = Prisma.raw('20.0')
 
-/** Metrisches CRS der Berechnung — dasselbe wie im Worker. */
+/** Metric CRS of the computation — same as in the worker. */
 const METRIC_SRID = Prisma.raw('25832')
 
-/** Quell-CRS von `data.census_population_point` und `public._buildings`. */
+/** Source CRS of `data.census_population_point` and `public._buildings`. */
 const SOURCE_SRID = Prisma.raw('5243')
 
-/** Notbremse: das Gebiet ist auf 25 km² begrenzt, aber eine Anfrage im
- * Anlege-Dialog darf unter keinen Umständen hängen bleiben. Prisma bricht die Transaktion sonst
- * schon nach seinen eigenen 5 s ab, bevor das Statement-Timeout überhaupt greifen könnte. */
+/** Emergency brake: the area is capped at 25 km², but a request in the create dialog must
+ * never hang. Otherwise Prisma aborts the transaction after its own 5 s, before the statement
+ * timeout could even kick in. */
 const STATEMENT_TIMEOUT_MS = Prisma.raw('30000')
 const TRANSACTION_TIMEOUT_MS = 35_000
 
-/** Grenzen des Vorschlags. Unten verhindert die Schranke, dass in fast unbewohnten Gebieten
- * schon ein einzelnes Haus den vollen Zuschlag auslöst; oben, dass ein Hochhaus das ganze
- * Gebiet auf „nie voller Zuschlag" stellt. */
+/** Bounds of the suggestion. The lower bound keeps a single house in a nearly uninhabited area
+ * from triggering the full bonus; the upper bound keeps one high-rise from pushing the whole
+ * area to "never full bonus". */
 const MIN_SUGGESTION = 3
 const MAX_SUGGESTION = 150
 
-/** Auf ganze Zahlen unter 10, darüber auf Vielfache von 5 (das Eingabefeld läuft in 5er-Schritten). */
+/** Round to integers below 10, above that to multiples of 5 (the input steps by 5). */
 const roundSuggestion = (value: number) =>
   value < 10 ? Math.max(1, Math.round(value)) : Math.round(value / 5) * 5
 
 type CensusStats = { saettigungEw: number; ewPerHa: number }
 
 /**
- * Rechnet die Kennzahlen für eine Studiengebiet-Geometrie. Gibt `null` zurück, wenn das
- * Data-Schema auf dieser Umgebung fehlt, das Gebiet unbewohnt ist oder die Abfrage scheitert —
- * analog zu den graceful Fallbacks der Worker-Loader. Der Aufrufer speichert dann NULL, und der
- * Worker-Default (30) greift.
+ * Computes the stats for a study area geometry. Returns `null` if the data schema is missing on
+ * this environment, the area is uninhabited or the query fails — like the graceful fallbacks of
+ * the worker loaders. The caller then stores NULL and the worker default (30) applies.
  */
 async function computeCensusStats(studyArea: unknown) {
   const geometry = unwrapGeometry(studyArea)
@@ -67,17 +66,17 @@ async function computeCensusStats(studyArea: unknown) {
       async (tx) => {
         await tx.$executeRaw`SET LOCAL statement_timeout = ${STATEMENT_TIMEOUT_MS}`
 
-        // Bewusst temporäre Tabellen statt einer großen CTE-Abfrage: die Rasterprobe schlägt für
-        // jeden Punkt in den Quellen nach, und auf CTE-Ergebnissen gibt es keinen Index. Ohne die
-        // GiST-Indizes unten wird daraus ein Nested Loop über alle Quellen — im Test 30 s statt 1 s.
+        // Deliberately temp tables instead of one big CTE query: the grid sample looks up the
+        // sources for every point, and CTE results have no index. Without the GiST indexes below
+        // this becomes a nested loop over all sources — 30 s instead of 1 s in testing.
         await tx.$executeRaw`
           CREATE TEMP TABLE census_area ON COMMIT DROP AS
           SELECT
             ST_Transform(ST_SetSRID(ST_GeomFromGeoJSON(${geojson}), 4326), ${METRIC_SRID}) AS metric,
             ST_Transform(ST_SetSRID(ST_GeomFromGeoJSON(${geojson}), 4326), ${SOURCE_SRID}) AS source`
 
-        // Gebäude im Gebiet. Die Rampe misst ab der Gebäudekante, deshalb sind die Polygone die
-        // Quellgeometrie und nicht die Zensuspunkte (die auf dem Gebäudemittelpunkt sitzen).
+        // Buildings in the area. The ramp measures from the building edge, so the polygons are
+        // the source geometry, not the census points (which sit on the building centroid).
         await tx.$executeRaw`
           CREATE TEMP TABLE census_buildings ON COMMIT DROP AS
           SELECT row_number() OVER () AS bid, ST_Transform(b.geom, ${METRIC_SRID}) AS geom
@@ -94,8 +93,8 @@ async function computeCensusStats(studyArea: unknown) {
         await tx.$executeRaw`CREATE INDEX ON census_points USING gist (geom)`
         await tx.$executeRaw`ANALYZE census_buildings, census_points`
 
-        // Punkte per Point-in-Polygon auf ihr Gebäude aggregieren; was kein Gebäude trifft (der
-        // Zensus kennt ALKIS, wir OSM) bleibt Punktquelle, damit keine Einwohner verloren gehen.
+        // Aggregate points onto their building via point-in-polygon; points hitting no building
+        // (the census uses ALKIS, we use OSM) stay point sources so no residents get lost.
         await tx.$executeRaw`
           CREATE TEMP TABLE census_sources ON COMMIT DROP AS
           WITH matched AS (
@@ -110,8 +109,8 @@ async function computeCensusStats(studyArea: unknown) {
         await tx.$executeRaw`CREATE INDEX ON census_sources USING gist (geom)`
         await tx.$executeRaw`ANALYZE census_sources`
 
-        // Stichprobe: Rasterpunkte im Gebiet, die nicht auf einem Gebäude liegen. Gebäudeflächen
-        // bekommen im Scorer bewusst 0 (der Bedarf entsteht rund um das Haus, nicht darauf).
+        // Sample: grid points in the area that are not on a building. The scorer deliberately
+        // gives building footprints 0 (demand arises around the house, not on it).
         const rows = await tx.$queryRaw<{ p90: number | null; ew_pro_ha: number | null }[]>`
           WITH sample AS (
             SELECT (
@@ -144,14 +143,14 @@ async function computeCensusStats(studyArea: unknown) {
       { timeout: TRANSACTION_TIMEOUT_MS },
     )
   } catch (error) {
-    console.error('Zensus-Sättigung konnte nicht ermittelt werden:', error)
+    console.error('Could not compute census saturation:', error)
     return null
   }
 }
 
-/** Rechnet neu und schreibt das Ergebnis ans Planungsgebiet — nach Anlegen und nach jeder
- * Geometrieänderung. Schlägt die Abfrage fehl, werden die Werte auf NULL zurückgesetzt, damit
- * kein Vorschlag zu einer alten Geometrie stehen bleibt. */
+/** Recomputes and writes the result to the Planungsgebiet — after creation and after every
+ * geometry change. If the query fails, the values are reset to NULL so no suggestion for an
+ * old geometry remains. */
 export async function refreshAreaCensusStats(areaId: number, studyArea: unknown) {
   const stats = await computeCensusStats(studyArea)
   await db.planningArea.update({
@@ -165,8 +164,8 @@ export async function refreshAreaCensusStats(areaId: number, studyArea: unknown)
   return stats
 }
 
-/** Füllt die Kennzahlen für Gebiete nach, die vor diesem Feature angelegt wurden. Rechnet nur,
- * solange `censusComputedAt` NULL ist — danach nur noch über `refreshAreaCensusStats`. */
+/** Backfills the stats for areas created before this feature. Only computes while
+ * `censusComputedAt` is NULL — afterwards only via `refreshAreaCensusStats`. */
 export async function ensureAreaCensusStats(areaId: number) {
   const area = await db.planningArea.findUnique({
     where: { id: areaId },
@@ -176,9 +175,9 @@ export async function ensureAreaCensusStats(areaId: number) {
   return refreshAreaCensusStats(areaId, area.studyArea)
 }
 
-/** GeoJSON auf die nackte Geometrie herunterbrechen — Gebiete liegen mal als Feature, mal als
- * FeatureCollection, mal als Geometrie vor (gleiche Normalisierung wie `planning_census`).
- * Exportiert, weil `parkingDataAvailability.server.ts` dieselbe Normalisierung braucht. */
+/** Reduce GeoJSON to the bare geometry — areas come as Feature, FeatureCollection or geometry
+ * (same normalization as `planning_census`). Exported because
+ * `parkingDataAvailability.server.ts` needs the same normalization. */
 export function unwrapGeometry(studyArea: unknown) {
   const geo = studyArea as {
     type?: string

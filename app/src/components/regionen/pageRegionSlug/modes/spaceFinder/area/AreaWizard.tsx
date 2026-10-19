@@ -52,8 +52,8 @@ export const AreaWizard = ({
           userDatasets: userDatasets.map((dataset) => ({ ...dataset, name: dataset.name.trim() })),
           useCase,
           areaSizeM2,
-          // Die gewählte Flächengröße belegt die Flächensuche der ersten Variante vor;
-          // danach ist sie je Variante frei änderbar.
+          // The chosen area size prefills the area search of the first variant;
+          // after that it can be changed freely per variant.
           factorConfig: { ...DEFAULT_FACTOR_TEMPLATE, min_area_m2: areaSizeM2 },
         },
       })

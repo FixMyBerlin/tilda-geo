@@ -5,9 +5,9 @@ import { twJoin } from 'tailwind-merge'
 import { collapsibleBoxClass, collapsibleBoxHeaderClass } from './collapsibleBoxStyles'
 
 /**
- * Chevron der Klapp-Boxen. Zugeklappt sitzt er in einem weißen Chip — zusammen mit dem gefüllten
- * Kopf (siehe `collapsibleBoxHeaderClass`) ist die Zeile so auch ohne sichtbaren Inhalt klar
- * als aufklappbar zu erkennen.
+ * Chevron of the collapsible boxes. Collapsed, it sits in a white chip — together with the filled
+ * header (see `collapsibleBoxHeaderClass`) the row is clearly expandable even without visible
+ * content.
  */
 export const CollapsibleBoxChevron = ({ open }: { open: boolean }) => (
   <span
@@ -21,8 +21,8 @@ export const CollapsibleBoxChevron = ({ open }: { open: boolean }) => (
 )
 
 /**
- * Auf-/zuklappbare Box mit Titelzeile. Basis für die Flächenfinder-Abschnitte, damit sie im
- * Planungspanel identisch aussehen und sich gleich verhalten.
+ * Collapsible box with a title row. Base for the Flächenfinder sections, so they look and behave
+ * the same in the planning panel.
  */
 export const CollapsibleBox = ({
   title,

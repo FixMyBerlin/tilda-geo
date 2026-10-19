@@ -11,7 +11,7 @@ import {
 import db from '../../src/server/db.server'
 
 /**
- * Flächenfinder (Planungsmodul) dev seeds — a few realistic Planungsgebiete in Neukölln so
+ * Flächenfinder (planning module) dev seeds — a few realistic Planungsgebiete in Neukölln so
  * `bun run dev` has a good testing case straight away: `/regionen/parkraum/flaechenfinder`.
  *
  * Region: `parkraum` (see `regionSeedCatalog.ts`) — its map already centers on Neukölln

@@ -1,10 +1,10 @@
 import { twJoin } from 'tailwind-merge'
 
 /**
- * Auf-/zuklappbare Box (Faktoren, Wizard-Schritte). Eingeklappt sieht sie sonst genauso aus wie
- * die flachen Info-/Schalterzeilen des Panels und wird als klickbar übersehen — deshalb bekommt
- * sie zugeklappt einen gefüllten Kopf. Der Rahmen bleibt auch aufgeklappt kräftig genug, um auf
- * dem getönten Panel sichtbar zu sein und die Box zusammenzuhalten.
+ * Collapsible box (factors, wizard steps). Collapsed, it would otherwise look just like the
+ * panel's flat info/toggle rows and be overlooked as clickable — so it gets a filled header when
+ * collapsed. The border stays strong enough when open to be visible on the tinted panel and hold
+ * the box together.
  */
 export const collapsibleBoxClass = (open: boolean) =>
   twJoin('rounded border', open ? 'border-gray-300' : 'border-gray-300 hover:border-gray-400')

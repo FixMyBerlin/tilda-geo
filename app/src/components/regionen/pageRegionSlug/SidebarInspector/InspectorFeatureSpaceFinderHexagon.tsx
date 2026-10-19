@@ -28,14 +28,14 @@ type Props = {
 }
 
 // Per-hexagon factor breakdown grouped by the two probabilities (Issue #3415), see
-// `PLANNING_SCORE_GROUPS`. Innerhalb der Gruppe unterscheiden sich die beiden Faktorarten auch in
-// der Anzeige, weil sie andere Werte halten (mirrors scorer.py):
-//   criteria  → 0–100-Teilscore, gewichteter Durchschnitt → Balken
-//   modifiers → Zu-/Abschlag in Punkten (kann negativ sein) → Balken relativ zum Maximaleffekt
+// `PLANNING_SCORE_GROUPS`. Within a group the two factor kinds are also displayed differently
+// because they hold different values (mirrors scorer.py):
+//   criteria  → 0–100 Teilscore, weighted average → bar
+//   modifiers → bonus/penalty in points (can be negative) → bar relative to the max effect
 const SCORE_GROUPS = PLANNING_SCORE_GROUPS
 
-// `score_*` (Ergebnis pro Hexagon) → `w_*` (Gewicht der Variante) — nötig, um den maximal
-// möglichen Effekt (`weightToPoints`) für den Anteils-Balken zu bestimmen (mirrors weightScale.ts).
+// `score_*` (result per hexagon) → `w_*` (variant weight) — needed to determine the maximum
+// possible effect (`weightToPoints`) for the share bar (mirrors weightScale.ts).
 const MODIFIER_WEIGHT_KEYS: Record<string, string> = {
   score_fussgaengerzone: 'w_fussgaengerzone',
   score_bestand: 'w_bestand',
@@ -47,22 +47,22 @@ const MODIFIER_WEIGHT_KEYS: Record<string, string> = {
   score_zielorte: 'w_target',
 }
 
-// Dasselbe für die Kriterien — `criterionShares` (weightScale.ts) ist nach Gewichts-Namen
-// indiziert, die Sidebar zeigt aber Score-Namen.
+// Same for the criteria — `criterionShares` (weightScale.ts) is keyed by weight names,
+// but the sidebar shows score names.
 const CRITERION_WEIGHT_KEYS: Record<string, string> = {
   score_radweg: 'w_cyclepath',
   score_oepnv: 'w_transit',
   score_hangneigung: 'w_slope',
 }
 
-// Vollständige Ausschlussgründe (nullen mce_gesamtscore, siehe scorer.py
-// Z. 966-975 `exclusion` bzw. Z. 902-906 `eigendaten_exclude`), jeweils mit
-// erklärendem Sidebar-Hinweis. Gebäude/Fahrbahn/Eigene-Flächen haben dafür ein
-// eigenes persistiertes Flag (analog `gebaeude`); Steilhang braucht keins –
-// `score_hangneigung` ist nur bei Gewicht > 0 gesetzt (sonst NULL) und exakt 0
-// nur bei Hangneigung > 10°, identisch zur Ausschlussbedingung im Worker. Bei
-// Gewicht 0 ist `score_hangneigung` NULL, der Check greift dann also nicht –
-// wie bei jedem anderen ausgeschalteten Faktor entfällt der Ausschluss.
+// Hard exclusion reasons (zero out mce_gesamtscore, see scorer.py
+// l. 966-975 `exclusion` and l. 902-906 `eigendaten_exclude`), each with an
+// explanatory sidebar note. Building/carriageway/user areas have their own
+// persisted flag for this (like `gebaeude`); steep slope needs none –
+// `score_hangneigung` is only set with weight > 0 (otherwise NULL) and exactly 0
+// only for slope > 10°, identical to the exclusion condition in the worker. With
+// weight 0, `score_hangneigung` is NULL, so the check does not apply –
+// like any other disabled factor, the exclusion is dropped.
 const EXCLUSION_REASONS: { check: (props: Record<string, any>) => boolean; text: string }[] = [
   {
     check: (props) => !!props.gebaeude,
@@ -86,10 +86,10 @@ const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
   'sehr gut': 'bg-green-100 text-green-800',
 }
 
-// Gemeinsames Spaltenraster für alle Faktor-Zeilen (Kriterien, Zu-/Abschläge, "bald verfügbar"):
-// Label bekommt den Restplatz, Balken/Wert/Prozent haben feste Breiten. Nur so bleiben die Balken
-// exakt untereinander ausgerichtet — unabhängig davon, ob eine Zeile einen Prozent-Anteil zeigt
-// (Kriterien) oder nicht (Zu-/Abschläge), und über beide Gruppen-Tabellen (Bedarf/Bebauung) hinweg.
+// Shared column grid for all factor rows (criteria, bonuses/penalties, "bald verfügbar"):
+// the label gets the remaining space, bar/value/percent have fixed widths. This keeps the bars
+// aligned exactly — whether a row shows a percent share (criteria) or not
+// (bonuses/penalties), and across both group tables (Bedarf/Bebauung).
 const ROW_GRID = 'grid grid-cols-[1fr_6rem_2.75rem_2.5rem] items-center gap-x-2'
 
 const BarTrack = ({
@@ -112,12 +112,12 @@ const BarTrack = ({
 )
 
 /**
- * Zu-/Abschlag in Punkten — anders als die Kriterien vorzeichenbehaftet und ohne 0–100-Skala.
- * Die Füllung zeigt den Anteil am maximal möglichen Effekt dieses Faktors (`max` =
- * `weightToPoints(Gewicht)`, siehe `weightScale.ts`) und ist grün (Zuschlag) bzw. rot (Abschlag)
- * eingefärbt. Statt eines Prozentanteils (bei vorzeichenbehafteten Punkten ohne gemeinsame
- * Bezugsgröße wenig aussagekräftig) zeigt der Wert direkt den Bruch aus angewandtem Effekt und dem
- * im Faktor eingestellten Maximum, z. B. „5/15".
+ * Bonus/penalty in points — unlike the criteria, signed and without a 0–100 scale.
+ * The fill shows the share of this factor's maximum possible effect (`max` =
+ * `weightToPoints(weight)`, see `weightScale.ts`) and is green (bonus) or red (penalty).
+ * Instead of a percent share (not very meaningful for signed points without a common
+ * reference), the value directly shows the applied effect over the maximum configured
+ * in the factor, e.g. „5/15".
  */
 const formatModifierValue = (value: number | null | undefined, max: number) =>
   value == null
@@ -148,9 +148,9 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
       minAreaDraft,
     ) > 0
 
-  // Gewichte des Laufs, der die hier angezeigten Werte tatsächlich erzeugt hat — NICHT die
-  // (womöglich seither ohne Neuberechnung veränderten) aktuellen Variantengewichte. Sonst würden
-  // Balkenmaximum und Prozentanteile einer nicht mehr aktuellen Faktor-Konfiguration entsprechen.
+  // Weights of the run that actually produced the values shown here — NOT the current variant
+  // weights (which may have changed since without a recompute). Otherwise bar maximum and
+  // percent shares would reflect an outdated factor configuration.
   const run = variant?.runs?.find((r) => r.id === runId)
   const snapshot = run?.factorConfigSnapshot
   const weights = snapshot?.weights
@@ -159,17 +159,17 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
     const weightKey = MODIFIER_WEIGHT_KEYS[scoreKey]
     return weightKey ? weightToPoints(weights?.[weightKey]) : MODIFIER_MAX_POINTS
   }
-  // Verteilung zwischen Bedarf und Bebauung: Anteil der Kriterien dieser Gruppe am Grundscore
-  // (dieselbe Größe, die FactorEditorPanel als "XX % des Grundscores" neben der Gruppen-
-  // überschrift zeigt) — hier auf den Gewichten des Laufs statt der Live-Variante.
+  // Split between Bedarf and Bebauung: share of this group's criteria in the base score
+  // (the same value FactorEditorPanel shows as "XX % des Grundscores" next to the group
+  // heading) — here based on the run's weights instead of the live variant.
   const groupSharePct = (groupKey: 'bedarf' | 'bebauung') => {
     if (!shares) return undefined
     const weightGroup = WEIGHT_GROUPS.find((g) => g.key === groupKey)
     return weightGroup ? groupShare(shares, weightGroup.criteria) : undefined
   }
 
-  // Eigene Daten: Namen und Stärken aus dem Lauf-Snapshot (so wie damals gerechnet), sonst aus der
-  // aktuellen Variante.
+  // Eigene Daten: names and strengths from the run snapshot (as computed then), otherwise from the
+  // current variant.
   const datasetsById = new Map(
     (snapshot?.user_datasets ?? variant?.factorConfig.user_datasets ?? []).map((dataset) => [
       dataset.id,
@@ -177,7 +177,7 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
     ]),
   )
   const datasetName = (id: string) => datasetsById.get(id)?.name ?? 'Eigene Daten'
-  // Ausschluss-Text je Modus: „Ausschluss außen“ trifft Flächen AUSSERHALB des Datensatzes.
+  // Exclusion text per mode: „Ausschluss außen“ hits areas OUTSIDE the dataset.
   const datasetExclusionText = (id: string) => {
     const name = `„${datasetName(id)}“`
     switch (datasetsById.get(id)?.mode) {
@@ -196,8 +196,8 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
   const props = feature.properties
   if (!props) return null
 
-  // Grobe Zellen (Aggregat-Gitter unter Zoom 16) tragen nur Mittelwerte: keine Ausschlussgründe
-  // und keine Aufschlüsselung je Datensatz (siehe `aggregate_hexagons` im Worker).
+  // Coarse cells (aggregate grid below zoom 16) only carry averages: no exclusion reasons
+  // and no per-dataset breakdown (see `aggregate_hexagons` in the worker).
   const coarseCell = isCoarseHexagon(props.h3_id)
   const eigendatenDetails = parseEigendatenDetails(props.eigendaten_details)
   const eigendatenExcludedBy = eigendatenDetails.filter((detail) => detail.x != null)
@@ -265,8 +265,8 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
             const groupVal = props[group.scoreKey]
             const sharePct = groupSharePct(group.key)
             return (
-              // Gleiche Gruppenfarben wie im Flächenfinder-Panel, damit die lange Faktorenliste hier
-              // und die Gewichte dort ohne Suchen zusammenzubringen sind.
+              // Same group colors as in the Flächenfinder panel, so the long factor list here
+              // and the weights there can be matched up at a glance.
               <div
                 key={group.scoreKey}
                 className={twJoin(
@@ -358,11 +358,11 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
             )
           })}
 
-          {/* Eigene Daten: eigene Kategorie (nicht in Bedarf/Bebauung), Amber (größter
-              Farbabstand zu Blau/Lila auf dem Farbkreis, siehe spaceFinderPanelStyles.ts) —
-              unabhängig von der Kartenlayer-Farbe der hochgeladenen Flächen (Violett).
-              Je Datensatz eine Zeile: Zu-/Abschlag in Punkten oder „ausgeschlossen“ (harter Cut,
-              ohne Punkte). Ohne Aufschlüsselung (Alt-Läufe, grobe Zellen) nur der Gesamteffekt. */}
+          {/* Eigene Daten: its own category (not in Bedarf/Bebauung), amber (largest
+              hue distance to blue/purple on the color wheel, see spaceFinderPanelStyles.ts) —
+              independent of the map layer color of the uploaded areas (violet).
+              One row per dataset: bonus/penalty in points or „ausgeschlossen“ (hard cut,
+              no points). Without breakdown (legacy runs, coarse cells) only the total effect. */}
           {showEigendaten && (
             <div
               className={twJoin(
@@ -379,7 +379,7 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
                 Eigene Daten
               </div>
               {eigendatenDetails.length > 0 ? (
-                // Je Datensatz eine Zeile mit seinem Namen; die Summe steht im Gesamtscore.
+                // One row per dataset with its name; the sum is in the total score.
                 eigendatenDetails.map((detail) =>
                   detail.p != null ? (
                     <div key={detail.id} className={twJoin(ROW_GRID, 'py-1.5 text-xs')}>
@@ -406,7 +406,7 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
                   ),
                 )
               ) : (
-                // Läufe vor der Aufschlüsselung je Datensatz: nur der Gesamteffekt ist bekannt.
+                // Runs from before the per-dataset breakdown: only the total effect is known.
                 <div className={twJoin(ROW_GRID, 'py-1.5 text-xs')}>
                   <span className="pr-3 text-gray-500">{SCORE_LABELS.score_eigendaten}</span>
                   <BarTrack

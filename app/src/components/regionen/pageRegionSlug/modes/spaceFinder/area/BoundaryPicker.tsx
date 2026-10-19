@@ -12,7 +12,7 @@ import {
 } from '@/server/planning/planningQueryOptions'
 import { spaceFinderTextInputClass } from '../spaceFinderPanelStyles'
 
-// Level 9 ist regional uneinheitlich: in Berlin Bezirk, in Brandenburg meist Ortsteil.
+// Level 9 varies by region: a Bezirk in Berlin, mostly an Ortsteil in Brandenburg.
 const LEVEL_LABELS: Record<string, string> = {
   '8': 'Gemeinde',
   '9': 'Bezirk / Ortsteil',
@@ -21,9 +21,9 @@ const LEVEL_LABELS: Record<string, string> = {
 
 type Boundary = { id: string; name: string; name_prefix: string | null; admin_level: string }
 
-// Namen wiederholen sich über die Ebenen hinweg (Berlin hat „Mitte", „Pankow", „Spandau" … jeweils
-// als Bezirk und als Ortsteil). In der Liste trennt das die Gruppen-Überschrift, im Eingabefeld
-// nach der Auswahl nicht – deshalb dort die Ebene mit anzeigen.
+// Names repeat across levels (Berlin has „Mitte", „Pankow", „Spandau" … each as Bezirk and as
+// Ortsteil). In the list the group heading separates them, in the input after selection it
+// doesn't – so show the level there too.
 const displayName = (b: Boundary | null) =>
   b ? `${b.name} (${b.name_prefix ?? LEVEL_LABELS[b.admin_level] ?? `Level ${b.admin_level}`})` : ''
 
@@ -40,14 +40,14 @@ export const BoundaryPicker = ({
   const queryClient = useQueryClient()
   const { setBoundaryHighlightGeom } = useSpaceFinderBoundaryActions()
   const [query, setQuery] = useState('')
-  // Das gewählte Gebiet kommt aus der Trefferliste des Moments der Auswahl; da die Liste
-  // suchabhängig ist, wird es hier festgehalten, statt es später wieder nachzuschlagen.
+  // The selected area comes from the result list at the moment of selection; since the list
+  // depends on the search, keep it here instead of looking it up again later.
   const [selected, setSelected] = useState<Boundary | null>(null)
   const [geomLoading, setGeomLoading] = useState(false)
   const [geomError, setGeomError] = useState<string | null>(null)
 
-  // Die Suche läuft serverseitig mit LIMIT – entprellt, damit nicht jeder Tastendruck eine
-  // Anfrage auslöst.
+  // The search runs server-side with LIMIT – debounced so not every keystroke triggers a
+  // request.
   const debouncedQuery = useDebouncedValue(query.trim(), 250)
   const { data, isPending } = useQuery(adminBoundariesQueryOptions(regionSlug, debouncedQuery))
 
@@ -61,8 +61,8 @@ export const BoundaryPicker = ({
     return acc
   }, {})
 
-  // Die Geometrie hängt nicht an der Liste, sondern wird erst hier nachgeladen (sonst müsste die
-  // Liste alle Umrisse der Region mitliefern – für Berlin einige hundert Kilobyte).
+  // The geometry is not part of the list but loaded here (otherwise the list would have to
+  // ship all outlines of the region – a few hundred kilobytes for Berlin).
   const handleChange = async (boundary: Boundary | null) => {
     if (!boundary) return
     setSelected(boundary)
@@ -91,10 +91,10 @@ export const BoundaryPicker = ({
 
   if (isPending && debouncedQuery === '')
     return <span className="text-xs text-gray-400">Lade Gebiete…</span>
-  // Datenlücke, kein Nutzerfehler: `public.boundaries` ist leer bzw. enthält keine Grenzen im
-  // Regions-Umriss (Processing für diese Region noch nicht gelaufen). Deutlich sichtbar machen,
-  // sonst wirkt es, als wäre die Gebietssuche verschwunden. Ein leeres Ergebnis *mit* Suchbegriff
-  // heißt dagegen nur „nichts gefunden“ und wird unten in der Liste gemeldet.
+  // Data gap, not a user error: `public.boundaries` is empty or has no boundaries within the
+  // region outline (processing not yet run for this region). Make it clearly visible, otherwise
+  // the area search looks like it vanished. An empty result *with* a search term just means
+  // „nichts gefunden“ and is reported in the list below.
   if (debouncedQuery === '' && boundaries.length === 0)
     return (
       <div className="rounded border border-amber-300 bg-amber-50 px-2 py-1.5 text-xs text-amber-800">

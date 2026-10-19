@@ -61,7 +61,7 @@ export const SpaceFinderBody = ({
     return () => setVegetationAttribution(null)
   }, [variant, setVegetationAttribution])
 
-  // Alle Eigene-Daten-Datensätze als eine Kontroll-Ebene; der Name steht an jedem Objekt.
+  // All "Eigene Daten" datasets as one control layer; the name is on every object.
   const userDatasets = variant?.factorConfig.user_datasets
   useEffect(
     function syncUserDatasetsToMapStore() {

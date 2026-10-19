@@ -41,7 +41,7 @@ export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId:
     queryClient.invalidateQueries({ queryKey: ['planning', 'areas'] })
   }, [data?.status, data?.resultRunId, variantId, queryClient])
 
-  // Der "Neu berechnen"-Button in RunButton zeigt den fertigen Zustand schon an.
+  // The "Neu berechnen" button in RunButton already shows the finished state.
   if (!data || data.status === 'DONE') return null
 
   const showProgress =
@@ -50,8 +50,8 @@ export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId:
   const jobActive = data.status === 'RUNNING' || data.status === 'QUEUED'
 
   const currentStep = deriveScoringStep(data.status, data.progress, data.progressLabel)
-  // Das numerische "n/total · "-Präfix der Scoring-Schritte zeigt schon die
-  // Schrittliste – im Header nur den reinen Namen anhängen.
+  // The step list already shows the numeric "n/total · " prefix of the scoring
+  // steps – only append the plain name in the header.
   const headerLabel = data.progressLabel?.replace(/^\d+\/\d+\s*·\s*/, '')
 
   return (

@@ -9,7 +9,7 @@ import {
   type CategoryShares,
 } from './categoryShares'
 
-/** Farbpunkte mit ihrem Anteil je Kategorie — zugeklappt der einzige Hinweis auf die Aufteilung. */
+/** Color dots with their share per category — the only hint at the split while collapsed. */
 const SharePreview = <K extends string>({
   categories,
   shares,
@@ -32,22 +32,22 @@ const SharePreview = <K extends string>({
 )
 
 /**
- * Verhältnis der Kategorien eines Faktors zueinander, als gekoppelte Regler: die Summe bleibt
- * immer 100 % — wird eine Kategorie hochgezogen, geben die übrigen anteilig ab
- * (`rebalanceCategoryShares`). Generisches UI-Gegenstück zu `categoryShares.ts`; bindet weder an
- * Zielorte noch ÖPNV, sondern nimmt Kategorienliste/Defaults/Beschriftung als Props (siehe
- * `zielortShares.ts`/`oepnvShares.ts` für die konkreten Bindungen).
+ * Ratio of a factor's categories as coupled sliders: the sum always stays 100 % — raising one
+ * category takes proportionally from the others (`rebalanceCategoryShares`). Generic UI
+ * counterpart of `categoryShares.ts`; bound neither to Zielorte nor ÖPNV, it takes the category
+ * list/defaults/labels as props (see `zielortShares.ts`/`oepnvShares.ts` for the concrete
+ * bindings).
  *
- * Diese 100 % gelten NUR innerhalb des jeweiligen Faktors; wie stark der Faktor insgesamt wirkt,
- * bleibt der Punkte-/Wichtigkeits-Regler darüber.
+ * These 100 % apply ONLY within the respective factor; how strongly the factor acts overall is
+ * still set by the points/importance slider above.
  *
- * Standardmäßig zugeklappt: zusätzliche Regler in einem ohnehin langen Formular sind für die
- * meisten Läufe nicht nötig (Gleichverteilung ist der Normalfall). Zugeklappt zeigt die Zeile
- * trotzdem die aktuellen Anteile, damit eine abweichende Aufteilung nicht unbemerkt bleibt.
+ * Collapsed by default: extra sliders in an already long form aren't needed for most runs
+ * (equal split is the normal case). Collapsed, the row still shows the current shares so that a
+ * non-default split doesn't go unnoticed.
  *
- * `open`/`onOpenChange` liegen bewusst außen (`FactorEditorPanel`): solange die Kategorien offen
- * sind, hebt sich die ganze Faktor-Zeile inklusive Haupt-Regler als eigene Karte ab, und dieser
- * Rahmen sitzt eine Ebene höher.
+ * `open`/`onOpenChange` are deliberately owned outside (`FactorEditorPanel`): while the
+ * categories are open, the whole factor row including the main slider stands out as its own
+ * card, and that frame sits one level up.
  */
 export const CategorySliders = <K extends string>({
   categories,
@@ -67,9 +67,9 @@ export const CategorySliders = <K extends string>({
   open: boolean
   onOpenChange: (open: boolean) => void
   disabled?: boolean
-  /** Überschrift neben dem Klapp-Pfeil, z. B. „Zielort-Arten" / „ÖPNV-Arten". */
+  /** Heading next to the disclosure arrow, e.g. "Zielort-Arten" / "ÖPNV-Arten". */
   groupLabel: string
-  /** Name des übergeordneten Faktors für die Regler-`aria-label`s, z. B. „Zielorte". */
+  /** Name of the parent factor for the sliders' `aria-label`s, e.g. "Zielorte". */
   factorLabel: string
 }) => {
   const keys = categories.map((category) => category.key)

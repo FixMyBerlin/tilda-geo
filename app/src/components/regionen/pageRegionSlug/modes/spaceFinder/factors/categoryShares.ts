@@ -1,20 +1,20 @@
 /**
- * Generischer Algorithmus hinter allen „Kategorie-Aufteilung eines Faktors"-Reglern
- * (Zielorte: 4 Kategorien, ÖPNV: 2) — Summe der Anteile bleibt immer 100 %, ein Regler ziehen
- * verteilt den Rest proportional auf die übrigen. `zielortShares.ts`/`oepnvShares.ts` binden das
- * jeweils an ihre konkreten Kategorien/Defaults; hier steht nur die Rechenlogik, einmal.
+ * Generic algorithm behind all "category split of a factor" sliders (Zielorte: 4 categories,
+ * ÖPNV: 2) — the shares always sum to 100 %; dragging one slider distributes the rest
+ * proportionally across the others. `zielortShares.ts`/`oepnvShares.ts` bind this to their
+ * concrete categories/defaults; only the math lives here, once.
  */
 export type CategoryShares<K extends string> = Record<K, number>
 
-/** Summe aller Kategorie-Anteile — bleibt immer 100 (siehe `rebalanceCategoryShares`). */
+/** Sum of all category shares — always 100 (see `rebalanceCategoryShares`). */
 export const CATEGORY_SHARE_TOTAL = 100
 
-/** Schrittweite der Regler. */
+/** Slider step size. */
 export const CATEGORY_SHARE_STEP = 5
 
 /**
- * Liest die Anteile aus einer gespeicherten Config. Fehlende oder kaputte Werte (alte Varianten,
- * die das Feld noch nicht kennen) fallen auf `defaults` zurück.
+ * Reads the shares from a stored config. Missing or invalid values (old variants that don't
+ * know the field yet) fall back to `defaults`.
  */
 export const readCategoryShares = <K extends string>(
   keys: readonly K[],
@@ -32,7 +32,7 @@ export const readCategoryShares = <K extends string>(
   }
   const total = values.reduce((sum, value) => sum + value, 0)
   if (total <= 0) return { ...defaults }
-  // Auf 100 normieren: gespeicherte Altstände könnten durch Rundung leicht daneben liegen.
+  // Normalize to 100: older stored values may be slightly off due to rounding.
   return distribute(
     keys,
     values.map((value) => (value / total) * CATEGORY_SHARE_TOTAL),
@@ -40,8 +40,8 @@ export const readCategoryShares = <K extends string>(
 }
 
 /**
- * Rundet Roh-Anteile so auf ganze Prozent, dass ihre Summe exakt 100 ergibt (Largest-Remainder:
- * die Kategorien mit dem größten abgeschnittenen Rest bekommen den Rest).
+ * Rounds raw shares to whole percent so that they sum to exactly 100 (largest remainder: the
+ * categories with the largest truncated fraction get the remainder).
  */
 const distribute = <K extends string>(keys: readonly K[], raw: number[]) => {
   const floors = raw.map((value) => Math.floor(value))
@@ -58,11 +58,11 @@ const distribute = <K extends string>(keys: readonly K[], raw: number[]) => {
 }
 
 /**
- * Setzt eine Kategorie auf `nextValue` und verteilt den Rest auf die übrigen — proportional zu
- * deren bisherigem Verhältnis, damit sich beim Ziehen eines Reglers nur der eingestellte Wert
- * gezielt ändert und die anderen ihr Verhältnis untereinander behalten. Stehen die anderen alle
- * auf 0, wird gleichmäßig verteilt (sonst bliebe die Summe unter 100 hängen). Bei nur zwei
- * Kategorien vereinfacht sich das automatisch zu „die andere bekommt den Rest".
+ * Sets one category to `nextValue` and distributes the rest across the others — proportionally
+ * to their current ratio, so dragging a slider only changes the value being set and the others
+ * keep their ratio to each other. If the others are all 0, the rest is split evenly (otherwise
+ * the sum would stay below 100). With only two categories this simply becomes "the other one
+ * gets the rest".
  */
 export const rebalanceCategoryShares = <K extends string>(
   keys: readonly K[],
@@ -79,7 +79,7 @@ export const rebalanceCategoryShares = <K extends string>(
     return othersTotal > 0 ? (shares[key] / othersTotal) * rest : rest / others.length
   })
   const balanced = distribute(keys, raw)
-  // Der eingestellte Wert ist gesetzt, nicht gerundet — die Rundungsdifferenz tragen die anderen.
+  // The value being set is kept as is, not rounded — the others absorb the rounding difference.
   if (balanced[changed] !== value) {
     const diff = balanced[changed] - value
     balanced[changed] = value
@@ -90,10 +90,10 @@ export const rebalanceCategoryShares = <K extends string>(
 }
 
 /**
- * Faktor, um den der Effekt einer einzelnen Kategorie gegenüber dem vollen Effekt gedämpft ist —
- * dieselbe Normierung wie im Worker (`zielort_category_factors`/`oepnv_category_factors` in
- * `config.py`): die größte Kategorie steht für 100 %, eine halb so groß gewichtete für 50 %. Bei
- * Gleichverteilung ist jede Kategorie also voll wirksam.
+ * Factor by which a single category's effect is dampened relative to the full effect — the same
+ * normalization as in the worker (`zielort_category_factors`/`oepnv_category_factors` in
+ * `config.py`): the largest category stands for 100 %, one weighted half as much for 50 %. With
+ * an equal split, every category is fully effective.
  */
 export const categoryEffect = <K extends string>(
   keys: readonly K[],

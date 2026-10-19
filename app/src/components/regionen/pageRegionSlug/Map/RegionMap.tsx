@@ -153,10 +153,10 @@ export const RegionMap = () => {
       return
     }
 
-    // Flächenfinder-Auswahlwerkzeug (`SpaceFinderCandidatesSection`): solange es aktiv ist,
-    // sammelt ein Klick auf ein Ergebnis-Hexagon Kandidaten, statt den Inspector zu öffnen.
-    // Ein Klick ins Leere lässt die Auswahl unangetastet. Grobe Zellen (unter Zoom 16) sind nur
-    // Mittelwerte über viele Flächen und taugen nicht als Kandidat — das Panel bittet ums Zoomen.
+    // Flächenfinder selection tool (`SpaceFinderCandidatesSection`): while active, a click on a
+    // result hexagon collects candidates instead of opening the inspector. A click on empty map
+    // leaves the selection untouched. Coarse cells (below zoom 16) are only averages over many
+    // areas and don't work as candidates — the panel asks the user to zoom in.
     if (currentMode.isSpaceFinder && candidateSelectActive) {
       const hexagon = features?.find((f) => f.sourceLayer === planningHexagonsSourceLayer)
       const h3Id = hexagon?.properties?.h3_id
@@ -179,7 +179,7 @@ export const RegionMap = () => {
         if (added) {
           getPlanningHexagonGeomFn({ data: { runId, h3Id: candidateId } })
             .then((geometry) => setCandidateGeometry(runKey, candidateId, geometry))
-            .catch((error) => console.error('Kandidaten-Geometrie nicht geladen', error))
+            .catch((error) => console.error('Candidate geometry not loaded', error))
         }
       }
       return

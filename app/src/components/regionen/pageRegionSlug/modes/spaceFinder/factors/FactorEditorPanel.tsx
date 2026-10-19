@@ -62,8 +62,8 @@ import {
 import { ZielortCategorySliders } from './ZielortCategorySliders'
 import { readZielortShares, type ZielortShares } from './zielortShares'
 
-/** Hinweis unter den Parkdaten-abhängigen Faktoren, wenn `parkingDataAvailable` false ist —
- * siehe [[PARKING_DATA_DEPENDENT_KEYS]] in spaceFinderDefaults.ts. */
+/** Note below the parking-data-dependent factors when `parkingDataAvailable` is false —
+ * see [[PARKING_DATA_DEPENDENT_KEYS]] in spaceFinderDefaults.ts. */
 const PARKING_DATA_HINT = 'Keine Parkdaten für dieses Gebiet verfügbar — Faktor hier deaktiviert.'
 
 const FactorInfo = ({ factorKey, extra }: { factorKey: string; extra?: string }) => {
@@ -72,16 +72,16 @@ const FactorInfo = ({ factorKey, extra }: { factorKey: string; extra?: string })
   return <InfoTooltip>{text}</InfoTooltip>
 }
 
-/** Basis der Blocküberschriften; die Farbe kommt je Block dazu (Faktorgruppen farbig, Rest grau). */
+/** Base of the block headings; each block adds its color (factor groups colored, the rest gray). */
 const groupHeadlineBaseClass =
   'flex items-baseline justify-between gap-2 border-b pb-0.5 text-sm font-bold'
 
 const groupHeadlineClass = twJoin(groupHeadlineBaseClass, 'border-gray-200 text-gray-800')
 
 /**
- * Wert-Text des Eigene-Daten-Chips im zugeklappten Faktoren-Kopf. Bei genau einem Datensatz: bei
- * Bonus/Abzug die Punkte in Wirkrichtung, bei den Ausschluss-Modi nur der Modus-Name. Bei mehreren
- * ist ein Wert allein nichtssagend — dort steht die Anzahl.
+ * Value text of the "Eigene Daten" chip in the collapsed factors header. With exactly one dataset:
+ * for bonus/penalty the points in the direction of effect, for the exclusion modes only the mode
+ * name. With several, a single value says nothing — so it shows the count.
  */
 const eigendatenChipValue = (config: FactorConfig) => {
   const datasets = config.user_datasets ?? []
@@ -95,16 +95,16 @@ const eigendatenChipValue = (config: FactorConfig) => {
   return `${mode === 'penalty' ? '−' : '+'}${points}`
 }
 
-/** Was ein Ausschluss-Modus bewirkt — dort gibt es keine Stärke, also steht das statt des Reglers. */
+/** What an exclusion mode does — it has no strength, so this replaces the slider. */
 const EIGENDATEN_EXCLUDE_TEXT: Partial<Record<UserDataset['mode'], string>> = {
   exclude_inside: 'Flächen innerhalb dieses Datensatzes werden ausgeschlossen.',
   exclude_outside: 'Nur Flächen innerhalb dieses Datensatzes bleiben zulässig.',
 }
 
 /**
- * Ein Eigene-Daten-Datensatz im Faktoren-Block: Name, Modus (nur Anzeige — er gehört zum
- * Planungsgebiet und wird dort eingestellt), Stärke bei Bonus/Abzug (gehört zur Variante) und der
- * Hinweis, wenn Objekte außerhalb des Planungsgebiets liegen.
+ * One "Eigene Daten" dataset in the factors block: name, mode (display only — it belongs to the
+ * Planungsgebiet and is set there), strength for bonus/penalty (belongs to the variant) and the
+ * note when features lie outside the Planungsgebiet.
  */
 const EigendatenDatasetBlock = ({
   dataset,
@@ -162,9 +162,9 @@ const EigendatenDatasetBlock = ({
 }
 
 /**
- * Anteil beider Faktorgruppen am Grundscore als farbige Chips — die Kurzfassung der
- * Gruppenüberschriften für den zugeklappten Faktoren-Kopf. Sind eigene Daten hochgeladen, kommt
- * ihr Chip (Amber, wie der Eigene-Daten-Block) dazu, damit ihr Effekt auch zugeklappt sichtbar ist.
+ * Share of both factor groups in the base score as colored chips — the short form of the group
+ * headings for the collapsed factors header. If user datasets are uploaded, their chip (amber,
+ * like the "Eigene Daten" block) is added so their effect is visible when collapsed, too.
  */
 const GroupShareChips = ({ config }: { config: FactorConfig }) => {
   const shares = criterionShares(config.weights)
@@ -199,9 +199,9 @@ const GroupShareChips = ({ config }: { config: FactorConfig }) => {
 }
 
 /**
- * Herkunftshinweis unter der Bewohnerbedarf-Sättigung. Der Wert wird je Planungsgebiet einmal aus
- * dem Zensus geschätzt (siehe `censusSaettigung.server.ts`) und gilt für alle seine Varianten,
- * solange ihn niemand überschreibt — deshalb zwei Zustände: „automatisch ermittelt" und
+ * Source note below the resident-demand saturation. The value is estimated once per Planungsgebiet
+ * from the census (see `censusSaettigung.server.ts`) and applies to all its variants until someone
+ * overrides it — hence two states: „automatisch ermittelt" and
  * „von Hand gesetzt, Vorschlag war X".
  */
 const AutoSaettigungHint = ({
@@ -292,7 +292,7 @@ const FactorParamInputs = ({
   })
 }
 
-/** Gewichte-/Schwellen-Formularfelder (ohne Geometrie / eigene Daten). */
+/** Weight/threshold form fields (without geometry / user datasets). */
 const FactorFields = ({
   config,
   setWeights,
@@ -331,11 +331,11 @@ const FactorFields = ({
   const shares = criterionShares(weights)
   const points = modifierPointRange(weights, directions)
   const zielortShares = readZielortShares(config.zielort_category_shares)
-  // Offen/zu der Zielort-Arten liegt hier, weil davon die Hervorhebung der ganzen Zielorte-Zeile
-  // abhängt (siehe unten) — nicht nur der Inhalt unterhalb des Reglers.
+  // Open/closed state of the target-location types lives here because the highlight of the whole
+  // Zielorte row depends on it (see below) — not just the content below the slider.
   const [zielortCategoriesOpen, setZielortCategoriesOpen] = useState(false)
   const oepnvShares = readOepnvShares(config.oepnv_category_shares)
-  // Gleiches Muster wie bei Zielorte, nur am Kriterien-Regler w_transit statt am Modifier w_target.
+  // Same pattern as Zielorte, but on the criteria slider w_transit instead of the modifier w_target.
   const [oepnvCategoriesOpen, setOepnvCategoriesOpen] = useState(false)
 
   return (
@@ -353,9 +353,9 @@ const FactorFields = ({
           </button>
         )}
         {WEIGHT_GROUPS.map((group) => (
-          // Farbiger Streifen + zarte Tönung je Gruppe: im langen Formular ist sonst nicht auf
-          // einen Blick zu sehen, wo Bedarf aufhört und Bebauung anfängt. Gleiche Farben wie die
-          // Anteil-Chips im zugeklappten Kopf.
+          // Colored stripe + subtle tint per group: otherwise the long form doesn't show at a
+          // glance where demand ends and built environment begins. Same colors as the share
+          // chips in the collapsed header.
           <div
             key={group.key}
             className={twJoin(
@@ -397,8 +397,8 @@ const FactorFields = ({
                         restoreAutoSaettigung={restoreAutoSaettigung}
                         readOnly={readOnly}
                       />
-                      {/* Die Gruppen-Aufteilung hängt am ÖPNV-Regler: sie verteilt dessen Anteil
-                          auf ÖPNV und Bikesharing, ohne die übrigen Faktoren zu berühren. */}
+                      {/* The group split hangs off the ÖPNV slider: it distributes its share
+                          across ÖPNV and bikesharing without touching the other factors. */}
                       {key === 'w_transit' && (
                         <OepnvCategorySliders
                           shares={oepnvShares}
@@ -412,8 +412,8 @@ const FactorFields = ({
                   }
                 />
               )
-              // Aufgeklappt gehören ÖPNV-Regler und Arten-Regler sichtbar zusammen, gleiches
-              // Muster wie bei Zielorte weiter unten.
+              // When expanded, the ÖPNV slider and the type sliders visibly belong together,
+              // same pattern as Zielorte further down.
               if (key === 'w_transit' && oepnvCategoriesOpen) {
                 return (
                   <div
@@ -493,8 +493,8 @@ const FactorFields = ({
                         restoreAutoSaettigung={restoreAutoSaettigung}
                         readOnly={readOnly}
                       />
-                      {/* Die Kategorie-Aufteilung hängt am Zielorte-Regler: sie verteilt dessen
-                          Punkte auf die vier Zielort-Arten, ohne die übrigen Faktoren zu berühren. */}
+                      {/* The category split hangs off the Zielorte slider: it distributes its
+                          points across the four target-location types without touching the other factors. */}
                       {key === 'w_target' && (
                         <ZielortCategorySliders
                           shares={zielortShares}
@@ -508,9 +508,9 @@ const FactorFields = ({
                   }
                 />
               )
-              // Aufgeklappt gehören Zielorte-Regler und Arten-Regler sichtbar zusammen: die weiße
-              // Karte hebt beide gemeinsam aus dem getönten Gruppenblock heraus, statt die Arten
-              // als lose Regler unter dem Faktor stehen zu lassen.
+              // When expanded, the Zielorte slider and the type sliders visibly belong together: the
+              // white card lifts both out of the tinted group block, instead of leaving the types
+              // as loose sliders below the factor.
               if (key === 'w_target' && zielortCategoriesOpen) {
                 return (
                   <div
@@ -542,7 +542,7 @@ const FactorFields = ({
               <InfoTooltip>{GROUP_HELP.eigendaten}</InfoTooltip>
             </span>
           </div>
-          {/* Nur die Überschrift hat eine Linie; die Datensätze trennt der Abstand. */}
+          {/* Only the heading has a rule; spacing separates the datasets. */}
           <ul className="mt-1.5 space-y-3">
             {userDatasets.map((dataset) => (
               <EigendatenDatasetBlock
@@ -606,15 +606,15 @@ const FactorFields = ({
   )
 }
 
-/** Wie lange nach der letzten Reglerbewegung gewartet wird, bevor gespeichert wird. */
+/** How long to wait after the last slider movement before saving. */
 const AUTOSAVE_DELAY_MS = 700
 
 /**
  * Edits a variant's factorConfig. Read-only while a job is in flight.
  *
- * Änderungen speichern sich selbst (siehe Auto-Save unten) — es gibt keinen Speichern-Button.
- * `lastRunConfig` ist der eingefrorene Faktorenstand des letzten Laufs
- * (`PlanningRun.factorConfigSnapshot`) und dient als Bezugspunkt für „Änderungen verwerfen".
+ * Changes save themselves (see auto-save below) — there is no save button.
+ * `lastRunConfig` is the frozen factor state of the last run
+ * (`PlanningRun.factorConfigSnapshot`) and is the reference point for „Änderungen verwerfen".
  */
 export const FactorEditorPanel = (props: {
   variantId: number
@@ -649,8 +649,8 @@ const FactorEditorPanelForm = ({
   const [open, setOpen] = useState(defaultOpen)
   const [prevReadOnly, setPrevReadOnly] = useState(readOnly)
   const { setFactorSavePending } = useSpaceFinderBoundaryActions()
-  // Fingerprint des Stands, der zuletzt an den Server geschickt wurde — der Vergleich mit dem
-  // aktuellen Entwurf steuert Auto-Save, Verwerfen-Button und die Sperre von „Neu berechnen".
+  // Fingerprint of the state last sent to the server — comparing it with the current draft drives
+  // auto-save, the discard button and the lock on „Neu berechnen".
   const [savedFingerprint, setSavedFingerprint] = useState(() => factorFingerprint(factorConfig))
 
   if (readOnly !== prevReadOnly) {
@@ -658,9 +658,9 @@ const FactorEditorPanelForm = ({
     setOpen(!readOnly)
   }
 
-  // Gebietsfelder (Geometrie, eigene Daten, Nutzung, Größe) ändert nur das Gebietsformular; der
-  // Entwurf hier hält sie nur zur Anzeige. Kommt ein neuer Gebietsstand vom Server (z. B. ein
-  // weiterer Datensatz), wird er übernommen, ohne ungespeicherte Faktoren anzutasten.
+  // Area fields (geometry, user datasets, use case, size) are only changed by the area form; the
+  // draft here only holds them for display. When a new area state arrives from the server (e.g.
+  // another dataset), it is adopted without touching unsaved factors.
   const [syncedAreaConfig, setSyncedAreaConfig] = useState(factorConfig)
   if (
     syncedAreaConfig.study_area !== factorConfig.study_area ||
@@ -669,8 +669,8 @@ const FactorEditorPanelForm = ({
     syncedAreaConfig.area_size_m2 !== factorConfig.area_size_m2
   ) {
     setSyncedAreaConfig(factorConfig)
-    // Stärken mitziehen wie auf dem Server (`syncEigendatenWeights`): neue Datensätze mit
-    // Startwert, entfernte raus, ungespeicherte Werte bleiben.
+    // Sync strengths like the server does (`syncEigendatenWeights`): new datasets get the
+    // initial value, removed ones are dropped, unsaved values stay.
     setConfig((c) =>
       syncEigendatenWeights(
         {
@@ -696,8 +696,8 @@ const FactorEditorPanelForm = ({
       updatePlanningVariantFn({
         data: {
           variantId,
-          // `min_area_m2` wird außerhalb dieses Formulars (Flächensuche-Filter) gepflegt —
-          // immer der frische Prop-Wert, damit der lokale Entwurf ihn nicht zurückdreht.
+          // `min_area_m2` is maintained outside this form (area search filter) — always use
+          // the fresh prop value so the local draft doesn't revert it.
           factorConfig: toVariantConfig({ ...next, min_area_m2: factorConfig.min_area_m2 }),
         },
       }),
@@ -708,8 +708,8 @@ const FactorEditorPanelForm = ({
       queryClient.invalidateQueries(planningAreaQueryOptions(areaId))
     },
     onError: (error) => {
-      // Fingerprint verwerfen: der Server hat den Stand nicht — die nächste Änderung soll wieder
-      // einen vollständigen Speicherversuch auslösen, und „Neu berechnen" bleibt gesperrt.
+      // Drop the fingerprint: the server doesn't have this state — the next change should trigger
+      // a full save attempt again, and „Neu berechnen" stays locked.
       setSavedFingerprint('')
       toastError(error, 'Faktoren konnten nicht gespeichert werden')
     },
@@ -726,8 +726,8 @@ const FactorEditorPanelForm = ({
 
   const unsavedFactors = factorFingerprint(config) !== savedFingerprint
 
-  // Auto-Save: jede Faktorenänderung speichert sich nach kurzer Ruhepause von selbst. Der Timer
-  // fasst das Ziehen eines Reglers zu einem einzigen Schreibvorgang zusammen.
+  // Auto-save: every factor change saves itself after a short pause. The timer merges
+  // dragging a slider into a single write.
   useEffect(
     function autosaveUnsavedFactors() {
       if (readOnly || !unsavedFactors) return
@@ -739,7 +739,7 @@ const FactorEditorPanelForm = ({
     [config, readOnly, unsavedFactors],
   )
 
-  // Solange etwas ungespeichert ist oder gerade geschrieben wird, darf keine Berechnung starten.
+  // No computation may start while something is unsaved or being written.
   useEffect(
     function syncFactorSavePendingToMapStore() {
       setFactorSavePending(unsavedFactors || mutation.isPending)
@@ -756,8 +756,8 @@ const FactorEditorPanelForm = ({
     setConfig((c) => ({
       ...c,
       [key]: value,
-      // Der Zensus-Vorschlag gilt nur, solange das Feld unangetastet ist — sobald jemand eine Zahl
-      // eintippt, wird sie als Nutzerwert in der Variante gespeichert (siehe `stripAutoSaettigung`).
+      // The census suggestion only applies while the field is untouched — once someone types a
+      // number, it is stored as a user value in the variant (see `stripAutoSaettigung`).
       ...(key === 'bewohnerbedarf_saettigung_ew' && { bewohnerbedarf_saettigung_auto: false }),
     }))
 
@@ -784,8 +784,8 @@ const FactorEditorPanelForm = ({
   const setOepnvShares = (shares: OepnvShares) =>
     setConfig((c) => ({ ...c, oepnv_category_shares: shares }))
 
-  // Die Stärke je Datensatz ist Teil der Variante und läuft über deren Auto-Save. Name, Modus und
-  // Geometrie der Datensätze gehören zum Planungsgebiet und werden im Gebietsformular geändert.
+  // The strength per dataset is part of the variant and goes through its auto-save. Name, mode and
+  // geometry of the datasets belong to the Planungsgebiet and are changed in the area form.
   const setEigendatenWeight = (id: string, value: number) =>
     setConfig((c) => ({ ...c, eigendaten_weights: { ...c.eigendaten_weights, [id]: value } }))
 
@@ -793,12 +793,12 @@ const FactorEditorPanelForm = ({
     setConfig((c) => ({
       ...c,
       ...DEFAULT_FACTOR_TEMPLATE,
-      // Standard heißt für die Sättigung: zurück auf den Zensus-Vorschlag des Gebiets. Nur wo es
-      // keinen gibt, bleibt der Wert aus dem Worker-Default stehen.
+      // For saturation, default means: back to the area's census suggestion. Only where there is
+      // none does the worker default value stay.
       bewohnerbedarf_saettigung_ew:
         c.bewohnerbedarf_saettigung_auto_ew ?? c.bewohnerbedarf_saettigung_ew,
       bewohnerbedarf_saettigung_auto: c.bewohnerbedarf_saettigung_auto_ew != null,
-      // Standard heißt für Eigene Daten: die Startstärke je Datensatz.
+      // For "Eigene Daten", default means: the initial strength per dataset.
       eigendaten_weights: syncEigendatenWeights<VariantFactorConfig>({}, c.user_datasets)
         .eigendaten_weights,
       study_area: c.study_area,
@@ -808,17 +808,17 @@ const FactorEditorPanelForm = ({
     }))
   }
 
-  // Bezugspunkt für „Änderungen verwerfen": der Faktorenstand, mit dem der letzte Lauf gerechnet
-  // hat. Vor dem ersten Lauf gibt es keinen Snapshot — dann gilt der Stand beim Öffnen der
-  // Variante (danach bleibt nur „Auf Standardwerte zurücksetzen").
+  // Reference point for „Änderungen verwerfen": the factor state the last run computed with.
+  // Before the first run there is no snapshot — then the state when opening the variant applies
+  // (after that only „Auf Standardwerte zurücksetzen" remains).
   const [openedWithConfig] = useState(factorConfig)
   const discardBase = lastRunConfig ?? openedWithConfig
   const canDiscard = factorsDiffer(config, discardBase)
 
   const discardChanges = () => {
-    // Der Variantenstand kommt komplett aus dem Bezugspunkt, nicht über den Entwurf gelegt: fehlt
-    // dort ein optionales Feld (z. B. `eigendaten_weights`, wenn beim Lauf noch keine Stärke
-    // gesetzt war), muss es auch im Entwurf wegfallen. Vom Entwurf bleiben nur die Gebietsfelder.
+    // The variant state comes entirely from the reference point, not layered over the draft: if an
+    // optional field is missing there (e.g. `eigendaten_weights` when no strength was set at run
+    // time), it must be dropped from the draft too. Only the area fields are kept from the draft.
     const restored: FactorConfig = {
       ...toVariantConfig(discardBase),
       study_area: config.study_area,
@@ -828,7 +828,7 @@ const FactorEditorPanelForm = ({
       min_area_m2: factorConfig.min_area_m2,
     }
     setConfig(restored)
-    save(restored) // sofort, nicht erst nach der Auto-Save-Pause
+    save(restored) // immediately, not after the auto-save pause
   }
 
   return (
@@ -841,9 +841,8 @@ const FactorEditorPanelForm = ({
           <span className="flex-1">Faktoren</span>
           <CollapsibleBoxChevron open={open} />
         </div>
-        {/* Zugeklappt ist nicht zu sehen, wie die Gewichte stehen — die zweite Zeile zeigt
-            deshalb den Anteil beider Gruppen am Grundscore (wie die Gruppenüberschriften im
-            geöffneten Formular). */}
+        {/* When collapsed, the weights aren't visible — so the second line shows the share of
+            both groups in the base score (like the group headings in the open form). */}
         {!open && <GroupShareChips config={config} />}
       </DisclosureButton>
 

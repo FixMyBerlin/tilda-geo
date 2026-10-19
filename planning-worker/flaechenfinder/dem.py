@@ -4,12 +4,12 @@ from typing import List, Tuple, Optional
 
 class DEMAdapter:
     """
-    Liefert Hangneigungen (°) für eine Liste von (lng, lat)-Punkten.
+    Returns slopes (°) for a list of (lng, lat) points.
 
-    Quellen (Priorität):
-      1. dgm1   – DGM1 GeoTIFF via rasterio + np.gradient (Volume `planning_dem`)
-      2. mapterhorn – PMTiles-Extrakt (Terrarium-Encoding) – Stub
-      3. srtm   – konstanter Fallback (MVP ohne echtes DEM)
+    Sources (priority):
+      1. dgm1   – DGM1 GeoTIFF via rasterio + np.gradient (volume `planning_dem`)
+      2. mapterhorn – PMTiles extract (Terrarium encoding) – stub
+      3. srtm   – constant fallback (MVP without a real DEM)
     """
 
     def __init__(self, source: str = "srtm", dgm1_path: Optional[str] = None):
@@ -26,7 +26,7 @@ class DEMAdapter:
                 pass
 
     def get_slopes(self, points: List[Tuple[float, float]]) -> List[float]:
-        """Gibt Hangneigungen in Grad für [(lng, lat), ...] zurück."""
+        """Return slopes in degrees for [(lng, lat), ...]."""
         if self.source == "dgm1" and self.dgm1_path:
             return self._slopes_from_dgm1(points)
         elif self.source == "mapterhorn":
@@ -67,14 +67,14 @@ class DEMAdapter:
             return slopes
 
         except ImportError:
-            print("   ⚠️  rasterio nicht verfügbar – Fallback auf SRTM")
+            print("   ⚠️  rasterio not available – falling back to SRTM")
             return self._slopes_srtm_fallback(points)
 
-    # Gleiche Kachelquelle/-schema wie das Höhenprofil im Frontend
+    # Same tile source/scheme as the elevation profile in the frontend
     # (app/.../terrainProfile/sampling/{terrarium,terrainSampler}.ts): Terrarium-
-    # kodierte WebP-Kacheln von tiles.mapterhorn.com, weltweit, ~30m-Basisauflösung
-    # (Copernicus GLO-30). Zoom 13 @ 512px ergibt ~6m/Pixel bei mittleren Breiten –
-    # für die Score-Klassifizierung ausreichend, nicht baugenau.
+    # encoded WebP tiles from tiles.mapterhorn.com, worldwide, ~30m base resolution
+    # (Copernicus GLO-30). Zoom 13 @ 512px gives ~6m/pixel at mid latitudes –
+    # sufficient for score classification, not construction-grade.
     _MAPTERHORN_ZOOM = 13
     _MAPTERHORN_TILE_SIZE = 512
     _MAPTERHORN_TILES_ORIGIN = "https://tiles.mapterhorn.com"
@@ -94,9 +94,9 @@ class DEMAdapter:
         return tile_x, tile_y, px, py
 
     def _load_mapterhorn_tile(self, tile_x, tile_y):
-        """Lädt+decodiert eine Mapterhorn-Kachel zu einem Höhen-Array (Meter).
-        Pro DEMAdapter-Instanz gecacht (ein Lauf trifft meist wenige Kacheln
-        mehrfach), analog zum Tile-Cache im Frontend."""
+        """Load + decode a Mapterhorn tile into an elevation array (meters).
+        Cached per DEMAdapter instance (a run usually hits a few tiles
+        repeatedly), like the tile cache in the frontend."""
         key = (tile_x, tile_y)
         if key in self._mapterhorn_tile_cache:
             return self._mapterhorn_tile_cache[key]
@@ -106,7 +106,7 @@ class DEMAdapter:
         from PIL import Image
 
         url = f"{self._MAPTERHORN_TILES_ORIGIN}/{self._MAPTERHORN_ZOOM}/{tile_x}/{tile_y}.webp"
-        # Ohne User-Agent blockt der CDN mit 403 (Standard-urllib-UA wird gefiltert).
+        # Without a User-Agent the CDN blocks with 403 (default urllib UA is filtered).
         req = urllib.request.Request(url, headers={"User-Agent": "tilda-geo-planning-worker"})
         try:
             with urllib.request.urlopen(req, timeout=10) as resp:
@@ -115,7 +115,7 @@ class DEMAdapter:
             rgb = np.asarray(img, dtype=np.float64)
             elevation = rgb[:, :, 0] * 256 + rgb[:, :, 1] + rgb[:, :, 2] / 256 - 32768
         except Exception as exc:
-            print(f"   ⚠️  Mapterhorn-Kachel {self._MAPTERHORN_ZOOM}/{tile_x}/{tile_y} nicht ladbar: {exc}")
+            print(f"   ⚠️  Mapterhorn tile {self._MAPTERHORN_ZOOM}/{tile_x}/{tile_y} could not be loaded: {exc}")
             elevation = None
 
         self._mapterhorn_tile_cache[key] = elevation
@@ -125,15 +125,15 @@ class DEMAdapter:
         import math
 
         try:
-            from PIL import Image  # noqa: F401 – nur Verfügbarkeit prüfen
+            from PIL import Image  # noqa: F401 – availability check only
         except ImportError:
-            print("   ⚠️  Pillow nicht verfügbar – Fallback auf SRTM")
+            print("   ⚠️  Pillow not available – falling back to SRTM")
             return self._slopes_srtm_fallback(points)
 
         tile_size = self._MAPTERHORN_TILE_SIZE
         zoom = self._MAPTERHORN_ZOOM
-        # WebMercator-Pixelauflösung (m/px) bei gegebener Breite/Zoom, für 256px-
-        # Kachelschema; auf die tatsächliche Kachelgröße skaliert.
+        # Web Mercator pixel resolution (m/px) at the given latitude/zoom for the 256px
+        # tile scheme; scaled to the actual tile size.
         equator_res = 156543.03392804097
 
         slopes = []
@@ -149,7 +149,7 @@ class DEMAdapter:
             x_minus, x_plus = max(0, x0 - 1), min(tile_size - 1, x0 + 1)
             y_minus, y_plus = max(0, y0 - 1), min(tile_size - 1, y0 + 1)
             if x_minus == x_plus or y_minus == y_plus:
-                # Punkt liegt auf einer Kachelecke ohne beidseitigen Nachbarn
+                # Point lies on a tile corner without neighbors on both sides
                 slopes.append(0.0)
                 continue
 
@@ -163,9 +163,9 @@ class DEMAdapter:
 
     def _slopes_srtm_fallback(self, points):
         """
-        MVP-Fallback: konstante Hangneigung 2.0° für alle Punkte. Der Slope-Faktor
-        kann über `w_slope=0` im factorConfig faktisch deaktiviert werden. Echte
-        DGM1-Raster werden später über das `planning_dem`-Volume nachgerüstet.
+        MVP fallback: constant slope of 2.0° for all points. The slope factor
+        can effectively be disabled via `w_slope=0` in factorConfig. Real
+        DGM1 rasters are added later via the `planning_dem` volume.
         """
-        print("   ℹ️  DEM-Fallback aktiv: konstante Hangneigung 2.0°")
+        print("   ℹ️  DEM fallback active: constant slope 2.0°")
         return [2.0] * len(points)

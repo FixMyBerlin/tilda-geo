@@ -1,13 +1,13 @@
-"""Planning-Worker: konsumiert PlanningJob-Zeilen und berechnet Flächenfinder-Läufe.
+"""Planning worker: consumes PlanningJob rows and computes Flächenfinder runs.
 
-Lifecycle (siehe Architektur-Plan):
-  QUEUED  → von der App angelegt + pg_notify('planning_jobs', jobId)
-  RUNNING → hier via FOR UPDATE SKIP LOCKED beansprucht
-  DONE    → Ergebnis in planning.* geschrieben, resultRunId gesetzt
-  FAILED  → Exception abgefangen, errorMessage gesetzt
+Lifecycle (see architecture plan):
+  QUEUED  → created by the app + pg_notify('planning_jobs', jobId)
+  RUNNING → claimed here via FOR UPDATE SKIP LOCKED
+  DONE    → result written to planning.*, resultRunId set
+  FAILED  → exception caught, errorMessage set
 
-Wakeup über LISTEN/NOTIFY; 15s-Poll als Fallback für verpasste Notifies/Neustart.
-Beim Start werden hängengebliebene RUNNING-Jobs requeued.
+Wakeup via LISTEN/NOTIFY; 15s poll as fallback for missed notifies/restarts.
+Stale RUNNING jobs are requeued on startup.
 """
 from __future__ import annotations
 
@@ -54,22 +54,21 @@ def _study_area_from_config(cfg: dict):
     return shape(geo)
 
 
-# Vegetationsflächen hängen nur vom Studiengebiet ab (NDVI aus CIR-Kacheln),
-# nie von Gewichten/Schwellen. Ändert ein Nutzer nur einen Faktor und startet
-# neu, ist das Ergebnis eines früheren Laufs mit identischem Studiengebiet
-# bit-identisch – die (teure) Neuberechnung lässt sich dann überspringen.
+# Vegetation areas depend only on the study area (NDVI from CIR tiles), never on
+# weights/thresholds. If a user only changes a factor and reruns, the result of
+# an earlier run with an identical study area is bit-identical, so the
+# (expensive) recomputation can be skipped.
 _VEGETATION_REUSE_CANDIDATES = 5
 
 
 def _find_reusable_vegetation(conn, engine, variant_id: int, current_run_id: int, study_area):
-    """Sucht unter den letzten Läufen derselben Variante einen mit identischem
-    Studiengebiet, in dem Vegetation tatsächlich berechnet wurde, und lädt dessen
-    `scenario_vegetation`-Zeilen. None = kein Treffer, muss neu berechnet werden.
+    """Among the latest runs of the same variant, find one with an identical study
+    area in which vegetation was actually computed, and load its
+    `scenario_vegetation` rows. None = no match, must be recomputed.
 
-    Läufe ohne gespeicherte Flächen zählen nicht als Treffer: 0 Zeilen heißt in
-    der Praxis, dass die Berechnung damals fehlgeschlagen ist (z. B. WMS-Ausfall).
-    Würden wir sie wiederverwenden, würde ein einziger fehlgeschlagener Lauf alle
-    Folgeläufe derselben Variante dauerhaft leer halten."""
+    Runs without stored areas don't count as a match: 0 rows in practice means
+    the computation failed back then (e.g. WMS outage). Reusing them would let a
+    single failed run keep all later runs of the same variant empty forever."""
     with conn.cursor() as cur:
         cur.execute(
             """SELECT id, "factorConfigSnapshot" FROM prisma."PlanningRun"
@@ -81,7 +80,7 @@ def _find_reusable_vegetation(conn, engine, variant_id: int, current_run_id: int
 
     for prev_run_id, snapshot in candidates:
         if not ((snapshot.get("weights") or {}).get("w_vegetation", 0) or 0):
-            continue  # Vegetation wurde in diesem Lauf gar nicht berechnet
+            continue  # vegetation was not computed in this run
         try:
             prev_study_area = _study_area_from_config(snapshot)
         except Exception:
@@ -90,7 +89,7 @@ def _find_reusable_vegetation(conn, engine, variant_id: int, current_run_id: int
             continue
         gdf = _load_vegetation_rows(engine, prev_run_id)
         if not len(gdf):
-            continue  # leerer Lauf = damals fehlgeschlagen, nicht wiederverwenden
+            continue  # empty run = failed back then, don't reuse
         return gdf
     return None
 
@@ -106,7 +105,7 @@ def _load_vegetation_rows(engine, run_id: int) -> gpd.GeoDataFrame:
 
 
 def claim_job(conn: psycopg.Connection):
-    """Beansprucht den ältesten QUEUED-Job atomar. Gibt (job_id, variant_id) oder None."""
+    """Atomically claim the oldest QUEUED job. Returns (job_id, variant_id) or None."""
     with conn.cursor() as cur:
         cur.execute(
             """
@@ -123,7 +122,7 @@ def claim_job(conn: psycopg.Connection):
             """
         )
         row = cur.fetchone()
-    return row  # None oder (id, variantId)
+    return row  # None or (id, variantId)
 
 
 def requeue_stale(conn: psycopg.Connection):
@@ -134,14 +133,14 @@ def requeue_stale(conn: psycopg.Connection):
         )
         n = cur.rowcount
     if n:
-        print(f"   ↺ {n} hängengebliebene RUNNING-Jobs requeued")
+        print(f"   ↺ {n} stale RUNNING jobs requeued")
 
 
 def _load_variant_config(conn, variant_id: int):
-    """Lädt Variante + Planungsgebiet und merged zu einem flachen factorConfig-Dict.
+    """Load variant + planning area and merge them into a flat factorConfig dict.
 
-    Der Merge (`_merge_factor_config`) ist der Spiegel von `mergeFactorConfig.ts`, damit
-    Snapshot und Scoring dieselbe Sättigung sehen wie die UI (Zensus-Vorschlag bzw. 30).
+    The merge (`_merge_factor_config`) mirrors `mergeFactorConfig.ts`, so snapshot
+    and scoring see the same saturation as the UI (census suggestion or 30).
     """
     with conn.cursor() as cur:
         cur.execute(
@@ -188,8 +187,8 @@ def _create_run(conn, variant_id: int, snapshot: dict) -> int:
 
 
 def set_progress(conn, job_id: int, pct: int, label: str = ""):
-    """Schreibt den Fortschritt (0–100) des Jobs und loggt ihn. Autocommit →
-    sofort für die App sichtbar. Fehlt die Spalte, wird still ignoriert."""
+    """Write the job's progress (0–100) and log it. Autocommit → visible to the
+    app immediately. A missing column is silently ignored."""
     pct = max(0, min(100, int(pct)))
     print(f"   ⏳ {pct}% – {label}")
     try:
@@ -199,7 +198,7 @@ def set_progress(conn, job_id: int, pct: int, label: str = ""):
                 (pct, label or None, job_id),
             )
     except Exception as e:
-        print(f"   ⚠️  Fortschritt konnte nicht gespeichert werden: {e}")
+        print(f"   ⚠️  Could not save progress: {e}")
 
 
 def process_job(conn, engine, job_id: int, variant_id: int):
@@ -216,19 +215,18 @@ def process_job(conn, engine, job_id: int, variant_id: int):
     tilda_loader = TildaLoader(loader)
     dem_adapter = DEMAdapter(source=use_case.dem_source, dgm1_path=use_case.dgm1_path)
 
-    # Schritt 1: Vegetationsflächen on-demand aus CIR/RGBI-Kacheln berechnen.
-    # Die Quelle (Bayern / Hessen / BB – jeweils WMS) wird aus use_case.cir_source aufgelöst.
-    # Fehlt die Datengrundlage oder liegt das Gebiet außerhalb bekannter Quellen,
-    # läuft das restliche Scoring normal ohne Vegetationsdaten weiter – das
-    # Frontend erkennt diesen Fall selbst (Gewicht w_vegetation=0) und zeigt
-    # den Schritt dort als übersprungen an, statt sich auf den Fortschrittstext
-    # zu verlassen.
+    # Step 1: compute vegetation areas on demand from CIR/RGBI tiles.
+    # The source (Bavaria / Hesse / BB, each a WMS) is resolved from use_case.cir_source.
+    # Without source data, or if the area lies outside known sources, the rest of
+    # the scoring runs normally without vegetation data. The frontend detects
+    # this itself (weight w_vegetation=0) and shows the step as skipped instead
+    # of relying on the progress text.
     #
-    # Fortschritts-Budget: die Vegetationsphase ist die mit Abstand längste,
-    # läuft aber nicht immer (Gewicht 0, keine CIR-Quelle, Cache-Treffer). Nur
-    # wenn sie wirklich rechnet, bekommt sie VEG_RANGE (5–70 %); sonst bleibt
-    # der Balken bei VEG_SKIPPED_PCT und die Scoring-Schritte bekommen das
-    # ganze Budget ab ~3 % – statt scheinbar erst bei 72 % loszulaufen.
+    # Progress budget: the vegetation phase is by far the longest but doesn't
+    # always run (weight 0, no CIR source, cache hit). Only when it actually
+    # computes does it get VEG_RANGE (5–70 %); otherwise the bar stays at
+    # VEG_SKIPPED_PCT and the scoring steps get the whole budget from ~3 %,
+    # instead of seemingly starting at 72 %.
     VEG_RANGE = (5, 70)
     VEG_SKIPPED_PCT = 2
     SCORING_END = 90
@@ -241,58 +239,57 @@ def process_job(conn, engine, job_id: int, variant_id: int):
     cir_source = None
     veg_phase_ran = False
     if not (use_case.weights.get("w_vegetation", 0) or 0):
-        print("   ℹ️  w_vegetation=0 – Vegetationsberechnung übersprungen")
+        print("   ℹ️  w_vegetation=0 – vegetation computation skipped")
         vegetation = None
         set_progress(conn, job_id, VEG_SKIPPED_PCT, step1_label)
     else:
         cir_source = resolve_source(use_case.cir_source, study_area)
         if cir_source is None:
-            print("   ℹ️  Keine CIR-Quelle für dieses Gebiet – Vegetation übersprungen")
+            print("   ℹ️  No CIR source for this area – vegetation skipped")
             vegetation = None
             set_progress(conn, job_id, VEG_SKIPPED_PCT, step1_label)
         else:
             try:
                 vegetation = _find_reusable_vegetation(conn, engine, variant_id, run_id, study_area)
             except Exception as e:
-                print(f"   ⚠️  Cache-Suche für Vegetation fehlgeschlagen: {e}")
+                print(f"   ⚠️  Vegetation cache lookup failed: {e}")
                 vegetation = None
             if vegetation is not None:
-                print(f"   ♻️  Vegetation aus vorherigem Lauf wiederverwendet ({len(vegetation)} Flächen)")
+                print(f"   ♻️  Reused vegetation from previous run ({len(vegetation)} areas)")
                 set_progress(conn, job_id, VEG_SKIPPED_PCT, step1_label)
             else:
-                # Ab hier läuft die lange Phase – der Balken bewegt sich in VEG_RANGE,
-                # auch wenn sie später fehlschlägt (dann bleibt er am oberen Rand).
+                # The long phase runs from here; the bar moves within VEG_RANGE,
+                # even if it fails later (then it stays at the upper bound).
                 veg_phase_ran = True
                 try:
                     vegetation = compute_vegetation_areas(
                         study_area, source=cir_source, progress_cb=_veg_progress
                     )
                 except Exception as e:
-                    print(f"   ⚠️  Vegetationsberechnung fehlgeschlagen: {e}")
+                    print(f"   ⚠️  Vegetation computation failed: {e}")
                     vegetation = None
                 set_progress(conn, job_id, VEG_RANGE[1], step1_label)
 
-    # Fahrbahnen ausschließen (Checkbox, kein eigener Scoring-Step): Straßen
-    # einmalig laden+puffern, damit dasselbe GeoDataFrame sowohl für den
-    # harten Ausschluss (run_flaechenfinder) als auch für die Kartenanzeige
-    # (scenario_carriageways) genutzt wird – analog zur Vegetation oben.
+    # "Fahrbahnen ausschließen" (checkbox, not a scoring step of its own): load and
+    # buffer roads once, so the same GeoDataFrame serves both the hard exclusion
+    # (run_flaechenfinder) and the map display (scenario_carriageways), like
+    # vegetation above.
     carriageways = None
     if use_case.exclude_carriageways:
         try:
             carriageways = compute_carriageway_areas(study_area, tilda_loader)
         except Exception as e:
-            print(f"   ⚠️  Fahrbahnen-Berechnung fehlgeschlagen: {e}")
+            print(f"   ⚠️  Carriageway computation failed: {e}")
             carriageways = None
 
-    # Schritte 2–11 (Scoring in run_flaechenfinder) auf das verbleibende Budget
-    # bis SCORING_END abbilden: 72–90 %, wenn die Vegetationsphase gelaufen ist,
-    # sonst 3–90 %. Den Namen als progressLabel an die App weiterreichen, Format
-    # "n/total · Name", damit das Frontend den aktuellen Schritt in der
-    # Schrittliste hervorheben kann.
+    # Map steps 2–11 (scoring in run_flaechenfinder) onto the remaining budget up
+    # to SCORING_END: 72–90 % if the vegetation phase ran, otherwise 3–90 %. Pass
+    # the name to the app as progressLabel in the format "n/total · Name", so the
+    # frontend can highlight the current step in the step list.
     scoring_start = VEG_RANGE[1] + 2 if veg_phase_ran else VEG_SKIPPED_PCT + 1
 
     def _scoring_progress(step, total, label):
-        first, last = 2, total - 1  # Schritt 1 (Vegetation) und total (Speichern) laufen hier nicht
+        first, last = 2, total - 1  # step 1 (vegetation) and total (saving) don't run here
         frac = (step - first) / (last - first)
         set_progress(
             conn, job_id, scoring_start + frac * (SCORING_END - scoring_start), f"{step}/{total} · {label}"
@@ -312,8 +309,8 @@ def process_job(conn, engine, job_id: int, variant_id: int):
         progress_cb=_scoring_progress,
     )
 
-    # Grobes Aggregat-Gitter für niedrige Zoomstufen (z < 16). Reine
-    # Nachverarbeitung der bereits berechneten Scores – keine Spatial-Joins.
+    # Coarse aggregate grid for low zoom levels (z < 16). Pure post-processing
+    # of the already computed scores, no spatial joins.
     hex_agg = aggregate_hexagons(hex_proj)
 
     set_progress(conn, job_id, 92, f"{SCORING_STEP_COUNT}/{SCORING_STEP_COUNT} · {SCORING_STEPS[-1]}")
@@ -353,11 +350,11 @@ def fail_job(conn, job_id: int, message: str):
                 (message[:2000], job_id),
             )
     except Exception as e:
-        print(f"   ⚠️  Konnte Job {job_id} nicht als FAILED markieren: {e}")
+        print(f"   ⚠️  Could not mark job {job_id} as FAILED: {e}")
 
 
 def drain(conn, engine):
-    """Verarbeitet alle aktuell wartenden Jobs, bis keiner mehr da ist."""
+    """Process all currently queued jobs until none are left."""
     while True:
         row = claim_job(conn)
         if row is None:
@@ -367,27 +364,27 @@ def drain(conn, engine):
             process_job(conn, engine, job_id, variant_id)
         except Exception:
             tb = traceback.format_exc()
-            print(f"   ✗ Job {job_id} fehlgeschlagen:\n{tb}", file=sys.stderr)
+            print(f"   ✗ Job {job_id} failed:\n{tb}", file=sys.stderr)
             fail_job(conn, job_id, tb)
 
 
 def main():
-    print("🛠️  Planning-Worker startet...")
+    print("🛠️  Planning worker starting...")
     conn = db.connect()
     engine = db.make_engine()
     db.apply_schema(conn)
     requeue_stale(conn)
 
     conn.execute(f"LISTEN {CHANNEL}")
-    print(f"   👂 LISTEN {CHANNEL} (Poll-Fallback {POLL_SECONDS}s)")
+    print(f"   👂 LISTEN {CHANNEL} (poll fallback {POLL_SECONDS}s)")
 
-    drain(conn, engine)  # evtl. bereits wartende Jobs
+    drain(conn, engine)  # jobs that may already be waiting
 
     while True:
-        # select() auf dem Connection-Socket: wacht bei pg_notify oder nach
-        # POLL_SECONDS auf. Zuverlässiger als conn.notifies(timeout=…), das in
-        # psycopg3 3.3.x intern in futex_do_wait hängt und weder NOTIFY noch
-        # Timeout korrekt weitergibt.
+        # select() on the connection socket: wakes up on pg_notify or after
+        # POLL_SECONDS. More reliable than conn.notifies(timeout=…), which in
+        # psycopg3 3.3.x hangs internally in futex_do_wait and passes on neither
+        # NOTIFY nor the timeout correctly.
         try:
             _select.select([conn.fileno()], [], [], POLL_SECONDS)
         except Exception:

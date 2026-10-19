@@ -9,10 +9,10 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
   name: 'Fahrradbox',
   h3_resolution: 13,
   dem_source: 'mapterhorn',
-  // Kriterien liegen auf dem UI-Raster 0–10 (Vielfache von 0.1); nur ihr Verhältnis zueinander
-  // zählt, weil scorer.py durch die Summe der aktiven Gewichte teilt — Radwegnähe wiegt hier also
-  // doppelt so schwer wie Hangneigung und ÖPNV. Die übrigen Gewichte (inkl. Zielorte) sind
-  // Zu-/Abschläge und stehen für „bis zu w × 100 Punkte" (siehe `weightScale.ts`).
+  // Criteria sit on the UI grid 0–10 (multiples of 0.1); only their ratio matters, because
+  // scorer.py divides by the sum of active weights — so cycleway proximity weighs twice as much
+  // as slope and public transport here. The other weights (incl. target locations) are
+  // bonuses/penalties and mean "up to w × 100 points" (see `weightScale.ts`).
   weights: {
     w_cyclepath: 0.2,
     w_target: 0.1,
@@ -35,31 +35,30 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
   parken_radius_m: 15,
   fussgaengerzone_radius_m: 20,
   bestand_default_diameter_m: 20,
-  // Gleichverteilung der vier Zielort-Arten: der Faktor verhält sich damit wie vor der
-  // Kategorie-Gewichtung (siehe `zielortShares.ts`).
+  // Equal split of the four target location types: the factor behaves as it did before
+  // category weighting (see `zielortShares.ts`).
   zielort_category_shares: { ...DEFAULT_ZIELORT_SHARES },
-  // 50/50 zwischen ÖPNV und Bikesharing — ANDERS als bei Zielorte NICHT der Stand von vor der
-  // Kategorie-Gewichtung (siehe `oepnvCategories.ts`).
+  // 50/50 between public transport and bike sharing — UNLIKE target locations, NOT the behavior
+  // from before category weighting (see `oepnvCategories.ts`).
   oepnv_category_shares: { ...DEFAULT_OEPNV_SHARES },
-  // `bewohnerbedarf_saettigung_ew` fehlt hier bewusst: ohne Wert in der Varianten-Config gilt der
-  // Zensus-Vorschlag des Planungsgebiets (siehe `mergeFactorConfig`). Erst wenn jemand das Feld
-  // von Hand ändert, steht eine Zahl in der Variante.
+  // `bewohnerbedarf_saettigung_ew` is deliberately missing: without a value in the variant config,
+  // the planning area's census suggestion applies (see `mergeFactorConfig`). Only once someone
+  // edits the field by hand does the variant hold a number.
   min_score_threshold: 60,
 }
 
-// TODO Flächenfinder: Auswahl „Art & Größe der gesuchten Fläche“ ist vorübergehend deaktiviert.
-// Grund: Die Auswahl wird zwar am Planungsgebiet gespeichert, hat aber bisher keinen Effekt auf
-// Score oder Flächensuche. Bis die automatische Flächensuche daran hängt, blenden wir die Felder
-// aus — der komplette Code (State, Server-Felder, DB-Spalten) bleibt absichtlich bestehen.
-// Zum Reaktivieren: hier auf `true` setzen; die UI dazu steht in `AreaFormFields.tsx`, gespeist
-// aus `AreaWizard.tsx` und `AreaEditor.tsx`. Dann greifen wieder die Defaults unten.
+// TODO Flächenfinder: the "Art & Größe der gesuchten Fläche" selection is temporarily disabled.
+// Reason: the selection is saved on the planning area but so far has no effect on the score or
+// the area search. Until the automatic area search uses it, we hide the fields — all the code
+// (state, server fields, DB columns) intentionally stays.
+// To re-enable: set this to `true`; the UI is in `AreaFormFields.tsx`, fed from
+// `AreaWizard.tsx` and `AreaEditor.tsx`. The defaults below then apply again.
 export const SHOW_PLANNING_USE_CASE_UI = false
 
-// Anwendungsfälle für das Planungsgebiet ("Art & Größe der gesuchten Fläche").
-// `defaultAreaM2` ist die vorbelegte Flächengröße; bei „Sonstiges“ gibt es keinen Default, die
-// Größe wird frei eingegeben. Die Fläche liegt auf dem Planungsgebiet (nicht im variant
-// factorConfig) und wird aktuell nur mitgespeichert — Vorbereitung für die künftige
-// automatische Flächensuche.
+// Use cases for the planning area ("Art & Größe der gesuchten Fläche").
+// `defaultAreaM2` is the prefilled area size; "Sonstiges" has no default, the size is entered
+// freely. The area is stored on the planning area (not in the variant factorConfig) and is
+// currently only saved — preparation for the future automatic area search.
 export type PlanningUseCase =
   | 'fahrradbox'
   | 'fahrradabstellanlage'
@@ -137,10 +136,10 @@ export const FACTOR_PARAMS: Record<
   ],
   w_intersection: [{ key: 'intersection_radius_m', label: 'Radius (m)', step: 1, min: 0 }],
   w_parken: [{ key: 'parken_radius_m', label: 'Radius (m)', step: 1, min: 0 }],
-  // Kein Eintrag für w_platz: kein Radius/Distanzabfall, nur direkt auf der Platzfläche wirksam.
-  // Der 20-m-Radius ist bewusst fest verdrahtet (kein UI-Feld) und steht als Konstante in
-  // flaechenfinder/config.py. Einstellbar ist nur die Sättigung; ihr Label nennt die Einheit,
-  // weil „Einwohner" allein nicht erkennen lässt, dass der Abstand schon eingerechnet ist.
+  // No entry for w_platz: no radius/distance decay, only effective directly on the square.
+  // The 20 m radius is deliberately hard-wired (no UI field) and is a constant in
+  // flaechenfinder/config.py. Only saturation is adjustable; its label names the unit, because
+  // "Einwohner" alone doesn't show that the distance is already factored in.
   w_bewohnerbedarf: [
     {
       key: 'bewohnerbedarf_saettigung_ew',
@@ -149,15 +148,15 @@ export const FACTOR_PARAMS: Record<
       min: 0,
     },
   ],
-  // Kein Eintrag für w_target: Radius (20 m) UND Sättigung (fest 1.0) sind beide nicht
-  // UI-einstellbar (siehe Kommentar in flaechenfinder/config.py).
+  // No entry for w_target: radius (20 m) AND saturation (fixed 1.0) are both not adjustable
+  // in the UI (see the comment in flaechenfinder/config.py).
 }
 
-/** Faktoren, die `public._parking_*`-Tabellen lesen (siehe `postgis_loader.py`) — das
- * `parking`-Topic läuft nur in festen Bboxen (`processing/constants/topics.const.ts`), außerhalb
- * gibt es dort keine Daten. `parkingDataAvailable` (aus `getPlanningVariantFn`) blendet diese
- * Faktoren in `FactorEditorPanel` aus, statt lautlos 0 beizutragen. `exclude_carriageways` gehört
- * fachlich auch dazu, ist aber kein Gewicht und wird dort separat behandelt. */
+/** Factors that read `public._parking_*` tables (see `postgis_loader.py`) — the `parking` topic
+ * only runs in fixed bboxes (`processing/constants/topics.const.ts`); outside them there is no
+ * data. `parkingDataAvailable` (from `getPlanningVariantFn`) hides these factors in
+ * `FactorEditorPanel` instead of silently contributing 0. `exclude_carriageways` belongs here
+ * too, but isn't a weight and is handled separately there. */
 export const PARKING_DATA_DEPENDENT_KEYS = ['w_parken', 'w_intersection', 'w_fussgaengerzone']
 
 export const WEIGHT_LABELS: Record<string, string> = {
@@ -174,31 +173,30 @@ export const WEIGHT_LABELS: Record<string, string> = {
   w_bewohnerbedarf: 'Bewohnerbedarf (Zensus)',
 }
 
-// Wirkrichtung eines Zu-/Abschlags. `vegetation`/`platz` stehen für „richtet sich nach
-// `vegetation_direction`"/`platz_direction`" — nur diese beiden können je nach Einstellung Bonus
-// oder Abzug sein.
+// Direction of a bonus/penalty. `vegetation`/`platz` mean "follows `vegetation_direction`" /
+// "follows `platz_direction`" — only these two can be a bonus or a penalty depending on the
+// setting.
 export type ModifierDirection = 'positive' | 'negative' | 'vegetation' | 'platz'
 
 // Factor → probability grouping (Issue #3415). The weight sliders and the
 // per-hexagon sidebar breakdown are grouped by these two categories. Must stay in
 // sync with the backend split in flaechenfinder/scorer.py (_group_score):
-//   Bedarf   → Radwegnähe, ÖPNV + Modifier Bestandsanlagen (Abzug), Bewohnerbedarf
-//              (Zuschlag), Zielorte (Zuschlag) und Fußgängerzonen (Zuschlag)
-//   Bebauung → Hangneigung + Modifier
+//   Bedarf   → Radwegnähe, ÖPNV + modifiers Bestandsanlagen (penalty), Bewohnerbedarf
+//              (bonus), Zielorte (bonus) and Fußgängerzonen (bonus)
+//   Bebauung → Hangneigung + modifiers
 //              (Vegetation, Plätze, Kreuzungen, Parken)
 //
-// Innerhalb der Gruppen trennen wir zusätzlich nach Rechenart, weil beide Arten in scorer.py
-// unterschiedlich wirken und deshalb auch unterschiedlich eingestellt werden (siehe
-// `weightScale.ts`):
-//   criteria  → gewichteter Durchschnitt der 0–100-Teilscores; Gewicht = Anteil am Grundscore
-//   modifiers → Zu-/Abschläge in Punkten auf den fertigen Score
+// Within each group we also split by computation type, because the two types act differently
+// in scorer.py and are therefore set differently (see `weightScale.ts`):
+//   criteria  → weighted average of the 0–100 sub-scores; weight = share of the base score
+//   modifiers → bonuses/penalties in points on the final score
 export const WEIGHT_GROUPS: {
   key: 'bedarf' | 'bebauung'
   label: string
   criteria: string[]
   modifiers: { key: string; direction: ModifierDirection }[]
-  // Angekündigte, aber noch nicht integrierte Kriterien (kein Gewicht, kein Score) — werden nur
-  // als deaktivierte Zeile mit "bald verfügbar"-Hinweis angezeigt (ComingSoonFactorRow).
+  // Announced but not yet integrated criteria (no weight, no score) — only shown as a
+  // disabled row with a "bald verfügbar" hint (ComingSoonFactorRow).
   comingSoon?: string[]
 }[] = [
   {

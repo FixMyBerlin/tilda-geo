@@ -217,8 +217,8 @@ export const SpaceFinderCandidatesSection = ({
         {selectActive ? 'Auswahl beenden' : 'Kandidaten auswählen'}
       </button>
 
-      {/* Wie `QaZoomNotice`: unter Zoom 16 zeigt die Karte nur gemittelte grobe Zellen, die
-          RegionMap nicht als Kandidat annimmt. */}
+      {/* Like `QaZoomNotice`: below zoom 16 the map only shows averaged coarse cells, which
+          RegionMap does not accept as candidates. */}
       {selectActive && (mapParam?.zoom ?? 0) < FINE_HEXAGON_MIN_ZOOM && (
         <div className="flex items-start justify-between gap-3 rounded border border-yellow-200 bg-yellow-50 px-2 py-1.5">
           <p className="text-xs text-yellow-900">

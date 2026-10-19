@@ -1,15 +1,15 @@
-"""Eigene Daten: mehrere hochgeladene Datensätze zu einem Score-Beitrag verrechnen.
+"""Eigene Daten: combine several uploaded datasets into one score contribution.
 
-Jeder Datensatz `{id, name, mode, geojson}` liefert je Hexagon eine Distanz zur (gepufferten)
-Geometrie (NaN = kein Datensatz / keine Objekte). Der Modus des Datensatzes bestimmt die Wirkung:
+Each dataset `{id, name, mode, geojson}` yields a distance per hexagon to the (buffered)
+geometry (NaN = no dataset / no objects). The dataset's mode determines the effect:
 
-  bonus / penalty   → voller Zu-/Abschlag innerhalb, 0 außerhalb; Stärke = eigendaten_weights[id] × 100
-  exclude_inside    → Hexagon innerhalb → mce = 0
-  exclude_outside   → Hexagon außerhalb → mce = 0 (Maske für erlaubte Zonen)
+  bonus / penalty   → full bonus/penalty inside, 0 outside; strength = eigendaten_weights[id] × 100
+  exclude_inside    → hexagon inside → mce = 0
+  exclude_outside   → hexagon outside → mce = 0 (mask for allowed zones)
 
-Mehrere Datensätze addieren ihre Zu-/Abschläge und verknüpfen ihre Ausschlüsse mit ODER.
-Als reine Funktion ohne Geodaten-Abhängigkeiten getrennt vom Scorer, damit sie einzeln
-testbar ist.
+Multiple datasets add up their bonuses/penalties and combine their exclusions with OR.
+Kept separate from the scorer as a pure function without geodata dependencies so it can be
+tested on its own.
 """
 from __future__ import annotations
 
@@ -25,15 +25,15 @@ def combine_eigendaten(
     eigendaten_weights: dict | None,
     index: pd.Index,
 ):
-    """Verrechnet alle Datensätze.
+    """Combine all datasets.
 
     Returns ``(score, delta, exclude, details)``:
-      score   – Serie, Summe der weichen Effekte in Punkten (gerundet); NaN überall, wenn kein
-                weicher Datensatz wirkt (Gewicht 0 / Ausschluss-Modus / keine Daten)
-      delta   – Serie derselben Summe (0 statt NaN) zum Aufaddieren auf den Gesamtscore
-      exclude – bool-Serie, True wo ein Ausschluss-Datensatz das Hexagon ausschließt
-      details – Serie mit JSON-Text je betroffenem Hexagon (sonst None), z. B.
-                ``[{"id":"a","p":12.5},{"id":"b","x":1}]`` (p = Punkte, x = ausgeschlossen)
+      score   – series, sum of the soft effects in points (rounded); NaN everywhere if no
+                soft dataset applies (weight 0 / exclusion mode / no data)
+      delta   – series of the same sum (0 instead of NaN) to add to the total score
+      exclude – bool series, True where an exclusion dataset excludes the hexagon
+      details – series with JSON text per affected hexagon (else None), e.g.
+                ``[{"id":"a","p":12.5},{"id":"b","x":1}]`` (p = points, x = excluded)
     """
     weights = eigendaten_weights or {}
     delta = pd.Series(0.0, index=index)

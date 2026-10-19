@@ -1,7 +1,7 @@
-"""Persistiert Flächenfinder-Ergebnisse nach PostGIS `planning.*` (keyed by run_id).
+"""Persists Flächenfinder results to PostGIS `planning.*` (keyed by run_id).
 
-Geometrien werden nach EPSG:3857 transformiert (wie tildas `public`-Tabellen),
-damit Martins ST_AsMVT-Funktionen direkt darauf arbeiten können.
+Geometries are transformed to EPSG:3857 (like TILDA's `public` tables)
+so Martin's ST_AsMVT functions can work on them directly.
 """
 from __future__ import annotations
 
@@ -20,10 +20,10 @@ HEX_COLUMNS = [
 
 
 def _write_hexagons(engine, frame: gpd.GeoDataFrame, run_id: int) -> int:
-    """Schreibt ein Hexagon-Gitter (fein oder aggregiert) nach PostGIS.
+    """Write a hexagon grid (fine or aggregated) to PostGIS.
 
-    Erwartet eine `resolution`-Spalte im Frame; fehlende Score-Spalten werden
-    als NULL ergänzt.
+    Expects a `resolution` column in the frame; missing score columns are
+    added as NULL.
     """
     if frame is None or not len(frame):
         return 0
@@ -54,15 +54,15 @@ def write_results(
     carriageways: gpd.GeoDataFrame | None = None,
     hex_agg: gpd.GeoDataFrame | None = None,
 ):
-    """Schreibt Hexagone + Vegetation + Fahrbahnflächen für `run_id`.
+    """Write hexagons + vegetation + carriageway areas for `run_id`.
 
-    `hex_proj` ist das feine BASE-Gitter, `hex_agg` das grobe Aggregat für
-    niedrige Zoomstufen; beide landen mit ihrer jeweiligen `resolution` in
-    derselben Tabelle. Gibt (hex_count, veg_count, carriageway_count) zurück,
-    wobei `hex_count` nur die feinen (BASE-)Hexagone zählt.
+    `hex_proj` is the fine BASE grid, `hex_agg` the coarse aggregate for
+    low zoom levels; both go into the same table with their respective
+    `resolution`. Returns (hex_count, veg_count, carriageway_count), where
+    `hex_count` only counts the fine (BASE) hexagons.
     """
 
-    # Idempotenz: evtl. vorhandene Zeilen dieses Laufs entfernen.
+    # Idempotency: remove any existing rows of this run.
     with conn.cursor() as cur:
         cur.execute("DELETE FROM planning.scenario_hexagons WHERE run_id = %s", (run_id,))
         cur.execute("DELETE FROM planning.scenario_vegetation WHERE run_id = %s", (run_id,))
@@ -103,7 +103,7 @@ def write_results(
         del cw
 
     print(
-        f"   ✓ geschrieben: {hex_count} Hexagone, {veg_count} Vegetationsflächen, "
-        f"{carriageway_count} Fahrbahnflächen (run_id={run_id})"
+        f"   ✓ written: {hex_count} hexagons, {veg_count} vegetation areas, "
+        f"{carriageway_count} carriageway areas (run_id={run_id})"
     )
     return hex_count, veg_count, carriageway_count

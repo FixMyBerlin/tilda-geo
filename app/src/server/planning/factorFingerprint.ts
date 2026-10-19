@@ -8,15 +8,15 @@ import {
 
 type FactorLike = MergedFactorConfig | VariantFactorConfig | null | undefined
 
-/** Gebietsfelder — eigener Fingerprint, weil `stale` sowohl Gebiet- als auch Faktor-Writes setzt. */
+/** Area fields — separate fingerprint because `stale` is set by both area and factor writes. */
 const AREA_KEYS = ['study_area', 'user_datasets', 'use_case', 'area_size_m2'] as const
 
 /**
- * Felder, die für „müssen die Faktoren neu berechnet werden?" nicht zählen:
- * - Planungsgebiet — siehe `areaInputsDiffer`
- * - `min_area_m2` — reiner Client-Filter der Flächensuche, geht in keinen Lauf ein
- * - die Marker rund um die Zensus-Sättigung — sie beschreiben, WOHER der Wert kommt; berechnet
- *   wird mit `bewohnerbedarf_saettigung_ew`, und das zählt weiterhin mit
+ * Fields that don't count for "do the factors need a recompute?":
+ * - Planungsgebiet — see `areaInputsDiffer`
+ * - `min_area_m2` — pure client filter of the area search, not part of any run
+ * - the markers around the census saturation — they describe WHERE the value comes from; the
+ *   computation uses `bewohnerbedarf_saettigung_ew`, which still counts
  */
 const IGNORED_FACTOR_KEYS = new Set<string>([
   ...AREA_KEYS,
@@ -34,9 +34,9 @@ const sortedJson = (value: unknown, omitKey?: (key: string) => boolean) =>
   })
 
 /**
- * Stabiler Vergleichswert der berechnungsrelevanten Faktoren einer Variante: gleicher Fingerprint
- * = gleicher Lauf. Der Replacer sortiert die Schlüssel jedes Objekts, weil Postgres `jsonb` eine
- * andere Reihenfolge zurückgibt als der Entwurf im Formular.
+ * Stable comparison value of a variant's computation-relevant factors: same fingerprint
+ * = same run. The replacer sorts each object's keys because Postgres `jsonb` returns a
+ * different order than the form draft.
  */
 export const factorFingerprint = (config: FactorLike) =>
   sortedJson(config, (key) => IGNORED_FACTOR_KEYS.has(key))
@@ -44,7 +44,7 @@ export const factorFingerprint = (config: FactorLike) =>
 export const factorsDiffer = (a: FactorLike, b: FactorLike) =>
   factorFingerprint(a) !== factorFingerprint(b)
 
-/** Roh-Snapshot gegen aktuelle Config — nicht den re-gemergten Snapshot, der das heutige Gebiet trägt. */
+/** Raw snapshot vs. current config — not the re-merged snapshot, which carries today's area. */
 export const areaInputsDiffer = (current: FactorLike, snapshot: FactorLike) => {
   const pick = (config: FactorLike) => {
     if (config == null) return null
@@ -65,14 +65,14 @@ export const runFreshnessAfterFactorSave = (
   snapshot: MergedFactorConfig | null | undefined,
 ) => {
   if (snapshot == null) return 'keep' as const
-  // Gleicher Vergleich wie in der Oberfläche: gemergte Config gegen den normalisierten Lauf.
+  // Same comparison as in the UI: merged config vs. the normalized run.
   const merged = mergeFactorConfig(area, next)
   if (factorsDiffer(merged, comparableRunSnapshot(snapshot, area))) return 'stale' as const
   if (areaInputsDiffer(merged, snapshot)) return 'keep' as const
   return 'fresh' as const
 }
 
-/** Banner-Text der Ursachen; leer wenn nichts veraltet ist. */
+/** Banner text listing the causes; null when nothing is outdated. */
 export const outdatedBannerReason = (factorsChanged: boolean, areaChanged: boolean) => {
   const parts = [
     factorsChanged && 'Faktoren geändert',
@@ -82,11 +82,11 @@ export const outdatedBannerReason = (factorsChanged: boolean, areaChanged: boole
 }
 
 /**
- * Bringt einen Lauf-Snapshot auf dieselbe Form wie die gemergte Varianten-Config:
- * `stripAutoSaettigung` reduziert auf Variantenfelder (Auto-Marker und eingefrorene Auto-Zahl
- * raus), danach derselbe Gebiets-Merge wie in der UI. Alte Snapshots ohne Schwellen-Key und
- * neue mit gemergter Zahl vergleichen so beide fair — `min_area_m2` und Gebietsfelder bleiben
- * über `factorsDiffer` ignoriert.
+ * Brings a run snapshot into the same shape as the merged variant config:
+ * `stripAutoSaettigung` reduces it to variant fields (auto markers and frozen auto value
+ * removed), then the same area merge as in the UI. This compares old snapshots without the
+ * threshold key and new ones with a merged value fairly — `min_area_m2` and area fields stay
+ * ignored via `factorsDiffer`.
  */
 export const comparableRunSnapshot = (
   snapshot: MergedFactorConfig | null | undefined,

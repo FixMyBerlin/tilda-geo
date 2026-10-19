@@ -71,8 +71,8 @@ const StudyAreaSchema = z.unknown().transform((val, ctx) => {
   }
 })
 
-// Die Datensatz-Liste ersetzt immer die komplette Liste (Hinzufügen, Umbenennen, Entfernen,
-// Modus ändern). `undefined` = unverändert lassen.
+// The dataset list always replaces the full list (add, rename, remove, change mode).
+// `undefined` = leave unchanged.
 const UserDatasetsSchema = z
   .any()
   .optional()
@@ -292,8 +292,8 @@ export const getPlanningVariantFn = createServerFn({ method: 'GET' })
         },
       },
     })
-    // Gebiete, die vor dem Zensus-Vorschlag angelegt wurden, holen ihn hier einmalig nach —
-    // der Faktoren-Editor hängt an dieser Query, also ist das der Ort, an dem der Wert gebraucht wird.
+    // Areas created before the census suggestion existed backfill it here once — the factor
+    // editor depends on this query, so this is where the value is needed.
     const stats = await ensureAreaCensusStats(variant.areaId)
     const area = {
       ...variant.area,
@@ -573,8 +573,8 @@ export const updatePlanningAreaFn = createServerFn({ method: 'POST' })
       userDatasetsChanged ||
       (data.useCase !== undefined && data.useCase !== existing.useCase) ||
       (data.areaSizeM2 !== undefined && data.areaSizeM2 !== existing.areaSizeM2)
-    // Datensätze hinzugefügt oder entfernt: Stärken aller Varianten nachziehen (neue mit
-    // Startwert, entfernte raus), sonst bleiben verwaiste Schlüssel in der factorConfig stehen.
+    // Datasets added or removed: sync the strengths of all variants (new ones with the
+    // initial value, removed ones dropped), otherwise orphaned keys remain in factorConfig.
     if (userDatasetsChanged) {
       const variants = await db.planningVariant.findMany({
         where: { areaId: data.areaId },
@@ -607,7 +607,7 @@ export const updatePlanningAreaFn = createServerFn({ method: 'POST' })
       select: { id: true },
     })
     if (areaInputsChanged) await markRunsStaleForArea(data.areaId)
-    // Nur die Geometrie verschiebt die Zensus-Kennzahlen; Titel, Nutzung oder eigene Daten nicht.
+    // Only the geometry changes the census figures; title, use case or user datasets do not.
     if (data.studyArea !== undefined && !jsonEqual(data.studyArea, existing.studyArea)) {
       await refreshAreaCensusStats(data.areaId, data.studyArea)
     }
@@ -633,7 +633,7 @@ const UpdateVariantInput = z.object({
   title: z.string().min(1).optional(),
   description: z.string().optional(),
   factorConfig: VariantFactorConfigSchema.optional(),
-  /** Nur die Zielgröße der Flächensuche setzen, ohne die übrige factorConfig mitzuschicken. */
+  /** Set only the target size of the area search without sending the rest of factorConfig. */
   minAreaM2: z.number().min(0).nullable().optional(),
 })
 
@@ -670,8 +670,8 @@ export const updatePlanningVariantFn = createServerFn({ method: 'POST' })
         min_area_m2: data.minAreaM2,
       }
     }
-    // Gegen die Datensätze des Gebiets abgleichen: ein Entwurf von vor dem letzten Gebiets-Speichern
-    // darf keine Stärken entfernter Datensätze zurückschreiben.
+    // Sync with the area's datasets: a draft from before the last area save must not write
+    // back strengths of removed datasets.
     const stored =
       factorConfig !== undefined
         ? syncEigendatenWeights(
@@ -690,9 +690,9 @@ export const updatePlanningVariantFn = createServerFn({ method: 'POST' })
       },
       select: { id: true, areaId: true },
     })
-    // Titel und Beschreibung ändern das Ergebnis nicht. `min_area_m2` ist ein Client-Filter und
-    // zählt in `runFreshnessAfterFactorSave` nicht. Ein Speichern, das wieder dem letzten Lauf
-    // entspricht (Änderungen verwerfen), hebt `stale` auf — solange das Gebiet noch passt.
+    // Title and description do not change the result. `min_area_m2` is a client filter and does
+    // not count in `runFreshnessAfterFactorSave`. A save that matches the last run again
+    // (discarding changes) clears `stale` — as long as the area still matches.
     if (stored !== undefined) {
       const snapshot = existing.runs[0]
         ? parseFactorConfigSnapshot(existing.runs[0].factorConfigSnapshot)

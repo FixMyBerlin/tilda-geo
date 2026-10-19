@@ -1,4 +1,4 @@
-"""Mehrere Eigene-Daten-Datensätze: Zu-/Abschläge addieren sich, Ausschlüsse sind ein ODER."""
+"""Multiple "Eigene Daten" datasets: bonuses/penalties add up, exclusions are an OR."""
 
 import json
 import unittest
@@ -16,32 +16,32 @@ def dist(*values):
 
 
 class TestCombineEigendaten(unittest.TestCase):
-    def test_ohne_datensaetze_wirkt_nichts(self):
+    def test_without_datasets_nothing_applies(self):
         score, delta, exclude, details = combine_eigendaten([], {}, None, INDEX)
         self.assertTrue(score.isna().all())
         self.assertTrue((delta == 0).all())
         self.assertFalse(exclude.any())
         self.assertTrue(details.isna().all())
 
-    def test_bonus_und_abzug_addieren_sich(self):
+    def test_bonus_and_penalty_add_up(self):
         datasets = [
             {"id": "a", "mode": "bonus"},
             {"id": "b", "mode": "penalty"},
         ]
-        # a: Hexagone 0,1 innerhalb; b: Hexagone 1,2 innerhalb
+        # a: hexagons 0,1 inside; b: hexagons 1,2 inside
         distances = {"a": dist(0, 0, 50, np.nan), "b": dist(40, 0, 0, np.nan)}
         score, delta, exclude, details = combine_eigendaten(
             datasets, distances, {"a": 0.3, "b": 0.1}, INDEX
         )
         self.assertEqual(list(score.iloc[:3]), [30.0, 20.0, -10.0])
-        self.assertEqual(score.iloc[3], 0.0)  # weicher Datensatz aktiv, Hexagon außerhalb: 0
+        self.assertEqual(score.iloc[3], 0.0)  # soft dataset active, hexagon outside: 0
         self.assertFalse(exclude.any())
         self.assertEqual(
             json.loads(details.iloc[1]), [{"id": "a", "p": 30.0}, {"id": "b", "p": -10.0}]
         )
         self.assertIsNone(details.iloc[3])
 
-    def test_gewicht_null_laesst_den_datensatz_wirkungslos(self):
+    def test_zero_weight_makes_dataset_ineffective(self):
         score, delta, _, details = combine_eigendaten(
             [{"id": "a", "mode": "bonus"}], {"a": dist(0, 0, 0, 0)}, {"a": 0}, INDEX
         )
@@ -49,20 +49,20 @@ class TestCombineEigendaten(unittest.TestCase):
         self.assertTrue((delta == 0).all())
         self.assertTrue(details.isna().all())
 
-    def test_ausschluesse_verschiedener_datensaetze_sind_ein_oder(self):
+    def test_exclusions_of_different_datasets_are_an_or(self):
         datasets = [
             {"id": "a", "mode": "exclude_inside"},
             {"id": "b", "mode": "exclude_outside"},
         ]
-        # a schließt Hexagon 0 aus (innerhalb); b erlaubt nur Hexagon 1 und 2 (innerhalb)
+        # a excludes hexagon 0 (inside); b only allows hexagons 1 and 2 (inside)
         distances = {"a": dist(0, 20, 20, 20), "b": dist(30, 0, 0, 30)}
         score, _, exclude, details = combine_eigendaten(datasets, distances, {}, INDEX)
         self.assertEqual(list(exclude), [True, False, False, True])
-        self.assertTrue(score.isna().all())  # kein weicher Datensatz
+        self.assertTrue(score.isna().all())  # no soft dataset
         self.assertEqual(json.loads(details.iloc[0]), [{"id": "a", "x": 1}, {"id": "b", "x": 1}])
         self.assertIsNone(details.iloc[1])
 
-    def test_ausschluss_und_bonus_zusammen(self):
+    def test_exclusion_and_bonus_together(self):
         datasets = [
             {"id": "tabu", "mode": "exclude_inside"},
             {"id": "gut", "mode": "bonus"},
@@ -73,7 +73,7 @@ class TestCombineEigendaten(unittest.TestCase):
         self.assertEqual(list(score), [20.0, 20.0, 0.0, 0.0])
         self.assertEqual(list(delta), [20.0, 20.0, 0.0, 0.0])
 
-    def test_datensatz_ohne_objekte_wird_uebersprungen(self):
+    def test_dataset_without_features_is_skipped(self):
         score, _, exclude, _ = combine_eigendaten(
             [{"id": "leer", "mode": "exclude_outside"}], {}, {}, INDEX
         )

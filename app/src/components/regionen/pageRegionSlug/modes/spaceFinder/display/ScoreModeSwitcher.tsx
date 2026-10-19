@@ -16,18 +16,18 @@ const MODES: [PlanningScoreMode, string][] = [
   ['kombination', 'Kombination'],
 ]
 
-// Regler-Wert, auf den beim Wiedereinblenden zurückgesprungen wird (z.B. Klick auf
-// einen Modus-Button, während der Regler noch bei 0% steht). 100% entspricht der
-// ursprünglichen, vollen Layer-Deckkraft vor Einführung des Reglers.
+// Slider value restored when the layer is shown again (e.g. clicking a mode button
+// while the slider is still at 0%). 100% equals the original full layer opacity
+// from before the slider existed.
 const DEFAULT_OPACITY = 100
 
-// `compact`: nur die Modus-Buttons (für die eingeklappte Panel-Breadcrumb-Zeile) — ohne
-// Transparenz-Regler. Keine eigene Überschrift: die umgebende Box heißt bereits »Anzeige«.
+// `compact`: only the mode buttons (for the collapsed panel breadcrumb row) — without the
+// transparency slider. No heading of its own: the surrounding box is already called »Anzeige«.
 export const ScoreModeSwitcher = ({ compact = false }: { compact?: boolean }) => {
   const { spaceFinderMode, setSpaceFinderModeParam } = useSpaceFinderModeParam()
   const mode = spaceFinderMode.score ?? 'kombination'
   const opacity = spaceFinderMode.opacity ?? 100
-  // 0% Deckkraft bedeutet ausgeblendet (D7 — ersetzt das frühere separate Sichtbarkeits-Flag).
+  // 0% opacity means hidden (D7 — replaces the former separate visibility flag).
   const visible = opacity > 0
 
   const setOpacity = (value: number) =>

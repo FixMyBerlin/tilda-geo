@@ -13,13 +13,12 @@ import { useSpaceFinderModeParam } from '../useSpaceFinderModeParam'
 import { ToggleSwitch } from './LayerToggles'
 
 /**
- * Zielgrößen-Filter der Flächensuche. Die Quadratmeter gehören zur Variante
- * (`factorConfig.min_area_m2`, beim Anlegen des Planungsgebiets aus dessen Flächengröße
- * vorbelegt) und werden beim Verlassen des Felds gespeichert.
- * `space.minArea: true` schaltet den Filter nur an (fehlend = aus). Der Entwurf im Store
- * gilt, solange getippt wird, damit die Karte vor dem Speichern reagiert und eine geleerte
- * Zahl nicht auf den gespeicherten Wert zurückfällt. Der lokale Zustand hält die Zahl auch
- * sichtbar, während der Filter per Schalter ausgeschaltet ist.
+ * Target size filter of the area search. The square meters belong to the variant
+ * (`factorConfig.min_area_m2`, prefilled from the Planungsgebiet's size on creation) and are
+ * saved on blur.
+ * `space.minArea: true` only switches the filter on (missing = off). The store draft applies
+ * while typing, so the map reacts before saving and a cleared number does not fall back to the
+ * saved value. Local state keeps the number visible while the filter is switched off.
  */
 const MinAreaFilterForm = ({
   variantId,
@@ -37,9 +36,9 @@ const MinAreaFilterForm = ({
   const { setMinAreaDraft } = useSpaceFinderBoundaryActions()
   const filterOn = spaceFinderMode.minArea === true
   const [minArea, setLocalMinArea] = useState(savedMinArea)
-  // Schalter an, aber noch keine Zahl > 0: der Filter gilt noch nicht, das Feld muss trotzdem
-  // freigegeben sein — sonst kommt man ohne gespeicherten Wert nie hinein und das Feld sperrt
-  // sich, sobald man die Zahl zum Neueintippen löscht.
+  // Switch on but no number > 0 yet: the filter does not apply yet, but the field must still be
+  // enabled — otherwise without a saved value you could never enter it, and the field would lock
+  // as soon as you clear the number to retype it.
   const [awaitingValue, setAwaitingValue] = useState(() => filterOn && savedMinArea <= 0)
   const checked = filterOn || awaitingValue
   const lastSaved = useRef(savedMinArea)

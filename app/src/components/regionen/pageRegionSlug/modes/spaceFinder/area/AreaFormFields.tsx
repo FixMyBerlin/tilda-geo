@@ -210,11 +210,11 @@ export const AreaFormFields = ({
           </label>
           {titleMissing && <p className="text-xs text-red-600">Bitte einen Namen angeben.</p>}
 
-          {/* TODO Flächenfinder: Auswahl „Art & Größe der gesuchten Fläche“ ist über
-          `SHOW_PLANNING_USE_CASE_UI` (spaceFinderDefaults.ts) ausgeblendet, weil sie bisher keinen
-          Effekt auf Score oder Flächensuche hat. Der Block bleibt bewusst stehen und wird durch
-          Umstellen des Flags wieder sichtbar; die Werte laufen weiterhin über die Defaults der
-          aufrufenden Formulare (AreaWizard/AreaEditor) und werden gespeichert. */}
+          {/* TODO Flächenfinder: the „Art & Größe der gesuchten Fläche“ selection is hidden via
+          `SHOW_PLANNING_USE_CASE_UI` (spaceFinderDefaults.ts) because it has no effect on score or
+          area search yet. The block stays on purpose and reappears by flipping the flag; the
+          values still come from the defaults of the calling forms (AreaWizard/AreaEditor) and
+          are saved. */}
           {SHOW_PLANNING_USE_CASE_UI && (
             <div className="space-y-2">
               <div className="text-xs font-semibold text-gray-700">

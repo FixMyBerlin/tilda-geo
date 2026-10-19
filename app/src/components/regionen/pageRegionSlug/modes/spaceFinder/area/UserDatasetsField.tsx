@@ -21,7 +21,7 @@ import { RemoveIconButton } from '../RemoveIconButton'
 import { spaceFinderPanelTitleInputClass } from '../spaceFinderPanelStyles'
 import { GeoJsonUploadField } from './GeoJsonUpload'
 
-/** `[value, label, tooltip]` — die Erklärung erscheint als Info-Icon auf dem jeweiligen Button. */
+/** `[value, label, tooltip]` — the explanation shows as an info icon on the respective button. */
 export const USER_DATASET_MODE_OPTIONS = [
   [
     'bonus',
@@ -45,13 +45,13 @@ export const USER_DATASET_MODE_OPTIONS = [
   ],
 ] as const satisfies readonly (readonly [UserDatasetMode, string, string])[]
 
-/** Alle Namen gefüllt und verschieden? Sonst lehnt der Server ab — Speichern bleibt gesperrt. */
+/** All names filled and distinct? Otherwise the server rejects — saving stays disabled. */
 export const userDatasetsValid = (datasets: UserDataset[]) =>
   datasets.every(
     (dataset) => dataset.name.trim().length > 0 && !isDuplicateUserDatasetName(datasets, dataset),
   )
 
-/** Amber-Hinweis, wenn Daten (ganz oder teilweise) außerhalb des Planungsgebiets liegen. */
+/** Amber hint when data lies (fully or partly) outside the Planungsgebiet. */
 export const UserDatasetCoverageHint = ({ message }: { message: string }) => (
   <p className="flex items-start gap-1 rounded bg-amber-50 px-2 py-1 text-xs text-amber-800">
     <ExclamationTriangleIcon className="mt-px h-4 w-4 shrink-0" aria-hidden="true" />
@@ -60,10 +60,10 @@ export const UserDatasetCoverageHint = ({ message }: { message: string }) => (
 )
 
 /**
- * Liste der Eigene-Daten-Datensätze eines Planungsgebiets: je Datensatz Name (erscheint im Scoring
- * und in der Sidebar), Modus (Bonus/Abzug/Ausschluss, gilt für alle Varianten), Objektzahl, Hinweis
- * bei Daten außerhalb des Gebiets und „Entfernen“; darunter der Upload für einen weiteren Datensatz.
- * Nur die Stärke bei Bonus/Abzug gehört zur Variante und steht im Faktoren-Block.
+ * List of a Planungsgebiet's "Eigene Daten" datasets: per dataset the name (shown in scoring and
+ * in the sidebar), mode (Bonus/Abzug/Ausschluss, applies to all variants), object count, a hint for
+ * data outside the area and "Entfernen"; below, the upload for another dataset.
+ * Only the strength for Bonus/Abzug belongs to the variant and lives in the factor block.
  */
 export const UserDatasetsField = ({
   datasets,
@@ -74,16 +74,16 @@ export const UserDatasetsField = ({
 }: {
   datasets: UserDataset[]
   onChange: (datasets: UserDataset[]) => void
-  /** Geometrie des Planungsgebiets für den Außerhalb-Hinweis (gezeichnet oder gespeichert). */
+  /** Geometry of the Planungsgebiet for the outside hint (drawn or saved). */
   studyArea: GeoJSON.Geometry | null | undefined
   readOnly?: boolean
-  /** Nach einem Absende-Versuch: fehlende Namen markieren — wie beim Namen des Gebiets. */
+  /** After a submit attempt: mark missing names — like the area name. */
   showErrors?: boolean
 }) => {
   const [limitError, setLimitError] = useState<string | null>(null)
   const atLimit = datasets.length >= MAX_USER_DATASETS
 
-  // Beim Zeichnen ändert sich das Gebiet laufend; der Hinweis darf hinterherhinken, die Karte nicht.
+  // While drawing, the area changes constantly; the hint may lag behind, the map must not.
   const deferredStudyArea = useDeferredValue(studyArea)
 
   const add = (geojson: GeoJSON.FeatureCollection, fileName: string) => {

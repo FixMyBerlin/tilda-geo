@@ -6,22 +6,22 @@ import {
 import type { PlanningScoreMode } from '@/shared/regionen/planningScoreMode.const'
 
 /**
- * Farbe der Faktorgruppen. Dient nur dazu, die Gruppen auf einen Blick auseinanderzuhalten —
- * Anteil-Chip im zugeklappten Faktoren-Kopf, Block/Überschrift im geöffneten Formular, dieselben
- * Gruppen in der Sidebar (Hexagon-Inspector) und die Modus-Buttons (`ScoreModeSwitcher`).
- * Kombination hat bewusst keine eigene Farbe (bleibt neutral/grün) — sie ist keine Faktorgruppe,
- * sondern das gemeinsame Ergebnis. `eigendaten` ist Amber: auf dem Farbkreis der größte Abstand zu
- * Blau (bedarf, ~221°) und Lila (bebauung, ~271°) — Violett (~258°) läge dazwischen und wäre kaum
- * unterscheidbar. Bewusst in Kauf genommen: der Kartenlayer der hochgeladenen Flächen
- * (`UserObstaclesLayer` in `SourcesLayersSpaceFinder.tsx`) bleibt Violett (`#7c3aed`) und der
- * Fahrbahnen-Ausschluss-Layer ist ebenfalls Amber (`carriageways.py`/`SourcesLayersSpaceFinder.tsx`,
- * anderer Layer, andere Bedeutung) — beides Farbüberschneidungen mit anderen Kartenlayern, aber
- * keine mit den beiden übrigen Faktorgruppen. Die übrigen Farben selbst haben keine eigene
- * Bedeutung und sind bewusst nicht die der Kartenlayer.
+ * Color of the factor groups. Only serves to tell the groups apart at a glance — share chip in
+ * the collapsed factors header, block/heading in the open form, the same groups in the sidebar
+ * (hexagon inspector) and the mode buttons (`ScoreModeSwitcher`).
+ * Kombination deliberately has no color of its own (stays neutral/green) — it is not a factor
+ * group but the combined result. `eigendaten` is amber: on the color wheel the furthest from
+ * blue (bedarf, ~221°) and purple (bebauung, ~271°) — violet (~258°) would sit in between and be
+ * hard to tell apart. Accepted on purpose: the map layer of the uploaded areas
+ * (`UserObstaclesLayer` in `SourcesLayersSpaceFinder.tsx`) stays violet (`#7c3aed`) and the
+ * carriageway exclusion layer is amber too (`carriageways.py`/`SourcesLayersSpaceFinder.tsx`,
+ * different layer, different meaning) — both overlap in color with other map layers, but not
+ * with the two other factor groups. The colors carry no meaning of their own and are
+ * deliberately not those of the map layers.
  *
- * `chip` = farbiger Wert-Chip, `block` = linker Streifen + Tönung eines Gruppenblocks,
- * `headline` = Überschrift mit Unterstrich, `text` = nur die Textfarbe, `button` = aktiver
- * Zustand eines Toggle-Buttons (siehe `spaceFinderGroupButtonClass`).
+ * `chip` = colored value chip, `block` = left stripe + tint of a group block,
+ * `headline` = heading with underline, `text` = text color only, `button` = active state of a
+ * toggle button (see `spaceFinderGroupButtonClass`).
  */
 export const spaceFinderGroupStyle: Record<
   'bedarf' | 'bebauung' | 'eigendaten',
@@ -51,10 +51,10 @@ export const spaceFinderGroupStyle: Record<
 }
 
 /**
- * Balkenfarben der Faktor-Zeilen im Hexagon-Inspector (`InspectorFeatureSpaceFinderHexagon`), in der
- * Gruppenfarbe aus `spaceFinderGroupStyle` statt einer von der Gruppe unabhängigen Farbcodierung.
- * `full` = Kriterien-Balken sowie Zuschläge, `pale` = Abschläge (Vorzeichen bleibt so über die
- * Sättigung erkennbar, ohne die Gruppenzuordnung zu verlassen).
+ * Bar colors of the factor rows in the hexagon inspector (`InspectorFeatureSpaceFinderHexagon`), in
+ * the group color from `spaceFinderGroupStyle` instead of a group-independent color coding.
+ * `full` = criteria bars and bonuses, `pale` = penalties (the sign stays recognizable via
+ * saturation without leaving the group color).
  */
 export const spaceFinderGroupBarStyle: Record<
   'bedarf' | 'bebauung' | 'eigendaten',
@@ -66,8 +66,8 @@ export const spaceFinderGroupBarStyle: Record<
 }
 
 /**
- * Toggle-Button in der Gruppenfarbe (aktiv) bzw. neutral (inaktiv) — für `ScoreModeSwitcher`.
- * Kombination hat keine Gruppenfarbe und fällt auf den ursprünglichen Grün-Akzent zurück.
+ * Toggle button in the group color (active) or neutral (inactive) — for `ScoreModeSwitcher`.
+ * Kombination has no group color and falls back to the original green accent.
  */
 export const spaceFinderGroupButtonClass = (active: boolean, mode: PlanningScoreMode) =>
   twJoin(
@@ -79,7 +79,7 @@ export const spaceFinderGroupButtonClass = (active: boolean, mode: PlanningScore
       : toggleButtonInactive,
   )
 
-/** Kompakte Eingabefelder — eine Stufe kleiner als Panel-Fließtext (`text-sm`). */
+/** Compact input fields — one step smaller than panel body text (`text-sm`). */
 const spaceFinderInputClass =
   'rounded border border-gray-300 p-[3px] text-xs leading-none focus:border-blue-400 focus:ring-1 focus:ring-blue-400 focus:outline-none disabled:bg-gray-50 disabled:text-gray-400'
 
@@ -87,6 +87,6 @@ export const spaceFinderNumberInputClass = `${spaceFinderInputClass} w-14 text-r
 
 export const spaceFinderTextInputClass = `${spaceFinderInputClass} w-full`
 
-/** Volle Panel-Breite, normale Schriftgröße — für Titel/Name-Felder im Assistenten. */
+/** Full panel width, normal font size — for title/name fields in the wizard. */
 export const spaceFinderPanelTitleInputClass =
   'w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:border-blue-400 focus:ring-1 focus:ring-blue-400 focus:outline-none'

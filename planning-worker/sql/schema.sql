@@ -22,94 +22,93 @@ CREATE TABLE IF NOT EXISTS planning.scenario_hexagons (
   eignungsklasse          text
 );
 
--- Nachträglich für bereits bestehende Tabellen (CREATE TABLE IF NOT EXISTS oben
--- fügt einer vorhandenen Tabelle keine Spalte hinzu).
+-- Backfill for existing tables (CREATE TABLE IF NOT EXISTS above does not add
+-- columns to an existing table).
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_vegetation real;
 
--- Getrennte Teil-Scores (Issue #3415): Bedarfswahrscheinlichkeit (ÖPNV, Zielorte)
--- und Bebauungswahrscheinlichkeit (Radweg, Hangneigung
--- + Modifier + Ausschluss). NULL bei Alt-Läufen bzw. wenn die
--- Gruppe im Szenario komplett ungewichtet ist. mce_gesamtscore bleibt die
--- unveränderte Kombination.
+-- Separate sub-scores (issue #3415): demand likelihood (ÖPNV, Zielorte)
+-- and build likelihood (Radweg, Hangneigung
+-- + modifiers + exclusion). NULL for legacy runs or when the
+-- group is entirely unweighted in the scenario. mce_gesamtscore stays the
+-- unchanged combination.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bedarf real;
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bebauung real;
 
--- Kreuzungs-Bonus: Zuschlag nahe Bordstein-Ecken (Radabstellanlagen); NULL wenn
--- der Faktor (w_intersection) im Szenario nicht gewichtet ist.
+-- Intersection bonus: boost near curb corners (bicycle parking); NULL when
+-- the factor (w_intersection) is not weighted in the scenario.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_kreuzung real;
 
--- Parken-Bonus: Zuschlag auf/nahe bestehenden KFZ-Parkflächen (Umwidmung zu
--- Radabstellanlagen); NULL wenn der Faktor (w_parken) im Szenario nicht
--- gewichtet ist.
+-- Parking bonus: boost on/near existing car parking areas (conversion to
+-- bicycle parking); NULL when the factor (w_parken) is not weighted in the
+-- scenario.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_parken real;
 
--- Platz-Bonus/Abschlag: signierter Effekt (bonus > 0 / Abzug < 0, je
--- platz_direction) auf/nahe Platzflächen (place=square); NULL wenn der Faktor
--- (w_platz) im Szenario nicht gewichtet ist.
+-- Square bonus/penalty: signed effect (bonus > 0 / penalty < 0, per
+-- platz_direction) on/near squares (place=square); NULL when the factor
+-- (w_platz) is not weighted in the scenario.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_platz real;
 
--- Fußgängerzonen-Bonus: besonders hoher Zuschlag an Ecken, wo eine Straße auf
--- eine Fußgängerzone trifft (Bedarfsgruppe); NULL wenn der Faktor
--- (w_fussgaengerzone) im Szenario nicht gewichtet ist.
+-- Pedestrian zone bonus: especially high boost at corners where a street meets
+-- a pedestrian zone (demand group); NULL when the factor
+-- (w_fussgaengerzone) is not weighted in the scenario.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_fussgaengerzone real;
 
--- Bestandsanlagen-Bedarfssenkung: bestehende Fahrradabstellanlagen
--- (public."bicycleParking_points") senken den Bedarf in ihrem Umkreis; NULL wenn
--- der Faktor (w_bestand) im Szenario nicht gewichtet ist. Signierter Abzug (≤ 0).
+-- Existing-facility demand reduction: existing bicycle parking
+-- (public."bicycleParking_points") lowers demand around it; NULL when
+-- the factor (w_bestand) is not weighted in the scenario. Signed penalty (≤ 0).
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bestand real;
 
--- Eigene Daten (Nutzer-Uploads): Summe der Zu-/Abschläge aller Bonus-/Abzug-Datensätze in
--- Punkten innerhalb der (gepufferten) Geometrie; NULL, wenn kein solcher Datensatz mit Stärke > 0
--- wirkt (nur Ausschluss-Datensätze oder keine Datensätze).
+-- Eigene Daten (user uploads): sum of the bonuses/penalties of all bonus/penalty datasets in
+-- points inside the (buffered) geometry; NULL when no such dataset with strength > 0
+-- applies (only exclusion datasets or no datasets).
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_eigendaten real;
 
--- Bewohnerbedarf (Zensus): Zuschlag in Punkten rund um bewohnte Gebäude, aus der
--- gewichteten Einwohner-Nachbarschaftssumme (data.census_population_point) gegen den
--- Sättigungswert normiert. 0 auf Hexagonen, die selbst ein Gebäude schneiden;
--- NULL, wenn der Faktor (w_bewohnerbedarf) nicht gewichtet ist.
+-- Bewohnerbedarf (census): boost in points around inhabited buildings, from the
+-- weighted population neighborhood sum (data.census_population_point) normalized
+-- against the saturation value. 0 on hexagons that intersect a building themselves;
+-- NULL when the factor (w_bewohnerbedarf) is not weighted.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bewohnerbedarf real;
 
--- Flächen-Cluster (Connected-Component-Labeling über H3-Nachbarschaft): Gesamt-
--- fläche der zusammenhängenden Fläche, zu der ein Hexagon gehört (nur Zellen mit
--- mce_gesamtscore >= min_score_threshold; sonst NULL). Client filtert darauf auf
--- eine gesuchte Zielgröße. Nur im Fein-Gitter (Res 13) gesetzt.
+-- Area clusters (connected-component labeling over H3 neighborhood): total
+-- area of the contiguous area a hexagon belongs to (only cells with
+-- mce_gesamtscore >= min_score_threshold; otherwise NULL). The client filters on it
+-- for a target size. Only set on the fine grid (res 13).
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS cluster_area_m2 real;
 
--- H3-Auflösung der Zeile: BASE (13) = feines Scoring-Gitter für hohe
--- Zoomstufen, AGG (11) = grobes Aggregat für z < 16. Beide Gitter desselben
--- Laufs liegen in dieser Tabelle; die Martin-Funktion planning_hexagons wählt
--- je Zoomstufe. Default 13, damit vorhandene Zeilen als BASE-Gitter gelten.
+-- H3 resolution of the row: BASE (13) = fine scoring grid for high zoom
+-- levels, AGG (11) = coarse aggregate for z < 16. Both grids of the same
+-- run live in this table; the Martin function planning_hexagons picks one
+-- per zoom level. Default 13 so existing rows count as BASE grid.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS resolution smallint NOT NULL DEFAULT 13;
 
--- Liegt das Hexagon auf einem Gebäude (public._buildings)? Solche Zellen sind
--- hart ausgeschlossen (mce_gesamtscore = 0); das Flag erlaubt der Sidebar, den
--- Ausschlussgrund „Gebäude" anzuzeigen. Nur im Fein-Gitter (Res 13) gesetzt.
+-- Does the hexagon lie on a building (public._buildings)? Such cells are
+-- hard-excluded (mce_gesamtscore = 0); the flag lets the sidebar show the
+-- exclusion reason „Gebäude". Only set on the fine grid (res 13).
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS gebaeude boolean NOT NULL DEFAULT false;
 
--- Liegt das Hexagon auf einer Fahrbahn (public._parking_roads, gepuffert um
--- die Straßenbreite)? Nur gesetzt, wenn „Fahrbahnen ausschließen" aktiv war;
--- solche Zellen sind hart ausgeschlossen (mce_gesamtscore = 0). Nur im
--- Fein-Gitter (Res 13) gesetzt.
+-- Does the hexagon lie on a carriageway (public._parking_roads, buffered by
+-- the street width)? Only set when „Fahrbahnen ausschließen" was active;
+-- such cells are hard-excluded (mce_gesamtscore = 0). Only set on the
+-- fine grid (res 13).
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS fahrbahn boolean NOT NULL DEFAULT false;
 
--- Liegt das Hexagon im Ausschlussbereich eigener Flächen (Nutzer-Upload, Datensatz mit
--- mode = exclude_inside/exclude_outside)? Nur dann gesetzt;
--- solche Zellen sind hart ausgeschlossen (mce_gesamtscore = 0). Das Flag
--- erlaubt der Sidebar, den Ausschlussgrund anzuzeigen, auch wenn
--- score_eigendaten in diesem Modus NULL bleibt. Nur im Fein-Gitter (Res 13)
--- gesetzt.
+-- Does the hexagon lie in the exclusion area of user areas (user upload, dataset with
+-- mode = exclude_inside/exclude_outside)? Only set in that case;
+-- such cells are hard-excluded (mce_gesamtscore = 0). The flag
+-- lets the sidebar show the exclusion reason even though
+-- score_eigendaten stays NULL in this mode. Only set on the fine grid (res 13).
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS eigendaten_ausschluss boolean NOT NULL DEFAULT false;
 
--- Je Hexagon, welcher Eigene-Daten-Datensatz wie gewirkt hat: JSON-Text wie
--- [{"id":"a","p":12.5},{"id":"b","x":1}] (p = Punkte, x = ausgeschlossen). NULL, wo kein
--- Datensatz wirkt, auf dem Aggregat-Gitter und bei Alt-Läufen.
+-- Per hexagon, how each Eigene-Daten dataset applied: JSON text like
+-- [{"id":"a","p":12.5},{"id":"b","x":1}] (p = points, x = excluded). NULL where no
+-- dataset applies, on the aggregate grid and for legacy runs.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS eigendaten_details text;
 
--- Potentialflächen (aus Hexagonen abgeleitete Polygone) werden nicht mehr
--- berechnet; Altbestand aus früheren Läufen aufräumen.
+-- Potential areas (polygons derived from hexagons) are no longer
+-- computed; clean up leftovers from earlier runs.
 DROP TABLE IF EXISTS planning.scenario_areas;
 
--- On-demand berechnete Vegetationsflächen (NDVI), pro Lauf gespeichert.
+-- On-demand computed vegetation areas (NDVI), stored per run.
 CREATE TABLE IF NOT EXISTS planning.scenario_vegetation (
   run_id     bigint NOT NULL,
   geom       geometry(MultiPolygon, 3857) NOT NULL,
@@ -117,9 +116,9 @@ CREATE TABLE IF NOT EXISTS planning.scenario_vegetation (
   flaeche_m2 real
 );
 
--- Gepufferte Fahrbahnflächen (public._parking_roads, Breite als Puffer), pro
--- Lauf gespeichert. Nur befüllt, wenn „Fahrbahnen ausschließen" aktiv war
--- (siehe scenario_hexagons.fahrbahn); dient hier der Kartenanzeige.
+-- Buffered carriageway areas (public._parking_roads, width as buffer), stored per
+-- run. Only filled when „Fahrbahnen ausschließen" was active
+-- (see scenario_hexagons.fahrbahn); used here for the map display.
 CREATE TABLE IF NOT EXISTS planning.scenario_carriageways (
   run_id   bigint NOT NULL,
   geom     geometry(MultiPolygon, 3857) NOT NULL,

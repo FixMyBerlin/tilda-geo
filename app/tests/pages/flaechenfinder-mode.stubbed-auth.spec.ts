@@ -46,7 +46,7 @@ test.describe('Flächenfinder mode (stubbed admin login)', () => {
           .getByRole('link', { name: 'Flächenfinder' }),
       ).toBeVisible({ timeout: 30_000 })
       await waitForMapLoad(page)
-      // The first Gebiet is opened on entry; the other one sits in the collection dropdown.
+      // The first area is opened on entry; the other one sits in the collection dropdown.
       await expect(page.getByText('Schillerkiez').first()).toBeVisible({ timeout: 30_000 })
     })
   })

@@ -39,9 +39,9 @@ export const DisplaySection = ({ variant }: { variant: PlanningVariantDetail }) 
           <ScoreModeSwitcher />
           {(latestRun?.vegCount ?? 0) > 0 && <VegetationToggle />}
           {factorConfig?.exclude_carriageways && <CarriagewaysToggle />}
-          {/* Aus dem Lauf-Snapshot, nicht aus der aktuellen Konfiguration: die Kacheln werden auf das
-              Planungsgebiet DIESES Laufs zugeschnitten (siehe planning_census), der Schalter soll also
-              genau dann erscheinen, wenn der Bewohnerbedarf tatsächlich mitgerechnet wurde. */}
+          {/* From the run snapshot, not the current config: the tiles are clipped to the
+              Planungsgebiet of THIS run (see planning_census), so the toggle should appear exactly
+              when resident demand was actually included. */}
           {(lastRunConfig?.weights?.w_bewohnerbedarf ?? 0) > 0 && <CensusToggle />}
         </>
       )}

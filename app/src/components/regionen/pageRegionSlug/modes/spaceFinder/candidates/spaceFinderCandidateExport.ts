@@ -2,10 +2,10 @@ import { feature, featureCollection } from '@turf/helpers'
 import type { SpaceFinderCandidate } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-candidates-store'
 
 /**
- * Die ausgewählten Hexagone als GeoJSON-FeatureCollection: potentielle Standorte
- * für den Bau von Abstellanlagen. Die Tile-Properties (Scores, Eignungsklasse,
- * Ausschluss-Flags) werden unverändert übernommen und um die Position in der
- * Auswahlliste ergänzt, damit die Reihenfolge aus der Sidebar erhalten bleibt.
+ * The selected hexagons as a GeoJSON FeatureCollection: potential sites for building
+ * bicycle parking. The tile properties (scores, suitability class, exclusion flags) are
+ * copied unchanged and extended with the position in the selection list so the sidebar
+ * order is kept.
  */
 const candidatesToGeojson = (candidates: SpaceFinderCandidate[]) =>
   featureCollection(
@@ -29,7 +29,7 @@ export const candidateExportFileName = (variantId: number | null | undefined) =>
     : `${date}--abstellanlagen-kandidaten.geojson`
 }
 
-/** Triggert den Browser-Download der Auswahl (Blob statt data-URL wegen der Größe). */
+/** Triggers the browser download of the selection (Blob instead of data URL due to size). */
 export const downloadCandidatesGeojson = (candidates: SpaceFinderCandidate[], fileName: string) => {
   const blob = new Blob([JSON.stringify(candidatesToGeojson(candidates), null, 2)], {
     type: 'application/geo+json',

@@ -7,10 +7,10 @@ import { geoDataClient } from '@/server/prisma-client.server'
 // They take a `query_params json` 4th argument — Martin passes URL query params
 // as JSON, e.g. `…/planning_hexagons/{z}/{x}/{y}?run_id=42`.
 //
-// Signatur und Rumpf müssen mit planning-worker/sql/martin_functions.sql
-// übereinstimmen: beide Seiten legen dieselben Funktionen an (App beim Start,
-// Worker beim Lauf). Abweichende Parameter-Defaults lässt Postgres bei
-// CREATE OR REPLACE nicht zu (42P13).
+// Signature and body must match planning-worker/sql/martin_functions.sql:
+// both sides create the same functions (the app on startup, the worker per
+// run). Postgres rejects differing parameter defaults on CREATE OR REPLACE
+// (42P13).
 //
 // A completed run is immutable, so its tiles are cacheable forever under the
 // run_id-keyed URL (see configs/nginx.conf `planning_cache` zone). A re-run
@@ -45,11 +45,11 @@ async function ensurePlanningSchema() {
       eigendaten_ausschluss   boolean NOT NULL DEFAULT false,
       eigendaten_details      text
     );`)
-  // Bestehende Tabellen nachrüsten (CREATE TABLE IF NOT EXISTS fügt keine Spalte hinzu).
+  // Upgrade existing tables (CREATE TABLE IF NOT EXISTS doesn't add columns).
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_vegetation real;`,
   )
-  // Getrennte Teil-Scores (Issue #3415): Bedarf vs. Bebauung; NULL bei Alt-Läufen.
+  // Separate partial scores (issue #3415): demand vs. built environment; NULL for old runs.
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bedarf real;`,
   )
@@ -71,47 +71,47 @@ async function ensurePlanningSchema() {
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bestand real;`,
   )
-  // Eigene Daten (Nutzer-Upload): signierter Effekt in Punkten; NULL bei Alt-Läufen
-  // und Ausschluss-Modi.
+  // Eigene Daten (user upload): signed effect in points; NULL for old runs
+  // and exclusion modes.
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_eigendaten real;`,
   )
-  // Bewohnerbedarf (Zensus): Zuschlag in Punkten rund um bewohnte Gebäude; 0 auf
-  // Gebäude-Hexagonen, NULL bei Alt-Läufen und ohne Gewicht.
+  // Resident demand (census): bonus points around inhabited buildings; 0 on
+  // building hexagons, NULL for old runs and without weight.
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bewohnerbedarf real;`,
   )
-  // Flächen-Cluster (Connected-Component-Labeling über H3-Nachbarschaft): Gesamt-
-  // fläche der zusammenhängenden Fläche, zu der ein Hexagon gehört (NULL unter
-  // min_score_threshold). Client filtert clientseitig auf eine Zielgröße.
+  // Area clusters (connected-component labeling over H3 neighbors): total area of
+  // the contiguous area a hexagon belongs to (NULL below min_score_threshold).
+  // The client filters on a target size.
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS cluster_area_m2 real;`,
   )
-  // Fahrbahnen ausschließen: Hexagon liegt auf einer um ihre Breite gepufferten
-  // Straße (public._parking_roads); nur gesetzt, wenn die Checkbox aktiv war.
+  // "Fahrbahnen ausschließen": hexagon lies on a road buffered by its width
+  // (public._parking_roads); only set when the checkbox was active.
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS fahrbahn boolean NOT NULL DEFAULT false;`,
   )
-  // H3-Auflösung der Zeile: BASE (13) für hohe Zoomstufen, AGG (11) als grobes
-  // Aggregat darunter. planning_hexagons wählt je Zoomstufe.
+  // H3 resolution of the row: BASE (13) for high zoom levels, AGG (11) as coarse
+  // aggregate below. planning_hexagons picks per zoom level.
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS resolution smallint NOT NULL DEFAULT 13;`,
   )
-  // Hexagon liegt auf einem Gebäude (public._buildings) → hart ausgeschlossen;
-  // das Flag erlaubt der Sidebar, den Ausschlussgrund anzuzeigen.
+  // Hexagon lies on a building (public._buildings) → hard exclusion;
+  // the flag lets the sidebar show the exclusion reason.
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS gebaeude boolean NOT NULL DEFAULT false;`,
   )
-  // Hexagon liegt im Ausschlussbereich eigener Daten (Nutzer-Upload,
-  // exclude_inside/exclude_outside) → hart ausgeschlossen; das Flag erlaubt der
-  // Sidebar, den Ausschlussgrund anzuzeigen, auch wenn score_eigendaten in
-  // diesem Modus NULL bleibt.
+  // Hexagon lies in the exclusion zone of user datasets (user upload,
+  // exclude_inside/exclude_outside) → hard exclusion; the flag lets the sidebar
+  // show the exclusion reason even though score_eigendaten stays NULL in this
+  // mode.
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS eigendaten_ausschluss boolean NOT NULL DEFAULT false;`,
   )
-  // Je Hexagon, welcher Eigene-Daten-Datensatz wie gewirkt hat: JSON-Text wie
-  // [{"id":"a","p":12.5},{"id":"b","x":1}] (p = Punkte, x = ausgeschlossen). NULL, wo kein
-  // Datensatz wirkt, und bei Alt-Läufen.
+  // Per hexagon, which "Eigene Daten" dataset had which effect: JSON text like
+  // [{"id":"a","p":12.5},{"id":"b","x":1}] (p = points, x = excluded). NULL where no
+  // dataset applies, and for old runs.
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS eigendaten_details text;`,
   )
@@ -122,8 +122,8 @@ async function ensurePlanningSchema() {
       ndvi       real,
       flaeche_m2 real
     );`)
-  // Gepufferte Fahrbahnflächen (public._parking_roads, Breite als Puffer); nur
-  // befüllt, wenn „Fahrbahnen ausschließen" aktiv war. Dient der Kartenanzeige.
+  // Buffered carriageway areas (public._parking_roads, width as buffer); only
+  // filled when „Fahrbahnen ausschließen" was active. Used for map display.
   await geoDataClient.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS planning.scenario_carriageways (
       run_id  bigint NOT NULL,
@@ -151,7 +151,7 @@ async function ensurePlanningSchema() {
   await geoDataClient.$executeRawUnsafe(
     `CREATE INDEX IF NOT EXISTS scenario_carriageways_geom_idx ON planning.scenario_carriageways USING gist (geom);`,
   )
-  // Potentialflächen werden nicht mehr berechnet; Altbestand aufräumen.
+  // Potential areas are no longer computed; clean up leftovers.
   await geoDataClient.$executeRawUnsafe(`DROP TABLE IF EXISTS planning.scenario_areas;`)
   await geoDataClient.$executeRawUnsafe(
     `DROP FUNCTION IF EXISTS public.planning_areas(int, int, int, json);`,
@@ -201,16 +201,14 @@ async function registerHexagonsFunction() {
         WHERE run_id = rid AND resolution = res_val AND (geom && bounds)
       ) AS tile;
 
-      -- Eigener Punkt-Layer für das Label (nur ab z18, siehe HEXAGON_LABEL_MIN_ZOOM in
-      -- SourcesLayersSpaceFinder.tsx): der Fläche-Layer oben puffert & schneidet die
-      -- Hexagon-Polygone pro Kachel (buffer=256) für nahtlose Füllung an
-      -- Kachelgrenzen — dasselbe Polygon liegt dadurch oft in mehreren Kacheln, je
-      -- mit einem eigenen, zur sichtbaren Teilfläche versetzten Zentroid. Ein
-      -- Symbol-Layer darauf würde also mehrfache, außermittige Labels je Hexagon
-      -- zeigen. Der Label-Layer nimmt stattdessen den echten Hexagon-Mittelpunkt,
-      -- ungepuffert (buffer=0) und via ST_Contains auf die ungeweiteten
-      -- Kachelgrenzen gefiltert — jedes Hexagon liefert seinen Mittelpunkt so in
-      -- genau einer Kachel.
+      -- Separate point layer for the label (only from z18, see HEXAGON_LABEL_MIN_ZOOM in
+      -- SourcesLayersSpaceFinder.tsx): the fill layer above buffers & clips the hexagon
+      -- polygons per tile (buffer=256) so the fill stays seamless at tile edges — but the
+      -- same polygon then often lands in several tiles, each with its own centroid shifted
+      -- toward the visible part. A symbol layer based on that would produce multiple,
+      -- off-center labels per hexagon. Instead the label layer uses the true hexagon
+      -- center, unbuffered (buffer=0) and filtered via ST_Contains against the unexpanded
+      -- tile bounds — so each hexagon yields its center in exactly one tile.
       IF z >= 18 THEN
         SELECT INTO label_mvt ST_AsMVT(tile, 'planning_hexagons_label', 4096, 'geom') FROM (
           SELECT
@@ -335,21 +333,20 @@ async function registerCarriagewaysFunction() {
 }
 
 /**
- * Zensus-Einwohnerpunkte des Bewohnerbedarf-Faktors als Punktlayer.
+ * Census population points of the resident demand factor as a point layer.
  *
- * Liest DIREKT aus `data.census_population_point` — es wird bewusst nichts pro Lauf
- * ins `planning`-Schema kopiert: die Tabelle deckt ganz Deutschland ab (~24 Mio.
- * Punkte, EPSG:5243) und liegt ohnehin in dieser DB. Gezeigt wird derselbe
- * Ausschnitt, den auch das Scoring benutzt — `PostgisLoader.load_census_population()`
- * filtert mit `geom && ST_Transform(study_area, 5243)`, also über die Bounding-Box
- * des Planungsgebiets. Das Gebiet kommt aus dem eingefrorenen
- * `factorConfigSnapshot` des Laufs, damit der Layer zum Ergebnis passt, auch wenn
- * das Planungsgebiet danach bearbeitet wurde.
+ * Reads DIRECTLY from `data.census_population_point` — deliberately nothing is copied
+ * into the `planning` schema per run: the table covers all of Germany (~24M points,
+ * EPSG:5243) and lives in this DB anyway. It shows the same extent the scoring uses —
+ * `PostgisLoader.load_census_population()` filters with
+ * `geom && ST_Transform(study_area, 5243)`, i.e. the Planungsgebiet bounding box. The
+ * area comes from the run's frozen `factorConfigSnapshot`, so the layer matches the
+ * result even if the Planungsgebiet was edited later.
  *
- * Fehlt das Data-Schema auf dieser Umgebung, liefert die Funktion NULL statt eines
- * Fehlers (leere Kachel) — wie die graceful Fallbacks im Worker.
+ * If the data schema is missing on this environment, the function returns NULL instead
+ * of an error (empty tile) — like the graceful fallbacks in the worker.
  *
- * Muss mit planning-worker/sql/martin_functions.sql übereinstimmen.
+ * Must match planning-worker/sql/martin_functions.sql.
  */
 async function registerCensusFunction() {
   await geoDataClient.$executeRawUnsafe(`

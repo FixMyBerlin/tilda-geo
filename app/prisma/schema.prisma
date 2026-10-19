@@ -180,7 +180,7 @@ model Region {
   notesInternal Boolean       @default(false)
   showSearch    Boolean       @default(false)
 
-  /// Flächenfinder (Planungsmodus). Default aus; Regionen schalten ihn im Admin ein.
+  /// Flächenfinder (planning mode). Off by default; regions enable it in the admin.
   spaceFinderEnabled Boolean @default(false)
 
   mapLat  Float @default(0)
@@ -815,9 +815,9 @@ enum QaEvaluatorType {
 }
 
 // ── Planning module (Flächenfinder) ──────────────────────────────────────────
-// Planungsgebiet (selten geändert: Geometrie, eigene Daten) + Variante
-// (häufig: Gewichte, Schwellen, Use-Case). Ein Lauf merged beides in
-// factorConfigSnapshot; PostGIS-Ergebnisse hängen an PlanningRun.id.
+// Planungsgebiet (rarely changed: geometry, user datasets) + variant
+// (often: weights, thresholds, use case). A run merges both into
+// factorConfigSnapshot; PostGIS results hang off PlanningRun.id.
 //
 // Permissions: any region member may edit/run any area/variant of that region;
 // createdBy is tracked for attribution only (and is cleared when the user is deleted). Variants duplicate via `parentId`.
@@ -851,11 +851,11 @@ model PlanningArea {
   // Bumped when geometry/obstacles/use-case/size change — marks existing COMPLETE runs stale.
   inputUpdatedAt     DateTime          @default(now())
   //
-  // Zensus-Kennzahlen des Planungsgebiets, einmal je Gebiet aus `data.census_population_point`
-  // ermittelt (siehe server/planning/censusSaettigung.server.ts). Sie füllen den Faktor-Parameter
-  // `bewohnerbedarf_saettigung_ew` vor; alle Varianten des Gebiets starten damit auf demselben
-  // Wert. `censusComputedAt` unterscheidet „noch nie gerechnet" von „gerechnet, nichts gefunden"
-  // (dann bleiben beide Werte NULL und der Worker-Default greift).
+  // Census figures of the Planungsgebiet, computed once per area from `data.census_population_point`
+  // (see server/planning/censusSaettigung.server.ts). They prefill the factor parameter
+  // `bewohnerbedarf_saettigung_ew`; all variants of the area start on the same value.
+  // `censusComputedAt` distinguishes "never computed" from "computed, nothing found"
+  // (then both values stay NULL and the worker default applies).
   censusSaettigungEw Float?
   censusEwPerHa      Float?
   censusComputedAt   DateTime?
@@ -886,7 +886,7 @@ model PlanningVariant {
   parentId     Int?
   children     PlanningVariant[] @relation("Lineage")
   //
-  // Editable UseCaseConfig ohne Geometrie: weights and thresholds only (use-case/size live on PlanningArea).
+  // Editable UseCaseConfig without geometry: weights and thresholds only (use-case/size live on PlanningArea).
   factorConfig Json
   //
   // Pointer to the latest successful run used for display. Plain Int (logical FK
@@ -937,7 +937,7 @@ model PlanningJob {
   startedAt     DateTime?
   finishedAt    DateTime?
   errorMessage  String?
-  // Fortschritt 0–100 + Kurzlabel, vom planning-worker während der Berechnung gesetzt.
+  // Progress 0–100 + short label, set by the planning-worker during computation.
   progress      Int?
   progressLabel String?
   //

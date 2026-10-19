@@ -2,15 +2,15 @@ import { check } from '@placemarkio/check-geojson'
 import { bbox, booleanIntersects, booleanWithin } from '@turf/turf'
 import { z } from 'zod'
 
-// Grenzen für das vom Nutzer hochgeladene Eigendaten-GeoJSON. Client UND Server
-// erzwingen dieselben Werte (der Server vertraut dem Client nicht).
+// Limits for the user-uploaded Eigendaten GeoJSON. Client AND server
+// enforce the same values (the server doesn't trust the client).
 export const MAX_USER_GEOJSON_BYTES = 8 * 1024 * 1024 // 8 MB
 export const MAX_USER_GEOJSON_FEATURES = 10_000
 const MAX_USER_GEOJSON_COORDS = 500_000
 
-// Grenzen für die Liste der Datensätze eines Planungsgebiets.
+// Limits for the dataset list of a Planungsgebiet.
 export const MAX_USER_DATASETS = 10
-export const MAX_USER_DATASETS_BYTES = 16 * 1024 * 1024 // 16 MB insgesamt
+export const MAX_USER_DATASETS_BYTES = 16 * 1024 * 1024 // 16 MB total
 export const MAX_USER_DATASET_NAME_LENGTH = 80
 
 const UserDatasetModeSchema = z.enum(['bonus', 'penalty', 'exclude_inside', 'exclude_outside'], {
@@ -19,8 +19,8 @@ const UserDatasetModeSchema = z.enum(['bonus', 'penalty', 'exclude_inside', 'exc
 export type UserDatasetMode = z.infer<typeof UserDatasetModeSchema>
 
 /**
- * Die gespeicherte Datensatz-Liste (`PlanningArea.userDatasets`, Run-Snapshots). Sie wurde beim
- * Schreiben mit `sanitizeUserDatasets` geprüft; die Geometrie wird hier nicht noch einmal geprüft.
+ * The stored dataset list (`PlanningArea.userDatasets`, run snapshots). It was validated with
+ * `sanitizeUserDatasets` on write; the geometry is not validated again here.
  */
 export const StoredUserDatasetsSchema = z.array(
   z.object({
@@ -32,13 +32,13 @@ export const StoredUserDatasetsSchema = z.array(
 )
 
 /**
- * Ein hochgeladener Eigene-Daten-Datensatz eines Planungsgebiets. Name, Modus und Geometrie
- * gehören zum Gebiet (gelten für alle Varianten); die Stärke je Datensatz steht je Variante in
+ * An uploaded "Eigene Daten" dataset of a Planungsgebiet. Name, mode and geometry belong to the
+ * area (apply to all variants); the strength per dataset is stored per variant in
  * `factorConfig.eigendaten_weights[id]`.
  */
 export type UserDataset = z.infer<typeof StoredUserDatasetsSchema>[number]
 
-/** Was der Client schickt: Geometrie prüft `sanitizeUserGeojson`, die Liste `sanitizeUserDatasets`. */
+/** What the client sends: `sanitizeUserGeojson` validates the geometry, `sanitizeUserDatasets` the list. */
 const UserDatasetInputSchema = z.object({
   id: z
     .string({ error: 'Eigene Daten: ungültige Datensatz-ID.' })
@@ -63,7 +63,7 @@ const UserDatasetsInputSchema = z
   .array(UserDatasetInputSchema, { error: 'Eigene Daten: ungültige Datensatz-Liste.' })
   .max(MAX_USER_DATASETS, `Zu viele Datensätze (max. ${MAX_USER_DATASETS}).`)
 
-/** Kurze, im Gebiet eindeutige ID für einen neuen Datensatz. */
+/** Short ID for a new dataset, unique within the area. */
 export const newUserDatasetId = (existing: UserDataset[]) => {
   const taken = new Set(existing.map((dataset) => dataset.id))
   let id = ''
@@ -73,10 +73,10 @@ export const newUserDatasetId = (existing: UserDataset[]) => {
   return id
 }
 
-/** Vergleichsform eines Namens: Namen müssen im Gebiet eindeutig sein (ohne Groß/klein, Ränder). */
+/** Comparison form of a name: names must be unique within the area (ignoring case and surrounding whitespace). */
 const userDatasetNameKey = (name: string) => name.trim().toLocaleLowerCase('de-DE')
 
-/** Trägt ein anderer Datensatz der Liste schon denselben (nicht leeren) Namen? */
+/** Does another dataset in the list already have the same (non-empty) name? */
 export const isDuplicateUserDatasetName = (
   datasets: Pick<UserDataset, 'id' | 'name'>[],
   dataset: Pick<UserDataset, 'id' | 'name'>,
@@ -89,8 +89,8 @@ export const isDuplicateUserDatasetName = (
 }
 
 /**
- * Dateiname ohne Endung als Vorschlag für den Datensatznamen; ist er schon vergeben, mit „(2)“,
- * „(3)“ … dahinter.
+ * File name without extension as the suggested dataset name; if already taken, „(2)“,
+ * „(3)“ … is appended.
  */
 export const defaultUserDatasetName = (
   fileName: string,
@@ -109,7 +109,7 @@ export const defaultUserDatasetName = (
   return name
 }
 
-/** Unterstützte Geometrietypen (Punkte/Linien/Flächen; keine GeometryCollection). */
+/** Supported geometry types (points/lines/polygons; no GeometryCollection). */
 const ALLOWED_GEOMETRY_TYPES = new Set<GeoJSON.GeoJsonGeometryTypes>([
   'Point',
   'MultiPoint',
@@ -130,14 +130,14 @@ type UserGeometry =
 const isAllowed = (geom: GeoJSON.Geometry | null | undefined): geom is UserGeometry =>
   geom != null && ALLOWED_GEOMETRY_TYPES.has(geom.type)
 
-/** Byte-Größe des serialisierten Werts (für das 5-MB-Limit auf Server-Seite). */
+/** Byte size of the serialized value (for `MAX_USER_GEOJSON_BYTES` / `MAX_USER_DATASETS_BYTES`). */
 export function userGeojsonByteSize(value: unknown) {
   return new TextEncoder().encode(JSON.stringify(value)).length
 }
 
-// Läuft rekursiv durch die verschachtelten Koordinaten-Arrays, prüft jede
-// Position auf endliche, plausible Lon/Lat-Werte und zählt die Positionen (DoS-
-// Schutz gegen riesige Geometrien).
+// Walks the nested coordinate arrays recursively, checks each position for
+// finite, plausible lon/lat values and counts the positions (DoS protection
+// against huge geometries).
 function validatePositions(coords: unknown, counter: { n: number }) {
   if (!Array.isArray(coords)) throw new Error('Ungültige Koordinaten im GeoJSON.')
   if (typeof coords[0] === 'number') {
@@ -158,15 +158,15 @@ function validatePositions(coords: unknown, counter: { n: number }) {
 }
 
 /**
- * Normalisiert und sanitisiert beliebiges GeoJSON (Geometry / Feature /
- * FeatureCollection) zu einer minimalen `FeatureCollection` für
- * einen Eigene-Daten-Datensatz:
- *   - nur unterstützte Geometrietypen (Punkt/Linie/Fläche),
- *   - `properties` werden verworfen (nur Geometrie zählt),
- *   - Feature- und Koordinaten-Obergrenzen (DoS-Schutz),
- *   - Koordinaten-Plausibilität (endlich, Lon/Lat im gültigen Bereich).
- * Wirft eine nutzerlesbare (deutsche) Fehlermeldung bei ungültigem Input.
- * Von Client (Upload) und Server (harte Durchsetzung) gleichermaßen genutzt.
+ * Normalizes and sanitizes arbitrary GeoJSON (Geometry / Feature /
+ * FeatureCollection) into a minimal `FeatureCollection` for
+ * an "Eigene Daten" dataset:
+ *   - only supported geometry types (point/line/polygon),
+ *   - `properties` are dropped (only geometry matters),
+ *   - feature and coordinate caps (DoS protection),
+ *   - coordinate plausibility (finite, lon/lat in valid range).
+ * Throws a user-readable (German) error message on invalid input.
+ * Used by both the client (upload) and the server (hard enforcement).
  */
 export function sanitizeUserGeojson(input: GeoJSON.GeoJSON) {
   const geometries: UserGeometry[] = []
@@ -223,9 +223,9 @@ export function parseUserGeojson(jsonStr: string) {
 }
 
 /**
- * Prüft und bereinigt die Datensatz-Liste eines Planungsgebiets (Client und Server): Anzahl,
- * eindeutige Namen und IDs, gültige Modi, je Datei die Grenzen aus `sanitizeUserGeojson` und die
- * Gesamtgröße. Wirft eine nutzerlesbare Fehlermeldung.
+ * Validates and cleans the dataset list of a Planungsgebiet (client and server): count, unique
+ * names and IDs, valid modes, the per-file limits from `sanitizeUserGeojson` and the total size.
+ * Throws a user-readable error message.
  */
 export function sanitizeUserDatasets(input: unknown) {
   const parsed = UserDatasetsInputSchema.safeParse(input)
@@ -236,7 +236,7 @@ export function sanitizeUserDatasets(input: unknown) {
   const datasets = parsed.data.map(({ id, name, mode, geojson: rawGeojson }) => {
     if (seenIds.has(id)) throw new Error('Eigene Daten: doppelte Datensatz-ID.')
     seenIds.add(id)
-    // Der Name ist das einzige Etikett in Sidebar und Prüfliste — zweimal derselbe wäre mehrdeutig.
+    // The name is the only label in the sidebar and Prüfliste — the same one twice would be ambiguous.
     if (seenNames.has(userDatasetNameKey(name)))
       throw new Error(`Eigene Daten: Der Name „${name}“ ist doppelt vergeben.`)
     seenNames.add(userDatasetNameKey(name))
@@ -257,22 +257,22 @@ export function sanitizeUserDatasets(input: unknown) {
 
 export type UserDatasetCoverage = {
   total: number
-  /** Objekte komplett außerhalb des Planungsgebiets. */
+  /** Features completely outside the Planungsgebiet. */
   outside: number
-  /** Objekte, die die Grenze schneiden (nur teilweise im Gebiet). */
+  /** Features crossing the boundary (only partly inside the area). */
   partial: number
 }
 
 /**
- * Ergebnisse je Datensatz-Objekt und Gebiet (als JSON). Die Prüfung kann bei vielen Objekten
- * Sekunden dauern; so läuft sie je Datei und Gebietsstand nur einmal, auch wenn Gebietsformular
- * und Faktoren-Block sie neu rendern. Die WeakMap gibt den Eintrag mit dem Datensatz frei.
+ * Results per dataset object and area (as JSON). The check can take seconds with many features;
+ * this way it runs only once per file and area state, even when the area form and the factors
+ * block re-render. The WeakMap releases the entry together with the dataset.
  */
 const coverageCache = new WeakMap<GeoJSON.FeatureCollection, Map<string, UserDatasetCoverage>>()
 
 /**
- * Wie viele Objekte eines Datensatzes liegen (ganz oder teilweise) außerhalb des Planungsgebiets?
- * Reine Hinweis-Berechnung für die Oberfläche. Ohne Gebiet gibt es nichts zu vergleichen.
+ * How many features of a dataset lie (fully or partly) outside the Planungsgebiet?
+ * Only computes a UI hint. Without an area there is nothing to compare.
  */
 export function userDatasetCoverage(
   geojson: GeoJSON.FeatureCollection,
@@ -291,7 +291,7 @@ export function userDatasetCoverage(
     coverageCache.set(geojson, byArea)
   }
   const result = computeUserDatasetCoverage(geojson, studyArea)
-  // Nur den letzten Gebietsstand je Datei behalten — beim Zeichnen entstehen viele Zwischenstände.
+  // Keep only the latest area state per file — drawing produces many intermediate states.
   byArea.clear()
   byArea.set(areaKey, result)
   return result
@@ -308,7 +308,7 @@ function computeUserDatasetCoverage(
 
   for (const feature of geojson.features) {
     const [fMinX, fMinY, fMaxX, fMaxY] = bbox(feature)
-    // Bbox-Vorprüfung: spart die teure Geometrieprüfung für die meisten Objekte.
+    // Bbox pre-check: skips the expensive geometry check for most features.
     if (fMaxX < minX || fMinX > maxX || fMaxY < minY || fMinY > maxY) {
       outside++
       continue
@@ -317,13 +317,13 @@ function computeUserDatasetCoverage(
       if (!booleanIntersects(feature, area)) outside++
       else if (!booleanWithin(feature, area)) partial++
     } catch {
-      // Ungewöhnliche Geometriekombination: lieber kein falscher Alarm.
+      // Unusual geometry combination: better no false alarm.
     }
   }
   return { total, outside, partial }
 }
 
-/** Kurztext für den Hinweis; `null`, wenn alles im Planungsgebiet liegt. */
+/** Short text for the hint; `null` if everything lies within the Planungsgebiet. */
 export function userDatasetCoverageMessage({ total, outside, partial }: UserDatasetCoverage) {
   if (total === 0 || (outside === 0 && partial === 0)) return null
   if (outside === total)

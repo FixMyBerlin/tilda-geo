@@ -50,10 +50,10 @@ services:
       FORCE_COLOR: 1
       PLANNING_CIR_DIR: /cir
     volumes:
-      # DEM-Raster (rasterio-Quelle); MVP läuft auch ohne (SRTM-Fallback).
+      # DEM rasters (rasterio source); the MVP also runs without them (SRTM fallback).
       - planning_dem:/dem
-      # CIR-DOP-Kacheln für die On-demand-NDVI-Vegetation; ohne Kacheln bleibt
-      # die Vegetation leer und das übrige Scoring läuft normal weiter.
+      # CIR DOP tiles for the on-demand NDVI vegetation; without tiles the vegetation
+      # stays empty and the rest of the scoring runs as usual.
       - planning_cir:/cir
     depends_on:
       db:

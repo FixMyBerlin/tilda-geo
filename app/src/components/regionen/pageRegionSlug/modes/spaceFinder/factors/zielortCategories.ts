@@ -1,16 +1,16 @@
 /**
- * Die vier Zielort-Kategorien des Faktors „Zielorte" (`w_target`).
+ * The four target location categories of the factor „Zielorte" (`w_target`).
  *
- * Quelle ist `public."poiClassification"` (processing/topics/poiClassification): jeder relevante
- * OSM-Punkt landet dort in genau einer dieser vier Kategorien. Bis hierher gingen alle vier
- * gleichwertig in den Zuschlag ein; über `zielort_category_shares` lässt sich ihr Verhältnis
- * zueinander verschieben (siehe `zielortShares.ts` und `scorer.py`).
+ * Source is `public."poiClassification"` (processing/topics/poiClassification): every relevant
+ * OSM point ends up in exactly one of these four categories. Previously all four counted
+ * equally towards the bonus; `zielort_category_shares` shifts their ratio
+ * (see `zielortShares.ts` and `scorer.py`).
  *
- * `color` ist bewusst dieselbe Farbe, mit der die Kategorie im Zielorte-Layer der Karte gezeichnet
- * wird (`mapboxStyles/groups/atlas_pois_default.ts`, Layer `pois-classification`) — die Regler
- * sollen ohne Legende zum Kartenbild passen. Ändert sich dort die Farbe, hier nachziehen.
+ * `color` is deliberately the color the category is drawn with in the Zielorte map layer
+ * (`mapboxStyles/groups/atlas_pois_default.ts`, layer `pois-classification`) — the sliders
+ * should match the map without a legend. If the color changes there, update it here.
  *
- * Die `help`-Texte listen die häufigsten OSM-Werte der Kategorie aus
+ * The `help` texts list the most common OSM values of the category from
  * `processing/topics/poiClassification/helper/category_values_with_categories.lua`.
  */
 export type ZielortCategory = 'Grundversorgung' | 'Bildung' | 'Einkauf' | 'Freizeit'
@@ -49,8 +49,8 @@ export const ZIELORT_CATEGORIES: {
 
 export const ZIELORT_CATEGORY_KEYS = ZIELORT_CATEGORIES.map((category) => category.key)
 
-/** Gleichverteilung — der Stand, mit dem der Faktor sich genau wie vor der Kategorie-Gewichtung
- * verhält (siehe `zielortShares.ts`). */
+/** Equal split — with this the factor behaves exactly as before category weighting existed
+ * (see `zielortShares.ts`). */
 export const DEFAULT_ZIELORT_SHARES: Record<ZielortCategory, number> = {
   Grundversorgung: 25,
   Bildung: 25,

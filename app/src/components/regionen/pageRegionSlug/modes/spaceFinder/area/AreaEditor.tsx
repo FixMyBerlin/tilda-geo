@@ -83,7 +83,7 @@ const AreaEditorForm = ({
     },
   })
 
-  // Wie im Assistenten: Fehler erst nach dem Speichern-Versuch zeigen, dann am Feld markieren.
+  // Like the wizard: show errors only after a save attempt, then mark them at the field.
   const handleSubmit = () => {
     setSubmitAttempted(true)
     if (title.trim().length === 0 || !namesValid) return

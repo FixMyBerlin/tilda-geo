@@ -33,9 +33,9 @@ export const VariantFactorConfigSchema = z
   })
   .passthrough()
 
-// Tolerant: reads what is stored. Gespeicherte Configs (und eingefrorene Run-Snapshots) können
-// älter sein als das aktuelle Schema. Ein Wert, der nicht mehr passt, fällt weg und der Default
-// greift — statt dass die ganze Variantenseite wirft.
+// Tolerant: reads what is stored. Stored configs (and frozen run snapshots) may be older than
+// the current schema. A value that no longer fits is dropped and the default applies —
+// instead of the whole variant page throwing.
 const VariantFactorConfigReadSchema = z
   .object(
     Object.fromEntries(

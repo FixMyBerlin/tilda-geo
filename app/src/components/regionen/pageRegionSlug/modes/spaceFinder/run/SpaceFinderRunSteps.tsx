@@ -1,8 +1,8 @@
 import { useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 
-// Die 14 fachlichen Schritte eines Laufs, in Reihenfolge. Müssen mit
-// SCORING_STEPS im planning-worker (flaechenfinder/scorer.py) übereinstimmen.
+// The 14 domain steps of a run, in order. Must match SCORING_STEPS in the
+// planning-worker (flaechenfinder/scorer.py).
 const SCORING_STEPS = [
   'Vegetationsflächen berechnen',
   'H3-Gitter generieren',
@@ -20,10 +20,10 @@ const SCORING_STEPS = [
   'Ergebnisse speichern',
 ] as const
 
-// Das steuernde Faktor-Gewicht je Schritt (0-basiert, index-gleich zu
-// SCORING_STEPS). Leeres Array = struktureller Schritt ohne Gewicht (läuft
-// immer). Ein Schritt gilt als „ohne Gewicht", wenn ALLE genannten Gewichte 0
-// sind. Schritt 4 lädt Gebäude (harter Ausschluss, läuft immer, kein Gewicht).
+// The controlling factor weight(s) per step (0-based, same index as
+// SCORING_STEPS). Empty array = structural step without weight (always runs).
+// A step counts as "without weight" if ALL listed weights are 0.
+// Step 4 loads buildings (hard exclusion, always runs, no weight).
 const STEP_WEIGHT_KEYS: string[][] = [
   ['w_vegetation'], //  1 Vegetationsflächen berechnen
   [], //                2 H3-Gitter generieren
@@ -36,34 +36,32 @@ const STEP_WEIGHT_KEYS: string[][] = [
   ['w_target'], //          9 Zielorte laden
   ['w_slope'], //           10 Hangneigung berechnen
   ['w_vegetation'], //      11 Vegetationsabdeckung verschneiden
-  ['w_eigendaten'], //      12 Eigene Daten verschneiden (Sonderfall, siehe stepDisplay)
+  ['w_eigendaten'], //      12 Eigene Daten verschneiden (special case, see stepDisplay)
   [], //                    13 MCE-Score berechnen
   [], //                    14 Ergebnisse speichern
 ]
 
-// 0-basierter Index des Eigendaten-Schritts: läuft, sobald das Gebiet Datensätze hat, sonst
-// wird er übersprungen.
+// 0-based index of the user datasets step: runs as soon as the area has datasets,
+// otherwise it is skipped.
 const USER_DATASETS_STEP_INDEX = 11
 
-// Der ausklappbare Block fasst alle Faktor-Schritte zusammen (1-basierte
-// Schrittnummern 3–12). Schritt 1/2 (Vegetationsvorphase, H3) und 13/14
-// (MCE, Speichern) bleiben top-level.
+// The collapsible block groups all factor steps (1-based step numbers 3–12).
+// Steps 1/2 (vegetation pre-phase, H3) and 13/14 (MCE, save) stay top-level.
 const LOAD_GROUP = { firstStep: 3, lastStep: 12, label: 'Eingangsdaten & Faktoren' }
 
 type StepDisplay = {
   done: boolean
   active: boolean
-  /** Gewicht 0 → wird gar nicht ausgeführt. */
+  /** Weight 0 → not executed at all. */
   skipped: boolean
 }
 
 /**
- * Leitet den aktuell laufenden Schritt (1..SCORING_STEPS.length) aus dem
- * Job-Fortschritt ab. Der Worker schreibt das progressLabel als
- * "n/total · Name…"; nur die Vorbereitungsphase (~0–2 %) hat kein solches
- * Präfix.
- *   0                      → noch kein Schritt aktiv (Vorbereitung)
- *   1..SCORING_STEPS.length → dieser Schritt läuft gerade / ist fertig
+ * Derives the currently running step (1..SCORING_STEPS.length) from the job
+ * progress. The worker writes the progressLabel as "n/total · Name…"; only the
+ * preparation phase (~0–2 %) has no such prefix.
+ *   0                      → no step active yet (preparation)
+ *   1..SCORING_STEPS.length → this step is running / done
  */
 export function deriveScoringStep(
   status: string,
@@ -76,7 +74,7 @@ export function deriveScoringStep(
   return 0
 }
 
-/** Zustand eines einzelnen Schritts (0-basierter Index) aus currentStep + Gewichten. */
+/** State of a single step (0-based index) from currentStep + weights. */
 function stepDisplay(
   i: number,
   currentStep: number,
@@ -89,20 +87,20 @@ function stepDisplay(
   const weightZero = !structural && keys.every((k) => !(weights?.[k] ?? 0))
   const base = { done: step < currentStep, active: step === currentStep }
 
-  // Eigendaten-Schritt: die Distanzberechnung (scorer.py) läuft für jeden Datensatz,
-  // unabhängig von Modus und Stärke (die zählen erst im MCE-Schritt).
+  // User datasets step: the distance computation (scorer.py) runs for every dataset,
+  // regardless of mode and strength (those only matter in the MCE step).
   if (i === USER_DATASETS_STEP_INDEX) return { ...base, skipped: !hasUserDatasets }
 
   return { ...base, skipped: weightZero }
 }
 
-/** Der Status-Marker (Kreis/Punkt) links neben dem Schrittnamen. */
+/** Status marker (circle/dot) left of the step name. */
 const StepMarker = ({
   d,
   numbered,
 }: {
   d: StepDisplay
-  /** Top-level: Schrittnummer im Kreis; im Block: Punkt-Marker. */
+  /** Top-level: step number in a circle; inside the block: dot marker. */
   numbered?: number
 }) => {
   const label = d.skipped ? '–' : d.done ? '✓' : (numbered ?? '')
@@ -122,7 +120,7 @@ const StepMarker = ({
   )
 }
 
-/** Eine Schrittzeile (top-level oder als Kind im Block). */
+/** One step row (top-level or as a child in the block). */
 const StepRow = ({ label, d, numbered }: { label: string; d: StepDisplay; numbered?: number }) => {
   return (
     <li className="flex items-center gap-2 text-xs">
@@ -143,9 +141,9 @@ const StepRow = ({ label, d, numbered }: { label: string; d: StepDisplay; number
 }
 
 /**
- * Ausklappbarer Block, der die Faktor-Schritte (Indizes childIndices)
- * zusammenfasst. Klappt automatisch auf, solange einer seiner Schritte läuft,
- * und wieder zu, sobald der Block fertig ist – ein manueller Klick übersteuert.
+ * Collapsible block grouping the factor steps (indices childIndices).
+ * Opens automatically while one of its steps runs and closes once the block is
+ * done – a manual click overrides this.
  */
 const CollapsibleStepGroup = ({
   label,
@@ -165,7 +163,7 @@ const CollapsibleStepGroup = ({
   const active = currentStep >= firstStep && currentStep <= lastStep
   const done = currentStep > lastStep
 
-  // null = automatisch (offen solange aktiv); ein Klick setzt einen festen Wert.
+  // null = automatic (open while active); a click sets a fixed value.
   const [open, setOpen] = useState<boolean | null>(null)
   const effectiveOpen = open ?? active
 
@@ -220,10 +218,9 @@ const CollapsibleStepGroup = ({
 }
 
 /**
- * Checkliste der Scoring-Schritte mit Hervorhebung des aktuellen Schritts. Die
- * Faktor-Schritte (3–10) sind in einem ausklappbaren Block zusammengefasst.
- * `weights` (Faktor-Gewichte des Szenarios) markiert einen Schritt bei Gewicht
- * 0 als „übersprungen".
+ * Checklist of the scoring steps, highlighting the current step. The factor
+ * steps (3–12) are grouped in a collapsible block. `weights` (the scenario's
+ * factor weights) marks a step with weight 0 as "übersprungen".
  */
 export const SpaceFinderRunSteps = ({
   currentStep,
@@ -243,8 +240,8 @@ export const SpaceFinderRunSteps = ({
   return (
     <ol className="mt-2 flex flex-col gap-1">
       {SCORING_STEPS.map((label, i) => {
-        // An der Position des ersten Gruppen-Schritts einmal den Block rendern;
-        // die restlichen Gruppen-Indizes im Loop überspringen.
+        // Render the block once at the first group step's position;
+        // skip the remaining group indices in the loop.
         if (i === groupStart) {
           return (
             <CollapsibleStepGroup

@@ -32,37 +32,37 @@ import { LayerHighlight } from './LayerHighlight'
 export const planningHexagonsSourceId = 'planning-hexagons-source'
 export const planningHexagonsLayerId = 'planning-hexagons'
 /**
- * Zwei unsichtbare Fixpunkte, direkt (und ausschließlich) beim ersten Rendern mit
- * gesetztem `runId` gemountet und danach nie mehr entfernt oder neu erzeugt.
+ * Two invisible anchor layers, mounted only on the first render with a `runId` set and
+ * never removed or recreated afterwards.
  *
- * - Die Hexagon-Layer (Fläche/Highlight/Label) hängen sich per `beforeId` immer direkt
- *   unter die Decke (`ceiling`).
- * - Die Kontroll-Layer (Vegetation, Fahrbahnen, Zensus, Eigene Daten) hängen sich per
- *   `beforeId` unter den Boden (`floor`), der direkt vor der Decke liegt, und liegen
- *   damit immer unter den Hexagonen.
+ * - The hexagon layers (fill/highlight/label) always attach directly below the
+ *   `ceiling` via `beforeId`.
+ * - The control layers (vegetation, carriageways, census, "Eigene Daten") attach below
+ *   the `floor` via `beforeId`, which sits directly before the ceiling, so they always
+ *   stay below the hexagons.
  *
- * Ohne die Fixpunkte würde ein Neu-Mount (z.B. Ein-/Ausblenden über ScoreModeSwitcher
- * oder die Schalter) einen Layer ohne `beforeId` ganz oben einfügen, also über bereits
- * sichtbare andere Layer.
+ * Without the anchors a remount (e.g. toggling via ScoreModeSwitcher or the switches)
+ * would add a layer without `beforeId` at the very top, above other layers already
+ * visible.
  */
 const planningOverlayFloorLayerId = 'planning-overlay-floor'
 const planningOverlayCeilingLayerId = 'planning-overlay-ceiling'
 /** MVT layer name of the Martin function source (see registerPlanningFunctions.server.ts). */
 export const planningHexagonsSourceLayer = 'planning_hexagons'
 /**
- * Eigener Punkt-Layer mit dem Hexagon-Mittelpunkt, je Hexagon in genau einer
- * Kachel enthalten (siehe registerPlanningFunctions.server.ts). Der Fläche-Layer
- * `planningHexagonsSourceLayer` puffert & schneidet Polygone pro Kachel, sodass
- * dasselbe Hexagon oft in mehreren Kacheln mit versetztem Zentroid auftaucht — ein
- * Label darauf wäre mehrfach und außermittig. Deshalb ein eigener, ungepufferter
- * Punkt-Layer nur fürs Label.
+ * Separate point layer with the hexagon center, each hexagon contained in exactly one
+ * tile (see registerPlanningFunctions.server.ts). The fill layer
+ * `planningHexagonsSourceLayer` buffers & clips polygons per tile, so the same hexagon
+ * often appears in several tiles with shifted centroids — a label on it would be
+ * duplicated and off-center. Hence a separate, unbuffered point layer just for the
+ * label.
  */
 const planningHexagonsLabelSourceLayer = 'planning_hexagons_label'
 const planningHexagonsLabelLayerId = 'planning-hexagons-label'
 
-// Ab Zoom 18 wird der Score-Wert des aktiven Anzeigemodus (Kombination/Bedarf/
-// Bebauung) gut lesbar im Hexagon eingeblendet. Unter Zoom 18 bleibt es wie
-// bisher (nur Einfärbung, kein Label).
+// From zoom 18 on, the score of the active display mode (Kombination/Bedarf/
+// Bebauung) is shown as a readable label in the hexagon. Below zoom 18 there is
+// only the fill color, no label.
 const HEXAGON_LABEL_MIN_ZOOM = 18
 
 // Planning module result layers (Flächenfinder).
@@ -75,16 +75,15 @@ const HEXAGON_LABEL_MIN_ZOOM = 18
 // When the active variant has no run yet (`runId` from `useSpaceFinderSelection`), this renders
 // nothing — this component only mounts inside the Flächenfinder mode anyway (`RegionMap`).
 
-// Score → Farbintensitäts-Rampe (0 = ausgeschlossen/transparent … 100 = kräftigste Farbe).
-// Hexagone mit Wert 0 bekommen keine Füllfarbe, nur der Rand (fill-outline-color)
-// markiert sie noch. Zwischen 0 und HEXAGON_FADE_IN_THRESHOLD blendet die
-// Deckkraft graduell ein (statt hart bei 0 umzuschalten) – sonst entsteht bei
-// vielen knapp über 0 liegenden Werten ein löchriges Muster aus abrupt
-// wechselnden transparenten und undurchsichtigen Nachbar-Hexagonen. Der Farbton
-// hängt vom aktiven Anzeigemodus ab — dieselben Farben wie `spaceFinderGroupStyle`
-// (Bedarf blau, Bebauung lila); Kombination ist keine Faktorgruppe und bekommt ein
-// positives Gelbgrün/Lime (Rot wirkt negativ, gute Flächen sollen positiv wirken). Der
-// Vegetations-Layer nutzt ein bläuliches Smaragdgrün, damit beide unterscheidbar bleiben.
+// Score → color intensity ramp (0 = excluded/transparent … 100 = strongest color).
+// Hexagons with value 0 get no fill, only the outline (fill-outline-color) still
+// marks them. Between 0 and HEXAGON_FADE_IN_THRESHOLD the opacity fades in gradually
+// (instead of switching hard at 0) – otherwise many values just above 0 produce a
+// patchy pattern of abruptly alternating transparent and opaque neighbor hexagons.
+// The hue depends on the active display mode — same colors as `spaceFinderGroupStyle`
+// (Bedarf blue, Bebauung purple); Kombination is not a factor group and gets a
+// positive yellow-green/lime (red reads as negative, good areas should read positive).
+// The vegetation layer uses a bluish emerald so both stay distinguishable.
 const HEXAGON_FADE_IN_THRESHOLD = 10
 const HEXAGON_SCORE_RAMP: Record<PlanningScoreMode, { fadeFrom: string; stops: string[] }> = {
   kombination: {
@@ -119,23 +118,21 @@ const scoreColor = (property: string, mode: PlanningScoreMode) => {
   ]
 }
 
-// Ursprüngliche feste Layer-Deckkraft (vor Einführung des Transparenz-Reglers).
-// Der Regler steht bei 100% für genau diesen Wert, nicht für CSS-Opacity 1 —
-// er skaliert die volle Fläche darunter, damit "100%" optisch dem alten,
-// unveränderten Layer entspricht.
+// Original fixed layer opacity (before the transparency slider existed).
+// 100% on the slider maps to exactly this value, not CSS opacity 1 —
+// it scales the full range below, so "100%" looks like the old, unchanged layer.
 const MAX_FILL_OPACITY = 0.7
 
-// Verhältnis abgedunkelt : voll sichtbar aus den ursprünglichen Festwerten (0.1/0.7),
-// jetzt relativ zur per Regler eingestellten Deckkraft (`space.opacity`, ScoreModeSwitcher)
-// angewendet, damit das Abdunkeln bei jeder Transparenz-Einstellung sichtbar bleibt.
+// Dimmed : fully visible ratio from the original fixed values (0.1/0.7), now applied
+// relative to the slider opacity (`space.opacity`, ScoreModeSwitcher) so dimming stays
+// visible at every transparency setting.
 const DIMMED_RATIO = 0.1 / 0.7
 
-// Flächen-Cluster-Filter: nur bei aktivierter Checkbox (filterOn) und gesetzter
-// Zielgröße (minArea > 0) werden Hexagone, deren zusammenhängende Fläche
-// (`cluster_area_m2`) die Zielgröße nicht erreicht (oder gar keinem Cluster
-// angehören, also NULL sind), stark abgedunkelt statt ausgeblendet – so bleibt
-// die Score-Einfärbung als Kontext sichtbar. Checkbox aus → wie vor Einführung
-// des Filters, alle Hexagone mit der eingestellten Deckkraft eingefärbt.
+// Area cluster filter: only with the checkbox on (filterOn) and a target size set
+// (minArea > 0), hexagons whose contiguous area (`cluster_area_m2`) is below the
+// target size (or that belong to no cluster, i.e. NULL) are strongly dimmed instead
+// of hidden – so the score coloring stays visible as context. Checkbox off → no
+// filter, all hexagons colored with the configured opacity.
 const clusterOpacity = (filterOn: boolean, minArea: number, maxOpacity: number) =>
   filterOn && minArea > 0
     ? [
@@ -183,18 +180,18 @@ const hexagonLabelLayerProps = (property: string) => ({
   },
 })
 
-// Zensus-Einwohnerpunkte (Faktor „Bewohnerbedarf"). Die Kacheln kommen direkt aus
-// `data.census_population_point`, auf die Bounding-Box des Planungsgebiets
-// beschränkt — es liegt nichts pro Lauf im planning-Schema (siehe die
-// Martin-Funktion `planning_census`). Ein Punkt sitzt in aller Regel auf dem
-// Gebäudemittelpunkt und trägt dessen Einwohnerzahl.
+// Census population points (factor „Bewohnerbedarf"). Tiles come directly from
+// `data.census_population_point`, limited to the study area's bounding box —
+// nothing is stored per run in the planning schema (see the Martin function
+// `planning_census`). A point usually sits on the building center and carries its
+// population.
 const planningCensusSourceId = 'planning-census-source'
 
 const CENSUS_ATTRIBUTION =
   '<a href="https://www.zensus2022.de/" target="_blank" rel="noopener">Zensus 2022</a> (Destatis, auf Gebäude disaggregiert)'
 
-// Ab Zoom 17 die Einwohnerzahl neben den Punkt schreiben — darunter liegen die
-// Gebäude zu dicht beieinander, als dass Zahlen lesbar wären.
+// From zoom 17 on, write the population next to the point — below that, buildings
+// are too close together for numbers to be readable.
 const CENSUS_LABEL_MIN_ZOOM = 17
 
 const censusCircleLayerProps = {
@@ -203,8 +200,8 @@ const censusCircleLayerProps = {
   'source-layer': 'planning_census',
   type: 'circle' as const,
   paint: {
-    // Radius wächst mit Zoom UND Einwohnerzahl, damit ein Mehrfamilienhaus auch
-    // ohne Label vom Einfamilienhaus zu unterscheiden ist.
+    // Radius grows with zoom AND population, so an apartment building can be told
+    // apart from a single-family house even without a label.
     'circle-radius': [
       'interpolate',
       ['linear'],
@@ -252,8 +249,8 @@ const censusLabelLayerProps = {
   },
 }
 
-// Vegetation als helle smaragdgrüne Fläche. Das bläuliche Grün hebt sich vom gelbgrünen
-// Hexagon-Verlauf (Lime) ab.
+// Vegetation as a light emerald fill. The bluish green stands out from the yellow-green
+// (lime) hexagon ramp.
 const VEGETATION_FILL_COLOR = '#6ee7b7'
 const VEGETATION_LINE_COLOR = '#047857'
 
@@ -283,10 +280,10 @@ const BoundaryHighlightLayer = () => {
   )
 }
 
-// Kontroll-Layer für die hochgeladenen „Eigene Daten" (alle Datensätze aus factorConfig.user_datasets).
-// Die Geometrie liegt clientseitig im Store (von `SpaceFinderBody` gesetzt); Punkte,
-// Linien und Flächen werden mit eigenen Layern dargestellt. Über den Schalter im
-// Panel (userObstaclesVisible) ein- und ausblendbar wie Vegetation/Fahrbahnen.
+// Control layer for the uploaded „Eigene Daten" (all datasets from factorConfig.user_datasets).
+// The geometry lives client-side in the store (set by `SpaceFinderBody`); points,
+// lines and polygons get their own layers. Toggled via the panel switch
+// (userObstaclesVisible) like vegetation/carriageways.
 const UserObstaclesLayer = () => {
   const geom = useSpaceFinderUserObstaclesGeom()
   const visible = useSpaceFinderUserObstaclesVisible()
@@ -323,18 +320,17 @@ const UserObstaclesLayer = () => {
   )
 }
 
-// Gelbe Umrandung der als Kandidaten ausgewählten Hexagone (Auswahl-Werkzeug,
-// siehe `SpaceFinderCandidatesSection`). Die Geometrien liegen beim Klick bereits im
-// Store, deshalb eine eigene GeoJSON-Source statt eines Filter-Ausdrucks auf der
-// Vektor-Source. So bleibt die Markierung auch sichtbar, wenn ein Hexagon gerade
-// nicht in den gerenderten Kacheln liegt.
+// Yellow outline of the hexagons selected as candidates (selection tool, see
+// `SpaceFinderCandidatesSection`). The geometries are already in the store on click,
+// hence a separate GeoJSON source instead of a filter expression on the vector source.
+// This keeps the marking visible even when a hexagon is not in the rendered tiles.
 //
-// Alle Kandidaten sind nur sichtbar, während das Auswahl-Werkzeug aktiv ist (`selectActive`).
-// Ausschalten des Toggles oder Zuklappen von »Auswahl« setzt `selectActive` auf false und
-// blendet die Markierung aus, ohne die Auswahl selbst zu löschen.
+// All candidates are only visible while the selection tool is active (`selectActive`).
+// Turning the toggle off or collapsing »Auswahl« sets `selectActive` to false and hides
+// the marking without clearing the selection itself.
 //
-// Der in der Liste angeklickte (`focusedH3Id`) und der dort überfahrene Kandidat bekommen
-// zusätzlich Füllung und dickeren Rand, auch wenn das Werkzeug gerade aus ist.
+// The candidate clicked in the list (`focusedH3Id`) and the one hovered there also get
+// a fill and a thicker outline, even when the tool is off.
 const CANDIDATE_LIST_ITEM_ID_PREFIX = 'spaceFinder-candidate-'
 export const spaceFinderCandidateListItemId = (h3Id: string) =>
   `${CANDIDATE_LIST_ITEM_ID_PREFIX}${h3Id}`
@@ -442,7 +438,7 @@ export const SourcesLayersSpaceFinder = () => {
     <>
       <BoundaryHighlightLayer />
 
-      {/* Siehe Kommentar bei planningOverlayCeilingLayerId. */}
+      {/* See comment at planningOverlayCeilingLayerId. */}
       <Layer id={planningOverlayFloorLayerId} type="background" layout={{ visibility: 'none' }} />
       <Layer id={planningOverlayCeilingLayerId} type="background" layout={{ visibility: 'none' }} />
 
@@ -467,7 +463,7 @@ export const SourcesLayersSpaceFinder = () => {
         </>
       )}
 
-      {/* Nach den Hexagon-Layern, damit die gelbe Auswahl-Umrandung darüber liegt. */}
+      {/* After the hexagon layers so the yellow selection outline sits on top. */}
       <CandidateHighlightLayer runKey={candidateRunKey} />
 
       <UserObstaclesLayer />

@@ -28,11 +28,11 @@ const collection = (...geometries: GeoJSON.Geometry[]): GeoJSON.FeatureCollectio
   features: geometries.map((geometry) => ({ type: 'Feature', geometry, properties: {} })),
 })
 
-// Planungsgebiet: Quadrat (13.40, 52.50) – (13.50, 52.60)
+// Planungsgebiet: square (13.40, 52.50) – (13.50, 52.60)
 const studyArea = square(13.4, 52.5, 0.1)
 
 describe('userDatasetCoverage', () => {
-  it('zählt Objekte komplett innerhalb als unauffällig', () => {
+  it('treats features fully inside as unremarkable', () => {
     const result = userDatasetCoverage(
       collection(point(13.45, 52.55), square(13.42, 52.52)),
       studyArea,
@@ -41,7 +41,7 @@ describe('userDatasetCoverage', () => {
     expect(userDatasetCoverageMessage(result)).toBeNull()
   })
 
-  it('erkennt Objekte außerhalb und solche, die die Grenze schneiden', () => {
+  it('detects features outside and those crossing the boundary', () => {
     const result = userDatasetCoverage(
       collection(point(13.45, 52.55), point(14.0, 53.0), square(13.395, 52.55, 0.02)),
       studyArea,
@@ -52,27 +52,27 @@ describe('userDatasetCoverage', () => {
     )
   })
 
-  it('warnt deutlich, wenn gar nichts im Gebiet liegt', () => {
+  it('warns clearly when nothing lies within the area', () => {
     const result = userDatasetCoverage(collection(point(14.0, 53.0), point(14.1, 53.1)), studyArea)
     expect(userDatasetCoverageMessage(result)).toBe(
       'Alle Objekte liegen außerhalb des Planungsgebiets – falsche Datei oder falsches Gebiet?',
     )
   })
 
-  it('macht ohne Planungsgebiet keine Aussage', () => {
+  it('makes no statement without a Planungsgebiet', () => {
     const result = userDatasetCoverage(collection(point(14.0, 53.0)), null)
     expect(result).toEqual({ total: 1, outside: 0, partial: 0 })
   })
 })
 
 describe('defaultUserDatasetName / isDuplicateUserDatasetName', () => {
-  it('hängt bei schon vergebenem Namen eine Nummer an', () => {
+  it('appends a number when the name is already taken', () => {
     const existing = [{ name: 'Bäume' }, { name: 'bäume (2)' }]
     expect(defaultUserDatasetName('Bäume.geojson', existing)).toBe('Bäume (3)')
     expect(defaultUserDatasetName('Hecken.gpkg', existing)).toBe('Hecken')
   })
 
-  it('erkennt denselben Namen bei einem anderen Datensatz', () => {
+  it('detects the same name on another dataset', () => {
     const datasets = [
       { id: 'a', name: 'Bäume' },
       { id: 'b', name: ' bäume ' },
@@ -92,25 +92,25 @@ describe('sanitizeUserDatasets', () => {
     geojson: collection(point(13.45, 52.55)),
   }
 
-  it('übernimmt gültige Datensätze und kürzt den Namen', () => {
+  it('accepts valid datasets and trims the name', () => {
     const [dataset] = sanitizeUserDatasets([valid])
     expect(dataset?.name).toBe('Wunschorte')
     expect(dataset?.geojson.features).toHaveLength(1)
   })
 
-  it('lehnt doppelte Namen ab, auch bei anderer Groß-/Kleinschreibung', () => {
+  it('rejects duplicate names, also with different casing', () => {
     expect(() => sanitizeUserDatasets([valid, { ...valid, id: 'a2', name: 'wunschorte' }])).toThrow(
       /doppelt/,
     )
   })
 
-  it('lehnt doppelte IDs, leere Namen und unbekannte Modi ab', () => {
+  it('rejects duplicate IDs, empty names and unknown modes', () => {
     expect(() => sanitizeUserDatasets([valid, valid])).toThrow(/doppelte/)
     expect(() => sanitizeUserDatasets([{ ...valid, name: '  ' }])).toThrow(/Name/)
     expect(() => sanitizeUserDatasets([{ ...valid, mode: 'boost' }])).toThrow(/Modus/)
   })
 
-  it('begrenzt die Anzahl der Datensätze', () => {
+  it('limits the number of datasets', () => {
     const many = Array.from({ length: MAX_USER_DATASETS + 1 }, (_, index) => ({
       ...valid,
       id: `d${index}`,
@@ -118,7 +118,7 @@ describe('sanitizeUserDatasets', () => {
     expect(() => sanitizeUserDatasets(many)).toThrow(/Zu viele/)
   })
 
-  it('lehnt Koordinaten außerhalb von WGS84 ab', () => {
+  it('rejects coordinates outside WGS84', () => {
     const projected = { ...valid, geojson: collection(point(390000, 5800000)) }
     expect(() => sanitizeUserDatasets([projected])).toThrow(/WGS84/)
   })

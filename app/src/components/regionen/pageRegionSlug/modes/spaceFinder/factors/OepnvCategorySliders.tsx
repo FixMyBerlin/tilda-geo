@@ -3,8 +3,8 @@ import { DEFAULT_OEPNV_SHARES, OEPNV_CATEGORIES } from './oepnvCategories'
 import type { OepnvShares } from './oepnvShares'
 
 /**
- * Bindet die generische `CategorySliders` (siehe dort für Verhalten/Begründung) an die beiden
- * ÖPNV/Bikesharing-Gruppen. Reiner Wiring-Wrapper, keine eigene Logik.
+ * Binds the generic `CategorySliders` (see there for behavior/rationale) to the two
+ * ÖPNV/bikesharing groups. Pure wiring wrapper, no logic of its own.
  */
 export const OepnvCategorySliders = ({
   shares,

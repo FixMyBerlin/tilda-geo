@@ -10,7 +10,7 @@ export const spaceFinderImportId = (h3Id: string) => `flaechenfinder:${h3Id}`
 
 type CandidateProperties = Record<string, unknown>
 
-/** Datensatz-ID → Name der Eigene-Daten-Datensätze, wie im Lauf gerechnet. */
+/** Dataset ID → name of the Eigene-Daten datasets, as computed in the run. */
 type EigendatenNames = Record<string, string>
 
 const asNumber = (value: unknown) =>
@@ -25,7 +25,7 @@ const exclusionReasons = (props: CandidateProperties) => {
   if (props.gebaeude) reasons.push('Gebäude')
   if (props.fahrbahn) reasons.push('Straße')
   if (props.score_hangneigung === 0) reasons.push('Zu steil')
-  // Welcher Datensatz ausschließt, steht bei den Teilscores.
+  // Which dataset excludes it is listed with the Teilscores.
   if (props.eigendaten_ausschluss) reasons.push('Eigene Daten')
   return reasons
 }
@@ -63,7 +63,7 @@ const scoreBreakdown = (props: CandidateProperties, names?: EigendatenNames) => 
     blocks.push(lines.join('\n'))
   }
 
-  // Eigene Daten: je Datensatz mit Namen — Punkte oder „ausgeschlossen“ (Alt-Läufe: Gesamtwert).
+  // Eigene Daten: per dataset with name — points or „ausgeschlossen“ (legacy runs: total value).
   const details = parseEigendatenDetails(props.eigendaten_details)
   const total = asNumber(props.score_eigendaten)
   const eigendaten =
@@ -107,7 +107,7 @@ export const buildSpaceFinderReviewProperties = ({
   areaTitle: string
   variantTitle: string
   h3Id: string
-  /** Namen der Eigene-Daten-Datensätze des Laufs (ID → Name), falls vorhanden. */
+  /** Names of the run's Eigene-Daten datasets (ID → name), if any. */
   eigendatenNames?: EigendatenNames
 }) => {
   const score = asNumber(candidateProperties.mce_gesamtscore)

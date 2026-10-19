@@ -3,7 +3,7 @@ import { twJoin } from 'tailwind-merge'
 export const toggleButtonBase = 'rounded border px-2 py-1.5 text-xs font-medium transition-colors'
 export const toggleButtonInactive = 'border-gray-300 bg-white text-gray-700 hover:bg-gray-50'
 
-/** Radio-artige Auswahlbuttons (eine Option aktiv). Farbe bleibt pro Kontext. */
+/** Radio-like choice buttons (one option active). Color stays per context. */
 export const radioButtonClass = (active: boolean, accent: 'blue' | 'green' = 'blue') =>
   twJoin(
     toggleButtonBase,

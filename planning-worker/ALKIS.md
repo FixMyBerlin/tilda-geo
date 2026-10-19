@@ -1,63 +1,63 @@
-# ALKIS im Planungsmodus — Ist-Stand
+# ALKIS in the planning mode — current state
 
-Kurzübersicht, welche ALKIS-Daten der Flächenfinder heute tatsächlich nutzt.
+Short overview of which ALKIS data the Flächenfinder actually uses today.
 
-## Fazit
+## Conclusion
 
-**Keine.** Kein Score-Faktor greift auf ALKIS zu — weder Vektor- noch Rasterdaten.
-Alle Eingangsgeometrien des Scorings stammen aus OSM (über tildas `public`-Schema),
-ergänzt um DGM1 (Höhe) und DOP20-CIR-Luftbilder (Vegetation).
+**None.** No score factor accesses ALKIS — neither vector nor raster data.
+All input geometries of the scoring come from OSM (via TILDA's `public` schema),
+plus DGM1 (elevation) and DOP20 CIR aerial imagery (vegetation).
 
-## Datenquellen je Faktor
+## Data sources per factor
 
-Siehe [`SCORING.md`](SCORING.md), Loader in [`flaechenfinder/postgis_loader.py`](flaechenfinder/postgis_loader.py).
+See [`SCORING.md`](SCORING.md), loaders in [`flaechenfinder/postgis_loader.py`](flaechenfinder/postgis_loader.py).
 
-| Faktor / Flag                             | Quelle                                                                       | Herkunft                                         |
+| Factor / flag                             | Source                                                                       | Origin                                           |
 | ----------------------------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------ |
 | `score_radweg`                            | `public.bikelanes`                                                           | OSM                                              |
-| `score_zielorte`                          | OSM-Tags je Szenario-`targets`                                               | OSM                                              |
+| `score_zielorte`                          | OSM tags per scenario `targets`                                              | OSM                                              |
 | `score_oepnv`                             | `public.publicTransport`, `public._publicTransport_entrances`                | OSM                                              |
-| `score_kreuzung`, `score_fussgaengerzone` | `public._parking_intersection_corners` (+ `_parking_kerbs`/`_parking_roads`) | OSM (Parking-Topic)                              |
-| `score_parken`                            | `public.parkings`, `public.parkings_separate`                                | OSM (Parking-Topic)                              |
+| `score_kreuzung`, `score_fussgaengerzone` | `public._parking_intersection_corners` (+ `_parking_kerbs`/`_parking_roads`) | OSM (parking topic)                              |
+| `score_parken`                            | `public.parkings`, `public.parkings_separate`                                | OSM (parking topic)                              |
 | `score_bestand`                           | `public.bicycleParking_points`                                               | OSM                                              |
-| `gebaeude` (harter Ausschluss)            | `public._buildings`                                                          | **OSM** (Landcover-Topic), _nicht_ ALKIS-Gebäude |
-| `score_hangneigung`                       | DGM1-GeoTIFF via `planning_dem`-Volume, sonst SRTM-Fallback                  | amtliches DGM, kein ALKIS                        |
-| `score_vegetation`                        | DOP20-CIR (Bayern, Brandenburg/Berlin, Hessen) → NDVI                        | amtliche Orthophotos, kein ALKIS                 |
-| `score_eigendaten`                        | GeoJSON-Upload des Nutzers                                                   | Nutzerdaten                                      |
+| `gebaeude` (hard exclusion)               | `public._buildings`                                                          | **OSM** (landcover topic), _not_ ALKIS buildings |
+| `score_hangneigung`                       | DGM1 GeoTIFF via `planning_dem` volume, otherwise SRTM fallback              | official DGM, not ALKIS                          |
+| `score_vegetation`                        | DOP20 CIR (Bavaria, Brandenburg/Berlin, Hesse) → NDVI                        | official orthophotos, not ALKIS                  |
+| `score_eigendaten`                        | User GeoJSON upload                                                          | user data                                        |
 
-Das Gebäude-Flag ist der einzige Faktor, der inhaltlich nach ALKIS aussieht — er kommt
-aber aus OSM (`processing/topics/landcover/buildings/`, Filter: < 100 m² verworfen).
+The building flag is the only factor that looks like ALKIS content-wise — but it comes
+from OSM (`processing/topics/landcover/buildings/`, filter: < 100 m² discarded).
 
-### `public._buildings` neu befüllen: wie und wann
+### Refilling `public._buildings`: how and when
 
-`_buildings` ist Teil des **`landcover`**-Topics (kein eigenes Topic) und läuft daher nur
-im wöchentlichen Weekend-Run, nicht in der nightly Pipeline (siehe
-`processing/README.md`). Lokal/manuell auffrischen:
+`_buildings` is part of the **`landcover`** topic (not a topic of its own) and therefore only
+runs in the weekly weekend run, not in the nightly pipeline (see
+`processing/README.md`). To refresh locally/manually:
 
 ```sh
 PROCESS_ONLY_TOPICS=landcover SKIP_DOWNLOAD=1 SKIP_WARM_CACHE=1 SKIP_UNCHANGED=0 \
 PROCESSING_DIFFING_MODE=off docker compose up -d processing && docker logs -f processing
 ```
 
-Wann nötig: wenn `_buildings` leer/veraltet ist (z. B. nach DB-Reset — Hashes liegen im
-`osmfiles`-Volume, siehe [SKIP_UNCHANGED-Falle](../processing/README.md#trap-empty-table-although-the-topic-ran))
-oder wenn das `gebaeude`-Ausschlussflag im Scoring auffällig viele/wenige Treffer liefert.
-`SKIP_UNCHANGED=0` ist Pflicht, sonst wird der Lauf anhand des Lua/SQL-Hashs übersprungen.
+When needed: if `_buildings` is empty/outdated (e.g. after a DB reset — hashes live in the
+`osmfiles` volume, see [SKIP_UNCHANGED trap](../processing/README.md#trap-empty-table-although-the-topic-ran))
+or if the `gebaeude` exclusion flag in the scoring yields suspiciously many/few hits.
+`SKIP_UNCHANGED=0` is required, otherwise the run is skipped based on the Lua/SQL hash.
 
-## ALKIS im Repo (außerhalb des Scorings)
+## ALKIS in the repo (outside the scoring)
 
-Nur als **Raster-Hintergrundkarte** in der Karten-UI, reine Anzeige — der Worker
-liest davon nichts:
+Only as a **raster background map** in the map UI, display only — the worker
+reads nothing from it:
 
-- Berlin ALKIS-Tiles (`mapproxy.codefor.de/tiles/.../alkis_30/…`) in
+- Berlin ALKIS tiles (`mapproxy.codefor.de/tiles/.../alkis_30/…`) in
   [`sourcesBackgroundsRasterTILDA.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRasterTILDA.ts)
-- ALKIS-WMS für Brandenburg, NRW, Sachsen, Sachsen-Anhalt in
+- ALKIS WMS for Brandenburg, NRW, Saxony, Saxony-Anhalt in
   [`sourcesBackgroundRasterELI.const.ts`](../app/src/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundRasterELI.const.ts)
 
-## Geplant, nicht umgesetzt
+## Planned, not implemented
 
-Eigentums-Faktor (`score_eigentum`: öffentlich / privat / Bahn) auf Basis
-klassifizierter ALKIS-Flurstücke, on-demand über die Rust-CLI
-`ist-dieses-flurstueck-oeffentlich` (nur Baden-Württemberg).
+Ownership factor (`score_eigentum`: public / private / railway) based on
+classified ALKIS parcels, on demand via the Rust CLI
+`ist-dieses-flurstueck-oeffentlich` (Baden-Württemberg only).
 Plan: [`.claude/plans/in-dem-repository-ist-magical-turing.md`](../.claude/plans/in-dem-repository-ist-magical-turing.md).
-Im Code existiert davon bisher nichts (keine `scenario_parcels`, kein `w_eigentum`).
+Nothing of it exists in the code yet (no `scenario_parcels`, no `w_eigentum`).

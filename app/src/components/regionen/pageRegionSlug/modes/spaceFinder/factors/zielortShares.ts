@@ -13,8 +13,8 @@ import {
 
 export type ZielortShares = CategoryShares<ZielortCategory>
 
-/** Bindet den generischen Kategorie-Algorithmus (`categoryShares.ts`) an die vier
- * Zielort-Kategorien — siehe dort für die Rechenlogik. */
+/** Binds the generic category algorithm (`categoryShares.ts`) to the four target location
+ * categories — see there for the calculation logic. */
 export const ZIELORT_SHARE_TOTAL = CATEGORY_SHARE_TOTAL
 
 export const readZielortShares = (stored: Partial<Record<string, number>> | undefined | null) =>

@@ -89,7 +89,7 @@ describe('getReviewEntry', () => {
       sourceMeta: { areaTitle: 'Mitte', variantTitle: 'Standard', variantId: 5, runId: 9 },
     }
 
-    test('resolves the Variante only inside the requested region', async () => {
+    test('resolves the variant only inside the requested region', async () => {
       canAccessMemberModeForRegion.mockResolvedValue({ isAuthorized: true, regionId: 11 })
       reviewEntryFindFirst.mockResolvedValue(spaceFinderRow)
       planningVariantFindFirst.mockResolvedValue({ id: 5, currentRunId: 9 })
@@ -103,7 +103,7 @@ describe('getReviewEntry', () => {
       })
     })
 
-    test('has no link target when the Variante belongs to another region or is gone', async () => {
+    test('has no link target when the variant belongs to another region or is gone', async () => {
       canAccessMemberModeForRegion.mockResolvedValue({ isAuthorized: true, regionId: 11 })
       reviewEntryFindFirst.mockResolvedValue(spaceFinderRow)
       planningVariantFindFirst.mockResolvedValue(null)

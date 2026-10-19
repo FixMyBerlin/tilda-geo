@@ -1,14 +1,14 @@
-# Flächenfinder-Instanz: Deploy & Reprocessing triggern
+# Flächenfinder instance: deploy & trigger reprocessing
 
-Die Flächenfinder-Instanz (`flaechenfinder.tilda-geo.de`, SSH-Alias `flaechenfinder`,
-Setup in `infra-code/tilda-flaechenfinder.vars.yml`) deployed sich **selbst automatisch**:
-ein systemd-Timer pollt alle 2 Minuten den Branch `flaechenfinder-module` auf GitHub und
-baut/restartet bei neuem Commit (`/usr/local/bin/tilda-autodeploy.sh`,
-`infra-code/playbooks/tilda-autodeploy.yml`). Ein Push auf `flaechenfinder-module` reicht
-also für den Code-Deploy.
+The Flächenfinder instance (`flaechenfinder.tilda-geo.de`, SSH alias `flaechenfinder`,
+setup in `infra-code/tilda-flaechenfinder.vars.yml`) **deploys itself automatically**:
+a systemd timer polls the `flaechenfinder-module` branch on GitHub every 2 minutes and
+rebuilds/restarts on a new commit (`/usr/local/bin/tilda-autodeploy.sh`,
+`infra-code/playbooks/tilda-autodeploy.yml`). A push to `flaechenfinder-module` is
+enough for a code deploy.
 
-**Reprocessing der Daten läuft NICHT automatisch mit** – der Autodeploy baut/restartet
-nur die Container, er stößt keinen neuen Processing-Lauf an. Dafür manuell auf der Instanz:
+**Data reprocessing does NOT run along with it** – autodeploy only rebuilds/restarts
+the containers, it does not trigger a new processing run. Do that manually on the instance:
 
 ```bash
 ssh flaechenfinder
@@ -17,24 +17,24 @@ docker compose -f docker-compose.yml -f docker-compose.network.yml -f docker-com
   run --rm -e PROCESS_ONLY_BBOX="" -e SKIP_DOWNLOAD=1 -e PROCESS_ONLY_TOPICS=<topic> processing
 ```
 
-- `PROCESS_ONLY_TOPICS=<topic>` auf das betroffene Topic beschränken (z.B. `parking`),
-  sonst läuft der volle nightly-Satz.
-- `SKIP_DOWNLOAD=1`, wenn der PBF-Extract schon aktuell auf der Instanz liegt (spart den Download).
-- `PROCESS_ONLY_BBOX` leer lassen, wenn `process_only_bbox` in den Instanz-Vars ebenfalls leer ist
-  (Germany-wide Extract); sonst auf denselben Wert setzen wie in den Vars.
+- `PROCESS_ONLY_TOPICS=<topic>` limits the run to the affected topic (e.g. `parking`),
+  otherwise the full nightly set runs.
+- `SKIP_DOWNLOAD=1` if the PBF extract on the instance is already current (skips the download).
+- Leave `PROCESS_ONLY_BBOX` empty if `process_only_bbox` in the instance vars is empty too
+  (Germany-wide extract); otherwise set it to the same value as in the vars.
 
-Vollständiger Ablauf inkl. Ersteinrichtung: `infra-code/playbooks/process-tilda-instance.yml`.
+Full procedure incl. initial setup: `infra-code/playbooks/process-tilda-instance.yml`.
 
-## Falle: `parking` ist im Code auf Bboxen begrenzt
+## Pitfall: `parking` is limited to bboxes in code
 
-`parking` ist das einzige Topic mit gesetzten `bboxes`
+`parking` is the only topic with `bboxes` set
 (`processing/constants/topics.const.ts`: Berlin, BiBi, Lörrach, Friedberg, München).
-`resolveTopicInputFile` (`processing/steps/filter.ts`) schneidet daraus vor osm2pgsql ein
-`parking_extracted.osm.pbf` – **auch bei leerem `PROCESS_ONLY_BBOX` und Germany-Extract**.
-Für Deutschland-weites Parken muss dort `bboxes: null` gesetzt werden; sonst nur weitere Bbox
-ergänzen. Env-Vars allein reichen nicht.
+`resolveTopicInputFile` (`processing/steps/filter.ts`) cuts a `parking_extracted.osm.pbf`
+from them before osm2pgsql – **even with an empty `PROCESS_ONLY_BBOX` and a Germany extract**.
+For Germany-wide parking, set `bboxes: null` there; otherwise just add another bbox.
+Env vars alone are not enough.
 
-Lokal (Default-Stack, Repo-Root) Deutschland-weit testen:
+Test Germany-wide locally (default stack, repo root):
 
 ```bash
 docker compose up -d db
@@ -44,26 +44,26 @@ SKIP_DOWNLOAD=0 WAIT_FOR_FRESH_DATA=0 SKIP_UNCHANGED=0 SKIP_WARM_CACHE=1 PROCESS
 docker compose up processing
 ```
 
-`SKIP_DOWNLOAD=0`, weil im `osmfiles`-Volume sonst der alte Regional-Extract liegt.
-`bun run processing` taugt hier nicht (die CLI verlangt zwingend Preset/`--only-bbox`).
-Rechne mit mehreren Stunden und hebe ggf. `mem_limit`/`cpus` des `processing`-Containers in
-`docker-compose.override.yml` (Default 4 GB) an.
+`SKIP_DOWNLOAD=0` because otherwise the old regional extract sits in the `osmfiles` volume.
+`bun run processing` does not work here (the CLI requires a preset/`--only-bbox`).
+Expect several hours, and raise `mem_limit`/`cpus` of the `processing` container in
+`docker-compose.override.yml` (default 4 GB) if needed.
 
-## Gebäude (`_buildings`) neu bauen
+## Rebuild buildings (`_buildings`)
 
-Dasselbe gilt für `public._building_entrances` (Gebäudeeingänge, `entrance=*`): ebenfalls aus
-`landcover`, existiert also erst nach einem expliziten Lauf. Vorher liefert
-`PostgisLoader.load_building_entrances()` ein leeres GeoDataFrame.
+The same applies to `public._building_entrances` (building entrances, `entrance=*`): also built
+from `landcover`, so it only exists after an explicit run. Until then
+`PostgisLoader.load_building_entrances()` returns an empty GeoDataFrame.
 
-`public._buildings` ist kein eigenes Topic, sondern Teil von **`landcover`**
-(`schedule: 'weekend'`). Auf dieser Instanz gibt es **keinen Cronjob fürs Processing** –
-der einzige Timer ist `tilda-autodeploy.timer` (nur Deploy). Die Weekend-Schedule greift hier
-also nie von selbst; `landcover` läuft nur, wenn man es explizit anstößt.
+`public._buildings` is not a topic of its own but part of **`landcover`**
+(`schedule: 'weekend'`). This instance has **no cron job for processing** –
+the only timer is `tilda-autodeploy.timer` (deploy only). So the weekend schedule never
+kicks in here; `landcover` only runs when triggered explicitly.
 
 ```bash
 ssh flaechenfinder
 cd /srv/tilda-geo
-# Stale Weekend-PBF entfernen (siehe Falle unten), dann:
+# Remove the stale weekend PBF (see pitfall below), then:
 docker compose -f docker-compose.yml -f docker-compose.network.yml -f docker-compose.instance.yml \
   run --rm -T \
   -e PROCESS_ONLY_BBOX= -e SKIP_DOWNLOAD=1 -e SKIP_UNCHANGED=0 \
@@ -71,19 +71,18 @@ docker compose -f docker-compose.yml -f docker-compose.network.yml -f docker-com
   -e PROCESS_ONLY_TOPICS=landcover processing
 ```
 
-**Falle: die Weekend-PBF wird stillschweigend wiederverwendet.** `landcover` liest nicht die
-nightly-PBF, sondern `filtered/weekend_filtered.osm.pbf` (eigener Tag-Filter, gebaut aus dem
-Download). Regeneriert wird die nur, wenn Download oder Filter-Expressions sich geändert haben
-oder die Datei fehlt – mit `SKIP_DOWNLOAD=1` ist `sourceFileChanged=false`, also wird eine alte
-Datei aus einem früheren Regional-Extract weiterverwendet und die Gebäude bleiben auf dem alten
-Ausschnitt. Prüfen und ggf. löschen:
+**Pitfall: the weekend PBF is silently reused.** `landcover` does not read the nightly PBF
+but `filtered/weekend_filtered.osm.pbf` (its own tag filter, built from the download). It is
+only regenerated when the download or filter expressions changed or the file is missing –
+with `SKIP_DOWNLOAD=1`, `sourceFileChanged=false`, so an old file from an earlier regional
+extract is reused and the buildings stay on the old extent. Check and delete if needed:
 
 ```bash
 docker run --rm -v tilda-geo_osmfiles:/d alpine ls -la /d/filtered /d/downloads
 docker run --rm -v tilda-geo_osmfiles:/d alpine rm -f /d/filtered/weekend_filtered.osm.pbf
 ```
 
-Kontrolle danach (Extent muss Deutschland abdecken, nicht nur eine Bbox):
+Verify afterwards (the extent must cover Germany, not just one bbox):
 
 ```sql
 SELECT count(*), round(min(ST_XMin(ST_Transform(geom,4326)))::numeric,2) AS minx,
@@ -91,8 +90,8 @@ SELECT count(*), round(min(ST_XMin(ST_Transform(geom,4326)))::numeric,2) AS minx
 FROM public._buildings;
 ```
 
-Weitere Hinweise: `processing/topics/landcover/README.md`, `planning-worker/ALKIS.md`.
+More notes: `processing/topics/landcover/README.md`, `planning-worker/ALKIS.md`.
 
-## Flächenfinder pro Region einschalten
+## Enable the Flächenfinder per region
 
-`spaceFinderEnabled` steht für neue Regionen standardmäßig auf `false` (Admin: "Flächenfinder aktiv"). Die Migration `region_space_finder_default_off` schaltet beim Deploy alle Regionen ohne Planungsgebiet aus. Soll eine solche Region auf der Instanz den Flächenfinder nutzen, danach im Admin wieder einschalten.
+`spaceFinderEnabled` defaults to `false` for new regions (admin: "Flächenfinder aktiv"). The migration `region_space_finder_default_off` switches off all regions without a Planungsgebiet on deploy. If such a region on the instance should use the Flächenfinder, switch it back on in the admin afterwards.
