@@ -4,7 +4,6 @@ import { twJoin } from 'tailwind-merge'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 import { modeIdentity } from './modeIdentity'
 import {
-  modePanelActionFooterClassName,
   modePanelBackButtonClassName,
   modePanelClassName,
   modePanelCollectionClassName,
@@ -181,7 +180,7 @@ export const ModePanel = ({
           Außerhalb des Kartenausschnitts
         </footer>
       ) : null}
-      {footer ? <div className={modePanelActionFooterClassName}>{footer}</div> : null}
+      {footer ? <div className="shrink-0 px-4 py-3">{footer}</div> : null}
     </section>
   )
 }

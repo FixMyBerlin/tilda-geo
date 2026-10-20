@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { buttonStylesOnYellow } from '@/components/shared/links/styles'
 import { runPlanningVariantFn } from '@/server/planning/planning.functions'
 import {
   planningAreasQueryOptions,
@@ -60,7 +61,7 @@ export const RunButton = ({
           type="button"
           onClick={() => mutation.mutate()}
           disabled={mutation.isPending || factorSavePending}
-          className="rounded bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className={buttonStylesOnYellow}
         >
           {label}
         </button>

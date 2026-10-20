@@ -6,7 +6,7 @@ import {
 import { bbox, centroid } from '@turf/turf'
 import { useEffect, useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
-import { twJoin } from 'tailwind-merge'
+import { twJoin, twMerge } from 'tailwind-merge'
 import {
   type SpaceFinderCandidate,
   useSpaceFinderCandidateSelectActive,
@@ -20,7 +20,9 @@ import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQuery
 import { spaceFinderCandidateListItemId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersSpaceFinder'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { CollapsibleBox } from '@/components/shared/CollapsibleBox/CollapsibleBox'
+import { buttonStylesSecondary } from '@/components/shared/links/styles'
 import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
+import { radioButtonClass } from '@/components/shared/SegmentedChoice/radioButtonClass'
 import { ModeListItem } from '../../ModeListItem'
 import {
   modePanelListMetaClassName,
@@ -30,6 +32,7 @@ import {
 } from '../../modePanel.const'
 import { FINE_HEXAGON_MIN_ZOOM } from '../planningHexagonResolution'
 import { RemoveIconButton } from '../RemoveIconButton'
+import { spaceFinderDiscardLinkClass, spaceFinderDiscardRowClass } from '../spaceFinderPanelStyles'
 import { useSpaceFinderSelection } from '../useSpaceFinderSelection'
 import { candidateExportFileName, downloadCandidatesGeojson } from './spaceFinderCandidateExport'
 import { SpaceFinderReviewListModal } from './SpaceFinderReviewListModal'
@@ -206,11 +209,10 @@ export const SpaceFinderCandidatesSection = ({
         type="button"
         onClick={toggleSelect}
         aria-pressed={selectActive}
+        // Same toggle look as »Gebiet bearbeiten« / »Zeichnen beenden« in the area form.
         className={twJoin(
-          'flex w-full items-center justify-center gap-1.5 rounded border px-3 py-1.5 text-sm font-medium',
-          selectActive
-            ? 'border-emerald-700 bg-emerald-700 text-white hover:bg-emerald-800'
-            : 'border-emerald-700 bg-white text-emerald-800 hover:bg-emerald-50',
+          'flex w-full items-center justify-center gap-1.5',
+          radioButtonClass(selectActive),
         )}
       >
         <SquaresPlusIcon className="size-4" aria-hidden="true" />
@@ -257,12 +259,15 @@ export const SpaceFinderCandidatesSection = ({
         </ul>
       )}
 
-      <div className="flex flex-col gap-2 border-t border-gray-200 pt-3">
+      <div className="flex flex-col gap-2">
         <button
           type="button"
           disabled={candidates.length === 0}
           onClick={() => downloadCandidatesGeojson(candidates, candidateExportFileName(variantId))}
-          className="flex items-center justify-center gap-2 rounded bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className={twMerge(
+            buttonStylesSecondary,
+            'gap-2 disabled:cursor-not-allowed disabled:opacity-60',
+          )}
         >
           <ArrowDownTrayIcon className="size-4" />
           Als GeoJSON herunterladen
@@ -274,19 +279,24 @@ export const SpaceFinderCandidatesSection = ({
             captureModalOpenOrigin(event.currentTarget)
             setReviewListModalOpen(true)
           }}
-          className="flex items-center justify-center gap-2 rounded border border-blue-600 bg-white px-3 py-2 text-sm font-medium text-blue-700 hover:bg-blue-50 disabled:opacity-50"
+          className={twMerge(
+            buttonStylesSecondary,
+            'gap-2 disabled:cursor-not-allowed disabled:opacity-60',
+          )}
         >
           <ClipboardDocumentCheckIcon className="size-4" />
           In Prüfliste übernehmen
         </button>
         {candidates.length > 0 && (
-          <button
-            type="button"
-            onClick={() => runKey != null && clearCandidates(runKey)}
-            className="text-xs text-gray-500 hover:text-gray-800"
-          >
-            Auswahl leeren
-          </button>
+          <div className={spaceFinderDiscardRowClass}>
+            <button
+              type="button"
+              onClick={() => runKey != null && clearCandidates(runKey)}
+              className={spaceFinderDiscardLinkClass}
+            >
+              Auswahl leeren
+            </button>
+          </div>
         )}
       </div>
       {variant && (

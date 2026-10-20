@@ -1,23 +1,11 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from '@headlessui/react'
-import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { useState } from 'react'
-import { twJoin } from 'tailwind-merge'
+import { DisclosureChevron } from '@/components/shared/DisclosureChevron/DisclosureChevron'
 import { collapsibleBoxClass, collapsibleBoxHeaderClass } from './collapsibleBoxStyles'
 
-/**
- * Chevron of the collapsible boxes. Collapsed, it sits in a white chip — together with the filled
- * header (see `collapsibleBoxHeaderClass`) the row is clearly expandable even without visible
- * content.
- */
+/** Chevron of the collapsible boxes — the shared TILDA disclosure chevron at the row's end. */
 export const CollapsibleBoxChevron = ({ open }: { open: boolean }) => (
-  <span
-    className={twJoin(
-      'flex size-5 shrink-0 items-center justify-center rounded-full transition-colors',
-      open ? 'text-gray-500' : 'border border-gray-300 bg-white text-gray-700 shadow-sm',
-    )}
-  >
-    <ChevronRightIcon className={twJoin('size-4 transition-transform', open && 'rotate-90')} />
-  </span>
+  <DisclosureChevron open={open} side="trailing" className="size-5 text-gray-500" />
 )
 
 /**
