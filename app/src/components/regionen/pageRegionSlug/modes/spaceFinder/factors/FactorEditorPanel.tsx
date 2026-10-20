@@ -1,7 +1,6 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from '@headlessui/react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useEffectEvent, useState } from 'react'
-import { toast } from 'sonner'
 import { twJoin } from 'tailwind-merge'
 import { CollapsibleBoxChevron } from '@/components/shared/CollapsibleBox/CollapsibleBox'
 import {
@@ -11,6 +10,7 @@ import {
 import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
 import { SegmentedChoice } from '@/components/shared/SegmentedChoice/SegmentedChoice'
 import { toastError } from '@/components/shared/toast/toastError'
+import { toastSuccess } from '@/components/shared/toast/toastSuccess'
 import {
   type UserDataset,
   userDatasetCoverage,
@@ -31,7 +31,12 @@ import {
 import { useSpaceFinderBoundaryActions } from '../../../hooks/mapState/space-finder-boundary-store'
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import { USER_DATASET_MODE_OPTIONS, UserDatasetCoverageHint } from '../area/UserDatasetsField'
-import { spaceFinderGroupStyle, spaceFinderNumberInputClass } from '../spaceFinderPanelStyles'
+import {
+  spaceFinderDiscardLinkClass,
+  spaceFinderDiscardRowClass,
+  spaceFinderGroupStyle,
+  spaceFinderNumberInputClass,
+} from '../spaceFinderPanelStyles'
 import { OepnvCategorySliders } from './OepnvCategorySliders'
 import { readOepnvShares, type OepnvShares } from './oepnvShares'
 import {
@@ -696,13 +701,12 @@ const FactorEditorPanelForm = ({
       updatePlanningVariantFn({
         data: {
           variantId,
-          // `min_area_m2` is maintained outside this form (area search filter) — always use
-          // the fresh prop value so the local draft doesn't revert it.
-          factorConfig: toVariantConfig({ ...next, min_area_m2: factorConfig.min_area_m2 }),
+          // `min_area_m2` belongs to the area search filter; the server keeps the stored value.
+          factorConfig: toVariantConfig(next),
         },
       }),
     onSuccess: () => {
-      toast.success('Faktoren gespeichert', { id: 'planning-factors-saved' })
+      toastSuccess('Faktoren gespeichert', { id: 'planning-factors-saved' })
       queryClient.invalidateQueries(planningVariantQueryOptions(variantId))
       queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
       queryClient.invalidateQueries(planningAreaQueryOptions(areaId))
@@ -877,21 +881,15 @@ const FactorEditorPanelForm = ({
             parkingDataAvailable={parkingDataAvailable}
           />
 
-          {!readOnly && (
-            <div className="flex flex-wrap items-center gap-2">
+          {!readOnly && canDiscard && (
+            <div className={spaceFinderDiscardRowClass}>
               <button
                 type="button"
                 onClick={discardChanges}
-                disabled={!canDiscard}
-                className="rounded border border-gray-300 px-3 py-1.5 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-default disabled:opacity-40"
+                className={spaceFinderDiscardLinkClass}
               >
                 Änderungen verwerfen
               </button>
-              <span className="text-xs text-gray-500">
-                {unsavedFactors || mutation.isPending
-                  ? 'Speichern…'
-                  : 'Änderungen werden automatisch gespeichert'}
-              </span>
             </div>
           )}
         </DisclosurePanel>

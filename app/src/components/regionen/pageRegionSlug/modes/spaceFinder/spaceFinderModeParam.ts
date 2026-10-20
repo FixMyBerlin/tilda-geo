@@ -8,7 +8,8 @@ import { PLANNING_SCORE_MODES } from '@/shared/regionen/planningScoreMode.const'
  * it — replaces the old separate visibility flag). `minArea: true` turns the "Fläche suchen"
  * filter on; absent means off. The square meters live on the variant (`factorConfig.min_area_m2`),
  * not in the URL — a draft in the space-finder store covers the value while it is being typed.
- * `new` is the create wizard (new Planungsgebiet or new Variante); `edit` opens the Planungsgebiet editor.
+ * `new` opens the create wizard for a Planungsgebiet (a new Variante is a modal); `edit` opens the
+ * Planungsgebiet editor.
  */
 // Per-field `.catch` keeps stale bookmarks usable: `optionalSearchJson` drops the whole object
 // as soon as one field fails.
@@ -17,7 +18,7 @@ export const zodSpaceFinderModeParam = z.object({
   score: z.enum(PLANNING_SCORE_MODES).optional().catch(undefined),
   opacity: z.number().min(0).max(100).optional().catch(undefined),
   minArea: z.literal(true).optional().catch(undefined),
-  new: z.enum(['area', 'variant']).optional().catch(undefined),
+  new: z.literal('area').optional().catch(undefined),
   edit: z.literal('area').optional().catch(undefined),
 })
 

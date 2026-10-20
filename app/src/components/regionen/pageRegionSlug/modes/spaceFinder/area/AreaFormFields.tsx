@@ -1,12 +1,18 @@
 import { PencilSquareIcon } from '@heroicons/react/24/outline'
+import { useStore } from '@tanstack/react-form'
 import { bbox } from '@turf/turf'
-import { useEffect } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { twJoin } from 'tailwind-merge'
+import { fieldErrorClass, labelClass } from '@/components/shared/form/fields/sharedStyles'
+import { TextField } from '@/components/shared/form/fields/TextField'
+import { uniqueFormattedFormErrors } from '@/components/shared/form/formatError'
+import type { FormApi } from '@/components/shared/form/types'
 import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
 import { radioButtonClass } from '@/components/shared/SegmentedChoice/radioButtonClass'
 import { MAX_STUDY_AREA_KM2, studyAreaSizeKm2 } from '@/lib/planningStudyAreaLimit'
 import type { UserDataset } from '@/lib/planningUserGeojson'
+import type { PlanningAreaFormValues } from '@/server/planning/planningFormSchemas'
 import {
   useSpaceFinderBoundaryActions,
   useSpaceFinderDrawnGeometry,
@@ -17,11 +23,11 @@ import {
   GROUP_HELP,
   PLANNING_USE_CASES,
   SHOW_PLANNING_USE_CASE_UI,
-  type PlanningUseCase,
 } from '../factors/spaceFinderDefaults'
 import {
+  spaceFinderDiscardLinkClass,
+  spaceFinderDiscardRowClass,
   spaceFinderNumberInputClass,
-  spaceFinderPanelTitleInputClass,
 } from '../spaceFinderPanelStyles'
 import { BoundaryPicker } from './BoundaryPicker'
 import type { StudyAreaGeometry } from './extractStudyAreaGeometry'
@@ -30,8 +36,7 @@ import { UserDatasetsField } from './UserDatasetsField'
 
 type AreaTab = 'search' | 'custom'
 
-const groupHeadlineClass =
-  'flex items-baseline justify-between gap-2 text-sm font-bold text-gray-800'
+const groupHeadlineClass = twJoin(labelClass, 'mb-0 flex items-baseline justify-between gap-2')
 
 // Sections inside one rounded box, split by horizontal lines (like the Anzeige box).
 const sectionClass = 'flex flex-col gap-2 p-2.5'
@@ -41,29 +46,14 @@ const tabClass = (active: boolean) =>
     active ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'
   }`
 
-type AreaFormState = {
-  title: string
-  boundaryId: string | null
-  studyArea: unknown
-  areaTab: AreaTab
-  userDatasets: UserDataset[]
-  useCase: PlanningUseCase
-  areaSizeM2: number | null
-}
+/**
+ * The form as these fields see it: the datasets' GeoJSON is hidden from TanStack's deep key types,
+ * which overflow on GeoJSON's recursive geometry types (TS2589). Only `userDatasets` is affected.
+ */
+type AreaFormFieldValues = Omit<PlanningAreaFormValues, 'userDatasets'> & { userDatasets: unknown }
 
 type AreaFormFieldsProps = {
-  state: AreaFormState
-  onTitleChange: (title: string) => void
-  onBoundaryIdChange: (id: string | null) => void
-  onStudyAreaChange: (geom: unknown) => void
-  onAreaTabChange: (tab: AreaTab) => void
-  onUserDatasetsChange: (datasets: UserDataset[]) => void
-  onUseCaseChange: (useCase: PlanningUseCase) => void
-  onAreaSizeM2Change: (value: number | null) => void
-  titleMissing?: boolean
-  /** After a submit attempt: mark Eigene-Daten datasets without a name like the missing title. */
-  showValidation?: boolean
-  showUserData?: boolean
+  form: FormApi<PlanningAreaFormValues>
   geometryStepTitle?: string
   /** The saved study area when an existing Gebiet is edited; "discard" goes back to it. */
   originalStudyArea?: StudyAreaGeometry | null
@@ -71,36 +61,50 @@ type AreaFormFieldsProps = {
   editGeometryOnOpen?: boolean
 }
 
-/** Shared fields for creating or editing a planungsgebiet. */
+/**
+ * Shared fields for creating or editing a planungsgebiet, inside the caller's `Form`. The drawn
+ * study area lives in the space-finder store (the map draws outside the form) and is mirrored into
+ * the `studyArea` field.
+ */
 export const AreaFormFields = ({
-  state,
-  onTitleChange,
-  onBoundaryIdChange,
-  onStudyAreaChange,
-  onAreaTabChange,
-  onUserDatasetsChange,
-  onUseCaseChange,
-  onAreaSizeM2Change,
-  titleMissing = false,
-  showValidation = false,
-  showUserData = true,
+  form: areaForm,
   geometryStepTitle = 'Geometrie des Gebiets',
   originalStudyArea = null,
   editGeometryOnOpen = false,
 }: AreaFormFieldsProps) => {
+  const form = areaForm as unknown as FormApi<AreaFormFieldValues>
   const { mainMap: map } = useMap()
   const { setBoundaryHighlightGeom, setDrawingActive, setDrawnGeometry } =
     useSpaceFinderBoundaryActions()
   const drawingActive = useSpaceFinderDrawingActive()
   const drawnGeometry = useSpaceFinderDrawnGeometry()
   const draw = useSpaceFinderDraw()
+  // UI-only state: which way the Gebiet is picked, and the picked boundary. Not submitted.
+  const [areaTab, setAreaTab] = useState<AreaTab>(editGeometryOnOpen ? 'custom' : 'search')
+  const [boundaryId, setBoundaryId] = useState<string | null>(null)
+  // The name last filled in from a boundary or a file, see `suggestTitle`.
+  const autoTitle = useRef<string | null>(null)
 
-  const effectiveStudyArea = state.studyArea ?? drawnGeometry
+  const studyArea = useStore(form.store, (state) => state.values.studyArea)
+  const showErrors = useStore(form.store, (state) => state.submissionAttempts > 0)
+  const useCase = useStore(form.store, (state) => state.values.useCase)
 
-  const areaKm2 = effectiveStudyArea
-    ? studyAreaSizeKm2(effectiveStudyArea as GeoJSON.Geometry)
-    : null
+  const areaKm2 = studyArea ? studyAreaSizeKm2(studyArea) : null
   const areaTooLarge = areaKm2 != null && areaKm2 > MAX_STUDY_AREA_KM2
+
+  const setStudyArea = (geom: StudyAreaGeometry | null) => form.setFieldValue('studyArea', geom)
+  // An effect event: `form` stays out of the sync effect's dependencies.
+  const setStudyAreaFromDrawing = useEffectEvent(setStudyArea)
+
+  useEffect(
+    function syncDrawnStudyAreaIntoForm() {
+      // The store is the source while drawing, and afterwards as long as the drawing is the area.
+      // Every other source (boundary, upload, reset) clears `drawnGeometry` first.
+      if (!drawingActive && drawnGeometry == null) return
+      setStudyAreaFromDrawing(drawnGeometry)
+    },
+    [drawingActive, drawnGeometry],
+  )
 
   useEffect(
     function resetDrawingStoreOnUnmount() {
@@ -112,6 +116,14 @@ export const AreaFormFields = ({
     },
     [setDrawingActive, setDrawnGeometry, setBoundaryHighlightGeom],
   )
+
+  // A name from the picked boundary or the file name — but never over a name someone typed.
+  const suggestTitle = (name: string) => {
+    const current = form.state.values.title
+    if (current.trim() !== '' && current !== autoTitle.current) return
+    form.setFieldValue('title', name)
+    autoTitle.current = name
+  }
 
   const fitToGeometry = (geom: object) => {
     if (!map) return
@@ -128,34 +140,31 @@ export const AreaFormFields = ({
     draw.cancel()
     setDrawingActive(false)
     setDrawnGeometry(null)
-    onStudyAreaChange(originalStudyArea)
+    setStudyArea(originalStudyArea)
     setBoundaryHighlightGeom(originalStudyArea, { filled: false })
   }
 
   const switchTab = (tab: AreaTab) => {
-    onAreaTabChange(tab)
-    onBoundaryIdChange(null)
+    setAreaTab(tab)
+    setBoundaryId(null)
     resetToOriginal()
   }
 
   // Drawing starts from the area that is there, so it can be changed instead of redrawn.
+  // The sync effect then mirrors the drawing into the form.
   const startDrawing = () => {
-    const current = effectiveStudyArea as GeoJSON.Geometry | null
-    const isPolygonal = current?.type === 'Polygon' || current?.type === 'MultiPolygon'
-    setDrawnGeometry(isPolygonal ? current : null)
-    onStudyAreaChange(null)
+    setDrawnGeometry(form.state.values.studyArea)
     setBoundaryHighlightGeom(null)
     setDrawingActive(true)
   }
 
-  useEffect(
-    function startEditingOnOpen() {
-      if (editGeometryOnOpen) startDrawing()
-    },
-    // Only once per open form; later changes of the area must not restart the drawing.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [],
-  )
+  const startDrawingOnOpen = useEffectEvent(() => {
+    if (editGeometryOnOpen) startDrawing()
+  })
+  // Only once per open form; later changes of the area must not restart the drawing.
+  useEffect(function startEditingOnOpen() {
+    startDrawingOnOpen()
+  }, [])
 
   const toggleDrawing = () => {
     if (drawingActive) {
@@ -173,42 +182,32 @@ export const AreaFormFields = ({
     draw.cancel()
     draw.replace([])
     setDrawnGeometry(null)
-    onStudyAreaChange(null)
+    setStudyArea(null)
     setBoundaryHighlightGeom(null)
     setDrawingActive(true)
   }
 
-  const canDiscardArea = effectiveStudyArea != null || draw.isDrawing
+  const canDiscardArea = studyArea != null || draw.isDrawing
   // Editing only: the area differs from the saved one, so "back to the saved area" means something.
   const canRestoreOriginal =
     originalStudyArea != null &&
-    JSON.stringify(effectiveStudyArea ?? null) !== JSON.stringify(originalStudyArea)
+    JSON.stringify(studyArea ?? null) !== JSON.stringify(originalStudyArea)
 
   const handleStudyUpload = (geometry: StudyAreaGeometry, fileName: string) => {
     draw.cancel()
     setDrawingActive(false)
-    onStudyAreaChange(geometry)
+    setDrawnGeometry(null)
+    setStudyArea(geometry)
     setBoundaryHighlightGeom(geometry)
     fitToGeometry(geometry)
-    if (!state.title) onTitleChange(fileName.replace(/\.(geo)?json$/i, ''))
+    suggestTitle(fileName.replace(/\.(geo)?json$/i, ''))
   }
 
   return (
     <div className="p-3">
-      <div className="flex flex-col divide-y divide-gray-300 rounded border border-gray-300">
+      <div className="flex flex-col divide-y divide-gray-300 rounded border border-gray-300 bg-gray-100">
         <div className={sectionClass}>
-          <label className="flex flex-col gap-1 text-sm text-gray-700">
-            Name
-            <input
-              type="text"
-              required
-              aria-invalid={titleMissing}
-              value={state.title}
-              onChange={(e) => onTitleChange(e.target.value)}
-              className={spaceFinderPanelTitleInputClass}
-            />
-          </label>
-          {titleMissing && <p className="text-xs text-red-600">Bitte einen Namen angeben.</p>}
+          <TextField form={form} name="title" label="Name" />
 
           {/* TODO Flächenfinder: the „Art & Größe der gesuchten Fläche“ selection is hidden via
           `SHOW_PLANNING_USE_CASE_UI` (spaceFinderDefaults.ts) because it has no effect on score or
@@ -226,33 +225,45 @@ export const AreaFormFields = ({
                     key={key}
                     type="button"
                     onClick={() => {
-                      onUseCaseChange(key)
+                      form.setFieldValue('useCase', key)
                       const defaultAreaM2 = PLANNING_USE_CASES.find(
                         (u) => u.key === key,
                       )?.defaultAreaM2
-                      if (defaultAreaM2 != null) onAreaSizeM2Change(defaultAreaM2)
+                      if (defaultAreaM2 != null) form.setFieldValue('areaSizeM2', defaultAreaM2)
                     }}
-                    className={radioButtonClass(state.useCase === key)}
+                    className={radioButtonClass(useCase === key)}
                   >
                     {label}
                   </button>
                 ))}
               </div>
-              <label className="flex items-center justify-between gap-2 text-xs text-gray-600">
-                <span>Flächengröße (m²)</span>
-                <input
-                  type="number"
-                  min={0}
-                  step={1}
-                  value={state.areaSizeM2 ?? ''}
-                  onChange={(e) =>
-                    onAreaSizeM2Change(
-                      e.target.value === '' ? null : Math.max(0, Number(e.target.value)),
-                    )
-                  }
-                  className={spaceFinderNumberInputClass}
-                />
-              </label>
+              <form.Field name="areaSizeM2">
+                {(field) => (
+                  <div>
+                    <label className="flex items-center justify-between gap-2 text-xs text-gray-600">
+                      <span>Flächengröße (m²)</span>
+                      <input
+                        name={field.name}
+                        type="number"
+                        min={0}
+                        step={1}
+                        value={field.state.value ?? ''}
+                        onBlur={field.handleBlur}
+                        onChange={(e) =>
+                          field.handleChange(e.target.value === '' ? null : Number(e.target.value))
+                        }
+                        aria-invalid={field.state.meta.errors.length > 0}
+                        className={spaceFinderNumberInputClass}
+                      />
+                    </label>
+                    {uniqueFormattedFormErrors(field.state.meta.errors).map((message) => (
+                      <p key={message} role="alert" className={fieldErrorClass}>
+                        {message}
+                      </p>
+                    ))}
+                  </div>
+                )}
+              </form.Field>
             </div>
           )}
         </div>
@@ -263,14 +274,14 @@ export const AreaFormFields = ({
             <div className="flex gap-1 rounded bg-gray-200 p-0.5">
               <button
                 type="button"
-                className={tabClass(state.areaTab === 'search')}
+                className={tabClass(areaTab === 'search')}
                 onClick={() => switchTab('search')}
               >
                 Gebiet suchen
               </button>
               <button
                 type="button"
-                className={tabClass(state.areaTab === 'custom')}
+                className={tabClass(areaTab === 'custom')}
                 onClick={() => switchTab('custom')}
               >
                 Eigenes Gebiet
@@ -278,18 +289,19 @@ export const AreaFormFields = ({
             </div>
           </div>
 
-          {state.areaTab === 'search' && (
+          {areaTab === 'search' && (
             <BoundaryPicker
-              value={state.boundaryId}
+              value={boundaryId}
               onChange={(id, geom, name) => {
-                onBoundaryIdChange(id)
-                onStudyAreaChange(geom)
-                onTitleChange(name)
+                setBoundaryId(id)
+                setDrawnGeometry(null)
+                setStudyArea(geom as StudyAreaGeometry)
+                suggestTitle(name)
               }}
             />
           )}
 
-          {state.areaTab === 'custom' && (
+          {areaTab === 'custom' && (
             <div className="flex flex-col gap-2">
               <button
                 type="button"
@@ -302,17 +314,17 @@ export const AreaFormFields = ({
                 <PencilSquareIcon className="h-4 w-4" />
                 {drawingActive
                   ? 'Zeichnen beenden'
-                  : effectiveStudyArea
+                  : studyArea
                     ? 'Gebiet bearbeiten'
                     : 'Gebiet zeichnen'}
               </button>
               {(canDiscardArea || canRestoreOriginal) && (
-                <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs">
+                <div className={spaceFinderDiscardRowClass}>
                   {canDiscardArea && (
                     <button
                       type="button"
                       onClick={discardAndRedraw}
-                      className="text-gray-500 underline hover:text-gray-700"
+                      className={spaceFinderDiscardLinkClass}
                     >
                       Gebiet verwerfen
                     </button>
@@ -321,7 +333,7 @@ export const AreaFormFields = ({
                     <button
                       type="button"
                       onClick={resetToOriginal}
-                      className="text-gray-500 underline hover:text-gray-700"
+                      className={spaceFinderDiscardLinkClass}
                     >
                       Änderungen am Gebiet verwerfen
                     </button>
@@ -338,41 +350,44 @@ export const AreaFormFields = ({
             </div>
           )}
 
-          {areaTooLarge && (
-            <p className="text-xs text-red-600">
+          {areaTooLarge ? (
+            <p className={fieldErrorClass}>
               Das Berechnungsgebiet ist zu groß ({areaKm2?.toFixed(1)} km²). Maximal{' '}
               {MAX_STUDY_AREA_KM2} km² sind erlaubt.
             </p>
+          ) : (
+            <form.Field name="studyArea">
+              {(field) =>
+                showErrors &&
+                uniqueFormattedFormErrors(field.state.meta.errors).map((message) => (
+                  <p key={message} role="alert" className={fieldErrorClass}>
+                    {message}
+                  </p>
+                ))
+              }
+            </form.Field>
           )}
         </div>
 
-        {showUserData && (
-          <div className={sectionClass}>
-            <div className={groupHeadlineClass}>
-              <span className="flex items-center gap-1">
-                Eigene Daten
-                <InfoTooltip>{GROUP_HELP.eigendaten}</InfoTooltip>
-              </span>
-            </div>
-            <div>
-              <UserDatasetsField
-                datasets={state.userDatasets}
-                onChange={onUserDatasetsChange}
-                studyArea={(effectiveStudyArea as GeoJSON.Geometry | null | undefined) ?? null}
-                showErrors={showValidation}
-              />
-            </div>
+        <div className={sectionClass}>
+          <div className={groupHeadlineClass}>
+            <span className="flex items-center gap-1">
+              Eigene Daten
+              <InfoTooltip>{GROUP_HELP.eigendaten}</InfoTooltip>
+            </span>
           </div>
-        )}
+          <form.Field name="userDatasets">
+            {(field) => (
+              <UserDatasetsField
+                datasets={field.state.value as UserDataset[]}
+                onChange={(datasets) => field.handleChange(datasets)}
+                studyArea={studyArea}
+                showErrors={showErrors}
+              />
+            )}
+          </form.Field>
+        </div>
       </div>
     </div>
   )
 }
-
-export const useEffectiveStudyArea = (studyArea: unknown) => {
-  const drawnGeometry = useSpaceFinderDrawnGeometry()
-  return studyArea ?? drawnGeometry
-}
-
-export const useStudyAreaKm2 = (studyArea: unknown) =>
-  studyArea ? studyAreaSizeKm2(studyArea as GeoJSON.Geometry) : null

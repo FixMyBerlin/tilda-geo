@@ -1,5 +1,12 @@
 import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { useDeferredValue, useState } from 'react'
+import { twJoin } from 'tailwind-merge'
+import {
+  fieldErrorClass,
+  inputBase,
+  inputError,
+  inputNormal,
+} from '@/components/shared/form/fields/sharedStyles'
 import { SegmentedChoice } from '@/components/shared/SegmentedChoice/SegmentedChoice'
 import {
   defaultUserDatasetName,
@@ -18,7 +25,6 @@ import {
   userGeojsonByteSize,
 } from '@/lib/planningUserGeojson'
 import { RemoveIconButton } from '../RemoveIconButton'
-import { spaceFinderPanelTitleInputClass } from '../spaceFinderPanelStyles'
 import { GeoJsonUploadField } from './GeoJsonUpload'
 
 /** `[value, label, tooltip]` — the explanation shows as an info icon on the respective button. */
@@ -44,12 +50,6 @@ export const USER_DATASET_MODE_OPTIONS = [
     'Nur die hochgeladene Fläche bleibt zulässig, alles andere wird ausgeschlossen, z. B. für erlaubte Zonen.',
   ],
 ] as const satisfies readonly (readonly [UserDatasetMode, string, string])[]
-
-/** All names filled and distinct? Otherwise the server rejects — saving stays disabled. */
-export const userDatasetsValid = (datasets: UserDataset[]) =>
-  datasets.every(
-    (dataset) => dataset.name.trim().length > 0 && !isDuplicateUserDatasetName(datasets, dataset),
-  )
 
 /** Amber hint when data lies (fully or partly) outside the Planungsgebiet. */
 export const UserDatasetCoverageHint = ({ message }: { message: string }) => (
@@ -118,6 +118,7 @@ export const UserDatasetsField = ({
         <ul className="space-y-2">
           {datasets.map((dataset) => {
             const nameMissing = showErrors && dataset.name.trim().length === 0
+            const nameDuplicate = isDuplicateUserDatasetName(datasets, dataset)
             const coverageMessage = userDatasetCoverageMessage(
               userDatasetCoverage(dataset.geojson, deferredStudyArea),
             )
@@ -134,9 +135,12 @@ export const UserDatasetsField = ({
                     disabled={readOnly}
                     onChange={(event) => update(dataset.id, { name: event.target.value })}
                     aria-label="Name des Datensatzes"
-                    aria-invalid={nameMissing}
+                    aria-invalid={nameMissing || nameDuplicate}
                     placeholder="Name des Datensatzes"
-                    className={spaceFinderPanelTitleInputClass}
+                    className={twJoin(
+                      inputBase,
+                      nameMissing || nameDuplicate ? inputError : inputNormal,
+                    )}
                   />
                   {!readOnly && (
                     <RemoveIconButton
@@ -145,9 +149,15 @@ export const UserDatasetsField = ({
                     />
                   )}
                 </div>
-                {nameMissing && <p className="text-red-600">Bitte einen Namen angeben.</p>}
-                {isDuplicateUserDatasetName(datasets, dataset) && (
-                  <p className="text-red-600">Diesen Namen trägt schon ein anderer Datensatz.</p>
+                {nameMissing && (
+                  <p role="alert" className={fieldErrorClass}>
+                    Bitte einen Namen angeben.
+                  </p>
+                )}
+                {nameDuplicate && (
+                  <p role="alert" className={fieldErrorClass}>
+                    Diesen Namen trägt schon ein anderer Datensatz.
+                  </p>
                 )}
                 <p className="text-green-700">
                   ✓ {dataset.geojson.features.length.toLocaleString('de-DE')} Objekt(e) geladen
@@ -195,7 +205,11 @@ export const UserDatasetsField = ({
           Mehr als {MAX_USER_DATASETS} Datensätze sind nicht möglich.
         </p>
       )}
-      {limitError && <p className="text-xs text-red-600">{limitError}</p>}
+      {limitError && (
+        <p role="alert" className={fieldErrorClass}>
+          {limitError}
+        </p>
+      )}
     </div>
   )
 }

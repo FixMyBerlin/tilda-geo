@@ -1,5 +1,6 @@
 import type { VariantFactorConfig } from '@/server/planning/mergeFactorConfig'
 import type { FactorConfig } from '@/server/planning/planning.functions'
+import type { PlanningUseCase } from '@/server/planning/planningFormSchemas'
 import { PLANNING_USE_CASE_LABELS } from '@/shared/regionen/planningScoreLabels.const'
 import { DEFAULT_OEPNV_SHARES } from './oepnvCategories'
 import { DEFAULT_ZIELORT_SHARES } from './zielortCategories'
@@ -59,11 +60,7 @@ export const SHOW_PLANNING_USE_CASE_UI = false
 // `defaultAreaM2` is the prefilled area size; "Sonstiges" has no default, the size is entered
 // freely. The area is stored on the planning area (not in the variant factorConfig) and is
 // currently only saved — preparation for the future automatic area search.
-export type PlanningUseCase =
-  | 'fahrradbox'
-  | 'fahrradabstellanlage'
-  | 'mobilitaetsstation'
-  | 'sonstiges'
+export type { PlanningUseCase }
 
 export const PLANNING_USE_CASES: {
   key: PlanningUseCase

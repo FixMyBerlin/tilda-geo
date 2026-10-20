@@ -1,123 +1,107 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
+import { twJoin } from 'tailwind-merge'
+import { fieldErrorClass } from '@/components/shared/form/fields/sharedStyles'
+import { Form } from '@/components/shared/form/Form'
 import { frenchQuote } from '@/components/shared/text/Quotes'
-import { toastSuccess } from '@/components/shared/toast/toastSuccess'
-import { MAX_STUDY_AREA_KM2 } from '@/lib/planningStudyAreaLimit'
-import type { UserDataset } from '@/lib/planningUserGeojson'
+import { getErrorMessage } from '@/components/shared/toast/toastError'
 import { createPlanningAreaFn } from '@/server/planning/planning.functions'
+import {
+  PlanningAreaFormSchema,
+  type PlanningAreaFormValues,
+} from '@/server/planning/planningFormSchemas'
 import {
   planningAreaQueryOptions,
   planningAreasQueryOptions,
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
-import { DEFAULT_FACTOR_TEMPLATE, type PlanningUseCase } from '../factors/spaceFinderDefaults'
-import { AreaFormFields, useEffectiveStudyArea, useStudyAreaKm2 } from './AreaFormFields'
-import { userDatasetsValid } from './UserDatasetsField'
+import { ModeFormSubmit } from '../../ModeFormSubmit'
+import { DEFAULT_FACTOR_TEMPLATE } from '../factors/spaceFinderDefaults'
+import { AreaFormFields } from './AreaFormFields'
+
+const emptyValues: PlanningAreaFormValues = {
+  title: '',
+  studyArea: null,
+  userDatasets: [],
+  useCase: 'fahrradbox',
+  areaSizeM2: 2,
+}
 
 /** Reduced wizard: name + geometry + eigene Daten. Creates area + first variant (no auto-run). */
 export const AreaWizard = ({
   onCreated,
+  onCancel,
 }: {
   onCreated: (areaId: number, variantId: number) => void
+  onCancel: () => void
 }) => {
   const regionSlug = useRegionSlug()
   const queryClient = useQueryClient()
-  const [title, setTitle] = useState('')
-  const [submitAttempted, setSubmitAttempted] = useState(false)
-  const titleMissing = submitAttempted && title.trim().length === 0
-  const [boundaryId, setBoundaryId] = useState<string | null>(null)
-  const [studyArea, setStudyArea] = useState<unknown>(null)
-  const [areaTab, setAreaTab] = useState<'search' | 'custom'>('search')
-  const [userDatasets, setUserDatasets] = useState<UserDataset[]>([])
-  const [useCase, setUseCase] = useState<PlanningUseCase>('fahrradbox')
-  const [areaSizeM2, setAreaSizeM2] = useState<number | null>(2)
-
-  const effectiveStudyArea = useEffectiveStudyArea(studyArea)
-  const areaKm2 = useStudyAreaKm2(effectiveStudyArea)
-  const areaTooLarge = areaKm2 != null && areaKm2 > MAX_STUDY_AREA_KM2
-
-  const mutation = useMutation({
-    mutationFn: async () => {
-      if (!effectiveStudyArea) throw new Error('Bitte ein Gebiet auswählen')
-      if (areaTooLarge)
-        throw new Error(
-          `Das Berechnungsgebiet ist zu groß (${areaKm2?.toFixed(1)} km²). Maximal ${MAX_STUDY_AREA_KM2} km² sind erlaubt.`,
-        )
-      return createPlanningAreaFn({
-        data: {
-          regionSlug,
-          title,
-          studyArea: effectiveStudyArea,
-          userDatasets: userDatasets.map((dataset) => ({ ...dataset, name: dataset.name.trim() })),
-          useCase,
-          areaSizeM2,
-          // The chosen area size prefills the area search of the first variant;
-          // after that it can be changed freely per variant.
-          factorConfig: { ...DEFAULT_FACTOR_TEMPLATE, min_area_m2: areaSizeM2 },
-        },
-      })
-    },
-    onSuccess: async (created) => {
-      // Wait for the refetch: selecting the new variant while the area list is still the old one
-      // looks like an orphaned key, and the page's auto-select would jump to the first Gebiet.
-      await Promise.all([
-        queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug)),
-        queryClient.invalidateQueries(planningAreaQueryOptions(created.areaId)),
-        queryClient.invalidateQueries(planningVariantQueryOptions(created.variantId)),
-      ])
-      toastSuccess(`Planungsgebiet ${frenchQuote(title.trim())} angelegt.`)
-      onCreated(created.areaId, created.variantId)
-    },
-  })
-
-  const namesValid = userDatasetsValid(userDatasets)
-
-  const handleSubmit = () => {
-    setSubmitAttempted(true)
-    if (title.trim().length === 0 || !namesValid) return
-    mutation.mutate()
-  }
 
   return (
-    <div className="flex flex-col">
-      <AreaFormFields
-        state={{
-          title,
-          boundaryId,
-          studyArea,
-          areaTab,
-          userDatasets,
-          useCase,
-          areaSizeM2,
-        }}
-        onTitleChange={setTitle}
-        onBoundaryIdChange={setBoundaryId}
-        onStudyAreaChange={setStudyArea}
-        onAreaTabChange={setAreaTab}
-        onUserDatasetsChange={setUserDatasets}
-        onUseCaseChange={setUseCase}
-        onAreaSizeM2Change={setAreaSizeM2}
-        titleMissing={titleMissing}
-        showValidation={submitAttempted}
-      />
-
-      {mutation.isError && (
-        <p className="px-3 text-xs text-red-600">{String((mutation.error as Error).message)}</p>
+    <Form
+      className="flex flex-col space-y-0"
+      actionBarPlacement="none"
+      showFormErrors={false}
+      schema={PlanningAreaFormSchema}
+      defaultValues={emptyValues}
+      onSubmit={async (values) => {
+        const title = values.title.trim()
+        try {
+          const created = await createPlanningAreaFn({
+            data: {
+              regionSlug,
+              title,
+              studyArea: values.studyArea,
+              userDatasets: values.userDatasets.map((dataset) => ({
+                ...dataset,
+                name: dataset.name.trim(),
+              })),
+              useCase: values.useCase,
+              areaSizeM2: values.areaSizeM2,
+              // The chosen area size prefills the area search of the first variant;
+              // after that it can be changed freely per variant.
+              factorConfig: { ...DEFAULT_FACTOR_TEMPLATE, min_area_m2: values.areaSizeM2 },
+            },
+          })
+          // Wait for the refetch: selecting the new variant while the area list is still the old
+          // one looks like an orphaned key, and the page's auto-select would jump to the first Gebiet.
+          await Promise.all([
+            queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug)),
+            queryClient.invalidateQueries(planningAreaQueryOptions(created.areaId)),
+            queryClient.invalidateQueries(planningVariantQueryOptions(created.variantId)),
+          ])
+          onCreated(created.areaId, created.variantId)
+          return { success: true, message: `Planungsgebiet ${frenchQuote(title)} angelegt.` }
+        } catch (error) {
+          return {
+            success: false,
+            message: getErrorMessage(error, 'Planungsgebiet konnte nicht angelegt werden.'),
+          }
+        }
+      }}
+    >
+      {(form, { submitError }) => (
+        <>
+          <AreaFormFields form={form} />
+          {submitError && (
+            <p role="alert" className={twJoin(fieldErrorClass, 'mt-0 px-3 pb-2')}>
+              {submitError}
+            </p>
+          )}
+          <div className="px-3 pb-3">
+            <form.Subscribe selector={(state) => state.isSubmitting}>
+              {(isSubmitting) => (
+                <ModeFormSubmit
+                  label="Anlegen"
+                  pending={isSubmitting}
+                  cancel={{ onClick: onCancel }}
+                />
+              )}
+            </form.Subscribe>
+          </div>
+        </>
       )}
-      <div className="flex gap-2 px-3 pb-3">
-        <button
-          type="button"
-          onClick={handleSubmit}
-          disabled={mutation.isPending || !effectiveStudyArea || areaTooLarge}
-          className="rounded bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
-        >
-          {mutation.isPending ? 'Wird angelegt…' : 'Planungsgebiet anlegen'}
-        </button>
-      </div>
-      {(title.trim().length === 0 || !effectiveStudyArea || !namesValid) && (
-        <p className="px-3 pb-3 text-xs text-red-600">Alle Felder ausfüllen</p>
-      )}
-    </div>
+    </Form>
   )
 }

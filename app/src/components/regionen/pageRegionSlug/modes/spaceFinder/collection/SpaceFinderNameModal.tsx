@@ -5,12 +5,15 @@ import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form } from '@/components/shared/form/Form'
 import { buttonStylesOnYellow } from '@/components/shared/links/styles'
 import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
+import { getErrorMessage } from '@/components/shared/toast/toastError'
+import { planningTitleSchema } from '@/server/planning/planningFormSchemas'
+import type { SpaceFinderNameModalKind } from './useSpaceFinderCommands'
 
 const NameSchema = z.object({
-  name: z.string().trim().min(1, 'Name fehlt.'),
+  name: planningTitleSchema,
 })
 
-type Kind = 'renameVariant' | 'renameArea'
+type Kind = SpaceFinderNameModalKind
 
 type Props = {
   kind: Kind | null
@@ -20,20 +23,34 @@ type Props = {
   onSubmit: (name: string) => Promise<void>
 }
 
-const COPY: Record<Kind, { title: string; label: string; successMessage: string }> = {
+const COPY: Record<
+  Kind,
+  { title: string; label: string; submitLabel: string; successMessage: string; failure: string }
+> = {
+  newVariant: {
+    title: 'Neue Variante',
+    label: 'Name der Variante',
+    submitLabel: 'Anlegen',
+    successMessage: 'Variante angelegt. Die Faktoren starten mit den Standardwerten.',
+    failure: 'Variante konnte nicht angelegt werden.',
+  },
   renameVariant: {
     title: 'Variante umbenennen',
     label: 'Name der Variante',
+    submitLabel: 'Speichern',
     successMessage: 'Variante umbenannt.',
+    failure: 'Umbenennen fehlgeschlagen.',
   },
   renameArea: {
     title: 'Planungsgebiet umbenennen',
     label: 'Name des Planungsgebiets',
+    submitLabel: 'Speichern',
     successMessage: 'Planungsgebiet umbenannt.',
+    failure: 'Umbenennen fehlgeschlagen.',
   },
 }
 
-/** Rename modal for the active Variante or Gebiet — same shape as `ReviewListNameModal`. */
+/** Create/rename modal for a Variante or the Gebiet — same shape as `ReviewListNameModal`. */
 export const SpaceFinderNameModal = ({
   kind,
   defaultName = '',
@@ -62,7 +79,7 @@ export const SpaceFinderNameModal = ({
             disabled={isPending}
             className={twJoin(buttonStylesOnYellow, 'inline-flex w-full justify-center sm:w-auto')}
           >
-            Speichern
+            {copy.submitLabel}
           </button>
         ) : null
       }
@@ -75,13 +92,13 @@ export const SpaceFinderNameModal = ({
           schema={NameSchema}
           onSubmit={async (values) => {
             try {
-              await onSubmit(values.name)
+              await onSubmit(values.name.trim())
               onClose()
               return { success: true, message: copy.successMessage }
             } catch (error) {
               return {
                 success: false,
-                message: error instanceof Error ? error.message : String(error),
+                message: getErrorMessage(error, copy.failure),
               }
             }
           }}

@@ -33,7 +33,6 @@ import { SpaceFinderVariantSelect } from './collection/SpaceFinderVariantSelect'
 import { useSpaceFinderCommands } from './collection/useSpaceFinderCommands'
 import { SpaceFinderEditAreaDetail } from './detail/SpaceFinderEditAreaDetail'
 import { SpaceFinderNewAreaDetail } from './detail/SpaceFinderNewAreaDetail'
-import { SpaceFinderNewVariantDetail } from './detail/SpaceFinderNewVariantDetail'
 import { SpaceFinderBody } from './SpaceFinderBody'
 import { compactSpaceFinderModeParam } from './spaceFinderModeParam'
 import { spaceFinderOpenRunStatus } from './spaceFinderRunStatus'
@@ -46,21 +45,6 @@ const MobileEditingNotice = () => (
     Bearbeitung nur am Desktop verfügbar. Auf dem Smartphone können Sie Planungsgebiete und
     Varianten ansehen sowie berechnete Ergebnisse erkunden.
   </p>
-)
-
-/** Empty region (D4): no Planungsgebiet yet, like Prüflisten with zero lists. */
-const SpaceFinderEmptyState = ({ onCreate }: { onCreate: () => void }) => (
-  <div className="flex flex-col gap-3 px-4 py-4" role="status">
-    <p className={modePanelMutedClassName}>Noch kein Planungsgebiet in dieser Region.</p>
-    <button
-      type="button"
-      onClick={onCreate}
-      className="flex w-fit items-center gap-1.5 rounded border border-gray-300 px-3 py-1.5 text-sm font-medium text-gray-800 hover:bg-gray-50"
-    >
-      <PlusIcon className="size-4" aria-hidden />
-      Erstes Planungsgebiet anlegen
-    </button>
-  </div>
 )
 
 /**
@@ -163,9 +147,6 @@ export const PageModeSpaceFinder = () => {
   const closeEdit = () => setSpaceFinderModeParam({ ...spaceFinderMode, edit: undefined })
   const onAreaCreated = (_areaId: number, variantId: number) =>
     setSpaceFinderModeParam({ ...spaceFinderMode, key: variantId, new: undefined })
-  const onVariantCreated = (variantId: number) =>
-    setSpaceFinderModeParam({ ...spaceFinderMode, key: variantId, new: undefined })
-
   // Detail views are desktop-only (D10). Create/edit affordances that open them are already
   // hidden on mobile, but guard here too in case a bookmark still carries `space.new`/`space.edit`.
   const newAreaDetail =
@@ -173,23 +154,7 @@ export const PageModeSpaceFinder = () => {
       ? {
           title: 'Neues Planungsgebiet',
           onBack: closeNew,
-          children: <SpaceFinderNewAreaDetail onCreated={onAreaCreated} />,
-        }
-      : undefined
-  const newVariantDetail =
-    isDesktop && spaceFinderMode.new === 'variant' && selection
-      ? {
-          title: 'Neue Variante',
-          subtitle: `Planungsgebiet ${frenchQuote(selection.areaTitle)}`,
-          onBack: closeNew,
-          children: (
-            <SpaceFinderNewVariantDetail
-              areaId={selection.areaId}
-              areaTitle={selection.areaTitle}
-              onCreated={onVariantCreated}
-              onClose={closeNew}
-            />
-          ),
+          children: <SpaceFinderNewAreaDetail onCreated={onAreaCreated} onCancel={closeNew} />,
         }
       : undefined
   const editAreaDetail =
@@ -206,7 +171,7 @@ export const PageModeSpaceFinder = () => {
           ),
         }
       : undefined
-  const panelDetail = newAreaDetail ?? newVariantDetail ?? editAreaDetail
+  const panelDetail = newAreaDetail ?? editAreaDetail
 
   // The area form shows no result (`useSpaceFinderSelection`), so an inspected hexagon of the
   // previous run must not stay open beside it. One navigation for both params: separate ones
@@ -255,7 +220,7 @@ export const PageModeSpaceFinder = () => {
         activeStatus={run?.status}
         onSelect={onSelect}
         editable={isDesktop}
-        onNewVariant={() => setSpaceFinderModeParam({ ...spaceFinderMode, new: 'variant' })}
+        onNewVariant={(origin) => commands.openNameModal('newVariant', origin)}
         commands={commands}
       />
     ) : undefined
@@ -292,13 +257,10 @@ export const PageModeSpaceFinder = () => {
       {activeVariant != null ? (
         <SpaceFinderBody variant={variant} editable={isDesktop} />
       ) : sortedAreas.length === 0 ? (
-        isDesktop ? (
-          <SpaceFinderEmptyState onCreate={openNewArea} />
-        ) : (
-          <p className={twJoin('px-4 py-3', modePanelMutedClassName)}>
-            Noch kein Planungsgebiet in dieser Region.
-          </p>
-        )
+        // Empty region (D4): creating the first one is in the header, like Prüflisten.
+        <p className={twJoin('px-4 py-3', modePanelMutedClassName)} role="status">
+          Noch kein Planungsgebiet in dieser Region.
+        </p>
       ) : (
         <p className={twJoin('px-4 py-3', modePanelMutedClassName)}>
           Wählen Sie ein Planungsgebiet.
@@ -313,11 +275,19 @@ export const PageModeSpaceFinder = () => {
               ? selection.areaTitle
               : commands.nameModal === 'renameVariant'
                 ? selection.variantTitle
-                : ''
+                : `Variante ${selection.area.variants.length + 1}`
           }
-          isPending={commands.renameVariant.isPending || commands.renameArea.isPending}
+          isPending={
+            commands.createVariant.isPending ||
+            commands.renameVariant.isPending ||
+            commands.renameArea.isPending
+          }
           onClose={commands.closeNameModal}
           onSubmit={async (name) => {
+            if (commands.nameModal === 'newVariant') {
+              await commands.createVariant.mutateAsync(name)
+              return
+            }
             if (commands.nameModal === 'renameArea') {
               await commands.renameArea.mutateAsync(name)
               return

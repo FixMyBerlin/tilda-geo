@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
 import { toastSuccess } from '@/components/shared/toast/toastSuccess'
 import {
+  createPlanningVariantFn,
   deletePlanningAreaFn,
   deletePlanningVariantFn,
   duplicatePlanningVariantFn,
@@ -15,11 +16,14 @@ import {
   planningVariantQueryOptions,
 } from '@/server/planning/planningQueryOptions'
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
+import { DEFAULT_FACTOR_TEMPLATE } from '../factors/spaceFinderDefaults'
 import {
   firstSpaceFinderVariantId,
   type PlanningAreasRow,
   type SpaceFinderSelectedVariant,
 } from './spaceFinderCollectionOptions'
+
+export type SpaceFinderNameModalKind = 'newVariant' | 'renameVariant' | 'renameArea'
 
 type UseSpaceFinderCommandsInput = {
   areas: readonly PlanningAreasRow[]
@@ -29,11 +33,11 @@ type UseSpaceFinderCommandsInput = {
 }
 
 /**
- * Variante/Gebiet rename/duplicate/delete commands, mirroring `useReviewListCommands`. Unlike
- * Prüflisten's single collection entity, this manages two levels: the Gebiet ⋯ menu in the panel
- * header acts on `selectedOption.areaId`, the Varianten ⋯ menu on `selectedOption.variantId`.
- * Creation (»Neue Variante«/»Neues Planungsgebiet«) is not here — those open a ModePanel detail
- * view (`space.new`) with their own forms/wizard.
+ * Variante/Gebiet create/rename/duplicate/delete commands, mirroring `useReviewListCommands`.
+ * Unlike Prüflisten's single collection entity, this manages two levels: the Gebiet ⋯ menu in the
+ * panel header acts on `selectedOption.areaId`, the Varianten ⋯ menu on `selectedOption.variantId`.
+ * »Neue Variante« uses the name modal like »Neue Prüfliste«; »Neues Planungsgebiet« is not here —
+ * it opens a ModePanel detail view (`space.new`) with its wizard.
  */
 export const useSpaceFinderCommands = ({
   areas,
@@ -42,9 +46,9 @@ export const useSpaceFinderCommands = ({
 }: UseSpaceFinderCommandsInput) => {
   const regionSlug = useRegionSlug()
   const queryClient = useQueryClient()
-  const [nameModal, setNameModal] = useState<'renameVariant' | 'renameArea' | null>(null)
+  const [nameModal, setNameModal] = useState<SpaceFinderNameModalKind | null>(null)
 
-  const openNameModal = (kind: 'renameVariant' | 'renameArea', origin?: HTMLElement) => {
+  const openNameModal = (kind: SpaceFinderNameModalKind, origin?: HTMLElement) => {
     if (origin) captureModalOpenOrigin(origin)
     setNameModal(kind)
   }
@@ -85,6 +89,20 @@ export const useSpaceFinderCommands = ({
     },
   })
 
+  const createVariant = useMutation({
+    mutationFn: (title: string) => {
+      if (!selectedOption) throw new Error('Kein Planungsgebiet ausgewählt.')
+      return createPlanningVariantFn({
+        data: { areaId: selectedOption.areaId, title, factorConfig: DEFAULT_FACTOR_TEMPLATE },
+      })
+    },
+    onSuccess: async (created) => {
+      await invalidateAreas()
+      await queryClient.invalidateQueries(planningVariantQueryOptions(created.id))
+      onSelect(created.id)
+    },
+  })
+
   const duplicateVariant = useMutation({
     mutationFn: (variantId: number) => duplicatePlanningVariantFn({ data: { variantId } }),
     onSuccess: async (created) => {
@@ -119,6 +137,7 @@ export const useSpaceFinderCommands = ({
     nameModal,
     openNameModal,
     closeNameModal,
+    createVariant,
     renameVariant,
     renameArea,
     duplicateVariant,

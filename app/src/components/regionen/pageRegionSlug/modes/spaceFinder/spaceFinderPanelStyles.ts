@@ -87,6 +87,8 @@ export const spaceFinderNumberInputClass = `${spaceFinderInputClass} w-14 text-r
 
 export const spaceFinderTextInputClass = `${spaceFinderInputClass} w-full`
 
-/** Full panel width, normal font size — for title/name fields in the wizard. */
-export const spaceFinderPanelTitleInputClass =
-  'w-full rounded border border-gray-300 px-2 py-1.5 text-sm focus:border-blue-400 focus:ring-1 focus:ring-blue-400 focus:outline-none'
+/** Row of discard links (»Gebiet verwerfen«, »Änderungen verwerfen«, »Auswahl leeren«), centered. */
+export const spaceFinderDiscardRowClass = 'flex flex-wrap justify-center gap-x-3 gap-y-1'
+
+/** A small text link that throws something away. */
+export const spaceFinderDiscardLinkClass = 'text-xs text-gray-500 underline hover:text-gray-700'
