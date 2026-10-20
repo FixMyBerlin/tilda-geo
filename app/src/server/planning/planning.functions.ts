@@ -17,22 +17,17 @@ import {
   parseVariantFactorConfig,
   VariantFactorConfigSchema,
 } from './factorConfigSchema'
-import { runFreshnessAfterFactorSave } from './factorFingerprint'
+import { jsonEqualIgnoringKeyOrder, runFreshnessAfterFactorSave } from './factorFingerprint'
 import {
   areaInputFromRow,
+  keepStoredMinArea,
   mergeFactorConfig,
   type MergedFactorConfig,
   stripAutoSaettigung,
   syncEigendatenWeights,
 } from './mergeFactorConfig'
 import { checkParkingDataAvailable } from './parkingDataAvailability.server'
-
-const PlanningUseCaseSchema = z.enum([
-  'fahrradbox',
-  'fahrradabstellanlage',
-  'mobilitaetsstation',
-  'sonstiges',
-])
+import { PlanningUseCaseSchema, planningTitleSchema } from './planningFormSchemas'
 
 // Merged config (variant + area) — used by UI for map layers and worker payload.
 export type FactorConfig = MergedFactorConfig
@@ -146,7 +141,7 @@ async function markRunsFreshForVariant(variantId: number) {
   })
 }
 
-const jsonEqual = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
+const jsonEqual = jsonEqualIgnoringKeyOrder
 
 async function deleteVariantPostgisResults(variantId: number) {
   const runs = await db.planningRun.findMany({
@@ -498,11 +493,11 @@ export const getPlanningHexagonGeomFn = createServerFn({ method: 'GET' })
 
 const CreateAreaInput = z.object({
   regionSlug: z.string(),
-  title: z.string().min(1),
+  title: planningTitleSchema,
   ...AreaGeometryInputSchema.shape,
   useCase: PlanningUseCaseSchema.optional(),
   areaSizeM2: z.number().nullable().optional(),
-  variantTitle: z.string().min(1).optional(),
+  variantTitle: planningTitleSchema.optional(),
   factorConfig: VariantFactorConfigSchema.optional(),
 })
 
@@ -544,7 +539,7 @@ export const createPlanningAreaFn = createServerFn({ method: 'POST' })
 
 const UpdateAreaInput = z.object({
   areaId: z.number().int(),
-  title: z.string().min(1).optional(),
+  title: planningTitleSchema.optional(),
   studyArea: StudyAreaSchema.optional(),
   userDatasets: UserDatasetsSchema,
   useCase: PlanningUseCaseSchema.optional(),
@@ -630,7 +625,7 @@ export const deletePlanningAreaFn = createServerFn({ method: 'POST' })
 
 const UpdateVariantInput = z.object({
   variantId: z.number().int(),
-  title: z.string().min(1).optional(),
+  title: planningTitleSchema.optional(),
   description: z.string().optional(),
   factorConfig: VariantFactorConfigSchema.optional(),
   /** Set only the target size of the area search without sending the rest of factorConfig. */
@@ -664,6 +659,12 @@ export const updatePlanningVariantFn = createServerFn({ method: 'POST' })
       },
     })
     let factorConfig = data.factorConfig
+    if (factorConfig !== undefined && data.minAreaM2 === undefined) {
+      factorConfig = keepStoredMinArea(
+        factorConfig,
+        parseVariantFactorConfig(existing.factorConfig),
+      )
+    }
     if (data.minAreaM2 !== undefined) {
       factorConfig = {
         ...parseVariantFactorConfig(factorConfig ?? existing.factorConfig),
@@ -731,7 +732,7 @@ export const duplicatePlanningVariantFn = createServerFn({ method: 'POST' })
 
 const CreateVariantInput = z.object({
   areaId: z.number().int(),
-  title: z.string().min(1).optional(),
+  title: planningTitleSchema.optional(),
   factorConfig: VariantFactorConfigSchema.optional(),
 })
 

@@ -7,6 +7,7 @@ import {
   stripAutoSaettigung,
   syncEigendatenWeights,
   DEFAULT_EIGENDATEN_WEIGHT,
+  keepStoredMinArea,
 } from './mergeFactorConfig'
 
 const emptyCollection: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] }
@@ -127,5 +128,19 @@ describe('stripAutoSaettigung', () => {
       bewohnerbedarf_ew_pro_ha: 195.3,
     })
     expect(stored).toEqual({ bewohnerbedarf_saettigung_ew: 45 })
+  })
+})
+
+describe('keepStoredMinArea', () => {
+  it('keeps the stored searched area size over the one sent with the factors', () => {
+    expect(
+      keepStoredMinArea({ min_score_threshold: 60, min_area_m2: 2 }, { min_area_m2: 20 }),
+    ).toEqual({ min_score_threshold: 60, min_area_m2: 20 })
+  })
+
+  it('leaves the size out when none is stored', () => {
+    expect(keepStoredMinArea({ min_score_threshold: 60, min_area_m2: 2 }, {})).toEqual({
+      min_score_threshold: 60,
+    })
   })
 })

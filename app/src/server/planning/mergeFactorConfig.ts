@@ -154,6 +154,21 @@ export const stripAutoSaettigung = (config: MergedFactorConfig) => {
   return rest as VariantFactorConfig
 }
 
+/**
+ * Saving factors must not touch the target size of the area search: it belongs to the filter in
+ * »Anzeige« (`minAreaM2`). Otherwise an auto-save with an older draft could revert a value that was
+ * just saved.
+ */
+export const keepStoredMinArea = <T extends VariantFactorConfig>(
+  incoming: T,
+  stored: VariantFactorConfig,
+) => {
+  const { min_area_m2: _ignored, ...rest } = incoming
+  return (
+    stored.min_area_m2 === undefined ? rest : { ...rest, min_area_m2: stored.min_area_m2 }
+  ) as T
+}
+
 /** Initial strength of a new "Eigene Daten" dataset (10 points) so it takes effect immediately. */
 export const DEFAULT_EIGENDATEN_WEIGHT = 0.1
 

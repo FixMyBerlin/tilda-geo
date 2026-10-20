@@ -4,6 +4,7 @@ import {
   areaInputsDiffer,
   comparableRunSnapshot,
   factorsDiffer,
+  jsonEqualIgnoringKeyOrder,
   outdatedBannerReason,
   runFreshnessAfterFactorSave,
 } from './factorFingerprint'
@@ -157,5 +158,18 @@ describe('outdatedBannerReason', () => {
     expect(outdatedBannerReason(true, false)).toBe('Faktoren geändert')
     expect(outdatedBannerReason(false, true)).toBe('Planungsgebiet geändert')
     expect(outdatedBannerReason(false, false)).toBeNull()
+  })
+})
+
+describe('jsonEqualIgnoringKeyOrder', () => {
+  it('treats a dataset list read back from jsonb as unchanged', () => {
+    const sent = [
+      { id: 'd1', name: 'Tabu', mode: 'bonus', geojson: { type: 'Point', coordinates: [1, 2] } },
+    ]
+    const stored = [
+      { id: 'd1', mode: 'bonus', name: 'Tabu', geojson: { coordinates: [1, 2], type: 'Point' } },
+    ]
+    expect(jsonEqualIgnoringKeyOrder(sent, stored)).toBe(true)
+    expect(jsonEqualIgnoringKeyOrder(sent, [{ ...stored[0], mode: 'penalty' }])).toBe(false)
   })
 })

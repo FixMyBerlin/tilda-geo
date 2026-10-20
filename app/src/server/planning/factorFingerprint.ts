@@ -34,6 +34,12 @@ const sortedJson = (value: unknown, omitKey?: (key: string) => boolean) =>
   })
 
 /**
+ * Same JSON regardless of key order. Postgres `jsonb` stores object keys in its own order, so a
+ * value read back never matches the one the client sent with a plain `JSON.stringify` compare.
+ */
+export const jsonEqualIgnoringKeyOrder = (a: unknown, b: unknown) => sortedJson(a) === sortedJson(b)
+
+/**
  * Stable comparison value of a variant's computation-relevant factors: same fingerprint
  * = same run. The replacer sorts each object's keys because Postgres `jsonb` returns a
  * different order than the form draft.
