@@ -57,6 +57,7 @@ export const numericSourceIds: Record<number, SourceNames> = {
   35: 'qa-source',
   36: 'tilda_highwayAreas',
   37: 'atlas_busStopsAndBikeSharing',
+  38: 'atlas_buildingEntrances',
 }
 
 export const persistableSourceKeys = new Set(Object.values(numericSourceIds))

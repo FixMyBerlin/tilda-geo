@@ -1,7 +1,8 @@
 -- Train station buildings for the `_buildings_train_station` PROCESSING-ONLY table
--- (geometry only — no tags/meta, no minzoom). The leading `_` keeps it out of Martin's tile
--- sources; it is used by the planning-worker to score proximity to train stations for the
--- ÖPNV factor (bicycle parking is best planned as close as possible to the station building).
+-- (geometry only — no tags/meta, no minzoom). The leading `_` marks it internal: no map layer,
+-- Martin only serves it for inspection. It is used by the planning-worker to score proximity to
+-- train stations for the ÖPNV factor (bicycle parking is best planned as close as possible to
+-- the station building).
 --
 -- Separate from `_buildings` on purpose: that table drops rows with no tag column at all
 -- (see buildings.lua) and additionally filters out buildings < 100 m² (filter.sql) — a

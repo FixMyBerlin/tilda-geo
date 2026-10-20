@@ -11,6 +11,7 @@ type TildaSourceId =
   | 'atlas_bikelanes'
   | 'atlas_bikeroutes'
   | 'atlas_boundaries'
+  | 'atlas_buildingEntrances'
   | 'atlas_busStopsAndBikeSharing'
   | 'atlas_landuse'
   | 'atlas_places'
@@ -297,6 +298,22 @@ export const sources: MapDataSource<SourcesId>[] = [
       enabled: true,
       highlightingKey: 'id',
       documentedKeys: ['name', 'category', 'type'],
+    },
+  },
+  {
+    id: 'atlas_buildingEntrances',
+    tileTables: ['buildingEntrances'],
+    minzoom: SIMPLIFY_MIN_ZOOM,
+    maxzoom: SIMPLIFY_MAX_ZOOM,
+    attributionHtml:
+      '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
+    licence: 'ODbL',
+    promoteId: 'id',
+    osmIdConfig: { osmTypeId: 'id' },
+    inspector: {
+      enabled: true,
+      highlightingKey: 'id',
+      documentedKeys: ['entrance', 'ref', 'name', 'wheelchair', 'access'],
     },
   },
   {

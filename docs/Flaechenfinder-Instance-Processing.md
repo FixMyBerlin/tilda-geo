@@ -51,7 +51,7 @@ Expect several hours, and raise `mem_limit`/`cpus` of the `processing` container
 
 ## Rebuild buildings (`_buildings`)
 
-The same applies to `public._building_entrances` (building entrances, `entrance=*`): also built
+The same applies to `public."buildingEntrances"` (building entrances, `entrance=*`): also built
 from `landcover`, so it only exists after an explicit run. Until then
 `PostgisLoader.load_building_entrances()` returns an empty GeoDataFrame.
 

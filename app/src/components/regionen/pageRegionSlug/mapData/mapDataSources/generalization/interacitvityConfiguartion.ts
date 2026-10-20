@@ -98,6 +98,10 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
     stylingKeys: ['category'],
     minzoom: 11,
   },
+  buildingEntrances: {
+    stylingKeys: ['entrance'],
+    minzoom: 14,
+  },
   trafficSigns: { stylingKeys: [], minzoom: 0 },
   // aggregated_lengths: { // Does not work, see https://github.com/FixMyBerlin/private-issues/issues/2240
   //   stylingKeys: [],

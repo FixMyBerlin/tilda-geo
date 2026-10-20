@@ -1,5 +1,6 @@
 -- Buildings source for the `_buildings` PROCESSING-ONLY table (geometry only — no tags/meta,
--- no minzoom). The leading `_` keeps it out of Martin's tile sources; it is for processing only.
+-- no minzoom). The leading `_` marks it internal: no map layer, Martin only serves it for
+-- inspection; it is for processing only.
 -- The heavy import is fine on the weekend schedule. filter.sql drops buildings < 100 m².
 --
 -- TODO: when `_buildings` becomes a PRESENTATIONAL table, give it the standard topic shape

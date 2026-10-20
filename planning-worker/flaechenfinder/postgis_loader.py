@@ -136,13 +136,15 @@ class PostgisLoader:
         polygon_4326: BaseGeometry,
         kinds: tuple[str, ...] = ("yes", "main", "home", "staircase"),
     ) -> gpd.GeoDataFrame:
-        """Building entrances (`entrance=*`) from `public._building_entrances`.
+        """Building entrances (`entrance=*`) from `public."buildingEntrances"`.
 
-        Processing-side `_` table (see processing/topics/landcover/buildings/
-        building_entrances.lua), EPSG:5243 like `_buildings`. The table holds all
-        entrance values; `kinds` filters them. Default is the entrances relevant to
-        residents: `yes`/`main` plus `home`/`staircase`, which are the norm on residential
-        blocks in Germany. `kinds=()` returns all (incl. `service`, `emergency`).
+        Map layer in the standard topic shape (see processing/topics/landcover/buildings/
+        building_entrances.lua), EPSG:3857 like the other `public.*` tables; the value
+        lives in `tags->>'entrance'`. The table holds all entrance values; `kinds` filters
+        them. Default is the entrances relevant to residents: `yes`/`main` plus
+        `home`/`staircase`, which are the norm on residential blocks in Germany.
+        `kinds=()` returns all (incl. `service`, `emergency`). Keep the default in sync with
+        `mainEntranceValues` in the map style (`subcat_poi_plus_buildingEntrances.const.ts`).
 
         Returns `geom` (EPSG:4326) and the `entrance` column. The table is built by the
         weekend topic `landcover`; if it is missing (instance without a landcover run), an
@@ -152,20 +154,20 @@ class PostgisLoader:
         kind_filter = ""
         if kinds:
             values = ", ".join(f"'{_sql_literal(k)}'" for k in kinds)
-            kind_filter = f" AND entrance IN ({values})"
+            kind_filter = f" AND tags->>'entrance' IN ({values})"
         sql = f"""
-            SELECT entrance, ST_Transform(geom, 4326) AS geom
-            FROM public."_building_entrances"
-            WHERE geom && ST_Transform(ST_GeomFromText('{wkt}', 4326), 5243){kind_filter}
+            SELECT tags->>'entrance' AS entrance, ST_Transform(geom, 4326) AS geom
+            FROM public."buildingEntrances"
+            WHERE geom && ST_Transform(ST_GeomFromText('{wkt}', 4326), 3857){kind_filter}
         """
         try:
             gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
             if gdf.crs is None:
                 gdf = gdf.set_crs("EPSG:4326")
-            print(f"   ✓ PostGIS: {len(gdf)} building entrances from public._building_entrances")
+            print(f"   ✓ PostGIS: {len(gdf)} building entrances from public.buildingEntrances")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS query public._building_entrances failed: {e}")
+            print(f"   ⚠️  PostGIS query public.buildingEntrances failed: {e}")
             return _empty("EPSG:4326")
 
     def load_cycleways(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:

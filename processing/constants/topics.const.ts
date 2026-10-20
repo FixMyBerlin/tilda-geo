@@ -39,9 +39,9 @@ const config = [
   { id: 'publicTransport', bboxes: null, schedule: 'nightly' },
   { id: 'poiClassification', bboxes: null, schedule: 'nightly' },
   { id: 'barriers', bboxes: null, schedule: 'nightly' },
-  // Weekend (~weekly): produces the `landuse` display table, the settlement-area source
-  // (dissolved into public._settlement_areas by landcover.sql) and `_buildings`. Also runnable on
-  // demand with PROCESS_ONLY_TOPICS=landcover.
+  // Weekend (~weekly): produces the `landuse` and `buildingEntrances` display tables, the
+  // settlement-area source (dissolved into public._settlement_areas by landcover.sql) and
+  // `_buildings`. Also runnable on demand with PROCESS_ONLY_TOPICS=landcover.
   { id: 'landcover', bboxes: null, schedule: 'weekend' },
   {
     id: 'parking',
