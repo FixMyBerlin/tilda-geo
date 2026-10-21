@@ -25,7 +25,6 @@ export const SpaceFinderSelect = ({ areas, selectedAreaId, onSelectArea, onNewAr
       {areas.length > 0 ? (
         <ModeCollectionSelect
           aria-label="Planungsgebiet"
-          closeOnSelect
           value={String(selectedAreaId ?? areas[0]?.id ?? '')}
           options={areas.map((area) => ({
             value: String(area.id),

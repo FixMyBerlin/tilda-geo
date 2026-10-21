@@ -87,7 +87,6 @@ export const SpaceFinderVariantSelect = ({
           <div className="flex flex-col gap-1">
             <ModeCollectionSelect
               aria-label="Variante"
-              closeOnSelect
               value={String(selected.variantId)}
               options={variants.map((variant) => ({
                 value: String(variant.id),
