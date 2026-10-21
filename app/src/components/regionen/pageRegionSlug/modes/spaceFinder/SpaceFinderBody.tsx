@@ -1,12 +1,12 @@
 import { feature, featureCollection } from '@turf/helpers'
 import { useEffect } from 'react'
 import { twJoin } from 'tailwind-merge'
-import { formatDate } from '@/components/shared/date/formatDate'
 import { comparableRunSnapshot } from '@/server/planning/factorFingerprint'
 import { areaInputFromRow } from '@/server/planning/mergeFactorConfig'
 import { useSpaceFinderBoundaryActions } from '../../hooks/mapState/space-finder-boundary-store'
 import { modePanelMutedClassName } from '../modePanel.const'
 import { SpaceFinderCandidatesSection } from './candidates/SpaceFinderCandidatesSection'
+import { spaceFinderRunUpToDate } from './collection/spaceFinderCollectionOptions'
 import { DisplaySection } from './display/DisplaySection'
 import { FactorEditorPanel } from './factors/FactorEditorPanel'
 import { JobStatusBadge } from './run/JobStatusBadge'
@@ -15,8 +15,7 @@ import type { PlanningVariantDetail } from './spaceFinderVariantDetail'
 
 /** Status line (D5): same run state as the Varianten dropdown and the run button. */
 const StatusSection = ({ variant }: { variant: PlanningVariantDetail }) => {
-  const { status, outdatedReason, latestJob, latestRun, hasCompleteRun } =
-    spaceFinderOpenRunStatus(variant)
+  const { status, outdatedReason, latestJob } = spaceFinderOpenRunStatus(variant)
 
   return (
     <div className="flex flex-col gap-2 px-4 py-2">
@@ -26,8 +25,8 @@ const StatusSection = ({ variant }: { variant: PlanningVariantDetail }) => {
         </p>
       )}
       {latestJob != null && <JobStatusBadge jobId={latestJob.id} variantId={variant.id} />}
-      {status === 'complete' && latestJob == null && latestRun != null && hasCompleteRun && (
-        <p className="text-xs text-green-700">✓ Ergebnis vom {formatDate(latestRun.createdAt)}</p>
+      {spaceFinderRunUpToDate(status, latestJob?.status) && (
+        <p className={modePanelMutedClassName}>Ergebnis ist aktuell</p>
       )}
       {status === 'none' && latestJob == null && (
         <p className={modePanelMutedClassName}>Noch nicht berechnet.</p>

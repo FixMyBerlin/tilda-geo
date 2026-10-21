@@ -1,3 +1,4 @@
+import { CloseButton } from '@headlessui/react'
 import { CheckBadgeIcon, InformationCircleIcon, LockClosedIcon } from '@heroicons/react/20/solid'
 import { CheckBadgeIcon as CheckBadgeIconOutline } from '@heroicons/react/24/outline'
 import { twJoin } from 'tailwind-merge'
@@ -27,6 +28,8 @@ type Props = {
   onChange?: (value: string) => void
   /** Openable so the lock is visible, but the selection cannot change (Hinweise). */
   readOnly?: boolean
+  /** Picking an option closes the surrounding Headless UI disclosure. Off: it stays open. */
+  closeOnSelect?: boolean
   'aria-label'?: string
 }
 
@@ -39,17 +42,20 @@ export const ModeCollectionSelect = ({
   options,
   onChange,
   readOnly = false,
+  closeOnSelect = false,
   'aria-label': ariaLabel = 'Sammlung wählen',
 }: Props) => {
   const selected = options.find((option) => option.value === value) ?? options[0]
   if (!selected) return null
+
+  const OptionButton = closeOnSelect ? CloseButton : 'button'
 
   return (
     <div role="listbox" aria-label={ariaLabel} className="flex flex-col gap-0.5">
       {options.map((option) => {
         const isSelected = option.value === selected.value
         return (
-          <button
+          <OptionButton
             key={option.value}
             type="button"
             role="option"
@@ -103,7 +109,7 @@ export const ModeCollectionSelect = ({
                 title={PRIVATE_DATASET_TITLE}
               />
             ) : null}
-          </button>
+          </OptionButton>
         )
       })}
     </div>

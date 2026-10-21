@@ -106,6 +106,15 @@ export const spaceFinderVariantStatus = (
   return 'none'
 }
 
+/**
+ * `complete` means the factors still match the latest run (drift would make it `stale`). A failed
+ * last job still offers a rerun, so it does not count as up to date.
+ */
+export const spaceFinderRunUpToDate = (
+  status: SpaceFinderVariantStatus,
+  jobStatus?: string | null,
+) => status === 'complete' && jobStatus !== 'FAILED'
+
 /** A finished or failed attempt offers »Neu berechnen«; a variant that never ran offers »Berechnung starten«. */
 export const spaceFinderRunNeedsRerun = (
   status: SpaceFinderVariantStatus,

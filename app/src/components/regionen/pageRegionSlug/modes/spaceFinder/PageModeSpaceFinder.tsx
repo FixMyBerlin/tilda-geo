@@ -24,6 +24,7 @@ import {
   firstSpaceFinderVariantId,
   sortedSpaceFinderAreas,
   spaceFinderActiveSelection,
+  spaceFinderRunUpToDate,
   spaceFinderSelectedVariant,
 } from './collection/spaceFinderCollectionOptions'
 import { SpaceFinderAreaManageMenu } from './collection/SpaceFinderMenus'
@@ -77,8 +78,11 @@ export const PageModeSpaceFinder = () => {
   const run =
     variant != null && variant.id === activeVariant ? spaceFinderOpenRunStatus(variant) : null
 
-  const onSelect = (variantId: number | undefined) =>
+  // The inspector holds a frozen hexagon of the previous selection's run — close it on any switch.
+  const onSelect = (variantId: number | undefined) => {
+    clearInspectorFeatures()
     setSpaceFinderModeParam({ ...spaceFinderMode, key: variantId })
+  }
 
   // Switching the Gebiet opens its first variant; `space.key` stays a variant id (D7).
   const onSelectArea = (areaId: number) => {
@@ -225,9 +229,15 @@ export const PageModeSpaceFinder = () => {
       />
     ) : undefined
 
-  // Sticky footer: hidden in a detail view and on mobile (D10 — running needs desktop).
+  // Sticky footer: hidden in a detail view and on mobile (D10 — running needs desktop), while a run
+  // is in progress, and when the result is up to date (the status line says so instead).
   const footer =
-    !panelDetail && isDesktop && activeVariant != null && variant != null ? (
+    !panelDetail &&
+    isDesktop &&
+    activeVariant != null &&
+    variant != null &&
+    run?.status !== 'running' &&
+    !spaceFinderRunUpToDate(run?.status ?? 'none', run?.latestJob?.status) ? (
       <RunButton
         variantId={activeVariant}
         status={run?.status ?? 'none'}

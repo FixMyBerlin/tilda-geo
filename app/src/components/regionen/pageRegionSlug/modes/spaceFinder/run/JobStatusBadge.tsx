@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
+import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { Spinner } from '@/components/shared/Spinner/Spinner'
 import {
   planningJobQueryOptions,
@@ -24,6 +25,7 @@ const COLORS: Record<string, string> = {
 /** Polls a job until DONE/FAILED. On DONE, shows the run on the map + refreshes variant. */
 export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId: number }) => {
   const queryClient = useQueryClient()
+  const { clearInspectorFeatures } = useMapActions()
 
   const { data } = useQuery({
     ...planningJobQueryOptions(jobId),
@@ -39,7 +41,9 @@ export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId:
     // the worker already set server-side — this invalidation just refetches it.
     queryClient.invalidateQueries(planningVariantQueryOptions(variantId))
     queryClient.invalidateQueries({ queryKey: ['planning', 'areas'] })
-  }, [data?.status, data?.resultRunId, variantId, queryClient])
+    // An open hexagon inspector shows the previous run's frozen snapshot.
+    clearInspectorFeatures()
+  }, [data?.status, data?.resultRunId, variantId, queryClient, clearInspectorFeatures])
 
   // The "Neu berechnen" button in RunButton already shows the finished state.
   if (!data || data.status === 'DONE') return null

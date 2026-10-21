@@ -10,6 +10,7 @@ import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import {
   type SpaceFinderVariantStatus,
   spaceFinderRunNeedsRerun,
+  spaceFinderRunUpToDate,
 } from '../collection/spaceFinderCollectionOptions'
 import { JobStatusBadge } from './JobStatusBadge'
 
@@ -45,6 +46,8 @@ export const RunButton = ({
   // Factors save automatically; until that is done, the run would still compute server-side
   // with the old state (see FactorEditorPanel).
   const factorSavePending = useSpaceFinderFactorSavePending()
+  // Up to date: no button, the status line in the panel body says so (`SpaceFinderBody`).
+  const upToDate = spaceFinderRunUpToDate(status, latestJob?.status)
 
   const label = mutation.isPending
     ? 'Wird gestartet…'
@@ -53,6 +56,8 @@ export const RunButton = ({
       : hasFinishedRun
         ? 'Neu berechnen'
         : 'Berechnung starten'
+
+  if (upToDate) return null
 
   return (
     <div className="flex flex-col gap-2">
