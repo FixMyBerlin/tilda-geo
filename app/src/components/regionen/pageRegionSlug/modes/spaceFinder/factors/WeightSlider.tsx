@@ -1,5 +1,9 @@
 import { twJoin } from 'tailwind-merge'
 import {
+  spaceFinderFactorActiveTextClass,
+  spaceFinderFactorMutedTextClass,
+} from '../spaceFinderPanelStyles'
+import {
   MODIFIER_MAX_POINTS,
   MODIFIER_POINT_STEP,
   pointsToWeight,
@@ -32,7 +36,7 @@ export const WeightScaleLegend = () => (
 const FactorBadge = ({
   value,
   muted,
-  valueClassName = 'bg-green-50 text-green-800',
+  valueClassName = 'bg-green-50 text-green-900',
 }: {
   value: string
   muted: boolean
@@ -73,7 +77,7 @@ const FactorRow = ({
       <span
         className={twJoin(
           'flex items-center gap-1 text-xs',
-          muted ? 'text-gray-400' : 'text-gray-700',
+          muted ? spaceFinderFactorMutedTextClass : spaceFinderFactorActiveTextClass,
         )}
       >
         {label}
@@ -166,7 +170,12 @@ export const CriterionSlider = ({
       nested={nested}
       badge={
         <span className="flex shrink-0 items-baseline gap-1.5">
-          <span className="text-[11px] text-gray-400 tabular-nums">
+          <span
+            className={twJoin(
+              'text-[11px] tabular-nums',
+              step === 0 ? 'text-gray-400' : 'text-gray-500',
+            )}
+          >
             {step}/{WEIGHT_STEPS}
           </span>
           <FactorBadge value={`${Math.round(sharePct)} %`} muted={step === 0} />

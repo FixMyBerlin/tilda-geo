@@ -34,8 +34,13 @@ import { USER_DATASET_MODE_OPTIONS, UserDatasetCoverageHint } from '../area/User
 import {
   spaceFinderDiscardLinkClass,
   spaceFinderDiscardRowClass,
+  spaceFinderFactorHintClass,
+  spaceFinderFactorGroupLabelClass,
+  spaceFinderFactorGroupRowsClass,
+  spaceFinderGroupHeadingClass,
   spaceFinderGroupStyle,
   spaceFinderNumberInputClass,
+  spaceFinderParamLabelMutedClass,
 } from '../spaceFinderPanelStyles'
 import { OepnvCategorySliders } from './OepnvCategorySliders'
 import { readOepnvShares, type OepnvShares } from './oepnvShares'
@@ -78,8 +83,10 @@ const FactorInfo = ({ factorKey, extra }: { factorKey: string; extra?: string })
 }
 
 /** Base of the block headings; each block adds its color (factor groups colored, the rest gray). */
-const groupHeadlineBaseClass =
-  'flex items-baseline justify-between gap-2 border-b pb-0.5 text-sm font-bold'
+const groupHeadlineBaseClass = twJoin(
+  'flex items-baseline justify-between gap-2 border-b pb-0.5',
+  spaceFinderGroupHeadingClass,
+)
 
 const groupHeadlineClass = twJoin(groupHeadlineBaseClass, 'border-gray-200 text-gray-800')
 
@@ -270,8 +277,10 @@ const FactorParamInputs = ({
     const disabled = readOnly || (weightOff && !alwaysEditable)
     return (
       <div key={String(key)} className="space-y-0.5">
-        <label className="flex items-center justify-between gap-2 text-xs text-gray-600">
-          <span className={disabled ? 'text-gray-400' : ''}>{label}</span>
+        <label className="flex items-center justify-between gap-2">
+          <span className={disabled ? spaceFinderParamLabelMutedClass : spaceFinderFactorHintClass}>
+            {label}
+          </span>
           <input
             type="number"
             step={step}
@@ -367,7 +376,11 @@ const FactorFields = ({
             )}
           >
             <div
-              className={twJoin(groupHeadlineBaseClass, spaceFinderGroupStyle[group.key].headline)}
+              className={twJoin(
+                groupHeadlineBaseClass,
+                spaceFinderGroupStyle[group.key].headline,
+                spaceFinderGroupStyle[group.key].title,
+              )}
             >
               <span className="flex items-center gap-1">
                 {group.label}
@@ -378,154 +391,156 @@ const FactorFields = ({
               </span>
             </div>
 
-            <div className="mt-1 text-sm font-semibold tracking-wide text-black uppercase">
-              Kriterien
-            </div>
-            {group.criteria.map((key) => {
-              const criterionSlider = (
-                <CriterionSlider
-                  label={WEIGHT_LABELS[key] ?? key}
-                  weight={weights[key]}
-                  sharePct={shares[key] ?? 0}
-                  onChange={(value) => setWeightFromWeights(key, value)}
-                  readOnly={readOnly}
-                  info={<FactorInfo factorKey={key} />}
-                  nested={
-                    <>
-                      <FactorParamInputs
-                        factorKey={key}
-                        config={config}
-                        weight={weights[key]}
-                        setField={setField}
-                        restoreAutoSaettigung={restoreAutoSaettigung}
-                        readOnly={readOnly}
-                      />
-                      {/* The group split hangs off the ÖPNV slider: it distributes its share
-                          across ÖPNV and bikesharing without touching the other factors. */}
-                      {key === 'w_transit' && (
-                        <OepnvCategorySliders
-                          shares={oepnvShares}
-                          onChange={setOepnvShares}
-                          open={oepnvCategoriesOpen}
-                          onOpenChange={setOepnvCategoriesOpen}
-                          disabled={readOnly || weightToStep(weights[key]) === 0}
-                        />
-                      )}
-                    </>
-                  }
-                />
-              )
-              // When expanded, the ÖPNV slider and the type sliders visibly belong together,
-              // same pattern as Zielorte further down.
-              if (key === 'w_transit' && oepnvCategoriesOpen) {
-                return (
-                  <div
-                    key={key}
-                    className="-mx-1 my-1 rounded border border-gray-300 bg-white px-2 py-0.5 shadow-sm"
-                  >
-                    {criterionSlider}
-                  </div>
-                )
-              }
-              return <div key={key}>{criterionSlider}</div>
-            })}
-            {group.comingSoon?.map((key) => (
-              <ComingSoonFactorRow
-                key={key}
-                label={WEIGHT_LABELS[key] ?? key}
-                info={<FactorInfo factorKey={key} />}
-              />
-            ))}
-
-            <div className="mt-1.5 text-sm font-semibold tracking-wide text-black uppercase">
-              Zu- und Abschläge
-            </div>
-            {group.modifiers.map(({ key, direction }) => {
-              const dataUnavailable =
-                !parkingDataAvailable && PARKING_DATA_DEPENDENT_KEYS.includes(key)
-              if (dataUnavailable) {
-                return (
-                  <UnavailableFactorRow
-                    key={key}
+            <div className={twJoin('mt-1.5', spaceFinderFactorGroupLabelClass)}>Kriterien</div>
+            <div className={spaceFinderFactorGroupRowsClass}>
+              {group.criteria.map((key) => {
+                const criterionSlider = (
+                  <CriterionSlider
                     label={WEIGHT_LABELS[key] ?? key}
-                    info={<FactorInfo factorKey={key} extra={PARKING_DATA_HINT} />}
+                    weight={weights[key]}
+                    sharePct={shares[key] ?? 0}
+                    onChange={(value) => setWeightFromWeights(key, value)}
+                    readOnly={readOnly}
+                    info={<FactorInfo factorKey={key} />}
+                    nested={
+                      <>
+                        <FactorParamInputs
+                          factorKey={key}
+                          config={config}
+                          weight={weights[key]}
+                          setField={setField}
+                          restoreAutoSaettigung={restoreAutoSaettigung}
+                          readOnly={readOnly}
+                        />
+                        {/* The group split hangs off the ÖPNV slider: it distributes its share
+                          across ÖPNV and bikesharing without touching the other factors. */}
+                        {key === 'w_transit' && (
+                          <OepnvCategorySliders
+                            shares={oepnvShares}
+                            onChange={setOepnvShares}
+                            open={oepnvCategoriesOpen}
+                            onOpenChange={setOepnvCategoriesOpen}
+                            disabled={readOnly || weightToStep(weights[key]) === 0}
+                          />
+                        )}
+                      </>
+                    }
                   />
                 )
-              }
-              const slider = (
-                <ModifierSlider
+                // When expanded, the ÖPNV slider and the type sliders visibly belong together,
+                // same pattern as Zielorte further down.
+                if (key === 'w_transit' && oepnvCategoriesOpen) {
+                  return (
+                    <div
+                      key={key}
+                      className="-mx-1 my-1 rounded border border-gray-300 bg-white px-2 py-0.5 shadow-sm"
+                    >
+                      {criterionSlider}
+                    </div>
+                  )
+                }
+                return <div key={key}>{criterionSlider}</div>
+              })}
+              {group.comingSoon?.map((key) => (
+                <ComingSoonFactorRow
+                  key={key}
                   label={WEIGHT_LABELS[key] ?? key}
-                  weight={weights[key]}
-                  direction={resolveModifierDirection(direction, directions)}
-                  onChange={(value) => setWeightFromWeights(key, value)}
-                  readOnly={readOnly}
                   info={<FactorInfo factorKey={key} />}
-                  nested={
-                    <>
-                      {key === 'w_vegetation' && (
-                        <SegmentedChoice
-                          options={
-                            [
-                              ['negative', 'Grün schützen'],
-                              ['positive', 'Grün bevorzugen'],
-                            ] as const
-                          }
-                          value={vegetationDirection}
-                          onChange={setVegetationDirection}
-                          disabled={readOnly || weightToPoints(weights[key]) === 0}
-                        />
-                      )}
-                      {key === 'w_platz' && (
-                        <SegmentedChoice
-                          options={
-                            [
-                              ['negative', 'Platz freihalten'],
-                              ['positive', 'Belebung bevorzugen'],
-                            ] as const
-                          }
-                          value={platzDirection}
-                          onChange={setPlatzDirection}
-                          disabled={readOnly || weightToPoints(weights[key]) === 0}
-                        />
-                      )}
-                      <FactorParamInputs
-                        factorKey={key}
-                        config={config}
-                        weight={weights[key]}
-                        setField={setField}
-                        restoreAutoSaettigung={restoreAutoSaettigung}
-                        readOnly={readOnly}
-                      />
-                      {/* The category split hangs off the Zielorte slider: it distributes its
-                          points across the four target-location types without touching the other factors. */}
-                      {key === 'w_target' && (
-                        <ZielortCategorySliders
-                          shares={zielortShares}
-                          onChange={setZielortShares}
-                          open={zielortCategoriesOpen}
-                          onOpenChange={setZielortCategoriesOpen}
-                          disabled={readOnly || weightToPoints(weights[key]) === 0}
-                        />
-                      )}
-                    </>
-                  }
                 />
-              )
-              // When expanded, the Zielorte slider and the type sliders visibly belong together: the
-              // white card lifts both out of the tinted group block, instead of leaving the types
-              // as loose sliders below the factor.
-              if (key === 'w_target' && zielortCategoriesOpen) {
-                return (
-                  <div
-                    key={key}
-                    className="-mx-1 my-1 rounded border border-gray-300 bg-white px-2 py-0.5 shadow-sm"
-                  >
-                    {slider}
-                  </div>
+              ))}
+            </div>
+
+            <div className={twJoin('mt-2', spaceFinderFactorGroupLabelClass)}>
+              Zu- und Abschläge
+            </div>
+            <div className={spaceFinderFactorGroupRowsClass}>
+              {group.modifiers.map(({ key, direction }) => {
+                const dataUnavailable =
+                  !parkingDataAvailable && PARKING_DATA_DEPENDENT_KEYS.includes(key)
+                if (dataUnavailable) {
+                  return (
+                    <UnavailableFactorRow
+                      key={key}
+                      label={WEIGHT_LABELS[key] ?? key}
+                      info={<FactorInfo factorKey={key} extra={PARKING_DATA_HINT} />}
+                    />
+                  )
+                }
+                const slider = (
+                  <ModifierSlider
+                    label={WEIGHT_LABELS[key] ?? key}
+                    weight={weights[key]}
+                    direction={resolveModifierDirection(direction, directions)}
+                    onChange={(value) => setWeightFromWeights(key, value)}
+                    readOnly={readOnly}
+                    info={<FactorInfo factorKey={key} />}
+                    nested={
+                      <>
+                        {key === 'w_vegetation' && (
+                          <SegmentedChoice
+                            options={
+                              [
+                                ['negative', 'Grün schützen'],
+                                ['positive', 'Grün bevorzugen'],
+                              ] as const
+                            }
+                            value={vegetationDirection}
+                            onChange={setVegetationDirection}
+                            disabled={readOnly || weightToPoints(weights[key]) === 0}
+                          />
+                        )}
+                        {key === 'w_platz' && (
+                          <SegmentedChoice
+                            options={
+                              [
+                                ['negative', 'Platz freihalten'],
+                                ['positive', 'Belebung bevorzugen'],
+                              ] as const
+                            }
+                            value={platzDirection}
+                            onChange={setPlatzDirection}
+                            disabled={readOnly || weightToPoints(weights[key]) === 0}
+                          />
+                        )}
+                        <FactorParamInputs
+                          factorKey={key}
+                          config={config}
+                          weight={weights[key]}
+                          setField={setField}
+                          restoreAutoSaettigung={restoreAutoSaettigung}
+                          readOnly={readOnly}
+                        />
+                        {/* The category split hangs off the Zielorte slider: it distributes its
+                          points across the four target-location types without touching the other factors. */}
+                        {key === 'w_target' && (
+                          <ZielortCategorySliders
+                            shares={zielortShares}
+                            onChange={setZielortShares}
+                            open={zielortCategoriesOpen}
+                            onOpenChange={setZielortCategoriesOpen}
+                            disabled={readOnly || weightToPoints(weights[key]) === 0}
+                          />
+                        )}
+                      </>
+                    }
+                  />
                 )
-              }
-              return <div key={key}>{slider}</div>
-            })}
+                // When expanded, the Zielorte slider and the type sliders visibly belong together: the
+                // white card lifts both out of the tinted group block, instead of leaving the types
+                // as loose sliders below the factor.
+                if (key === 'w_target' && zielortCategoriesOpen) {
+                  return (
+                    <div
+                      key={key}
+                      className="-mx-1 my-1 rounded border border-gray-300 bg-white px-2 py-0.5 shadow-sm"
+                    >
+                      {slider}
+                    </div>
+                  )
+                }
+                return <div key={key}>{slider}</div>
+              })}
+            </div>
           </div>
         ))}
       </div>
@@ -538,7 +553,11 @@ const FactorFields = ({
           )}
         >
           <div
-            className={twJoin(groupHeadlineBaseClass, spaceFinderGroupStyle.eigendaten.headline)}
+            className={twJoin(
+              groupHeadlineBaseClass,
+              spaceFinderGroupStyle.eigendaten.headline,
+              spaceFinderGroupStyle.eigendaten.title,
+            )}
           >
             <span className="flex items-center gap-1">
               Eigene Daten

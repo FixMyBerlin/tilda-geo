@@ -26,7 +26,7 @@ Core code: [`flaechenfinder/scorer.py`](flaechenfinder/scorer.py)
 5. **Hard exclusions** – regardless of the weighted score, `mce_gesamtscore`
    is set to 0 if any of these applies:
    - slope too steep (`score_hangneigung == 0`)
-   - cycleway farther away than `max_cyclepath_dist_m` (default 150 m)
+   - cycleway farther away than `max_cyclepath_dist_m` (default 50 m)
    - building overlap (`gebaeude`)
 6. **Classification** – `eignungsklasse` is binned from `mce_gesamtscore`
    (`_KLASSE_BINS`/`_KLASSE_LABELS`):

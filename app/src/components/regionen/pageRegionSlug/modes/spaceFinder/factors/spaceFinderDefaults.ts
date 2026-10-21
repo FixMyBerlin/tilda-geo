@@ -149,6 +149,32 @@ export const FACTOR_PARAMS: Record<
   // in the UI (see the comment in flaechenfinder/config.py).
 }
 
+/**
+ * Configured reach of a factor, shown next to it in the hexagon inspector (read from the run
+ * snapshot). `w_target` and `w_platz` have none (see the comments in `FACTOR_PARAMS`).
+ * `bewohnerbedarf_radius_m` is not stored in variants (no UI field); the worker's fixed 20 m
+ * (`UseCaseConfig.bewohnerbedarf_radius_m`) is the fallback.
+ */
+const FACTOR_RANGE_HINTS: Record<
+  string,
+  { key: keyof FactorConfig; prefix: string; fallbackM?: number }
+> = {
+  w_cyclepath: { key: 'max_cyclepath_dist_m', prefix: 'bis' },
+  w_bestand: { key: 'bestand_default_diameter_m', prefix: 'Standard-Ø' },
+  w_bewohnerbedarf: { key: 'bewohnerbedarf_radius_m', prefix: 'Radius', fallbackM: 20 },
+  w_fussgaengerzone: { key: 'fussgaengerzone_radius_m', prefix: 'Radius' },
+  w_intersection: { key: 'intersection_radius_m', prefix: 'Radius' },
+  w_parken: { key: 'parken_radius_m', prefix: 'Radius' },
+}
+
+/** E.g. „bis 50 m“ / „Radius 20 m“; undefined when the factor has no configured reach. */
+export const factorRangeHint = (weightKey: string, config: Partial<FactorConfig> | undefined) => {
+  const hint = FACTOR_RANGE_HINTS[weightKey]
+  if (!hint || !config) return undefined
+  const value = config[hint.key] ?? hint.fallbackM
+  return typeof value === 'number' ? `${hint.prefix} ${value.toLocaleString('de-DE')} m` : undefined
+}
+
 /** Factors that read `public._parking_*` tables (see `postgis_loader.py`) — the `parking` topic
  * only runs in fixed bboxes (`processing/constants/topics.const.ts`); outside them there is no
  * data. `parkingDataAvailable` (from `getPlanningVariantFn`) hides these factors in

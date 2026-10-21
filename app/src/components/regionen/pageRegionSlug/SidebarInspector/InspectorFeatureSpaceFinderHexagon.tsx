@@ -1,17 +1,28 @@
 import { twJoin } from 'tailwind-merge'
 import { useSpaceFinderMinAreaDraft } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-boundary-store'
 import type { StoreFeaturesInspector } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
-import { WEIGHT_GROUPS } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/spaceFinderDefaults'
+import {
+  factorRangeHint,
+  WEIGHT_GROUPS,
+} from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/spaceFinderDefaults'
 import {
   criterionShares,
   groupShare,
   MODIFIER_MAX_POINTS,
   weightToPoints,
+  weightToStep,
 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/weightScale'
 import { isCoarseHexagon } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/planningHexagonResolution'
 import { appliedMinAreaM2 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderModeParam'
 import {
+  spaceFinderFactorActiveTextClass,
+  spaceFinderFactorEmptyValueClass,
+  spaceFinderFactorHintClass,
+  spaceFinderFactorMutedTextClass,
+  spaceFinderFactorGroupLabelClass,
+  spaceFinderFactorGroupRowsClass,
   spaceFinderGroupBarStyle,
+  spaceFinderGroupHeadingClass,
   spaceFinderGroupStyle,
 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderPanelStyles'
 import { spaceFinderOpenRunStatus } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderRunStatus'
@@ -41,6 +52,7 @@ const MODIFIER_WEIGHT_KEYS: Record<string, string> = {
   score_fussgaengerzone: 'w_fussgaengerzone',
   score_bestand: 'w_bestand',
   score_vegetation: 'w_vegetation',
+  score_bewohnerbedarf: 'w_bewohnerbedarf',
   score_kreuzung: 'w_intersection',
   score_parken: 'w_parken',
   score_platz: 'w_platz',
@@ -54,6 +66,21 @@ const CRITERION_WEIGHT_KEYS: Record<string, string> = {
   score_radweg: 'w_cyclepath',
   score_oepnv: 'w_transit',
   score_hangneigung: 'w_slope',
+}
+
+// Row order follows the factor editor (`WEIGHT_GROUPS`), so the same factor sits at the same
+// position in the editor and here. `PLANNING_SCORE_GROUPS` is shared with the Prüfliste
+// take-over and has its own order, so it is only re-sorted here.
+const EDITOR_ORDER = new Map(
+  WEIGHT_GROUPS.flatMap((group) => [...group.criteria, ...group.modifiers.map((m) => m.key)]).map(
+    (weightKey, index) => [weightKey, index],
+  ),
+)
+const inEditorOrder = (scoreKeys: string[]) => {
+  const position = (scoreKey: string) =>
+    EDITOR_ORDER.get(CRITERION_WEIGHT_KEYS[scoreKey] ?? MODIFIER_WEIGHT_KEYS[scoreKey] ?? '') ??
+    Number.MAX_SAFE_INTEGER
+  return [...scoreKeys].sort((a, b) => position(a) - position(b))
 }
 
 // Hard exclusion reasons (zero out mce_gesamtscore, see scorer.py
@@ -92,6 +119,32 @@ const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
 // aligned exactly — whether a row shows a percent share (criteria) or not
 // (bonuses/penalties), and across both group tables (Bedarf/Bebauung).
 const ROW_GRID = 'grid grid-cols-[1fr_6rem_2.75rem_2.5rem] items-center gap-x-2'
+
+// Factor label with the configured reach (active factors). Disabled factors (weight 0) are muted.
+const FactorLabel = ({
+  label,
+  active,
+  hint,
+}: {
+  label: string
+  active: boolean
+  hint?: string
+}) => (
+  <span className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 pr-3">
+    <span className={active ? spaceFinderFactorActiveTextClass : spaceFinderFactorMutedTextClass}>
+      {label}
+    </span>
+    {active && hint && <span className={spaceFinderFactorHintClass}>{hint}</span>}
+  </span>
+)
+
+/** Value color: darker for factors that count, light gray for "–" and zeros, muted when disabled. */
+const factorValueClassName = (active: boolean, rounded: number | null) =>
+  !active
+    ? spaceFinderFactorMutedTextClass
+    : rounded == null || rounded === 0
+      ? spaceFinderFactorEmptyValueClass
+      : spaceFinderFactorActiveTextClass
 
 const BarTrack = ({
   pct,
@@ -156,6 +209,11 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
   const snapshot = run?.factorConfigSnapshot
   const weights = snapshot?.weights
   const shares = weights ? criterionShares(weights) : undefined
+  // Without a snapshot (legacy run) nothing is known about the weights: treat all as active.
+  const criterionActive = (scoreKey: string) =>
+    !weights || weightToStep(weights[CRITERION_WEIGHT_KEYS[scoreKey] ?? scoreKey]) > 0
+  const modifierActive = (scoreKey: string) =>
+    !weights || weightToPoints(weights[MODIFIER_WEIGHT_KEYS[scoreKey] ?? scoreKey]) > 0
   const modifierMax = (scoreKey: string) => {
     const weightKey = MODIFIER_WEIGHT_KEYS[scoreKey]
     return weightKey ? weightToPoints(weights?.[weightKey]) : MODIFIER_MAX_POINTS
@@ -226,7 +284,7 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
     <Disclosure title="Potenzialflächen-Hexagon">
       <div className="space-y-3 px-4 py-3">
         {runStatus?.status === 'stale' && (
-          <p className="rounded bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
+          <p className="rounded bg-amber-50 px-2 py-1 text-xs text-amber-800">
             {runStatus.outdatedReason ? `${runStatus.outdatedReason} — ` : ''}Ergebnis veraltet. Die
             Werte stammen aus der letzten Berechnung. Bitte neu berechnen.
           </p>
@@ -284,11 +342,16 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
                   spaceFinderGroupStyle[group.key].block,
                 )}
               >
-                <div className="mb-5 flex items-center justify-between">
+                <div
+                  className={twJoin(
+                    'mb-2 flex items-center justify-between border-b pb-0.5',
+                    spaceFinderGroupStyle[group.key].headline,
+                  )}
+                >
                   <div
                     className={twJoin(
-                      'text-xs font-semibold uppercase',
-                      spaceFinderGroupStyle[group.key].text,
+                      spaceFinderGroupHeadingClass,
+                      spaceFinderGroupStyle[group.key].title,
                     )}
                   >
                     {group.label}
@@ -308,61 +371,86 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
                   </span>
                 </div>
                 <div className="space-y-0 text-xs">
-                  {group.criteria.map((key) => {
-                    const value = props[key] as number | null | undefined
-                    const pct = value != null ? Math.max(0, Math.min(100, value)) : 0
-                    const sharePct = shares?.[CRITERION_WEIGHT_KEYS[key] ?? key]
-                    return (
-                      <div
-                        key={key}
-                        className={twJoin(ROW_GRID, 'border-b border-gray-100 py-1.5')}
-                      >
-                        <span className="pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</span>
-                        <BarTrack
-                          pct={pct}
-                          fillClassName={spaceFinderGroupBarStyle[group.key].full}
-                        />
-                        <span className="text-right font-mono text-gray-600">
-                          {value != null ? Math.round(value) : '–'}
+                  <div className={spaceFinderFactorGroupLabelClass}>Kriterien</div>
+                  <div className={spaceFinderFactorGroupRowsClass}>
+                    {inEditorOrder(group.criteria).map((key) => {
+                      const value = props[key] as number | null | undefined
+                      const pct = value != null ? Math.max(0, Math.min(100, value)) : 0
+                      const weightKey = CRITERION_WEIGHT_KEYS[key] ?? key
+                      const sharePct = shares?.[weightKey]
+                      const active = criterionActive(key)
+                      const rounded = value != null ? Math.round(value) : null
+                      return (
+                        <div key={key} className={twJoin(ROW_GRID, 'py-1')}>
+                          <FactorLabel
+                            label={SCORE_LABELS[key] ?? key}
+                            active={active}
+                            hint={factorRangeHint(weightKey, snapshot)}
+                          />
+                          <BarTrack
+                            pct={pct}
+                            fillClassName={spaceFinderGroupBarStyle[group.key].full}
+                          />
+                          <span
+                            className={twJoin(
+                              'text-right font-mono',
+                              factorValueClassName(active, rounded),
+                            )}
+                          >
+                            {rounded ?? '–'}
+                          </span>
+                          <span className="text-right text-[10px] text-gray-400 tabular-nums">
+                            {active && sharePct != null ? `(${Math.round(sharePct)}%)` : null}
+                          </span>
+                        </div>
+                      )
+                    })}
+                    {group.comingSoon?.map((key) => (
+                      <div key={key} className={twJoin(ROW_GRID, 'py-1')}>
+                        <span className={twJoin('pr-3', spaceFinderFactorMutedTextClass)}>
+                          {SCORE_LABELS[key] ?? key}
                         </span>
-                        <span className="text-right text-[10px] text-gray-400 tabular-nums">
-                          {sharePct != null ? `(${Math.round(sharePct)}%)` : null}
+                        <BarTrack pct={0} trackClassName="bg-gray-100" />
+                        <span className="col-span-2 text-right text-[10px] text-gray-400">
+                          bald
                         </span>
                       </div>
-                    )
-                  })}
-                  {group.comingSoon?.map((key) => (
-                    <div key={key} className={twJoin(ROW_GRID, 'border-b border-gray-100 py-1.5')}>
-                      <span className="pr-3 text-gray-400">{SCORE_LABELS[key] ?? key}</span>
-                      <BarTrack pct={0} trackClassName="bg-gray-100" />
-                      <span className="col-span-2 text-right text-[10px] text-gray-400">bald</span>
-                    </div>
-                  ))}
-                  <div className="pt-1.5 text-[10px] tracking-wide text-gray-400 uppercase">
+                    ))}
+                  </div>
+                  <div className={twJoin('pt-2', spaceFinderFactorGroupLabelClass)}>
                     Zu- und Abschläge
                   </div>
-                  {group.modifiers.map((key) => {
-                    const value = props[key] as number | null | undefined
-                    const max = modifierMax(key)
-                    return (
-                      <div
-                        key={key}
-                        className={twJoin(
-                          ROW_GRID,
-                          'border-b border-gray-100 py-1.5 last:border-0',
-                        )}
-                      >
-                        <span className="pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</span>
-                        <BarTrack
-                          pct={modifierBarPct(value, max)}
-                          fillClassName={modifierFillClassName(value, group.key)}
-                        />
-                        <span className="col-span-2 text-right font-mono text-black">
-                          {formatModifierValue(value, max)}
-                        </span>
-                      </div>
-                    )
-                  })}
+                  <div className={spaceFinderFactorGroupRowsClass}>
+                    {inEditorOrder(group.modifiers).map((key) => {
+                      const value = props[key] as number | null | undefined
+                      const max = modifierMax(key)
+                      const active = modifierActive(key)
+                      return (
+                        <div key={key} className={twJoin(ROW_GRID, 'py-1')}>
+                          <FactorLabel
+                            label={SCORE_LABELS[key] ?? key}
+                            active={active}
+                            hint={factorRangeHint(MODIFIER_WEIGHT_KEYS[key] ?? key, snapshot)}
+                          />
+                          <BarTrack
+                            pct={modifierBarPct(value, max)}
+                            fillClassName={modifierFillClassName(value, group.key)}
+                          />
+                          <span
+                            className={twJoin(
+                              'col-span-2 text-right font-mono',
+                              factorValueClassName(
+                                active,
+                                value != null ? Math.round(value) : null,
+                              ),
+                            )}
+                          >
+                            {formatModifierValue(value, max)}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
               </div>
             )
@@ -382,8 +470,10 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
             >
               <div
                 className={twJoin(
-                  'mb-1 text-xs font-semibold uppercase',
-                  spaceFinderGroupStyle.eigendaten.text,
+                  'mb-1 border-b pb-0.5',
+                  spaceFinderGroupHeadingClass,
+                  spaceFinderGroupStyle.eigendaten.headline,
+                  spaceFinderGroupStyle.eigendaten.title,
                 )}
               >
                 Eigene Daten
@@ -392,21 +482,32 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
                 // One row per dataset with its name; the sum is in the total score.
                 eigendatenDetails.map((detail) =>
                   detail.p != null ? (
-                    <div key={detail.id} className={twJoin(ROW_GRID, 'py-1.5 text-xs')}>
-                      <span className="truncate pr-3 text-gray-500" title={datasetName(detail.id)}>
+                    <div key={detail.id} className={twJoin(ROW_GRID, 'py-1 text-xs')}>
+                      <span
+                        className={twJoin('truncate pr-3', spaceFinderFactorActiveTextClass)}
+                        title={datasetName(detail.id)}
+                      >
                         {datasetName(detail.id)}
                       </span>
                       <BarTrack
                         pct={modifierBarPct(detail.p, datasetMax(detail.id))}
                         fillClassName={modifierFillClassName(detail.p, 'eigendaten')}
                       />
-                      <span className="col-span-2 text-right font-mono text-black">
+                      <span
+                        className={twJoin(
+                          'col-span-2 text-right font-mono',
+                          factorValueClassName(true, Math.round(detail.p)),
+                        )}
+                      >
                         {formatModifierValue(detail.p, datasetMax(detail.id))}
                       </span>
                     </div>
                   ) : (
-                    <div key={detail.id} className={twJoin(ROW_GRID, 'py-1.5 text-xs')}>
-                      <span className="truncate pr-3 text-gray-500" title={datasetName(detail.id)}>
+                    <div key={detail.id} className={twJoin(ROW_GRID, 'py-1 text-xs')}>
+                      <span
+                        className={twJoin('truncate pr-3', spaceFinderFactorActiveTextClass)}
+                        title={datasetName(detail.id)}
+                      >
                         {datasetName(detail.id)}
                       </span>
                       <span className="col-span-3 text-right font-semibold text-gray-800">
@@ -417,13 +518,23 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
                 )
               ) : (
                 // Runs from before the per-dataset breakdown: only the total effect is known.
-                <div className={twJoin(ROW_GRID, 'py-1.5 text-xs')}>
-                  <span className="pr-3 text-gray-500">{SCORE_LABELS.score_eigendaten}</span>
+                <div className={twJoin(ROW_GRID, 'py-1 text-xs')}>
+                  <span className={twJoin('pr-3', spaceFinderFactorActiveTextClass)}>
+                    {SCORE_LABELS.score_eigendaten}
+                  </span>
                   <BarTrack
                     pct={modifierBarPct(props.score_eigendaten, modifierMax('score_eigendaten'))}
                     fillClassName={modifierFillClassName(props.score_eigendaten, 'eigendaten')}
                   />
-                  <span className="col-span-2 text-right font-mono text-black">
+                  <span
+                    className={twJoin(
+                      'col-span-2 text-right font-mono',
+                      factorValueClassName(
+                        true,
+                        props.score_eigendaten != null ? Math.round(props.score_eigendaten) : null,
+                      ),
+                    )}
+                  >
                     {formatModifierValue(props.score_eigendaten, modifierMax('score_eigendaten'))}
                   </span>
                 </div>

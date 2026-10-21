@@ -76,7 +76,7 @@ export const CategorySliders = <K extends string>({
   const isDefault = categories.every(({ key }) => shares[key] === defaultShares[key])
 
   return (
-    <div className={twJoin('mt-1', open && 'border-t border-gray-200 pt-1')}>
+    <div className={twJoin('mt-1', open && 'pt-1')}>
       <div className="flex items-center gap-1">
         <button
           type="button"
