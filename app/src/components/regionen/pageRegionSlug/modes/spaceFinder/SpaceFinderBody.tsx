@@ -6,7 +6,6 @@ import { areaInputFromRow } from '@/server/planning/mergeFactorConfig'
 import { useSpaceFinderBoundaryActions } from '../../hooks/mapState/space-finder-boundary-store'
 import { modePanelMutedClassName } from '../modePanel.const'
 import { SpaceFinderCandidatesSection } from './candidates/SpaceFinderCandidatesSection'
-import { spaceFinderRunUpToDate } from './collection/spaceFinderCollectionOptions'
 import { DisplaySection } from './display/DisplaySection'
 import { FactorEditorPanel } from './factors/FactorEditorPanel'
 import { JobStatusBadge } from './run/JobStatusBadge'
@@ -25,9 +24,6 @@ const StatusSection = ({ variant }: { variant: PlanningVariantDetail }) => {
         </p>
       )}
       {latestJob != null && <JobStatusBadge jobId={latestJob.id} variantId={variant.id} />}
-      {spaceFinderRunUpToDate(status, latestJob?.status) && (
-        <p className={modePanelMutedClassName}>Ergebnis ist aktuell</p>
-      )}
       {status === 'none' && latestJob == null && (
         <p className={modePanelMutedClassName}>Noch nicht berechnet.</p>
       )}
