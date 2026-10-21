@@ -68,7 +68,7 @@ type AreaFormFieldsProps = {
  */
 export const AreaFormFields = ({
   form: areaForm,
-  geometryStepTitle = 'Geometrie des Gebiets',
+  geometryStepTitle = 'Geometrie',
   originalStudyArea = null,
   editGeometryOnOpen = false,
 }: AreaFormFieldsProps) => {

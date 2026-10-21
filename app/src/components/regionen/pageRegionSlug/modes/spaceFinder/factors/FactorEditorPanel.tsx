@@ -349,13 +349,11 @@ const FactorFields = ({
         <div className="mb-1 font-semibold">Gewichtung der Faktoren</div>
         {!readOnly && <WeightScaleLegend />}
         {onReset && (
-          <button
-            type="button"
-            onClick={onReset}
-            className="mb-1 text-xs font-medium text-gray-500 hover:text-gray-800"
-          >
-            Auf Standardwerte zurücksetzen
-          </button>
+          <div className={twJoin(spaceFinderDiscardRowClass, 'mb-1')}>
+            <button type="button" onClick={onReset} className={spaceFinderDiscardLinkClass}>
+              Auf Standardwerte zurücksetzen
+            </button>
+          </div>
         )}
         {WEIGHT_GROUPS.map((group) => (
           // Colored stripe + subtle tint per group: otherwise the long form doesn't show at a

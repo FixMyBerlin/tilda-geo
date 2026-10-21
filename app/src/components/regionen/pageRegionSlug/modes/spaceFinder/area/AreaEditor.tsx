@@ -108,7 +108,7 @@ const AreaEditorForm = ({
 
           <AreaFormFields
             form={form}
-            geometryStepTitle="Geometrie des Gebiets"
+            geometryStepTitle="Geometrie"
             originalStudyArea={originalStudyArea}
             editGeometryOnOpen
           />

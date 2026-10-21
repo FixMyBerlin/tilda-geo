@@ -29,21 +29,21 @@ const COPY: Record<
 > = {
   newVariant: {
     title: 'Neue Variante',
-    label: 'Name der Variante',
+    label: 'Name',
     submitLabel: 'Anlegen',
     successMessage: 'Variante angelegt. Die Faktoren starten mit den Standardwerten.',
     failure: 'Variante konnte nicht angelegt werden.',
   },
   renameVariant: {
     title: 'Variante umbenennen',
-    label: 'Name der Variante',
+    label: 'Name',
     submitLabel: 'Speichern',
     successMessage: 'Variante umbenannt.',
     failure: 'Umbenennen fehlgeschlagen.',
   },
   renameArea: {
     title: 'Planungsgebiet umbenennen',
-    label: 'Name des Planungsgebiets',
+    label: 'Name',
     submitLabel: 'Speichern',
     successMessage: 'Planungsgebiet umbenannt.',
     failure: 'Umbenennen fehlgeschlagen.',
