@@ -14,6 +14,7 @@ import {
   spaceFinderGroupBarStyle,
   spaceFinderGroupStyle,
 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderPanelStyles'
+import { spaceFinderOpenRunStatus } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderRunStatus'
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
 import { parseEigendatenDetails } from '@/shared/regionen/planningEigendatenDetails'
@@ -193,6 +194,8 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
   }
   const datasetMax = (id: string) => weightToPoints(snapshot?.eigendaten_weights?.[id])
 
+  const runStatus = variant ? spaceFinderOpenRunStatus(variant) : null
+
   const props = feature.properties
   if (!props) return null
 
@@ -222,6 +225,13 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
   return (
     <Disclosure title="Potenzialflächen-Hexagon">
       <div className="space-y-3 px-4 py-3">
+        {runStatus?.status === 'stale' && (
+          <p className="rounded bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
+            {runStatus.outdatedReason ? `${runStatus.outdatedReason} — ` : ''}Ergebnis veraltet. Die
+            Werte stammen aus der letzten Berechnung. Bitte neu berechnen.
+          </p>
+        )}
+
         <div className="flex items-center justify-between rounded-r border-l-[3px] border-gray-400 bg-gray-50 py-1.5 pr-2 pl-2">
           <span className="text-xs font-bold text-gray-700 uppercase">Gesamtscore</span>
           <div className="flex items-center gap-2">
