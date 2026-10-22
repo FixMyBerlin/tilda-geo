@@ -5,6 +5,7 @@ import type { CompiledAttribute, CompiledValue, InspectorDescriptions } from './
 const sharedSourceTitles: Record<string, string> = {
   tilda_parkings: 'Straßenparken',
   atlas_barriers: 'Barrieren',
+  atlas_bicycleParking: 'Fahrradstellplätze',
 }
 
 // YAMLs sharing a source must agree on every text, otherwise the result depends on file order.

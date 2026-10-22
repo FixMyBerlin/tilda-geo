@@ -28,6 +28,9 @@ n/railway=subway_entrance
 nw/tourism
 wr/leisure
 
+# Topic: bicycleParking (`bicycleParking_rental` also imports multipolygon relations)
+r/tourism=bicycle_rental
+
 # Topic: Traffic signs
 n/traffic_sign*
 

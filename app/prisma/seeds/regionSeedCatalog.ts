@@ -120,8 +120,8 @@ const flaechenfinderDevRegionConfig = {
   mapLat: 52.4771,
   mapLng: 13.4241,
   mapZoom: 15,
-  // `poi`: bus stops + bike sharing are Flächenfinder scoring inputs and only show with it.
-  categories: ['parkingLars', 'poi'],
+  // Flächenfinder scoring inputs: bus stops (`poi`, ÖPNV) and bike sharing (`bicycleParking`).
+  categories: ['parkingLars', 'poi', 'bicycleParking'],
   welcome: null,
 } satisfies Omit<RegionWriteInput, 'slug' | 'name' | 'fullName'>
 

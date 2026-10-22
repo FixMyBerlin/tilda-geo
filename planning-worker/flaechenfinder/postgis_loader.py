@@ -197,18 +197,20 @@ class PostgisLoader:
         return gdf.to_crs("EPSG:4326") if len(gdf) else _empty("EPSG:4326")
 
     def load_bikesharing(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
-        """Bike sharing stations (`*=bicycle_rental`) from `public."poiClassification"`.
+        """Bike sharing stations (`*=bicycle_rental`) from `public."bicycleParking_rental"`.
 
-        Bike sharing is not in `publicTransport` but a POI in `poiClassification` –
-        hence a separate loader instead of an entry in `_TRANSIT_TAG_MAP`. Filters on
-        `tags->>'type'`, which the topic stores as `<osm-key>-bicycle_rental` (see
-        processing/topics/poiClassification/helper/result_tags.lua); the map layer
-        filters the same three values (`subcat_poi_plus_busStops.const.ts`).
+        Bike sharing is not in `publicTransport` but in its own table of the
+        bicycleParking topic (processing/topics/bicycleParking/bicycle_rental.lua) –
+        hence a separate loader instead of an entry in `_TRANSIT_TAG_MAP`. It is
+        kept out of `bicycleParking_points`, so `load_bicycle_parking` does not
+        count rental stations as existing parking. The map shows the same table in
+        the "Fahrradstellplätze" layer (`subcat_bicycleParking.ts`).
+
+        Dependency: the table only exists if the bicycleParking topic was processed
+        for the region. If missing, `_read_table` returns an empty GeoDataFrame
+        (bikesharing then contributes 0).
         """
-        types = ("amenity-bicycle_rental", "tourism-bicycle_rental", "leisure-bicycle_rental")
-        types_sql = ", ".join(f"'{_sql_literal(t)}'" for t in types)
-        where = f"tags->>'type' IN ({types_sql})"
-        gdf = self._read_table("poiClassification", polygon_4326, where=where)
+        gdf = self._read_table("bicycleParking_rental", polygon_4326)
         return gdf.to_crs("EPSG:4326") if len(gdf) else _empty("EPSG:4326")
 
     def load_intersection_corners(

@@ -4,6 +4,10 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-10
 
+### `bicycleParking_rental`
+
+- New table in the `bicycleParking` topic: bike sharing and bike rental (`amenity|tourism|leisure=bicycle_rental`) as points, ways and multipolygon relations as their centroid, with `category=bicycle_rental`, `bicycle_rental`, `name`, `operator`, `network` and `capacity`. Shown in the „Fahrradstellplätze“ layer and read by the Flächenfinder (`load_bikesharing`, before from `poiClassification`). Not part of `bicycleParking_points`, so Summieren, the calculator and the Flächenfinder's existing parking do not count it as parking. `poiClassification` keeps its `*-bicycle_rental` rows.
+
 ### `roads`, `routing`, `bikelanes`
 
 - Fix: `maxspeed` is now read from `zone:maxspeed` (e.g. `DE:30`, `30`) and from `source:maxspeed=DE:zone:30` (colon form) when the way has no `maxspeed` tag. Before, these values gave no `maxspeed`.

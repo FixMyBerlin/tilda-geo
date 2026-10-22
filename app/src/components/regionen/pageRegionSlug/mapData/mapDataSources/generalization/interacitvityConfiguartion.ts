@@ -78,6 +78,7 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
     stylingKeys: ['covered'],
     minzoom: 9,
   },
+  bicycleParking_rental: { stylingKeys: [], minzoom: 9 },
   bikeroutes: {
     stylingKeys: ['network', 'ref', 'cycle_highway'],
     minzoom: 5,

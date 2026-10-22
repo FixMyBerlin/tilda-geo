@@ -675,7 +675,7 @@ describe('getRegionRedirectUrl()', () => {
       const resultUrl = getUrl(redirectUrl)
 
       expect(resultUrl.searchParams.get('v')).toBe(String(currentUrlVersion))
-      expect(resultUrl.searchParams.get('config')).toBe('zltve0.4g4qsp.popxe')
+      expect(resultUrl.searchParams.get('config')).toBe('1j0asj.282dgp.cucyp')
     })
 
     test('MIGRATION: Preserve already-short config when version is missing', async () => {

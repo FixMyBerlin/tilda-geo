@@ -56,7 +56,7 @@ export const numericSourceIds: Record<number, SourceNames> = {
   34: 'review-entries-source',
   35: 'qa-source',
   36: 'tilda_highwayAreas',
-  37: 'atlas_busStopsAndBikeSharing',
+  // 37: 'atlas_busStopsAndBikeSharing', // bus stops moved to ÖPNV, bike sharing to Fahrradstellplätze
   38: 'atlas_buildingEntrances',
 }
 

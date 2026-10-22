@@ -6,6 +6,7 @@ export type TableId =
   | 'barrierAreas'
   | 'bicycleParking_points'
   | 'bicycleParking_areas'
+  | 'bicycleParking_rental'
   | 'bikeroutes'
   | 'boundaries'
   | 'boundaryLabels'

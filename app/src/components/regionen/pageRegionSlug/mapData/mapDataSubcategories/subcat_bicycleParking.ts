@@ -1,4 +1,5 @@
 import type { FileMapDataSubcategory } from '../types'
+import { customMapIcons } from './customMapIcons.const'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
 import { mapboxStyleGroupLayers_atlas_bicycleparking_areas } from './mapboxStyles/groups/atlas_bicycleparking_areas'
 import { mapboxStyleGroupLayers_atlas_bicycleparking_points } from './mapboxStyles/groups/atlas_bicycleparking_points'
@@ -30,6 +31,24 @@ export const subcat_bicycleParking: FileMapDataSubcategory = {
           source,
           sourceLayer: 'bicycleParking_points',
         }),
+        // Bike sharing and rental stations (`*=bicycle_rental`), own table so they are not
+        // counted as parking. Custom pin, see `customMapIcons.const.ts`.
+        {
+          id: 'bicycle-rental',
+          type: 'symbol',
+          source,
+          'source-layer': 'bicycleParking_rental',
+          layout: {
+            'icon-allow-overlap': true,
+            'icon-anchor': 'bottom',
+            'icon-image': customMapIcons.bikeSharePin.id,
+            'icon-padding': 1,
+            'icon-size': ['interpolate', ['linear'], ['zoom'], 14, 0.4, 18, 0.7],
+          },
+          paint: {
+            'icon-opacity': 1,
+          },
+        },
       ],
       // legends: [
       //   {

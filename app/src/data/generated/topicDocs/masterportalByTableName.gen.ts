@@ -293,6 +293,36 @@ const data = {
       'osm_capacity:cargo_bike': 'OSM Kapazität Lastenrad (roh, Testdaten)',
     },
   },
+  bicycleParking_rental: {
+    gfiAttributes: {
+      category: {
+        name: 'Art',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          bicycle_rental: 'Bikesharing / Fahrradverleih',
+        },
+      },
+      bicycle_rental: {
+        name: 'Art der Station',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          docking_station: 'Station mit festen Stellplätzen',
+          dropoff_point: 'Abstellzone ohne Ständer',
+          shop: 'Verleih-Laden',
+        },
+      },
+      capacity: {
+        name: 'Anzahl Fahrrad-Stellplätze',
+        type: 'number',
+      },
+      name: 'Name',
+      operator: 'Betreiber',
+      network: 'Verleihsystem',
+      osm_capacity: 'OSM Kapazität (roh, Testdaten)',
+    },
+  },
   bikelanes: {
     gfiAttributes: {
       category: {

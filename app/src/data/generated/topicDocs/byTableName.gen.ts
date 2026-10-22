@@ -709,6 +709,77 @@ const data = {
     ],
     chapters: [],
   },
+  bicycleParking_rental: {
+    topic: 'bicycleParking',
+    tableName: 'bicycleParking_rental',
+    sourceIds: ['atlas_bicycleParking'],
+    title: 'Bikesharing und Fahrradverleih',
+    groups: [],
+    attributes: [
+      {
+        key: 'category',
+        type: 'string',
+        label: 'Art',
+        values: [
+          {
+            value: 'bicycle_rental',
+            label: 'Bikesharing / Fahrradverleih',
+          },
+        ],
+      },
+      {
+        key: 'bicycle_rental',
+        type: 'string',
+        label: 'Art der Station',
+        values: [
+          {
+            value: 'docking_station',
+            label: 'Station mit festen Stellplätzen',
+          },
+          {
+            value: 'dropoff_point',
+            label: 'Abstellzone ohne Ständer',
+          },
+          {
+            value: 'shop',
+            label: 'Verleih-Laden',
+          },
+        ],
+      },
+      {
+        key: 'capacity',
+        type: 'number',
+        label: 'Anzahl Fahrrad-Stellplätze',
+        values: [],
+      },
+      {
+        key: 'name',
+        type: 'sanitized_strings',
+        label: 'Name',
+        values: [],
+      },
+      {
+        key: 'operator',
+        type: 'sanitized_strings',
+        label: 'Betreiber',
+        values: [],
+      },
+      {
+        key: 'network',
+        type: 'sanitized_strings',
+        label: 'Verleihsystem',
+        values: [],
+      },
+      {
+        key: 'osm_capacity',
+        type: 'sanitized_strings',
+        label: 'OSM Kapazität (roh, Testdaten)',
+        purpose: 'qa',
+        values: [],
+      },
+    ],
+    chapters: [],
+  },
   bikelanes: {
     topic: 'roads_bikelanes',
     tableName: 'bikelanes',
