@@ -10,7 +10,7 @@ Registers custom PostgreSQL functions used by the app and Martin tile layers.
 ## What `registerSQLFunctions` does
 
 1. `initExportFunctions(exportApiIdentifier)` — functions for the export API (`src/routes/api/export.$regionSlug.$tableName.ts`)
-2. `initGeneralizationFunctions(InteracitvityConfiguartion)` — Martin function layers that simplify geometries and drop unused tags to reduce tile size
+2. `initGeneralizationFunctions(InteracitvityConfiguartion)` — Martin function layers that simplify geometries and drop unused tags to reduce tile size. Tables that do not exist yet (their topic never ran on this instance) are skipped with a warning; the post-processing hook registers them after their processing run.
 
 ## Related: processing afterthoughts
 
