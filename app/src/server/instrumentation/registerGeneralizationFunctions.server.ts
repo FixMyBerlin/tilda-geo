@@ -63,6 +63,18 @@ export async function registerGeneralizationFunctions() {
   )) {
     const typedTableName = tableName as TableId
     const functionName = generalizationFunctionIdentifier(typedTableName)
+
+    // A table only exists after its topic ran once on this instance (e.g. weekend `landcover`
+    // tables right after a deploy). Skip it instead of failing, so the tables after it in the
+    // list still get their functions; the post-processing hook registers it after that run.
+    const existsRows = await geoDataClient.$queryRawUnsafe<{ exists: boolean }[]>(
+      `SELECT to_regclass('public."${tableName}"') IS NOT NULL AS exists;`,
+    )
+    if (!existsRows[0]?.exists) {
+      console.warn(`[generalization] Skipped ${functionName}: table public."${tableName}" missing`)
+      continue
+    }
+
     // Gather meta information for the tile specification
     const tileSpecification = await createTileSpecification(typedTableName)
 
