@@ -190,7 +190,7 @@ class PostgisLoader:
         """Square areas (place=square) from `public._places_squares` (for the square bonus/penalty).
 
         Processing-side `_` table (see processing/topics/places/places_squares.lua),
-        EPSG:3857 like the main publicTransport table. MVP: closed ways only, no
+        EPSG:3857 like the other `places` tables. MVP: closed ways only, no
         multipolygon relations (same as the pedestrian zone MVP decision).
         """
         gdf = self._read_table("_places_squares", polygon_4326)

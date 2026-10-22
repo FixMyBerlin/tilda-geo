@@ -4,9 +4,9 @@
 -- train stations for the ÖPNV factor (bicycle parking is best planned as close as possible to
 -- the station building).
 --
--- Separate from `_buildings` on purpose: that table drops rows with no tag column at all
--- (see buildings.lua) and additionally filters out buildings < 100 m² (filter.sql) — a
--- filter station buildings should not be subject to.
+-- Separate from `_buildings` on purpose: `_buildings` stores geometry only (no tags, see
+-- buildings.lua), so station buildings could not be filtered out of it, and filter.sql drops
+-- buildings < 100 m² there — small station buildings should stay.
 --
 -- TODO: if this ever becomes a PRESENTATIONAL table, give it the standard topic shape
 --       (id/tags/meta/geom + a minzoom) and drop the `_` prefix.

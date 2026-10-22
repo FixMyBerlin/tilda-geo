@@ -508,8 +508,6 @@ def run_flaechenfinder(
                     _transit_scores.append(pd.Series(0.0, index=hex_proj.index))
                     continue
                 _stops_p = _stops.to_crs("EPSG:25832")
-                if _tname == "Bahnhof" and "station" in _stops_p.columns:
-                    _stops_p = _stops_p[_stops_p["station"] != "subway"]
                 _dist = _dist_to_union(centroids, _stops_p)
                 _score = _dist.apply(lambda d, r=_tradius: max(0.0, 100.0 * (1.0 - d / r)))
                 _transit_scores.append(_score)
