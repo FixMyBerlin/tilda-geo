@@ -7,8 +7,28 @@ rebuilds/restarts on a new commit (`/usr/local/bin/tilda-autodeploy.sh`,
 `infra-code/playbooks/tilda-autodeploy.yml`). A push to `flaechenfinder-module` is
 enough for a code deploy.
 
-**Data reprocessing does NOT run along with it** – autodeploy only rebuilds/restarts
-the containers, it does not trigger a new processing run. Do that manually on the instance:
+**Data reprocessing does NOT run along with it** – autodeploy rebuilds all images but
+starts every service except `processing` (`infra-code/templates/tilda-autodeploy.sh.j2`).
+
+**Scheduled processing:** a second systemd timer runs a full processing run every
+**Saturday 01:00 (Berlin time)** (`tilda-processing.timer`,
+`infra-code/playbooks/tilda-processing-timer.yml`). Because it starts on a Saturday, it also
+runs the `weekend` topics (`landcover` → `_buildings`, `_building_entrances`, `landuse`), and
+because it downloads a fresh extract, `weekend_filtered.osm.pbf` is rebuilt too (see the
+pitfall below). There is no nightly run on this instance, so data is up to one week old.
+
+```bash
+ssh flaechenfinder
+systemctl list-timers tilda-processing       # next scheduled run
+systemctl start --no-block tilda-processing  # run now (same run as the timer)
+journalctl -u tilda-processing -f            # follow the run
+systemctl status tilda-processing            # "failed" = last run exited non-zero
+```
+
+A failed run exits non-zero (`processing/index.ts`), so `docker ps -a`, systemd and Ansible
+show it. The `public.meta` row of that run stays on `processing`.
+
+For a targeted run (e.g. one topic after a code fix), run it manually on the instance:
 
 ```bash
 ssh flaechenfinder
@@ -56,9 +76,8 @@ from `landcover`, so it only exists after an explicit run. Until then
 `PostgisLoader.load_building_entrances()` returns an empty GeoDataFrame.
 
 `public._buildings` is not a topic of its own but part of **`landcover`**
-(`schedule: 'weekend'`). This instance has **no cron job for processing** –
-the only timer is `tilda-autodeploy.timer` (deploy only). So the weekend schedule never
-kicks in here; `landcover` only runs when triggered explicitly.
+(`schedule: 'weekend'`). It runs with the Saturday timer run (see above). To rebuild it
+in between, trigger `landcover` explicitly:
 
 ```bash
 ssh flaechenfinder
