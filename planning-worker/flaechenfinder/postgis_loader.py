@@ -12,7 +12,7 @@ from __future__ import annotations
 import geopandas as gpd
 from shapely.geometry.base import BaseGeometry
 
-from .config import ZIELORT_CATEGORIES
+from .config import BIKESHARING_KIND, NON_PARKING_KINDS, ZIELORT_CATEGORIES
 
 
 def _empty(crs="EPSG:3857") -> gpd.GeoDataFrame:
@@ -212,7 +212,7 @@ class PostgisLoader:
         (bikesharing then contributes 0).
         """
         gdf = self._read_table(
-            "bicycleParking_points", polygon_4326, where="tags->>'kind' = 'bicycle_rental'"
+            "bicycleParking_points", polygon_4326, where=f"tags->>'kind' = '{BIKESHARING_KIND}'"
         )
         return gdf.to_crs("EPSG:4326") if len(gdf) else _empty("EPSG:4326")
 
@@ -406,13 +406,15 @@ class PostgisLoader:
         """Existing bicycle parking (for the existing-supply demand factor).
 
         Reads `public."bicycleParking_points"` – the point table of the
-        bicycleParking topic. It is the superset "one facility = one point":
-        OSM nodes (`amenity=bicycle_parking`) AND the centroids of the areas from
-        `bicycleParking_areas` are emitted here. All parking kinds count
+        bicycleParking topic: one point per kind of a facility, mapped as a node or as
+        the centroid of its area in `bicycleParking_areas`. A facility with normal and
+        cargo bike spaces is two rows (`bicycle_parking` with the normal spaces,
+        `cargo_bike_parking` with the cargo spaces) at points a little apart, so its
+        capacity is split, not counted twice. All parking kinds count
         (`bicycle_parking`, `cargo_bike_parking`, `small_electric_vehicle_parking`),
-        with or without capacity. Left out: `kind=bicycle_rental` (bike sharing,
-        `load_bikesharing`) and `kind=mobility_hub` (a container whose stands are
-        rows of their own).
+        with or without capacity. Left out: `NON_PARKING_KINDS`, i.e. bike sharing
+        (`load_bikesharing`) and mobility hubs (containers whose stands are rows of
+        their own).
 
         The (optional) capacity is returned as numeric column `capacity` – the
         scorer derives each facility's reach from it (diameter = capacity/2).
@@ -430,14 +432,14 @@ class PostgisLoader:
         wkt = polygon_4326.wkt
         bbox = f"ST_Transform(ST_GeomFromText('{wkt}', 4326), 3857)"
         cap_num = "NULLIF(tags->>'capacity', '') ~ '^[0-9]+(\\.[0-9]+)?$'"
+        non_parking_kinds = ", ".join(f"'{_sql_literal(k)}'" for k in NON_PARKING_KINDS)
         sql = f"""
             SELECT
                 ST_Transform(geom, 4326) AS geom,
                 CASE WHEN {cap_num} THEN (tags->>'capacity')::numeric END AS capacity
             FROM public."bicycleParking_points"
             WHERE geom && {bbox}
-                AND tags->>'kind' IS DISTINCT FROM 'bicycle_rental'
-                AND tags->>'kind' IS DISTINCT FROM 'mobility_hub'
+                AND COALESCE(tags->>'kind', '') NOT IN ({non_parking_kinds})
         """
         try:
             gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")

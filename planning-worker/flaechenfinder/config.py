@@ -50,6 +50,12 @@ OEPNV_CATEGORIES = ("ÖPNV", "Bikesharing")
 # existing runs even with an equal split (user decision, accepted on purpose).
 DEFAULT_OEPNV_CATEGORY_SHARES = {c: 50.0 for c in OEPNV_CATEGORIES}
 
+# `kind` values of `bicycleParking_points` (processing/topics/bicycleParking/helper/amenity_kinds.lua).
+# Bike sharing is read by `load_bikesharing`; both kinds are left out of the existing bicycle
+# parking (`load_bicycle_parking`), a mobility hub only contains stands that are rows of their own.
+BIKESHARING_KIND = "bicycle_rental"
+NON_PARKING_KINDS = (BIKESHARING_KIND, "mobility_hub")
+
 
 def oepnv_category_factors(shares: Dict[str, float]) -> Dict[str, float]:
     """Shares (percent, sum 100) → factor 0–1 per group, normalized to the largest share.
