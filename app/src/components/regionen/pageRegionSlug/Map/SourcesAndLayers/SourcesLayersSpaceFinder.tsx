@@ -32,8 +32,10 @@ import { LayerHighlight } from './LayerHighlight'
 export const planningHexagonsSourceId = 'planning-hexagons-source'
 export const planningHexagonsLayerId = 'planning-hexagons'
 /**
- * Two invisible anchor layers, mounted only on the first render with a `runId` set and
- * never removed or recreated afterwards.
+ * Two invisible anchor layers, mounted on the first render (with or without a `runId`) and
+ * never removed or recreated afterwards. `PlanningOverlayAnchors` sits at the same position
+ * in both returns of `SourcesLayersSpaceFinder`, so React keeps it mounted when `runId`
+ * changes.
  *
  * - The hexagon layers (fill/highlight/label) always attach directly below the
  *   `ceiling` via `beforeId`.
@@ -254,6 +256,14 @@ const censusLabelLayerProps = {
 const VEGETATION_FILL_COLOR = '#6ee7b7'
 const VEGETATION_LINE_COLOR = '#047857'
 
+// See comment at planningOverlayCeilingLayerId.
+const PlanningOverlayAnchors = () => (
+  <>
+    <Layer id={planningOverlayFloorLayerId} type="background" layout={{ visibility: 'none' }} />
+    <Layer id={planningOverlayCeilingLayerId} type="background" layout={{ visibility: 'none' }} />
+  </>
+)
+
 const BoundaryHighlightLayer = () => {
   const geom = useSpaceFinderBoundaryHighlightGeom()
   const filled = useSpaceFinderBoundaryHighlightFilled()
@@ -418,6 +428,7 @@ export const SourcesLayersSpaceFinder = () => {
     return (
       <>
         <BoundaryHighlightLayer />
+        <PlanningOverlayAnchors />
         <UserObstaclesLayer />
       </>
     )
@@ -437,10 +448,7 @@ export const SourcesLayersSpaceFinder = () => {
   return (
     <>
       <BoundaryHighlightLayer />
-
-      {/* See comment at planningOverlayCeilingLayerId. */}
-      <Layer id={planningOverlayFloorLayerId} type="background" layout={{ visibility: 'none' }} />
-      <Layer id={planningOverlayCeilingLayerId} type="background" layout={{ visibility: 'none' }} />
+      <PlanningOverlayAnchors />
 
       {hexagonsOpacityPct > 0 && (
         <>
