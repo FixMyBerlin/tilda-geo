@@ -1,11 +1,11 @@
 import type { FileMapDataSubcategory, FileMapDataSubcategoryStyle } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { withBikelaneVisualLineOffset } from './mapboxStyles/bikelaneLineOffset'
-import { mapboxStyleGroupLayers_atlas_bikelanes_default } from './mapboxStyles/groups/atlas_bikelanes_default'
-import { mapboxStyleGroupLayers_atlas_bikelanes_details } from './mapboxStyles/groups/atlas_bikelanes_details'
-import { mapboxStyleGroupLayers_atlas_bikelanes_widths } from './mapboxStyles/groups/atlas_bikelanes_widths'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
-import { structureIconLayers } from './mapboxStyles/structureIconLayers'
+import { layers_bikelanes_default } from './layers/bikelanes_default'
+import { layers_bikelanes_details } from './layers/bikelanes_details'
+import { layers_bikelanes_widths } from './layers/bikelanes_widths'
+import { withBikelaneVisualLineOffset } from './layers/utils/bikelaneLineOffset'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
+import { wayIconLayers } from './layers/wayIconLayers'
 import { bikelanesWidthLegend } from './subcat_radinfra_width.const'
 
 const subcatId = 'bikelanes'
@@ -20,18 +20,22 @@ export type SubcatBikelanesStyleIds =
   | 'freshness'
   | 'bikelane_oneway_arrows'
 
-const structureIcons = structureIconLayers({ source, sourceLayer })
+const wayIcons = wayIconLayers({
+  source,
+  sourceLayer,
+  transformLayers: withBikelaneVisualLineOffset,
+})
 
 export const bikelanesDefaultStyle: FileMapDataSubcategoryStyle = {
   id: 'default',
   name: 'Führungsform einfach',
   layers: [
-    ...mapboxStyleLayers({
-      layers: withBikelaneVisualLineOffset(mapboxStyleGroupLayers_atlas_bikelanes_default),
+    ...wrapSourceLayers({
+      layers: withBikelaneVisualLineOffset(layers_bikelanes_default),
       source,
       sourceLayer,
     }),
-    ...structureIcons,
+    ...wayIcons,
   ],
   legends: [
     {
@@ -99,12 +103,12 @@ export const bikelanesDetailsStyle: FileMapDataSubcategoryStyle = {
   id: 'details',
   name: 'Führungsform details',
   layers: [
-    ...mapboxStyleLayers({
-      layers: withBikelaneVisualLineOffset(mapboxStyleGroupLayers_atlas_bikelanes_details),
+    ...wrapSourceLayers({
+      layers: withBikelaneVisualLineOffset(layers_bikelanes_details),
       source,
       sourceLayer,
     }),
-    ...structureIcons,
+    ...wayIcons,
   ],
   legends: [
     {
@@ -224,12 +228,12 @@ const bikelanesWidthStyle: FileMapDataSubcategoryStyle = {
   id: 'width',
   name: 'Breite RVA',
   layers: [
-    ...mapboxStyleLayers({
-      layers: withBikelaneVisualLineOffset(mapboxStyleGroupLayers_atlas_bikelanes_widths),
+    ...wrapSourceLayers({
+      layers: withBikelaneVisualLineOffset(layers_bikelanes_widths),
       source,
       sourceLayer,
     }),
-    ...structureIcons,
+    ...wayIcons,
   ],
   legends: bikelanesWidthLegend,
 }

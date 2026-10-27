@@ -287,10 +287,6 @@ For adding datasets, follow skill `add-static-dataset`, but perform file edits i
 
 Load [finish-work](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/finish-work/SKILL.md) when wrapping up. It covers `bun run check` (includes advisory knip), lint/format staging, and commit messages. **Default: commit** with a user-facing message; draft only when the user clearly did not want a commit ("don't commit", "draft only", review-only turns, etc.).
 
-### Large multi-step tasks (orchestration)
-
-For multi-file features or parallel work, pick a premium orchestrator (Fable 5, Sonnet 5, or GPT-5.6 Sol) with **`@orchestrator-worker`** and Composer subagents (`/implementer`, `/verifier`). See [cursor-ide.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/agent-orchestration/references/cursor-ide.md). Skip for trivial one-file edits.
-
 ### Command locations (common mistakes)
 
 | Run from      | Examples                                                                                     |
@@ -320,7 +316,6 @@ For multi-file features or parallel work, pick a premium orchestrator (Fable 5, 
 - [ ] Processing change? -> load [test-processing-diff](../test-processing-diff/SKILL.md)
 - [ ] Static dataset change? -> worktree `tilda-static-data`, relink `geojson`, then load [add-static-dataset](../add-static-dataset/SKILL.md)
 - [ ] Map/UI bug? -> use agent-browser MCP; inspect `window.__mainMap` when available
-- [ ] Large multi-step task? -> premium orchestrator + `@orchestrator-worker` (see [cursor-ide](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/agent-orchestration/references/cursor-ide.md))
 - [ ] Private experiment? -> load [tilda-geo-private-repo](../tilda-geo-private-repo/SKILL.md)
 - [ ] Done? -> load [finish-work](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/finish-work/SKILL.md)
 ```

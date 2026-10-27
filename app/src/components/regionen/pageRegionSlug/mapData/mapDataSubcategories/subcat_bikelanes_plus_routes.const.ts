@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_atlas_bikelanes_plus_routes } from './mapboxStyles/groups/atlas_bikelanes_plus_routes'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { layers_bikelanes_plus_routes } from './layers/bikelanes_plus_routes'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'bikelanes_plus_routes'
 const source = 'atlas_bikeroutes'
@@ -17,8 +17,8 @@ export const subcat_bikelanes_plus_routes: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Radrouten',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_atlas_bikelanes_plus_routes,
+      layers: wrapSourceLayers({
+        layers: layers_bikelanes_plus_routes,
         source,
         sourceLayer,
       }),

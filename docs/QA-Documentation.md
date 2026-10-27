@@ -53,7 +53,7 @@ indicator of a cell in one view.
 - A feature that crosses a cell border counts in each cell with the share that lies inside it
   ([Measure.md](Measure.md)), so amounts can be fractional (12.4 parking spaces).
 - An **indicator** is a Merkmal plus its thresholds (§2): `{ key, label, goodThreshold,
-needsReviewThreshold, absoluteDifferenceThreshold }` in `QaConfig.indicators`, validated by
+  needsReviewThreshold, absoluteDifferenceThreshold }` in `QaConfig.indicators`, validated by
   [`qaIndicatorsSchema.ts`](../app/src/server/qa-configs/schemas/qaIndicatorsSchema.ts). `key` is
   either `total` (the plain amount) or a tag, e.g. `condition_category_primary`; each key once per config.
   The order of the list is the order in the detail panel and on the map when statuses tie.
@@ -183,7 +183,7 @@ For a config with `mapTable = public.<name>`, all tables are created in SQL (nev
 - **`public.<name>`**: `id TEXT PRIMARY KEY, geom geometry(MultiPolygon, 3857)` + GIST index. The
   only table Martin publishes as vector tiles (no values, so nothing private leaks).
 - **`public.<name>_indicators`**: `area_id, indicator_key, reference, current, difference,
-deviation, breakdown` (§1), primary key `(area_id, indicator_key)`. One row per cell and
+  deviation, breakdown` (§1), primary key `(area_id, indicator_key)`. One row per cell and
   indicator with reference rows (§6), also when both sides are empty. Rebuilt every run, like
   `_last_editors`.
 - **`public.<name>_last_editors`**: `area_id, last_editors JSONB` (§3), one row per cell, `[]`

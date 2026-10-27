@@ -81,6 +81,7 @@ export const sources: MapDataSource<SourcesId>[] = [
         'surface_color__if_present',
         'description__if_present',
         'length',
+        'composit_route_relations',
         // Last: links to photos, not a property of the object.
         'composit_mapillary',
       ],
@@ -145,6 +146,7 @@ export const sources: MapDataSource<SourcesId>[] = [
         'width',
         'length',
         'description__if_present',
+        'composit_route_relations',
         // Last: links to photos, not a property of the object.
         'composit_mapillary',
       ],
@@ -206,6 +208,7 @@ export const sources: MapDataSource<SourcesId>[] = [
         'width',
         'length',
         'description__if_present',
+        'composit_route_relations',
         // Last: links to photos, not a property of the object.
         'composit_mapillary',
       ],
@@ -343,7 +346,7 @@ export const sources: MapDataSource<SourcesId>[] = [
   },
   {
     id: 'atlas_bicycleParking',
-    tileTables: ['bicycleParking_points', 'bicycleParking_areas', 'bicycleParking_rental'],
+    tileTables: ['bicycleParking_points', 'bicycleParking_areas'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -355,15 +358,18 @@ export const sources: MapDataSource<SourcesId>[] = [
       enabled: true,
       highlightingKey: 'id',
       documentedKeys: [
-        // Only set on bike sharing / rental (`bicycleParking_rental`).
-        'category__if_present',
-        'bicycle_rental__if_present',
-        'network__if_present',
+        'kind',
         'capacity',
-        'capacity:cargo_bike__if_present',
         'access',
         'covered',
+        'name__if_present',
+        'operator__if_present',
         'operator_type__if_present',
+        'network__if_present',
+        'stand_type__if_present',
+        'rental_type__if_present',
+        'position__if_present',
+        'in_mobility_hub__if_present',
         'lit__if_present',
         'description__if_present',
         // Last: links to photos, not a property of the object.

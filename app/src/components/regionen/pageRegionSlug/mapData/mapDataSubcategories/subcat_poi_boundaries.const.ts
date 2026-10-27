@@ -1,8 +1,8 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_atlas_boundaries } from './mapboxStyles/groups/atlas_boundaries'
-import { mapboxStyleGroupLayers_atlas_boundaries_names } from './mapboxStyles/groups/atlas_boundaries_names'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { layers_boundaries } from './layers/boundaries'
+import { layers_boundaries_names } from './layers/boundaries_names'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const topiId = 'poiBoundaries'
 export type SubcatPoiBoundariesId = typeof topiId
@@ -24,8 +24,8 @@ export const subcat_poi_boundaries: FileMapDataSubcategory = {
       id: 'default',
       name: 'Landkreise & Kreisfreie Städte',
       layers: [
-        ...mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_atlas_boundaries,
+        ...wrapSourceLayers({
+          layers: layers_boundaries,
           source: 'atlas_boundaries',
           sourceLayer: 'boundaries',
           additionalFilter: ['has', 'category_district'],
@@ -36,14 +36,14 @@ export const subcat_poi_boundaries: FileMapDataSubcategory = {
       id: 'category_district_label',
       name: 'Landkreise & Kreisfreie Städte mit Namen',
       layers: [
-        ...mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_atlas_boundaries,
+        ...wrapSourceLayers({
+          layers: layers_boundaries,
           source: 'atlas_boundaries',
           sourceLayer: 'boundaries',
           additionalFilter: ['has', 'category_district'],
         }),
-        ...mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_atlas_boundaries_names,
+        ...wrapSourceLayers({
+          layers: layers_boundaries_names,
           source: 'atlas_boundaries',
           sourceLayer: 'boundaryLabels',
           additionalFilter: ['has', 'category_district'],
@@ -54,8 +54,8 @@ export const subcat_poi_boundaries: FileMapDataSubcategory = {
       id: 'category_municipality',
       name: 'Gemeinden',
       layers: [
-        ...mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_atlas_boundaries,
+        ...wrapSourceLayers({
+          layers: layers_boundaries,
           source: 'atlas_boundaries',
           sourceLayer: 'boundaries',
           additionalFilter: ['has', 'category_municipality'],
@@ -66,14 +66,14 @@ export const subcat_poi_boundaries: FileMapDataSubcategory = {
       id: 'category_municipality_label',
       name: 'Gemeinden mit Namen',
       layers: [
-        ...mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_atlas_boundaries,
+        ...wrapSourceLayers({
+          layers: layers_boundaries,
           source: 'atlas_boundaries',
           sourceLayer: 'boundaries',
           additionalFilter: ['has', 'category_municipality'],
         }),
-        ...mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_atlas_boundaries_names,
+        ...wrapSourceLayers({
+          layers: layers_boundaries_names,
           source: 'atlas_boundaries',
           sourceLayer: 'boundaryLabels',
           additionalFilter: ['has', 'category_municipality'],

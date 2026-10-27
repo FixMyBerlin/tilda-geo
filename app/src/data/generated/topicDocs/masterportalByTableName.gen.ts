@@ -112,12 +112,20 @@ const data = {
   },
   bicycleParking_points: {
     gfiAttributes: {
-      capacity: {
-        name: 'Anzahl Fahrrad-Stellplätze',
-        type: 'number',
+      kind: {
+        name: 'Art',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          bicycle_parking: 'Fahrradstellplätze',
+          cargo_bike_parking: 'Lastenrad-Stellplätze',
+          small_electric_vehicle_parking: 'E-Scooter- / Kleinstfahrzeug-Parkplätze',
+          bicycle_rental: 'Bikesharing-Stationen',
+          mobility_hub: 'Mobilitätsstationen',
+        },
       },
-      'capacity:cargo_bike': {
-        name: 'Anzahl Lastenfahrrad-Stellplätze',
+      capacity: {
+        name: 'Anzahl Stellplätze',
         type: 'number',
       },
       access: {
@@ -127,8 +135,10 @@ const data = {
         format: {
           yes: 'Öffentlich',
           customers: 'Kund:innen',
+          members: 'Mitglieder',
           permissive: 'Öffentliche Nutzung geduldet',
           private: 'Privat',
+          no: 'Kein Zugang',
         },
       },
       covered: {
@@ -158,6 +168,7 @@ const data = {
         type: 'string',
         format: {
           yes: 'Zugelassen',
+          designated: 'Nur Lastenräder',
         },
       },
       lit: {
@@ -169,8 +180,8 @@ const data = {
           no: 'Nicht beleuchtet',
         },
       },
-      bicycle_parking: {
-        name: 'Fahrradabstellanlage',
+      stand_type: {
+        name: 'Art der Abstellanlage',
         condition: 'contains',
         type: 'string',
         format: {
@@ -178,9 +189,49 @@ const data = {
           wide_stands: 'Breite Anlehnbügel',
           bollard: 'Poller',
           wall_loops: 'Wandhalter',
-          shed: 'Unterstand',
+          rack: 'Fahrradständer',
+          safe_loops: 'Sicherheitsbügel',
+          ground_slots: 'Bodenschlitze',
+          anchors: 'Bodenanker',
+          lean_and_stick: 'Anlehnhilfe',
+          handlebar_holder: 'Lenkerhalter',
+          upright_stands: 'Vertikalparker',
           'two-tier': 'Doppelstockparker',
+          shed: 'Unterstand',
+          building: 'Fahrradparkhaus',
           lockers: 'Fahrradboxen',
+          streetpod: 'Streetpod',
+          smart_dock: 'Smart-Dock',
+          floor: 'Abstellfläche ohne Halter',
+        },
+      },
+      rental_type: {
+        name: 'Art der Verleihstation',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          docking_station: 'Station mit Andockpunkten',
+          dropoff_point: 'Abstellfläche (Free-Floating-Zone)',
+          key_dispensing_machine: 'Schlüsselautomat',
+        },
+      },
+      network: 'Netz / Verbund',
+      in_mobility_hub: {
+        name: 'In Mobilitätsstation',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          yes: 'Innerhalb einer Mobilitätsstation',
+        },
+      },
+      geometry_transform: {
+        name: 'Geometrie geschätzt',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          area_split: 'Fläche nach Stellplätzen geteilt',
+          line_halves: 'Linie in der Mitte geteilt',
+          point_offset: 'Nebeneinander gesetzt',
         },
       },
       operator_type: {
@@ -199,15 +250,21 @@ const data = {
         format: {
           sidewalk: 'Gehweg',
           grass_verge: 'Grünstreifen',
-          lane: 'Fahrbahn',
           kerb_extension: 'Gehwegvorstreckung',
-          parking_lot: 'Parkplatz',
-          street_side: 'Straßenrand',
-          school_ground: 'Schulgelände',
-          private_property: 'Privatgrund',
           pedestrian_area: 'Fußgängerbereich',
+          lane: 'Fahrbahn',
+          street_side: 'Straßenrand',
+          shoulder: 'Seitenstreifen',
+          traffic_island: 'Verkehrsinsel',
+          parklet: 'Parklet',
           park: 'Park',
+          school_ground: 'Schulgelände',
+          playground: 'Spielplatz',
+          parking_lot: 'Parkplatz',
           parking: 'Parkfläche',
+          driveway: 'Zufahrt',
+          private_property: 'Privatgrund',
+          public_property: 'Öffentliches Gelände',
         },
       },
       indoor: {
@@ -289,38 +346,6 @@ const data = {
       description: 'Beschreibung',
       traffic_sign: 'Verkehrszeichen',
       maxstay: 'Maximaldauer',
-      osm_capacity: 'OSM Kapazität (roh, Testdaten)',
-      'osm_capacity:cargo_bike': 'OSM Kapazität Lastenrad (roh, Testdaten)',
-    },
-  },
-  bicycleParking_rental: {
-    gfiAttributes: {
-      category: {
-        name: 'Art',
-        condition: 'contains',
-        type: 'string',
-        format: {
-          bicycle_rental: 'Bikesharing / Fahrradverleih',
-        },
-      },
-      bicycle_rental: {
-        name: 'Art der Station',
-        condition: 'contains',
-        type: 'string',
-        format: {
-          docking_station: 'Station mit festen Stellplätzen',
-          dropoff_point: 'Abstellzone ohne Ständer',
-          shop: 'Verleih-Laden',
-        },
-      },
-      capacity: {
-        name: 'Anzahl Fahrrad-Stellplätze',
-        type: 'number',
-      },
-      name: 'Name',
-      operator: 'Betreiber',
-      network: 'Verleihsystem',
-      osm_capacity: 'OSM Kapazität (roh, Testdaten)',
     },
   },
   bikelanes: {
@@ -747,6 +772,7 @@ const data = {
           },
         },
       },
+      route_relations: 'Routen',
       description: 'Hinweis aus OSM',
       operator_type: {
         name: 'Betreibertyp',
@@ -1389,6 +1415,36 @@ const data = {
       },
     },
   },
+  busroutes: {
+    gfiAttributes: {
+      route: 'Routentyp (`route=*`)',
+      name: 'Name',
+      ref: 'Referenz',
+      network: 'Netz (`network=*`)',
+      operator: 'Betreiber',
+      from: 'Start',
+      to: 'Ziel',
+      route_description: 'Freitext zur Route',
+      colours: 'Farben (mit `/` getrennt)',
+      website: 'Website',
+      wikipedia: 'Wikipedia',
+    },
+  },
+  footroutes: {
+    gfiAttributes: {
+      route: 'Routentyp (`route=*`)',
+      name: 'Name',
+      ref: 'Referenz',
+      network: 'Netz (`network=*`)',
+      operator: 'Betreiber',
+      from: 'Start',
+      to: 'Ziel',
+      route_description: 'Freitext zur Route',
+      colours: 'Farben (mit `/` getrennt)',
+      website: 'Website',
+      wikipedia: 'Wikipedia',
+    },
+  },
   highwayAreas: {
     gfiAttributes: {
       road: {
@@ -1692,6 +1748,21 @@ const data = {
       },
     },
   },
+  hikingroutes: {
+    gfiAttributes: {
+      route: 'Routentyp (`route=*`)',
+      name: 'Name',
+      ref: 'Referenz',
+      network: 'Netz (`network=*`)',
+      operator: 'Betreiber',
+      from: 'Start',
+      to: 'Ziel',
+      route_description: 'Freitext zur Route',
+      colours: 'Farben (mit `/` getrennt)',
+      website: 'Website',
+      wikipedia: 'Wikipedia',
+    },
+  },
   landuse: {
     gfiAttributes: {
       landuse: {
@@ -1742,6 +1813,21 @@ const data = {
       },
       name: 'Name',
       operator: 'Betreiber',
+    },
+  },
+  mtbroutes: {
+    gfiAttributes: {
+      route: 'Routentyp (`route=*`)',
+      name: 'Name',
+      ref: 'Referenz',
+      network: 'Netz (`network=*`)',
+      operator: 'Betreiber',
+      from: 'Start',
+      to: 'Ziel',
+      route_description: 'Freitext zur Route',
+      colours: 'Farben (mit `/` getrennt)',
+      website: 'Website',
+      wikipedia: 'Wikipedia',
     },
   },
   off_street_parking_areas: {
@@ -2957,6 +3043,54 @@ const data = {
       },
     },
   },
+  parkings_labels: {
+    gfiAttributes: {
+      capacity: {
+        name: 'Stellplatzanzahl',
+        type: 'number',
+      },
+      operator_type: {
+        name: 'Betreibertyp',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          private: 'Privat',
+          public: 'Öffentlich',
+        },
+      },
+      operator_type_source: {
+        name: 'Herkunft des Betreibertyps',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          default_fallback: 'Annahme bei fehlender Angabe.',
+          driveway_inference: 'Annahme bei fehlender Angabe wenn eine Einfahrt erkannt wurde.',
+          manual_overwrite_list: 'Anhand einer manuellen Korrekturliste in TILDA.',
+          parent_highway_tag: 'Explizite Angabe aus OSM an der zugeordneten Straße.',
+          tag: 'Explizite Angabe aus OSM.',
+        },
+      },
+      operator_type_confidence: {
+        name: 'Konfidenz des Betreibertyps',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          high: 'Hoch',
+          medium: 'Mittel',
+          low: 'Niedrig',
+        },
+      },
+      area: {
+        name: 'Fläche',
+        type: 'number',
+        suffix: 'm²',
+      },
+      angle: {
+        name: 'Textwinkel',
+        type: 'number',
+      },
+    },
+  },
   parkings_no: {
     gfiAttributes: {
       parking: {
@@ -3968,6 +4102,7 @@ const data = {
           },
         },
       },
+      route_relations: 'Routen',
       traffic_sign: {
         name: 'Beschilderung',
         condition: 'contains',
@@ -4427,6 +4562,7 @@ const data = {
           },
         },
       },
+      route_relations: 'Routen',
       traffic_sign: {
         name: 'Beschilderung',
         condition: 'contains',

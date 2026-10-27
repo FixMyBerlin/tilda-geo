@@ -1,7 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
-import { customMapIcons } from './customMapIcons.const'
-import { mapboxStyleGroupLayers_atlas_ziele_plus_publictransport } from './mapboxStyles/groups/atlas_ziele_plus_publictransport'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
+import { layers_ziele_plus_publictransport } from './layers/ziele_plus_publictransport'
 
 const tpoicId = 'poiPlusPublicTransport'
 const source = 'atlas_publicTransport'
@@ -19,13 +18,12 @@ export const subcat_poi_plus_publicTransport: FileMapDataSubcategory = {
       id: 'default',
       name: 'Standard',
       layers: [
-        ...mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_atlas_ziele_plus_publictransport,
+        ...wrapSourceLayers({
+          layers: layers_ziele_plus_publictransport,
           source,
           sourceLayer,
         }),
-        // Not in the Mapbox Studio style yet, which leaves `bus_stop` without an icon.
-        // Drop this layer once the generated style styles bus stops itself.
+        // `layers_ziele_plus_publictransport` has no icon for `bus_stop`.
         {
           id: 'bus-stops',
           type: 'symbol',
@@ -34,10 +32,9 @@ export const subcat_poi_plus_publicTransport: FileMapDataSubcategory = {
           filter: ['==', ['get', 'category'], 'bus_stop'],
           layout: {
             'icon-allow-overlap': true,
-            'icon-anchor': 'bottom',
-            'icon-image': customMapIcons.busStopPin.id,
+            'icon-image': 'bus-stop',
             'icon-padding': 1,
-            'icon-size': ['interpolate', ['linear'], ['zoom'], 14, 0.4, 18, 0.7],
+            'icon-size': ['interpolate', ['linear'], ['zoom'], 14, 0.6, 18, 1],
           },
           paint: {
             'icon-opacity': 1,

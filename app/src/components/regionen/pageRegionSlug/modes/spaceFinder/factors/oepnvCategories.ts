@@ -3,7 +3,7 @@
  *
  * „ÖPNV" still combines the five classic stop types (subway entrance, tram, bus, station,
  * station building) via an internal max() — the nearest type counts.
- * „Bikesharing" (poiClassification, `*=bicycle_rental`) stays a separate type.
+ * „Bikesharing" (`bicycleParking_points` with `kind=bicycle_rental`) stays a separate type.
  * `oepnv_category_shares` shifts the ratio between the two groups
  * (see `oepnvShares.ts` and `scorer.py`).
  *

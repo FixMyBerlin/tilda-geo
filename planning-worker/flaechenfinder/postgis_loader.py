@@ -197,20 +197,23 @@ class PostgisLoader:
         return gdf.to_crs("EPSG:4326") if len(gdf) else _empty("EPSG:4326")
 
     def load_bikesharing(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
-        """Bike sharing stations (`*=bicycle_rental`) from `public."bicycleParking_rental"`.
+        """Bike sharing stations from `public."bicycleParking_points"` with `kind=bicycle_rental`.
 
-        Bike sharing is not in `publicTransport` but in its own table of the
-        bicycleParking topic (processing/topics/bicycleParking/bicycle_rental.lua) –
-        hence a separate loader instead of an entry in `_TRANSIT_TAG_MAP`. It is
-        kept out of `bicycleParking_points`, so `load_bicycle_parking` does not
-        count rental stations as existing parking. The map shows the same table in
-        the "Fahrradstellplätze" layer (`subcat_bicycleParking.ts`).
+        The bicycleParking topic writes `amenity=bicycle_rental` (without
+        `bicycle_rental=shop|virtual`) as its own kind next to the parking
+        (processing/topics/bicycleParking/helper/kind_parts.lua) – hence a separate
+        loader instead of an entry in `_TRANSIT_TAG_MAP`. A station mapped as an area
+        is in the table as its centroid. `load_bicycle_parking` leaves this kind out,
+        so rental stations do not count as existing parking. The map shows them in
+        the "Fahrrad- & Mikromobilitätsparken" layer (`layers/bicycleParking.ts`).
 
         Dependency: the table only exists if the bicycleParking topic was processed
         for the region. If missing, `_read_table` returns an empty GeoDataFrame
         (bikesharing then contributes 0).
         """
-        gdf = self._read_table("bicycleParking_rental", polygon_4326)
+        gdf = self._read_table(
+            "bicycleParking_points", polygon_4326, where="tags->>'kind' = 'bicycle_rental'"
+        )
         return gdf.to_crs("EPSG:4326") if len(gdf) else _empty("EPSG:4326")
 
     def load_intersection_corners(
@@ -405,8 +408,11 @@ class PostgisLoader:
         Reads `public."bicycleParking_points"` – the point table of the
         bicycleParking topic. It is the superset "one facility = one point":
         OSM nodes (`amenity=bicycle_parking`) AND the centroids of the areas from
-        `bicycleParking_areas` are emitted here. Deliberately ALL recorded
-        facilities count (no type/capacity filter).
+        `bicycleParking_areas` are emitted here. All parking kinds count
+        (`bicycle_parking`, `cargo_bike_parking`, `small_electric_vehicle_parking`),
+        with or without capacity. Left out: `kind=bicycle_rental` (bike sharing,
+        `load_bikesharing`) and `kind=mobility_hub` (a container whose stands are
+        rows of their own).
 
         The (optional) capacity is returned as numeric column `capacity` – the
         scorer derives each facility's reach from it (diameter = capacity/2).
@@ -430,6 +436,8 @@ class PostgisLoader:
                 CASE WHEN {cap_num} THEN (tags->>'capacity')::numeric END AS capacity
             FROM public."bicycleParking_points"
             WHERE geom && {bbox}
+                AND tags->>'kind' IS DISTINCT FROM 'bicycle_rental'
+                AND tags->>'kind' IS DISTINCT FROM 'mobility_hub'
         """
         try:
             gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")

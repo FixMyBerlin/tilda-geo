@@ -21,7 +21,7 @@ export default {
     'src/components/shared/utils/getCachelessTilesUrl.ts': ['exports'],
     'src/components/shared/utils/getTilesUrl.ts': ['exports'],
   },
-  ignoreBinaries: ['gdal', 'gdalinfo', 'github', 'ogr2ogr', 'ogrinfo'],
+  ignoreBinaries: ['gdal', 'gdalinfo', 'ogr2ogr', 'ogrinfo'],
   ignoreDependencies: [
     '@tanstack/router-plugin',
     // Used in symlinked tilda-static-data geojson scripts (gitignored; see static-datasets-link)

@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_atlas_roads_plus_label } from './mapboxStyles/groups/atlas_roads_plus_label'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { layers_roads_plus_label } from './layers/roads_plus_label'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'roads_plus_label'
 const source = 'atlas_roads'
@@ -17,8 +17,8 @@ export const subcat_roads_plus_label: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Label Hauptstraßen',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_atlas_roads_plus_label,
+      layers: wrapSourceLayers({
+        layers: layers_roads_plus_label,
         source,
         sourceLayer,
       }),

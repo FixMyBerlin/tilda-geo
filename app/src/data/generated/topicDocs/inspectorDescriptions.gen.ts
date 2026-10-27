@@ -1,10 +1,25 @@
 const data = {
   atlas_bicycleParking: {
     keys: {
+      stand_type: 'Aus `bicycle_parking=*`.',
+      rental_type: 'Aus `bicycle_rental=*`.',
+      geometry_transform:
+        'Gesetzt, wenn ein OSM-Objekt nach Art aufgeteilt und die Lage der Teile geschätzt wurde.',
       mapillary: 'Mapillary-Foto-ID für dieses Feature.',
       traffic_sign: 'Verkehrszeichennummer, mit der dieses Feature ausgeschildert ist.',
     },
-    values: {},
+    values: {
+      kind: {
+        bicycle_parking: '`amenity=bicycle_parking`',
+        cargo_bike_parking:
+          '`amenity=bicycle_parking` mit `cargo_bike=designated` oder `capacity:cargo_bike`',
+        small_electric_vehicle_parking:
+          '`amenity=small_electric_vehicle_parking`, `amenity=kick-scooter_parking`',
+        bicycle_rental: '`amenity=bicycle_rental`, ohne Fahrradverleih-Läden',
+        mobility_hub:
+          '`amenity=mobility_hub`. Eine Fläche, in der Stellplätze und Verleihstationen liegen; beim Summieren zählt sie nicht mit.',
+      },
+    },
   },
   atlas_bikelanes: {
     keys: {
@@ -30,6 +45,7 @@ const data = {
         'Mapillary-Bild-IDs in Gegenrichtung (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
       mapillary_traffic_sign:
         'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
+      route_relations: 'Routen und Netze, zu denen der Weg gehört.',
       offset:
         'Reiner Darstellungswert für den Kartenstil – empfohlener seitlicher Versatz in Metern. Die Geometrie bleibt auf der Straßen-Mittellinie; der Versatz wird ausschließlich visuell als `line-offset` angewendet und verändert die Daten nicht. Vorzeichen: positiv = links, negativ = rechts der Mittellinie. Der Betrag wird im Processing aus der halben Straßenbreite berechnet.',
     },
@@ -127,6 +143,7 @@ const data = {
         'Mapillary-Bild-IDs in Gegenrichtung (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
       mapillary_traffic_sign:
         'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
+      route_relations: 'Routen und Netze, zu denen der Weg gehört.',
     },
     values: {
       tunnel: {
@@ -152,6 +169,7 @@ const data = {
         'Mapillary-Bild-IDs in Gegenrichtung (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
       mapillary_traffic_sign:
         'Mapillary-Bild-IDs für Verkehrszeichen (technisch bereinigt). Mehrere IDs sind als semikolongetrennte Liste möglich. Im Inspector wird pro ID ein Link erzeugt, z. B. `https://www.mapillary.com/app/?pKey=<ID>&focus=photo&z=15`.',
+      route_relations: 'Routen und Netze, zu denen der Weg gehört.',
       adjoining_road:
         'Ein Indikator für die Gefährdung durch nahen Kfz-Verkehr: TILDA-Straßenklasse der relevanten Kfz-Straße (keine Aussage, ob der Weg zu dieser Straße gehört). Bei begleitenden Wegen die parallele Straße; bei Querungen die gequerte Straße. Primär, außer bei Querungen: OSM `is_sidepath:of`, über die TILDA-Straßenklassifikation gemappt (nur die `highway`-Klasse, ohne Untertags). Damit kann eine Kartierung die Schätzung überschreiben. `residential_priority_road` entsteht so nicht; der gröbere `:of`-Wert bleibt. Unbrauchbare `:of`-Werte (Tippfehler, Straßenname, `trunk`) fallen auf die Schätzung zurück. Bei Querungen immer nur die Schätzung (gequerte Straße), nie `:of`. Auch gesetzt, wenn der Weg selbstständig geführt ist.',
       adjoining_maxspeed:
@@ -263,6 +281,8 @@ const data = {
         'JSON-Array analog zu `way_ids`. Pro Way, ob die OSM-Digitization der Kantenrichtung entgegengesetzt ist.',
       start_node: 'OSM-Node-ID am Anfang der Kante. Zusammen mit `end_node` die Objekt-ID.',
       end_node: 'OSM-Node-ID am Ende der Kante. Zusammen mit `start_node` die Objekt-ID.',
+      angle:
+        'Drehung der Beschriftung in Grad (im Uhrzeigersinn, 0 = Osten), entlang der Linie (Parklinie bzw. Kante) und so gewendet, dass der Text nie auf dem Kopf steht (−90 bis 90). Nur zur Darstellung.',
     },
     values: {
       condition_category: {

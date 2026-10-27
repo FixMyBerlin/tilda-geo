@@ -2,57 +2,31 @@ local metadata = require('topics.helper.metadata')
 local default_id = require('topics.helper.default_id')
 local LOG_ERROR = require('topics.bicycleParking.bicycleParking_errors')
 local result_tags = require('topics.bicycleParking.helper.result_tags')
-local insert_bicycle_parking_point = require('topics.bicycleParking.helper.insert_bicycle_parking_point')
-local minzoom = require('topics.bicycleParking.helper.minzoom')
-
-local areaTable = osm2pgsql.define_table({
-  name = 'bicycleParking_areas',
-  ids = { type = 'any', id_column = 'osm_id', type_column = 'osm_type' },
-  columns = {
-    { column = 'id', type = 'text', not_null = true },
-    { column = 'tags', type = 'jsonb' },
-    { column = 'meta', type = 'jsonb' },
-    { column = 'geom', type = 'polygon' },
-    { column = 'minzoom', type = 'integer', not_null = true },
-  },
-  indexes = {
-    { column = { 'minzoom', 'geom' }, method = 'gist' },
-    { column = 'id', method = 'btree', unique = true }
-  }
-})
+local kind_parts = require('topics.bicycleParking.helper.kind_parts')
+local parts_rows = require('topics.bicycleParking.helper.insert_bicycle_parking_parts')
+local insert_bicycle_parking_line = require('topics.bicycleParking.helper.insert_bicycle_parking_line')
 
 local function process_way(object)
-  if object.tags.amenity ~= 'bicycle_parking' then return end
+  local parts = kind_parts(object.tags)
+  if #parts == 0 then return end
+
+  local shared_tags, replaced_tags = result_tags(object.tags)
+  local id = default_id(object)
+  local meta = metadata(object)
 
   if object.is_closed then
-    local cleaned_tags, replaced_tags = result_tags(object.tags)
     local poly = object:as_polygon()
     LOG_ERROR.SANITIZED_VALUE(object, poly, replaced_tags, 'bicycleParking_way_area')
-
-    local id = default_id(object)
-    local meta = metadata(object)
-    areaTable:insert({
-      tags = cleaned_tags,
-      meta = meta,
-      geom = poly,
-      minzoom = minzoom(cleaned_tags),
-      id = id,
-    })
-
-    insert_bicycle_parking_point(cleaned_tags, meta, poly:centroid(), id)
+    parts_rows.areas(parts, shared_tags, meta, poly, id)
     return
   end
 
-  local cleaned_tags, replaced_tags = result_tags(object.tags)
   local line = object:as_linestring()
   LOG_ERROR.SANITIZED_VALUE(object, line, replaced_tags, 'bicycleParking_way_line')
-
-  insert_bicycle_parking_point(
-    cleaned_tags,
-    metadata(object),
-    line:centroid(),
-    default_id(object)
-  )
+  parts_rows.points(parts, shared_tags, meta, line:centroid(), id, 'line_halves')
+  if #parts > 1 then
+    insert_bicycle_parking_line(id, line)
+  end
 end
 
 return process_way

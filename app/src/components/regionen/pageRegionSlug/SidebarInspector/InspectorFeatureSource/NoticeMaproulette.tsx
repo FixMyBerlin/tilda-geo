@@ -50,17 +50,6 @@ const useNoticeMaprouletteProjectKeys = ({
   )
 }
 
-export const useNoticeMaprouletteVisible = ({
-  sourceId,
-  osmTypeIdString,
-  properties,
-  geometry,
-}: NoticeMaproulette) => {
-  const maprouletteProjectKeys = useNoticeMaprouletteProjectKeys({ sourceId, properties })
-
-  return !!(maprouletteProjectKeys.length && osmTypeIdString && geometry?.type === 'LineString')
-}
-
 export const NoticeMaproulette = ({
   sourceId,
   osmTypeIdString,

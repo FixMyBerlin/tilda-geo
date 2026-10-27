@@ -9,135 +9,129 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as RegionenRouteImport } from './routes/regionen'
-import { Route as PreviewRouteImport } from './routes/preview'
-import { Route as McpRouteImport } from './routes/mcp'
-import { Route as AdminRouteImport } from './routes/admin'
-import { Route as PagesRouteImport } from './routes/_pages'
 import { Route as IndexRouteImport } from './routes/index'
-import { Route as RegionenIndexRouteImport } from './routes/regionen/index'
-import { Route as AdminIndexRouteImport } from './routes/admin/index'
-import { Route as RegionenStatsRouteImport } from './routes/regionen/stats'
-import { Route as PreviewRootFallbackRouteImport } from './routes/preview/root-fallback'
-import { Route as PreviewRegionPendingRouteImport } from './routes/preview/region-pending'
-import { Route as PreviewRegionErrorRouteImport } from './routes/preview/region-error'
-import { Route as PreviewNotFoundRouteImport } from './routes/preview/not-found'
-import { Route as PreviewDefaultPendingRouteImport } from './routes/preview/default-pending'
-import { Route as PreviewDefaultErrorRouteImport } from './routes/preview/default-error'
-import { Route as ApiUploadsRouteImport } from './routes/api/uploads'
-import { Route as ApiStatsRouteImport } from './routes/api/stats'
-import { Route as ApiRegionsRouteImport } from './routes/api/regions'
-import { Route as ApiProcessingDatesMapillaryRouteImport } from './routes/api/processing-dates-mapillary'
-import { Route as ApiProcessingDatesRouteImport } from './routes/api/processing-dates'
-import { Route as ApiOsmcha2RssRewriteRouteImport } from './routes/api/osmcha2-rss-rewrite'
-import { Route as ApiMapStyleRouteImport } from './routes/api/map-style'
-import { Route as ApiCampaignsRouteImport } from './routes/api/campaigns'
-import { Route as ApiBoundaryRouteImport } from './routes/api/boundary'
-import { Route as AdminUsersRouteImport } from './routes/admin/users'
-import { Route as AdminReviewListsRouteImport } from './routes/admin/review-lists'
-import { Route as AdminRegionsRouteImport } from './routes/admin/regions'
-import { Route as AdminRegionContractsRouteImport } from './routes/admin/region-contracts'
-import { Route as AdminQaConfigsRouteImport } from './routes/admin/qa-configs'
-import { Route as AdminProcessingRouteImport } from './routes/admin/processing'
-import { Route as AdminPrivateBackgroundsRouteImport } from './routes/admin/private-backgrounds'
-import { Route as AdminNoteFoldersRouteImport } from './routes/admin/note-folders'
-import { Route as AdminMapDatasetUploadsRouteImport } from './routes/admin/map-dataset-uploads'
-import { Route as AdminMapDatasetCategoriesRouteImport } from './routes/admin/map-dataset-categories'
-import { Route as AdminLayerOrderRouteImport } from './routes/admin/layer-order'
-import { Route as AdminDataSchemaRouteImport } from './routes/admin/data-schema'
-import { Route as AdminAuditLogRouteImport } from './routes/admin/audit-log'
-import { Route as AdminApiTokensRouteImport } from './routes/admin/api-tokens'
-import { Route as PagesOAuthErrorRouteImport } from './routes/_pages/oAuthError'
-import { Route as PagesKontaktRouteImport } from './routes/_pages/kontakt'
-import { Route as PagesDatenschutzRouteImport } from './routes/_pages/datenschutz'
+import { Route as PagesRouteImport } from './routes/_pages'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as McpRouteImport } from './routes/mcp'
+import { Route as PreviewRouteImport } from './routes/preview'
+import { Route as RegionenRouteImport } from './routes/regionen'
 import { Route as PagesAccessDeniedRouteImport } from './routes/_pages/access-denied'
+import { Route as PagesDatenschutzRouteImport } from './routes/_pages/datenschutz'
+import { Route as PagesKontaktRouteImport } from './routes/_pages/kontakt'
+import { Route as PagesOAuthErrorRouteImport } from './routes/_pages/oAuthError'
+import { Route as AdminIndexRouteImport } from './routes/admin/index'
+import { Route as AdminApiTokensRouteImport } from './routes/admin/api-tokens'
+import { Route as AdminAuditLogRouteImport } from './routes/admin/audit-log'
+import { Route as AdminDataSchemaRouteImport } from './routes/admin/data-schema'
+import { Route as AdminLayerOrderRouteImport } from './routes/admin/layer-order'
+import { Route as AdminMapDatasetCategoriesRouteImport } from './routes/admin/map-dataset-categories'
+import { Route as AdminMapDatasetUploadsRouteImport } from './routes/admin/map-dataset-uploads'
+import { Route as AdminNoteFoldersRouteImport } from './routes/admin/note-folders'
+import { Route as AdminPrivateBackgroundsRouteImport } from './routes/admin/private-backgrounds'
+import { Route as AdminProcessingRouteImport } from './routes/admin/processing'
+import { Route as AdminQaConfigsRouteImport } from './routes/admin/qa-configs'
+import { Route as AdminRegionContractsRouteImport } from './routes/admin/region-contracts'
+import { Route as AdminRegionsRouteImport } from './routes/admin/regions'
+import { Route as AdminReviewListsRouteImport } from './routes/admin/review-lists'
+import { Route as AdminUsersRouteImport } from './routes/admin/users'
+import { Route as ApiBoundaryRouteImport } from './routes/api/boundary'
+import { Route as ApiCampaignsRouteImport } from './routes/api/campaigns'
+import { Route as ApiMapStyleRouteImport } from './routes/api/map-style'
+import { Route as ApiOsmcha2RssRewriteRouteImport } from './routes/api/osmcha2-rss-rewrite'
+import { Route as ApiProcessingDatesRouteImport } from './routes/api/processing-dates'
+import { Route as ApiProcessingDatesMapillaryRouteImport } from './routes/api/processing-dates-mapillary'
+import { Route as ApiRegionsRouteImport } from './routes/api/regions'
+import { Route as ApiStatsRouteImport } from './routes/api/stats'
+import { Route as ApiUploadsRouteImport } from './routes/api/uploads'
+import { Route as PreviewDefaultErrorRouteImport } from './routes/preview/default-error'
+import { Route as PreviewDefaultPendingRouteImport } from './routes/preview/default-pending'
+import { Route as PreviewNotFoundRouteImport } from './routes/preview/not-found'
+import { Route as PreviewRegionErrorRouteImport } from './routes/preview/region-error'
+import { Route as PreviewRegionPendingRouteImport } from './routes/preview/region-pending'
+import { Route as PreviewRootFallbackRouteImport } from './routes/preview/root-fallback'
+import { Route as RegionenIndexRouteImport } from './routes/regionen/index'
 import { Route as RegionenRegionSlugRouteRouteImport } from './routes/regionen/$regionSlug/route'
-import { Route as RegionenRegionSlugIndexRouteImport } from './routes/regionen/$regionSlug/index'
-import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
-import { Route as AdminReviewListsIndexRouteImport } from './routes/admin/review-lists/index'
-import { Route as AdminRegionsIndexRouteImport } from './routes/admin/regions/index'
-import { Route as AdminRegionContractsIndexRouteImport } from './routes/admin/region-contracts/index'
-import { Route as AdminQaConfigsIndexRouteImport } from './routes/admin/qa-configs/index'
-import { Route as AdminProcessingIndexRouteImport } from './routes/admin/processing/index'
-import { Route as AdminPrivateBackgroundsIndexRouteImport } from './routes/admin/private-backgrounds/index'
-import { Route as AdminNoteFoldersIndexRouteImport } from './routes/admin/note-folders/index'
-import { Route as AdminMapDatasetUploadsIndexRouteImport } from './routes/admin/map-dataset-uploads/index'
-import { Route as AdminMapDatasetCategoriesIndexRouteImport } from './routes/admin/map-dataset-categories/index'
-import { Route as RegionenRegionSlugSummierenRouteImport } from './routes/regionen/$regionSlug/summieren'
-import { Route as RegionenRegionSlugQaRouteImport } from './routes/regionen/$regionSlug/qa'
-import { Route as RegionenRegionSlugPrueflistenRouteImport } from './routes/regionen/$regionSlug/prueflisten'
-import { Route as RegionenRegionSlugMessenRouteImport } from './routes/regionen/$regionSlug/messen'
-import { Route as RegionenRegionSlugHinweiseRouteImport } from './routes/regionen/$regionSlug/hinweise'
-import { Route as RegionenRegionSlugFlaechenfinderRouteImport } from './routes/regionen/$regionSlug/flaechenfinder'
-import { Route as ApiUploadsCreateRouteImport } from './routes/api/uploads.create'
-import { Route as ApiUploadsSlugRouteImport } from './routes/api/uploads.$slug'
-import { Route as ApiSignInOsmRouteImport } from './routes/api/sign-in.osm'
-import { Route as ApiReviewListsUploadRouteImport } from './routes/api/review-lists.upload'
-import { Route as ApiPrivateWarmCacheRouteImport } from './routes/api/private/warm-cache'
-import { Route as ApiPrivateRegisterSqlFunctionsRouteImport } from './routes/api/private/register-sql-functions'
-import { Route as ApiPrivateRegionsRouteImport } from './routes/api/private/regions'
-import { Route as ApiPrivatePostProcessingQaUpdateRouteImport } from './routes/api/private/post-processing-qa-update'
-import { Route as ApiPrivatePostProcessingHookRouteImport } from './routes/api/private/post-processing-hook'
-import { Route as ApiPrivateGenerateMaprouletteTasksRouteImport } from './routes/api/private/generate-maproulette-tasks'
-import { Route as ApiOsmNotesRssRouteImport } from './routes/api/osm-notes.rss'
-import { Route as ApiNotesRegionSlugRouteImport } from './routes/api/notes.$regionSlug'
-import { Route as ApiAuthOsmTokenRouteImport } from './routes/api/auth.osm-token'
-import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
-import { Route as ApiAdminRegionsRouteImport } from './routes/api/admin/regions'
-import { Route as ApiAdminRegionUploadsRouteImport } from './routes/api/admin/region-uploads'
-import { Route as ApiAdminProcessingRouteImport } from './routes/api/admin/processing'
-import { Route as ApiAdminAuditLogRouteImport } from './routes/api/admin/audit-log'
-import { Route as AdminRegionsNewRouteImport } from './routes/admin/regions/new'
-import { Route as AdminRegionContractsNewRouteImport } from './routes/admin/region-contracts/new'
-import { Route as AdminQaConfigsNewRouteImport } from './routes/admin/qa-configs/new'
-import { Route as AdminProcessingHooksRouteImport } from './routes/admin/processing/hooks'
-import { Route as AdminProcessingMetaIdRouteImport } from './routes/admin/processing/$metaId'
-import { Route as AdminMembershipsNewRouteImport } from './routes/admin/memberships/new'
-import { Route as AdminMapDatasetUploadsSlugRouteImport } from './routes/admin/map-dataset-uploads/$slug'
-import { Route as AdminMapDatasetCategoriesNewRouteImport } from './routes/admin/map-dataset-categories/new'
-import { Route as AdminMapDatasetCategoriesCategoryKeyRouteImport } from './routes/admin/map-dataset-categories/$categoryKey'
-import { Route as PagesSettingsUserRouteImport } from './routes/_pages/settings.user'
-import { Route as PagesDocsMapillaryCoverageRouteImport } from './routes/_pages/docs.mapillary-coverage'
+import { Route as RegionenStatsRouteImport } from './routes/regionen/stats'
 import { Route as PagesDocsTableNameRouteImport } from './routes/_pages/docs.$tableName'
-import { Route as ApiRegionsRegionSlugUploadsCsvRouteImport } from './routes/api/regions.$regionSlug.uploads-csv'
-import { Route as ApiRegionUploadsIdFilenameRouteImport } from './routes/api/region-uploads.$id.$filename'
-import { Route as ApiNotesRegionSlugDownloadRouteImport } from './routes/api/notes.$regionSlug.download'
-import { Route as ApiNotesRegionSlugFolderIdRouteImport } from './routes/api/notes.$regionSlug.$folderId'
-import { Route as ApiMaprouletteStatisticProxyChallengeIdRouteImport } from './routes/api/maproulette.statistic-proxy.$challengeId'
-import { Route as ApiMaprouletteDataTest_tag_fix_twoRouteImport } from './routes/api/maproulette.data.test_tag_fix_two'
-import { Route as ApiMaprouletteDataTest_tag_fix_cyclewaySharedRouteImport } from './routes/api/maproulette.data.test_tag_fix_cycleway-shared'
-import { Route as ApiMaprouletteDataTest_tag_fixRouteImport } from './routes/api/maproulette.data.test_tag_fix'
-import { Route as ApiMaprouletteDataProjectKeyRouteImport } from './routes/api/maproulette.data.$projectKey'
-import { Route as ApiExportRegionSlugTableNameRouteImport } from './routes/api/export.$regionSlug.$tableName'
-import { Route as ApiExportOgrRegionSlugTableNameRouteImport } from './routes/api/export-ogr.$regionSlug.$tableName'
-import { Route as ApiAdminRegionsSlugRouteImport } from './routes/api/admin/regions.$slug'
-import { Route as ApiAdminRegionUploadsUploadRouteImport } from './routes/api/admin/region-uploads.upload'
-import { Route as ApiAdminProcessingMetaIdRouteImport } from './routes/api/admin/processing.$metaId'
-import { Route as ApiAdminDataSchemaImportRouteImport } from './routes/api/admin/data-schema.import'
-import { Route as AdminUsersUserIdEditRouteImport } from './routes/admin/users/$userId.edit'
-import { Route as AdminReviewListsIdEditRouteImport } from './routes/admin/review-lists/$id.edit'
-import { Route as AdminRegionsRegionSlugEditRouteImport } from './routes/admin/regions/$regionSlug.edit'
-import { Route as AdminRegionContractsSlugEditRouteImport } from './routes/admin/region-contracts/$slug.edit'
-import { Route as AdminQaConfigsIdEditRouteImport } from './routes/admin/qa-configs/$id.edit'
+import { Route as PagesDocsMapillaryCoverageRouteImport } from './routes/_pages/docs.mapillary-coverage'
+import { Route as PagesSettingsUserRouteImport } from './routes/_pages/settings.user'
+import { Route as AdminMapDatasetCategoriesIndexRouteImport } from './routes/admin/map-dataset-categories/index'
+import { Route as AdminMapDatasetCategoriesCategoryKeyRouteImport } from './routes/admin/map-dataset-categories/$categoryKey'
+import { Route as AdminMapDatasetCategoriesNewRouteImport } from './routes/admin/map-dataset-categories/new'
+import { Route as AdminMapDatasetUploadsIndexRouteImport } from './routes/admin/map-dataset-uploads/index'
+import { Route as AdminMapDatasetUploadsSlugRouteImport } from './routes/admin/map-dataset-uploads/$slug'
+import { Route as AdminMembershipsNewRouteImport } from './routes/admin/memberships/new'
+import { Route as AdminNoteFoldersIndexRouteImport } from './routes/admin/note-folders/index'
+import { Route as AdminPrivateBackgroundsIndexRouteImport } from './routes/admin/private-backgrounds/index'
+import { Route as AdminProcessingIndexRouteImport } from './routes/admin/processing/index'
+import { Route as AdminProcessingMetaIdRouteImport } from './routes/admin/processing/$metaId'
+import { Route as AdminProcessingHooksRouteImport } from './routes/admin/processing/hooks'
+import { Route as AdminQaConfigsIndexRouteImport } from './routes/admin/qa-configs/index'
+import { Route as AdminQaConfigsNewRouteImport } from './routes/admin/qa-configs/new'
+import { Route as AdminRegionContractsIndexRouteImport } from './routes/admin/region-contracts/index'
+import { Route as AdminRegionContractsNewRouteImport } from './routes/admin/region-contracts/new'
+import { Route as AdminRegionsIndexRouteImport } from './routes/admin/regions/index'
+import { Route as AdminRegionsNewRouteImport } from './routes/admin/regions/new'
+import { Route as AdminReviewListsIndexRouteImport } from './routes/admin/review-lists/index'
+import { Route as AdminUsersIndexRouteImport } from './routes/admin/users/index'
+import { Route as ApiAdminAuditLogRouteImport } from './routes/api/admin/audit-log'
+import { Route as ApiAdminProcessingRouteImport } from './routes/api/admin/processing'
+import { Route as ApiAdminRegionUploadsRouteImport } from './routes/api/admin/region-uploads'
+import { Route as ApiAdminRegionsRouteImport } from './routes/api/admin/regions'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
+import { Route as ApiAuthOsmTokenRouteImport } from './routes/api/auth.osm-token'
+import { Route as ApiNotesRegionSlugRouteImport } from './routes/api/notes.$regionSlug'
+import { Route as ApiOsmNotesRssRouteImport } from './routes/api/osm-notes.rss'
+import { Route as ApiPrivateGenerateMaprouletteTasksRouteImport } from './routes/api/private/generate-maproulette-tasks'
+import { Route as ApiPrivatePostProcessingHookRouteImport } from './routes/api/private/post-processing-hook'
+import { Route as ApiPrivatePostProcessingQaUpdateRouteImport } from './routes/api/private/post-processing-qa-update'
+import { Route as ApiPrivateRegionsRouteImport } from './routes/api/private/regions'
+import { Route as ApiPrivateRegisterSqlFunctionsRouteImport } from './routes/api/private/register-sql-functions'
+import { Route as ApiPrivateWarmCacheRouteImport } from './routes/api/private/warm-cache'
+import { Route as ApiReviewListsUploadRouteImport } from './routes/api/review-lists.upload'
+import { Route as ApiSignInOsmRouteImport } from './routes/api/sign-in.osm'
+import { Route as ApiUploadsSlugRouteImport } from './routes/api/uploads.$slug'
+import { Route as ApiUploadsCreateRouteImport } from './routes/api/uploads.create'
+import { Route as RegionenRegionSlugIndexRouteImport } from './routes/regionen/$regionSlug/index'
+import { Route as RegionenRegionSlugFlaechenfinderRouteImport } from './routes/regionen/$regionSlug/flaechenfinder'
+import { Route as RegionenRegionSlugHinweiseRouteImport } from './routes/regionen/$regionSlug/hinweise'
+import { Route as RegionenRegionSlugMessenRouteImport } from './routes/regionen/$regionSlug/messen'
+import { Route as RegionenRegionSlugPrueflistenRouteImport } from './routes/regionen/$regionSlug/prueflisten'
+import { Route as RegionenRegionSlugQaRouteImport } from './routes/regionen/$regionSlug/qa'
+import { Route as RegionenRegionSlugSummierenRouteImport } from './routes/regionen/$regionSlug/summieren'
 import { Route as AdminNoteFoldersIdEditRouteImport } from './routes/admin/note-folders/$id.edit'
-import { Route as ApiNotesRegionSlugFolderIdNoteIdRouteImport } from './routes/api/notes.$regionSlug.$folderId.$noteId'
+import { Route as AdminQaConfigsIdEditRouteImport } from './routes/admin/qa-configs/$id.edit'
+import { Route as AdminRegionContractsSlugEditRouteImport } from './routes/admin/region-contracts/$slug.edit'
+import { Route as AdminRegionsRegionSlugEditRouteImport } from './routes/admin/regions/$regionSlug.edit'
+import { Route as AdminReviewListsIdEditRouteImport } from './routes/admin/review-lists/$id.edit'
+import { Route as AdminUsersUserIdEditRouteImport } from './routes/admin/users/$userId.edit'
+import { Route as ApiAdminDataSchemaImportRouteImport } from './routes/api/admin/data-schema.import'
+import { Route as ApiAdminProcessingMetaIdRouteImport } from './routes/api/admin/processing.$metaId'
+import { Route as ApiAdminRegionUploadsUploadRouteImport } from './routes/api/admin/region-uploads.upload'
+import { Route as ApiAdminRegionsSlugRouteImport } from './routes/api/admin/regions.$slug'
+import { Route as ApiExportOgrRegionSlugTableNameRouteImport } from './routes/api/export-ogr.$regionSlug.$tableName'
+import { Route as ApiExportRegionSlugTableNameRouteImport } from './routes/api/export.$regionSlug.$tableName'
+import { Route as ApiMaprouletteDataProjectKeyRouteImport } from './routes/api/maproulette.data.$projectKey'
+import { Route as ApiMaprouletteDataTest_tag_fixRouteImport } from './routes/api/maproulette.data.test_tag_fix'
+import { Route as ApiMaprouletteDataTest_tag_fix_cyclewaySharedRouteImport } from './routes/api/maproulette.data.test_tag_fix_cycleway-shared'
+import { Route as ApiMaprouletteDataTest_tag_fix_twoRouteImport } from './routes/api/maproulette.data.test_tag_fix_two'
+import { Route as ApiMaprouletteStatisticProxyChallengeIdRouteImport } from './routes/api/maproulette.statistic-proxy.$challengeId'
+import { Route as ApiNotesRegionSlugFolderIdRouteImport } from './routes/api/notes.$regionSlug.$folderId'
+import { Route as ApiNotesRegionSlugDownloadRouteImport } from './routes/api/notes.$regionSlug.download'
+import { Route as ApiRegionUploadsIdFilenameRouteImport } from './routes/api/region-uploads.$id.$filename'
+import { Route as ApiRegionsRegionSlugUploadsCsvRouteImport } from './routes/api/regions.$regionSlug.uploads-csv'
 import { Route as ApiAdminQaConfigsIdExportCsvRouteImport } from './routes/api/admin.qa-configs.$id.export-csv'
-import { Route as ApiPrivateBackgroundsSlugZXYRouteImport } from './routes/api/private-backgrounds.$slug.$z.$x.$y'
+import { Route as ApiNotesRegionSlugFolderIdNoteIdRouteImport } from './routes/api/notes.$regionSlug.$folderId.$noteId'
 import { Route as ApiNotesRegionSlugFolderIdNoteIdCommentsRouteImport } from './routes/api/notes.$regionSlug.$folderId.$noteId.comments'
+import { Route as ApiPrivateBackgroundsSlugZXYRouteImport } from './routes/api/private-backgrounds.$slug.$z.$x.$y'
 
-const RegionenRoute = RegionenRouteImport.update({
-  id: '/regionen',
-  path: '/regionen',
+const IndexRoute = IndexRouteImport.update({
+  id: '/',
+  path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PreviewRoute = PreviewRouteImport.update({
-  id: '/preview',
-  path: '/preview',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const McpRoute = McpRouteImport.update({
-  id: '/mcp',
-  path: '/mcp',
+const PagesRoute = PagesRouteImport.update({
+  id: '/_pages',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AdminRoute = AdminRouteImport.update({
@@ -145,149 +139,64 @@ const AdminRoute = AdminRouteImport.update({
   path: '/admin',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PagesRoute = PagesRouteImport.update({
-  id: '/_pages',
+const McpRoute = McpRouteImport.update({
+  id: '/mcp',
+  path: '/mcp',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
+const PreviewRoute = PreviewRouteImport.update({
+  id: '/preview',
+  path: '/preview',
   getParentRoute: () => rootRouteImport,
 } as any)
-const RegionenIndexRoute = RegionenIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => RegionenRoute,
+const RegionenRoute = RegionenRouteImport.update({
+  id: '/regionen',
+  path: '/regionen',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PagesAccessDeniedRoute = PagesAccessDeniedRouteImport.update({
+  id: '/access-denied',
+  path: '/access-denied',
+  getParentRoute: () => PagesRoute,
+} as any)
+const PagesDatenschutzRoute = PagesDatenschutzRouteImport.update({
+  id: '/datenschutz',
+  path: '/datenschutz',
+  getParentRoute: () => PagesRoute,
+} as any)
+const PagesKontaktRoute = PagesKontaktRouteImport.update({
+  id: '/kontakt',
+  path: '/kontakt',
+  getParentRoute: () => PagesRoute,
+} as any)
+const PagesOAuthErrorRoute = PagesOAuthErrorRouteImport.update({
+  id: '/oAuthError',
+  path: '/oAuthError',
+  getParentRoute: () => PagesRoute,
 } as any)
 const AdminIndexRoute = AdminIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => AdminRoute,
 } as any)
-const RegionenStatsRoute = RegionenStatsRouteImport.update({
-  id: '/stats',
-  path: '/stats',
-  getParentRoute: () => RegionenRoute,
-} as any)
-const PreviewRootFallbackRoute = PreviewRootFallbackRouteImport.update({
-  id: '/root-fallback',
-  path: '/root-fallback',
-  getParentRoute: () => PreviewRoute,
-} as any)
-const PreviewRegionPendingRoute = PreviewRegionPendingRouteImport.update({
-  id: '/region-pending',
-  path: '/region-pending',
-  getParentRoute: () => PreviewRoute,
-} as any)
-const PreviewRegionErrorRoute = PreviewRegionErrorRouteImport.update({
-  id: '/region-error',
-  path: '/region-error',
-  getParentRoute: () => PreviewRoute,
-} as any)
-const PreviewNotFoundRoute = PreviewNotFoundRouteImport.update({
-  id: '/not-found',
-  path: '/not-found',
-  getParentRoute: () => PreviewRoute,
-} as any)
-const PreviewDefaultPendingRoute = PreviewDefaultPendingRouteImport.update({
-  id: '/default-pending',
-  path: '/default-pending',
-  getParentRoute: () => PreviewRoute,
-} as any)
-const PreviewDefaultErrorRoute = PreviewDefaultErrorRouteImport.update({
-  id: '/default-error',
-  path: '/default-error',
-  getParentRoute: () => PreviewRoute,
-} as any)
-const ApiUploadsRoute = ApiUploadsRouteImport.update({
-  id: '/api/uploads',
-  path: '/api/uploads',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiStatsRoute = ApiStatsRouteImport.update({
-  id: '/api/stats',
-  path: '/api/stats',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiRegionsRoute = ApiRegionsRouteImport.update({
-  id: '/api/regions',
-  path: '/api/regions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiProcessingDatesMapillaryRoute =
-  ApiProcessingDatesMapillaryRouteImport.update({
-    id: '/api/processing-dates-mapillary',
-    path: '/api/processing-dates-mapillary',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiProcessingDatesRoute = ApiProcessingDatesRouteImport.update({
-  id: '/api/processing-dates',
-  path: '/api/processing-dates',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiOsmcha2RssRewriteRoute = ApiOsmcha2RssRewriteRouteImport.update({
-  id: '/api/osmcha2-rss-rewrite',
-  path: '/api/osmcha2-rss-rewrite',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiMapStyleRoute = ApiMapStyleRouteImport.update({
-  id: '/api/map-style',
-  path: '/api/map-style',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiCampaignsRoute = ApiCampaignsRouteImport.update({
-  id: '/api/campaigns',
-  path: '/api/campaigns',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiBoundaryRoute = ApiBoundaryRouteImport.update({
-  id: '/api/boundary',
-  path: '/api/boundary',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminUsersRoute = AdminUsersRouteImport.update({
-  id: '/users',
-  path: '/users',
+const AdminApiTokensRoute = AdminApiTokensRouteImport.update({
+  id: '/api-tokens',
+  path: '/api-tokens',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminReviewListsRoute = AdminReviewListsRouteImport.update({
-  id: '/review-lists',
-  path: '/review-lists',
+const AdminAuditLogRoute = AdminAuditLogRouteImport.update({
+  id: '/audit-log',
+  path: '/audit-log',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminRegionsRoute = AdminRegionsRouteImport.update({
-  id: '/regions',
-  path: '/regions',
+const AdminDataSchemaRoute = AdminDataSchemaRouteImport.update({
+  id: '/data-schema',
+  path: '/data-schema',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminRegionContractsRoute = AdminRegionContractsRouteImport.update({
-  id: '/region-contracts',
-  path: '/region-contracts',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminQaConfigsRoute = AdminQaConfigsRouteImport.update({
-  id: '/qa-configs',
-  path: '/qa-configs',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminProcessingRoute = AdminProcessingRouteImport.update({
-  id: '/processing',
-  path: '/processing',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminPrivateBackgroundsRoute = AdminPrivateBackgroundsRouteImport.update({
-  id: '/private-backgrounds',
-  path: '/private-backgrounds',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminNoteFoldersRoute = AdminNoteFoldersRouteImport.update({
-  id: '/note-folders',
-  path: '/note-folders',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminMapDatasetUploadsRoute = AdminMapDatasetUploadsRouteImport.update({
-  id: '/map-dataset-uploads',
-  path: '/map-dataset-uploads',
+const AdminLayerOrderRoute = AdminLayerOrderRouteImport.update({
+  id: '/layer-order',
+  path: '/layer-order',
   getParentRoute: () => AdminRoute,
 } as any)
 const AdminMapDatasetCategoriesRoute =
@@ -296,290 +205,145 @@ const AdminMapDatasetCategoriesRoute =
     path: '/map-dataset-categories',
     getParentRoute: () => AdminRoute,
   } as any)
-const AdminLayerOrderRoute = AdminLayerOrderRouteImport.update({
-  id: '/layer-order',
-  path: '/layer-order',
+const AdminMapDatasetUploadsRoute = AdminMapDatasetUploadsRouteImport.update({
+  id: '/map-dataset-uploads',
+  path: '/map-dataset-uploads',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminDataSchemaRoute = AdminDataSchemaRouteImport.update({
-  id: '/data-schema',
-  path: '/data-schema',
+const AdminNoteFoldersRoute = AdminNoteFoldersRouteImport.update({
+  id: '/note-folders',
+  path: '/note-folders',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminAuditLogRoute = AdminAuditLogRouteImport.update({
-  id: '/audit-log',
-  path: '/audit-log',
+const AdminPrivateBackgroundsRoute = AdminPrivateBackgroundsRouteImport.update({
+  id: '/private-backgrounds',
+  path: '/private-backgrounds',
   getParentRoute: () => AdminRoute,
 } as any)
-const AdminApiTokensRoute = AdminApiTokensRouteImport.update({
-  id: '/api-tokens',
-  path: '/api-tokens',
+const AdminProcessingRoute = AdminProcessingRouteImport.update({
+  id: '/processing',
+  path: '/processing',
   getParentRoute: () => AdminRoute,
 } as any)
-const PagesOAuthErrorRoute = PagesOAuthErrorRouteImport.update({
-  id: '/oAuthError',
-  path: '/oAuthError',
-  getParentRoute: () => PagesRoute,
+const AdminQaConfigsRoute = AdminQaConfigsRouteImport.update({
+  id: '/qa-configs',
+  path: '/qa-configs',
+  getParentRoute: () => AdminRoute,
 } as any)
-const PagesKontaktRoute = PagesKontaktRouteImport.update({
-  id: '/kontakt',
-  path: '/kontakt',
-  getParentRoute: () => PagesRoute,
+const AdminRegionContractsRoute = AdminRegionContractsRouteImport.update({
+  id: '/region-contracts',
+  path: '/region-contracts',
+  getParentRoute: () => AdminRoute,
 } as any)
-const PagesDatenschutzRoute = PagesDatenschutzRouteImport.update({
-  id: '/datenschutz',
-  path: '/datenschutz',
-  getParentRoute: () => PagesRoute,
+const AdminRegionsRoute = AdminRegionsRouteImport.update({
+  id: '/regions',
+  path: '/regions',
+  getParentRoute: () => AdminRoute,
 } as any)
-const PagesAccessDeniedRoute = PagesAccessDeniedRouteImport.update({
-  id: '/access-denied',
-  path: '/access-denied',
-  getParentRoute: () => PagesRoute,
+const AdminReviewListsRoute = AdminReviewListsRouteImport.update({
+  id: '/review-lists',
+  path: '/review-lists',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminUsersRoute = AdminUsersRouteImport.update({
+  id: '/users',
+  path: '/users',
+  getParentRoute: () => AdminRoute,
+} as any)
+const ApiBoundaryRoute = ApiBoundaryRouteImport.update({
+  id: '/api/boundary',
+  path: '/api/boundary',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiCampaignsRoute = ApiCampaignsRouteImport.update({
+  id: '/api/campaigns',
+  path: '/api/campaigns',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMapStyleRoute = ApiMapStyleRouteImport.update({
+  id: '/api/map-style',
+  path: '/api/map-style',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOsmcha2RssRewriteRoute = ApiOsmcha2RssRewriteRouteImport.update({
+  id: '/api/osmcha2-rss-rewrite',
+  path: '/api/osmcha2-rss-rewrite',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProcessingDatesRoute = ApiProcessingDatesRouteImport.update({
+  id: '/api/processing-dates',
+  path: '/api/processing-dates',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiProcessingDatesMapillaryRoute =
+  ApiProcessingDatesMapillaryRouteImport.update({
+    id: '/api/processing-dates-mapillary',
+    path: '/api/processing-dates-mapillary',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiRegionsRoute = ApiRegionsRouteImport.update({
+  id: '/api/regions',
+  path: '/api/regions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiStatsRoute = ApiStatsRouteImport.update({
+  id: '/api/stats',
+  path: '/api/stats',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUploadsRoute = ApiUploadsRouteImport.update({
+  id: '/api/uploads',
+  path: '/api/uploads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PreviewDefaultErrorRoute = PreviewDefaultErrorRouteImport.update({
+  id: '/default-error',
+  path: '/default-error',
+  getParentRoute: () => PreviewRoute,
+} as any)
+const PreviewDefaultPendingRoute = PreviewDefaultPendingRouteImport.update({
+  id: '/default-pending',
+  path: '/default-pending',
+  getParentRoute: () => PreviewRoute,
+} as any)
+const PreviewNotFoundRoute = PreviewNotFoundRouteImport.update({
+  id: '/not-found',
+  path: '/not-found',
+  getParentRoute: () => PreviewRoute,
+} as any)
+const PreviewRegionErrorRoute = PreviewRegionErrorRouteImport.update({
+  id: '/region-error',
+  path: '/region-error',
+  getParentRoute: () => PreviewRoute,
+} as any)
+const PreviewRegionPendingRoute = PreviewRegionPendingRouteImport.update({
+  id: '/region-pending',
+  path: '/region-pending',
+  getParentRoute: () => PreviewRoute,
+} as any)
+const PreviewRootFallbackRoute = PreviewRootFallbackRouteImport.update({
+  id: '/root-fallback',
+  path: '/root-fallback',
+  getParentRoute: () => PreviewRoute,
+} as any)
+const RegionenIndexRoute = RegionenIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => RegionenRoute,
 } as any)
 const RegionenRegionSlugRouteRoute = RegionenRegionSlugRouteRouteImport.update({
   id: '/$regionSlug',
   path: '/$regionSlug',
   getParentRoute: () => RegionenRoute,
 } as any)
-const RegionenRegionSlugIndexRoute = RegionenRegionSlugIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => RegionenRegionSlugRouteRoute,
+const RegionenStatsRoute = RegionenStatsRouteImport.update({
+  id: '/stats',
+  path: '/stats',
+  getParentRoute: () => RegionenRoute,
 } as any)
-const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminUsersRoute,
-} as any)
-const AdminReviewListsIndexRoute = AdminReviewListsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminReviewListsRoute,
-} as any)
-const AdminRegionsIndexRoute = AdminRegionsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminRegionsRoute,
-} as any)
-const AdminRegionContractsIndexRoute =
-  AdminRegionContractsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AdminRegionContractsRoute,
-  } as any)
-const AdminQaConfigsIndexRoute = AdminQaConfigsIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminQaConfigsRoute,
-} as any)
-const AdminProcessingIndexRoute = AdminProcessingIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminProcessingRoute,
-} as any)
-const AdminPrivateBackgroundsIndexRoute =
-  AdminPrivateBackgroundsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AdminPrivateBackgroundsRoute,
-  } as any)
-const AdminNoteFoldersIndexRoute = AdminNoteFoldersIndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => AdminNoteFoldersRoute,
-} as any)
-const AdminMapDatasetUploadsIndexRoute =
-  AdminMapDatasetUploadsIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AdminMapDatasetUploadsRoute,
-  } as any)
-const AdminMapDatasetCategoriesIndexRoute =
-  AdminMapDatasetCategoriesIndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => AdminMapDatasetCategoriesRoute,
-  } as any)
-const RegionenRegionSlugSummierenRoute =
-  RegionenRegionSlugSummierenRouteImport.update({
-    id: '/summieren',
-    path: '/summieren',
-    getParentRoute: () => RegionenRegionSlugRouteRoute,
-  } as any)
-const RegionenRegionSlugQaRoute = RegionenRegionSlugQaRouteImport.update({
-  id: '/qa',
-  path: '/qa',
-  getParentRoute: () => RegionenRegionSlugRouteRoute,
-} as any)
-const RegionenRegionSlugPrueflistenRoute =
-  RegionenRegionSlugPrueflistenRouteImport.update({
-    id: '/prueflisten',
-    path: '/prueflisten',
-    getParentRoute: () => RegionenRegionSlugRouteRoute,
-  } as any)
-const RegionenRegionSlugMessenRoute =
-  RegionenRegionSlugMessenRouteImport.update({
-    id: '/messen',
-    path: '/messen',
-    getParentRoute: () => RegionenRegionSlugRouteRoute,
-  } as any)
-const RegionenRegionSlugHinweiseRoute =
-  RegionenRegionSlugHinweiseRouteImport.update({
-    id: '/hinweise',
-    path: '/hinweise',
-    getParentRoute: () => RegionenRegionSlugRouteRoute,
-  } as any)
-const RegionenRegionSlugFlaechenfinderRoute =
-  RegionenRegionSlugFlaechenfinderRouteImport.update({
-    id: '/flaechenfinder',
-    path: '/flaechenfinder',
-    getParentRoute: () => RegionenRegionSlugRouteRoute,
-  } as any)
-const ApiUploadsCreateRoute = ApiUploadsCreateRouteImport.update({
-  id: '/create',
-  path: '/create',
-  getParentRoute: () => ApiUploadsRoute,
-} as any)
-const ApiUploadsSlugRoute = ApiUploadsSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => ApiUploadsRoute,
-} as any)
-const ApiSignInOsmRoute = ApiSignInOsmRouteImport.update({
-  id: '/api/sign-in/osm',
-  path: '/api/sign-in/osm',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiReviewListsUploadRoute = ApiReviewListsUploadRouteImport.update({
-  id: '/api/review-lists/upload',
-  path: '/api/review-lists/upload',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPrivateWarmCacheRoute = ApiPrivateWarmCacheRouteImport.update({
-  id: '/api/private/warm-cache',
-  path: '/api/private/warm-cache',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPrivateRegisterSqlFunctionsRoute =
-  ApiPrivateRegisterSqlFunctionsRouteImport.update({
-    id: '/api/private/register-sql-functions',
-    path: '/api/private/register-sql-functions',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPrivateRegionsRoute = ApiPrivateRegionsRouteImport.update({
-  id: '/api/private/regions',
-  path: '/api/private/regions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiPrivatePostProcessingQaUpdateRoute =
-  ApiPrivatePostProcessingQaUpdateRouteImport.update({
-    id: '/api/private/post-processing-qa-update',
-    path: '/api/private/post-processing-qa-update',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPrivatePostProcessingHookRoute =
-  ApiPrivatePostProcessingHookRouteImport.update({
-    id: '/api/private/post-processing-hook',
-    path: '/api/private/post-processing-hook',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiPrivateGenerateMaprouletteTasksRoute =
-  ApiPrivateGenerateMaprouletteTasksRouteImport.update({
-    id: '/api/private/generate-maproulette-tasks',
-    path: '/api/private/generate-maproulette-tasks',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const ApiOsmNotesRssRoute = ApiOsmNotesRssRouteImport.update({
-  id: '/api/osm-notes/rss',
-  path: '/api/osm-notes/rss',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiNotesRegionSlugRoute = ApiNotesRegionSlugRouteImport.update({
-  id: '/api/notes/$regionSlug',
-  path: '/api/notes/$regionSlug',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAuthOsmTokenRoute = ApiAuthOsmTokenRouteImport.update({
-  id: '/api/auth/osm-token',
-  path: '/api/auth/osm-token',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
-  id: '/api/auth/$',
-  path: '/api/auth/$',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminRegionsRoute = ApiAdminRegionsRouteImport.update({
-  id: '/api/admin/regions',
-  path: '/api/admin/regions',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminRegionUploadsRoute = ApiAdminRegionUploadsRouteImport.update({
-  id: '/api/admin/region-uploads',
-  path: '/api/admin/region-uploads',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminProcessingRoute = ApiAdminProcessingRouteImport.update({
-  id: '/api/admin/processing',
-  path: '/api/admin/processing',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiAdminAuditLogRoute = ApiAdminAuditLogRouteImport.update({
-  id: '/api/admin/audit-log',
-  path: '/api/admin/audit-log',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AdminRegionsNewRoute = AdminRegionsNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => AdminRegionsRoute,
-} as any)
-const AdminRegionContractsNewRoute = AdminRegionContractsNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => AdminRegionContractsRoute,
-} as any)
-const AdminQaConfigsNewRoute = AdminQaConfigsNewRouteImport.update({
-  id: '/new',
-  path: '/new',
-  getParentRoute: () => AdminQaConfigsRoute,
-} as any)
-const AdminProcessingHooksRoute = AdminProcessingHooksRouteImport.update({
-  id: '/hooks',
-  path: '/hooks',
-  getParentRoute: () => AdminProcessingRoute,
-} as any)
-const AdminProcessingMetaIdRoute = AdminProcessingMetaIdRouteImport.update({
-  id: '/$metaId',
-  path: '/$metaId',
-  getParentRoute: () => AdminProcessingRoute,
-} as any)
-const AdminMembershipsNewRoute = AdminMembershipsNewRouteImport.update({
-  id: '/memberships/new',
-  path: '/memberships/new',
-  getParentRoute: () => AdminRoute,
-} as any)
-const AdminMapDatasetUploadsSlugRoute =
-  AdminMapDatasetUploadsSlugRouteImport.update({
-    id: '/$slug',
-    path: '/$slug',
-    getParentRoute: () => AdminMapDatasetUploadsRoute,
-  } as any)
-const AdminMapDatasetCategoriesNewRoute =
-  AdminMapDatasetCategoriesNewRouteImport.update({
-    id: '/new',
-    path: '/new',
-    getParentRoute: () => AdminMapDatasetCategoriesRoute,
-  } as any)
-const AdminMapDatasetCategoriesCategoryKeyRoute =
-  AdminMapDatasetCategoriesCategoryKeyRouteImport.update({
-    id: '/$categoryKey',
-    path: '/$categoryKey',
-    getParentRoute: () => AdminMapDatasetCategoriesRoute,
-  } as any)
-const PagesSettingsUserRoute = PagesSettingsUserRouteImport.update({
-  id: '/settings/user',
-  path: '/settings/user',
+const PagesDocsTableNameRoute = PagesDocsTableNameRouteImport.update({
+  id: '/docs/$tableName',
+  path: '/docs/$tableName',
   getParentRoute: () => PagesRoute,
 } as any)
 const PagesDocsMapillaryCoverageRoute =
@@ -588,63 +352,306 @@ const PagesDocsMapillaryCoverageRoute =
     path: '/docs/mapillary-coverage',
     getParentRoute: () => PagesRoute,
   } as any)
-const PagesDocsTableNameRoute = PagesDocsTableNameRouteImport.update({
-  id: '/docs/$tableName',
-  path: '/docs/$tableName',
+const PagesSettingsUserRoute = PagesSettingsUserRouteImport.update({
+  id: '/settings/user',
+  path: '/settings/user',
   getParentRoute: () => PagesRoute,
 } as any)
-const ApiRegionsRegionSlugUploadsCsvRoute =
-  ApiRegionsRegionSlugUploadsCsvRouteImport.update({
-    id: '/$regionSlug/uploads-csv',
-    path: '/$regionSlug/uploads-csv',
-    getParentRoute: () => ApiRegionsRoute,
+const AdminMapDatasetCategoriesIndexRoute =
+  AdminMapDatasetCategoriesIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AdminMapDatasetCategoriesRoute,
   } as any)
-const ApiRegionUploadsIdFilenameRoute =
-  ApiRegionUploadsIdFilenameRouteImport.update({
-    id: '/api/region-uploads/$id/$filename',
-    path: '/api/region-uploads/$id/$filename',
+const AdminMapDatasetCategoriesCategoryKeyRoute =
+  AdminMapDatasetCategoriesCategoryKeyRouteImport.update({
+    id: '/$categoryKey',
+    path: '/$categoryKey',
+    getParentRoute: () => AdminMapDatasetCategoriesRoute,
+  } as any)
+const AdminMapDatasetCategoriesNewRoute =
+  AdminMapDatasetCategoriesNewRouteImport.update({
+    id: '/new',
+    path: '/new',
+    getParentRoute: () => AdminMapDatasetCategoriesRoute,
+  } as any)
+const AdminMapDatasetUploadsIndexRoute =
+  AdminMapDatasetUploadsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AdminMapDatasetUploadsRoute,
+  } as any)
+const AdminMapDatasetUploadsSlugRoute =
+  AdminMapDatasetUploadsSlugRouteImport.update({
+    id: '/$slug',
+    path: '/$slug',
+    getParentRoute: () => AdminMapDatasetUploadsRoute,
+  } as any)
+const AdminMembershipsNewRoute = AdminMembershipsNewRouteImport.update({
+  id: '/memberships/new',
+  path: '/memberships/new',
+  getParentRoute: () => AdminRoute,
+} as any)
+const AdminNoteFoldersIndexRoute = AdminNoteFoldersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminNoteFoldersRoute,
+} as any)
+const AdminPrivateBackgroundsIndexRoute =
+  AdminPrivateBackgroundsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AdminPrivateBackgroundsRoute,
+  } as any)
+const AdminProcessingIndexRoute = AdminProcessingIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminProcessingRoute,
+} as any)
+const AdminProcessingMetaIdRoute = AdminProcessingMetaIdRouteImport.update({
+  id: '/$metaId',
+  path: '/$metaId',
+  getParentRoute: () => AdminProcessingRoute,
+} as any)
+const AdminProcessingHooksRoute = AdminProcessingHooksRouteImport.update({
+  id: '/hooks',
+  path: '/hooks',
+  getParentRoute: () => AdminProcessingRoute,
+} as any)
+const AdminQaConfigsIndexRoute = AdminQaConfigsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminQaConfigsRoute,
+} as any)
+const AdminQaConfigsNewRoute = AdminQaConfigsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminQaConfigsRoute,
+} as any)
+const AdminRegionContractsIndexRoute =
+  AdminRegionContractsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => AdminRegionContractsRoute,
+  } as any)
+const AdminRegionContractsNewRoute = AdminRegionContractsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminRegionContractsRoute,
+} as any)
+const AdminRegionsIndexRoute = AdminRegionsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminRegionsRoute,
+} as any)
+const AdminRegionsNewRoute = AdminRegionsNewRouteImport.update({
+  id: '/new',
+  path: '/new',
+  getParentRoute: () => AdminRegionsRoute,
+} as any)
+const AdminReviewListsIndexRoute = AdminReviewListsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminReviewListsRoute,
+} as any)
+const AdminUsersIndexRoute = AdminUsersIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => AdminUsersRoute,
+} as any)
+const ApiAdminAuditLogRoute = ApiAdminAuditLogRouteImport.update({
+  id: '/api/admin/audit-log',
+  path: '/api/admin/audit-log',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminProcessingRoute = ApiAdminProcessingRouteImport.update({
+  id: '/api/admin/processing',
+  path: '/api/admin/processing',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminRegionUploadsRoute = ApiAdminRegionUploadsRouteImport.update({
+  id: '/api/admin/region-uploads',
+  path: '/api/admin/region-uploads',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAdminRegionsRoute = ApiAdminRegionsRouteImport.update({
+  id: '/api/admin/regions',
+  path: '/api/admin/regions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAuthOsmTokenRoute = ApiAuthOsmTokenRouteImport.update({
+  id: '/api/auth/osm-token',
+  path: '/api/auth/osm-token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiNotesRegionSlugRoute = ApiNotesRegionSlugRouteImport.update({
+  id: '/api/notes/$regionSlug',
+  path: '/api/notes/$regionSlug',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiOsmNotesRssRoute = ApiOsmNotesRssRouteImport.update({
+  id: '/api/osm-notes/rss',
+  path: '/api/osm-notes/rss',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPrivateGenerateMaprouletteTasksRoute =
+  ApiPrivateGenerateMaprouletteTasksRouteImport.update({
+    id: '/api/private/generate-maproulette-tasks',
+    path: '/api/private/generate-maproulette-tasks',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiNotesRegionSlugDownloadRoute =
-  ApiNotesRegionSlugDownloadRouteImport.update({
-    id: '/download',
-    path: '/download',
-    getParentRoute: () => ApiNotesRegionSlugRoute,
-  } as any)
-const ApiNotesRegionSlugFolderIdRoute =
-  ApiNotesRegionSlugFolderIdRouteImport.update({
-    id: '/$folderId',
-    path: '/$folderId',
-    getParentRoute: () => ApiNotesRegionSlugRoute,
-  } as any)
-const ApiMaprouletteStatisticProxyChallengeIdRoute =
-  ApiMaprouletteStatisticProxyChallengeIdRouteImport.update({
-    id: '/api/maproulette/statistic-proxy/$challengeId',
-    path: '/api/maproulette/statistic-proxy/$challengeId',
+const ApiPrivatePostProcessingHookRoute =
+  ApiPrivatePostProcessingHookRouteImport.update({
+    id: '/api/private/post-processing-hook',
+    path: '/api/private/post-processing-hook',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiMaprouletteDataTest_tag_fix_twoRoute =
-  ApiMaprouletteDataTest_tag_fix_twoRouteImport.update({
-    id: '/api/maproulette/data/test_tag_fix_two',
-    path: '/api/maproulette/data/test_tag_fix_two',
+const ApiPrivatePostProcessingQaUpdateRoute =
+  ApiPrivatePostProcessingQaUpdateRouteImport.update({
+    id: '/api/private/post-processing-qa-update',
+    path: '/api/private/post-processing-qa-update',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiMaprouletteDataTest_tag_fix_cyclewaySharedRoute =
-  ApiMaprouletteDataTest_tag_fix_cyclewaySharedRouteImport.update({
-    id: '/api/maproulette/data/test_tag_fix_cycleway-shared',
-    path: '/api/maproulette/data/test_tag_fix_cycleway-shared',
+const ApiPrivateRegionsRoute = ApiPrivateRegionsRouteImport.update({
+  id: '/api/private/regions',
+  path: '/api/private/regions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiPrivateRegisterSqlFunctionsRoute =
+  ApiPrivateRegisterSqlFunctionsRouteImport.update({
+    id: '/api/private/register-sql-functions',
+    path: '/api/private/register-sql-functions',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiMaprouletteDataTest_tag_fixRoute =
-  ApiMaprouletteDataTest_tag_fixRouteImport.update({
-    id: '/api/maproulette/data/test_tag_fix',
-    path: '/api/maproulette/data/test_tag_fix',
+const ApiPrivateWarmCacheRoute = ApiPrivateWarmCacheRouteImport.update({
+  id: '/api/private/warm-cache',
+  path: '/api/private/warm-cache',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiReviewListsUploadRoute = ApiReviewListsUploadRouteImport.update({
+  id: '/api/review-lists/upload',
+  path: '/api/review-lists/upload',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiSignInOsmRoute = ApiSignInOsmRouteImport.update({
+  id: '/api/sign-in/osm',
+  path: '/api/sign-in/osm',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiUploadsSlugRoute = ApiUploadsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ApiUploadsRoute,
+} as any)
+const ApiUploadsCreateRoute = ApiUploadsCreateRouteImport.update({
+  id: '/create',
+  path: '/create',
+  getParentRoute: () => ApiUploadsRoute,
+} as any)
+const RegionenRegionSlugIndexRoute = RegionenRegionSlugIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => RegionenRegionSlugRouteRoute,
+} as any)
+const RegionenRegionSlugFlaechenfinderRoute =
+  RegionenRegionSlugFlaechenfinderRouteImport.update({
+    id: '/flaechenfinder',
+    path: '/flaechenfinder',
+    getParentRoute: () => RegionenRegionSlugRouteRoute,
+  } as any)
+const RegionenRegionSlugHinweiseRoute =
+  RegionenRegionSlugHinweiseRouteImport.update({
+    id: '/hinweise',
+    path: '/hinweise',
+    getParentRoute: () => RegionenRegionSlugRouteRoute,
+  } as any)
+const RegionenRegionSlugMessenRoute =
+  RegionenRegionSlugMessenRouteImport.update({
+    id: '/messen',
+    path: '/messen',
+    getParentRoute: () => RegionenRegionSlugRouteRoute,
+  } as any)
+const RegionenRegionSlugPrueflistenRoute =
+  RegionenRegionSlugPrueflistenRouteImport.update({
+    id: '/prueflisten',
+    path: '/prueflisten',
+    getParentRoute: () => RegionenRegionSlugRouteRoute,
+  } as any)
+const RegionenRegionSlugQaRoute = RegionenRegionSlugQaRouteImport.update({
+  id: '/qa',
+  path: '/qa',
+  getParentRoute: () => RegionenRegionSlugRouteRoute,
+} as any)
+const RegionenRegionSlugSummierenRoute =
+  RegionenRegionSlugSummierenRouteImport.update({
+    id: '/summieren',
+    path: '/summieren',
+    getParentRoute: () => RegionenRegionSlugRouteRoute,
+  } as any)
+const AdminNoteFoldersIdEditRoute = AdminNoteFoldersIdEditRouteImport.update({
+  id: '/$id/edit',
+  path: '/$id/edit',
+  getParentRoute: () => AdminNoteFoldersRoute,
+} as any)
+const AdminQaConfigsIdEditRoute = AdminQaConfigsIdEditRouteImport.update({
+  id: '/$id/edit',
+  path: '/$id/edit',
+  getParentRoute: () => AdminQaConfigsRoute,
+} as any)
+const AdminRegionContractsSlugEditRoute =
+  AdminRegionContractsSlugEditRouteImport.update({
+    id: '/$slug/edit',
+    path: '/$slug/edit',
+    getParentRoute: () => AdminRegionContractsRoute,
+  } as any)
+const AdminRegionsRegionSlugEditRoute =
+  AdminRegionsRegionSlugEditRouteImport.update({
+    id: '/$regionSlug/edit',
+    path: '/$regionSlug/edit',
+    getParentRoute: () => AdminRegionsRoute,
+  } as any)
+const AdminReviewListsIdEditRoute = AdminReviewListsIdEditRouteImport.update({
+  id: '/$id/edit',
+  path: '/$id/edit',
+  getParentRoute: () => AdminReviewListsRoute,
+} as any)
+const AdminUsersUserIdEditRoute = AdminUsersUserIdEditRouteImport.update({
+  id: '/$userId/edit',
+  path: '/$userId/edit',
+  getParentRoute: () => AdminUsersRoute,
+} as any)
+const ApiAdminDataSchemaImportRoute =
+  ApiAdminDataSchemaImportRouteImport.update({
+    id: '/api/admin/data-schema/import',
+    path: '/api/admin/data-schema/import',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiMaprouletteDataProjectKeyRoute =
-  ApiMaprouletteDataProjectKeyRouteImport.update({
-    id: '/api/maproulette/data/$projectKey',
-    path: '/api/maproulette/data/$projectKey',
+const ApiAdminProcessingMetaIdRoute =
+  ApiAdminProcessingMetaIdRouteImport.update({
+    id: '/$metaId',
+    path: '/$metaId',
+    getParentRoute: () => ApiAdminProcessingRoute,
+  } as any)
+const ApiAdminRegionUploadsUploadRoute =
+  ApiAdminRegionUploadsUploadRouteImport.update({
+    id: '/upload',
+    path: '/upload',
+    getParentRoute: () => ApiAdminRegionUploadsRoute,
+  } as any)
+const ApiAdminRegionsSlugRoute = ApiAdminRegionsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ApiAdminRegionsRoute,
+} as any)
+const ApiExportOgrRegionSlugTableNameRoute =
+  ApiExportOgrRegionSlugTableNameRouteImport.update({
+    id: '/api/export-ogr/$regionSlug/$tableName',
+    path: '/api/export-ogr/$regionSlug/$tableName',
     getParentRoute: () => rootRouteImport,
   } as any)
 const ApiExportRegionSlugTableNameRoute =
@@ -653,72 +660,59 @@ const ApiExportRegionSlugTableNameRoute =
     path: '/api/export/$regionSlug/$tableName',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiExportOgrRegionSlugTableNameRoute =
-  ApiExportOgrRegionSlugTableNameRouteImport.update({
-    id: '/api/export-ogr/$regionSlug/$tableName',
-    path: '/api/export-ogr/$regionSlug/$tableName',
+const ApiMaprouletteDataProjectKeyRoute =
+  ApiMaprouletteDataProjectKeyRouteImport.update({
+    id: '/api/maproulette/data/$projectKey',
+    path: '/api/maproulette/data/$projectKey',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiAdminRegionsSlugRoute = ApiAdminRegionsSlugRouteImport.update({
-  id: '/$slug',
-  path: '/$slug',
-  getParentRoute: () => ApiAdminRegionsRoute,
-} as any)
-const ApiAdminRegionUploadsUploadRoute =
-  ApiAdminRegionUploadsUploadRouteImport.update({
-    id: '/upload',
-    path: '/upload',
-    getParentRoute: () => ApiAdminRegionUploadsRoute,
-  } as any)
-const ApiAdminProcessingMetaIdRoute =
-  ApiAdminProcessingMetaIdRouteImport.update({
-    id: '/$metaId',
-    path: '/$metaId',
-    getParentRoute: () => ApiAdminProcessingRoute,
-  } as any)
-const ApiAdminDataSchemaImportRoute =
-  ApiAdminDataSchemaImportRouteImport.update({
-    id: '/api/admin/data-schema/import',
-    path: '/api/admin/data-schema/import',
+const ApiMaprouletteDataTest_tag_fixRoute =
+  ApiMaprouletteDataTest_tag_fixRouteImport.update({
+    id: '/api/maproulette/data/test_tag_fix',
+    path: '/api/maproulette/data/test_tag_fix',
     getParentRoute: () => rootRouteImport,
   } as any)
-const AdminUsersUserIdEditRoute = AdminUsersUserIdEditRouteImport.update({
-  id: '/$userId/edit',
-  path: '/$userId/edit',
-  getParentRoute: () => AdminUsersRoute,
-} as any)
-const AdminReviewListsIdEditRoute = AdminReviewListsIdEditRouteImport.update({
-  id: '/$id/edit',
-  path: '/$id/edit',
-  getParentRoute: () => AdminReviewListsRoute,
-} as any)
-const AdminRegionsRegionSlugEditRoute =
-  AdminRegionsRegionSlugEditRouteImport.update({
-    id: '/$regionSlug/edit',
-    path: '/$regionSlug/edit',
-    getParentRoute: () => AdminRegionsRoute,
+const ApiMaprouletteDataTest_tag_fix_cyclewaySharedRoute =
+  ApiMaprouletteDataTest_tag_fix_cyclewaySharedRouteImport.update({
+    id: '/api/maproulette/data/test_tag_fix_cycleway-shared',
+    path: '/api/maproulette/data/test_tag_fix_cycleway-shared',
+    getParentRoute: () => rootRouteImport,
   } as any)
-const AdminRegionContractsSlugEditRoute =
-  AdminRegionContractsSlugEditRouteImport.update({
-    id: '/$slug/edit',
-    path: '/$slug/edit',
-    getParentRoute: () => AdminRegionContractsRoute,
+const ApiMaprouletteDataTest_tag_fix_twoRoute =
+  ApiMaprouletteDataTest_tag_fix_twoRouteImport.update({
+    id: '/api/maproulette/data/test_tag_fix_two',
+    path: '/api/maproulette/data/test_tag_fix_two',
+    getParentRoute: () => rootRouteImport,
   } as any)
-const AdminQaConfigsIdEditRoute = AdminQaConfigsIdEditRouteImport.update({
-  id: '/$id/edit',
-  path: '/$id/edit',
-  getParentRoute: () => AdminQaConfigsRoute,
-} as any)
-const AdminNoteFoldersIdEditRoute = AdminNoteFoldersIdEditRouteImport.update({
-  id: '/$id/edit',
-  path: '/$id/edit',
-  getParentRoute: () => AdminNoteFoldersRoute,
-} as any)
-const ApiNotesRegionSlugFolderIdNoteIdRoute =
-  ApiNotesRegionSlugFolderIdNoteIdRouteImport.update({
-    id: '/$noteId',
-    path: '/$noteId',
-    getParentRoute: () => ApiNotesRegionSlugFolderIdRoute,
+const ApiMaprouletteStatisticProxyChallengeIdRoute =
+  ApiMaprouletteStatisticProxyChallengeIdRouteImport.update({
+    id: '/api/maproulette/statistic-proxy/$challengeId',
+    path: '/api/maproulette/statistic-proxy/$challengeId',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiNotesRegionSlugFolderIdRoute =
+  ApiNotesRegionSlugFolderIdRouteImport.update({
+    id: '/$folderId',
+    path: '/$folderId',
+    getParentRoute: () => ApiNotesRegionSlugRoute,
+  } as any)
+const ApiNotesRegionSlugDownloadRoute =
+  ApiNotesRegionSlugDownloadRouteImport.update({
+    id: '/download',
+    path: '/download',
+    getParentRoute: () => ApiNotesRegionSlugRoute,
+  } as any)
+const ApiRegionUploadsIdFilenameRoute =
+  ApiRegionUploadsIdFilenameRouteImport.update({
+    id: '/api/region-uploads/$id/$filename',
+    path: '/api/region-uploads/$id/$filename',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const ApiRegionsRegionSlugUploadsCsvRoute =
+  ApiRegionsRegionSlugUploadsCsvRouteImport.update({
+    id: '/$regionSlug/uploads-csv',
+    path: '/$regionSlug/uploads-csv',
+    getParentRoute: () => ApiRegionsRoute,
   } as any)
 const ApiAdminQaConfigsIdExportCsvRoute =
   ApiAdminQaConfigsIdExportCsvRouteImport.update({
@@ -726,17 +720,23 @@ const ApiAdminQaConfigsIdExportCsvRoute =
     path: '/api/admin/qa-configs/$id/export-csv',
     getParentRoute: () => rootRouteImport,
   } as any)
-const ApiPrivateBackgroundsSlugZXYRoute =
-  ApiPrivateBackgroundsSlugZXYRouteImport.update({
-    id: '/api/private-backgrounds/$slug/$z/$x/$y',
-    path: '/api/private-backgrounds/$slug/$z/$x/$y',
-    getParentRoute: () => rootRouteImport,
+const ApiNotesRegionSlugFolderIdNoteIdRoute =
+  ApiNotesRegionSlugFolderIdNoteIdRouteImport.update({
+    id: '/$noteId',
+    path: '/$noteId',
+    getParentRoute: () => ApiNotesRegionSlugFolderIdRoute,
   } as any)
 const ApiNotesRegionSlugFolderIdNoteIdCommentsRoute =
   ApiNotesRegionSlugFolderIdNoteIdCommentsRouteImport.update({
     id: '/comments',
     path: '/comments',
     getParentRoute: () => ApiNotesRegionSlugFolderIdNoteIdRoute,
+  } as any)
+const ApiPrivateBackgroundsSlugZXYRoute =
+  ApiPrivateBackgroundsSlugZXYRouteImport.update({
+    id: '/api/private-backgrounds/$slug/$z/$x/$y',
+    path: '/api/private-backgrounds/$slug/$z/$x/$y',
+    getParentRoute: () => rootRouteImport,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -1462,32 +1462,11 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/regionen': {
-      id: '/regionen'
-      path: '/regionen'
-      fullPath: '/regionen'
-      preLoaderRoute: typeof RegionenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/preview': {
-      id: '/preview'
-      path: '/preview'
-      fullPath: '/preview'
-      preLoaderRoute: typeof PreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mcp': {
-      id: '/mcp'
-      path: '/mcp'
-      fullPath: '/mcp'
-      preLoaderRoute: typeof McpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin': {
-      id: '/admin'
-      path: '/admin'
-      fullPath: '/admin'
-      preLoaderRoute: typeof AdminRouteImport
+    '/': {
+      id: '/'
+      path: '/'
+      fullPath: '/'
+      preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_pages': {
@@ -1497,249 +1476,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PagesRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/regionen/': {
-      id: '/regionen/'
-      path: '/'
-      fullPath: '/regionen/'
-      preLoaderRoute: typeof RegionenIndexRouteImport
-      parentRoute: typeof RegionenRoute
-    }
-    '/admin/': {
-      id: '/admin/'
-      path: '/'
-      fullPath: '/admin/'
-      preLoaderRoute: typeof AdminIndexRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/regionen/stats': {
-      id: '/regionen/stats'
-      path: '/stats'
-      fullPath: '/regionen/stats'
-      preLoaderRoute: typeof RegionenStatsRouteImport
-      parentRoute: typeof RegionenRoute
-    }
-    '/preview/root-fallback': {
-      id: '/preview/root-fallback'
-      path: '/root-fallback'
-      fullPath: '/preview/root-fallback'
-      preLoaderRoute: typeof PreviewRootFallbackRouteImport
-      parentRoute: typeof PreviewRoute
-    }
-    '/preview/region-pending': {
-      id: '/preview/region-pending'
-      path: '/region-pending'
-      fullPath: '/preview/region-pending'
-      preLoaderRoute: typeof PreviewRegionPendingRouteImport
-      parentRoute: typeof PreviewRoute
-    }
-    '/preview/region-error': {
-      id: '/preview/region-error'
-      path: '/region-error'
-      fullPath: '/preview/region-error'
-      preLoaderRoute: typeof PreviewRegionErrorRouteImport
-      parentRoute: typeof PreviewRoute
-    }
-    '/preview/not-found': {
-      id: '/preview/not-found'
-      path: '/not-found'
-      fullPath: '/preview/not-found'
-      preLoaderRoute: typeof PreviewNotFoundRouteImport
-      parentRoute: typeof PreviewRoute
-    }
-    '/preview/default-pending': {
-      id: '/preview/default-pending'
-      path: '/default-pending'
-      fullPath: '/preview/default-pending'
-      preLoaderRoute: typeof PreviewDefaultPendingRouteImport
-      parentRoute: typeof PreviewRoute
-    }
-    '/preview/default-error': {
-      id: '/preview/default-error'
-      path: '/default-error'
-      fullPath: '/preview/default-error'
-      preLoaderRoute: typeof PreviewDefaultErrorRouteImport
-      parentRoute: typeof PreviewRoute
-    }
-    '/api/uploads': {
-      id: '/api/uploads'
-      path: '/api/uploads'
-      fullPath: '/api/uploads'
-      preLoaderRoute: typeof ApiUploadsRouteImport
+    '/mcp': {
+      id: '/mcp'
+      path: '/mcp'
+      fullPath: '/mcp'
+      preLoaderRoute: typeof McpRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/stats': {
-      id: '/api/stats'
-      path: '/api/stats'
-      fullPath: '/api/stats'
-      preLoaderRoute: typeof ApiStatsRouteImport
+    '/preview': {
+      id: '/preview'
+      path: '/preview'
+      fullPath: '/preview'
+      preLoaderRoute: typeof PreviewRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/regions': {
-      id: '/api/regions'
-      path: '/api/regions'
-      fullPath: '/api/regions'
-      preLoaderRoute: typeof ApiRegionsRouteImport
+    '/regionen': {
+      id: '/regionen'
+      path: '/regionen'
+      fullPath: '/regionen'
+      preLoaderRoute: typeof RegionenRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/processing-dates-mapillary': {
-      id: '/api/processing-dates-mapillary'
-      path: '/api/processing-dates-mapillary'
-      fullPath: '/api/processing-dates-mapillary'
-      preLoaderRoute: typeof ApiProcessingDatesMapillaryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/processing-dates': {
-      id: '/api/processing-dates'
-      path: '/api/processing-dates'
-      fullPath: '/api/processing-dates'
-      preLoaderRoute: typeof ApiProcessingDatesRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/osmcha2-rss-rewrite': {
-      id: '/api/osmcha2-rss-rewrite'
-      path: '/api/osmcha2-rss-rewrite'
-      fullPath: '/api/osmcha2-rss-rewrite'
-      preLoaderRoute: typeof ApiOsmcha2RssRewriteRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/map-style': {
-      id: '/api/map-style'
-      path: '/api/map-style'
-      fullPath: '/api/map-style'
-      preLoaderRoute: typeof ApiMapStyleRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/campaigns': {
-      id: '/api/campaigns'
-      path: '/api/campaigns'
-      fullPath: '/api/campaigns'
-      preLoaderRoute: typeof ApiCampaignsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/boundary': {
-      id: '/api/boundary'
-      path: '/api/boundary'
-      fullPath: '/api/boundary'
-      preLoaderRoute: typeof ApiBoundaryRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/users': {
-      id: '/admin/users'
-      path: '/users'
-      fullPath: '/admin/users'
-      preLoaderRoute: typeof AdminUsersRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/review-lists': {
-      id: '/admin/review-lists'
-      path: '/review-lists'
-      fullPath: '/admin/review-lists'
-      preLoaderRoute: typeof AdminReviewListsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/regions': {
-      id: '/admin/regions'
-      path: '/regions'
-      fullPath: '/admin/regions'
-      preLoaderRoute: typeof AdminRegionsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/region-contracts': {
-      id: '/admin/region-contracts'
-      path: '/region-contracts'
-      fullPath: '/admin/region-contracts'
-      preLoaderRoute: typeof AdminRegionContractsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/qa-configs': {
-      id: '/admin/qa-configs'
-      path: '/qa-configs'
-      fullPath: '/admin/qa-configs'
-      preLoaderRoute: typeof AdminQaConfigsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/processing': {
-      id: '/admin/processing'
-      path: '/processing'
-      fullPath: '/admin/processing'
-      preLoaderRoute: typeof AdminProcessingRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/private-backgrounds': {
-      id: '/admin/private-backgrounds'
-      path: '/private-backgrounds'
-      fullPath: '/admin/private-backgrounds'
-      preLoaderRoute: typeof AdminPrivateBackgroundsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/note-folders': {
-      id: '/admin/note-folders'
-      path: '/note-folders'
-      fullPath: '/admin/note-folders'
-      preLoaderRoute: typeof AdminNoteFoldersRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/map-dataset-uploads': {
-      id: '/admin/map-dataset-uploads'
-      path: '/map-dataset-uploads'
-      fullPath: '/admin/map-dataset-uploads'
-      preLoaderRoute: typeof AdminMapDatasetUploadsRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/map-dataset-categories': {
-      id: '/admin/map-dataset-categories'
-      path: '/map-dataset-categories'
-      fullPath: '/admin/map-dataset-categories'
-      preLoaderRoute: typeof AdminMapDatasetCategoriesRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/layer-order': {
-      id: '/admin/layer-order'
-      path: '/layer-order'
-      fullPath: '/admin/layer-order'
-      preLoaderRoute: typeof AdminLayerOrderRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/data-schema': {
-      id: '/admin/data-schema'
-      path: '/data-schema'
-      fullPath: '/admin/data-schema'
-      preLoaderRoute: typeof AdminDataSchemaRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/audit-log': {
-      id: '/admin/audit-log'
-      path: '/audit-log'
-      fullPath: '/admin/audit-log'
-      preLoaderRoute: typeof AdminAuditLogRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/api-tokens': {
-      id: '/admin/api-tokens'
-      path: '/api-tokens'
-      fullPath: '/admin/api-tokens'
-      preLoaderRoute: typeof AdminApiTokensRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/_pages/oAuthError': {
-      id: '/_pages/oAuthError'
-      path: '/oAuthError'
-      fullPath: '/oAuthError'
-      preLoaderRoute: typeof PagesOAuthErrorRouteImport
-      parentRoute: typeof PagesRoute
-    }
-    '/_pages/kontakt': {
-      id: '/_pages/kontakt'
-      path: '/kontakt'
-      fullPath: '/kontakt'
-      preLoaderRoute: typeof PagesKontaktRouteImport
+    '/_pages/access-denied': {
+      id: '/_pages/access-denied'
+      path: '/access-denied'
+      fullPath: '/access-denied'
+      preLoaderRoute: typeof PagesAccessDeniedRouteImport
       parentRoute: typeof PagesRoute
     }
     '/_pages/datenschutz': {
@@ -1749,12 +1518,236 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PagesDatenschutzRouteImport
       parentRoute: typeof PagesRoute
     }
-    '/_pages/access-denied': {
-      id: '/_pages/access-denied'
-      path: '/access-denied'
-      fullPath: '/access-denied'
-      preLoaderRoute: typeof PagesAccessDeniedRouteImport
+    '/_pages/kontakt': {
+      id: '/_pages/kontakt'
+      path: '/kontakt'
+      fullPath: '/kontakt'
+      preLoaderRoute: typeof PagesKontaktRouteImport
       parentRoute: typeof PagesRoute
+    }
+    '/_pages/oAuthError': {
+      id: '/_pages/oAuthError'
+      path: '/oAuthError'
+      fullPath: '/oAuthError'
+      preLoaderRoute: typeof PagesOAuthErrorRouteImport
+      parentRoute: typeof PagesRoute
+    }
+    '/admin/': {
+      id: '/admin/'
+      path: '/'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AdminIndexRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/api-tokens': {
+      id: '/admin/api-tokens'
+      path: '/api-tokens'
+      fullPath: '/admin/api-tokens'
+      preLoaderRoute: typeof AdminApiTokensRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/audit-log': {
+      id: '/admin/audit-log'
+      path: '/audit-log'
+      fullPath: '/admin/audit-log'
+      preLoaderRoute: typeof AdminAuditLogRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/data-schema': {
+      id: '/admin/data-schema'
+      path: '/data-schema'
+      fullPath: '/admin/data-schema'
+      preLoaderRoute: typeof AdminDataSchemaRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/layer-order': {
+      id: '/admin/layer-order'
+      path: '/layer-order'
+      fullPath: '/admin/layer-order'
+      preLoaderRoute: typeof AdminLayerOrderRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/map-dataset-categories': {
+      id: '/admin/map-dataset-categories'
+      path: '/map-dataset-categories'
+      fullPath: '/admin/map-dataset-categories'
+      preLoaderRoute: typeof AdminMapDatasetCategoriesRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/map-dataset-uploads': {
+      id: '/admin/map-dataset-uploads'
+      path: '/map-dataset-uploads'
+      fullPath: '/admin/map-dataset-uploads'
+      preLoaderRoute: typeof AdminMapDatasetUploadsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/note-folders': {
+      id: '/admin/note-folders'
+      path: '/note-folders'
+      fullPath: '/admin/note-folders'
+      preLoaderRoute: typeof AdminNoteFoldersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/private-backgrounds': {
+      id: '/admin/private-backgrounds'
+      path: '/private-backgrounds'
+      fullPath: '/admin/private-backgrounds'
+      preLoaderRoute: typeof AdminPrivateBackgroundsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/processing': {
+      id: '/admin/processing'
+      path: '/processing'
+      fullPath: '/admin/processing'
+      preLoaderRoute: typeof AdminProcessingRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/qa-configs': {
+      id: '/admin/qa-configs'
+      path: '/qa-configs'
+      fullPath: '/admin/qa-configs'
+      preLoaderRoute: typeof AdminQaConfigsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/region-contracts': {
+      id: '/admin/region-contracts'
+      path: '/region-contracts'
+      fullPath: '/admin/region-contracts'
+      preLoaderRoute: typeof AdminRegionContractsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/regions': {
+      id: '/admin/regions'
+      path: '/regions'
+      fullPath: '/admin/regions'
+      preLoaderRoute: typeof AdminRegionsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/review-lists': {
+      id: '/admin/review-lists'
+      path: '/review-lists'
+      fullPath: '/admin/review-lists'
+      preLoaderRoute: typeof AdminReviewListsRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/users': {
+      id: '/admin/users'
+      path: '/users'
+      fullPath: '/admin/users'
+      preLoaderRoute: typeof AdminUsersRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/api/boundary': {
+      id: '/api/boundary'
+      path: '/api/boundary'
+      fullPath: '/api/boundary'
+      preLoaderRoute: typeof ApiBoundaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/campaigns': {
+      id: '/api/campaigns'
+      path: '/api/campaigns'
+      fullPath: '/api/campaigns'
+      preLoaderRoute: typeof ApiCampaignsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/map-style': {
+      id: '/api/map-style'
+      path: '/api/map-style'
+      fullPath: '/api/map-style'
+      preLoaderRoute: typeof ApiMapStyleRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/osmcha2-rss-rewrite': {
+      id: '/api/osmcha2-rss-rewrite'
+      path: '/api/osmcha2-rss-rewrite'
+      fullPath: '/api/osmcha2-rss-rewrite'
+      preLoaderRoute: typeof ApiOsmcha2RssRewriteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/processing-dates': {
+      id: '/api/processing-dates'
+      path: '/api/processing-dates'
+      fullPath: '/api/processing-dates'
+      preLoaderRoute: typeof ApiProcessingDatesRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/processing-dates-mapillary': {
+      id: '/api/processing-dates-mapillary'
+      path: '/api/processing-dates-mapillary'
+      fullPath: '/api/processing-dates-mapillary'
+      preLoaderRoute: typeof ApiProcessingDatesMapillaryRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/regions': {
+      id: '/api/regions'
+      path: '/api/regions'
+      fullPath: '/api/regions'
+      preLoaderRoute: typeof ApiRegionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/stats': {
+      id: '/api/stats'
+      path: '/api/stats'
+      fullPath: '/api/stats'
+      preLoaderRoute: typeof ApiStatsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/uploads': {
+      id: '/api/uploads'
+      path: '/api/uploads'
+      fullPath: '/api/uploads'
+      preLoaderRoute: typeof ApiUploadsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/preview/default-error': {
+      id: '/preview/default-error'
+      path: '/default-error'
+      fullPath: '/preview/default-error'
+      preLoaderRoute: typeof PreviewDefaultErrorRouteImport
+      parentRoute: typeof PreviewRoute
+    }
+    '/preview/default-pending': {
+      id: '/preview/default-pending'
+      path: '/default-pending'
+      fullPath: '/preview/default-pending'
+      preLoaderRoute: typeof PreviewDefaultPendingRouteImport
+      parentRoute: typeof PreviewRoute
+    }
+    '/preview/not-found': {
+      id: '/preview/not-found'
+      path: '/not-found'
+      fullPath: '/preview/not-found'
+      preLoaderRoute: typeof PreviewNotFoundRouteImport
+      parentRoute: typeof PreviewRoute
+    }
+    '/preview/region-error': {
+      id: '/preview/region-error'
+      path: '/region-error'
+      fullPath: '/preview/region-error'
+      preLoaderRoute: typeof PreviewRegionErrorRouteImport
+      parentRoute: typeof PreviewRoute
+    }
+    '/preview/region-pending': {
+      id: '/preview/region-pending'
+      path: '/region-pending'
+      fullPath: '/preview/region-pending'
+      preLoaderRoute: typeof PreviewRegionPendingRouteImport
+      parentRoute: typeof PreviewRoute
+    }
+    '/preview/root-fallback': {
+      id: '/preview/root-fallback'
+      path: '/root-fallback'
+      fullPath: '/preview/root-fallback'
+      preLoaderRoute: typeof PreviewRootFallbackRouteImport
+      parentRoute: typeof PreviewRoute
+    }
+    '/regionen/': {
+      id: '/regionen/'
+      path: '/'
+      fullPath: '/regionen/'
+      preLoaderRoute: typeof RegionenIndexRouteImport
+      parentRoute: typeof RegionenRoute
     }
     '/regionen/$regionSlug': {
       id: '/regionen/$regionSlug'
@@ -1763,319 +1756,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegionenRegionSlugRouteRouteImport
       parentRoute: typeof RegionenRoute
     }
-    '/regionen/$regionSlug/': {
-      id: '/regionen/$regionSlug/'
-      path: '/'
-      fullPath: '/regionen/$regionSlug/'
-      preLoaderRoute: typeof RegionenRegionSlugIndexRouteImport
-      parentRoute: typeof RegionenRegionSlugRouteRoute
+    '/regionen/stats': {
+      id: '/regionen/stats'
+      path: '/stats'
+      fullPath: '/regionen/stats'
+      preLoaderRoute: typeof RegionenStatsRouteImport
+      parentRoute: typeof RegionenRoute
     }
-    '/admin/users/': {
-      id: '/admin/users/'
-      path: '/'
-      fullPath: '/admin/users/'
-      preLoaderRoute: typeof AdminUsersIndexRouteImport
-      parentRoute: typeof AdminUsersRoute
-    }
-    '/admin/review-lists/': {
-      id: '/admin/review-lists/'
-      path: '/'
-      fullPath: '/admin/review-lists/'
-      preLoaderRoute: typeof AdminReviewListsIndexRouteImport
-      parentRoute: typeof AdminReviewListsRoute
-    }
-    '/admin/regions/': {
-      id: '/admin/regions/'
-      path: '/'
-      fullPath: '/admin/regions/'
-      preLoaderRoute: typeof AdminRegionsIndexRouteImport
-      parentRoute: typeof AdminRegionsRoute
-    }
-    '/admin/region-contracts/': {
-      id: '/admin/region-contracts/'
-      path: '/'
-      fullPath: '/admin/region-contracts/'
-      preLoaderRoute: typeof AdminRegionContractsIndexRouteImport
-      parentRoute: typeof AdminRegionContractsRoute
-    }
-    '/admin/qa-configs/': {
-      id: '/admin/qa-configs/'
-      path: '/'
-      fullPath: '/admin/qa-configs/'
-      preLoaderRoute: typeof AdminQaConfigsIndexRouteImport
-      parentRoute: typeof AdminQaConfigsRoute
-    }
-    '/admin/processing/': {
-      id: '/admin/processing/'
-      path: '/'
-      fullPath: '/admin/processing/'
-      preLoaderRoute: typeof AdminProcessingIndexRouteImport
-      parentRoute: typeof AdminProcessingRoute
-    }
-    '/admin/private-backgrounds/': {
-      id: '/admin/private-backgrounds/'
-      path: '/'
-      fullPath: '/admin/private-backgrounds/'
-      preLoaderRoute: typeof AdminPrivateBackgroundsIndexRouteImport
-      parentRoute: typeof AdminPrivateBackgroundsRoute
-    }
-    '/admin/note-folders/': {
-      id: '/admin/note-folders/'
-      path: '/'
-      fullPath: '/admin/note-folders/'
-      preLoaderRoute: typeof AdminNoteFoldersIndexRouteImport
-      parentRoute: typeof AdminNoteFoldersRoute
-    }
-    '/admin/map-dataset-uploads/': {
-      id: '/admin/map-dataset-uploads/'
-      path: '/'
-      fullPath: '/admin/map-dataset-uploads/'
-      preLoaderRoute: typeof AdminMapDatasetUploadsIndexRouteImport
-      parentRoute: typeof AdminMapDatasetUploadsRoute
-    }
-    '/admin/map-dataset-categories/': {
-      id: '/admin/map-dataset-categories/'
-      path: '/'
-      fullPath: '/admin/map-dataset-categories/'
-      preLoaderRoute: typeof AdminMapDatasetCategoriesIndexRouteImport
-      parentRoute: typeof AdminMapDatasetCategoriesRoute
-    }
-    '/regionen/$regionSlug/summieren': {
-      id: '/regionen/$regionSlug/summieren'
-      path: '/summieren'
-      fullPath: '/regionen/$regionSlug/summieren'
-      preLoaderRoute: typeof RegionenRegionSlugSummierenRouteImport
-      parentRoute: typeof RegionenRegionSlugRouteRoute
-    }
-    '/regionen/$regionSlug/qa': {
-      id: '/regionen/$regionSlug/qa'
-      path: '/qa'
-      fullPath: '/regionen/$regionSlug/qa'
-      preLoaderRoute: typeof RegionenRegionSlugQaRouteImport
-      parentRoute: typeof RegionenRegionSlugRouteRoute
-    }
-    '/regionen/$regionSlug/prueflisten': {
-      id: '/regionen/$regionSlug/prueflisten'
-      path: '/prueflisten'
-      fullPath: '/regionen/$regionSlug/prueflisten'
-      preLoaderRoute: typeof RegionenRegionSlugPrueflistenRouteImport
-      parentRoute: typeof RegionenRegionSlugRouteRoute
-    }
-    '/regionen/$regionSlug/messen': {
-      id: '/regionen/$regionSlug/messen'
-      path: '/messen'
-      fullPath: '/regionen/$regionSlug/messen'
-      preLoaderRoute: typeof RegionenRegionSlugMessenRouteImport
-      parentRoute: typeof RegionenRegionSlugRouteRoute
-    }
-    '/regionen/$regionSlug/hinweise': {
-      id: '/regionen/$regionSlug/hinweise'
-      path: '/hinweise'
-      fullPath: '/regionen/$regionSlug/hinweise'
-      preLoaderRoute: typeof RegionenRegionSlugHinweiseRouteImport
-      parentRoute: typeof RegionenRegionSlugRouteRoute
-    }
-    '/regionen/$regionSlug/flaechenfinder': {
-      id: '/regionen/$regionSlug/flaechenfinder'
-      path: '/flaechenfinder'
-      fullPath: '/regionen/$regionSlug/flaechenfinder'
-      preLoaderRoute: typeof RegionenRegionSlugFlaechenfinderRouteImport
-      parentRoute: typeof RegionenRegionSlugRouteRoute
-    }
-    '/api/uploads/create': {
-      id: '/api/uploads/create'
-      path: '/create'
-      fullPath: '/api/uploads/create'
-      preLoaderRoute: typeof ApiUploadsCreateRouteImport
-      parentRoute: typeof ApiUploadsRoute
-    }
-    '/api/uploads/$slug': {
-      id: '/api/uploads/$slug'
-      path: '/$slug'
-      fullPath: '/api/uploads/$slug'
-      preLoaderRoute: typeof ApiUploadsSlugRouteImport
-      parentRoute: typeof ApiUploadsRoute
-    }
-    '/api/sign-in/osm': {
-      id: '/api/sign-in/osm'
-      path: '/api/sign-in/osm'
-      fullPath: '/api/sign-in/osm'
-      preLoaderRoute: typeof ApiSignInOsmRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/review-lists/upload': {
-      id: '/api/review-lists/upload'
-      path: '/api/review-lists/upload'
-      fullPath: '/api/review-lists/upload'
-      preLoaderRoute: typeof ApiReviewListsUploadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/private/warm-cache': {
-      id: '/api/private/warm-cache'
-      path: '/api/private/warm-cache'
-      fullPath: '/api/private/warm-cache'
-      preLoaderRoute: typeof ApiPrivateWarmCacheRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/private/register-sql-functions': {
-      id: '/api/private/register-sql-functions'
-      path: '/api/private/register-sql-functions'
-      fullPath: '/api/private/register-sql-functions'
-      preLoaderRoute: typeof ApiPrivateRegisterSqlFunctionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/private/regions': {
-      id: '/api/private/regions'
-      path: '/api/private/regions'
-      fullPath: '/api/private/regions'
-      preLoaderRoute: typeof ApiPrivateRegionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/private/post-processing-qa-update': {
-      id: '/api/private/post-processing-qa-update'
-      path: '/api/private/post-processing-qa-update'
-      fullPath: '/api/private/post-processing-qa-update'
-      preLoaderRoute: typeof ApiPrivatePostProcessingQaUpdateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/private/post-processing-hook': {
-      id: '/api/private/post-processing-hook'
-      path: '/api/private/post-processing-hook'
-      fullPath: '/api/private/post-processing-hook'
-      preLoaderRoute: typeof ApiPrivatePostProcessingHookRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/private/generate-maproulette-tasks': {
-      id: '/api/private/generate-maproulette-tasks'
-      path: '/api/private/generate-maproulette-tasks'
-      fullPath: '/api/private/generate-maproulette-tasks'
-      preLoaderRoute: typeof ApiPrivateGenerateMaprouletteTasksRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/osm-notes/rss': {
-      id: '/api/osm-notes/rss'
-      path: '/api/osm-notes/rss'
-      fullPath: '/api/osm-notes/rss'
-      preLoaderRoute: typeof ApiOsmNotesRssRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/notes/$regionSlug': {
-      id: '/api/notes/$regionSlug'
-      path: '/api/notes/$regionSlug'
-      fullPath: '/api/notes/$regionSlug'
-      preLoaderRoute: typeof ApiNotesRegionSlugRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/osm-token': {
-      id: '/api/auth/osm-token'
-      path: '/api/auth/osm-token'
-      fullPath: '/api/auth/osm-token'
-      preLoaderRoute: typeof ApiAuthOsmTokenRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/auth/$': {
-      id: '/api/auth/$'
-      path: '/api/auth/$'
-      fullPath: '/api/auth/$'
-      preLoaderRoute: typeof ApiAuthSplatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/regions': {
-      id: '/api/admin/regions'
-      path: '/api/admin/regions'
-      fullPath: '/api/admin/regions'
-      preLoaderRoute: typeof ApiAdminRegionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/region-uploads': {
-      id: '/api/admin/region-uploads'
-      path: '/api/admin/region-uploads'
-      fullPath: '/api/admin/region-uploads'
-      preLoaderRoute: typeof ApiAdminRegionUploadsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/processing': {
-      id: '/api/admin/processing'
-      path: '/api/admin/processing'
-      fullPath: '/api/admin/processing'
-      preLoaderRoute: typeof ApiAdminProcessingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/admin/audit-log': {
-      id: '/api/admin/audit-log'
-      path: '/api/admin/audit-log'
-      fullPath: '/api/admin/audit-log'
-      preLoaderRoute: typeof ApiAdminAuditLogRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/admin/regions/new': {
-      id: '/admin/regions/new'
-      path: '/new'
-      fullPath: '/admin/regions/new'
-      preLoaderRoute: typeof AdminRegionsNewRouteImport
-      parentRoute: typeof AdminRegionsRoute
-    }
-    '/admin/region-contracts/new': {
-      id: '/admin/region-contracts/new'
-      path: '/new'
-      fullPath: '/admin/region-contracts/new'
-      preLoaderRoute: typeof AdminRegionContractsNewRouteImport
-      parentRoute: typeof AdminRegionContractsRoute
-    }
-    '/admin/qa-configs/new': {
-      id: '/admin/qa-configs/new'
-      path: '/new'
-      fullPath: '/admin/qa-configs/new'
-      preLoaderRoute: typeof AdminQaConfigsNewRouteImport
-      parentRoute: typeof AdminQaConfigsRoute
-    }
-    '/admin/processing/hooks': {
-      id: '/admin/processing/hooks'
-      path: '/hooks'
-      fullPath: '/admin/processing/hooks'
-      preLoaderRoute: typeof AdminProcessingHooksRouteImport
-      parentRoute: typeof AdminProcessingRoute
-    }
-    '/admin/processing/$metaId': {
-      id: '/admin/processing/$metaId'
-      path: '/$metaId'
-      fullPath: '/admin/processing/$metaId'
-      preLoaderRoute: typeof AdminProcessingMetaIdRouteImport
-      parentRoute: typeof AdminProcessingRoute
-    }
-    '/admin/memberships/new': {
-      id: '/admin/memberships/new'
-      path: '/memberships/new'
-      fullPath: '/admin/memberships/new'
-      preLoaderRoute: typeof AdminMembershipsNewRouteImport
-      parentRoute: typeof AdminRoute
-    }
-    '/admin/map-dataset-uploads/$slug': {
-      id: '/admin/map-dataset-uploads/$slug'
-      path: '/$slug'
-      fullPath: '/admin/map-dataset-uploads/$slug'
-      preLoaderRoute: typeof AdminMapDatasetUploadsSlugRouteImport
-      parentRoute: typeof AdminMapDatasetUploadsRoute
-    }
-    '/admin/map-dataset-categories/new': {
-      id: '/admin/map-dataset-categories/new'
-      path: '/new'
-      fullPath: '/admin/map-dataset-categories/new'
-      preLoaderRoute: typeof AdminMapDatasetCategoriesNewRouteImport
-      parentRoute: typeof AdminMapDatasetCategoriesRoute
-    }
-    '/admin/map-dataset-categories/$categoryKey': {
-      id: '/admin/map-dataset-categories/$categoryKey'
-      path: '/$categoryKey'
-      fullPath: '/admin/map-dataset-categories/$categoryKey'
-      preLoaderRoute: typeof AdminMapDatasetCategoriesCategoryKeyRouteImport
-      parentRoute: typeof AdminMapDatasetCategoriesRoute
-    }
-    '/_pages/settings/user': {
-      id: '/_pages/settings/user'
-      path: '/settings/user'
-      fullPath: '/settings/user'
-      preLoaderRoute: typeof PagesSettingsUserRouteImport
+    '/_pages/docs/$tableName': {
+      id: '/_pages/docs/$tableName'
+      path: '/docs/$tableName'
+      fullPath: '/docs/$tableName'
+      preLoaderRoute: typeof PagesDocsTableNameRouteImport
       parentRoute: typeof PagesRoute
     }
     '/_pages/docs/mapillary-coverage': {
@@ -2085,74 +1777,396 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PagesDocsMapillaryCoverageRouteImport
       parentRoute: typeof PagesRoute
     }
-    '/_pages/docs/$tableName': {
-      id: '/_pages/docs/$tableName'
-      path: '/docs/$tableName'
-      fullPath: '/docs/$tableName'
-      preLoaderRoute: typeof PagesDocsTableNameRouteImport
+    '/_pages/settings/user': {
+      id: '/_pages/settings/user'
+      path: '/settings/user'
+      fullPath: '/settings/user'
+      preLoaderRoute: typeof PagesSettingsUserRouteImport
       parentRoute: typeof PagesRoute
     }
-    '/api/regions/$regionSlug/uploads-csv': {
-      id: '/api/regions/$regionSlug/uploads-csv'
-      path: '/$regionSlug/uploads-csv'
-      fullPath: '/api/regions/$regionSlug/uploads-csv'
-      preLoaderRoute: typeof ApiRegionsRegionSlugUploadsCsvRouteImport
-      parentRoute: typeof ApiRegionsRoute
+    '/admin/map-dataset-categories/': {
+      id: '/admin/map-dataset-categories/'
+      path: '/'
+      fullPath: '/admin/map-dataset-categories/'
+      preLoaderRoute: typeof AdminMapDatasetCategoriesIndexRouteImport
+      parentRoute: typeof AdminMapDatasetCategoriesRoute
     }
-    '/api/region-uploads/$id/$filename': {
-      id: '/api/region-uploads/$id/$filename'
-      path: '/api/region-uploads/$id/$filename'
-      fullPath: '/api/region-uploads/$id/$filename'
-      preLoaderRoute: typeof ApiRegionUploadsIdFilenameRouteImport
+    '/admin/map-dataset-categories/$categoryKey': {
+      id: '/admin/map-dataset-categories/$categoryKey'
+      path: '/$categoryKey'
+      fullPath: '/admin/map-dataset-categories/$categoryKey'
+      preLoaderRoute: typeof AdminMapDatasetCategoriesCategoryKeyRouteImport
+      parentRoute: typeof AdminMapDatasetCategoriesRoute
+    }
+    '/admin/map-dataset-categories/new': {
+      id: '/admin/map-dataset-categories/new'
+      path: '/new'
+      fullPath: '/admin/map-dataset-categories/new'
+      preLoaderRoute: typeof AdminMapDatasetCategoriesNewRouteImport
+      parentRoute: typeof AdminMapDatasetCategoriesRoute
+    }
+    '/admin/map-dataset-uploads/': {
+      id: '/admin/map-dataset-uploads/'
+      path: '/'
+      fullPath: '/admin/map-dataset-uploads/'
+      preLoaderRoute: typeof AdminMapDatasetUploadsIndexRouteImport
+      parentRoute: typeof AdminMapDatasetUploadsRoute
+    }
+    '/admin/map-dataset-uploads/$slug': {
+      id: '/admin/map-dataset-uploads/$slug'
+      path: '/$slug'
+      fullPath: '/admin/map-dataset-uploads/$slug'
+      preLoaderRoute: typeof AdminMapDatasetUploadsSlugRouteImport
+      parentRoute: typeof AdminMapDatasetUploadsRoute
+    }
+    '/admin/memberships/new': {
+      id: '/admin/memberships/new'
+      path: '/memberships/new'
+      fullPath: '/admin/memberships/new'
+      preLoaderRoute: typeof AdminMembershipsNewRouteImport
+      parentRoute: typeof AdminRoute
+    }
+    '/admin/note-folders/': {
+      id: '/admin/note-folders/'
+      path: '/'
+      fullPath: '/admin/note-folders/'
+      preLoaderRoute: typeof AdminNoteFoldersIndexRouteImport
+      parentRoute: typeof AdminNoteFoldersRoute
+    }
+    '/admin/private-backgrounds/': {
+      id: '/admin/private-backgrounds/'
+      path: '/'
+      fullPath: '/admin/private-backgrounds/'
+      preLoaderRoute: typeof AdminPrivateBackgroundsIndexRouteImport
+      parentRoute: typeof AdminPrivateBackgroundsRoute
+    }
+    '/admin/processing/': {
+      id: '/admin/processing/'
+      path: '/'
+      fullPath: '/admin/processing/'
+      preLoaderRoute: typeof AdminProcessingIndexRouteImport
+      parentRoute: typeof AdminProcessingRoute
+    }
+    '/admin/processing/$metaId': {
+      id: '/admin/processing/$metaId'
+      path: '/$metaId'
+      fullPath: '/admin/processing/$metaId'
+      preLoaderRoute: typeof AdminProcessingMetaIdRouteImport
+      parentRoute: typeof AdminProcessingRoute
+    }
+    '/admin/processing/hooks': {
+      id: '/admin/processing/hooks'
+      path: '/hooks'
+      fullPath: '/admin/processing/hooks'
+      preLoaderRoute: typeof AdminProcessingHooksRouteImport
+      parentRoute: typeof AdminProcessingRoute
+    }
+    '/admin/qa-configs/': {
+      id: '/admin/qa-configs/'
+      path: '/'
+      fullPath: '/admin/qa-configs/'
+      preLoaderRoute: typeof AdminQaConfigsIndexRouteImport
+      parentRoute: typeof AdminQaConfigsRoute
+    }
+    '/admin/qa-configs/new': {
+      id: '/admin/qa-configs/new'
+      path: '/new'
+      fullPath: '/admin/qa-configs/new'
+      preLoaderRoute: typeof AdminQaConfigsNewRouteImport
+      parentRoute: typeof AdminQaConfigsRoute
+    }
+    '/admin/region-contracts/': {
+      id: '/admin/region-contracts/'
+      path: '/'
+      fullPath: '/admin/region-contracts/'
+      preLoaderRoute: typeof AdminRegionContractsIndexRouteImport
+      parentRoute: typeof AdminRegionContractsRoute
+    }
+    '/admin/region-contracts/new': {
+      id: '/admin/region-contracts/new'
+      path: '/new'
+      fullPath: '/admin/region-contracts/new'
+      preLoaderRoute: typeof AdminRegionContractsNewRouteImport
+      parentRoute: typeof AdminRegionContractsRoute
+    }
+    '/admin/regions/': {
+      id: '/admin/regions/'
+      path: '/'
+      fullPath: '/admin/regions/'
+      preLoaderRoute: typeof AdminRegionsIndexRouteImport
+      parentRoute: typeof AdminRegionsRoute
+    }
+    '/admin/regions/new': {
+      id: '/admin/regions/new'
+      path: '/new'
+      fullPath: '/admin/regions/new'
+      preLoaderRoute: typeof AdminRegionsNewRouteImport
+      parentRoute: typeof AdminRegionsRoute
+    }
+    '/admin/review-lists/': {
+      id: '/admin/review-lists/'
+      path: '/'
+      fullPath: '/admin/review-lists/'
+      preLoaderRoute: typeof AdminReviewListsIndexRouteImport
+      parentRoute: typeof AdminReviewListsRoute
+    }
+    '/admin/users/': {
+      id: '/admin/users/'
+      path: '/'
+      fullPath: '/admin/users/'
+      preLoaderRoute: typeof AdminUsersIndexRouteImport
+      parentRoute: typeof AdminUsersRoute
+    }
+    '/api/admin/audit-log': {
+      id: '/api/admin/audit-log'
+      path: '/api/admin/audit-log'
+      fullPath: '/api/admin/audit-log'
+      preLoaderRoute: typeof ApiAdminAuditLogRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/notes/$regionSlug/download': {
-      id: '/api/notes/$regionSlug/download'
-      path: '/download'
-      fullPath: '/api/notes/$regionSlug/download'
-      preLoaderRoute: typeof ApiNotesRegionSlugDownloadRouteImport
-      parentRoute: typeof ApiNotesRegionSlugRoute
-    }
-    '/api/notes/$regionSlug/$folderId': {
-      id: '/api/notes/$regionSlug/$folderId'
-      path: '/$folderId'
-      fullPath: '/api/notes/$regionSlug/$folderId'
-      preLoaderRoute: typeof ApiNotesRegionSlugFolderIdRouteImport
-      parentRoute: typeof ApiNotesRegionSlugRoute
-    }
-    '/api/maproulette/statistic-proxy/$challengeId': {
-      id: '/api/maproulette/statistic-proxy/$challengeId'
-      path: '/api/maproulette/statistic-proxy/$challengeId'
-      fullPath: '/api/maproulette/statistic-proxy/$challengeId'
-      preLoaderRoute: typeof ApiMaprouletteStatisticProxyChallengeIdRouteImport
+    '/api/admin/processing': {
+      id: '/api/admin/processing'
+      path: '/api/admin/processing'
+      fullPath: '/api/admin/processing'
+      preLoaderRoute: typeof ApiAdminProcessingRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/maproulette/data/test_tag_fix_two': {
-      id: '/api/maproulette/data/test_tag_fix_two'
-      path: '/api/maproulette/data/test_tag_fix_two'
-      fullPath: '/api/maproulette/data/test_tag_fix_two'
-      preLoaderRoute: typeof ApiMaprouletteDataTest_tag_fix_twoRouteImport
+    '/api/admin/region-uploads': {
+      id: '/api/admin/region-uploads'
+      path: '/api/admin/region-uploads'
+      fullPath: '/api/admin/region-uploads'
+      preLoaderRoute: typeof ApiAdminRegionUploadsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/maproulette/data/test_tag_fix_cycleway-shared': {
-      id: '/api/maproulette/data/test_tag_fix_cycleway-shared'
-      path: '/api/maproulette/data/test_tag_fix_cycleway-shared'
-      fullPath: '/api/maproulette/data/test_tag_fix_cycleway-shared'
-      preLoaderRoute: typeof ApiMaprouletteDataTest_tag_fix_cyclewaySharedRouteImport
+    '/api/admin/regions': {
+      id: '/api/admin/regions'
+      path: '/api/admin/regions'
+      fullPath: '/api/admin/regions'
+      preLoaderRoute: typeof ApiAdminRegionsRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/maproulette/data/test_tag_fix': {
-      id: '/api/maproulette/data/test_tag_fix'
-      path: '/api/maproulette/data/test_tag_fix'
-      fullPath: '/api/maproulette/data/test_tag_fix'
-      preLoaderRoute: typeof ApiMaprouletteDataTest_tag_fixRouteImport
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/maproulette/data/$projectKey': {
-      id: '/api/maproulette/data/$projectKey'
-      path: '/api/maproulette/data/$projectKey'
-      fullPath: '/api/maproulette/data/$projectKey'
-      preLoaderRoute: typeof ApiMaprouletteDataProjectKeyRouteImport
+    '/api/auth/osm-token': {
+      id: '/api/auth/osm-token'
+      path: '/api/auth/osm-token'
+      fullPath: '/api/auth/osm-token'
+      preLoaderRoute: typeof ApiAuthOsmTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/notes/$regionSlug': {
+      id: '/api/notes/$regionSlug'
+      path: '/api/notes/$regionSlug'
+      fullPath: '/api/notes/$regionSlug'
+      preLoaderRoute: typeof ApiNotesRegionSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/osm-notes/rss': {
+      id: '/api/osm-notes/rss'
+      path: '/api/osm-notes/rss'
+      fullPath: '/api/osm-notes/rss'
+      preLoaderRoute: typeof ApiOsmNotesRssRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/private/generate-maproulette-tasks': {
+      id: '/api/private/generate-maproulette-tasks'
+      path: '/api/private/generate-maproulette-tasks'
+      fullPath: '/api/private/generate-maproulette-tasks'
+      preLoaderRoute: typeof ApiPrivateGenerateMaprouletteTasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/private/post-processing-hook': {
+      id: '/api/private/post-processing-hook'
+      path: '/api/private/post-processing-hook'
+      fullPath: '/api/private/post-processing-hook'
+      preLoaderRoute: typeof ApiPrivatePostProcessingHookRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/private/post-processing-qa-update': {
+      id: '/api/private/post-processing-qa-update'
+      path: '/api/private/post-processing-qa-update'
+      fullPath: '/api/private/post-processing-qa-update'
+      preLoaderRoute: typeof ApiPrivatePostProcessingQaUpdateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/private/regions': {
+      id: '/api/private/regions'
+      path: '/api/private/regions'
+      fullPath: '/api/private/regions'
+      preLoaderRoute: typeof ApiPrivateRegionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/private/register-sql-functions': {
+      id: '/api/private/register-sql-functions'
+      path: '/api/private/register-sql-functions'
+      fullPath: '/api/private/register-sql-functions'
+      preLoaderRoute: typeof ApiPrivateRegisterSqlFunctionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/private/warm-cache': {
+      id: '/api/private/warm-cache'
+      path: '/api/private/warm-cache'
+      fullPath: '/api/private/warm-cache'
+      preLoaderRoute: typeof ApiPrivateWarmCacheRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/review-lists/upload': {
+      id: '/api/review-lists/upload'
+      path: '/api/review-lists/upload'
+      fullPath: '/api/review-lists/upload'
+      preLoaderRoute: typeof ApiReviewListsUploadRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/sign-in/osm': {
+      id: '/api/sign-in/osm'
+      path: '/api/sign-in/osm'
+      fullPath: '/api/sign-in/osm'
+      preLoaderRoute: typeof ApiSignInOsmRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/uploads/$slug': {
+      id: '/api/uploads/$slug'
+      path: '/$slug'
+      fullPath: '/api/uploads/$slug'
+      preLoaderRoute: typeof ApiUploadsSlugRouteImport
+      parentRoute: typeof ApiUploadsRoute
+    }
+    '/api/uploads/create': {
+      id: '/api/uploads/create'
+      path: '/create'
+      fullPath: '/api/uploads/create'
+      preLoaderRoute: typeof ApiUploadsCreateRouteImport
+      parentRoute: typeof ApiUploadsRoute
+    }
+    '/regionen/$regionSlug/': {
+      id: '/regionen/$regionSlug/'
+      path: '/'
+      fullPath: '/regionen/$regionSlug/'
+      preLoaderRoute: typeof RegionenRegionSlugIndexRouteImport
+      parentRoute: typeof RegionenRegionSlugRouteRoute
+    }
+    '/regionen/$regionSlug/flaechenfinder': {
+      id: '/regionen/$regionSlug/flaechenfinder'
+      path: '/flaechenfinder'
+      fullPath: '/regionen/$regionSlug/flaechenfinder'
+      preLoaderRoute: typeof RegionenRegionSlugFlaechenfinderRouteImport
+      parentRoute: typeof RegionenRegionSlugRouteRoute
+    }
+    '/regionen/$regionSlug/hinweise': {
+      id: '/regionen/$regionSlug/hinweise'
+      path: '/hinweise'
+      fullPath: '/regionen/$regionSlug/hinweise'
+      preLoaderRoute: typeof RegionenRegionSlugHinweiseRouteImport
+      parentRoute: typeof RegionenRegionSlugRouteRoute
+    }
+    '/regionen/$regionSlug/messen': {
+      id: '/regionen/$regionSlug/messen'
+      path: '/messen'
+      fullPath: '/regionen/$regionSlug/messen'
+      preLoaderRoute: typeof RegionenRegionSlugMessenRouteImport
+      parentRoute: typeof RegionenRegionSlugRouteRoute
+    }
+    '/regionen/$regionSlug/prueflisten': {
+      id: '/regionen/$regionSlug/prueflisten'
+      path: '/prueflisten'
+      fullPath: '/regionen/$regionSlug/prueflisten'
+      preLoaderRoute: typeof RegionenRegionSlugPrueflistenRouteImport
+      parentRoute: typeof RegionenRegionSlugRouteRoute
+    }
+    '/regionen/$regionSlug/qa': {
+      id: '/regionen/$regionSlug/qa'
+      path: '/qa'
+      fullPath: '/regionen/$regionSlug/qa'
+      preLoaderRoute: typeof RegionenRegionSlugQaRouteImport
+      parentRoute: typeof RegionenRegionSlugRouteRoute
+    }
+    '/regionen/$regionSlug/summieren': {
+      id: '/regionen/$regionSlug/summieren'
+      path: '/summieren'
+      fullPath: '/regionen/$regionSlug/summieren'
+      preLoaderRoute: typeof RegionenRegionSlugSummierenRouteImport
+      parentRoute: typeof RegionenRegionSlugRouteRoute
+    }
+    '/admin/note-folders/$id/edit': {
+      id: '/admin/note-folders/$id/edit'
+      path: '/$id/edit'
+      fullPath: '/admin/note-folders/$id/edit'
+      preLoaderRoute: typeof AdminNoteFoldersIdEditRouteImport
+      parentRoute: typeof AdminNoteFoldersRoute
+    }
+    '/admin/qa-configs/$id/edit': {
+      id: '/admin/qa-configs/$id/edit'
+      path: '/$id/edit'
+      fullPath: '/admin/qa-configs/$id/edit'
+      preLoaderRoute: typeof AdminQaConfigsIdEditRouteImport
+      parentRoute: typeof AdminQaConfigsRoute
+    }
+    '/admin/region-contracts/$slug/edit': {
+      id: '/admin/region-contracts/$slug/edit'
+      path: '/$slug/edit'
+      fullPath: '/admin/region-contracts/$slug/edit'
+      preLoaderRoute: typeof AdminRegionContractsSlugEditRouteImport
+      parentRoute: typeof AdminRegionContractsRoute
+    }
+    '/admin/regions/$regionSlug/edit': {
+      id: '/admin/regions/$regionSlug/edit'
+      path: '/$regionSlug/edit'
+      fullPath: '/admin/regions/$regionSlug/edit'
+      preLoaderRoute: typeof AdminRegionsRegionSlugEditRouteImport
+      parentRoute: typeof AdminRegionsRoute
+    }
+    '/admin/review-lists/$id/edit': {
+      id: '/admin/review-lists/$id/edit'
+      path: '/$id/edit'
+      fullPath: '/admin/review-lists/$id/edit'
+      preLoaderRoute: typeof AdminReviewListsIdEditRouteImport
+      parentRoute: typeof AdminReviewListsRoute
+    }
+    '/admin/users/$userId/edit': {
+      id: '/admin/users/$userId/edit'
+      path: '/$userId/edit'
+      fullPath: '/admin/users/$userId/edit'
+      preLoaderRoute: typeof AdminUsersUserIdEditRouteImport
+      parentRoute: typeof AdminUsersRoute
+    }
+    '/api/admin/data-schema/import': {
+      id: '/api/admin/data-schema/import'
+      path: '/api/admin/data-schema/import'
+      fullPath: '/api/admin/data-schema/import'
+      preLoaderRoute: typeof ApiAdminDataSchemaImportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/admin/processing/$metaId': {
+      id: '/api/admin/processing/$metaId'
+      path: '/$metaId'
+      fullPath: '/api/admin/processing/$metaId'
+      preLoaderRoute: typeof ApiAdminProcessingMetaIdRouteImport
+      parentRoute: typeof ApiAdminProcessingRoute
+    }
+    '/api/admin/region-uploads/upload': {
+      id: '/api/admin/region-uploads/upload'
+      path: '/upload'
+      fullPath: '/api/admin/region-uploads/upload'
+      preLoaderRoute: typeof ApiAdminRegionUploadsUploadRouteImport
+      parentRoute: typeof ApiAdminRegionUploadsRoute
+    }
+    '/api/admin/regions/$slug': {
+      id: '/api/admin/regions/$slug'
+      path: '/$slug'
+      fullPath: '/api/admin/regions/$slug'
+      preLoaderRoute: typeof ApiAdminRegionsSlugRouteImport
+      parentRoute: typeof ApiAdminRegionsRoute
+    }
+    '/api/export-ogr/$regionSlug/$tableName': {
+      id: '/api/export-ogr/$regionSlug/$tableName'
+      path: '/api/export-ogr/$regionSlug/$tableName'
+      fullPath: '/api/export-ogr/$regionSlug/$tableName'
+      preLoaderRoute: typeof ApiExportOgrRegionSlugTableNameRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/export/$regionSlug/$tableName': {
@@ -2162,89 +2176,68 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiExportRegionSlugTableNameRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/export-ogr/$regionSlug/$tableName': {
-      id: '/api/export-ogr/$regionSlug/$tableName'
-      path: '/api/export-ogr/$regionSlug/$tableName'
-      fullPath: '/api/export-ogr/$regionSlug/$tableName'
-      preLoaderRoute: typeof ApiExportOgrRegionSlugTableNameRouteImport
+    '/api/maproulette/data/$projectKey': {
+      id: '/api/maproulette/data/$projectKey'
+      path: '/api/maproulette/data/$projectKey'
+      fullPath: '/api/maproulette/data/$projectKey'
+      preLoaderRoute: typeof ApiMaprouletteDataProjectKeyRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/admin/regions/$slug': {
-      id: '/api/admin/regions/$slug'
-      path: '/$slug'
-      fullPath: '/api/admin/regions/$slug'
-      preLoaderRoute: typeof ApiAdminRegionsSlugRouteImport
-      parentRoute: typeof ApiAdminRegionsRoute
-    }
-    '/api/admin/region-uploads/upload': {
-      id: '/api/admin/region-uploads/upload'
-      path: '/upload'
-      fullPath: '/api/admin/region-uploads/upload'
-      preLoaderRoute: typeof ApiAdminRegionUploadsUploadRouteImport
-      parentRoute: typeof ApiAdminRegionUploadsRoute
-    }
-    '/api/admin/processing/$metaId': {
-      id: '/api/admin/processing/$metaId'
-      path: '/$metaId'
-      fullPath: '/api/admin/processing/$metaId'
-      preLoaderRoute: typeof ApiAdminProcessingMetaIdRouteImport
-      parentRoute: typeof ApiAdminProcessingRoute
-    }
-    '/api/admin/data-schema/import': {
-      id: '/api/admin/data-schema/import'
-      path: '/api/admin/data-schema/import'
-      fullPath: '/api/admin/data-schema/import'
-      preLoaderRoute: typeof ApiAdminDataSchemaImportRouteImport
+    '/api/maproulette/data/test_tag_fix': {
+      id: '/api/maproulette/data/test_tag_fix'
+      path: '/api/maproulette/data/test_tag_fix'
+      fullPath: '/api/maproulette/data/test_tag_fix'
+      preLoaderRoute: typeof ApiMaprouletteDataTest_tag_fixRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/admin/users/$userId/edit': {
-      id: '/admin/users/$userId/edit'
-      path: '/$userId/edit'
-      fullPath: '/admin/users/$userId/edit'
-      preLoaderRoute: typeof AdminUsersUserIdEditRouteImport
-      parentRoute: typeof AdminUsersRoute
+    '/api/maproulette/data/test_tag_fix_cycleway-shared': {
+      id: '/api/maproulette/data/test_tag_fix_cycleway-shared'
+      path: '/api/maproulette/data/test_tag_fix_cycleway-shared'
+      fullPath: '/api/maproulette/data/test_tag_fix_cycleway-shared'
+      preLoaderRoute: typeof ApiMaprouletteDataTest_tag_fix_cyclewaySharedRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/review-lists/$id/edit': {
-      id: '/admin/review-lists/$id/edit'
-      path: '/$id/edit'
-      fullPath: '/admin/review-lists/$id/edit'
-      preLoaderRoute: typeof AdminReviewListsIdEditRouteImport
-      parentRoute: typeof AdminReviewListsRoute
+    '/api/maproulette/data/test_tag_fix_two': {
+      id: '/api/maproulette/data/test_tag_fix_two'
+      path: '/api/maproulette/data/test_tag_fix_two'
+      fullPath: '/api/maproulette/data/test_tag_fix_two'
+      preLoaderRoute: typeof ApiMaprouletteDataTest_tag_fix_twoRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/regions/$regionSlug/edit': {
-      id: '/admin/regions/$regionSlug/edit'
-      path: '/$regionSlug/edit'
-      fullPath: '/admin/regions/$regionSlug/edit'
-      preLoaderRoute: typeof AdminRegionsRegionSlugEditRouteImport
-      parentRoute: typeof AdminRegionsRoute
+    '/api/maproulette/statistic-proxy/$challengeId': {
+      id: '/api/maproulette/statistic-proxy/$challengeId'
+      path: '/api/maproulette/statistic-proxy/$challengeId'
+      fullPath: '/api/maproulette/statistic-proxy/$challengeId'
+      preLoaderRoute: typeof ApiMaprouletteStatisticProxyChallengeIdRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/admin/region-contracts/$slug/edit': {
-      id: '/admin/region-contracts/$slug/edit'
-      path: '/$slug/edit'
-      fullPath: '/admin/region-contracts/$slug/edit'
-      preLoaderRoute: typeof AdminRegionContractsSlugEditRouteImport
-      parentRoute: typeof AdminRegionContractsRoute
+    '/api/notes/$regionSlug/$folderId': {
+      id: '/api/notes/$regionSlug/$folderId'
+      path: '/$folderId'
+      fullPath: '/api/notes/$regionSlug/$folderId'
+      preLoaderRoute: typeof ApiNotesRegionSlugFolderIdRouteImport
+      parentRoute: typeof ApiNotesRegionSlugRoute
     }
-    '/admin/qa-configs/$id/edit': {
-      id: '/admin/qa-configs/$id/edit'
-      path: '/$id/edit'
-      fullPath: '/admin/qa-configs/$id/edit'
-      preLoaderRoute: typeof AdminQaConfigsIdEditRouteImport
-      parentRoute: typeof AdminQaConfigsRoute
+    '/api/notes/$regionSlug/download': {
+      id: '/api/notes/$regionSlug/download'
+      path: '/download'
+      fullPath: '/api/notes/$regionSlug/download'
+      preLoaderRoute: typeof ApiNotesRegionSlugDownloadRouteImport
+      parentRoute: typeof ApiNotesRegionSlugRoute
     }
-    '/admin/note-folders/$id/edit': {
-      id: '/admin/note-folders/$id/edit'
-      path: '/$id/edit'
-      fullPath: '/admin/note-folders/$id/edit'
-      preLoaderRoute: typeof AdminNoteFoldersIdEditRouteImport
-      parentRoute: typeof AdminNoteFoldersRoute
+    '/api/region-uploads/$id/$filename': {
+      id: '/api/region-uploads/$id/$filename'
+      path: '/api/region-uploads/$id/$filename'
+      fullPath: '/api/region-uploads/$id/$filename'
+      preLoaderRoute: typeof ApiRegionUploadsIdFilenameRouteImport
+      parentRoute: typeof rootRouteImport
     }
-    '/api/notes/$regionSlug/$folderId/$noteId': {
-      id: '/api/notes/$regionSlug/$folderId/$noteId'
-      path: '/$noteId'
-      fullPath: '/api/notes/$regionSlug/$folderId/$noteId'
-      preLoaderRoute: typeof ApiNotesRegionSlugFolderIdNoteIdRouteImport
-      parentRoute: typeof ApiNotesRegionSlugFolderIdRoute
+    '/api/regions/$regionSlug/uploads-csv': {
+      id: '/api/regions/$regionSlug/uploads-csv'
+      path: '/$regionSlug/uploads-csv'
+      fullPath: '/api/regions/$regionSlug/uploads-csv'
+      preLoaderRoute: typeof ApiRegionsRegionSlugUploadsCsvRouteImport
+      parentRoute: typeof ApiRegionsRoute
     }
     '/api/admin/qa-configs/$id/export-csv': {
       id: '/api/admin/qa-configs/$id/export-csv'
@@ -2253,12 +2246,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAdminQaConfigsIdExportCsvRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/private-backgrounds/$slug/$z/$x/$y': {
-      id: '/api/private-backgrounds/$slug/$z/$x/$y'
-      path: '/api/private-backgrounds/$slug/$z/$x/$y'
-      fullPath: '/api/private-backgrounds/$slug/$z/$x/$y'
-      preLoaderRoute: typeof ApiPrivateBackgroundsSlugZXYRouteImport
-      parentRoute: typeof rootRouteImport
+    '/api/notes/$regionSlug/$folderId/$noteId': {
+      id: '/api/notes/$regionSlug/$folderId/$noteId'
+      path: '/$noteId'
+      fullPath: '/api/notes/$regionSlug/$folderId/$noteId'
+      preLoaderRoute: typeof ApiNotesRegionSlugFolderIdNoteIdRouteImport
+      parentRoute: typeof ApiNotesRegionSlugFolderIdRoute
     }
     '/api/notes/$regionSlug/$folderId/$noteId/comments': {
       id: '/api/notes/$regionSlug/$folderId/$noteId/comments'
@@ -2266,6 +2259,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/notes/$regionSlug/$folderId/$noteId/comments'
       preLoaderRoute: typeof ApiNotesRegionSlugFolderIdNoteIdCommentsRouteImport
       parentRoute: typeof ApiNotesRegionSlugFolderIdNoteIdRoute
+    }
+    '/api/private-backgrounds/$slug/$z/$x/$y': {
+      id: '/api/private-backgrounds/$slug/$z/$x/$y'
+      path: '/api/private-backgrounds/$slug/$z/$x/$y'
+      fullPath: '/api/private-backgrounds/$slug/$z/$x/$y'
+      preLoaderRoute: typeof ApiPrivateBackgroundsSlugZXYRouteImport
+      parentRoute: typeof rootRouteImport
     }
   }
 }

@@ -31,7 +31,7 @@ const bboxMuenchen: TopicConfigBbox = [11.25, 47.991071, 11.821289, 48.304436]
 
 const config = [
   { id: 'roads_bikelanes', bboxes: null, schedule: 'nightly' },
-  { id: 'bikeroutes', bboxes: null, schedule: 'nightly' },
+  { id: 'routes', bboxes: null, schedule: 'nightly' },
   { id: 'bicycleParking', bboxes: null, schedule: 'nightly' },
   { id: 'trafficSigns', bboxes: null, schedule: 'nightly' },
   { id: 'boundaries', bboxes: null, schedule: 'nightly' },

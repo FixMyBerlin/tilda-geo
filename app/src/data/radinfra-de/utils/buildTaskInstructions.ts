@@ -26,7 +26,10 @@ export const buildTaskInstructions = ({ projectKey, osmTypeIdString, kind, geome
   const startPoint = point(first).geometry
   const endPoint = point(last).geometry
 
-  const infrastructureName = translations[`ALL--category=${kind}`]
+  const infrastructureName = (
+    translations[`atlas_bikelanes--category=${kind}`] ?? translations[`atlas_roads--road=${kind}`]
+  )
+    ?.replaceAll('&shy;', '')
     ?.replace('(Straßenbegleitend oder selbstständig geführt; Kategorisierung unklar)', '')
     ?.replace('(Kategorisierung unklar)', '')
     ?.trim()

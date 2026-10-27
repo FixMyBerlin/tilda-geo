@@ -7,7 +7,7 @@
  * (see `zielortShares.ts` and `scorer.py`).
  *
  * `color` is deliberately the color the category is drawn with in the Zielorte map layer
- * (`mapboxStyles/groups/atlas_pois_default.ts`, layer `pois-classification`) — the sliders
+ * (`layers/pois_default.ts`, layer `pois-classification`) — the sliders
  * should match the map without a legend. If the color changes there, update it here.
  *
  * The `help` texts list the most common OSM values of the category from

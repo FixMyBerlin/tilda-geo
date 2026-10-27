@@ -6,6 +6,15 @@ local log = require('topics.helper.log')
 
 local MAPILLARY_CSV = '/data/pseudoTagsData/mapillary_coverage.csv'
 local SIDEPATH_CSV = '/data/pseudoTagsData/is_sidepath_estimation.csv'
+-- Downloaded from the infravelo-radnetz repo, see pseudoTags/infraveloNetzSource/README.md.
+local RADNETZ_BERLIN_CSV = '/data/pseudoTagsData/infravelo_netz.csv'
+
+-- The CSV uses single letters; `route_relations` carries the readable class.
+local RADNETZ_BERLIN_CLASSES = {
+  V = 'Vorrangnetz',
+  E = 'Ergänzungsnetz',
+  S = 'Sonstiges',
+}
 
 local function ensure_entry(merged, id)
   local entry = merged[id]
@@ -82,6 +91,20 @@ local function merge_sidepath(merged, rows)
   end
 end
 
+-- One row per (osm_id, id_suffix): the way itself (`id_suffix` empty) and its derived sides
+-- (`cycleway/left` …) can be in different classes, so the entry maps suffix → class.
+local function merge_radnetz_berlin(merged, rows)
+  for _, row in ipairs(rows) do
+    local id = tonumber(row['osm_id'])
+    local class = RADNETZ_BERLIN_CLASSES[row['infravelo_netz']]
+    if id and class then
+      local entry = ensure_entry(merged, id)
+      entry.radnetz_berlin = entry.radnetz_berlin or {}
+      entry.radnetz_berlin[row['id_suffix'] or ''] = class
+    end
+  end
+end
+
 local function load_merged_pseudo_tags()
   local cached = nil
 
@@ -96,6 +119,7 @@ local function load_merged_pseudo_tags()
 
       merge_mapillary(cached, parse_csv_rows(MAPILLARY_CSV, 'load_merged_pseudo_tags.mapillary'))
       merge_sidepath(cached, parse_csv_rows(SIDEPATH_CSV, 'load_merged_pseudo_tags.sidepath'))
+      merge_radnetz_berlin(cached, parse_csv_rows(RADNETZ_BERLIN_CSV, 'load_merged_pseudo_tags.radnetz_berlin'))
 
       local sample_id, sample_row = next(cached)
       local sample = {}

@@ -7,7 +7,7 @@ on:
         required: true
     outputs:
       CHANGES:
-        description: 'Whether the given directories have changed since the last successfull workflow run.'
+        description: 'Whether the given directories have changed since the last successful run of the calling workflow on this branch. Always true for non-push runs.'
         value: ${{ jobs.diff.outputs.CHANGES }}
 
 permissions:
@@ -19,27 +19,45 @@ jobs:
     outputs:
       CHANGES: ${{ steps.git_changes.outputs.CHANGES }}
     steps:
+      # Baseline is the newest successful run of the calling deploy workflow on this branch.
+      # Runs of other workflows (CodeQL, Dependabot, tile generation) finish on the same commit
+      # and must not count, otherwise the diff is empty and the build is skipped.
+      # Manual runs (Force Full Deploy) skip the baseline and always count as changed.
+      # `github.workflow_ref` names the caller here, e.g. `…/.github/workflows/deploy.staging.yml@refs/heads/develop`.
       - name: Get last run commit SHA
+        if: github.event_name == 'push'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WORKFLOW_REF: ${{ github.workflow_ref }}
+          BRANCH: ${{ github.head_ref || github.ref_name }}
         run: |
-          LAST_RUN_SHA=$(curl --request GET \
-          --url https://api.github.com/repos/${{ github.repository }}/actions/runs?branch=${{ github.head_ref || github.ref_name }} \
-          --header 'authorization: Bearer ${{ secrets.GITHUB_TOKEN }}' \
-          | jq -r '.workflow_runs[] | select(.conclusion == "success") | .head_sha' | head -1)
-          echo LAST_RUN_SHA=$LAST_RUN_SHA >> $GITHUB_ENV
+          WORKFLOW_FILE=$(basename "${WORKFLOW_REF%%@*}")
+          # Newest by start time, so a re-run of an older deploy becomes the baseline.
+          LAST_RUN_SHA=$(gh api --method GET "repos/${{ github.repository }}/actions/workflows/$WORKFLOW_FILE/runs" \
+            -f branch="$BRANCH" -f status=success -f per_page=20 \
+            --jq '.workflow_runs | max_by(.run_started_at) | .head_sha // empty')
+          echo "Baseline: last successful $WORKFLOW_FILE run on $BRANCH is ${LAST_RUN_SHA:-<none>}"
+          echo "LAST_RUN_SHA=$LAST_RUN_SHA" >> "$GITHUB_ENV"
         shell: bash
 
       - name: Checkout current version
         uses: actions/checkout@v7.0.1
 
-      - name: Checkout last build
-        uses: actions/checkout@v7.0.1
-        with:
-          ref: ${{ env.LAST_RUN_SHA }}
+      - name: Fetch last build
+        if: env.LAST_RUN_SHA != ''
+        run: git fetch --depth=1 origin "${{ env.LAST_RUN_SHA }}"
+        shell: bash
 
       - name: Check for changes
         id: git_changes
         run: |
-          if git diff --exit-code ${{ env.LAST_RUN_SHA }} ${{ github.sha }} -- ${{ inputs.CHECK_DIFF_LOCATIONS }} .github/workflows/; then
+          if [ "${{ github.event_name }}" != "push" ]; then
+            echo "Not a push run (${{ github.event_name }}), treating everything as changed"
+            echo "CHANGES=true" >> $GITHUB_OUTPUT
+          elif [ -z "${{ env.LAST_RUN_SHA }}" ]; then
+            echo "No baseline found, treating everything as changed"
+            echo "CHANGES=true" >> $GITHUB_OUTPUT
+          elif git diff --exit-code ${{ env.LAST_RUN_SHA }} ${{ github.sha }} -- ${{ inputs.CHECK_DIFF_LOCATIONS }} .github/workflows/; then
             echo "CHANGES=false" >> $GITHUB_OUTPUT
           else
             echo "CHANGES=true" >> $GITHUB_OUTPUT

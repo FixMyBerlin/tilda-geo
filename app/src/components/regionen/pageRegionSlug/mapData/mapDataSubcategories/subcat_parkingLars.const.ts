@@ -1,11 +1,11 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_parking_parkinglines } from './mapboxStyles/groups/parking_parkinglines'
-import { mapboxStyleGroupLayers_parking_parkinglines_completeness } from './mapboxStyles/groups/parking_parkinglines_completeness'
-import { mapboxStyleGroupLayers_parking_parkinglines_labels } from './mapboxStyles/groups/parking_parkinglines_labels'
-import { mapboxStyleGroupLayers_parking_parkinglines_missing } from './mapboxStyles/groups/parking_parkinglines_missing'
-import { mapboxStyleGroupLayers_parking_parkinglines_surface } from './mapboxStyles/groups/parking_parkinglines_surface'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { layers_parkingLars_parkinglines } from './layers/parkingLars_parkinglines'
+import { layers_parkingLars_parkinglines_completeness } from './layers/parkingLars_parkinglines_completeness'
+import { layers_parkingLars_parkinglines_labels } from './layers/parkingLars_parkinglines_labels'
+import { layers_parkingLars_parkinglines_missing } from './layers/parkingLars_parkinglines_missing'
+import { layers_parkingLars_parkinglines_surface } from './layers/parkingLars_parkinglines_surface'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'parkingLars'
 const source = 'lars_parking'
@@ -25,13 +25,13 @@ export const subcat_parkingLars: FileMapDataSubcategory = {
       id: 'default',
       name: 'Standard',
       layers: [
-        mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_parking_parkinglines,
+        wrapSourceLayers({
+          layers: layers_parkingLars_parkinglines,
           source,
           sourceLayer,
         }),
-        mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_parking_parkinglines_labels,
+        wrapSourceLayers({
+          layers: layers_parkingLars_parkinglines_labels,
           source: 'lars_parking',
           sourceLayer: 'processing.parking_segments_label',
         }),
@@ -41,18 +41,18 @@ export const subcat_parkingLars: FileMapDataSubcategory = {
       id: 'presence',
       name: 'Vollständigkeit',
       layers: [
-        mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_parking_parkinglines_labels,
+        wrapSourceLayers({
+          layers: layers_parkingLars_parkinglines_labels,
           source: 'lars_parking',
           sourceLayer: 'processing.parking_segments_label',
         }),
-        mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_parking_parkinglines_completeness,
+        wrapSourceLayers({
+          layers: layers_parkingLars_parkinglines_completeness,
           source,
           sourceLayer,
         }),
-        mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_parking_parkinglines,
+        wrapSourceLayers({
+          layers: layers_parkingLars_parkinglines,
           source,
           sourceLayer,
         }),
@@ -113,8 +113,8 @@ export const subcat_parkingLars: FileMapDataSubcategory = {
       id: 'missing',
       name: 'Fehlende Daten',
       layers: [
-        mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_parking_parkinglines_missing,
+        wrapSourceLayers({
+          layers: layers_parkingLars_parkinglines_missing,
           source,
           sourceLayer,
         }),
@@ -143,13 +143,13 @@ export const subcat_parkingLars: FileMapDataSubcategory = {
       id: 'surface',
       name: 'Oberflächen',
       layers: [
-        mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_parking_parkinglines_labels,
+        wrapSourceLayers({
+          layers: layers_parkingLars_parkinglines_labels,
           source: 'lars_parking',
           sourceLayer: 'processing.parking_segments_label',
         }),
-        mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_parking_parkinglines_surface,
+        wrapSourceLayers({
+          layers: layers_parkingLars_parkinglines_surface,
           source,
           sourceLayer,
         }),

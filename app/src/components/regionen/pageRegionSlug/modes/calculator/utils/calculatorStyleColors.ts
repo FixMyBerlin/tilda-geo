@@ -51,21 +51,21 @@ export const calculatorStyleColorExpression = ({ key, colors }: CalculatorStyleC
  * The colors of the active style, shared by the map (features) and the panel (dots in the
  * breakdown, which is the legend). `undefined` without a style or before an area is summed.
  *
- * The values are ranked by the first metric of the dataset over all areas, with the filter
- * applied to the other tags, so the colors do not change with the metric shown in the panel.
+ * The values are ranked like the rows of the panel: by the first metric of the dataset over all
+ * areas, with the filter applied to the other tags.
  */
 export const useCalculatorStyleColors = () => {
   const { activeDataset, filter, style } = useCalculatorDatasets()
   const rows = useCalculatorQuery().data?.rows
   if (!activeDataset || !style || !rows?.length) return undefined
 
-  const metric = calculatorMetricOrder.find((candidate) => candidate in activeDataset.sumKeys)
-  if (!metric) return undefined
+  const metrics = calculatorMetricOrder.filter((metric) => metric in activeDataset.sumKeys)
+  if (metrics.length === 0) return undefined
 
   const { combined } = calculateMetricSummaryForAreas({
     rows,
     areaIds: [],
-    metric,
+    metrics,
     groupByKeys: [style],
     filter,
   })

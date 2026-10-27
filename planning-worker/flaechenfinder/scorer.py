@@ -517,7 +517,7 @@ def run_flaechenfinder(
         _oepnv_group_score = pd.concat(_transit_scores, axis=1).max(axis=1)
         del _transit_scores
 
-        # Bikesharing (poiClassification, *=bicycle_rental): own group; like bus stops a
+        # Bikesharing (bicycleParking_points, kind=bicycle_rental): own group; like bus stops a
         # "last mile" access point, hence the same 30 m radius.
         try:
             _bike_stops = osm_loader.load_bikesharing(study_area_geom)

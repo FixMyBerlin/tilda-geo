@@ -73,12 +73,11 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
     stylingKeys: ['birdge', 'tunnel', 'railway', 'highway'],
     minzoom: 5,
   },
-  bicycleParking_areas: { stylingKeys: [], minzoom: 9 },
+  bicycleParking_areas: { stylingKeys: ['kind', 'capacity'], minzoom: 9 },
   bicycleParking_points: {
-    stylingKeys: ['covered'],
+    stylingKeys: ['kind', 'covered', 'capacity'],
     minzoom: 9,
   },
-  bicycleParking_rental: { stylingKeys: [], minzoom: 9 },
   bikeroutes: {
     stylingKeys: ['network', 'ref', 'cycle_highway'],
     minzoom: 5,
@@ -127,6 +126,7 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
     ],
     minzoom: 14,
   },
+  parkings_edges_labels: { stylingKeys: [], minzoom: 0 },
   parkings_labels: { stylingKeys: [], minzoom: 11 },
   parkings_cutouts: { stylingKeys: [], minzoom: 11 },
   parkings_separate: { stylingKeys: [], minzoom: 0 },

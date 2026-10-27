@@ -1,10 +1,10 @@
-import { mapboxStyleGroupLayers_park_off_default_area } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/park_off_default_area'
-import { mapboxStyleGroupLayers_park_off_default_points } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/park_off_default_points'
-import { mapboxStyleGroupLayers_park_off_labels } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/park_off_labels'
-import { mapboxStyleGroupLayers_park_street_areas_shadow } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/park_street_areas_shadow'
-import { mapboxStyleGroupLayers_park_street_default } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/park_street_default'
-import { mapboxStyleGroupLayers_park_street_label } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/park_street_label'
-import { mapboxStyleGroupLayers_park_street_pattern } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/park_street_pattern'
+import { layers_parkingTilda_off_default_area } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/parkingTilda_off_default_area'
+import { layers_parkingTilda_off_default_points } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/parkingTilda_off_default_points'
+import { layers_parkingTilda_off_labels } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/parkingTilda_off_labels'
+import { layers_parkingTilda_street_areas_shadow } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/parkingTilda_street_areas_shadow'
+import { layers_parkingTilda_street_default } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/parkingTilda_street_default'
+import { layers_parkingTilda_street_label } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/parkingTilda_street_label'
+import { layers_parkingTilda_street_pattern } from '../../../src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/parkingTilda_street_pattern'
 import {
   loadConditionCategoryLabels,
   validateLegendLabels,
@@ -27,18 +27,15 @@ export type ParkbeschraenkungenProfileOptions = {
 }
 
 export const buildParkbeschraenkungenStyles = (options: ParkbeschraenkungenProfileOptions) => {
-  const streetLine = mapboxStyleGroupLayers_park_street_default[0] as Record<string, unknown>
-  const parallelPattern = mapboxStyleGroupLayers_park_street_pattern[0] as Record<string, unknown>
-  const shadowFill = mapboxStyleGroupLayers_park_street_areas_shadow[0] as Record<string, unknown>
-  const shadowOutline = mapboxStyleGroupLayers_park_street_areas_shadow[1] as Record<
-    string,
-    unknown
-  >
-  const streetLabel = mapboxStyleGroupLayers_park_street_label[0] as Record<string, unknown>
-  const offFill = mapboxStyleGroupLayers_park_off_default_area[0] as Record<string, unknown>
-  const offOutline = mapboxStyleGroupLayers_park_off_default_area[1] as Record<string, unknown>
-  const offPoint = mapboxStyleGroupLayers_park_off_default_points[0] as Record<string, unknown>
-  const offLabel = mapboxStyleGroupLayers_park_off_labels[0] as Record<string, unknown>
+  const streetLine = layers_parkingTilda_street_default[0] as Record<string, unknown>
+  const parallelPattern = layers_parkingTilda_street_pattern[0] as Record<string, unknown>
+  const shadowFill = layers_parkingTilda_street_areas_shadow[0] as Record<string, unknown>
+  const shadowOutline = layers_parkingTilda_street_areas_shadow[1] as Record<string, unknown>
+  const streetLabel = layers_parkingTilda_street_label[0] as Record<string, unknown>
+  const offFill = layers_parkingTilda_off_default_area[0] as Record<string, unknown>
+  const offOutline = layers_parkingTilda_off_default_area[1] as Record<string, unknown>
+  const offPoint = layers_parkingTilda_off_default_points[0] as Record<string, unknown>
+  const offLabel = layers_parkingTilda_off_labels[0] as Record<string, unknown>
 
   const labels = loadConditionCategoryLabels()
   const streetPaint = (streetLine.paint ?? {}) as Record<string, unknown>
@@ -77,7 +74,7 @@ export const buildParkbeschraenkungenStyles = (options: ParkbeschraenkungenProfi
       tileUrl: `${TILES_BASE}/atlas_generalized_parkings,atlas_generalized_parkings_labels,atlas_generalized_parkings_separate/{z}/{x}/{y}`,
       sourceLayer: 'parkings',
       geometryType: 'LineString',
-      mapboxSourceFile: 'park_street_default.ts',
+      mapboxSourceFile: 'parkingTilda_street_default.ts',
       limitations: [
         'Nur Features mit capacity-Attribut (Mapbox-Filter)',
         'Linienbreite auf Zoom 17 eingefroren',
@@ -89,7 +86,7 @@ export const buildParkbeschraenkungenStyles = (options: ParkbeschraenkungenProfi
       tileUrl: `${TILES_BASE}/atlas_generalized_parkings,atlas_generalized_parkings_labels,atlas_generalized_parkings_separate/{z}/{x}/{y}`,
       sourceLayer: 'parkings',
       geometryType: 'LineString',
-      mapboxSourceFile: 'park_street_pattern.ts',
+      mapboxSourceFile: 'parkingTilda_street_pattern.ts',
       limitations: [
         'Nur parallele Ausrichtung; diagonal/perpendicular fehlen',
         'Linienbreite auf Zoom 17 eingefroren',
@@ -100,14 +97,14 @@ export const buildParkbeschraenkungenStyles = (options: ParkbeschraenkungenProfi
       tileUrl: `${TILES_BASE}/atlas_generalized_parkings,atlas_generalized_parkings_labels,atlas_generalized_parkings_separate/{z}/{x}/{y}`,
       sourceLayer: 'parkings_separate',
       geometryType: 'Polygon',
-      mapboxSourceFile: 'park_street_areas_shadow.ts',
+      mapboxSourceFile: 'parkingTilda_street_areas_shadow.ts',
     },
     {
       styleId: 'tilda_parkings_labels',
       tileUrl: `${TILES_BASE}/atlas_generalized_parkings,atlas_generalized_parkings_labels,atlas_generalized_parkings_separate/{z}/{x}/{y}`,
       sourceLayer: 'parkings_labels',
       geometryType: 'Point',
-      mapboxSourceFile: 'park_street_label.ts',
+      mapboxSourceFile: 'parkingTilda_street_label.ts',
       limitations: ['Textrotation (angle) nicht übernommen', 'Textgröße auf Zoom 17 eingefroren'],
     },
     {
@@ -115,7 +112,7 @@ export const buildParkbeschraenkungenStyles = (options: ParkbeschraenkungenProfi
       tileUrl: `${TILES_BASE}/atlas_generalized_off_street_parking_areas,atlas_generalized_off_street_parking_area_labels,atlas_generalized_off_street_parking_points/{z}/{x}/{y}`,
       sourceLayer: 'off_street_parking_areas',
       geometryType: 'Polygon',
-      mapboxSourceFile: 'park_off_default_area.ts',
+      mapboxSourceFile: 'parkingTilda_off_default_area.ts',
       limitations: ['Umrissbreite auf Zoom 17 eingefroren'],
     },
     {
@@ -123,7 +120,7 @@ export const buildParkbeschraenkungenStyles = (options: ParkbeschraenkungenProfi
       tileUrl: `${TILES_BASE}/atlas_generalized_off_street_parking_areas,atlas_generalized_off_street_parking_area_labels,atlas_generalized_off_street_parking_points/{z}/{x}/{y}`,
       sourceLayer: 'off_street_parking_points',
       geometryType: 'Point',
-      mapboxSourceFile: 'park_off_default_points.ts',
+      mapboxSourceFile: 'parkingTilda_off_default_points.ts',
       limitations: ['Kreisradius fest auf 6px gesetzt (Mapbox circle-radius fehlt im Export)'],
     },
     {
@@ -131,7 +128,7 @@ export const buildParkbeschraenkungenStyles = (options: ParkbeschraenkungenProfi
       tileUrl: `${TILES_BASE}/atlas_generalized_off_street_parking_areas,atlas_generalized_off_street_parking_area_labels,atlas_generalized_off_street_parking_points/{z}/{x}/{y}`,
       sourceLayer: 'off_street_parking_area_labels',
       geometryType: 'Point',
-      mapboxSourceFile: 'park_off_labels.ts',
+      mapboxSourceFile: 'parkingTilda_off_labels.ts',
       limitations: ['Textrotation (angle) nicht übernommen', 'Textgröße auf Zoom 17 eingefroren'],
     },
   ]

@@ -36,7 +36,6 @@ import {
   interactivityConfiguration,
   type InteracitvityConfiguartion,
 } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/generalization/interacitvityConfiguartion'
-import { customMapIcons } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/customMapIcons.const'
 import { useMeasureDraw } from '@/components/regionen/pageRegionSlug/modes/measure/drawing/useMeasureDraw'
 import { MeasureMap } from '@/components/regionen/pageRegionSlug/modes/measure/MeasureMap'
 import { createInspectorFeatureKey } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/createInspectorFeatureKey'
@@ -312,31 +311,6 @@ export const RegionMap = () => {
     exposeMainMapForDebugging(event.target)
     firePlaywrightMapLoadedEvent()
   }
-
-  useEffect(
-    function registerCustomMapIcons() {
-      if (!mainMap) return
-
-      let cancelled = false
-      Object.values(customMapIcons).forEach(({ id, url }) => {
-        if (mainMap.hasImage(id)) return
-        mainMap
-          .loadImage(url)
-          .then(({ data }) => {
-            if (cancelled || mainMap.hasImage(id)) return
-            mainMap.addImage(id, data, { pixelRatio: 2 })
-          })
-          .catch((error: unknown) => {
-            console.error(`Failed to load custom map icon "${id}"`, error)
-          })
-      })
-
-      return function cleanupCustomMapIconsRegistration() {
-        cancelled = true
-      }
-    },
-    [mainMap],
-  )
 
   useEffect(
     function subscribeToMissingStyleImages() {

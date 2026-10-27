@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_park_street_cutouts } from './mapboxStyles/groups/park_street_cutouts'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { layers_parkingTilda_street_cutouts } from './layers/parkingTilda_street_cutouts'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'parkingTildaCutouts'
 const source = 'tilda_parkings_cutouts'
@@ -18,8 +18,8 @@ export const subcat_parkingTilda_street_cutout: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_park_street_cutouts,
+      layers: wrapSourceLayers({
+        layers: layers_parkingTilda_street_cutouts,
         source,
         sourceLayer,
       }),

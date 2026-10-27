@@ -27,6 +27,8 @@ A caller sums `share × amount`. Nothing is converted into points.
 
 Summieren does that in `tilda_measure_sum`: the amounts of one or more datasets inside the drawn
 areas, grouped by tag values. The app only passes the dataset names, the areas and the tags.
+Features without a number for a metric are not in its sum; `missing` counts them per metric, and
+Summieren shows them in a column next to the sums (e.g. bicycle parking without `capacity`).
 
 ## Datasets
 
@@ -38,11 +40,15 @@ which tables a dataset reads.
 | `parking`         | `street` → `parkings` (lines), `off_street` → `off_street_parking_areas` | `capacity`, `area`                     |
 | `bikelanes`       | `bikelanes` → `bikelanes`                                                | `length`, `length_directions` (meters) |
 | `roads`           | `roads` → `roads`, `paths` → `roadsPathClasses`                          | `length`, `length_directions` (meters) |
-| `bicycle_parking` | `points` → `bicycleParking_points`                                       | `capacity`                             |
+| `bicycle_parking` | `points` → `bicycleParking_points` (without `kind=mobility_hub`)         | `capacity`, `objects`                  |
 
 A new dataset is one more function. Callers add what is theirs: QA filters parking
 by `operator_type` and moves bikelanes to their street side; Summieren groups by the tags of its
 panel.
+
+`objects` is one per feature (`1` on every row of `bicycle_parking`). A bicycle parking without
+`capacity` in OSM has no stands to count: it adds to `objects` only, nothing is assumed for its
+stands. Summieren shows how many objects have no value for a sum.
 
 `length_directions` is the length per direction of travel: the `length` of a oneway (`oneway` is
 `yes`, `implicit_yes` or `yes_dual_carriageway`), twice the `length` of every other line. Statistik

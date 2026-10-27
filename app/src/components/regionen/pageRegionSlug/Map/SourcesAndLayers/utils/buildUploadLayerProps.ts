@@ -1,6 +1,6 @@
 import type { FilterSpecification } from 'maplibre-gl'
 import type { LayerProps } from 'react-map-gl/maplibre'
-import { getDebugStyleForLayerType } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/debugLayerStyles'
+import { getDebugStyleForLayerType } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/debugLayerStyles'
 import type { AtlasLayerType } from '@/components/regionen/pageRegionSlug/mapData/types'
 import type { RegionDataset } from '@/server/uploads/queries/getUploadsForRegion.server'
 import { wrapFilterWithAll } from './filterUtils/wrapFilterWithAll'

@@ -1,0 +1,31 @@
+import type { StyleLayer } from './utils/types'
+
+export const layers_bikelanes_plus_bikesuitability: StyleLayer[] = [
+  {
+    id: 'bikeSuitability',
+    type: 'line',
+    filter: ['has', 'bikeSuitability'],
+    layout: {
+      'line-cap': 'round',
+      'line-join': 'round',
+    },
+    paint: {
+      'line-color': [
+        'match',
+        ['get', 'bikeSuitability'],
+        ['goodSurface'],
+        '#0fcc51',
+        ['noMotorizedVehicle'],
+        '#0b7f83',
+        ['noOvertaking'],
+        '#07dfd7',
+        ['livingStreet'],
+        '#0bbce0',
+        'rgba(240, 0, 0, 0)',
+      ],
+      'line-dasharray': [0.1, 1.5],
+      'line-opacity': 0.3,
+      'line-width': ['interpolate', ['linear'], ['zoom'], 9, 1, 11, 3, 12, 5, 16, 10],
+    },
+  },
+]

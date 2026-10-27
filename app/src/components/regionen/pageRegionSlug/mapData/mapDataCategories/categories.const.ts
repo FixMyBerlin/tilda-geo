@@ -125,8 +125,8 @@ export const categories: StaticMapDataCategory[] = [
   },
   {
     id: 'bicycleParking',
-    name: 'Fahrradstellplätze (Beta)',
-    desc: '',
+    name: 'Fahrradparken',
+    desc: 'Lastenrad, E-Scooter, Sharing, Mobilitätsstationen',
     subcategories: [{ ...subcat_bicycleParking, defaultStyle: 'default' }],
   },
   ...categoriesRadinfra,
