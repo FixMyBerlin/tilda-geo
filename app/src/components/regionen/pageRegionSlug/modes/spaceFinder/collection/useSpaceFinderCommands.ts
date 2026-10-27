@@ -1,0 +1,149 @@
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useState } from 'react'
+import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
+import { toastSuccess } from '@/components/shared/toast/toastSuccess'
+import {
+  createPlanningVariantFn,
+  deletePlanningAreaFn,
+  deletePlanningVariantFn,
+  duplicatePlanningVariantFn,
+  updatePlanningAreaFn,
+  updatePlanningVariantFn,
+} from '@/server/planning/planning.functions'
+import {
+  planningAreaQueryOptions,
+  planningAreasQueryOptions,
+  planningVariantQueryOptions,
+} from '@/server/planning/planningQueryOptions'
+import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
+import { DEFAULT_FACTOR_TEMPLATE } from '../factors/spaceFinderDefaults'
+import {
+  firstSpaceFinderVariantId,
+  type PlanningAreasRow,
+  type SpaceFinderSelectedVariant,
+} from './spaceFinderCollectionOptions'
+
+export type SpaceFinderNameModalKind = 'newVariant' | 'renameVariant' | 'renameArea'
+
+type UseSpaceFinderCommandsInput = {
+  areas: readonly PlanningAreasRow[]
+  selectedOption: SpaceFinderSelectedVariant | undefined
+  /** Writes `space.key`. `undefined` clears the selection (e.g. the last Gebiet was deleted). */
+  onSelect: (variantId: number | undefined) => void
+}
+
+/**
+ * Variante/Gebiet create/rename/duplicate/delete commands, mirroring `useReviewListCommands`.
+ * Unlike Prüflisten's single collection entity, this manages two levels: the Gebiet ⋯ menu in the
+ * panel header acts on `selectedOption.areaId`, the Varianten ⋯ menu on `selectedOption.variantId`.
+ * »Neue Variante« uses the name modal like »Neue Prüfliste«; »Neues Planungsgebiet« is not here —
+ * it opens a ModePanel detail view (`space.new`) with its wizard.
+ */
+export const useSpaceFinderCommands = ({
+  areas,
+  selectedOption,
+  onSelect,
+}: UseSpaceFinderCommandsInput) => {
+  const regionSlug = useRegionSlug()
+  const queryClient = useQueryClient()
+  const [nameModal, setNameModal] = useState<SpaceFinderNameModalKind | null>(null)
+
+  const openNameModal = (kind: SpaceFinderNameModalKind, origin?: HTMLElement) => {
+    if (origin) captureModalOpenOrigin(origin)
+    setNameModal(kind)
+  }
+  const closeNameModal = () => setNameModal(null)
+
+  const invalidateAreas = () => queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
+
+  const renameVariant = useMutation({
+    mutationFn: (title: string) => {
+      if (!selectedOption) throw new Error('Keine Variante ausgewählt.')
+      return updatePlanningVariantFn({ data: { variantId: selectedOption.variantId, title } })
+    },
+    onSuccess: async () => {
+      await invalidateAreas()
+      if (selectedOption) {
+        await queryClient.invalidateQueries(planningVariantQueryOptions(selectedOption.variantId))
+      }
+    },
+  })
+
+  const renameArea = useMutation({
+    mutationFn: (title: string) => {
+      if (!selectedOption) throw new Error('Kein Planungsgebiet ausgewählt.')
+      return updatePlanningAreaFn({
+        data: { areaId: selectedOption.areaId, title },
+      })
+    },
+    onSuccess: async () => {
+      await invalidateAreas()
+      if (!selectedOption) return
+      await queryClient.invalidateQueries(planningAreaQueryOptions(selectedOption.areaId))
+      const area = areas.find((candidate) => candidate.id === selectedOption.areaId)
+      await Promise.all(
+        (area?.variants ?? []).map((variant) =>
+          queryClient.invalidateQueries(planningVariantQueryOptions(variant.id)),
+        ),
+      )
+    },
+  })
+
+  const createVariant = useMutation({
+    mutationFn: (title: string) => {
+      if (!selectedOption) throw new Error('Kein Planungsgebiet ausgewählt.')
+      return createPlanningVariantFn({
+        data: { areaId: selectedOption.areaId, title, factorConfig: DEFAULT_FACTOR_TEMPLATE },
+      })
+    },
+    onSuccess: async (created) => {
+      await invalidateAreas()
+      await queryClient.invalidateQueries(planningVariantQueryOptions(created.id))
+      onSelect(created.id)
+    },
+  })
+
+  const duplicateVariant = useMutation({
+    mutationFn: (variantId: number) => duplicatePlanningVariantFn({ data: { variantId } }),
+    onSuccess: async (created) => {
+      await invalidateAreas()
+      await queryClient.invalidateQueries(planningVariantQueryOptions(created.id))
+      toastSuccess('Variante dupliziert.')
+      onSelect(created.id)
+    },
+  })
+
+  const deleteVariant = useMutation({
+    mutationFn: (variantId: number) => deletePlanningVariantFn({ data: { variantId } }),
+    onSuccess: async (_result, variantId) => {
+      await invalidateAreas()
+      if (selectedOption?.variantId !== variantId) return
+      const area = areas.find((a) => a.id === selectedOption.areaId)
+      const remaining = area?.variants.filter((v) => v.id !== variantId) ?? []
+      onSelect(remaining[0]?.id)
+    },
+  })
+
+  const deleteArea = useMutation({
+    mutationFn: (areaId: number) => deletePlanningAreaFn({ data: { areaId } }),
+    onSuccess: async (_result, areaId) => {
+      await invalidateAreas()
+      if (selectedOption?.areaId !== areaId) return
+      onSelect(firstSpaceFinderVariantId(areas.filter((a) => a.id !== areaId)))
+    },
+  })
+
+  return {
+    nameModal,
+    openNameModal,
+    closeNameModal,
+    createVariant,
+    renameVariant,
+    renameArea,
+    duplicateVariant,
+    deleteVariant,
+    deleteArea,
+  }
+}
+
+export type SpaceFinderCommands = ReturnType<typeof useSpaceFinderCommands>

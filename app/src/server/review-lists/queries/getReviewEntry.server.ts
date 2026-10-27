@@ -3,6 +3,7 @@ import { z } from 'zod'
 import { type MemberCaller, getMemberSession } from '@/server/auth/memberCaller.server'
 import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
+import { parseSpaceFinderSourceMeta } from '@/shared/reviewLists/spaceFinderReviewEntry'
 import { parseStoredProperties } from '../geojson'
 
 const Schema = z.object({
@@ -24,6 +25,7 @@ export async function getReviewEntry(input: z.infer<typeof Schema>, caller: Memb
       id: true,
       status: true,
       source: true,
+      sourceMeta: true,
       geometryType: true,
       properties: true,
       createdAt: true,
@@ -43,5 +45,19 @@ export async function getReviewEntry(input: z.infer<typeof Schema>, caller: Memb
     },
   })
   if (!entry) throw notFound()
-  return { ...entry, properties: parseStoredProperties(entry.properties) }
+
+  // Link target for Flächenfinder entries. Looked up (not a relation) because the Variante may be
+  // deleted, and only counts when it belongs to this region: a list can be shared with regions the
+  // Variante does not belong to.
+  const origin =
+    entry.source === 'SPACE_FINDER' ? parseSpaceFinderSourceMeta(entry.sourceMeta) : null
+  const spaceFinderVariant =
+    origin?.variantId != null
+      ? await db.planningVariant.findFirst({
+          where: { id: origin.variantId, area: { region: { slug: regionSlug } } },
+          select: { id: true, currentRunId: true },
+        })
+      : null
+
+  return { ...entry, properties: parseStoredProperties(entry.properties), spaceFinderVariant }
 }

@@ -37,6 +37,27 @@ services:
     depends_on:
       db:
         condition: service_healthy
+  planning-worker:
+    image: ${ECR_REGISTRY}/tilda/planning-worker:${ENVIRONMENT}-latest
+    container_name: planning-worker
+    restart: unless-stopped
+    environment:
+      PGHOST: ${DATABASE_HOST}
+      PGDATABASE: ${DATABASE_NAME}
+      PGUSER: ${DATABASE_USER}
+      PGPASSWORD: ${DATABASE_PASSWORD}
+      ENVIRONMENT:
+      FORCE_COLOR: 1
+      PLANNING_CIR_DIR: /cir
+    volumes:
+      # DEM rasters (rasterio source); the MVP also runs without them (SRTM fallback).
+      - planning_dem:/dem
+      # CIR DOP tiles for the on-demand NDVI vegetation; without tiles the vegetation
+      # stays empty and the rest of the scoring runs as usual.
+      - planning_cir:/cir
+    depends_on:
+      db:
+        condition: service_healthy
   app:
     image: ${ECR_REGISTRY}/tilda/app:${ENVIRONMENT}-latest
     container_name: app
@@ -164,6 +185,8 @@ services:
 volumes:
   db_postgres_17:
   osmfiles:
+  planning_dem:
+  planning_cir:
 
 configs:
   martin_conf:

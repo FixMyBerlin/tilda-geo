@@ -12,7 +12,7 @@ export const zodReviewListsModeParam = z.object({
   search: z.string().optional().catch(undefined),
   extent: z.enum(['view', 'all']).optional().catch(undefined),
   status: z.enum(['OPEN', 'OK', 'PROBLEM']).optional().catch(undefined),
-  source: z.enum(['UPLOAD', 'MANUAL']).optional().catch(undefined),
+  source: z.enum(['UPLOAD', 'MANUAL', 'SPACE_FINDER']).optional().catch(undefined),
   new: z.literal(true).optional().catch(undefined),
   move: z.literal(true).optional().catch(undefined),
 })

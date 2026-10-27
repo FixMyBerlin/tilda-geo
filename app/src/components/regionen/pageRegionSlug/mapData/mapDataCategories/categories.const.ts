@@ -15,6 +15,7 @@ import { subcat_poi } from '../mapDataSubcategories/subcat_poi.const'
 import { subcat_poi_boundaries } from '../mapDataSubcategories/subcat_poi_boundaries.const'
 import { subcat_poi_places } from '../mapDataSubcategories/subcat_poi_places.const'
 import { subcat_poi_plus_barriers } from '../mapDataSubcategories/subcat_poi_plus_barriers.const'
+import { subcat_poi_plus_buildingEntrances } from '../mapDataSubcategories/subcat_poi_plus_buildingEntrances.const'
 import { subcat_poi_plus_landuse } from '../mapDataSubcategories/subcat_poi_plus_landuse.const'
 import { subcat_poi_plus_publicTransport } from '../mapDataSubcategories/subcat_poi_plus_publicTransport.const'
 import { subcat_roads } from '../mapDataSubcategories/subcat_roads.const'
@@ -43,6 +44,7 @@ export const categories: StaticMapDataCategory[] = [
       { ...subcat_poi_plus_barriers, defaultStyle: 'hidden' },
       { ...subcat_poi_plus_landuse, defaultStyle: 'hidden' },
       { ...subcat_poi_plus_publicTransport, defaultStyle: 'hidden' },
+      { ...subcat_poi_plus_buildingEntrances, defaultStyle: 'hidden' },
     ],
   },
   {

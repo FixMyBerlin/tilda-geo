@@ -43,7 +43,7 @@ export function registerReviewListsTools(server: McpServer, caller: AdminApiCall
     {
       description:
         'List the entries of a review list as a GeoJSON FeatureCollection (properties: id, status ' +
-        'OPEN|OK|PROBLEM, source UPLOAD|MANUAL, importId, authorName, commentCount, data = the ' +
+        'OPEN|OK|PROBLEM, source UPLOAD|MANUAL|SPACE_FINDER, importId, authorName, commentCount, data = the ' +
         'display attributes).',
       inputSchema: { regionSlug: regionSlugInput, listId: idInput },
     },
@@ -54,8 +54,9 @@ export function registerReviewListsTools(server: McpServer, caller: AdminApiCall
     'review_entries_get',
     {
       description:
-        'Get one review entry with status, display attributes, author and all comments. ' +
-        'The geometry is part of review_entries_list.',
+        'Get one review entry with status, source (UPLOAD|MANUAL|SPACE_FINDER), sourceMeta ' +
+        '(Flächenfinder: areaTitle, variantTitle, runId, h3Id), display attributes, author and ' +
+        'all comments. The geometry is part of review_entries_list.',
       inputSchema: { regionSlug: regionSlugInput, entryId: idInput },
     },
     (args) => run(() => getReviewEntry(args, caller)),

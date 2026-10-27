@@ -43,6 +43,7 @@ const { regionFixtures } = vi.hoisted(() => ({
       ],
       notesOsm: true,
       notesInternal: true,
+      spaceFinderEnabled: true,
     },
     'bb-pg': {
       map: { lat: 52.3968, lng: 13.0342, zoom: 11 },
@@ -67,6 +68,7 @@ const { regionFixtures } = vi.hoisted(() => ({
       categories: string[]
       notesOsm?: boolean
       notesInternal?: boolean
+      spaceFinderEnabled?: boolean
     }
   >,
 }))
@@ -673,7 +675,7 @@ describe('getRegionRedirectUrl()', () => {
       const resultUrl = getUrl(redirectUrl)
 
       expect(resultUrl.searchParams.get('v')).toBe(String(currentUrlVersion))
-      expect(resultUrl.searchParams.get('config')).toBe('1jp11g0.ivb7ah.6f6hc')
+      expect(resultUrl.searchParams.get('config')).toBe('1j0asj.282dgp.cucyp')
     })
 
     test('MIGRATION: Preserve already-short config when version is missing', async () => {

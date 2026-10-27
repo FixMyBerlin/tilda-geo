@@ -15,6 +15,10 @@ describe('publicTransport minzoom', function()
     assert.are.same(minzoom({ category = 'tram_station' }), 13)
   end)
 
+  it('returns 14 for bus stops', function()
+    assert.are.same(minzoom({ category = 'bus_stop' }), 14)
+  end)
+
   it('returns 13 for unknown categories', function()
     assert.are.same(minzoom({ category = 'undefined' }), 13)
   end)

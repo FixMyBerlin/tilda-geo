@@ -6,6 +6,7 @@ import { useQaParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryS
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
 import { useNotesSelection } from '@/components/regionen/pageRegionSlug/modes/notes/useNotesSelection'
+import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
 import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { createLayerKeyAtlasGeo } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
@@ -18,6 +19,7 @@ import { reviewEntriesInteractiveLayerIds } from '../SourcesAndLayers/reviewEntr
 import { internalNotesLayerId } from '../SourcesAndLayers/SourcesLayersInternalNotes'
 import { osmNotesLayerId } from '../SourcesAndLayers/SourcesLayersOsmNotes'
 import { qaLayerId } from '../SourcesAndLayers/SourcesLayersQa'
+import { planningHexagonsLayerId } from '../SourcesAndLayers/SourcesLayersSpaceFinder'
 import { MASK_INTERACTIVE_LAYER_IDS } from './maskLayerUtils'
 
 type Props = { categories: MapDataCategoryConfig[] | undefined }
@@ -95,6 +97,7 @@ export const useInteractiveLayers = () => {
   const { data: regionDatasets } = useRegionDatasetsQuery()
   const currentMode = useCurrentMode()
   const notesSelection = useNotesSelection()
+  const { runId: planningRun } = useSpaceFinderSelection()
 
   // Debug mode: return ALL layers from config
   if (debugLayerStyles && categoriesConfig) {
@@ -125,6 +128,10 @@ export const useInteractiveLayers = () => {
   // via the normal dataset filtering. We need to manually add them so they're interactive.
   if (region.mask) {
     activeCategoryLayerIds.push(...MASK_INTERACTIVE_LAYER_IDS)
+  }
+
+  if (currentMode.isSpaceFinder && planningRun != null) {
+    activeCategoryLayerIds.push(planningHexagonsLayerId)
   }
 
   // active layer from datasets

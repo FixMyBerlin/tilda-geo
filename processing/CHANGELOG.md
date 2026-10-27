@@ -4,6 +4,10 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-10
 
+### Flächenfinder: bike sharing from `bicycleParking_points`
+
+- The Flächenfinder reads bike sharing stations from `bicycleParking_points` with `kind=bicycle_rental` (before from `poiClassification`). Its existing bicycle parking leaves out `kind=bicycle_rental` and `kind=mobility_hub`.
+
 ### Summieren: `tilda_measure_sum`
 
 - New column `missing`: per metric, the number of features without a number for it (they are not in `sums`). Summieren shows them in a column of their own.

@@ -1,0 +1,68 @@
+title: Gebäudeeingänge
+summary: Eingänge an Gebäuden (`entrance=*`) aus OpenStreetMap. Haupt- und Wohneingänge sind farblich hervorgehoben.
+sourceIds:
+  - atlas_buildingEntrances
+attributes:
+  - key: entrance
+    label: Art des Eingangs
+    values:
+      - value: 'yes'
+        label: Eingang
+      - value: main
+        label: Haupteingang
+      - value: home
+        label: Eingang Wohnhaus
+      - value: staircase
+        label: Treppenhaus-Eingang
+      - value: service
+        label: Nebeneingang (Lieferung, Personal)
+      - value: secondary
+        label: Nebeneingang
+      - value: emergency
+        label: Notausgang
+      - value: exit
+        label: Ausgang
+      - value: garage
+        label: Garageneinfahrt
+      - value: shop
+        label: Ladeneingang
+  - key: ref
+    label: Kennung (Hausnummer, Treppenhaus)
+    format: sanitized_strings
+  - key: name
+    label: Name
+    format: sanitized_strings
+  - key: wheelchair
+    label: Rollstuhlgerecht
+    values:
+      - value: 'yes'
+        label: Ja
+      - value: limited
+        label: Eingeschränkt
+      - value: 'no'
+        label: Nein
+      - value: designated
+        label: Speziell für Rollstühle
+  - key: access
+    label: Zugang
+    values:
+      - value: public
+        label: Öffentlich
+      - value: customers
+        label: Kund:innen
+      - value: delivery
+        label: Lieferverkehr
+      - value: destination
+        label: Anlieger
+      - value: employees
+        label: Mitarbeitende
+      - value: permissive
+        label: Öffentliche Nutzung geduldet
+      - value: permit
+        label: Mit Genehmigung
+      - value: private
+        label: Privat
+      - value: residents
+        label: Bewohner:innen
+      - value: 'no'
+        label: Kein Zugang

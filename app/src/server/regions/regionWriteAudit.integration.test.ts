@@ -41,6 +41,7 @@ const regionConfig = {
   notesOsm: true,
   notesInternal: false,
   showSearch: false,
+  spaceFinderEnabled: true,
   mapLat: 52.5,
   mapLng: 13.4,
   mapZoom: 10,

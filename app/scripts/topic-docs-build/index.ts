@@ -101,6 +101,7 @@ export const main = async () => {
         compiledAttributes,
         map: inspectorTranslations,
         descriptions: inspectorDescriptions,
+        filePath,
       })
     }
   }

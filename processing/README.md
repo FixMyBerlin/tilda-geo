@@ -79,6 +79,29 @@ Settlement-area export is not run (#3423).
 
 Whenever we talk about `hash`es in this code, this feature is referenced.
 
+#### Trap: empty table although the topic "ran"
+
+The hashes live in `/data/hashes` ([`HASH_DIR`](constants/directories.const.ts)), which is the `osmfiles` volume — **not** the database.
+Resetting/recreating the DB therefore leaves the hashes intact: every topic is considered "unchanged" and gets skipped,
+so its tables stay empty (or missing) run after run. Symptom in the log:
+
+```
+Topics: ⏩ Skipping "boundaries". The code hasn't changed and `SKIP_UNCHANGED` is active.
+```
+
+Fix: rerun with `SKIP_UNCHANGED=0`. `PROCESS_ONLY_TOPICS` alone does **not** help — [`willSkipTopic`](utils/skipUnchanged.ts)
+still applies the hash check to the topics that pass the `PROCESS_ONLY_TOPICS` filter. Combine both to rerun one topic quickly:
+
+```sh
+SKIP_UNCHANGED=0 PROCESS_ONLY_TOPICS=boundaries docker compose up processing
+```
+
+(`bun run processing` in `app/` already generates a command with `--skip-unchanged 0`.)
+osm2pgsql runs with `--create`, but only creates the tables defined in that topic's Lua file, so other topics' tables are untouched.
+
+Do not add `PROCESS_ONLY_BBOX` when the topic needs complete relations (e.g. `boundaries`): the bbox extract cuts relations,
+`object:as_multipolygon():is_null()` then drops them and the table ends up empty again.
+
 ### Processing: Inspect changes
 
 With `PROCESSING_DIFFING_MODE=previous`, `PROCESSING_DIFFING_MODE=fixed`, or `PROCESSING_DIFFING_MODE=reference` the system will create `public.<tablename>_diff` tables that contain only changed entries (except `reference` mode which creates a clean baseline).

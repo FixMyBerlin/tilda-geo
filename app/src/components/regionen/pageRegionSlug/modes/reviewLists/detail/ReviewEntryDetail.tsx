@@ -14,6 +14,7 @@ import { reviewCommentDraftId } from '../../composerDrafts/composerDraftIds'
 import { ModeCommentComposer } from '../../ModeCommentComposer'
 import { modePanelMutedClassName, modePanelTintHairlineTopClassName } from '../../modePanel.const'
 import { REVIEW_ENTRY_MOVE_COLOR, REVIEW_ENTRY_MOVE_COLOR_LABEL } from '../reviewEntryMapColors'
+import { REVIEW_ENTRY_SOURCE_DETAIL_LABEL } from '../reviewEntrySourceLabel'
 import { STATUS_LABEL } from '../reviewListsModeFilters'
 import { useReviewListsModeValue } from '../useReviewListsModeParam'
 import { ReviewEntryComment } from './ReviewEntryComment'
@@ -23,6 +24,7 @@ type Props = { entryId: number }
 
 export const ReviewEntryDetail = ({ entryId }: Props) => {
   const regionSlug = useRegionSlug()
+
   const { move: isMoveArmed } = useReviewListsModeValue()
   const queryClient = useQueryClient()
 
@@ -68,7 +70,7 @@ export const ReviewEntryDetail = ({ entryId }: Props) => {
       <div className="space-y-3 px-4 pt-4 pb-4">
         <div className="min-w-0 text-xs text-gray-500">
           <p className="truncate">
-            {entry.source === 'MANUAL' ? 'Manuell erstellt' : 'Importiert'}{' '}
+            {REVIEW_ENTRY_SOURCE_DETAIL_LABEL[entry.source]}{' '}
             <TimeWithRelativeTooltip date={entry.createdAt} timeClassName="text-inherit" />
             {createdByName ? ` von ${createdByName}` : null}
           </p>

@@ -6,11 +6,14 @@ import type { RegionMode } from './useCurrentMode'
 type AvailableModes = Record<Exclude<RegionMode, 'map'>, boolean>
 
 /**
- * Mode pages a region offers besides the default map. There is no separate "enabled modes" flag.
+ * Mode pages a region offers besides the default map. There is no separate "enabled modes" flag,
+ * except for Flächenfinder (D8, `spaceFinderEnabled`): unlike the other modes it cannot be derived
+ * from data alone, because the worker that produces its results only runs on some instances.
  * - notes: OSM notes or TILDA internal notes enabled
  * - qa: at least one active QA config the current user may see
  * - reviewLists: at least one assigned list, or the user is a region member/admin (can create the first)
  * - calculator: the region has a category with a dataset that can be summed
+ * - spaceFinder: `region.spaceFinderEnabled` and the user is a region member/admin (always member-only)
  * - measure: every region
  */
 export const deriveAvailableModes = ({
@@ -19,7 +22,7 @@ export const deriveAvailableModes = ({
   reviewListsCount = 0,
   canManage = false,
 }: {
-  region: Pick<TRegion, 'notesOsm' | 'notesInternal' | 'categories'>
+  region: Pick<TRegion, 'notesOsm' | 'notesInternal' | 'categories' | 'spaceFinderEnabled'>
   qaConfigsCount: number
   reviewListsCount?: number
   /** Region member/admin. Can open Prüflisten before any list exists. */
@@ -30,19 +33,21 @@ export const deriveAvailableModes = ({
     qa: qaConfigsCount > 0,
     reviewLists: reviewListsCount > 0 || canManage,
     calculator: calculatorDatasetsForCategories(region.categories).length > 0,
+    spaceFinder: region.spaceFinderEnabled && canManage,
     measure: true,
   } satisfies AvailableModes
 }
 
 /**
- * QA and Prüflisten are always member-only. Hinweise is when the region has only internal notes.
+ * QA, Prüflisten and Flächenfinder are always member-only (every planning server function already
+ * requires membership). Hinweise is member-only when the region has only internal notes.
  * Summieren and Messen are open to everyone who can see the region.
  */
 export const isMemberOnlyMode = (
   mode: Exclude<RegionMode, 'map'>,
   region: Pick<TRegion, 'notesOsm' | 'notesInternal'>,
 ) => {
-  if (mode === 'qa' || mode === 'reviewLists') return true
+  if (mode === 'qa' || mode === 'reviewLists' || mode === 'spaceFinder') return true
   if (mode === 'calculator' || mode === 'measure') return false
   return Boolean(region.notesInternal && !region.notesOsm)
 }

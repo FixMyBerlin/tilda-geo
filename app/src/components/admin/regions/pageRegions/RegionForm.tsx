@@ -38,7 +38,7 @@ const yesNoItems = [
   { value: 'false', label: 'Nein' },
 ]
 
-/** Section ids (jump list + URL hash) and titles of the 12 field groups, in page order. */
+/** Section ids (jump list + URL hash) and titles of the 13 field groups, in page order. */
 const sectionLabels = {
   identity: 'Identität',
   visibility: 'Sichtbarkeit',
@@ -52,6 +52,7 @@ const sectionLabels = {
   welcome: 'Willkommensdialog',
   cache: 'Cache-Warming',
   notes: 'Hinweise',
+  spaceFinder: 'Flächenfinder',
 } satisfies Record<string, string>
 
 export const regionFormEmptyDefaults = {
@@ -64,6 +65,7 @@ export const regionFormEmptyDefaults = {
   notesOsm: 'true' as const,
   notesInternal: 'false' as const,
   showSearch: 'false' as const,
+  spaceFinderEnabled: 'false' as const,
   mapLat: '52.5',
   mapLng: '13.4',
   mapZoom: '10',
@@ -463,6 +465,30 @@ export function RegionForm(props: Props) {
                   )}
                 </form.Field>
               ))}
+            </div>
+          </AdminFormSection>
+
+          <AdminFormSection
+            id="spaceFinder"
+            title={sectionLabels.spaceFinder}
+            description="Zusätzlich die Kategorie „poi“ (Orte, Ziele, Grenzen) unter „Kategorien“ aktivieren, sonst können die Zielorte, Haltestellen und Bikesharing, die in die Berechnung eingehen, in der Karte nicht angezeigt werden."
+          >
+            <div className={choiceOptionListClassName}>
+              <form.Field name="spaceFinderEnabled">
+                {(field) => (
+                  <ChoiceCheckbox
+                    id="spaceFinderEnabled"
+                    name={field.name}
+                    checked={field.state.value === 'true'}
+                    ariaLabel="Flächenfinder aktiv"
+                    label="Flächenfinder aktiv"
+                    onBlur={field.handleBlur}
+                    onChange={(checked) =>
+                      field.handleChange((_prev) => (checked ? 'true' : 'false') as typeof _prev)
+                    }
+                  />
+                )}
+              </form.Field>
             </div>
           </AdminFormSection>
         </AdminFormLayout>

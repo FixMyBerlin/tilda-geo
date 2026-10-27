@@ -23,12 +23,14 @@ const decode = (config: string, categories: MapDataCategoryId[]) =>
 
 describe('templateWithLegacyCalculatorSubcategories()', () => {
   // Checksums of the fresh config right before the subcategories were removed (develop a6be8269e).
+  // No `poi` case: the Bushaltestellen subcategory changed the `poi` checksum since, so old links
+  // with `poi` fall back to the stored templates.
   test.each([
     [['parkingTilda'], '1649tc'],
     [['parkingTilda', 'roads'], 'dgp49i'],
     [['parkingTilda', 'parkingLars'], 'usbee5'],
     [['parkingLars'], '7yzzp6'],
-    [['bikelanes', 'parkingLars', 'poi'], 'shaxr3'],
+    [['bikelanes', 'parkingLars'], '1h914bv'],
   ] as [MapDataCategoryId[], string][])(
     '%j has the checksum of old links',
     (categories, checksum) => {

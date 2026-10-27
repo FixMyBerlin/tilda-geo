@@ -79,6 +79,7 @@ export const MapInterface = () => {
         )}
         <OsmNotes />
         <SidebarLayerControls />
+        {/* Also renders the planning candidate list while that tool is active. */}
         <SidebarInspector />
         {/* Floats above the map and its controls; the user can move it out of the way. The box is
             the package's; these classes give it the look of our sheets (`mapOverlaySheetClassName`:

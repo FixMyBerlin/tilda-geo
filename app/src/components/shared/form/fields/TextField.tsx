@@ -4,7 +4,14 @@ import { isPartialEnDecimalInput } from '@/components/shared/form/enDecimalInput
 import { uniqueFormattedFormErrors } from '@/components/shared/form/formatError'
 import type { FormApi } from '@/components/shared/form/types'
 import type { FieldProps } from './sharedStyles'
-import { inputBase, inputError, inputNormal, inputReadonly, labelClass } from './sharedStyles'
+import {
+  fieldErrorClass,
+  inputBase,
+  inputError,
+  inputNormal,
+  inputReadonly,
+  labelClass,
+} from './sharedStyles'
 
 type Props<T extends Record<string, unknown>> = FieldProps & {
   form: FormApi<T>
@@ -83,7 +90,7 @@ export function TextField<T extends Record<string, unknown>>({
             />
             {help && <p className="mt-2 text-sm text-gray-500">{help}</p>}
             {hasError && (
-              <div role="alert" className="mt-1 text-sm text-red-800">
+              <div role="alert" className={fieldErrorClass}>
                 {uniqueFormattedFormErrors(errors).map((msg) => (
                   <p key={msg}>{msg}</p>
                 ))}

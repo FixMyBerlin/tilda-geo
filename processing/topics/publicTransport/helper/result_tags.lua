@@ -5,6 +5,10 @@ local CLEANER = require('topics.helper.sanitize_cleaner')
 local function result_tags_public_transport(tags)
   local category
 
+  -- Bus first so a stop that is both bus stop and rail stop keeps the (more specific) rail category.
+  if tags.highway == 'bus_stop' then
+    category = 'bus_stop'
+  end
   if tags.railway == 'station' or tags.railway == 'halt' then
     category = 'railway_station'
   end
