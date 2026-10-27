@@ -87,4 +87,19 @@ export const layers_ziele_plus_publictransport: StyleLayer[] = [
       ],
     },
   },
+  // `category=bus_stop` only comes from the Flächenfinder processing (`highway=bus_stop`).
+  {
+    id: 'bus-stops',
+    type: 'symbol',
+    filter: ['==', ['get', 'category'], 'bus_stop'],
+    layout: {
+      'icon-allow-overlap': true,
+      'icon-image': 'bus-stop',
+      'icon-padding': 1,
+      'icon-size': ['interpolate', ['linear'], ['zoom'], 14, 0.6, 18, 1],
+    },
+    paint: {
+      'icon-opacity': 1,
+    },
+  },
 ]
