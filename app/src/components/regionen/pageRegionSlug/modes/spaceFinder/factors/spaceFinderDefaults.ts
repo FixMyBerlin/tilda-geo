@@ -98,7 +98,7 @@ export const FACTOR_HELP: Record<string, string> = {
   w_cyclepath:
     'Vorhandene Radwege aus OpenStreetMap heben den Bedarf. Bis 20 m Entfernung gibt es die volle Punktzahl, danach fällt sie bis zur eingestellten Maximaldistanz auf null. Das Gewicht bestimmt, wie stark diese Nähe im Grundscore zählt.',
   w_transit:
-    'Haltestellen von U-Bahn, Straßenbahn, Bus und Bahn sowie Bikesharing-Stationen in der Nähe heben den Bedarf. Je näher, desto höher; Bahnhöfe wirken weiter als Haltestellen, Bushaltestellen und Bikesharing am kleinräumigsten. Das Gewicht bestimmt den Anteil am Grundscore. Unter „ÖPNV-Arten“ steht das Verhältnis von ÖPNV und Bikesharing zueinander: zusammen immer 100 %, wirksam nur in diesem Faktor.',
+    'Haltestellen von U-Bahn, Straßenbahn, Bus und Bahn sowie Bikesharing-Stationen in der Nähe heben den Bedarf. Je näher, desto höher; Bahnhöfe wirken weiter als Haltestellen, Bushaltestellen und Bikesharing am kleinräumigsten. Das Gewicht bestimmt den Anteil am Grundscore. Unter „ÖPNV-Arten“ steht das Verhältnis von ÖPNV und Bikesharing zueinander: zusammen immer 100 %, wirksam nur in diesem Faktor. Sichtbar in der Karte unter „Orte, Ziele, Grenzen“ → „ÖPNV-Haltepunkte und Fähranleger“ und unter „Fahrradparken“ (Bikesharing).',
   w_target:
     'Gebäude mit Alltagszielen (Grundversorgung, Bildung, Einkauf, Freizeit) heben den Bedarf direkt daneben; der Zuschlag nimmt bis 20 m Abstand linear ab. Das Gewicht bestimmt die maximalen Punkte, „Zielort-Arten“ das Verhältnis der vier Arten (zusammen 100 %). Sichtbar in der Karte unter „Orte, Ziele, Grenzen“ → „Quellen & Ziele“.',
   w_fussgaengerzone:

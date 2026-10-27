@@ -24,13 +24,13 @@ export const OEPNV_CATEGORIES: {
     key: 'ÖPNV',
     label: 'ÖPNV',
     color: '#2563eb',
-    help: 'U-Bahn-Eingänge, Straßenbahnhaltestellen, Bushaltestellen, Bahnhöfe und Bahnhofsgebäude. Der nächstgelegene dieser Typen zählt, Bahnhöfe wirken am weitesten, Bushaltestellen am kleinräumigsten.',
+    help: 'U-Bahn-Eingänge, Straßenbahnhaltestellen, Bushaltestellen, Bahnhöfe und Bahnhofsgebäude. Der nächstgelegene dieser Typen zählt, Bahnhöfe wirken am weitesten, Bushaltestellen am kleinräumigsten. Karte: „ÖPNV-Haltepunkte und Fähranleger“.',
   },
   {
     key: 'Bikesharing',
     label: 'Bikesharing',
     color: '#059669',
-    help: 'Bikesharing-Stationen (Leihräder) aus OpenStreetMap, gleicher Radius wie Bushaltestellen.',
+    help: 'Bikesharing-Stationen (Leihräder) aus OpenStreetMap, gleicher Radius wie Bushaltestellen. Karte: „Fahrradparken“.',
   },
 ]
 
