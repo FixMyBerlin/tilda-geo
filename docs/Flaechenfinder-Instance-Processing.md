@@ -22,11 +22,11 @@ ssh flaechenfinder
 systemctl list-timers tilda-processing       # next scheduled run
 systemctl start --no-block tilda-processing  # run now (same run as the timer)
 journalctl -u tilda-processing -f            # follow the run
-systemctl status tilda-processing            # "failed" = last run exited non-zero
 ```
 
-A failed run exits non-zero (`processing/index.ts`), so `docker ps -a`, systemd and Ansible
-show it. The `public.meta` row of that run stays on `processing`.
+A failed run still exits with code 0, so systemd shows it as succeeded. Look for
+`[ERROR] Processing failed` in `journalctl -u tilda-processing`, or a `public.meta` row that
+stays on `processing`.
 
 For a targeted run (e.g. one topic after a code fix), run it manually on the instance:
 
