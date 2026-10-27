@@ -96,7 +96,8 @@ export const layers_ziele_plus_publictransport: StyleLayer[] = [
       'icon-allow-overlap': true,
       'icon-image': 'bus-stop',
       'icon-padding': 1,
-      'icon-size': ['interpolate', ['linear'], ['zoom'], 14, 0.6, 18, 1],
+      // The SVG is 32 px; 0.43 gives the ~14 px of the U-Bahn icon (17 px at 0.8).
+      'icon-size': 0.43,
     },
     paint: {
       'icon-opacity': 1,
