@@ -45,12 +45,19 @@ export const subcat_poi_plus_buildingEntrances: FileMapDataSubcategory = {
       legends: [
         {
           id: 'main',
-          name: 'Haupt-/Wohneingang',
+          name: 'Eingang',
+          desc: [
+            '`entrance=main`, `entrance=home`, `entrance=staircase`',
+            '`entrance=yes`: Eingänge ohne nähere Angabe',
+          ],
           style: { type: 'circle', color: mainColor },
         },
         {
           id: 'other',
-          name: 'Sonstiger Eingang',
+          name: 'Neben-/Notausgang',
+          desc: [
+            'Alle übrigen `entrance`-Werte, u. a. `entrance=exit`, `entrance=service`, `entrance=emergency`, `entrance=secondary`, `entrance=shop`',
+          ],
           style: { type: 'circle', color: otherColor },
         },
       ],
