@@ -18,6 +18,8 @@ Core code: [`flaechenfinder/scorer.py`](flaechenfinder/scorer.py)
      `oepnv_category_shares` (sum 100 %, normalized to the maximum); they are combined as the
      sum weighted by these shares, capped at 100 (see
      `oepnv_category_factors`/`scorer.py`)
+   - `score_bewohnerbedarf` – bonus near inhabited buildings: census residents are assigned to
+     the nearest OSM building within 5 m and count with a 20 m ramp from its edge
 3. **Base score** – weighted sum of the sub-scores (`weights` in the
    `factorConfig`, see [`flaechenfinder/config.py`](flaechenfinder/config.py)).
 4. **Vegetation effect** – not an additive sub-score but a continuous

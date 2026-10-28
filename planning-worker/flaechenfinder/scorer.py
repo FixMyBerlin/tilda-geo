@@ -8,6 +8,7 @@ from scipy.sparse import coo_matrix
 from scipy.sparse.csgraph import connected_components
 
 from .config import (
+    CENSUS_BUILDING_TOLERANCE_M,
     USER_LINE_BUFFER_M,
     USER_POINT_BUFFER_M,
     ZIELORT_CATEGORIES,
@@ -186,12 +187,15 @@ def _census_demand_sources(
 ) -> gpd.GeoDataFrame:
     """Resident demand sources: census residents aggregated onto building polygons.
 
-    The points from `data.census_population_point` sit on the building centroid.
-    For a distance ramp that starts at the building edge, they are assigned to the
-    buildings via point-in-polygon and summed per building; the polygon is then the
-    source. Points without a building hit – the 0.5 % `cluster_typ='gitter_mitte'`
-    plus mismatches between ALKIS (census) and OSM (`public._buildings`) – keep
-    their point geometry so their residents are not lost.
+    The points from `data.census_population_point` sit on the centroid of an ALKIS
+    building. For a distance ramp that starts at the building edge, each point is
+    assigned to the nearest OSM building (`public._buildings`) within
+    `CENSUS_BUILDING_TOLERANCE_M` and summed per building; the polygon is then the
+    source. A point inside a building has distance 0 and keeps that building; the
+    tolerance covers ALKIS (census) and OSM outlines that do not line up.
+    Points without a building within the tolerance – `cluster_typ='gitter_mitte'`,
+    buildings < 100 m² or missing in OSM – keep their point geometry so their
+    residents are not lost.
 
     Both GeoDataFrames must be in the same metric CRS. Returns: GeoDataFrame with
     the column `einwohner` and mixed geometries (building polygons + leftover
@@ -205,9 +209,12 @@ def _census_demand_sources(
         return points
 
     bld = buildings_proj[["geometry"]].reset_index(drop=True)
-    hits = gpd.sjoin(points, bld, how="left", predicate="within")
-    # With overlapping buildings a point hits several times – count only the first
-    # hit, otherwise its residents would be summed more than once.
+    hits = gpd.sjoin_nearest(
+        points, bld, how="left", max_distance=CENSUS_BUILDING_TOLERANCE_M
+    )
+    # On a tie (overlapping buildings, or a point equally far from two) a point hits
+    # several times – count only the first hit, otherwise its residents would be
+    # summed more than once.
     hits = hits[~hits.index.duplicated(keep="first")]
 
     matched = hits["index_right"].notna()
@@ -447,8 +454,9 @@ def run_flaechenfinder(
     # Resident points from `data.census_population_point` (census 2022, disaggregated
     # to buildings) create demand around inhabited buildings – regardless of age, only
     # `total` counts. The points sit on the building centroid; so the ramp starts at
-    # the BUILDING EDGE (not at its center), they are aggregated via point-in-polygon
-    # onto the buildings loaded in step 4 (`_census_demand_sources`). The result is
+    # the BUILDING EDGE (not at its center), they are aggregated onto the nearest
+    # building loaded in step 4 within CENSUS_BUILDING_TOLERANCE_M
+    # (`_census_demand_sources`). The result is
     # the weighted neighborhood sum `bewohner_ew`: residents, decreasing linearly with
     # distance. The bonus derivation happens in the MCE step (13). Loaded only with
     # weight > 0; otherwise `bewohner_ew` stays NaN (→ score_bewohnerbedarf NaN → DB NULL).
