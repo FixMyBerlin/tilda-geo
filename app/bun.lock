@@ -18,7 +18,7 @@
         "@modelcontextprotocol/sdk": "1.31.0",
         "@osm-editor-kit/react-map-gl-draw": "1.0.0",
         "@osm-editor-kit/street-imagery": "1.0.0",
-        "@osm-editor-kit/street-imagery-react": "1.0.0",
+        "@osm-editor-kit/street-imagery-react": "1.1.0",
         "@osm-traffic-signs/converter": "0.6.0",
         "@prisma/adapter-pg": "7.8.0",
         "@prisma/client": "7.8.0",
@@ -537,7 +537,7 @@
 
     "@osm-editor-kit/street-imagery": ["@osm-editor-kit/street-imagery@1.0.0", "", { "dependencies": { "@mapbox/vector-tile": "^3.0.0", "@types/geojson": "^7946.0.16", "date-fns": "^4.4.0", "pbf": "^5.1.0" }, "peerDependencies": { "maplibre-gl": "^6" }, "optionalPeers": ["maplibre-gl"] }, "sha512-809xPDBFvU/kOH4xc5gSjaxzF/pTNCehjYltrBP1/C5PIR0IcE/rXXMXQEhS2038lZFeMwMGK30cDxFrMoGAAw=="],
 
-    "@osm-editor-kit/street-imagery-react": ["@osm-editor-kit/street-imagery-react@1.0.0", "", { "peerDependencies": { "@osm-editor-kit/street-imagery": "^1.0.0", "@panoramax/web-viewer": "^5", "@tanstack/react-query": "^5", "mapillary-js": "^4", "maplibre-gl": "^6", "react": "^19", "react-dom": "^19", "react-map-gl": "^8", "zustand": "^5" }, "optionalPeers": ["@panoramax/web-viewer"] }, "sha512-QtmHW26bmRut/OABxeDzjDdkGhGuRFcPJ0CTJrfz2MUKqVlQNn+9beIY6tIBhBsRVFSxR0T//fSJv4mi6MlZ5A=="],
+    "@osm-editor-kit/street-imagery-react": ["@osm-editor-kit/street-imagery-react@1.1.0", "", { "dependencies": { "@types/geojson": "^7946.0.16" }, "peerDependencies": { "@osm-editor-kit/street-imagery": "^1.0.0", "@panoramax/web-viewer": "^5", "@tanstack/react-query": "^5", "mapillary-js": "^4", "maplibre-gl": "^6", "react": "^19", "react-dom": "^19", "react-map-gl": "^8", "zustand": "^5" }, "optionalPeers": ["@panoramax/web-viewer", "mapillary-js"] }, "sha512-h7QdUI8da8qeeOIthnnLUlLlZUecs2odRcloaldqktymjYNoi31kXpyyCnaFDIWJDqW08zu0I3a/m4F0mBpelw=="],
 
     "@osm-traffic-signs/converter": ["@osm-traffic-signs/converter@0.6.0", "", { "dependencies": { "opening_hours": "^3.12.0" } }, "sha512-KjMOEv3qsnC5lzMK1CS9sdA3xTjEnabVshWxgAan0envgyvpVYeZIIvhv6aUNUT9mlg/LLdZs7aEKcnXG5Lgmw=="],
 

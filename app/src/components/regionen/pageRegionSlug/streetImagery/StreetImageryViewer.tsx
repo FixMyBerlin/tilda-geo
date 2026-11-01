@@ -6,9 +6,9 @@ import {
 import {
   FloatingPhotoViewer,
   PhotoDate,
-  StreetLevelImageryViewer,
   useViewerActions,
 } from '@osm-editor-kit/street-imagery-react'
+import { StreetLevelImageryViewer } from '@osm-editor-kit/street-imagery-react/viewer'
 import { useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
