@@ -1,3 +1,5 @@
+require('topics.helper.osm2pgsql')
+
 describe('collect_todos', function()
   local collect_todos = require('topics.helper.collect_todos')
   local road_todo_categories = require('topics.roads_bikelanes.roads.road_todo_categories')

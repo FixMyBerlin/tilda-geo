@@ -1,3 +1,5 @@
+require('topics.helper.osm2pgsql')
+
 describe('to_markdown_list', function()
   local to_markdown_list = require('topics.helper.to_markdown_list')
   local collect_todos = require('topics.helper.collect_todos')

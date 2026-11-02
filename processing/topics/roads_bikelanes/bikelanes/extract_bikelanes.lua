@@ -6,8 +6,6 @@ local road_width = require('topics.helper.road_width')
 local derive_surface = require('topics.helper.derive_surface')
 local derive_smoothness = require('topics.helper.derive_smoothness')
 local bikelane_todo_categories = require('topics.roads_bikelanes.bikelanes.bikelane_todo_categories')
-local adjoining_of_vs_csv_todo = require('topics.roads_bikelanes.pseudo_tags_sidepath.adjoining_of_vs_csv_todo')
-local bikelane_todos = adjoining_of_vs_csv_todo.append_to(bikelane_todo_categories)
 local collect_todos = require('topics.helper.collect_todos')
 local derive_oneway = require('topics.roads_bikelanes.bikelanes.derive_oneway')
 local default_id = require('topics.helper.default_id')
@@ -166,7 +164,7 @@ local function bikelanes(object_tags, object_geom)
           object_geom
         )
 
-        local todos = collect_todos(bikelane_todos, transformed_tags, result_tags)
+        local todos = collect_todos(bikelane_todo_categories, transformed_tags, result_tags)
         result_tags._todo_list = to_todo_tags(todos)
         result_tags.todos = to_markdown_list(todos)
       end

@@ -3,6 +3,7 @@ local sanitize_traffic_sign = require('topics.helper.sanitize_traffic_sign')
 local SET = require('topics.helper.sets')
 local bikelane_categories = require('topics.roads_bikelanes.bikelanes.bikelane_categories')
 local has_tag_with_prefix = require('topics.helper.has_tag_with_prefix')
+local is_adjoining_of_vs_csv = require('topics.roads_bikelanes.pseudo_tags_sidepath.is_adjoining_of_vs_csv')
 local is_unusual_width = require('topics.roads_bikelanes.helper.is_unusual_width')
 -- local inspect = require('inspect')
 local BikelaneTodo = {}
@@ -557,6 +558,15 @@ local missing_oneway__mapillary = BikelaneTodo.new({
   end
 })
 
+-- === Adjoining road ===
+local adjoining_of_vs_csv = BikelaneTodo.new({
+  id = 'adjoining_of_vs_csv',
+  desc = 'OSM is_sidepath:of and the sidepath CSV name different road classes. Published adjoining_road follows is_sidepath:of.',
+  todoTableOnly = true,
+  priority = function(_, _) return '2' end,
+  conditions = is_adjoining_of_vs_csv,
+})
+
 local bikelane_todo_categories = {
   -- REMINDER: Always use snake_case, never camelCase
   -- Infrastructure
@@ -584,6 +594,7 @@ local bikelane_todo_categories = {
   unusual_width,
   missing_surface,
   missing_oneway,
+  adjoining_of_vs_csv,
 
   -- Mapillary versions…
   missing_traffic_sign_vehicle_destination__mapillary,

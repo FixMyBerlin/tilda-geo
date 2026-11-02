@@ -6,8 +6,6 @@ local default_id = require('topics.helper.default_id')
 local paths_generalization = require('topics.roads_bikelanes.paths.paths_generalization')
 local road_generalization = require('topics.roads_bikelanes.roads.road_generalization')
 local road_todo_categories = require('topics.roads_bikelanes.roads.road_todo_categories')
-local adjoining_of_vs_csv_todo = require('topics.roads_bikelanes.pseudo_tags_sidepath.adjoining_of_vs_csv_todo')
-local road_todos = adjoining_of_vs_csv_todo.append_to(road_todo_categories)
 local collect_todos = require('topics.helper.collect_todos')
 local to_markdown_list = require('topics.helper.to_markdown_list')
 local to_todo_tags = require('topics.helper.to_todo_tags')
@@ -41,7 +39,7 @@ local function roads_bikelanes_roads(context)
   if not highway_classes.sidepath_highway_classes[object_tags.highway] then
     merge_table(result_tags, maxspeed(object_tags))
   end
-  local todos = collect_todos(road_todos, object_tags, result_tags)
+  local todos = collect_todos(road_todo_categories, object_tags, result_tags)
   result_tags._todo_list = to_todo_tags(todos)
   result_tags.todos = to_markdown_list(todos)
 

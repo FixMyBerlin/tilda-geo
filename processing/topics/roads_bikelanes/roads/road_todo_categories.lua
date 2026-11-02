@@ -1,3 +1,4 @@
+local is_adjoining_of_vs_csv = require('topics.roads_bikelanes.pseudo_tags_sidepath.is_adjoining_of_vs_csv')
 local is_unusual_width = require('topics.roads_bikelanes.helper.is_unusual_width')
 
 local road_todo_class = {}
@@ -58,9 +59,19 @@ local unusual_width = road_todo_class.new({
   conditions = is_unusual_width,
 })
 
+-- === Adjoining road ===
+local adjoining_of_vs_csv = road_todo_class.new({
+  id = 'adjoining_of_vs_csv',
+  desc = 'OSM is_sidepath:of and the sidepath CSV name different road classes. Published adjoining_road follows is_sidepath:of.',
+  todoTableOnly = true,
+  priority = function(_, _) return '2' end,
+  conditions = is_adjoining_of_vs_csv,
+})
+
 local road_todo_categories = {
   deprecated_cycleway_shared,
   unusual_width,
+  adjoining_of_vs_csv,
 }
 
 return road_todo_categories
