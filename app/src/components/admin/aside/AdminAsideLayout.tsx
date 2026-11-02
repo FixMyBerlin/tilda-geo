@@ -16,6 +16,8 @@ type Props = {
   sections: AdminAsideSection[]
   /** `AdminFormAsideActions` (inside a `<form>`) or `AdminAsideActions`; rendered for desktop and mobile. */
   actions: ReactNode
+  /** Error line in the sticky mobile bar; the desktop aside shows it as part of `actions`. */
+  mobileError?: string | null
   /** `AdminFormSection`s with ids matching `sections`. */
   children: ReactNode
 }
@@ -24,7 +26,7 @@ type Props = {
  * New / edit / detail page frame: content column + sticky aside (jump list + actions) from `lg`,
  * sticky bar below `AdminMobileTopBar` on smaller screens. Wrap it in the `<form>` on form pages.
  */
-export const AdminAsideLayout = ({ sections, actions, children }: Props) => {
+export const AdminAsideLayout = ({ sections, actions, mobileError, children }: Props) => {
   const { activeId, jumpToSection } = useActiveSectionId(sections.map((section) => section.id))
   const showJumpList = sections.length >= 2
 
@@ -33,7 +35,7 @@ export const AdminAsideLayout = ({ sections, actions, children }: Props) => {
       <div
         className={twJoin(
           adminAsideMobileBarClassName,
-          '-mx-4 -mt-2 mb-6 flex items-center gap-2 border-y border-gray-200 bg-gray-50 px-4 py-2 sm:-mx-6 sm:px-6',
+          '-mx-4 -mt-2 mb-6 flex flex-wrap items-center gap-2 border-y border-gray-200 bg-gray-50 px-4 py-2 sm:-mx-6 sm:px-6',
         )}
       >
         {showJumpList ? (
@@ -49,6 +51,11 @@ export const AdminAsideLayout = ({ sections, actions, children }: Props) => {
         <div className="flex shrink-0 items-center gap-2">
           <AdminAsideVariantContext value="mobile">{actions}</AdminAsideVariantContext>
         </div>
+        {mobileError ? (
+          <p role="alert" className="w-full text-sm text-red-700">
+            {mobileError}
+          </p>
+        ) : null}
       </div>
 
       <div className={adminAsideLayoutClassName}>

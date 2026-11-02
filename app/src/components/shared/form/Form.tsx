@@ -11,8 +11,8 @@ import { uniqueFormattedFormErrors } from '@/components/shared/form/formatError'
 import type { FormApi } from '@/components/shared/form/types'
 import { buttonStyles } from '@/components/shared/links/styles'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
+import { getErrorMessage } from '@/components/shared/toast/toastError'
 import { toastSuccess } from '@/components/shared/toast/toastSuccess'
-import { isProd } from '@/components/shared/utils/isEnv'
 import type { Router } from '@/router'
 
 type AppLinkTo = LinkOptions<Router>['to']
@@ -31,33 +31,43 @@ export type SubmitResult<T = Record<string, unknown>> =
       errors?: Partial<Record<Extract<keyof T, string>, string[]>>
     }
 
+/**
+ * Shows server errors on their rendered fields; returns the messages that have no such field.
+ * Field `errors` are derived from `errorMap`, and `onSubmit` entries clear on the next valid change.
+ */
 function applyFieldErrors(
-  form: { setFieldMeta: unknown; state: { values: unknown } },
+  form: { setFieldMeta: unknown; getFieldInfo: unknown },
   errors: Partial<Record<string, string[]>> | undefined,
 ) {
-  if (!errors) return
-  const values = form.state.values
-  if (typeof values !== 'object' || values === null) return
+  if (!errors) return []
+  const getFieldInfo = form.getFieldInfo as (field: string) => { instance: unknown }
   const setFieldMeta = form.setFieldMeta as (
     field: string,
-    updater: (prev: { errors?: string[] }) => { errors: string[] },
+    updater: (prev: { errorMap?: Record<string, unknown> }) => {
+      errorMap: Record<string, unknown>
+    },
   ) => void
+  const unassignedMessages: string[] = []
   for (const key of Object.keys(errors)) {
-    if (!(key in values)) continue
     const messages = errors[key]
     if (!messages?.length) continue
+    if (!getFieldInfo(key).instance) {
+      unassignedMessages.push(...messages)
+      continue
+    }
     setFieldMeta(key, (prev) => ({
       ...prev,
-      errors: messages,
+      errorMap: { ...prev.errorMap, onSubmit: messages.join(', ') },
     }))
   }
+  return unassignedMessages
 }
 
 /** Use schema input shape for field values (differs from `z.infer` when the schema uses `.transform()`). */
 type ActionBarPlacement = 'bottom' | 'both' | 'none'
 
 type FormRenderState = {
-  /** Message of the last rejected submit (`SubmitResult.message`), `null` otherwise. */
+  /** Message of the last rejected, invalid or failed submit, `null` otherwise. */
   submitError: string | null
 }
 
@@ -116,9 +126,23 @@ export function Form<TValues extends Record<string, unknown>>({
       onChange: schema as FormValidateOrFn<TValues>,
       onSubmit: schema as FormValidateOrFn<TValues>,
     },
+    onSubmitInvalid: ({ formApi }) => {
+      const message =
+        uniqueFormattedFormErrors(formApi.state.errors).join(' ') ||
+        'Bitte korrigieren Sie die Fehler im Formular'
+      console.error('[Form] submit invalid', formApi.getAllErrors())
+      setSubmitError(message)
+    },
     onSubmit: async ({ value }) => {
       setSubmitError(null)
-      const result = await onSubmit(value)
+      let result: SubmitResult<TValues> | undefined
+      try {
+        result = await onSubmit(value)
+      } catch (error) {
+        console.error('[Form] submit failed', error)
+        setSubmitError(getErrorMessage(error, 'Ein Fehler ist aufgetreten'))
+        return
+      }
       if (!result) return
       if (result.success) {
         form.reset(result.resetValues ?? value)
@@ -131,15 +155,9 @@ export function Form<TValues extends Record<string, unknown>>({
         }
         return
       }
-      if (!isProd) {
-        console.info('[Form] submit rejected', {
-          message: result.message,
-          fieldErrors: result.errors,
-          values: value,
-        })
-      }
-      setSubmitError(result.message)
-      applyFieldErrors(form, result.errors)
+      console.error('[Form] submit rejected:', result.message, result.errors)
+      const unassignedMessages = applyFieldErrors(form, result.errors)
+      setSubmitError([result.message, ...unassignedMessages].join(' '))
     },
   })
 
