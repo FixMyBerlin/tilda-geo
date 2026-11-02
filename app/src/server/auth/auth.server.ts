@@ -157,14 +157,13 @@ const options = {
               })
             }
 
-            // Return provider id (osmId) as id so Better Auth creates Account with accountId = OSM user id.
+            // Account.accountId comes from `id` in getUserInfo (the OSM user id), not from here.
             const outEmail = user.email ?? osmPlaceholderEmail(user.osmId)
             return {
-              id: String(user.osmId),
               name: user.osmName || '',
               email: outEmail,
               emailVerified: user.emailVerified ?? false,
-              image: user.osmAvatar,
+              image: user.osmAvatar ?? undefined,
               additionalFields: {
                 osmId: user.osmId,
                 osmName: user.osmName,

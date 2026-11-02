@@ -28,7 +28,7 @@ test.describe('Auth Setup', () => {
       return
     }
 
-    await page.goto('/api/auth/sign-in/osm')
+    await page.goto('/api/sign-in/osm')
     await page.waitForURL(/openstreetmap\.org/, { timeout: 10000 })
 
     await page.fill('input[name="username"]', username)

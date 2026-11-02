@@ -2,29 +2,32 @@ import { getRouteApi, Link, useRouter } from '@tanstack/react-router'
 
 const routeApi = getRouteApi('/_pages/oAuthError')
 
+const lostStateMessage =
+  'Der Anmeldevorgang konnte nicht fortgesetzt werden (Anmeldezustand fehlt oder ist ungültig). Das passiert zum Beispiel nach einem Serverfehler, wenn Cookies blockiert werden oder wenn die Seite während der Anmeldung neu geladen wird. Bitte starten Sie die Anmeldung erneut.'
+
 const oauthErrorMessages = {
-  please_restart_the_process:
-    'Der Anmeldevorgang konnte nicht fortgesetzt werden (Anmeldezustand fehlt oder ist ungültig). Das passiert zum Beispiel nach einem Serverfehler, wenn Cookies blockiert werden oder wenn die Seite während der Anmeldung neu geladen wird. Bitte starten Sie die Anmeldung erneut.',
+  state_not_found: lostStateMessage,
+  state_invalid: lostStateMessage,
   state_mismatch:
     'Der Anmeldevorgang wurde unterbrochen oder die Sitzung passt nicht mehr (abgelaufen oder manipuliert). Bitte melden Sie sich erneut an.',
-  invalid_callback_url:
-    'Die Zielseite für die Anmeldung war ungültig. Bitte starten Sie die Anmeldung erneut.',
   oauth_sign_in_failed:
     'Die Anmeldung konnte nicht gestartet werden. Bitte versuchen Sie es erneut.',
-  oauth_sign_in_missing_redirect:
-    'Die Anmeldung konnte nicht gestartet werden, weil kein Weiterleitungsziel zurückgegeben wurde.',
-  oauth_sign_in_exception:
-    'Die Anmeldung konnte wegen eines technischen Fehlers nicht gestartet werden.',
+  access_denied:
+    'Die Anmeldung wurde bei OpenStreetMap abgebrochen. Ohne Ihre Zustimmung können wir Sie nicht anmelden.',
+  invalid_code:
+    'OpenStreetMap hat die Anmeldung nicht bestätigt. Bitte starten Sie die Anmeldung erneut.',
+  unable_to_get_user_info:
+    'Ihre Profildaten konnten nicht von OpenStreetMap geladen werden. Bitte versuchen Sie es erneut.',
   account_not_linked:
     'OpenStreetMap konnte nicht mit Ihrem Nutzerkonto verknüpft werden. Bitte melden Sie sich erneut an.',
 } satisfies Record<string, string>
 
 export function PageOAuthError() {
-  const { error, error_description } = routeApi.useSearch()
+  const { error, error_description, callbackURL } = routeApi.useSearch()
   const router = useRouter()
   const { href: signInHref } = router.buildLocation({
     to: '/api/sign-in/osm',
-    search: { callbackURL: '/' },
+    search: { callbackURL: callbackURL ?? '/' },
   })
 
   const normalizedError = error?.trim().toLowerCase()

@@ -6,6 +6,7 @@ import { optionalSearchString } from '@/lib/searchParamsSchema'
 const searchSchema = z.object({
   error: optionalSearchString(),
   error_description: optionalSearchString(),
+  callbackURL: optionalSearchString(),
 })
 
 export const Route = createFileRoute('/_pages/oAuthError')({

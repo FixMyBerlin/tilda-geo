@@ -66,8 +66,8 @@ const cookieHeader = (response: Response) =>
  * Returns the session cookie of the signed-in user.
  */
 async function signInWithOsm(auth: ReturnType<typeof createTestAuth>['auth']) {
-  const start = await auth.api.signInWithOAuth2({
-    body: { providerId: 'osm', callbackURL: '/' },
+  const start = await auth.api.signInSocial({
+    body: { provider: 'osm', callbackURL: '/' },
     asResponse: true,
   })
   const { url } = (await start.json()) as { url: string }
@@ -85,7 +85,7 @@ async function signInWithOsm(auth: ReturnType<typeof createTestAuth>['auth']) {
   })
 
   const callback = await auth.handler(
-    new Request(`${ORIGIN}/api/auth/oauth2/callback/osm?code=code&state=${state}`, {
+    new Request(`${ORIGIN}/api/auth/callback/osm?code=code&state=${state}`, {
       headers: { cookie: cookieHeader(start) },
     }),
   )
@@ -93,6 +93,52 @@ async function signInWithOsm(auth: ReturnType<typeof createTestAuth>['auth']) {
   expect(callback.headers.get('location')).not.toContain('error')
   return cookieHeader(callback)
 }
+
+describe('OSM sign-in', () => {
+  afterEach(() => {
+    vi.restoreAllMocks()
+  })
+
+  it('links the account to a user that mapProfileToUser created first', async () => {
+    const { auth, memory } = createTestAuth()
+    const createdAt = new Date()
+    memory.user.push({
+      id: 'existing-user',
+      name: 'mapper',
+      email: 'osm-4711@example.com',
+      emailVerified: false,
+      createdAt,
+      updatedAt: createdAt,
+    })
+
+    await signInWithOsm(auth)
+
+    expect(memory.user).toHaveLength(1)
+    const account = storedAccount(memory)
+    expect(account).toMatchObject({ providerId: 'osm', accountId: '4711', userId: 'existing-user' })
+  })
+
+  it('reuses the Account row of an earlier sign-in', async () => {
+    const { auth, memory } = createTestAuth()
+    await signInWithOsm(auth)
+    const { id } = storedAccount(memory)
+    vi.restoreAllMocks()
+
+    await signInWithOsm(auth)
+
+    expect(storedAccount(memory).id).toBe(id)
+  })
+
+  it('sends a PKCE challenge and the /callback redirect URI to OSM', async () => {
+    const { auth } = createTestAuth()
+    const { url } = await auth.api.signInSocial({ body: { provider: 'osm', callbackURL: '/' } })
+    const params = new URL(url ?? '').searchParams
+
+    expect(params.get('redirect_uri')).toBe(`${ORIGIN}/api/auth/callback/osm`)
+    expect(params.get('code_challenge_method')).toBe('S256')
+    expect(params.get('code_challenge')).toBeTruthy()
+  })
+})
 
 describe('OSM OAuth token storage', () => {
   afterEach(() => {
@@ -108,7 +154,7 @@ describe('OSM OAuth token storage', () => {
     expect(account.accessToken).toMatch(/^[0-9a-f]+$/)
 
     const { accessToken } = await auth.api.getAccessToken({
-      body: { providerId: 'osm', userId: String(account.userId) },
+      body: { accountId: String(account.id), userId: String(account.userId) },
     })
     expect(accessToken).toBe(OSM_ACCESS_TOKEN)
   })
@@ -131,7 +177,7 @@ describe('OSM OAuth token storage', () => {
     account.accessToken = OSM_ACCESS_TOKEN
 
     const { accessToken } = await auth.api.getAccessToken({
-      body: { providerId: 'osm', userId: String(account.userId) },
+      body: { accountId: String(account.id), userId: String(account.userId) },
     })
     expect(accessToken).toBe(OSM_ACCESS_TOKEN)
   })

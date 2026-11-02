@@ -1,25 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { z } from 'zod'
 import { optionalSearchString } from '@/lib/searchParamsSchema'
-import { applyAuthResponseCookies } from '@/server/auth/applyAuthResponseCookies.server'
 import { auth } from '@/server/auth/auth.server'
 import { getSafeSignInCallbackURL } from '@/shared/auth/safeSignInCallbackURL'
 
 const searchSchema = z.object({
   callbackURL: optionalSearchString(),
 })
-
-function buildOAuthErrorRedirect(
-  requestUrl: string,
-  params: { error: string; error_description?: string },
-) {
-  const location = new URL('/oAuthError', requestUrl)
-  location.searchParams.set('error', params.error)
-  if (params.error_description) {
-    location.searchParams.set('error_description', params.error_description)
-  }
-  return location.toString()
-}
 
 function toSafeCallbackURL(rawCallbackURL: string | null, requestUrl: string) {
   const fallback = '/'
@@ -47,64 +34,21 @@ export const Route = createFileRoute('/api/sign-in/osm')({
       GET: async ({ request }) => {
         const searchParams = new URL(request.url).searchParams
         const callbackURL = toSafeCallbackURL(searchParams.get('callbackURL'), request.url)
-
-        const authUrl = new URL('/api/auth/sign-in/oauth2', request.url)
-        const authRequest = new Request(authUrl.toString(), {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ providerId: 'osm', callbackURL }),
-        })
+        const errorCallbackURL = `/oAuthError?${new URLSearchParams({ callbackURL })}`
 
         try {
-          const authResponse = await auth.handler(authRequest)
-          applyAuthResponseCookies(authResponse)
-          const data = (await authResponse.json().catch(() => null)) as {
-            url?: string
-            code?: string
-            message?: string
-          } | null
-
-          if (!authResponse.ok) {
-            return new Response(null, {
-              status: 302,
-              headers: {
-                Location: buildOAuthErrorRedirect(request.url, {
-                  error: data?.code ?? 'oauth_sign_in_failed',
-                  error_description:
-                    data?.message ?? 'Die Anmeldung konnte nicht gestartet werden.',
-                }),
-              },
-            })
-          }
-
-          if (data?.url) {
-            return new Response(null, {
-              status: 302,
-              headers: { Location: new URL(data.url).toString() },
-            })
-          }
-
-          return new Response(null, {
-            status: 302,
-            headers: {
-              Location: buildOAuthErrorRedirect(request.url, {
-                error: 'oauth_sign_in_missing_redirect',
-                error_description:
-                  'Die Anmeldung konnte nicht gestartet werden. Bitte versuchen Sie es erneut.',
-              }),
-            },
+          // auth.api, not auth.handler: the rate limiter of auth.handler would see no client IP in a
+          // request built here, and tanstackStartCookies only sets cookies for auth.api calls.
+          const result = await auth.api.signInSocial({
+            body: { provider: 'osm', callbackURL, errorCallbackURL },
           })
+          if (!('url' in result) || !result.url) throw new Error('No OSM authorization URL')
+          return new Response(null, { status: 302, headers: { Location: result.url } })
         } catch (error) {
           console.error('Failed to initiate OAuth sign-in:', error)
           return new Response(null, {
             status: 302,
-            headers: {
-              Location: buildOAuthErrorRedirect(request.url, {
-                error: 'oauth_sign_in_exception',
-                error_description:
-                  'Die Anmeldung konnte wegen eines Serverfehlers nicht gestartet werden.',
-              }),
-            },
+            headers: { Location: `${errorCallbackURL}&error=oauth_sign_in_failed` },
           })
         }
       },
