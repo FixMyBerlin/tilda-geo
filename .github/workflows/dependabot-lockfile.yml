@@ -34,7 +34,10 @@ jobs:
         working-directory: processing
         run: bun install --minimum-release-age 172800
 
+      # `bun install` set up Husky. This job only pushes bun.lock, CI checks the PR separately.
       - name: Commit bun.lock changes
+        env:
+          HUSKY: 0
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"

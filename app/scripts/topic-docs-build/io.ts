@@ -33,7 +33,9 @@ export const readTopicYamlFiles = async () => {
       }
     }
   }
-  return files
+  // `readdir()` order differs between filesystems. Docs of a shared `sourceId` overwrite each other
+  // in this order, so it decides the content of the generated files, not only their key order.
+  return files.sort((a, b) => a.localeCompare(b, 'en'))
 }
 
 const parseYamlWithPath = (raw: string, filePath: string) => {
