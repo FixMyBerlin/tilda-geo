@@ -25,12 +25,8 @@ local function resolve_motor_road_context(segment, context)
   if HIGHWAYS.path_classes[tags.highway] or HIGHWAYS.sidepath_highway_classes[tags.highway] then
     result.sidepath = adjoining_context.has_sidepath_context(object_tags, tags) and 'yes' or 'no'
     local adjoining = adjoining_context.derive_adjoining_context(object_tags, tags)
-    result.adjoining_road = tags.adjoining_road or adjoining.adjoining_road
-    if tags.adjoining_maxspeed ~= nil then
-      result.adjoining_maxspeed = tags.adjoining_maxspeed
-    else
-      result.adjoining_maxspeed = adjoining.adjoining_maxspeed
-    end
+    result.adjoining_road = adjoining.adjoining_road
+    result.adjoining_maxspeed = adjoining.adjoining_maxspeed
     return result
   end
 
