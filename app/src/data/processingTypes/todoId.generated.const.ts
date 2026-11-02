@@ -39,6 +39,7 @@ export const todoIds = [
   'unexpected_bicycle_access_on_footway__mapillary',
   'unexpected_highway_path',
   'unexpected_highway_path__mapillary',
+  'unusual_width',
   // (oxlint: one line per entry)
 ] as const
 export type TodoId = (typeof todoIds)[number]

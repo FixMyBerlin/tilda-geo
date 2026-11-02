@@ -1,3 +1,4 @@
+local is_unusual_width = require('topics.roads_bikelanes.helper.is_unusual_width')
 
 local road_todo_class = {}
 road_todo_class.__index = road_todo_class
@@ -45,8 +46,21 @@ local deprecated_cycleway_shared = road_todo_class.new({
   end,
 })
 
+-- === Width ===
+local unusual_width = road_todo_class.new({
+  id = 'unusual_width',
+  desc = 'Width that we cannot read or that is unusually high. Fix `width`, or confirm it with `check_date=*` or `check_date:width=*`.',
+  todoTableOnly = true,
+  priority = function(object_tags, _)
+    if object_tags.mapillary_coverage then return '1' end
+    return '2'
+  end,
+  conditions = is_unusual_width,
+})
+
 local road_todo_categories = {
   deprecated_cycleway_shared,
+  unusual_width,
 }
 
 return road_todo_categories

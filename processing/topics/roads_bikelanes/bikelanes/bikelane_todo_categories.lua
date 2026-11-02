@@ -3,6 +3,7 @@ local sanitize_traffic_sign = require('topics.helper.sanitize_traffic_sign')
 local SET = require('topics.helper.sets')
 local bikelane_categories = require('topics.roads_bikelanes.bikelanes.bikelane_categories')
 local has_tag_with_prefix = require('topics.helper.has_tag_with_prefix')
+local is_unusual_width = require('topics.roads_bikelanes.helper.is_unusual_width')
 -- local inspect = require('inspect')
 local BikelaneTodo = {}
 BikelaneTodo.__index = BikelaneTodo
@@ -468,6 +469,16 @@ local missing_width = BikelaneTodo.new({
       and not contains_substring(result_tags.category, 'sharedBusLane')
   end
 })
+local unusual_width = BikelaneTodo.new({
+  id = 'unusual_width',
+  desc = 'Width that we cannot read or that is unusually high. Fix `width`, or confirm it with `check_date=*` or `check_date:width=*`.',
+  todoTableOnly = true,
+  priority = function(object_tags, _)
+    if object_tags.mapillary_coverage then return '1' end
+    return '2'
+  end,
+  conditions = is_unusual_width,
+})
 local missing_width_surface_sett__mapillary = BikelaneTodo.new({
   id = 'missing_width_surface_sett__mapillary',
   desc = 'Ways without `width` but `surface=sett` to count stones',
@@ -570,6 +581,7 @@ local bikelane_todo_categories = {
   -- Other
   currentness_too_old,
   missing_width,
+  unusual_width,
   missing_surface,
   missing_oneway,
 

@@ -4,6 +4,12 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-11
 
+### `roads`, `roadsPathClasses`, `bikelanes`, `parkings`, `routing`: `width`
+
+- `parse_length` reads the seven most used decimal commas (`0,3`, `0,5`, `0,6`, `1,5`, `2,2`, `2,5`, `2,50`), which were empty before. A negative length is empty now.
+- `width` and `width_effective` are empty for `0`: new helper `parse_width`. So `offset` and the parking road width use the highway fallback then. `buffer_*` keeps `0`.
+- New `todos_lines` id `unusual_width` for `roads` and `bikelanes`: a `width` we can't read, `0` or negative, or above 50 m (published as it is). Table-only. `check_date`, `check_date:width`, `survey:date`, `survey:date:width` or `survey_date` closes it, also on the road of a lane.
+
 ### `routing`
 
 - Carriageway and path edges publish the sanitized values of `roads` / `roadsPathClasses` instead of raw OSM tags. `width` is a number in meters or empty (was the OSM text, e.g. `5,7`, which aborted the export). `surface` uses the same values as `roads` (e.g. `dirt` is now `ground`). `smoothness` is also derived from `surface` and other tags, like in `roads`.
