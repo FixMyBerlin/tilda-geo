@@ -30,7 +30,6 @@ import { ModeFormSubmit } from '../../ModeFormSubmit'
 import { modePanelMutedClassName } from '../../modePanel.const'
 import { compactNotesModeParam, zodNotesModeParam } from '../notesModeParam'
 import { osmNotesQueryKey } from '../osmNotesQueryOptions'
-import type { OsmApiNotesThreadType } from '../osmNotesSchema'
 import { useOsmNotesBbox } from '../useOsmNotesBbox'
 
 const OsmNoteSchema = z.object({ comment: z.string().min(1, 'Bitte Hinweistext eingeben.') })
@@ -119,7 +118,7 @@ export const OsmNotesNewForm = () => {
           lon: center.lng,
           text: body,
         },
-      }) as Promise<OsmApiNotesThreadType>
+      })
     },
     onSuccess: () => {
       clearDraft()
