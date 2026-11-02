@@ -64,6 +64,18 @@ describe('is_unusual_width', function()
       assert.are.equal(todos.unusual_width, 'prio1')
     end)
 
+    it('is left to bikelanes when the self row has it', function()
+      local object_tags = { highway = 'cycleway', width = '0' }
+      local todos = to_todo_tags(collect_todos(road_todos, object_tags, { _self_bikelane_has_unusual_width = true }))
+      assert.is_nil(todos.unusual_width)
+    end)
+
+    it('stays on the road when the self row does not have it', function()
+      local object_tags = { highway = 'residential', width = '0' }
+      local todos = to_todo_tags(collect_todos(road_todos, object_tags, { _self_bikelane_has_unusual_width = false }))
+      assert.are.equal(todos.unusual_width, 'prio2')
+    end)
+
     it('is table-only', function()
       local todos = collect_todos(road_todos, { highway = 'residential', width = '250' }, {})
       assert.is_true(todos[1].todoTableOnly)

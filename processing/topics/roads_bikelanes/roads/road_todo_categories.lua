@@ -56,7 +56,11 @@ local unusual_width = road_todo_class.new({
     if object_tags.mapillary_coverage then return '1' end
     return '2'
   end,
-  conditions = is_unusual_width,
+  -- One todo per way: skip it when the self row in `bikelanes` has it already. A self row can read
+  -- another value (`cycleway:width`, `width:lanes`), so a self row alone is not enough.
+  conditions = function(object_tags, result_tags)
+    return not result_tags._self_bikelane_has_unusual_width and is_unusual_width(object_tags, result_tags)
+  end,
 })
 
 -- === Adjoining road ===
