@@ -1,13 +1,36 @@
-title: Fahrradstellplätze
+title: Fahrrad- & Mikromobilitätsparken
+summary: >-
+  Abstellanlagen für Fahrräder, Lastenräder, E-Scooter und andere Kleinstfahrzeuge sowie
+  Bikesharing- und Mobilitätsstationen aus OpenStreetMap. Jedes Objekt ist eine Art (`kind`) mit
+  der Anzahl ihrer Stellplätze.
 sourceIds:
   - atlas_bicycleParking
 attributes:
+  - key: kind
+    label: Art
+    values:
+      - value: bicycle_parking
+        label: Fahrradstellplätze
+        description: '`amenity=bicycle_parking`'
+      - value: cargo_bike_parking
+        label: Lastenrad-Stellplätze
+        description: '`amenity=bicycle_parking` mit `cargo_bike=designated` oder `capacity:cargo_bike`'
+        chapterRefs:
+          - chapterId: aufgeteilte-objekte
+      - value: small_electric_vehicle_parking
+        label: E-Scooter- / Kleinstfahrzeug-Parkplätze
+        description: '`amenity=small_electric_vehicle_parking`, `amenity=kick-scooter_parking`'
+      - value: bicycle_rental
+        label: Bikesharing-Stationen
+        description: '`amenity=bicycle_rental`, ohne Fahrradverleih-Läden'
+      - value: mobility_hub
+        label: Mobilitätsstationen
+        description: '`amenity=mobility_hub`. Eine Fläche, in der Stellplätze und Verleihstationen liegen; beim Summieren zählt sie nicht mit.'
   - key: capacity
-    label: Anzahl Fahrrad-Stellplätze
+    label: Anzahl Stellplätze
     format: number
-  - key: capacity:cargo_bike
-    label: Anzahl Lastenfahrrad-Stellplätze
-    format: number
+    chapterRefs:
+      - chapterId: aufgeteilte-objekte
   - key: access
     label: Zugang
     values:
@@ -15,10 +38,14 @@ attributes:
         label: Öffentlich
       - value: customers
         label: Kund:innen
+      - value: members
+        label: Mitglieder
       - value: permissive
         label: Öffentliche Nutzung geduldet
       - value: private
         label: Privat
+      - value: 'no'
+        label: Kein Zugang
   - key: covered
     label: Überdacht
     valuesRef: parkings.covered
@@ -41,6 +68,8 @@ attributes:
     values:
       - value: 'yes'
         label: Zugelassen
+      - value: designated
+        label: Nur Lastenräder
   - key: lit
     label: Beleuchtung
     values:
@@ -48,8 +77,9 @@ attributes:
         label: Beleuchtet
       - value: 'no'
         label: Nicht beleuchtet
-  - key: bicycle_parking
-    label: Fahrradabstellanlage
+  - key: stand_type
+    label: Art der Abstellanlage
+    description: Aus `bicycle_parking=*`.
     values:
       - value: stands
         label: Anlehnbügel
@@ -59,12 +89,64 @@ attributes:
         label: Poller
       - value: wall_loops
         label: Wandhalter
-      - value: shed
-        label: Unterstand
+      - value: rack
+        label: Fahrradständer
+      - value: safe_loops
+        label: Sicherheitsbügel
+      - value: ground_slots
+        label: Bodenschlitze
+      - value: anchors
+        label: Bodenanker
+      - value: lean_and_stick
+        label: Anlehnhilfe
+      - value: handlebar_holder
+        label: Lenkerhalter
+      - value: upright_stands
+        label: Vertikalparker
       - value: two-tier
         label: Doppelstockparker
+      - value: shed
+        label: Unterstand
+      - value: building
+        label: Fahrradparkhaus
       - value: lockers
         label: Fahrradboxen
+      - value: streetpod
+        label: Streetpod
+      - value: smart_dock
+        label: Smart-Dock
+      - value: floor
+        label: Abstellfläche ohne Halter
+  - key: rental_type
+    label: Art der Verleihstation
+    description: Aus `bicycle_rental=*`.
+    values:
+      - value: docking_station
+        label: Station mit Andockpunkten
+      - value: dropoff_point
+        label: Abstellfläche (Free-Floating-Zone)
+      - value: key_dispensing_machine
+        label: Schlüsselautomat
+  - key: network
+    label: Netz / Verbund
+    format: sanitized_strings
+  - key: in_mobility_hub
+    label: In Mobilitätsstation
+    values:
+      - value: 'yes'
+        label: Innerhalb einer Mobilitätsstation
+  - key: geometry_transform
+    label: Geometrie geschätzt
+    description: Gesetzt, wenn ein OSM-Objekt nach Art aufgeteilt und die Lage der Teile geschätzt wurde.
+    chapterRefs:
+      - chapterId: aufgeteilte-objekte
+    values:
+      - value: area_split
+        label: Fläche nach Stellplätzen geteilt
+      - value: line_halves
+        label: Linie in der Mitte geteilt
+      - value: point_offset
+        label: Nebeneinander gesetzt
   - key: operator_type
     label: Betreibertyp
     valuesRef: parkings.operator_type
@@ -75,24 +157,36 @@ attributes:
         label: Gehweg
       - value: grass_verge
         label: Grünstreifen
-      - value: lane
-        label: Fahrbahn
       - value: kerb_extension
         label: Gehwegvorstreckung
-      - value: parking_lot
-        label: Parkplatz
-      - value: street_side
-        label: Straßenrand
-      - value: school_ground
-        label: Schulgelände
-      - value: private_property
-        label: Privatgrund
       - value: pedestrian_area
         label: Fußgängerbereich
+      - value: lane
+        label: Fahrbahn
+      - value: street_side
+        label: Straßenrand
+      - value: shoulder
+        label: Seitenstreifen
+      - value: traffic_island
+        label: Verkehrsinsel
+      - value: parklet
+        label: Parklet
       - value: park
         label: Park
+      - value: school_ground
+        label: Schulgelände
+      - value: playground
+        label: Spielplatz
+      - value: parking_lot
+        label: Parkplatz
       - value: parking
         label: Parkfläche
+      - value: driveway
+        label: Zufahrt
+      - value: private_property
+        label: Privatgrund
+      - value: public_property
+        label: Öffentliches Gelände
   - key: indoor
     label: Innenraum
     values:
@@ -138,12 +232,4 @@ attributes:
     ref: parkings.traffic_sign
   - key: maxstay
     label: Maximaldauer
-    format: sanitized_strings
-  - key: osm_capacity
-    purpose: qa
-    label: OSM Kapazität (roh, Testdaten)
-    format: sanitized_strings
-  - key: osm_capacity:cargo_bike
-    purpose: qa
-    label: OSM Kapazität Lastenrad (roh, Testdaten)
     format: sanitized_strings

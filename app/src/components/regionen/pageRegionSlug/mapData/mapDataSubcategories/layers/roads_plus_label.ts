@@ -1,0 +1,38 @@
+import type { StyleLayer } from './utils/types'
+
+export const layers_roads_plus_label: StyleLayer[] = [
+  {
+    id: 'sign_label-roads',
+    type: 'symbol',
+    filter: [
+      'all',
+      [
+        'match',
+        ['get', 'road'],
+        ['primary', 'primary_link', 'secondary', 'secondary_link'],
+        true,
+        false,
+      ],
+      ['has', 'name_ref'],
+    ],
+    minzoom: 8,
+    layout: {
+      'icon-image': 'label-box-yellow',
+      'icon-padding': 6,
+      'icon-rotation-alignment': 'viewport',
+      'icon-size': 1.2,
+      'icon-text-fit': 'width',
+      'symbol-placement': 'line',
+      'symbol-spacing': 700,
+      'text-field': ['to-string', ['get', 'name_ref']],
+      'text-font': ['Open Sans Bold', 'Arial Unicode MS Regular'],
+      'text-letter-spacing': -0.02,
+      'text-rotation-alignment': 'viewport',
+      'text-size': ['interpolate', ['linear'], ['zoom'], 7, 4, 9, 9],
+      'text-transform': 'uppercase',
+    },
+    paint: {
+      'text-color': '#595959',
+    },
+  },
+]

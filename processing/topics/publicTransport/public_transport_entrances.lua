@@ -1,7 +1,7 @@
 -- Subway/station entrance nodes for the `_publicTransport_entrances` PROCESSING-ONLY table
--- (geometry only — no tags/meta, no minzoom). The leading `_` keeps it out of Martin's tile
--- sources; it is used by the planning-worker to score proximity to actual pedestrian access
--- points instead of the (often distant) station point.
+-- (geometry only — no tags/meta, no minzoom). The leading `_` marks it internal: no map layer,
+-- Martin only serves it for inspection. It is used by the planning-worker to score proximity to
+-- actual pedestrian access points instead of the (often distant) station point.
 --
 -- TODO: if this ever becomes a PRESENTATIONAL table, give it the standard topic shape
 --       (id/tags/meta/geom + a minzoom) and drop the `_` prefix.

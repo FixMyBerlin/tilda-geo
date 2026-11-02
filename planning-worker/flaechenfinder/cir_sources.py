@@ -1,8 +1,8 @@
-"""CIR/RGBI-Kachelquellen für die Vegetationsberechnung.
+"""CIR/RGBI tile sources for the vegetation computation.
 
-Jede Quelle beschreibt, wie Kacheln gecacht, heruntergeladen und gelesen werden.
-Neue Quellen lassen sich durch ein weiteres `CirSource`-Objekt in `KNOWN_SOURCES`
-ergänzen – Änderungen an vegetation.py sind dafür nicht nötig.
+Each source describes how tiles are cached, downloaded and read.
+New sources can be added as another `CirSource` object in `KNOWN_SOURCES`
+– no changes to vegetation.py needed.
 """
 from __future__ import annotations
 
@@ -18,28 +18,28 @@ from shapely.geometry.base import BaseGeometry
 
 @dataclass(frozen=True)
 class CirSource:
-    """Konfiguration einer CIR/RGBI-Kachelquelle."""
+    """Configuration of a CIR/RGBI tile source."""
     name: str
-    crs: str             # EPSG-Code des Kachel-Koordinatensystems
-    tile_size_m: float   # Kachel-Kantenlänge in Metern
-    pixel_size_m: float  # Bodenauflösung in Metern
-    band_nir: int        # 1-basierter Band-Index für NIR
-    band_red: int        # 1-basierter Band-Index für Rot
-    # (easting_m, northing_m) → lokaler Cache-Dateiname (ohne Verzeichnis)
+    crs: str             # EPSG code of the tile CRS
+    tile_size_m: float   # tile edge length in meters
+    pixel_size_m: float  # ground resolution in meters
+    band_nir: int        # 1-based band index for NIR
+    band_red: int        # 1-based band index for red
+    # (easting_m, northing_m) → local cache file name (without directory)
     cache_filename_fn: Callable[[int, int], str]
-    # (easting_m, northing_m, dest_pfad) → True bei Erfolg
+    # (easting_m, northing_m, dest_path) → True on success
     download_fn: Callable[[int, int, str], bool]
-    # Pflicht-Quellenangabe gemäß Lizenz (für MapLibre AttributionControl)
+    # Attribution required by the license (for MapLibre AttributionControl)
     attribution: str
 
 
-# ── Hilfsfunktion ─────────────────────────────────────────────────────────────
+# ── Helper ────────────────────────────────────────────────────────────────────
 
 def _timeout_s() -> int:
     return int(os.environ.get("PLANNING_CIR_DOWNLOAD_TIMEOUT_S", "180"))
 
 
-# ── Bayern DOP20 CIR (WMS, EPSG:25832, NIR=B1, Rot=B2) ──────────────────────
+# ── Bayern DOP20 CIR (WMS, EPSG:25832, NIR=B1, Red=B2) ──────────────────────
 
 def _bayern_download(easting_m: int, northing_m: int, dest: str) -> bool:
     wms_url = os.environ.get(
@@ -61,16 +61,16 @@ def _bayern_download(easting_m: int, northing_m: int, dest: str) -> bool:
     )
     os.close(tmp_fd)
     try:
-        print(f"   ↓ lade CIR-Kachel {easting_m}_{northing_m} …")
+        print(f"   ↓ loading CIR tile {easting_m}_{northing_m} …")
         with urllib.request.urlopen(url, timeout=_timeout_s()) as resp:
             ctype = resp.headers.get("Content-Type", "")
             if "tiff" not in ctype:
-                raise ValueError(f"unerwarteter Content-Type {ctype!r}")
+                raise ValueError(f"unexpected Content-Type {ctype!r}")
             with open(tmp_path, "wb") as f:
                 while chunk := resp.read(1024 * 1024):
                     f.write(chunk)
         if os.path.getsize(tmp_path) == 0:
-            raise ValueError("leere Antwort")
+            raise ValueError("empty response")
         os.replace(tmp_path, dest)
         return True
     except Exception as e:
@@ -95,13 +95,13 @@ SOURCE_BAYERN = CirSource(
 )
 
 
-# ── Brandenburg/Berlin DOP20 CIR (WMS, EPSG:25833, NIR=B1, Rot=B2) ────────────
+# ── Brandenburg/Berlin DOP20 CIR (WMS, EPSG:25833, NIR=B1, Red=B2) ────────────
 #
 # WMS: https://isk.geobasis-bb.de/mapproxy/dop20cir/service/wms
-# Layer: bb_dop20cir  (CIR-only, kein RGBI-Volldownload nötig)
-# Kachelraster: 1000 m, Pixel 0,2 m (5000×5000 px).
-# Bandbelegung im TIFF: NIR=B1, Rot=B2, Grün=B3.
-# Lizenz: dl-de/by-2-0, Namensnennung: "© GeoBasis-DE/LGB, dl-de/by-2-0"
+# Layer: bb_dop20cir  (CIR only, no full RGBI download needed)
+# Tile grid: 1000 m, pixel 0.2 m (5000×5000 px).
+# Band layout in the TIFF: NIR=B1, red=B2, green=B3.
+# License: dl-de/by-2-0, attribution: "© GeoBasis-DE/LGB, dl-de/by-2-0"
 
 def _bb_wms_download(easting_m: int, northing_m: int, dest: str) -> bool:
     wms_url = os.environ.get(
@@ -123,16 +123,16 @@ def _bb_wms_download(easting_m: int, northing_m: int, dest: str) -> bool:
     )
     os.close(tmp_fd)
     try:
-        print(f"   ↓ lade CIR-Kachel BB {easting_m}_{northing_m} …")
+        print(f"   ↓ loading CIR tile BB {easting_m}_{northing_m} …")
         with urllib.request.urlopen(url, timeout=_timeout_s()) as resp:
             ctype = resp.headers.get("Content-Type", "")
             if "png" not in ctype:
-                raise ValueError(f"unerwarteter Content-Type {ctype!r}")
+                raise ValueError(f"unexpected Content-Type {ctype!r}")
             with open(tmp_path, "wb") as f:
                 while chunk := resp.read(1024 * 1024):
                     f.write(chunk)
         if os.path.getsize(tmp_path) == 0:
-            raise ValueError("leere Antwort")
+            raise ValueError("empty response")
         os.replace(tmp_path, dest)
         return True
     except Exception as e:
@@ -157,22 +157,22 @@ SOURCE_BB = CirSource(
 )
 
 
-# ── Hessen DOP20 CIR (WMS, EPSG:25832, NIR=B1, Rot=B2) ───────────────────────
+# ── Hessen DOP20 CIR (WMS, EPSG:25832, NIR=B1, Red=B2) ───────────────────────
 #
 # WMS: https://www.gds-srv.hessen.de/cgi-bin/lika-services/ogc-free-images.ows
-# Layer: he_dop20_cir  (DOP20 CIR-False-Color, 0,2 m, kostenfrei/OGC-„free-images")
-# Kachelraster: 500 m, Pixel 0,2 m (2500×2500 px).
-# Bandbelegung im TIFF: False-Color-RGB(+Alpha) → NIR=B1 (Rot-Kanal),
-#   Rot=B2 (Grün-Kanal), Grün=B3; das Alpha-Band (B4) bleibt ungenutzt.
-# Wie Bayern liegt Hessen in EPSG:25832 (UTM32) und liefert GeoTIFF.
-# Lizenz: dl-de/zero-2-0 (freie Geodaten der HVBG).
+# Layer: he_dop20_cir  (DOP20 CIR false color, 0.2 m, free of charge/OGC "free-images")
+# Tile grid: 500 m, pixel 0.2 m (2500×2500 px).
+# Band layout in the TIFF: false-color RGB(+alpha) → NIR=B1 (red channel),
+#   red=B2 (green channel), green=B3; the alpha band (B4) is unused.
+# Like Bayern, Hessen uses EPSG:25832 (UTM32) and serves GeoTIFF.
+# License: dl-de/zero-2-0 (open geodata of the HVBG).
 #
-# Kachelgröße 500 m statt 1000 m wie bei Bayern/BB: Der MapServer hinter diesem
-# WMS begrenzt WIDTH/HEIGHT hart auf 3000 px und beantwortet größere Anfragen
-# mit einer ServiceException statt mit einem Bild ("Image size out of range").
-# 1000 m bei 0,2 m wären 5000 px – damit schlug bisher jede Kachel fehl und die
-# Vegetation blieb in ganz Hessen leer. 500 m ergeben 2500 px; die Auflösung
-# bleibt bei 0,2 m, es sind nur 4 Requests pro km² statt einem.
+# Tile size 500 m instead of 1000 m as for Bayern/BB: the MapServer behind this
+# WMS hard-limits WIDTH/HEIGHT to 3000 px and answers larger requests with a
+# ServiceException instead of an image ("Image size out of range").
+# 1000 m at 0.2 m would be 5000 px – so far every tile failed and vegetation
+# stayed empty across Hessen. 500 m gives 2500 px; resolution stays at 0.2 m,
+# just 4 requests per km² instead of one.
 _HESSEN_TILE_M = 500
 
 
@@ -196,16 +196,16 @@ def _hessen_download(easting_m: int, northing_m: int, dest: str) -> bool:
     )
     os.close(tmp_fd)
     try:
-        print(f"   ↓ lade CIR-Kachel HE {easting_m}_{northing_m} …")
+        print(f"   ↓ loading CIR tile HE {easting_m}_{northing_m} …")
         with urllib.request.urlopen(url, timeout=_timeout_s()) as resp:
             ctype = resp.headers.get("Content-Type", "")
             if "tiff" not in ctype:
-                raise ValueError(f"unerwarteter Content-Type {ctype!r}")
+                raise ValueError(f"unexpected Content-Type {ctype!r}")
             with open(tmp_path, "wb") as f:
                 while chunk := resp.read(1024 * 1024):
                     f.write(chunk)
         if os.path.getsize(tmp_path) == 0:
-            raise ValueError("leere Antwort")
+            raise ValueError("empty response")
         os.replace(tmp_path, dest)
         return True
     except Exception as e:
@@ -230,9 +230,9 @@ SOURCE_HESSEN = CirSource(
 )
 
 
-# Ungefähre geografische Bounding-Box Hessens (aus dem WMS-GetCapabilities,
-# EX_GeographicBoundingBox von he_dop20_cir) für die „auto"-Erkennung.
-_HESSEN_BBOX_LONLAT = (7.6, 49.3, 10.3, 51.7)  # (west, süd, ost, nord)
+# Approximate geographic bounding box of Hessen (from WMS GetCapabilities,
+# EX_GeographicBoundingBox of he_dop20_cir) for "auto" detection.
+_HESSEN_BBOX_LONLAT = (7.6, 49.3, 10.3, 51.7)  # (west, south, east, north)
 
 
 # ── Registry ──────────────────────────────────────────────────────────────────
@@ -245,14 +245,14 @@ KNOWN_SOURCES: dict[str, CirSource] = {
 
 
 def resolve_source(key: str, study_area_geom: BaseGeometry) -> CirSource | None:
-    """Gibt die CirSource für `key` zurück.
+    """Return the CirSource for `key`.
 
-    „auto" erkennt anhand des Studiengebiet-Zentroiden:
-      1. innerhalb der Hessen-Bounding-Box → Hessen (EPSG:25832, WMS)
-      2. sonst < 12°E → Bayern (EPSG:25832); ≥ 12°E → Brandenburg/Berlin (EPSG:25833).
-    Die Hessen-Box überlappt am Rand mit Bayern (Unterfranken); im Zweifel die
-    Quelle explizit über `cir_source` setzen statt „auto".
-    Unbekannte Schlüssel geben None zurück (Vegetationsberechnung wird übersprungen).
+    "auto" picks by the study area centroid:
+      1. inside the Hessen bounding box → Hessen (EPSG:25832, WMS)
+      2. otherwise < 12°E → Bayern (EPSG:25832); ≥ 12°E → Brandenburg/Berlin (EPSG:25833).
+    The Hessen box overlaps Bayern at the edge (Unterfranken); if in doubt, set the
+    source explicitly via `cir_source` instead of "auto".
+    Unknown keys return None (vegetation computation is skipped).
     """
     if key in KNOWN_SOURCES:
         return KNOWN_SOURCES[key]
@@ -265,7 +265,7 @@ def resolve_source(key: str, study_area_geom: BaseGeometry) -> CirSource | None:
                 return SOURCE_HESSEN
             return SOURCE_BAYERN if lon < 12.0 else SOURCE_BB
         except Exception as exc:
-            print(f"   ⚠️  Auto-Erkennung der CIR-Quelle fehlgeschlagen: {exc}")
+            print(f"   ⚠️  Auto-detection of the CIR source failed: {exc}")
             return None
-    print(f"   ⚠️  Unbekannte cir_source {key!r} – Vegetationsberechnung übersprungen")
+    print(f"   ⚠️  Unknown cir_source {key!r} – skipping vegetation computation")
     return None

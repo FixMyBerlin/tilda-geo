@@ -36,7 +36,6 @@ import {
   interactivityConfiguration,
   type InteracitvityConfiguartion,
 } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/generalization/interacitvityConfiguartion'
-import { customMapIcons } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/customMapIcons.const'
 import { useMeasureDraw } from '@/components/regionen/pageRegionSlug/modes/measure/drawing/useMeasureDraw'
 import { MeasureMap } from '@/components/regionen/pageRegionSlug/modes/measure/MeasureMap'
 import { createInspectorFeatureKey } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/createInspectorFeatureKey'
@@ -60,6 +59,7 @@ import { useReviewDraw } from '../modes/reviewLists/drawing/useReviewDraw'
 import { useReviewDrawActive } from '../modes/reviewLists/useReviewDrawActive'
 import { SpaceFinderMapDrawing } from '../modes/spaceFinder/drawing/SpaceFinderMapDrawing'
 import { useSpaceFinderDraw } from '../modes/spaceFinder/drawing/useSpaceFinderDraw'
+import { isCoarseHexagon } from '../modes/spaceFinder/planningHexagonResolution'
 import { useSpaceFinderSelection } from '../modes/spaceFinder/useSpaceFinderSelection'
 import { useCurrentMode } from '../modes/useCurrentMode'
 import { useRegion } from '../regionUtils/useRegion'
@@ -139,7 +139,7 @@ export const RegionMap = () => {
   const spaceFinderDrawingActive = useSpaceFinderDrawingActive() && currentMode.isSpaceFinder
   const candidateSelectActive = useSpaceFinderCandidateSelectActive()
   const { toggleCandidate, setCandidateGeometry } = useSpaceFinderCandidatesActions()
-  const { runId: spaceFinderRunId } = useSpaceFinderSelection()
+  const { runId: spaceFinderRunId, candidateRunKey: spaceFinderRunKey } = useSpaceFinderSelection()
   const { providers: streetImageryProviders, setPhoto: setStreetImageryPhoto } =
     useStreetImageryParam()
   // "Öffnen in …" is armed: the next click opens that place (<LocationPickOnMap>), nothing else.
@@ -152,16 +152,24 @@ export const RegionMap = () => {
       return
     }
 
-    // Flächenfinder-Auswahlwerkzeug (`SpaceFinderCandidatesSection`): solange es aktiv ist,
-    // sammelt ein Klick auf ein Ergebnis-Hexagon Kandidaten, statt den Inspector zu öffnen.
-    // Ein Klick ins Leere lässt die Auswahl unangetastet.
+    // Flächenfinder selection tool (`SpaceFinderCandidatesSection`): while active, a click on a
+    // result hexagon collects candidates instead of opening the inspector. A click on empty map
+    // leaves the selection untouched. Coarse cells (below zoom 16) are only averages over many
+    // areas and don't work as candidates — the panel asks the user to zoom in.
     if (currentMode.isSpaceFinder && candidateSelectActive) {
       const hexagon = features?.find((f) => f.sourceLayer === planningHexagonsSourceLayer)
       const h3Id = hexagon?.properties?.h3_id
-      if (hexagon && h3Id && spaceFinderRunId != null) {
+      if (
+        hexagon &&
+        h3Id &&
+        !isCoarseHexagon(h3Id) &&
+        spaceFinderRunId != null &&
+        spaceFinderRunKey != null
+      ) {
         const runId = spaceFinderRunId
+        const runKey = spaceFinderRunKey
         const candidateId = String(h3Id)
-        const added = toggleCandidate(runId, {
+        const added = toggleCandidate(runKey, {
           h3Id: candidateId,
           geometry: hexagon.geometry,
           properties: { ...hexagon.properties },
@@ -169,8 +177,8 @@ export const RegionMap = () => {
         // The tile geometry is clipped at tile borders; replace it with the full hexagon.
         if (added) {
           getPlanningHexagonGeomFn({ data: { runId, h3Id: candidateId } })
-            .then((geometry) => setCandidateGeometry(runId, candidateId, geometry))
-            .catch((error) => console.error('Kandidaten-Geometrie nicht geladen', error))
+            .then((geometry) => setCandidateGeometry(runKey, candidateId, geometry))
+            .catch((error) => console.error('Candidate geometry not loaded', error))
         }
       }
       return
@@ -303,31 +311,6 @@ export const RegionMap = () => {
     exposeMainMapForDebugging(event.target)
     firePlaywrightMapLoadedEvent()
   }
-
-  useEffect(
-    function registerCustomMapIcons() {
-      if (!mainMap) return
-
-      let cancelled = false
-      Object.values(customMapIcons).forEach(({ id, url }) => {
-        if (mainMap.hasImage(id)) return
-        mainMap
-          .loadImage(url)
-          .then(({ data }) => {
-            if (cancelled || mainMap.hasImage(id)) return
-            mainMap.addImage(id, data, { pixelRatio: 2 })
-          })
-          .catch((error: unknown) => {
-            console.error(`Failed to load custom map icon "${id}"`, error)
-          })
-      })
-
-      return function cleanupCustomMapIconsRegistration() {
-        cancelled = true
-      }
-    },
-    [mainMap],
-  )
 
   useEffect(
     function subscribeToMissingStyleImages() {

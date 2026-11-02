@@ -1,8 +1,10 @@
 import { describe, expect, it } from 'vitest'
+import { parseFactorConfigSnapshot } from './factorConfigSchema'
 import {
   areaInputsDiffer,
   comparableRunSnapshot,
   factorsDiffer,
+  jsonEqualIgnoringKeyOrder,
   outdatedBannerReason,
   runFreshnessAfterFactorSave,
 } from './factorFingerprint'
@@ -16,29 +18,67 @@ const area = (overrides: Partial<PlanningAreaInput> = {}): PlanningAreaInput => 
 })
 
 describe('comparableRunSnapshot', () => {
-  it('stellt einen Auto-Alt-Snapshot ohne Schwellen-Key der gemergten Config gleich', () => {
+  it('treats an old auto snapshot without threshold key as equal to the merged config', () => {
     const input = area({ censusSaettigungEw: 22, censusEwPerHa: 100 })
     const current = mergeFactorConfig(input, { weights: { w_cyclepath: 0.2 } })
     const oldSnapshot = { weights: { w_cyclepath: 0.2 } }
     expect(factorsDiffer(current, comparableRunSnapshot(oldSnapshot, input))).toBe(false)
   })
 
-  it('erkennt einen von Hand gesetzten Wert gegen einen Snapshot mit Zensus-Vorschlag', () => {
+  it('detects a hand-set value against a snapshot with census suggestion', () => {
     const input = area({ censusSaettigungEw: 22 })
     const current = mergeFactorConfig(input, { bewohnerbedarf_saettigung_ew: 45 })
     const snapshot = mergeFactorConfig(input, {})
     expect(factorsDiffer(current, comparableRunSnapshot(snapshot, input))).toBe(true)
   })
 
-  it('stellt einen neuen Auto-Snapshot (Schwelle eingefroren) der aktuellen Config gleich', () => {
+  it('treats a new auto snapshot (threshold frozen) as equal to the current config', () => {
     const input = area({ censusSaettigungEw: 22 })
     const current = mergeFactorConfig(input, {})
     expect(factorsDiffer(current, comparableRunSnapshot(current, input))).toBe(false)
   })
 })
 
+describe('Eigene Daten in legacy snapshots', () => {
+  const fc: GeoJSON.FeatureCollection = { type: 'FeatureCollection', features: [] }
+  const input = area({
+    userDatasets: [{ id: 'd1', name: 'Eigene Daten', mode: 'bonus', geojson: fc }],
+  })
+  const current = mergeFactorConfig(input, { eigendaten_weights: { d1: 0.3 } })
+  // Run from the single-upload era: file + mode + `weights.w_eigendaten`, read like all
+  // snapshots (`parseFactorConfigSnapshot` upgrades it to datasets).
+  const legacySnapshot = parseFactorConfigSnapshot({
+    study_area: input.studyArea,
+    use_case: 'fahrradbox',
+    area_size_m2: null,
+    user_geojson: fc,
+    user_geojson_mode: 'bonus',
+    weights: { w_eigendaten: 0.3 },
+  })
+
+  it('does not consider an unchanged legacy run outdated', () => {
+    expect(factorsDiffer(current, comparableRunSnapshot(legacySnapshot, input))).toBe(false)
+    expect(areaInputsDiffer(current, legacySnapshot)).toBe(false)
+  })
+
+  it('detects a changed strength against the legacy run', () => {
+    const changed = mergeFactorConfig(input, { eigendaten_weights: { d1: 0.5 } })
+    expect(factorsDiffer(changed, comparableRunSnapshot(legacySnapshot, input))).toBe(true)
+  })
+
+  it('detects an additional dataset as an area change', () => {
+    const more = area({
+      userDatasets: [
+        ...input.userDatasets!,
+        { id: 'x', name: 'Neu', mode: 'penalty', geojson: fc },
+      ],
+    })
+    expect(areaInputsDiffer(mergeFactorConfig(more, {}), legacySnapshot)).toBe(true)
+  })
+})
+
 describe('areaInputsDiffer', () => {
-  it('ist false bei gleichem Gebiet, auch wenn Faktoren abweichen', () => {
+  it('is false for the same area even if factors differ', () => {
     const input = area({ censusSaettigungEw: 22 })
     const snapshot = mergeFactorConfig(input, { weights: { w_cyclepath: 0.2 } })
     const current = mergeFactorConfig(input, { weights: { w_cyclepath: 0.8 } })
@@ -46,14 +86,14 @@ describe('areaInputsDiffer', () => {
     expect(factorsDiffer(current, snapshot)).toBe(true)
   })
 
-  it('erkennt eine geänderte Nutzung unabhängig von den Faktoren', () => {
+  it('detects a changed use case independent of the factors', () => {
     const snapshot = mergeFactorConfig(area({ useCase: 'fahrradbox' }), {})
     const current = mergeFactorConfig(area({ useCase: 'mobilitaetsstation' }), {})
     expect(areaInputsDiffer(current, snapshot)).toBe(true)
     expect(factorsDiffer(current, snapshot)).toBe(false)
   })
 
-  it('erkennt eine geänderte Geometrie', () => {
+  it('detects a changed geometry', () => {
     const snapshot = mergeFactorConfig(area(), {})
     const current = mergeFactorConfig(
       area({
@@ -78,24 +118,24 @@ describe('areaInputsDiffer', () => {
 describe('runFreshnessAfterFactorSave', () => {
   const input = area({ censusSaettigungEw: 22 })
 
-  it('lässt einen Lauf in Ruhe, den es nicht gibt', () => {
+  it('leaves a non-existent run alone', () => {
     expect(runFreshnessAfterFactorSave({ weights: { w_cyclepath: 0.2 } }, input, null)).toBe('keep')
   })
 
-  it('markiert den Lauf veraltet, wenn die Faktoren vom Snapshot abweichen', () => {
+  it('marks the run outdated when the factors differ from the snapshot', () => {
     const snapshot = mergeFactorConfig(input, { weights: { w_cyclepath: 0.2 } })
     const next = { ...stripAutoSaettigung(snapshot), weights: { w_cyclepath: 0.8 } }
     expect(runFreshnessAfterFactorSave(next, input, snapshot)).toBe('stale')
   })
 
-  it('hebt veraltet auf, wenn die Faktoren wieder dem Lauf entsprechen', () => {
+  it('clears outdated when the factors match the run again', () => {
     const snapshot = mergeFactorConfig(input, { weights: { w_cyclepath: 0.2 } })
     expect(runFreshnessAfterFactorSave(stripAutoSaettigung(snapshot), input, snapshot)).toBe(
       'fresh',
     )
   })
 
-  it('hebt veraltet nicht auf, solange das Gebiet vom Lauf abweicht', () => {
+  it('does not clear outdated while the area differs from the run', () => {
     const snapshot = mergeFactorConfig(area({ useCase: 'fahrradbox' }), {
       weights: { w_cyclepath: 0.2 },
     })
@@ -110,13 +150,26 @@ describe('runFreshnessAfterFactorSave', () => {
 })
 
 describe('outdatedBannerReason', () => {
-  it('nennt beide Ursachen, wenn Gebiet und Faktoren veraltet sind', () => {
+  it('names both causes when area and factors are outdated', () => {
     expect(outdatedBannerReason(true, true)).toBe('Faktoren geändert und Planungsgebiet geändert')
   })
 
-  it('nennt nur die zutreffende Ursache', () => {
+  it('names only the applicable cause', () => {
     expect(outdatedBannerReason(true, false)).toBe('Faktoren geändert')
     expect(outdatedBannerReason(false, true)).toBe('Planungsgebiet geändert')
     expect(outdatedBannerReason(false, false)).toBeNull()
+  })
+})
+
+describe('jsonEqualIgnoringKeyOrder', () => {
+  it('treats a dataset list read back from jsonb as unchanged', () => {
+    const sent = [
+      { id: 'd1', name: 'Tabu', mode: 'bonus', geojson: { type: 'Point', coordinates: [1, 2] } },
+    ]
+    const stored = [
+      { id: 'd1', mode: 'bonus', name: 'Tabu', geojson: { coordinates: [1, 2], type: 'Point' } },
+    ]
+    expect(jsonEqualIgnoringKeyOrder(sent, stored)).toBe(true)
+    expect(jsonEqualIgnoringKeyOrder(sent, [{ ...stored[0], mode: 'penalty' }])).toBe(false)
   })
 })

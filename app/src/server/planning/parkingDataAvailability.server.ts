@@ -2,17 +2,16 @@ import { geoDataClient } from '@/server/prisma-client.server'
 import { unwrapGeometry } from './censusSaettigung.server'
 
 /**
- * Ob für dieses Planungsgebiet überhaupt OSM-Parkdaten vorliegen — Voraussetzung für die Faktoren
- * „Parken (Umwidmung)", „Kreuzungen", „Fußgängerzonen" und „Fahrbahnen ausschließen", die alle
- * `public._parking_*`-Tabellen lesen (siehe `flaechenfinder/postgis_loader.py`). Das
- * `parking`-Topic läuft nur in festen Bboxen (`processing/constants/topics.const.ts`) — außerhalb
- * existieren dort schlicht keine Zeilen, der Worker liefert dann still 0 Punkte statt eines
- * Hinweises. Die UI blendet die betroffenen Faktoren deshalb aus, statt ein verfälschtes
- * Scoring-Ergebnis zuzulassen.
+ * Whether OSM parking data exists for this Planungsgebiet at all — a prerequisite for the factors
+ * „Parken (Umwidmung)", „Kreuzungen", „Fußgängerzonen" and „Fahrbahnen ausschließen", which all
+ * read `public._parking_*` tables (see `flaechenfinder/postgis_loader.py`). The `parking` topic
+ * only runs in fixed bboxes (`processing/constants/topics.const.ts`) — outside them there are
+ * simply no rows, and the worker silently yields 0 points instead of a warning. So the UI hides
+ * the affected factors instead of allowing a skewed scoring result.
  *
- * Reine Bbox-Überlappung (`&&`), wie in den Worker-Loadern — es geht nur um „gibt es hier
- * überhaupt Daten", nicht um exakte Geometrie. Schlägt die Abfrage fehl, gilt der Faktor als
- * verfügbar (fail open): ein Infrastrukturfehler soll keinen Faktor stumm blockieren.
+ * Plain bbox overlap (`&&`), as in the worker loaders — it's only about "is there any data here",
+ * not exact geometry. If the query fails, the factor counts as available (fail open): an
+ * infrastructure error should not silently block a factor.
  */
 export async function checkParkingDataAvailable(studyArea: unknown) {
   const geometry = unwrapGeometry(studyArea)

@@ -2,12 +2,12 @@ import { InformationCircleIcon } from '@heroicons/react/20/solid'
 import { type ReactNode, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
-const TOOLTIP_WIDTH = 320 // = w-80, für das Clamping am rechten Fensterrand
+const TOOLTIP_WIDTH = 320 // = w-80, for clamping at the right window edge
 
 /**
- * Info-Icon mit Hover-/Fokus-Tooltip. Der Tooltip wird per Portal an `document.body` gehängt und
- * `fixed` positioniert — sonst schneidet ihn das Planungs-Panel ab, das ein Scroll-Container ist
- * (`overflow-auto`); ein höherer z-index hilft dagegen nicht.
+ * Info icon with hover/focus tooltip. The tooltip is portaled to `document.body` and positioned
+ * `fixed` — otherwise the planning panel, a scroll container (`overflow-auto`), clips it;
+ * a higher z-index doesn't help.
  */
 export const InfoTooltip = ({ children }: { children: ReactNode }) => {
   const triggerRef = useRef<HTMLButtonElement>(null)

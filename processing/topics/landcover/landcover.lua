@@ -5,7 +5,7 @@
 --   - settlement_source -> `_settlement_source_areas` (settlement_areas/dissolve.sql dissolves it)
 --   - buildings         -> `_buildings` (processing-only; buildings/filter.sql filters it)
 --   - buildings_train_station -> `_buildings_train_station` (processing-only; ÖPNV score input)
---   - building_entrances -> `_building_entrances` (processing-only; the only point output)
+--   - building_entrances -> `buildingEntrances` (map layer + planning-worker input; the only point output)
 local landuse = require('topics.landcover.landuse.landuse')
 local settlement_source = require('topics.landcover.settlement_areas.settlement_source')
 local buildings = require('topics.landcover.buildings.buildings')

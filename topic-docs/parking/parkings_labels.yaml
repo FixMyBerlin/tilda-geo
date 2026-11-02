@@ -1,0 +1,20 @@
+title: Straßenparken Beschriftung
+summary: Ein Punkt in der Mitte jeder Parklinie aus `parkings`, für die Beschriftung mit der Stellplatzzahl ab Zoom 16. Die Werte stammen aus der Parklinie.
+sourceIds:
+  - tilda_parkings
+attributes:
+  - key: capacity
+    ref: parkings.capacity
+  - key: operator_type
+    ref: parkings.operator_type
+  - key: operator_type_source
+    ref: parkings.operator_type_source
+  - key: operator_type_confidence
+    ref: parkings.operator_type_confidence
+  - key: area
+    ref: parkings.area
+  - key: angle
+    purpose: rendering
+    format: number
+    label: Textwinkel
+    description: Drehung der Beschriftung in Grad (im Uhrzeigersinn, 0 = Osten), entlang der Linie (Parklinie bzw. Kante) und so gewendet, dass der Text nie auf dem Kopf steht (−90 bis 90). Nur zur Darstellung.

@@ -468,17 +468,28 @@ export function RegionForm(props: Props) {
             </div>
           </AdminFormSection>
 
-          <AdminFormSection id="spaceFinder" title={sectionLabels.spaceFinder}>
-            <RadioGroup
-              inline
-              form={form}
-              name="spaceFinderEnabled"
-              label="Flächenfinder aktiv"
-              items={[
-                { value: 'true', label: 'Ja' },
-                { value: 'false', label: 'Nein' },
-              ]}
-            />
+          <AdminFormSection
+            id="spaceFinder"
+            title={sectionLabels.spaceFinder}
+            description="Zusätzlich unter „Kategorien“ aktivieren: „poi“ (Orte, Ziele, Grenzen: Zielorte und Haltestellen), „bicycleParking“ (Fahrradparken: Bestand und Bikesharing) und „bikelanes“ (Radinfrastruktur: Radwegenähe). Sonst können die Daten, die in die Berechnung eingehen, in der Karte nicht angezeigt werden."
+          >
+            <div className={choiceOptionListClassName}>
+              <form.Field name="spaceFinderEnabled">
+                {(field) => (
+                  <ChoiceCheckbox
+                    id="spaceFinderEnabled"
+                    name={field.name}
+                    checked={field.state.value === 'true'}
+                    ariaLabel="Flächenfinder aktiv"
+                    label="Flächenfinder aktiv"
+                    onBlur={field.handleBlur}
+                    onChange={(checked) =>
+                      field.handleChange((_prev) => (checked ? 'true' : 'false') as typeof _prev)
+                    }
+                  />
+                )}
+              </form.Field>
+            </div>
           </AdminFormSection>
         </AdminFormLayout>
       )}

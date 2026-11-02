@@ -1,10 +1,10 @@
 {
   "data_format": 1,
   "data_url": "https://tilda-geo.de/taginfo/tilda-bicycleParking.json",
-  "data_updated": "20260317T120000Z",
+  "data_updated": "20261014T120000Z",
   "project": {
     "name": "TILDA - Bicycle Parking",
-    "description": "TILDA processes bicycle parking facilities from OpenStreetMap data to analyze parking capacity, type, and accessibility.",
+    "description": "TILDA processes bicycle parking facilities, e-scooter parking, mobility hubs and bike rental stations from OpenStreetMap data to analyze parking capacity, type, and accessibility.",
     "project_url": "https://tilda-geo.de/",
     "doc_url": "https://github.com/fixmyberlin/tilda-geo/tree/main/processing/topics/bicycleParking",
     "contact_name": "FixMyCity",
@@ -14,63 +14,162 @@
     {
       "key": "amenity",
       "value": "bicycle_parking",
-      "object_types": ["node", "way", "area"],
-      "description": "Selects bicycle parking features for this topic."
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Selects bicycle parking features for this topic. Cargo bike parking is a bicycle parking with cargo bike spaces only, or with cargo_bike=designated."
+    },
+    {
+      "key": "amenity",
+      "value": "small_electric_vehicle_parking",
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Selects parking for e-scooters and other small electric vehicles for this topic."
+    },
+    {
+      "key": "amenity",
+      "value": "kick-scooter_parking",
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Selects kick-scooter parking for this topic, handled like small electric vehicle parking."
+    },
+    {
+      "key": "amenity",
+      "value": "mobility_hub",
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Selects mobility hubs for this topic. Stands and rental stations inside a mobility hub are flagged in_mobility_hub; the hub itself is not counted as parking."
+    },
+    {
+      "key": "amenity",
+      "value": "bicycle_rental",
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Selects bike sharing stations for this topic. Bicycle rental shops (bicycle_rental=shop) and virtual rental stations are not included."
+    },
+    {
+      "key": "bicycle_rental",
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Type of a bike sharing station (docking_station, dropoff_point, key_dispensing_machine)."
+    },
+    {
+      "key": "network",
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Network or association a bike sharing station, mobility hub or parking belongs to."
     },
     {
       "key": "capacity",
-      "object_types": ["node", "way", "area"],
+      "object_types": ["node", "way", "relation", "area"],
       "description": "Total capacity; normalized together with `capacity:*` sub-keys when present."
     },
     {
+      "key": "capacity:cargo_bike",
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Number of cargo bike spaces. Subtracted from capacity, so capacity counts the normal bicycle spaces."
+    },
+    {
       "key": "access",
-      "object_types": ["node", "way", "area"],
-      "description": "Who may use the parking (e.g. yes, private, permissive, customers)."
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Who may use the parking (e.g. yes, private, permissive, customers, members, no)."
     },
     {
       "key": "covered",
-      "object_types": ["node", "way", "area"],
+      "object_types": ["node", "way", "relation", "area"],
       "description": "Whether parking is covered (yes, no, partial)."
     },
     {
       "key": "fee",
-      "object_types": ["node", "way", "area"],
+      "object_types": ["node", "way", "relation", "area"],
       "description": "Whether use of the parking is subject to a fee."
     },
     {
       "key": "lit",
-      "object_types": ["node", "way", "area"],
+      "object_types": ["node", "way", "relation", "area"],
       "description": "Whether the location is lit (yes or no)."
     },
     {
       "key": "cargo_bike",
-      "object_types": ["node", "way", "area"],
-      "description": "Whether cargo bicycles are explicitly accommodated."
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Whether cargo bicycles are explicitly accommodated (yes, designated for cargo bikes only)."
     },
     {
       "key": "bicycle_parking",
-      "object_types": ["node", "way", "area"],
+      "object_types": ["node", "way", "relation", "area"],
       "description": "Physical form of the parking (stands, shed, lockers, two-tier, …)."
     },
     {
+      "key": "bicycle_parking:count",
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Number of parking facilities (e.g. stands) at the location."
+    },
+    {
+      "key": "position",
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Where the parking is located, e.g. sidewalk, lane, kerb_extension, shoulder, parklet."
+    },
+    {
+      "key": "bicycle_parking:position",
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Where the bicycle parking is located; takes precedence over position."
+    },
+    {
+      "key": "small_electric_vehicle_parking:position",
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Where the e-scooter or small electric vehicle parking is located; takes precedence over position."
+    },
+    {
+      "key": "mobility_hub:position",
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Where the mobility hub is located; takes precedence over position."
+    },
+    {
+      "key": "bicycle_rental:position",
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Where the bike sharing station is located; takes precedence over position."
+    },
+    {
       "key": "traffic_sign",
-      "object_types": ["node", "way", "area"],
+      "object_types": ["node", "way", "relation", "area"],
       "description": "Related traffic sign reference, normalized in processing."
     },
     {
       "key": "name",
-      "object_types": ["node", "way", "area"],
+      "object_types": ["node", "way", "relation", "area"],
       "description": "Name of the facility."
     },
     {
       "key": "operator",
-      "object_types": ["node", "way", "area"],
+      "object_types": ["node", "way", "relation", "area"],
       "description": "Name of the operator."
     },
     {
       "key": "operator:type",
-      "object_types": ["node", "way", "area"],
+      "object_types": ["node", "way", "relation", "area"],
       "description": "Whether the operator is classified as public or private."
+    },
+    {
+      "key": "surface",
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Surface of the parking area."
+    },
+    {
+      "key": "indoor",
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Whether the parking is indoors (yes)."
+    },
+    {
+      "key": "surveillance",
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Surveillance of the parking, e.g. outdoor, public, camera or private."
+    },
+    {
+      "key": "maxstay",
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Maximum duration a bicycle or vehicle may stay parked."
+    },
+    {
+      "key": "description",
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Free text description of the facility."
+    },
+    {
+      "key": "mapillary",
+      "object_types": ["node", "way", "relation", "area"],
+      "description": "Mapillary photo ID of the facility."
     }
   ]
 }

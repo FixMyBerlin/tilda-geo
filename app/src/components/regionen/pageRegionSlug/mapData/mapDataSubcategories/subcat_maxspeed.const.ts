@@ -1,9 +1,9 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_atlas_maxspeed_above40 } from './mapboxStyles/groups/atlas_maxspeed_above40'
-import { mapboxStyleGroupLayers_atlas_maxspeed_all } from './mapboxStyles/groups/atlas_maxspeed_all'
-import { mapboxStyleGroupLayers_atlas_maxspeed_below30 } from './mapboxStyles/groups/atlas_maxspeed_below30'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { layers_maxspeed_above40 } from './layers/maxspeed_above40'
+import { layers_maxspeed_all } from './layers/maxspeed_all'
+import { layers_maxspeed_below30 } from './layers/maxspeed_below30'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'maxspeed'
 const source = 'atlas_roads'
@@ -21,8 +21,8 @@ export const subcat_maxspeed: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Alle Höchstgeschwindigkeiten',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_atlas_maxspeed_all,
+      layers: wrapSourceLayers({
+        layers: layers_maxspeed_all,
         source,
         sourceLayer,
       }),
@@ -62,8 +62,8 @@ export const subcat_maxspeed: FileMapDataSubcategory = {
     {
       id: 'below30',
       name: 'Nur Höchstgeschwindigkeit ≤30 km/h',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_atlas_maxspeed_below30,
+      layers: wrapSourceLayers({
+        layers: layers_maxspeed_below30,
         source,
         sourceLayer,
       }),
@@ -83,8 +83,8 @@ export const subcat_maxspeed: FileMapDataSubcategory = {
     {
       id: 'above40',
       name: 'Nur Höchstgeschwindigkeiten ≥40 km/h',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_atlas_maxspeed_above40,
+      layers: wrapSourceLayers({
+        layers: layers_maxspeed_above40,
         source,
         sourceLayer,
       }),

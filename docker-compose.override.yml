@@ -55,14 +55,14 @@ services:
     build:
       context: .
       dockerfile: ./planning-worker.Dockerfile
-    # Als Host-User laufen, damit in den gemounteten Quellcode geschriebene Dateien
-    # (z. B. __pycache__) dem Host-User gehören und nicht root. Sonst lassen sie sich
-    # ohne sudo nicht mehr löschen. UID/GID kommen aus .env (siehe .env.example).
+    # Run as the host user so files written into the mounted source (e.g. __pycache__)
+    # belong to the host user, not root. Otherwise they can't be deleted without sudo.
+    # UID/GID come from .env (see .env.example).
     user: '${UID:-1000}:${GID:-1000}'
     volumes:
-      # Quellcode mounten für Iteration ohne Rebuild.
+      # Mount the source code to iterate without a rebuild.
       - ./planning-worker:/planning-worker
-      # Das im Image von `uv sync` gebaute venv nicht vom leeren Host-Ordner überschreiben lassen.
+      # Keep the venv built by `uv sync` in the image from being shadowed by the empty host folder.
       - /planning-worker/.venv
     environment:
       PGHOST: db

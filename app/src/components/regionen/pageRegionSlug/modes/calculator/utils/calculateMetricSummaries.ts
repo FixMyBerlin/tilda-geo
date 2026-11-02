@@ -10,27 +10,32 @@ export type CalculatorRow = {
   area: string
   properties: Record<string, string>
   sums: Partial<Record<CalculatorMetric, number>>
+  /** Per metric, the number of features without a value; they are not in `sums`. */
+  missing?: Partial<Record<CalculatorMetric, number>>
 }
+
+/**
+ * A column of the panel: a metric of the dataset, or `missing`, the number of features without a
+ * value for the first metric.
+ */
+export type CalculatorColumn = CalculatorMetric | 'missing'
+
+/** One amount per column; a column without a value has none. */
+export type CalculatorAmounts = Partial<Record<CalculatorColumn, number>>
 
 type CalculatorGroupValueSummary = {
   /** Display value; a missing value is `(Ohne Angabe)`. */
   value: string
   /** The value as a filter stores it; a missing value is `''`. */
   filterValue: string
-  sum: number
-  ratio: number
+  amounts: CalculatorAmounts
+  /** Per column, the share of the group, which is the total unless the group's own key is filtered. */
+  ratios: CalculatorAmounts
 }
 
 type CalculatorGroupSummary = {
   key: string
-  sum: number
-  ratio: number
   values: CalculatorGroupValueSummary[]
-}
-
-type CalculatorMetricSummary = {
-  total: number
-  groups: CalculatorGroupSummary[]
 }
 
 export const calculatorMissingGroupValueLabel = '(Ohne Angabe)'
@@ -52,111 +57,153 @@ const matchesFilter = (
     ([key, values]) => key === exceptKey || values.includes(toFilterValue(properties[key])),
   )
 
-/** Sum per value of each group-by key, without any filter. */
-type CalculatorValueRanks = Map<string, Map<string, number>>
+const addAmounts = (target: CalculatorAmounts, amounts: CalculatorAmounts) => {
+  for (const [column, value] of Object.entries(amounts) as [CalculatorColumn, number][]) {
+    target[column] = (target[column] ?? 0) + value
+  }
+}
+
+/** The amounts of a row in the columns of the panel. */
+const rowAmounts = ({ sums, missing }: CalculatorRow, columns: CalculatorColumn[]) => {
+  const amounts: CalculatorAmounts = {}
+  for (const column of columns) {
+    // `missing` counts the features without the first column, which is always a metric.
+    const value = column === 'missing' ? missing?.[columns[0] as CalculatorMetric] : sums[column]
+    if (value !== undefined) amounts[column] = value
+  }
+  return amounts
+}
+
+/** Amounts per value of each group-by key, without any filter. */
+type CalculatorValueRanks = Map<string, Map<string, CalculatorAmounts>>
 
 /**
- * The order of the values of a group: the largest first, measured without the filter over all
- * areas. So a filter never reorders the rows, and every area lists them the same way.
+ * The order of the values of a group: the largest first by the first column, then the next, measured
+ * without the filter over all areas. So a filter never reorders the rows, and every area lists them
+ * the same way.
  */
-const rankValues = (rows: CalculatorRow[], metric: CalculatorMetric, keys: string[]) => {
+const rankValues = (rows: CalculatorRow[], columns: CalculatorColumn[], keys: string[]) => {
   const ranks: CalculatorValueRanks = new Map(keys.map((key) => [key, new Map()]))
-  for (const { properties, sums } of rows) {
-    const metricValue = sums[metric]
-    if (metricValue === undefined) continue
+  for (const row of rows) {
+    const amounts = rowAmounts(row, columns)
     for (const [key, byValue] of ranks) {
-      const filterValue = toFilterValue(properties[key])
-      byValue.set(filterValue, (byValue.get(filterValue) ?? 0) + metricValue)
+      const filterValue = toFilterValue(row.properties[key])
+      const rank = byValue.get(filterValue) ?? {}
+      addAmounts(rank, amounts)
+      byValue.set(filterValue, rank)
     }
   }
   return ranks
 }
 
-const calculateMetricSummary = (
+const compareRanks = (columns: CalculatorColumn[], a: CalculatorAmounts, b: CalculatorAmounts) => {
+  for (const column of columns) {
+    const difference = (b[column] ?? 0) - (a[column] ?? 0)
+    if (difference !== 0) return difference
+  }
+  return 0
+}
+
+const calculateSummary = (
   rows: CalculatorRow[],
-  metric: CalculatorMetric,
+  columns: CalculatorColumn[],
   groupByKeys: string[],
   filter: CalculatorFilter,
   ranks: CalculatorValueRanks,
 ) => {
-  const sumByGroupByKey = new Map<string, number>()
-  const sumByGroupByValue = new Map<string, Map<string, number>>()
-  let total = 0
+  const totals: CalculatorAmounts = {}
+  const groupAmounts = new Map(groupByKeys.map((key) => [key, {} as CalculatorAmounts]))
+  const valueAmounts = new Map(
+    groupByKeys.map((key) => [key, new Map<string, CalculatorAmounts>()]),
+  )
 
-  for (const { properties, sums } of rows) {
-    const metricValue = sums[metric]
-    if (metricValue === undefined) continue
-    if (matchesFilter(properties, filter)) total += metricValue
+  for (const row of rows) {
+    const amounts = rowAmounts(row, columns)
+    // Only summed by a metric the dataset does not show.
+    if (Object.keys(amounts).length === 0) continue
+    if (matchesFilter(row.properties, filter)) addAmounts(totals, amounts)
 
     for (const groupByKey of groupByKeys) {
       // A group ignores the filter on its own key, so its other values stay there to pick.
-      if (!matchesFilter(properties, filter, groupByKey)) continue
+      if (!matchesFilter(row.properties, filter, groupByKey)) continue
 
-      const currentGroupSum = sumByGroupByKey.get(groupByKey) ?? 0
-      sumByGroupByKey.set(groupByKey, currentGroupSum + metricValue)
-
-      const byValue = sumByGroupByValue.get(groupByKey) ?? new Map<string, number>()
-      const filterValue = toFilterValue(properties[groupByKey])
-      const currentValueSum = byValue.get(filterValue) ?? 0
-      byValue.set(filterValue, currentValueSum + metricValue)
-      sumByGroupByValue.set(groupByKey, byValue)
+      addAmounts(groupAmounts.get(groupByKey) ?? {}, amounts)
+      const byValue = valueAmounts.get(groupByKey) ?? new Map<string, CalculatorAmounts>()
+      const filterValue = toFilterValue(row.properties[groupByKey])
+      const valueSum = byValue.get(filterValue) ?? {}
+      addAmounts(valueSum, amounts)
+      byValue.set(filterValue, valueSum)
     }
   }
 
   // Groups in the order of `groupByKeys`, values in the order of `ranks`: neither follows the
   // filtered sums, so the rows stay where they are when a filter changes.
   const groups = groupByKeys.flatMap((key) => {
-    const sum = sumByGroupByKey.get(key)
-    if (sum === undefined) return []
+    const byValue = valueAmounts.get(key)
+    if (!byValue?.size) return []
 
-    const rank = (filterValue: string) => ranks.get(key)?.get(filterValue) ?? 0
-    const values = [...(sumByGroupByValue.get(key)?.entries() ?? [])]
-      .map(([filterValue, valueSum]) => ({
+    const groupSum = groupAmounts.get(key) ?? {}
+    const rank = (filterValue: string) => ranks.get(key)?.get(filterValue) ?? {}
+    const values = [...byValue.entries()]
+      .map(([filterValue, amounts]) => ({
         value: filterValue || calculatorMissingGroupValueLabel,
         filterValue,
-        sum: valueSum,
-        // Share of the group, which is the total unless the group's own key is filtered.
-        ratio: toRatio(valueSum, sum),
+        amounts,
+        ratios: Object.fromEntries(
+          Object.entries(amounts).map(([column, value]) => [
+            column,
+            toRatio(value, groupSum[column as CalculatorColumn] ?? 0),
+          ]),
+        ),
       }))
       .sort(
         (a, b) =>
-          rank(b.filterValue) - rank(a.filterValue) || a.filterValue.localeCompare(b.filterValue),
+          compareRanks(columns, rank(a.filterValue), rank(b.filterValue)) ||
+          a.filterValue.localeCompare(b.filterValue),
       )
 
-    return [{ key, sum, ratio: toRatio(sum, total), values }]
+    return [{ key, values } satisfies CalculatorGroupSummary]
   })
 
-  return { total, groups } satisfies CalculatorMetricSummary
+  return { totals, groups }
 }
 
 /**
  * The summary of every drawn area (`areaIds`, also those without a row) and of all areas together.
  * The latter are the rows of the union of the areas, so an overlap is not counted twice.
+ *
+ * Every metric is a column. When features lack a value for the first metric, a `missing` column
+ * counts them: they are in the other columns, but not in the first.
  */
 export const calculateMetricSummaryForAreas = ({
   rows,
   areaIds,
-  metric,
+  metrics,
   groupByKeys,
   filter = {},
 }: {
   rows: CalculatorRow[]
   areaIds: string[]
-  metric: CalculatorMetric
+  /** The metrics of the dataset in the order of the columns. */
+  metrics: CalculatorMetric[]
   groupByKeys: string[]
   /** Tag values the summed features must have (`sum.filter`). */
   filter?: CalculatorFilter
 }) => {
+  const [firstMetric] = metrics
+  const hasMissing = rows.some((row) => firstMetric && row.missing?.[firstMetric])
+  const columns: CalculatorColumn[] = hasMissing ? [...metrics, 'missing'] : metrics
+
   const rowsOfArea = (area: string) => rows.filter((row) => row.area === area)
   const combinedRows = rowsOfArea(calculatorCombinedAreaId)
-  const ranks = rankValues(combinedRows, metric, groupByKeys)
+  const ranks = rankValues(combinedRows, columns, groupByKeys)
 
   const byArea = areaIds.map((key) => ({
     key,
-    summary: calculateMetricSummary(rowsOfArea(key), metric, groupByKeys, filter, ranks),
+    summary: calculateSummary(rowsOfArea(key), columns, groupByKeys, filter, ranks),
   }))
 
-  const combined = calculateMetricSummary(combinedRows, metric, groupByKeys, filter, ranks)
+  const combined = calculateSummary(combinedRows, columns, groupByKeys, filter, ranks)
 
-  return { byArea, combined }
+  return { columns, byArea, combined }
 }

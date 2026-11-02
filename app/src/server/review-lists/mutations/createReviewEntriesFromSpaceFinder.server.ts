@@ -8,7 +8,7 @@ import {
 } from '@/server/auth/memberCaller.server'
 import db from '@/server/db.server'
 import { authorizePlanningRegion } from '@/server/planning/authorizePlanningRegion.server'
-import { PLANNING_USE_CASE_LABELS } from '@/shared/regionen/planningScoreLabels.const'
+import { parseFactorConfigSnapshot } from '@/server/planning/factorConfigSchema'
 import { REVIEW_UPLOAD_MAX_FEATURES } from '@/shared/reviewLists/reviewEntryImport'
 import {
   buildSpaceFinderReviewProperties,
@@ -59,12 +59,13 @@ export async function createReviewEntriesFromSpaceFinder(
     where: { id: runId },
     select: {
       status: true,
+      factorConfigSnapshot: true,
       variant: {
         select: {
           id: true,
           title: true,
           area: {
-            select: { id: true, title: true, useCase: true, region: { select: { slug: true } } },
+            select: { id: true, title: true, region: { select: { slug: true } } },
           },
         },
       },
@@ -81,6 +82,13 @@ export async function createReviewEntriesFromSpaceFinder(
 
   if ('listId' in target) await assertListInRegion(target.listId, regionSlug)
 
+  // Names of the "Eigene Daten" datasets as the run computed them (snapshot, not today's area),
+  // so the Teilscores can name them.
+  const snapshot = parseFactorConfigSnapshot(run.factorConfigSnapshot)
+  const eigendatenNames = Object.fromEntries(
+    (snapshot.user_datasets ?? []).map((dataset) => [dataset.id, dataset.name]),
+  )
+
   // Validate and normalize before anything is written (a new list must not stay empty on errors).
   const uniqueCandidates = [...new Map(candidates.map((c) => [c.h3Id, c])).values()]
   const entries = featureCollectionToEntries({
@@ -93,8 +101,8 @@ export async function createReviewEntriesFromSpaceFinder(
         candidateProperties: candidate.properties,
         areaTitle: area.title,
         variantTitle: variant.title,
-        useCaseLabel: PLANNING_USE_CASE_LABELS[area.useCase] ?? null,
         h3Id: candidate.h3Id,
+        eigendatenNames,
       }),
     })),
   })

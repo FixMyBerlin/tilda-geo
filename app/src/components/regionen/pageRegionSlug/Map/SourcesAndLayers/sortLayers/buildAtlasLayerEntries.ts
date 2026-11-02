@@ -1,4 +1,5 @@
 import type { MapDataCategoryConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/type'
+import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
 import {
   createLayerKeyAtlasGeo,
@@ -21,6 +22,8 @@ type Props = {
   layerOrder: MapLayerOrderEntry[]
   backgroundParam: string | undefined
   debugLayerStyles: boolean
+  /** Hides every layer, whatever the config says: a mode shows its own data instead. */
+  hidden?: boolean
 }
 
 /** The Atlas-Geo layers of a region in mount order, the bottom layer first. */
@@ -29,6 +32,7 @@ export function buildAtlasLayerEntries({
   layerOrder,
   backgroundParam,
   debugLayerStyles,
+  hidden = false,
 }: Props) {
   // A position that is no longer a layer of the basemap style is ignored: maplibre does not add a
   // layer whose `beforeId` does not exist.
@@ -44,6 +48,7 @@ export function buildAtlasLayerEntries({
     string,
     {
       layer: AtlasStyleLayer
+      sourceId: SourcesId
       sourceKey: string
       position: LayerPosition
       visible: boolean
@@ -58,7 +63,7 @@ export function buildAtlasLayerEntries({
         subcategoryConfig.id,
       )
       for (const styleConfig of subcategoryConfig.styles) {
-        const visible = categoryConfig.active && styleConfig.active
+        const visible = !hidden && categoryConfig.active && styleConfig.active
         for (const layer of styleConfig.layers?.filter(isAtlasStyleLayer) ?? []) {
           const layerId = createLayerKeyAtlasGeo(
             sourceData.id,
@@ -73,6 +78,7 @@ export function buildAtlasLayerEntries({
           }
           layers.set(layerId, {
             layer,
+            sourceId: sourceData.id,
             sourceKey,
             position: layerPosition({
               layer,
@@ -86,8 +92,12 @@ export function buildAtlasLayerEntries({
     }
   }
 
-  const entries = Array.from(layers, ([layerId, { visible, ...layerConfig }]) => ({
+  const entries = Array.from(layers, ([layerId, { visible, sourceId, ...layerConfig }]) => ({
     layerId,
+    sourceId,
+    sourceKey: layerConfig.sourceKey,
+    sourceLayer: layerConfig.layer['source-layer'],
+    visible,
     position: layerConfig.position,
     // All styles of a subcategory are mounted at once and reuse style layer ids like
     // "structure-icons", so the highlight id comes from the unique layer key.

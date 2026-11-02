@@ -1,0 +1,34 @@
+title: Mountainbike-Routen
+summary: OSM-Relationen mit `type=route` und `route=mtb`. Noch ohne Kartenebene; die Wege der Routen verweisen über `route_relations` hierher.
+attributes:
+  - key: route
+    label: Routentyp (`route=*`)
+  - key: name
+    label: Name
+    format: sanitized_strings
+  - key: ref
+    label: Referenz
+    format: sanitized_strings
+  - key: network
+    label: Netz (`network=*`)
+    format: sanitized_strings
+  - key: operator
+    label: Betreiber
+    format: sanitized_strings
+  - key: from
+    label: Start
+    format: sanitized_strings
+  - key: to
+    label: Ziel
+    format: sanitized_strings
+  - key: route_description
+    label: Freitext zur Route
+    format: sanitized_strings
+  - key: colours
+    label: Farben (mit `/` getrennt)
+  - key: website
+    label: Website
+    format: sanitized_strings
+  - key: wikipedia
+    label: Wikipedia
+    format: sanitized_strings

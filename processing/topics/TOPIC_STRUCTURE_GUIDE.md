@@ -113,13 +113,16 @@ Required naming rhythm:
 
 ## Edge Case: Bicycle Parking Point Writes
 
-`bicycleParking` has a special write pattern: line/area processing also needs to write into the points table (centroid labels).
+`bicycleParking` writes one row per part of an OSM object: `helper/kind_parts.lua` returns the parts (a bicycle parking with cargo spaces gives a `bicycle_parking` and a `cargo_bike_parking` part). Area and relation processing also writes into the points table (centroid labels).
 
 Use this pattern:
 
-- point table is owned by a dedicated helper module in `helper/` (for example `helper/insert_bicycle_parking_point.lua`)
-- that helper defines the point table and exports a single insert function (for example `insert_bicycle_parking_point(...)`)
-- `bicycle_parking_nodes.lua` uses this helper for direct point writes
-- `bicycle_parking_ways.lua` defines only area table(s), and calls the same point insert helper when writing centroid point rows
+- point table is owned by a dedicated helper module in `helper/` (`helper/insert_bicycle_parking_point.lua`)
+- that helper defines the point table and exports a single insert function (`insert_bicycle_parking_point(...)`)
+- area table is owned the same way (`helper/insert_bicycle_parking_area.lua`, exports `insert_bicycle_parking_area(...)`)
+- `helper/insert_bicycle_parking_parts.lua` writes the rows of one object: `points` (one point per part) or `areas` (one area and one centroid point per part). Each row gets a copy of the shared tags plus its `kind` and `capacity`
+- `bicycle_parking_nodes.lua` writes points; `bicycle_parking_ways.lua` writes areas (closed ways) or points (open ways, plus the line in `helper/insert_bicycle_parking_line.lua` when there is more than one part); `bicycle_parking_relations.lua` (multipolygon) writes areas
+- `helper/amenity_kinds.lua` is the one list of the topic's `amenity` values and their `kind`
+- Lua writes the original geometry for every part. `bicycleParking.sql` includes the SQL steps: `1_split_parts.sql` cuts the geometry of split objects and sets `tags.geometry_transform`, `2_flag_mobility_hub.sql` sets `in_mobility_hub`; their functions are in `custom_functions/`
 
 This keeps ownership clear without reintroducing a topic-level `*_tables.lua` file.

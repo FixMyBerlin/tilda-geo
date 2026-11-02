@@ -6,6 +6,7 @@ local roads_bikelanes_tables = require('topics.roads_bikelanes.roads_bikelanes_t
 local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
 local orient_line_direction_tags = require('topics.roads_bikelanes.bikelanes.helper.orient_line_direction_tags')
 local reverse_linestring = require('topics.roads_bikelanes.routing_infra.reverse_linestring')
+local pseudo_route_relations = require('topics.roads_bikelanes.route_relations.pseudo_route_relations')
 
 local bikelanes_table = roads_bikelanes_tables.bikelanes_table
 local bikelanes_presence_table = roads_bikelanes_tables.bikelanes_presence_table
@@ -44,6 +45,7 @@ local function roads_bikelanes_bikelanes(context)
         parent_road = cycleway.parent_road,
         _is_sidepath = object_tags._is_sidepath,
         _in_settlement_area = object_tags._in_settlement_area,
+        route_relations = pseudo_route_relations(object_tags, cycleway._id),
       }
       local meta = object_meta
 

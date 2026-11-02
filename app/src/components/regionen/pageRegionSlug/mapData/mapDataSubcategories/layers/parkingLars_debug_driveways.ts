@@ -1,0 +1,23 @@
+import type { StyleLayer } from './utils/types'
+
+export const layers_parkingLars_debug_driveways: StyleLayer[] = [
+  {
+    id: 'buffer-driveways-area',
+    type: 'fill',
+    minzoom: 15,
+    paint: {
+      'fill-antialias': false,
+      'fill-color': 'rgba(8, 142, 175, 0.7)',
+    },
+  },
+  {
+    id: 'buffer-driveways-border',
+    type: 'line',
+    minzoom: 16.5,
+    paint: {
+      'line-color': 'hsl(0, 0%, 0%)',
+      'line-dasharray': [2, 2],
+      'line-opacity': 0.7,
+    },
+  },
+]

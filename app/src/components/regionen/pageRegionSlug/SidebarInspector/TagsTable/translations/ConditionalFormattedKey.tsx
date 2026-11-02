@@ -1,6 +1,7 @@
 import { registerInspectorMissingTranslation } from '@/components/regionen/pageRegionSlug/hooks/mapState/useInspectorMissingTranslationsState'
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
 import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
+import { parseMarkdownKey } from '@/components/shared/text/markdownKey'
 import { isDev } from '@/components/shared/utils/isEnv'
 import { InspectorFormattedMessage } from './InspectorFormattedMessage'
 import { translations } from './translations.const'
@@ -14,6 +15,7 @@ type Props = {
 export const ConditionalFormattedKey = ({ sourceId, tagKey }: Props) => {
   const translationKey = `${sourceId}--${tagKey}--key`
   const debugTitle = isDev ? `(KEY) ${translationKey}` : undefined
+  const { label } = parseMarkdownKey(tagKey)
 
   const { data: regionDatasets } = useRegionDatasetsQuery()
   const showRawValues = shouldShowRawInspectorValues(sourceId, regionDatasets)
@@ -24,12 +26,12 @@ export const ConditionalFormattedKey = ({ sourceId, tagKey }: Props) => {
   }
 
   if (showRawValues) {
-    return <code title={debugTitle}>{tagKey}</code>
+    return <code title={debugTitle}>{label}</code>
   }
 
   return (
     <span title={debugTitle}>
-      <InspectorFormattedMessage id={translationKey} defaultMessage={tagKey} />
+      <InspectorFormattedMessage id={translationKey} defaultMessage={label} />
     </span>
   )
 }

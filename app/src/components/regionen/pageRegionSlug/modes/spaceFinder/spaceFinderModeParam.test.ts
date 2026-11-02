@@ -34,9 +34,10 @@ describe('spaceFinderModeParam', () => {
     expect(zodSpaceFinderModeParam.parse({ key: 7, opacity: -1 })).toEqual({ key: 7 })
   })
 
-  test('new is area or variant, edit is only area', () => {
+  test('new and edit are only area', () => {
     expect(zodSpaceFinderModeParam.parse({ new: 'area' })).toEqual({ new: 'area' })
-    expect(zodSpaceFinderModeParam.parse({ new: 'variant' })).toEqual({ new: 'variant' })
+    // A new Variante is a modal now; old bookmarks with `new: 'variant'` just drop the field.
+    expect(zodSpaceFinderModeParam.parse({ new: 'variant' })).toEqual({})
     expect(zodSpaceFinderModeParam.parse({ new: 'invalid' })).toEqual({})
     expect(zodSpaceFinderModeParam.parse({ edit: 'area' })).toEqual({ edit: 'area' })
     expect(zodSpaceFinderModeParam.parse({ edit: 'variant' })).toEqual({})
@@ -77,7 +78,6 @@ describe('spaceFinderModeParam', () => {
   test('isSpaceFinderAreaFormOpen only for creating or editing a Planungsgebiet', () => {
     expect(isSpaceFinderAreaFormOpen({ key: 3, new: 'area' })).toBe(true)
     expect(isSpaceFinderAreaFormOpen({ key: 3, edit: 'area' })).toBe(true)
-    expect(isSpaceFinderAreaFormOpen({ key: 3, new: 'variant' })).toBe(false)
     expect(isSpaceFinderAreaFormOpen({ key: 3 })).toBe(false)
   })
 })

@@ -10,6 +10,7 @@ import { UserRoleEnum } from '@/prisma/generated/client'
 import { runWithAuditContextAsync } from '@/server/audit/auditContext.server'
 import db from '@/server/db.server'
 import { sendNewUserRegistration } from '@/server/notifications/sendNewUserRegistration.server'
+import { accountOptions, disabledAccountPaths } from './authAccountOptions.server'
 import { fetchOsmUserDetails } from './osmUserDetails.server'
 
 /**
@@ -71,7 +72,7 @@ const options = {
           // Set explicit endpoints so OAuth sign-in does not depend on live discovery.
           authorizationUrl: getOsmUrl('/oauth2/authorize'),
           tokenUrl: getOsmUrl('/oauth2/token'),
-          scopes: ['openid', 'read_prefs', 'write_prefs', 'write_notes'],
+          scopes: ['read_prefs', 'write_notes'],
           getUserInfo: async ({ accessToken }) => {
             if (!accessToken) throw new Error('No access token in OAuth response')
             const details = await fetchOsmUserDetails(accessToken)
@@ -176,16 +177,8 @@ const options = {
       ],
     }),
   ],
-  account: {
-    accountLinking: {
-      enabled: true,
-      trustedProviders: ['osm'],
-      allowDifferentEmails: true,
-      // OSM uses placeholder emails and never sets emailVerified; default true would block
-      // implicit Account creation after mapProfileToUser creates the User (see link-account.mjs).
-      requireLocalEmailVerified: false,
-    },
-  },
+  account: accountOptions,
+  disabledPaths: disabledAccountPaths,
   user: {
     modelName: 'user',
     fields: {

@@ -43,7 +43,7 @@ type Props = {
   onSelect: (variantId: number) => void
   /** Desktop only (D10): creating, duplicating, renaming and deleting variants. */
   editable: boolean
-  onNewVariant: () => void
+  onNewVariant: (origin: HTMLElement) => void
   commands: SpaceFinderCommands
 }
 
@@ -101,7 +101,7 @@ export const SpaceFinderVariantSelect = ({
               onChange={(next) => onSelect(Number(next))}
             />
             {editable ? (
-              <ModeCollectionNewRow onClick={onNewVariant}>
+              <ModeCollectionNewRow onClick={(event) => onNewVariant(event.currentTarget)}>
                 Neue Variante mit Standardwerten…
               </ModeCollectionNewRow>
             ) : null}

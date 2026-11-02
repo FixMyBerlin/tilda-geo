@@ -1,10 +1,10 @@
-"""Flächenfinder – Multi-Criteria-Evaluation zur Standortbewertung.
+"""Flächenfinder – multi-criteria evaluation for site assessment.
 
-Integriert als Modul in tilda-geo. Gegenüber dem ursprünglichen, eigenständigen
-flaechenfinder-Repo wurden die I/O-Enden getauscht:
-  - Inputs: PostGIS (tildas `public`-Schema) statt lokalem OSM-PBF (siehe postgis_loader.py)
-  - Outputs: PostGIS `planning`-Schema statt GeoPackage (siehe ../results.py)
+Integrated as a module into tilda-geo. Compared to the original standalone
+flaechenfinder repo, the I/O ends were swapped:
+  - Inputs: PostGIS (TILDA's `public` schema) instead of a local OSM PBF (see postgis_loader.py)
+  - Outputs: PostGIS `planning` schema instead of GeoPackage (see ../results.py)
 
-Die Kern-Scoring-Logik (scorer.run_flaechenfinder) ist unverändert in ihrer
-Methodik; sie gibt die berechneten GeoDataFrames zurück, statt Dateien zu schreiben.
+The core scoring logic (scorer.run_flaechenfinder) keeps its methodology; it
+returns the computed GeoDataFrames instead of writing files.
 """

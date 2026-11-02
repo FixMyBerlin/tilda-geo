@@ -6,7 +6,7 @@
     "name": "TILDA - Bike Routes",
     "description": "TILDA processes bicycle route relations from OpenStreetMap data for cycling network planning and visualization.",
     "project_url": "https://tilda-geo.de/",
-    "doc_url": "https://github.com/fixmyberlin/tilda-geo/tree/main/processing/topics/bikeroutes",
+    "doc_url": "https://github.com/fixmyberlin/tilda-geo/tree/main/processing/topics/routes",
     "contact_name": "FixMyCity",
     "contact_email": "tilda@fixmycity.de"
   },

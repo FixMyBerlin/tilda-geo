@@ -44,13 +44,13 @@ local function maxspeed_from_zone(tags)
   end
 
   if maxspeed_zone[tags['zone:maxspeed']] then
-    maxspeed = maxspeed_type[tags['zone:maxspeed']]
+    maxspeed = maxspeed_zone[tags['zone:maxspeed']]
     source = 'zone'
     confidence = 'high'
   end
 
   if maxspeed_source[tags['source:maxspeed']] then
-    maxspeed = maxspeed_type[tags['source:maxspeed']]
+    maxspeed = maxspeed_source[tags['source:maxspeed']]
     source = 'zone'
     confidence = 'high'
   end

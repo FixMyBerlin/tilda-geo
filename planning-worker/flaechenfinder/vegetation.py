@@ -1,17 +1,17 @@
-"""On-demand Vegetationsflächen-Erkennung aus CIR/RGBI-Kacheln via NDVI.
+"""On-demand vegetation area detection from CIR/RGBI tiles via NDVI.
 
-Quellenunabhängig: Bandbelegung, CRS und Download-Logik kommen aus dem
-CirSource-Objekt (cir_sources.py). Derzeit unterstützt: Bayern DOP20 CIR
-(EPSG:25832, WMS, NIR=B1), Hessen DOP20 CIR (EPSG:25832, WMS, NIR=B1) und
+Source-agnostic: band layout, CRS and download logic come from the
+CirSource object (cir_sources.py). Currently supported: Bayern DOP20 CIR
+(EPSG:25832, WMS, NIR=B1), Hessen DOP20 CIR (EPSG:25832, WMS, NIR=B1) and
 Brandenburg/Berlin DOP20 CIR (EPSG:25833, WMS, NIR=B1).
 
-Verarbeitung:
-  1. Studiengebiet → Quell-CRS projizieren
-  2. Kacheln bestimmen (Rastergröße je Quelle; Cache-Check / Download)
-  3. NDVI = (NIR – Rot) / (NIR + Rot) je Kachel
-  4. Binärmaske > NDVI_MIN + morphologisches Closing
-  5. Vektorisieren, vereinfachen, Kleinflächen entfernen
-  6. Auf Studiengebiet clippen
+Processing:
+  1. Project study area → source CRS
+  2. Determine tiles (grid size per source; cache check / download)
+  3. NDVI = (NIR – red) / (NIR + red) per tile
+  4. Binary mask > NDVI_MIN + morphological closing
+  5. Vectorize, simplify, drop small areas
+  6. Clip to study area
 """
 from __future__ import annotations
 
@@ -24,25 +24,25 @@ from shapely.geometry.base import BaseGeometry
 
 from flaechenfinder.cir_sources import CirSource
 
-# ── Algorithmus-Parameter ─────────────────────────────────────────────────────
+# ── Algorithm parameters ──────────────────────────────────────────────────────
 
-NDVI_MIN = 0.1          # Schwellwert: darüber = Vegetation
+NDVI_MIN = 0.1          # Threshold: above = vegetation
 
-# Morphologisches Closing schließt Lücken ≤ ITER × Pixelgröße.
+# Morphological closing fills gaps ≤ ITER × pixel size.
 MORPH_CLOSING_ITER = 3
 
-SIMPLIFY_TOLERANZ_M = 0.5  # Geometrie-Vereinfachung in Metern
+SIMPLIFY_TOLERANZ_M = 0.5  # Geometry simplification in meters
 
-MIN_LOCH_M2 = 20.0      # Innenlöcher kleiner als dieser Wert werden geschlossen.
-MIN_FLAECHE_M2 = 5.0    # Polygone kleiner als dieser Wert werden verworfen.
+MIN_LOCH_M2 = 20.0      # Interior holes smaller than this are filled.
+MIN_FLAECHE_M2 = 5.0    # Polygons smaller than this are dropped.
 
 CIR_DOWNLOAD_ENABLED = os.environ.get("PLANNING_CIR_DOWNLOAD", "1") not in ("0", "false", "")
 
-# Anzahl gleichzeitiger Kachel-Downloads (I/O-bound, daher Threads statt Prozesse).
+# Number of concurrent tile downloads (I/O-bound, hence threads instead of processes).
 CIR_DOWNLOAD_PARALLELISM = int(os.environ.get("PLANNING_CIR_DOWNLOAD_PARALLELISM", "4"))
 
 
-# ── Interne Hilfsfunktionen ───────────────────────────────────────────────────
+# ── Internal helpers ──────────────────────────────────────────────────────────
 
 def _ndvi_array(nir: np.ndarray, rot: np.ndarray) -> np.ndarray:
     denom = nir + rot
@@ -63,12 +63,12 @@ def _closing(maske: np.ndarray) -> np.ndarray:
         from scipy.ndimage import binary_closing
         return binary_closing(maske, iterations=MORPH_CLOSING_ITER).astype(np.uint8)
     except ImportError:
-        print("   ⚠️  scipy nicht verfügbar – Closing übersprungen")
+        print("   ⚠️  scipy not available – closing skipped")
         return maske
 
 
 def _expected_tiles(bounds_src, tile_size_m: float) -> list[tuple[int, int]]:
-    """SW-Ecken aller Kacheln über der bbox (Koordinaten in Quell-CRS-Metern)."""
+    """SW corners of all tiles covering the bbox (coordinates in source CRS meters)."""
     minx, miny, maxx, maxy = bounds_src
     ts = int(tile_size_m)
     e0 = int(minx // ts) * ts
@@ -85,7 +85,7 @@ def _expected_tiles(bounds_src, tile_size_m: float) -> list[tuple[int, int]]:
 def _ensure_tile(
     easting_m: int, northing_m: int, cir_dir: str, source: CirSource
 ) -> str | None:
-    """Gibt den Cache-Pfad zurück; lädt die Kachel nach, falls nötig und erlaubt."""
+    """Return the cache path; download the tile if needed and allowed."""
     pfad = os.path.join(cir_dir, source.cache_filename_fn(easting_m, northing_m))
     if os.path.exists(pfad):
         return pfad
@@ -97,20 +97,20 @@ def _ensure_tile(
 def _verarbeite_kachel(
     pfad: str, band_nir: int, band_red: int, tile_transform=None
 ) -> list[dict]:
-    """Liest eine Kachel, berechnet NDVI und gibt Polygon-Dicts (Quell-CRS) zurück.
+    """Read a tile, compute NDVI and return polygon dicts (source CRS).
 
-    `tile_transform` überschreibt die im Raster gespeicherte Georeferenzierung –
-    nötig für nicht-georeferenzierte Formate wie PNG aus WMS-Diensten.
+    `tile_transform` overrides the georeferencing stored in the raster –
+    needed for non-georeferenced formats like PNG from WMS services.
     """
     import rasterio
     from rasterio.features import shapes
 
     ergebnisse = []
-    # rasterio.open() gibt für PNG-Kacheln (Berlin/Brandenburg-WMS) eine
-    # NotGeoreferencedWarning aus, weil PNG – anders als das Bayern-GeoTIFF –
-    # keinen eingebetteten Geotransform trägt. Das ist harmlos: der Geotransform
-    # wird aus den Kachel-Rasterkoordinaten als `tile_transform` rekonstruiert
-    # (siehe compute_vegetation_areas) und unten explizit verwendet.
+    # rasterio.open() emits a NotGeoreferencedWarning for PNG tiles
+    # (Berlin/Brandenburg WMS) because PNG – unlike the Bayern GeoTIFF – carries
+    # no embedded geotransform. This is harmless: the geotransform is rebuilt
+    # from the tile grid coordinates as `tile_transform` (see
+    # compute_vegetation_areas) and used explicitly below.
     with rasterio.open(pfad) as src:
         nir = src.read(band_nir).astype(np.float32)
         rot = src.read(band_red).astype(np.float32)
@@ -152,7 +152,7 @@ def _empty_veg(crs: str) -> gpd.GeoDataFrame:
     return gpd.GeoDataFrame({"ndvi": [], "flaeche_m2": []}, geometry=[], crs=crs)
 
 
-# ── Öffentliche API ───────────────────────────────────────────────────────────
+# ── Public API ────────────────────────────────────────────────────────────────
 
 def compute_vegetation_areas(
     study_area_geom: BaseGeometry,
@@ -161,13 +161,13 @@ def compute_vegetation_areas(
     ndvi_min: float = NDVI_MIN,
     progress_cb=None,
 ) -> gpd.GeoDataFrame:
-    """Berechnet Vegetationsflächen on-demand für das Studiengebiet.
+    """Compute vegetation areas on demand for the study area.
 
-    `study_area_geom` ist in EPSG:4326. `source` bestimmt Kachelquelle, CRS
-    und Bandbelegung. Rückgabe ist ein GeoDataFrame in `source.crs` mit den
-    Spalten `geometry`, `ndvi`, `flaeche_m2` – auf das Studiengebiet geclippt.
+    `study_area_geom` is in EPSG:4326. `source` determines the tile source, CRS
+    and band layout. Returns a GeoDataFrame in `source.crs` with the columns
+    `geometry`, `ndvi`, `flaeche_m2` – clipped to the study area.
 
-    `progress_cb(fraction: float, label: str)` wird optional mit 0.0–1.0 aufgerufen.
+    `progress_cb(fraction: float, label: str)` is optionally called with 0.0–1.0.
     """
     global NDVI_MIN
     NDVI_MIN = ndvi_min
@@ -188,10 +188,10 @@ def compute_vegetation_areas(
     erwartet = _expected_tiles(study_src.bounds, source.tile_size_m)
     total = len(erwartet) or 1
 
-    # ── Phase 1: Kacheln bereitstellen (Cache / Download) ────────────────────
-    # Downloads sind I/O-bound (WMS-Requests) und laufen daher mit mehreren
-    # Threads parallel (Standard: 4, siehe PLANNING_CIR_DOWNLOAD_PARALLELISM).
-    # Speichert (pfad, easting_m, northing_m) für die spätere Geotransform-Berechnung.
+    # ── Phase 1: provide tiles (cache / download) ────────────────────────────
+    # Downloads are I/O-bound (WMS requests) and therefore run in parallel
+    # threads (default: 4, see PLANNING_CIR_DOWNLOAD_PARALLELISM).
+    # Stores (pfad, easting_m, northing_m) for the later geotransform computation.
     from concurrent.futures import ThreadPoolExecutor, as_completed
 
     kacheln_by_tile: dict[tuple[int, int], str] = {}
@@ -204,28 +204,28 @@ def compute_vegetation_areas(
             pfad = future.result()
             if pfad:
                 kacheln_by_tile[(e, n)] = pfad
-            print(f"   Kacheln bereitgestellt {i}/{total} ({i / total * 100:.0f} %)")
+            print(f"   Tiles ready {i}/{total} ({i / total * 100:.0f} %)")
             _report(0.5 * i / total, f"Luftbild-Kacheln laden {i}/{total}")
 
     kacheln = [(kacheln_by_tile[t], t[0], t[1]) for t in erwartet if t in kacheln_by_tile]
 
     if not kacheln:
         print(
-            f"   ⚠️  Keine CIR-Kacheln für das Gebiet verfügbar "
-            f"(Quelle: {source.name}, Cache: {cir_dir!r}, "
-            f"Download={'an' if CIR_DOWNLOAD_ENABLED else 'aus'})."
+            f"   ⚠️  No CIR tiles available for the area "
+            f"(source: {source.name}, cache: {cir_dir!r}, "
+            f"download={'on' if CIR_DOWNLOAD_ENABLED else 'off'})."
         )
         return _empty_veg(source.crs)
 
-    # ── Phase 2: NDVI je Kachel berechnen ────────────────────────────────────
+    # ── Phase 2: compute NDVI per tile ───────────────────────────────────────
     from affine import Affine
 
-    print(f"   {len(kacheln)} CIR-Kachel(n) [{source.name}] – NDVI-Berechnung läuft …")
+    print(f"   {len(kacheln)} CIR tile(s) [{source.name}] – computing NDVI …")
     alle_geom = []
     alle_ndvi = []
     nk = len(kacheln)
     for j, (pfad, e, n) in enumerate(kacheln, 1):
-        # Affine-Transform aus Kachelkoordinaten: deckt auch nicht-georef. PNG ab.
+        # Affine transform from tile coordinates: also covers non-georeferenced PNG.
         px = source.pixel_size_m
         tile_transform = Affine(px, 0, e, 0, -px, n + source.tile_size_m)
         try:
@@ -235,10 +235,10 @@ def compute_vegetation_areas(
                 alle_ndvi.append(p["ndvi"])
             print(
                 f"   NDVI {j}/{nk} ({j / nk * 100:.0f} %) – "
-                f"{os.path.basename(pfad)}: {len(polys)} Polygone"
+                f"{os.path.basename(pfad)}: {len(polys)} polygons"
             )
         except Exception as e:
-            print(f"   ⚠️  Kachel {os.path.basename(pfad)} fehlgeschlagen: {e}")
+            print(f"   ⚠️  Tile {os.path.basename(pfad)} failed: {e}")
         _report(0.5 + 0.5 * j / nk, f"NDVI berechnen {j}/{nk}")
 
     if not alle_geom:
@@ -250,7 +250,7 @@ def compute_vegetation_areas(
         gdf = gpd.clip(gdf, study_src)
         gdf = gdf[~gdf.geometry.is_empty & gdf.geometry.notna()].copy()
     except Exception as e:
-        print(f"   ⚠️  Clip auf Studiengebiet fehlgeschlagen: {e}")
+        print(f"   ⚠️  Clip to study area failed: {e}")
 
     if not len(gdf):
         return _empty_veg(source.crs)
@@ -259,7 +259,7 @@ def compute_vegetation_areas(
     gdf = gdf[gdf["flaeche_m2"] >= MIN_FLAECHE_M2].reset_index(drop=True)
 
     print(
-        f"   ✓ {len(gdf)} Vegetationsflächen "
+        f"   ✓ {len(gdf)} vegetation areas "
         f"({gdf['flaeche_m2'].sum() / 10_000:.1f} ha)"
     )
     return gdf

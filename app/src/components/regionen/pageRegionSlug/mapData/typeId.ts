@@ -116,9 +116,9 @@ import type {
   SubcatPoiPlusBarriersStyleIds,
 } from './mapDataSubcategories/subcat_poi_plus_barriers.const'
 import type {
-  SubcatPoiPlusBusStopsId,
-  SubcatPoiPlusBusStopsStyleIds,
-} from './mapDataSubcategories/subcat_poi_plus_busStops.const'
+  SubcatPoiPlusBuildingEntrancesId,
+  SubcatPoiPlusBuildingEntrancesStyleIds,
+} from './mapDataSubcategories/subcat_poi_plus_buildingEntrances.const'
 import type {
   SubcatPoiPlusLanduseId,
   SubcatPoiPlusLanduseStyleIds,
@@ -127,6 +127,10 @@ import type {
   SubcatPoiPlusPublicTransportId,
   SubcatPoiPlusPublicTransportStyleIds,
 } from './mapDataSubcategories/subcat_poi_plus_publicTransport.const'
+import type {
+  SubcatRadinfraBicycleParkingId,
+  SubcatRadinfraBicycleParkingStyleIds,
+} from './mapDataSubcategories/subcat_radinfra_bicycleParking.const'
 import type {
   SubcatRadinfraCampaignId,
   SubcatRadinfraCampaignStyleIds,
@@ -198,9 +202,10 @@ export type SubcategoryId =
   | SubcatPoiId
   | SubcatPoiPlacesId
   | SubcatPoiPlusBarriersId
-  | SubcatPoiPlusBusStopsId
+  | SubcatPoiPlusBuildingEntrancesId
   | SubcatPoiPlusLanduseId
   | SubcatPoiPlusPublicTransportId
+  | SubcatRadinfraBicycleParkingId
   | SubcatRadinfraCampaignId
   | SubcatRadinfraLitBikelanesId
   | SubcatRoadsId
@@ -248,10 +253,11 @@ export type StyleId =
   | SubcatPoiBoundariesStyleIds
   | SubcatPoiPlacesStyleIds
   | SubcatPoiPlusBarriersStyleIds
-  | SubcatPoiPlusBusStopsStyleIds
+  | SubcatPoiPlusBuildingEntrancesStyleIds
   | SubcatPoiPlusLanduseStyleIds
   | SubcatPoiPlusPublicTransportStyleIds
   | SubcatPoiStyleIds
+  | SubcatRadinfraBicycleParkingStyleIds
   | SubcatRadinfraCampaignStyleIds
   | SubcatRadinfraLitBikelanesStyleIds
   | SubcatRoadsPlusFootwaysStyleIds

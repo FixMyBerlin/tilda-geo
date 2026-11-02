@@ -75,8 +75,8 @@ export const exportConfigsTilda: MapDataExportConfig[] = [
   },
   {
     id: 'bicycleParking_points',
-    title: 'Fahrradstellplätze (Beta)',
-    desc: 'Alle Fahrradstellplätze. Flächen werden als Punkt ausgegeben.',
+    title: 'Fahrrad- & Mikromobilitätsparken',
+    desc: 'Alle Fahrrad- und Mikromobilitätsparkplätze, die Art steht in `kind`. Flächen werden als Punkt ausgegeben.',
     attributionHtml:
       '<a href="https://www.openstreetmap.org/copyright">© OpenStreetMap</a>; <a href="https://tilda-geo.de">tilda-geo.de</a>',
     licence: 'ODbL',

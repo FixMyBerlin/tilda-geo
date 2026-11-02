@@ -1,0 +1,31 @@
+import type { StyleLayer } from './utils/types'
+
+export const layers_parkingLars_debug_bus_tram: StyleLayer[] = [
+  {
+    id: 'parking-bus-tram-area',
+    type: 'fill',
+    minzoom: 15,
+    paint: {
+      'fill-color': 'rgba(250, 204, 20, 0.7)',
+    },
+  },
+  {
+    id: 'parking-bus-tram-line',
+    type: 'line',
+    minzoom: 16.5,
+    paint: {
+      'line-color': 'rgb(0, 0, 0)',
+      'line-dasharray': [2, 2],
+    },
+  },
+  {
+    id: 'parking-bus-tram-icon',
+    type: 'symbol',
+    minzoom: 15,
+    layout: {
+      'icon-image': 'bus-stop',
+      'icon-size': ['interpolate', ['linear'], ['zoom'], 15, 0, 22, 1.5],
+    },
+    paint: {},
+  },
+]

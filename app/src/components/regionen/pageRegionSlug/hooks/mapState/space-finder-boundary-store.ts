@@ -19,8 +19,8 @@ type SpaceFinderBoundaryStore = {
   userObstaclesGeom: GeoJsonGeometry | null
   /**
    * Whether the "Eigene Daten" control layer is shown. Store, not URL, like
-   * `vegetationVisible`. Defaults to true: wer eigene Daten hochgeladen hat, will sie
-   * zunächst sehen. Der Schalter dient dem Ausblenden.
+   * `vegetationVisible`. Defaults to true: whoever uploaded their own data wants to see it
+   * first. The toggle is for hiding it.
    */
   userObstaclesVisible: boolean
   /**
@@ -43,8 +43,8 @@ type SpaceFinderBoundaryStore = {
   carriagewaysVisible: boolean
   /**
    * Whether the Zensus-Einwohnerpunkte layer (Bewohnerbedarf) is shown.
-   * Store, not URL, like `vegetationVisible`. Default off: es sind viele Punkte,
-   * sie sollen den Blick auf die Hexagone nicht verstellen.
+   * Store, not URL, like `vegetationVisible`. Default off: there are many points and
+   * they should not obscure the hexagons.
    */
   censusVisible: boolean
   /**
@@ -54,7 +54,7 @@ type SpaceFinderBoundaryStore = {
    */
   factorSavePending: boolean
   /**
-   * Square meters being typed into „Gesuchte Fläche“, before blur saves them on the variant.
+   * Square meters being typed into „Fläche suchen“, before blur saves them on the variant.
    * `null`: the map uses `factorConfig.min_area_m2`. `0`: the field was cleared, so the map
    * does not fall back to the saved number. The URL only stores whether the filter is on.
    */

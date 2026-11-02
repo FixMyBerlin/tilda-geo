@@ -1,6 +1,6 @@
+import { parseEigendatenDetails } from '@/shared/regionen/planningEigendatenDetails'
 import {
-  PLANNING_CRITERION_SCORE_KEYS,
-  PLANNING_MODIFIER_SCORE_KEYS,
+  PLANNING_SCORE_GROUPS,
   PLANNING_SCORE_LABELS,
 } from '@/shared/regionen/planningScoreLabels.const'
 import { SPACE_FINDER_CHECKLIST } from './spaceFinderChecklist.const'
@@ -9,6 +9,9 @@ import { SPACE_FINDER_CHECKLIST } from './spaceFinderChecklist.const'
 export const spaceFinderImportId = (h3Id: string) => `flaechenfinder:${h3Id}`
 
 type CandidateProperties = Record<string, unknown>
+
+/** Dataset ID → name of the Eigene-Daten datasets, as computed in the run. */
+type EigendatenNames = Record<string, string>
 
 const asNumber = (value: unknown) =>
   typeof value === 'number' && Number.isFinite(value) ? value : null
@@ -22,6 +25,7 @@ const exclusionReasons = (props: CandidateProperties) => {
   if (props.gebaeude) reasons.push('Gebäude')
   if (props.fahrbahn) reasons.push('Straße')
   if (props.score_hangneigung === 0) reasons.push('Zu steil')
+  // Which dataset excludes it is listed with the Teilscores.
   if (props.eigendaten_ausschluss) reasons.push('Eigene Daten')
   return reasons
 }
@@ -30,26 +34,54 @@ const signedPoints = (value: number) => {
   const rounded = Math.round(value)
   return `${rounded > 0 ? '+' : rounded < 0 ? '−' : ''}${Math.abs(rounded)}`
 }
-
 /**
- * One line, no line breaks, so it survives the single-line attribute editor. Markdown only makes
- * the detail view wrap it. Criteria are 0–100, modifiers signed points.
+ * The Teilscores in the order and hierarchy of the hexagon inspector: per group (Bedarf, Bebauung)
+ * its score, the criteria (0–100) and under "Zu- und Abschläge" the signed points; then one line
+ * per Eigene-Daten dataset. Values the run did not compute are left out. It needs line breaks, so
+ * the single-line attribute editor flattens it when someone edits and saves the attributes (known,
+ * accepted for now).
  */
-const scoreBreakdown = (props: CandidateProperties) => {
+const scoreBreakdown = (props: CandidateProperties, names?: EigendatenNames) => {
   const label = (key: string) => PLANNING_SCORE_LABELS[key] ?? key
-  const scores = ['score_bedarf', 'score_bebauung', ...PLANNING_CRITERION_SCORE_KEYS].flatMap(
-    (key) => {
+  const blocks: string[] = []
+
+  for (const group of PLANNING_SCORE_GROUPS) {
+    const groupScore = asNumber(props[group.scoreKey])
+    const criteria = group.criteria.flatMap((key) => {
       const value = asNumber(props[key])
-      return value === null ? [] : [`${label(key)} ${Math.round(value)}`]
-    },
-  )
-  const modifiers = PLANNING_MODIFIER_SCORE_KEYS.flatMap((key) => {
-    const value = asNumber(props[key])
-    return value === null || Math.round(value) === 0 ? [] : [`${label(key)} ${signedPoints(value)}`]
-  })
-  const parts = [scores.join(' · ')]
-  if (modifiers.length > 0) parts.push(`Zu-/Abschläge: ${modifiers.join(' · ')}`)
-  return parts.filter(Boolean).join('; ')
+      return value === null ? [] : [`- ${label(key)} ${Math.round(value)}`]
+    })
+    const modifiers = group.modifiers.flatMap((key) => {
+      const value = asNumber(props[key])
+      return value === null ? [] : [`  - ${label(key)} ${signedPoints(value)}`]
+    })
+    if (groupScore === null && criteria.length === 0 && modifiers.length === 0) continue
+    const lines = [`**${group.label}${groupScore === null ? '' : ` ${Math.round(groupScore)}`}**`]
+    if (criteria.length > 0 || modifiers.length > 0) lines.push('')
+    lines.push(...criteria)
+    if (modifiers.length > 0) lines.push('- Zu- und Abschläge', ...modifiers)
+    blocks.push(lines.join('\n'))
+  }
+
+  // Eigene Daten: per dataset with name — points or „ausgeschlossen“ (legacy runs: total value).
+  const details = parseEigendatenDetails(props.eigendaten_details)
+  const total = asNumber(props.score_eigendaten)
+  const eigendaten =
+    details.length > 0
+      ? details.map((detail) => {
+          const name = `„${names?.[detail.id] ?? 'Eigene Daten'}“`
+          return detail.x != null
+            ? `- ${name} ausgeschlossen`
+            : `- ${name} ${signedPoints(detail.p ?? 0)}`
+        })
+      : total === null
+        ? []
+        : [`- ${label('score_eigendaten')} ${signedPoints(total)}`]
+  if (eigendaten.length > 0) {
+    blocks.push([`**${label('score_eigendaten')}**`, '', ...eigendaten].join('\n'))
+  }
+
+  return blocks.join('\n\n')
 }
 
 /**
@@ -68,20 +100,21 @@ export const buildSpaceFinderReviewProperties = ({
   candidateProperties,
   areaTitle,
   variantTitle,
-  useCaseLabel,
   h3Id,
+  eigendatenNames,
 }: {
   candidateProperties: CandidateProperties
   areaTitle: string
   variantTitle: string
-  useCaseLabel: string | null
   h3Id: string
+  /** Names of the run's Eigene-Daten datasets (ID → name), if any. */
+  eigendatenNames?: EigendatenNames
 }) => {
   const score = asNumber(candidateProperties.mce_gesamtscore)
   const clusterAreaM2 = asNumber(candidateProperties.cluster_area_m2)
   const eignungsklasse = candidateProperties.eignungsklasse
   const reasons = exclusionReasons(candidateProperties)
-  const breakdown = scoreBreakdown(candidateProperties)
+  const breakdown = scoreBreakdown(candidateProperties, eigendatenNames)
 
   const properties: Record<string, string> = {}
   if (score !== null) properties.Gesamtscore = String(Math.round(score))
@@ -92,7 +125,6 @@ export const buildSpaceFinderReviewProperties = ({
   if (clusterAreaM2 !== null) {
     properties['Clusterfläche (m²)'] = Math.round(clusterAreaM2).toLocaleString('de-DE')
   }
-  if (useCaseLabel) properties.Nutzungsfall = useCaseLabel
   properties.Planungsgebiet = areaTitle
   properties.Variante = variantTitle
   properties['H3-ID'] = h3Id

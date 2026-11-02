@@ -26,7 +26,8 @@ jobs:
   build_processing:
     runs-on: ubuntu-latest
     needs: diff_processing
-    if: ${{ inputs.DIFF_CHECK_MODE == 'skip' || (inputs.DIFF_CHECK_MODE == 'apply' && needs.diff_processing.outputs.changes == 'true') }}
+    # `!cancelled() && !failure()`: run even when diff_processing is skipped (DIFF_CHECK_MODE skip); a skipped `needs` skips the job otherwise.
+    if: ${{ !cancelled() && !failure() && (inputs.DIFF_CHECK_MODE == 'skip' || (inputs.DIFF_CHECK_MODE == 'apply' && needs.diff_processing.outputs.changes == 'true')) }}
     environment:
       name: ${{ inputs.ENVIRONMENT }}
     permissions:
@@ -69,7 +70,8 @@ jobs:
   restart_processing:
     runs-on: ubuntu-latest
     needs: [diff_processing, build_processing]
-    if: ${{ inputs.DIFF_CHECK_MODE == 'skip' || (inputs.DIFF_CHECK_MODE == 'apply' && (needs.diff_processing.outputs.changes == 'true' || inputs.CONFIG_CHANGED)) }}
+    # Also runs when build_processing was skipped (config change only) but not when it failed.
+    if: ${{ !cancelled() && !failure() && (inputs.DIFF_CHECK_MODE == 'skip' || (inputs.DIFF_CHECK_MODE == 'apply' && (needs.diff_processing.outputs.changes == 'true' || inputs.CONFIG_CHANGED))) }}
     environment:
       name: ${{ inputs.ENVIRONMENT }}
       url: https://${{ vars.TILES_URL }}

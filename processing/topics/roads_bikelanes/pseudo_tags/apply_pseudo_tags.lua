@@ -37,11 +37,19 @@ local function apply_sidepath(object_tags, row, highway)
   end
 end
 
+-- Kept as suffix → class map; each output line picks its own class (pseudo_route_relations.lua).
+local function apply_radnetz_berlin(object_tags, row)
+  if row and row.radnetz_berlin then
+    object_tags._radnetz_berlin = row.radnetz_berlin
+  end
+end
+
 local function apply_pseudo_tags(object_tags, object_id, merged, _object_geom)
   local row = lookup_row(merged, object_id)
 
   apply_mapillary(object_tags, row)
   apply_sidepath(object_tags, row, object_tags.highway)
+  apply_radnetz_berlin(object_tags, row)
 end
 
 return apply_pseudo_tags

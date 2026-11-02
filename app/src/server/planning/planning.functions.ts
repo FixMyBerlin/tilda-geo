@@ -4,12 +4,12 @@ import { getRequestHeaders } from '@tanstack/react-start/server'
 import { z } from 'zod'
 import { extractStudyAreaGeometry } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/area/extractStudyAreaGeometry'
 import { MAX_STUDY_AREA_KM2, studyAreaSizeKm2 } from '@/lib/planningStudyAreaLimit'
-import {
-  MAX_USER_GEOJSON_BYTES,
-  sanitizeUserGeojson,
-  userGeojsonByteSize,
-} from '@/lib/planningUserGeojson'
+import { sanitizeUserDatasets, StoredUserDatasetsSchema } from '@/lib/planningUserGeojson'
 import { Prisma } from '@/prisma/generated/client'
+import {
+  memberFormAuditContext,
+  runWithAuditContextAsync,
+} from '@/server/audit/auditContext.server'
 import { requireAuth } from '@/server/auth/session.server'
 import db from '@/server/db.server'
 import { getRegionIdBySlug } from '@/server/regions/queries/getRegionIdBySlug.server'
@@ -21,21 +21,17 @@ import {
   parseVariantFactorConfig,
   VariantFactorConfigSchema,
 } from './factorConfigSchema'
-import { runFreshnessAfterFactorSave } from './factorFingerprint'
+import { jsonEqualIgnoringKeyOrder, runFreshnessAfterFactorSave } from './factorFingerprint'
 import {
   areaInputFromRow,
+  keepStoredMinArea,
   mergeFactorConfig,
   type MergedFactorConfig,
   stripAutoSaettigung,
+  syncEigendatenWeights,
 } from './mergeFactorConfig'
 import { checkParkingDataAvailable } from './parkingDataAvailability.server'
-
-const PlanningUseCaseSchema = z.enum([
-  'fahrradbox',
-  'fahrradabstellanlage',
-  'mobilitaetsstation',
-  'sonstiges',
-])
+import { PlanningUseCaseSchema, planningTitleSchema } from './planningFormSchemas'
 
 // Merged config (variant + area) — used by UI for map layers and worker payload.
 export type FactorConfig = MergedFactorConfig
@@ -74,22 +70,15 @@ const StudyAreaSchema = z.unknown().transform((val, ctx) => {
   }
 })
 
-const UserGeojsonSchema = z
+// The dataset list always replaces the full list (add, rename, remove, change mode).
+// `undefined` = leave unchanged.
+const UserDatasetsSchema = z
   .any()
   .optional()
   .transform((val, ctx) => {
-    if (val === null) return null
     if (val === undefined) return undefined
     try {
-      const clean = sanitizeUserGeojson(val as GeoJSON.GeoJSON)
-      if (userGeojsonByteSize(clean) > MAX_USER_GEOJSON_BYTES) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          message: `Eigene Daten zu groß (max. ${MAX_USER_GEOJSON_BYTES / 1024 / 1024} MB).`,
-        })
-        return z.NEVER
-      }
-      return clean
+      return sanitizeUserDatasets(val ?? [])
     } catch (e) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: (e as Error).message })
       return z.NEVER
@@ -98,8 +87,7 @@ const UserGeojsonSchema = z
 
 const AreaGeometryInputSchema = z.object({
   studyArea: StudyAreaSchema,
-  userGeojson: UserGeojsonSchema,
-  userGeojsonMode: z.enum(['bonus', 'penalty', 'exclude_inside', 'exclude_outside']).optional(),
+  userDatasets: UserDatasetsSchema,
 })
 
 // ── Authorization helpers ──────────────────────────────────────────────────────
@@ -157,7 +145,7 @@ async function markRunsFreshForVariant(variantId: number) {
   })
 }
 
-const jsonEqual = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
+const jsonEqual = jsonEqualIgnoringKeyOrder
 
 async function deleteVariantPostgisResults(variantId: number) {
   const runs = await db.planningRun.findMany({
@@ -229,8 +217,7 @@ export const getPlanningAreaFn = createServerFn({ method: 'GET' })
         id: true,
         title: true,
         studyArea: true,
-        userGeojson: true,
-        userGeojsonMode: true,
+        userDatasets: true,
         useCase: true,
         areaSizeM2: true,
         censusSaettigungEw: true,
@@ -275,8 +262,7 @@ export const getPlanningVariantFn = createServerFn({ method: 'GET' })
             id: true,
             title: true,
             studyArea: true,
-            userGeojson: true,
-            userGeojsonMode: true,
+            userDatasets: true,
             useCase: true,
             areaSizeM2: true,
             censusSaettigungEw: true,
@@ -305,12 +291,14 @@ export const getPlanningVariantFn = createServerFn({ method: 'GET' })
         },
       },
     })
-    // Gebiete, die vor dem Zensus-Vorschlag angelegt wurden, holen ihn hier einmalig nach —
-    // der Faktoren-Editor hängt an dieser Query, also ist das der Ort, an dem der Wert gebraucht wird.
+    // Areas created before the census suggestion existed backfill it here once — the factor
+    // editor depends on this query, so this is where the value is needed.
     const stats = await ensureAreaCensusStats(variant.areaId)
-    const area = stats
-      ? { ...variant.area, censusSaettigungEw: stats.saettigungEw, censusEwPerHa: stats.ewPerHa }
-      : variant.area
+    const area = {
+      ...variant.area,
+      userDatasets: StoredUserDatasetsSchema.parse(variant.area.userDatasets),
+      ...(stats && { censusSaettigungEw: stats.saettigungEw, censusEwPerHa: stats.ewPerHa }),
+    }
     const factorConfig = mergeFactorConfig(
       areaInputFromRow(area),
       parseVariantFactorConfig(variant.factorConfig),
@@ -349,8 +337,7 @@ export const getPlanningJobFn = createServerFn({ method: 'GET' })
             area: {
               select: {
                 studyArea: true,
-                userGeojson: true,
-                userGeojsonMode: true,
+                userDatasets: true,
                 useCase: true,
                 areaSizeM2: true,
                 censusSaettigungEw: true,
@@ -377,8 +364,7 @@ export const getPlanningJobFn = createServerFn({ method: 'GET' })
       progress: job.progress,
       progressLabel: job.progressLabel,
       weights: (fc.weights ?? {}) as Record<string, number>,
-      userGeojsonPresent: fc.user_geojson != null,
-      userGeojsonMode: fc.user_geojson_mode ?? null,
+      hasUserDatasets: (fc.user_datasets?.length ?? 0) > 0,
     }
   })
 
@@ -511,11 +497,11 @@ export const getPlanningHexagonGeomFn = createServerFn({ method: 'GET' })
 
 const CreateAreaInput = z.object({
   regionSlug: z.string(),
-  title: z.string().min(1),
+  title: planningTitleSchema,
   ...AreaGeometryInputSchema.shape,
   useCase: PlanningUseCaseSchema.optional(),
   areaSizeM2: z.number().nullable().optional(),
-  variantTitle: z.string().min(1).optional(),
+  variantTitle: planningTitleSchema.optional(),
   factorConfig: VariantFactorConfigSchema.optional(),
 })
 
@@ -523,42 +509,48 @@ const CreateAreaInput = z.object({
 export const createPlanningAreaFn = createServerFn({ method: 'POST' })
   .validator((data: z.input<typeof CreateAreaInput>) => CreateAreaInput.parse(data))
   .handler(async ({ data }) => {
-    const session = await requireAuth(getRequestHeaders())
+    const headers = getRequestHeaders()
+    const session = await requireAuth(headers)
     await authorizePlanningRegion(session, data.regionSlug)
     const regionId = await getRegionIdBySlug(data.regionSlug)
-    const area = await db.planningArea.create({
-      data: {
-        regionId,
-        createdById: session.userId,
-        title: data.title,
-        studyArea: data.studyArea as unknown as Prisma.InputJsonValue,
-        userGeojson: data.userGeojson as Prisma.InputJsonValue | undefined,
-        userGeojsonMode: data.userGeojsonMode,
-        useCase: data.useCase ?? 'fahrradbox',
-        areaSizeM2: data.areaSizeM2 ?? null,
-        variants: {
-          create: {
+    return runWithAuditContextAsync(memberFormAuditContext(headers, session.userId), async () => {
+      // Two creates instead of a nested `variants: { create }`: the audit extension only logs the
+      // top-level model, so a nested variant would get no CREATE row.
+      const { area, variant } = await db.$transaction(async (tx) => {
+        const area = await tx.planningArea.create({
+          data: {
+            regionId,
+            createdById: session.userId,
+            title: data.title,
+            studyArea: data.studyArea as unknown as Prisma.InputJsonValue,
+            userDatasets: (data.userDatasets ?? []) as unknown as Prisma.InputJsonValue,
+            useCase: data.useCase ?? 'fahrradbox',
+            areaSizeM2: data.areaSizeM2 ?? null,
+          },
+        })
+        const variant = await tx.planningVariant.create({
+          data: {
+            areaId: area.id,
             createdById: session.userId,
             title: data.variantTitle ?? 'Variante 1',
-            factorConfig: stripAutoSaettigung(data.factorConfig ?? {}) as Prisma.InputJsonValue,
+            factorConfig: syncEigendatenWeights(
+              stripAutoSaettigung(data.factorConfig ?? {}),
+              data.userDatasets,
+            ) as Prisma.InputJsonValue,
           },
-        },
-      },
-      select: {
-        id: true,
-        variants: { select: { id: true }, take: 1 },
-      },
+        })
+        return { area, variant }
+      })
+      await refreshAreaCensusStats(area.id, data.studyArea)
+      return { areaId: area.id, variantId: variant.id }
     })
-    await refreshAreaCensusStats(area.id, data.studyArea)
-    return { areaId: area.id, variantId: area.variants[0]!.id }
   })
 
 const UpdateAreaInput = z.object({
   areaId: z.number().int(),
-  title: z.string().min(1).optional(),
+  title: planningTitleSchema.optional(),
   studyArea: StudyAreaSchema.optional(),
-  userGeojson: UserGeojsonSchema,
-  userGeojsonMode: z.enum(['bonus', 'penalty', 'exclude_inside', 'exclude_outside']).optional(),
+  userDatasets: UserDatasetsSchema,
   useCase: PlanningUseCaseSchema.optional(),
   areaSizeM2: z.number().nullable().optional(),
   markRunsStale: z.boolean().optional(),
@@ -567,80 +559,98 @@ const UpdateAreaInput = z.object({
 export const updatePlanningAreaFn = createServerFn({ method: 'POST' })
   .validator((data: z.input<typeof UpdateAreaInput>) => UpdateAreaInput.parse(data))
   .handler(async ({ data }) => {
-    await authorizeByArea(getRequestHeaders(), data.areaId)
-    const existing = await db.planningArea.findFirstOrThrow({
-      where: { id: data.areaId },
-      select: {
-        studyArea: true,
-        userGeojson: true,
-        userGeojsonMode: true,
-        useCase: true,
-        areaSizeM2: true,
-      },
+    const headers = getRequestHeaders()
+    const session = await authorizeByArea(headers, data.areaId)
+    return runWithAuditContextAsync(memberFormAuditContext(headers, session.userId), async () => {
+      const existing = await db.planningArea.findFirstOrThrow({
+        where: { id: data.areaId },
+        select: {
+          studyArea: true,
+          userDatasets: true,
+          useCase: true,
+          areaSizeM2: true,
+        },
+      })
+      const userDatasetsChanged =
+        data.userDatasets !== undefined && !jsonEqual(data.userDatasets, existing.userDatasets)
+      const areaInputsChanged =
+        data.markRunsStale === true ||
+        (data.studyArea !== undefined && !jsonEqual(data.studyArea, existing.studyArea)) ||
+        userDatasetsChanged ||
+        (data.useCase !== undefined && data.useCase !== existing.useCase) ||
+        (data.areaSizeM2 !== undefined && data.areaSizeM2 !== existing.areaSizeM2)
+      // Datasets added or removed: sync the strengths of all variants (new ones with the
+      // initial value, removed ones dropped), otherwise orphaned keys remain in factorConfig.
+      if (userDatasetsChanged) {
+        const variants = await db.planningVariant.findMany({
+          where: { areaId: data.areaId },
+          select: { id: true, factorConfig: true },
+        })
+        for (const variant of variants) {
+          const current = parseVariantFactorConfig(variant.factorConfig)
+          const synced = syncEigendatenWeights(current, data.userDatasets)
+          if (jsonEqual(synced, current)) continue
+          await db.planningVariant.update({
+            where: { id: variant.id },
+            data: { factorConfig: synced as Prisma.InputJsonValue },
+          })
+        }
+      }
+      const result = await db.planningArea.update({
+        where: { id: data.areaId },
+        data: {
+          ...(data.title !== undefined && { title: data.title }),
+          ...(data.studyArea !== undefined && {
+            studyArea: data.studyArea as unknown as Prisma.InputJsonValue,
+          }),
+          ...(data.userDatasets !== undefined && {
+            userDatasets: data.userDatasets as unknown as Prisma.InputJsonValue,
+          }),
+          ...(data.useCase !== undefined && { useCase: data.useCase }),
+          ...(data.areaSizeM2 !== undefined && { areaSizeM2: data.areaSizeM2 }),
+          ...(areaInputsChanged && { inputUpdatedAt: new Date() }),
+        },
+      })
+      if (areaInputsChanged) await markRunsStaleForArea(data.areaId)
+      // Only the geometry changes the census figures; title, use case or user datasets do not.
+      if (data.studyArea !== undefined && !jsonEqual(data.studyArea, existing.studyArea)) {
+        await refreshAreaCensusStats(data.areaId, data.studyArea)
+      }
+      return { id: result.id }
     })
-    const areaInputsChanged =
-      data.markRunsStale === true ||
-      (data.studyArea !== undefined && !jsonEqual(data.studyArea, existing.studyArea)) ||
-      (data.userGeojson !== undefined &&
-        !jsonEqual(data.userGeojson ?? null, existing.userGeojson ?? null)) ||
-      (data.userGeojsonMode !== undefined && data.userGeojsonMode !== existing.userGeojsonMode) ||
-      (data.useCase !== undefined && data.useCase !== existing.useCase) ||
-      (data.areaSizeM2 !== undefined && data.areaSizeM2 !== existing.areaSizeM2)
-    const result = await db.planningArea.update({
-      where: { id: data.areaId },
-      data: {
-        ...(data.title !== undefined && { title: data.title }),
-        ...(data.studyArea !== undefined && {
-          studyArea: data.studyArea as unknown as Prisma.InputJsonValue,
-        }),
-        ...(data.userGeojson !== undefined && {
-          userGeojson:
-            data.userGeojson == null
-              ? Prisma.DbNull
-              : (data.userGeojson as unknown as Prisma.InputJsonValue),
-        }),
-        ...(data.userGeojsonMode !== undefined && { userGeojsonMode: data.userGeojsonMode }),
-        ...(data.useCase !== undefined && { useCase: data.useCase }),
-        ...(data.areaSizeM2 !== undefined && { areaSizeM2: data.areaSizeM2 }),
-        ...(areaInputsChanged && { inputUpdatedAt: new Date() }),
-      },
-      select: { id: true },
-    })
-    if (areaInputsChanged) await markRunsStaleForArea(data.areaId)
-    // Nur die Geometrie verschiebt die Zensus-Kennzahlen; Titel, Nutzung oder eigene Daten nicht.
-    if (data.studyArea !== undefined && !jsonEqual(data.studyArea, existing.studyArea)) {
-      await refreshAreaCensusStats(data.areaId, data.studyArea)
-    }
-    return result
   })
 
 export const deletePlanningAreaFn = createServerFn({ method: 'POST' })
   .validator((data: z.infer<typeof AreaIdInput>) => AreaIdInput.parse(data))
   .handler(async ({ data }) => {
-    await authorizeByArea(getRequestHeaders(), data.areaId)
+    const headers = getRequestHeaders()
+    const session = await authorizeByArea(headers, data.areaId)
     const variants = await db.planningVariant.findMany({
       where: { areaId: data.areaId },
       select: { id: true },
     })
     for (const v of variants) await deleteVariantPostgisResults(v.id)
-    await db.planningArea.delete({ where: { id: data.areaId } })
+    await runWithAuditContextAsync(memberFormAuditContext(headers, session.userId), () =>
+      db.planningArea.delete({ where: { id: data.areaId } }),
+    )
   })
 
 // ── Mutations: Variant ────────────────────────────────────────────────────────
 
 const UpdateVariantInput = z.object({
   variantId: z.number().int(),
-  title: z.string().min(1).optional(),
+  title: planningTitleSchema.optional(),
   description: z.string().optional(),
   factorConfig: VariantFactorConfigSchema.optional(),
-  /** Nur die Zielgröße der Flächensuche setzen, ohne die übrige factorConfig mitzuschicken. */
+  /** Set only the target size of the area search without sending the rest of factorConfig. */
   minAreaM2: z.number().min(0).nullable().optional(),
 })
 
 export const updatePlanningVariantFn = createServerFn({ method: 'POST' })
   .validator((data: z.infer<typeof UpdateVariantInput>) => UpdateVariantInput.parse(data))
   .handler(async ({ data }) => {
-    await authorizeByVariant(getRequestHeaders(), data.variantId)
+    const headers = getRequestHeaders()
+    const session = await authorizeByVariant(headers, data.variantId)
     const existing = await db.planningVariant.findFirstOrThrow({
       where: { id: data.variantId },
       select: {
@@ -648,8 +658,7 @@ export const updatePlanningVariantFn = createServerFn({ method: 'POST' })
         area: {
           select: {
             studyArea: true,
-            userGeojson: true,
-            userGeojsonMode: true,
+            userDatasets: true,
             useCase: true,
             areaSizeM2: true,
             censusSaettigungEw: true,
@@ -665,27 +674,44 @@ export const updatePlanningVariantFn = createServerFn({ method: 'POST' })
       },
     })
     let factorConfig = data.factorConfig
+    if (factorConfig !== undefined && data.minAreaM2 === undefined) {
+      factorConfig = keepStoredMinArea(
+        factorConfig,
+        parseVariantFactorConfig(existing.factorConfig),
+      )
+    }
     if (data.minAreaM2 !== undefined) {
       factorConfig = {
         ...parseVariantFactorConfig(factorConfig ?? existing.factorConfig),
         min_area_m2: data.minAreaM2,
       }
     }
-    const stored = factorConfig !== undefined ? stripAutoSaettigung(factorConfig) : undefined
-    const result = await db.planningVariant.update({
-      where: { id: data.variantId },
-      data: {
-        ...(data.title !== undefined && { title: data.title }),
-        ...(data.description !== undefined && { description: data.description }),
-        ...(stored !== undefined && {
-          factorConfig: stored as Prisma.InputJsonValue,
+    // Sync with the area's datasets: a draft from before the last area save must not write
+    // back strengths of removed datasets.
+    const stored =
+      factorConfig !== undefined
+        ? syncEigendatenWeights(
+            stripAutoSaettigung(factorConfig),
+            areaInputFromRow(existing.area).userDatasets,
+          )
+        : undefined
+    const result = await runWithAuditContextAsync(
+      memberFormAuditContext(headers, session.userId),
+      () =>
+        db.planningVariant.update({
+          where: { id: data.variantId },
+          data: {
+            ...(data.title !== undefined && { title: data.title }),
+            ...(data.description !== undefined && { description: data.description }),
+            ...(stored !== undefined && {
+              factorConfig: stored as Prisma.InputJsonValue,
+            }),
+          },
         }),
-      },
-      select: { id: true, areaId: true },
-    })
-    // Titel und Beschreibung ändern das Ergebnis nicht. `min_area_m2` ist ein Client-Filter und
-    // zählt in `runFreshnessAfterFactorSave` nicht. Ein Speichern, das wieder dem letzten Lauf
-    // entspricht (Änderungen verwerfen), hebt `stale` auf — solange das Gebiet noch passt.
+    )
+    // Title and description do not change the result. `min_area_m2` is a client filter and does
+    // not count in `runFreshnessAfterFactorSave`. A save that matches the last run again
+    // (discarding changes) clears `stale` — as long as the area still matches.
     if (stored !== undefined) {
       const snapshot = existing.runs[0]
         ? parseFactorConfigSnapshot(existing.runs[0].factorConfigSnapshot)
@@ -698,33 +724,37 @@ export const updatePlanningVariantFn = createServerFn({ method: 'POST' })
       if (freshness === 'stale') await markRunsStaleForVariant(data.variantId)
       if (freshness === 'fresh') await markRunsFreshForVariant(data.variantId)
     }
-    return result
+    return { id: result.id, areaId: result.areaId }
   })
 
 export const duplicatePlanningVariantFn = createServerFn({ method: 'POST' })
   .validator((data: z.infer<typeof VariantIdInput>) => VariantIdInput.parse(data))
   .handler(async ({ data }) => {
-    const session = await authorizeByVariant(getRequestHeaders(), data.variantId)
+    const headers = getRequestHeaders()
+    const session = await authorizeByVariant(headers, data.variantId)
     const source = await db.planningVariant.findFirstOrThrow({
       where: { id: data.variantId },
       select: { areaId: true, title: true, factorConfig: true },
     })
-    const created = await db.planningVariant.create({
-      data: {
-        areaId: source.areaId,
-        createdById: session.userId,
-        parentId: data.variantId,
-        title: `${source.title} (Kopie)`,
-        factorConfig: source.factorConfig as Prisma.InputJsonValue,
-      },
-      select: { id: true, areaId: true },
-    })
-    return created
+    const created = await runWithAuditContextAsync(
+      memberFormAuditContext(headers, session.userId),
+      () =>
+        db.planningVariant.create({
+          data: {
+            areaId: source.areaId,
+            createdById: session.userId,
+            parentId: data.variantId,
+            title: `${source.title} (Kopie)`,
+            factorConfig: source.factorConfig as Prisma.InputJsonValue,
+          },
+        }),
+    )
+    return { id: created.id, areaId: created.areaId }
   })
 
 const CreateVariantInput = z.object({
   areaId: z.number().int(),
-  title: z.string().min(1).optional(),
+  title: planningTitleSchema.optional(),
   factorConfig: VariantFactorConfigSchema.optional(),
 })
 
@@ -732,17 +762,32 @@ const CreateVariantInput = z.object({
 export const createPlanningVariantFn = createServerFn({ method: 'POST' })
   .validator((data: z.infer<typeof CreateVariantInput>) => CreateVariantInput.parse(data))
   .handler(async ({ data }) => {
-    const session = await authorizeByArea(getRequestHeaders(), data.areaId)
-    const variantCount = await db.planningVariant.count({ where: { areaId: data.areaId } })
-    return db.planningVariant.create({
-      data: {
-        areaId: data.areaId,
-        createdById: session.userId,
-        title: data.title ?? `Variante ${variantCount + 1}`,
-        factorConfig: stripAutoSaettigung(data.factorConfig ?? {}) as Prisma.InputJsonValue,
-      },
-      select: { id: true, areaId: true },
-    })
+    const headers = getRequestHeaders()
+    const session = await authorizeByArea(headers, data.areaId)
+    const [variantCount, area] = await Promise.all([
+      db.planningVariant.count({ where: { areaId: data.areaId } }),
+      db.planningArea.findFirstOrThrow({
+        where: { id: data.areaId },
+        select: { userDatasets: true },
+      }),
+    ])
+    const userDatasets = StoredUserDatasetsSchema.parse(area.userDatasets)
+    const created = await runWithAuditContextAsync(
+      memberFormAuditContext(headers, session.userId),
+      () =>
+        db.planningVariant.create({
+          data: {
+            areaId: data.areaId,
+            createdById: session.userId,
+            title: data.title ?? `Variante ${variantCount + 1}`,
+            factorConfig: syncEigendatenWeights(
+              stripAutoSaettigung(data.factorConfig ?? {}),
+              userDatasets,
+            ) as Prisma.InputJsonValue,
+          },
+        }),
+    )
+    return { id: created.id, areaId: created.areaId }
   })
 
 export const runPlanningVariantFn = createServerFn({ method: 'POST' })
@@ -760,7 +805,8 @@ export const runPlanningVariantFn = createServerFn({ method: 'POST' })
 export const deletePlanningVariantFn = createServerFn({ method: 'POST' })
   .validator((data: z.infer<typeof VariantIdInput>) => VariantIdInput.parse(data))
   .handler(async ({ data }) => {
-    await authorizeByVariant(getRequestHeaders(), data.variantId)
+    const headers = getRequestHeaders()
+    const session = await authorizeByVariant(headers, data.variantId)
     // A Planungsgebiet always keeps at least one variant: the mode selects by variant id.
     const { areaId } = await db.planningVariant.findUniqueOrThrow({
       where: { id: data.variantId },
@@ -771,5 +817,7 @@ export const deletePlanningVariantFn = createServerFn({ method: 'POST' })
       throw new Error('Ein Planungsgebiet braucht mindestens eine Variante.')
     }
     await deleteVariantPostgisResults(data.variantId)
-    await db.planningVariant.delete({ where: { id: data.variantId } })
+    await runWithAuditContextAsync(memberFormAuditContext(headers, session.userId), () =>
+      db.planningVariant.delete({ where: { id: data.variantId } }),
+    )
   })

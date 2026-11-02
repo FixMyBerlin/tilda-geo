@@ -13,7 +13,7 @@ export const LegendNameDesc = ({ name, desc }: Props) => {
       <div className={wrapperClass}>
         {/* Native `::marker` sits on its own line when the name is a long compound word. */}
         <details className="group">
-          <summary className="flex cursor-pointer list-none flex-nowrap items-start gap-0.5 text-xs leading-tight marker:content-none [&::-webkit-details-marker]:hidden">
+          <summary className="flex cursor-pointer list-none flex-nowrap items-start justify-between gap-1 text-xs leading-tight marker:content-none [&::-webkit-details-marker]:hidden">
             <span
               className="min-w-0 wrap-anywhere hyphens-auto"
               lang="de"

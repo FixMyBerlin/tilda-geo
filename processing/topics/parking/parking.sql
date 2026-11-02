@@ -26,6 +26,8 @@
 \i '/processing/topics/parking/custom_functions/round_capacity.sql'
 \i '/processing/topics/parking/custom_functions/condition_category_priority.sql'
 \i '/processing/topics/parking/custom_functions/osm_ref.sql'
+-- * … FOR LABELS
+\i '/processing/topics/parking/custom_functions/line_label_angle.sql'
 
 -- * … FOR SEPARATE PARKINGS
 \i '/processing/topics/parking/custom_functions/get_polygon_corners.sql'

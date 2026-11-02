@@ -38,8 +38,8 @@ Output is gitignored.
 
 ## Sources
 
-Mapbox style groups:
+Layer files:
 
-`app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/mapboxStyles/groups/`
+`app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/`
 
 GPKG data model: `scripts/tilda-parkraum-euvm-export` → `parking_public.gpkg`

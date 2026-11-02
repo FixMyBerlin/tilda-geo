@@ -1,9 +1,9 @@
-"""Fahrbahnflächen (Straßen gepuffert um ihre Breite) für den Fahrbahnen-Ausschluss.
+"""Carriageway areas (roads buffered by their width) for the carriageway exclusion.
 
-Analog zu vegetation.py: die Geometrien werden einmal berechnet (hier: aus
-`public._parking_roads` statt CIR-Kacheln) und sowohl für den harten
-Hexagon-Ausschluss in scorer.py als auch für die Kartenanzeige
-(`planning.scenario_carriageways`) wiederverwendet.
+Like vegetation.py: the geometries are computed once (here from
+`public._parking_roads` instead of CIR tiles) and reused both for the hard
+hexagon exclusion in scorer.py and for the map display
+(`planning.scenario_carriageways`).
 """
 from __future__ import annotations
 
@@ -13,7 +13,7 @@ from shapely.geometry.base import BaseGeometry
 
 from flaechenfinder.tilda import TildaLoader
 
-DEFAULT_WIDTH_M = 3.0  # Fallback, falls width_m ausnahmsweise fehlt/ungültig ist.
+DEFAULT_WIDTH_M = 3.0  # Fallback in case width_m is missing/invalid.
 
 
 def _empty_carriageways(crs: str = "EPSG:25832") -> gpd.GeoDataFrame:
@@ -23,11 +23,11 @@ def _empty_carriageways(crs: str = "EPSG:25832") -> gpd.GeoDataFrame:
 def compute_carriageway_areas(
     study_area_geom: BaseGeometry, tilda_loader: TildaLoader
 ) -> gpd.GeoDataFrame:
-    """Lädt Straßen (public._parking_roads) und puffert sie um ihre Breite.
+    """Load roads (public._parking_roads) and buffer them by their width.
 
-    `study_area_geom` ist in EPSG:4326. Rückgabe ist ein GeoDataFrame in
-    EPSG:25832 mit den Spalten `geometry` (Polygon, ein Straßensegment je
-    Zeile) und `width_m` — analog zu `compute_vegetation_areas`.
+    `study_area_geom` is in EPSG:4326. Returns a GeoDataFrame in EPSG:25832
+    with the columns `geometry` (polygon, one road segment per row) and
+    `width_m` — like `compute_vegetation_areas`.
     """
     roads = tilda_loader.load_roads(study_area_geom)
     if not len(roads):
@@ -38,5 +38,5 @@ def compute_carriageway_areas(
     roads_proj = roads_proj.set_geometry(roads_proj.geometry.buffer(width / 2.0))
     roads_proj["width_m"] = width
 
-    print(f"   ✓ {len(roads_proj)} Fahrbahnflächen gepuffert")
+    print(f"   ✓ {len(roads_proj)} carriageway areas buffered")
     return roads_proj[["geometry", "width_m"]]

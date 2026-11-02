@@ -9,7 +9,6 @@ import {
 const base = {
   areaTitle: 'Mitte',
   variantTitle: 'Standard',
-  useCaseLabel: 'Fahrradboxen',
   h3Id: '8b1f',
 }
 
@@ -42,13 +41,12 @@ describe('buildSpaceFinderReviewProperties', () => {
       Gesamtscore: '72',
       Eignungsklasse: 'gut',
       'Clusterfläche (m²)': (1234).toLocaleString('de-DE'),
-      Nutzungsfall: 'Fahrradboxen',
       Planungsgebiet: 'Mitte',
       Variante: 'Standard',
       'H3-ID': '8b1f',
       Teilscores_markdown:
-        'Bedarf 72 · Bebauung 55 · Radweg 80 · ÖPNV + Bikesharing 60; ' +
-        'Zu-/Abschläge: Vegetation −3 · Parken +2',
+        '**Bedarf 72**\n\n- Radweg 80\n- ÖPNV + Bikesharing 60\n\n' +
+        '**Bebauung 55**\n\n- Zu- und Abschläge\n  - Vegetation −3\n  - Plätze 0\n  - Parken +2',
       Prüfkriterien_markdown: SPACE_FINDER_CHECKLIST.map(
         (c, index) => `${index + 1}. ${c.label}`,
       ).join('\n'),
@@ -73,12 +71,42 @@ describe('buildSpaceFinderReviewProperties', () => {
     expect(free).not.toHaveProperty('Ausschluss')
   })
 
-  test('keeps the Teilscores on one line so the single-line editor does not break them', () => {
+  test('lists each Eigene-Daten dataset in the Teilscores, the exclusion stays short', () => {
+    const properties = buildSpaceFinderReviewProperties({
+      ...base,
+      eigendatenNames: { a: 'Wunschorte', b: 'Erlaubte Zonen' },
+      candidateProperties: {
+        eigendaten_ausschluss: true,
+        score_bedarf: 40,
+        score_eigendaten: 12,
+        eigendaten_details: JSON.stringify([
+          { id: 'a', p: 12 },
+          { id: 'b', x: 1 },
+        ]),
+      },
+    })
+    expect(properties.Ausschluss).toBe('Eigene Daten')
+    expect(properties.Teilscores_markdown).toContain(
+      '**Eigene Daten**\n\n- „Wunschorte“ +12\n- „Erlaubte Zonen“ ausgeschlossen',
+    )
+  })
+
+  test('falls back to the plain label for runs without per-dataset details', () => {
+    const properties = buildSpaceFinderReviewProperties({
+      ...base,
+      candidateProperties: { eigendaten_ausschluss: true },
+    })
+    expect(properties.Ausschluss).toBe('Eigene Daten')
+  })
+
+  test('writes the Teilscores as a Markdown list, one value per line', () => {
     const properties = buildSpaceFinderReviewProperties({
       ...base,
       candidateProperties: { score_bedarf: 10, score_vegetation: 4 },
     })
-    expect(properties.Teilscores_markdown).not.toContain('\n')
+    expect(properties.Teilscores_markdown).toBe(
+      '**Bedarf 10**\n\n**Bebauung**\n\n- Zu- und Abschläge\n  - Vegetation +4',
+    )
   })
 
   test('adds the same checklist to every candidate as a numbered Markdown list', () => {
@@ -91,7 +119,6 @@ describe('buildSpaceFinderReviewProperties', () => {
   test('omits missing or invalid values', () => {
     const properties = buildSpaceFinderReviewProperties({
       ...base,
-      useCaseLabel: null,
       candidateProperties: { mce_gesamtscore: null, eignungsklasse: ' ', cluster_area_m2: 'x' },
     })
     expect(Object.keys(properties)).toEqual([

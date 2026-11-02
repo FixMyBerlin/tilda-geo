@@ -17,7 +17,7 @@ export async function getTopicTables(topic: Topic) {
       'todos_lines',
       'parking_errors',
       'roads_bikelanes_errors',
-      'bikeroutes_errors',
+      'routes_errors',
       'bicycleParking_errors',
       'poiClassification_errors',
     ]

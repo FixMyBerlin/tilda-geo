@@ -1,14 +1,17 @@
 import type { FileMapDataSubcategory, FileMapDataSubcategoryStyleLegend } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_park_street_areas_shadow } from './mapboxStyles/groups/park_street_areas_shadow'
-import { mapboxStyleGroupLayers_park_street_default } from './mapboxStyles/groups/park_street_default'
-import { mapboxStyleGroupLayers_park_street_kind } from './mapboxStyles/groups/park_street_kind'
-import { mapboxStyleGroupLayers_park_street_label } from './mapboxStyles/groups/park_street_label'
-import { mapboxStyleGroupLayers_park_street_pattern } from './mapboxStyles/groups/park_street_pattern'
-import { mapboxStyleGroupLayers_park_street_surface } from './mapboxStyles/groups/park_street_surface'
-import type { MapboxStyleLayersProps } from './mapboxStyles/mapboxStyleLayers'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
-import { parkingTildaEdgesLayersByStyle } from './parkingTildaEdgesLayers.const'
+import { layers_parkingTilda_street_areas_shadow } from './layers/parkingTilda_street_areas_shadow'
+import { layers_parkingTilda_street_default } from './layers/parkingTilda_street_default'
+import { layers_parkingTilda_street_kind } from './layers/parkingTilda_street_kind'
+import { layers_parkingTilda_street_label } from './layers/parkingTilda_street_label'
+import { layers_parkingTilda_street_pattern } from './layers/parkingTilda_street_pattern'
+import { layers_parkingTilda_street_surface } from './layers/parkingTilda_street_surface'
+import {
+  parkingTildaEdgesLabelLayers,
+  parkingTildaEdgesLayersByStyle,
+} from './layers/parkingTildaEdgesLayers.const'
+import type { WrapSourceLayersProps } from './layers/utils/wrapSourceLayers'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 import {
   parkingTildaStreetDefaultLegends,
   parkingTildaStreetKindLegends,
@@ -30,7 +33,7 @@ export type SubcatParkingTildaStyleIds =
   | 'public_access'
   | 'operator_type'
 
-const publicFilter: MapboxStyleLayersProps['additionalFilter'] = [
+const publicFilter: WrapSourceLayersProps['additionalFilter'] = [
   'match',
   ['get', 'operator_type'],
   ['public'],
@@ -38,31 +41,31 @@ const publicFilter: MapboxStyleLayersProps['additionalFilter'] = [
   false,
 ]
 
-const createStreetStyleLayers = (filter: MapboxStyleLayersProps['additionalFilter']) =>
+const createStreetStyleLayers = (filter: WrapSourceLayersProps['additionalFilter']) =>
   [
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_street_default,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_street_default,
       additionalFilter: filter,
       source,
       sourceLayer,
       minzoom: 14,
     }),
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_street_pattern,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_street_pattern,
       additionalFilter: filter,
       source,
       sourceLayer,
       minzoom: 14,
     }),
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_street_label,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_street_label,
       additionalFilter: filter,
       source,
       sourceLayer: sourceLayerLabel,
       interactive: false,
     }),
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_street_areas_shadow,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_street_areas_shadow,
       additionalFilter: filter,
       source,
       sourceLayer: sourceLayerArea,
@@ -70,31 +73,31 @@ const createStreetStyleLayers = (filter: MapboxStyleLayersProps['additionalFilte
     }),
   ] satisfies FileMapDataSubcategory['styles'][number]['layers']
 
-const createStreetSurfaceStyleLayers = (filter: MapboxStyleLayersProps['additionalFilter']) =>
+const createStreetSurfaceStyleLayers = (filter: WrapSourceLayersProps['additionalFilter']) =>
   [
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_street_surface,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_street_surface,
       additionalFilter: filter,
       source,
       sourceLayer,
       minzoom: 14,
     }),
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_street_pattern,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_street_pattern,
       additionalFilter: filter,
       source,
       sourceLayer,
       minzoom: 14,
     }),
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_street_label,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_street_label,
       additionalFilter: filter,
       source,
       sourceLayer: sourceLayerLabel,
       interactive: false,
     }),
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_street_areas_shadow,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_street_areas_shadow,
       additionalFilter: filter,
       source,
       sourceLayer: sourceLayerArea,
@@ -102,31 +105,31 @@ const createStreetSurfaceStyleLayers = (filter: MapboxStyleLayersProps['addition
     }),
   ] satisfies FileMapDataSubcategory['styles'][number]['layers']
 
-const createStreetKindStyleLayers = (filter: MapboxStyleLayersProps['additionalFilter']) =>
+const createStreetKindStyleLayers = (filter: WrapSourceLayersProps['additionalFilter']) =>
   [
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_street_kind,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_street_kind,
       additionalFilter: filter,
       source,
       sourceLayer,
       minzoom: 14,
     }),
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_street_pattern,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_street_pattern,
       additionalFilter: filter,
       source,
       sourceLayer,
       minzoom: 14,
     }),
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_street_label,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_street_label,
       additionalFilter: filter,
       source,
       sourceLayer: sourceLayerLabel,
       interactive: false,
     }),
-    ...mapboxStyleLayers({
-      layers: mapboxStyleGroupLayers_park_street_areas_shadow,
+    ...wrapSourceLayers({
+      layers: layers_parkingTilda_street_areas_shadow,
       additionalFilter: filter,
       source,
       sourceLayer: sourceLayerArea,
@@ -134,7 +137,7 @@ const createStreetKindStyleLayers = (filter: MapboxStyleLayersProps['additionalF
     }),
   ] satisfies FileMapDataSubcategory['styles'][number]['layers']
 
-export const createSharedStreetStyles = (filter: MapboxStyleLayersProps['additionalFilter']) =>
+export const createSharedStreetStyles = (filter: WrapSourceLayersProps['additionalFilter']) =>
   [
     defaultStyleHidden,
     {
@@ -175,9 +178,15 @@ export const attachParkingTildaEdges = (
   edgesLegend: typeof parkingTildaPublicDefaultLegend | typeof parkingTildaPrivateDefaultLegend,
 ) => {
   const layersByStyle = parkingTildaEdgesLayersByStyle(operatorType)
+  const edgeLabelLayers = wrapSourceLayers({
+    layers: parkingTildaEdgesLabelLayers(operatorType),
+    source,
+    sourceLayer: 'parkings_edges_labels',
+    interactive: false,
+  })
   return styles.map((style) => {
     if (style.id === 'default' || style.id === 'surface' || style.id === 'kind') {
-      const edgeLayers = mapboxStyleLayers({
+      const edgeLayers = wrapSourceLayers({
         layers: layersByStyle[style.id],
         source,
         sourceLayer: 'parkings_edges',
@@ -185,7 +194,7 @@ export const attachParkingTildaEdges = (
       })
       return {
         ...style,
-        layers: [...edgeLayers, ...style.layers],
+        layers: [...edgeLayers, ...edgeLabelLayers, ...style.layers],
         legends: [edgesLegend, ...(style.legends ?? [])],
       }
     }

@@ -7,9 +7,9 @@ export const Route = createFileRoute('/api/notes/$regionSlug/$folderId/$noteId/c
   ssr: false,
   server: {
     handlers: {
-      OPTIONS: ({ request }) => externalApiPreflightResponse(request),
+      OPTIONS: () => externalApiPreflightResponse(),
       POST: ({ request, params }) =>
-        handleExternalApiRequest(request, async () => ({
+        handleExternalApiRequest(async () => ({
           status: 201,
           body: await createExternalNoteComment(request, params),
         })),

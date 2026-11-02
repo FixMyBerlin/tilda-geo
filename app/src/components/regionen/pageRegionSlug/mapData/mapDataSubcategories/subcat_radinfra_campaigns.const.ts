@@ -3,8 +3,8 @@ import { todoIds } from '@/data/processingTypes/todoId.generated.const'
 import { campaigns } from '@/data/radinfra-de/campaigns'
 import { campaignCategorySelect } from '@/data/radinfra-de/schema/utils/campaignCategorySelect'
 import type { FileMapDataSubcategory, FileMapDataSubcategoryStyleLegend } from '../types'
-import { mapboxStyleGroupLayers_radinfra_campaign } from './mapboxStyles/groups/radinfra_campaign'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { layers_radinfra_campaign } from './layers/radinfra_campaign'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'campaigns'
 const source = 'atlas_todos_lines'
@@ -44,8 +44,8 @@ export const subcat_radinfra_campaigns: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Alle Kampagnen',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_radinfra_campaign,
+      layers: wrapSourceLayers({
+        layers: layers_radinfra_campaign,
         source,
         sourceLayer,
       }),
@@ -64,8 +64,8 @@ export const subcat_radinfra_campaigns: FileMapDataSubcategory = {
         id: todoId,
         name: campaign?.title || `${todoId} (in Arbeit)`,
         category: category || 'In Vorbereitung',
-        layers: mapboxStyleLayers({
-          layers: mapboxStyleGroupLayers_radinfra_campaign,
+        layers: wrapSourceLayers({
+          layers: layers_radinfra_campaign,
           source,
           sourceLayer,
           additionalFilter: ['has', todoId],

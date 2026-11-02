@@ -1,0 +1,25 @@
+title: Buslinien
+summary: OSM-Relationen mit `type=route` und `route=bus`. Noch ohne Kartenebene; die Wege der Routen verweisen über `route_relations` hierher.
+attributes:
+  - key: route
+    ref: mtbroutes.route
+  - key: name
+    ref: mtbroutes.name
+  - key: ref
+    ref: mtbroutes.ref
+  - key: network
+    ref: mtbroutes.network
+  - key: operator
+    ref: mtbroutes.operator
+  - key: from
+    ref: mtbroutes.from
+  - key: to
+    ref: mtbroutes.to
+  - key: route_description
+    ref: mtbroutes.route_description
+  - key: colours
+    ref: mtbroutes.colours
+  - key: website
+    ref: mtbroutes.website
+  - key: wikipedia
+    ref: mtbroutes.wikipedia

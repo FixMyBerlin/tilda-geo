@@ -7,7 +7,7 @@ ROOT="$(git rev-parse --show-toplevel)"
 cd "$ROOT/app"
 
 # Topic-docs: regenerate JSON, then fail if committed output is stale (git diff vs HEAD)
-bun run topic-docs-build || exit 1
+bun --bun run topic-docs-build || exit 1
 git -C "$ROOT" diff --exit-code -- app/src/data/generated/topicDocs || exit 1
 
 # Env contract docs: regenerate .github/README and fail if stale
@@ -15,10 +15,10 @@ bun "$ROOT/.github/scripts/generate-github-readme.ts" || exit 1
 git -C "$ROOT" diff --exit-code -- .github/README.md || exit 1
 
 # Linting, formatting, type-checks, deploy typecheck, and explicit deps for `App`
-bun run check-pre-push
+bun --bun run check-pre-push
 
 # Type checks (Lua + tsc), lint/format, and tests for `Processing`
 cd "$ROOT/processing"
-bun run check-pre-push
+bun --bun run check-pre-push
 
 # Use `git push --no-verify` to skip (sparingly).

@@ -128,7 +128,6 @@ describe('createReviewEntriesFromSpaceFinder', () => {
       properties: expect.objectContaining({
         Gesamtscore: '80',
         Planungsgebiet: 'Mitte',
-        Nutzungsfall: 'Fahrradboxen',
       }),
       sourceMeta: expect.objectContaining({ areaId: 3, variantId: 5, runId: 9, h3Id: 'a' }),
     })

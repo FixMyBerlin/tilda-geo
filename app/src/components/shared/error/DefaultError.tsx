@@ -22,7 +22,7 @@ export default function DefaultError({ error, reset }: ErrorComponentProps) {
               Ein Fehler ist aufgetreten
             </h1>
             <p className="mt-2 text-base text-gray-600">Leider ist ein Fehler aufgetreten.</p>
-            {isDev && error?.message && (
+            {isDev && error instanceof Error && error.message && (
               <p className="mt-2 font-mono text-sm wrap-break-word text-gray-700">
                 {error.message}
               </p>

@@ -1,8 +1,8 @@
 import type { FileMapDataSubcategory } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { surfaceLineBadLayers } from './manualStyles/surface'
-import { mapboxStyleGroupLayers_atlas_roads_smooth_all } from './mapboxStyles/groups/atlas_roads_smooth_all'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { layers_roads_smooth_all } from './layers/roads_smooth_all'
+import { surfaceLineBadLayers } from './layers/surface'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 import { legendSurfaceBad, legendSurfaceDefault } from './subcat_surface_roads.const'
 
 const subcatId = 'surfacePathClasses'
@@ -21,8 +21,8 @@ export const subcat_surface_path_classes: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_atlas_roads_smooth_all,
+      layers: wrapSourceLayers({
+        layers: layers_roads_smooth_all,
         source,
         sourceLayer,
         idPrefix: sourceLayer,
@@ -32,7 +32,7 @@ export const subcat_surface_path_classes: FileMapDataSubcategory = {
     {
       id: 'bad',
       name: 'Nur schlechte Oberflächen',
-      layers: mapboxStyleLayers({
+      layers: wrapSourceLayers({
         layers: surfaceLineBadLayers(),
         source,
         sourceLayer,

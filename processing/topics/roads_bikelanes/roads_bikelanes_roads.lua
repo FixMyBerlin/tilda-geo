@@ -18,6 +18,7 @@ local excluded_from_roads_tables = require('topics.roads_bikelanes.helper.exclud
 local SANITIZE_ROAD_TAGS = require('topics.roads_bikelanes.helper.sanitize_road_tags')
 local CLEANER = require('topics.helper.sanitize_cleaner')
 local LOG_ERROR = require('topics.roads_bikelanes.roads_bikelanes_errors')
+local pseudo_route_relations = require('topics.roads_bikelanes.route_relations.pseudo_route_relations')
 local roads_bikelanes_tables = require('topics.roads_bikelanes.roads_bikelanes_tables')
 local adjoining_context = require('topics.roads_bikelanes.pseudo_tags_sidepath.adjoining_context')
 
@@ -85,9 +86,11 @@ local function roads_bikelanes_roads(context)
       if cycleway._side == 'right' then result_tags['bikelane_right'] = cycleway.category end
     end
 
+    local path_id = default_id({ type = object_tags._type, id = object_tags._id })
     local path_tags = merge_table(extract_public_tags(result_tags), {
       _is_sidepath = object_tags._is_sidepath,
       _in_settlement_area = object_tags._in_settlement_area,
+      route_relations = pseudo_route_relations(object_tags, path_id),
     })
     merge_table(
       path_tags,
@@ -95,7 +98,7 @@ local function roads_bikelanes_roads(context)
     )
 
     roads_path_classes_table:insert({
-      id = default_id({ type = object_tags._type, id = object_tags._id }),
+      id = path_id,
       tags = path_tags,
       meta = object_meta,
       geom = object_geom,
@@ -103,10 +106,12 @@ local function roads_bikelanes_roads(context)
     })
   else
     result_tags.name_ref = object_tags.ref
+    local road_id = default_id({ type = object_tags._type, id = object_tags._id })
     roads_table:insert({
-      id = default_id({ type = object_tags._type, id = object_tags._id }),
+      id = road_id,
       tags = merge_table(extract_public_tags(result_tags), {
         _in_settlement_area = object_tags._in_settlement_area,
+        route_relations = pseudo_route_relations(object_tags, road_id),
       }),
       meta = object_meta,
       geom = object_geom,

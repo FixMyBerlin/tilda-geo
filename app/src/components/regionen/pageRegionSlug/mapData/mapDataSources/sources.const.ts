@@ -11,7 +11,7 @@ type TildaSourceId =
   | 'atlas_bikelanes'
   | 'atlas_bikeroutes'
   | 'atlas_boundaries'
-  | 'atlas_busStopsAndBikeSharing'
+  | 'atlas_buildingEntrances'
   | 'atlas_landuse'
   | 'atlas_places'
   | 'atlas_poiClassification'
@@ -81,6 +81,7 @@ export const sources: MapDataSource<SourcesId>[] = [
         'surface_color__if_present',
         'description__if_present',
         'length',
+        'composit_route_relations',
         // Last: links to photos, not a property of the object.
         'composit_mapillary',
       ],
@@ -145,6 +146,7 @@ export const sources: MapDataSource<SourcesId>[] = [
         'width',
         'length',
         'description__if_present',
+        'composit_route_relations',
         // Last: links to photos, not a property of the object.
         'composit_mapillary',
       ],
@@ -206,6 +208,7 @@ export const sources: MapDataSource<SourcesId>[] = [
         'width',
         'length',
         'description__if_present',
+        'composit_route_relations',
         // Last: links to photos, not a property of the object.
         'composit_mapillary',
       ],
@@ -266,10 +269,8 @@ export const sources: MapDataSource<SourcesId>[] = [
     },
   },
   {
-    id: 'atlas_busStopsAndBikeSharing',
-    // Bundles the `bus_stop` category from `publicTransport` with the `bicycle_rental`
-    // POIs from `poiClassification` for the combined "Bushaltestelle + Bikesharing" toggle.
-    tileTables: ['publicTransport', 'poiClassification'],
+    id: 'atlas_poiClassification',
+    tileTables: ['poiClassification'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -284,8 +285,8 @@ export const sources: MapDataSource<SourcesId>[] = [
     },
   },
   {
-    id: 'atlas_poiClassification',
-    tileTables: ['poiClassification'],
+    id: 'atlas_buildingEntrances',
+    tileTables: ['buildingEntrances'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -296,7 +297,7 @@ export const sources: MapDataSource<SourcesId>[] = [
     inspector: {
       enabled: true,
       highlightingKey: 'id',
-      documentedKeys: ['name', 'category', 'type'],
+      documentedKeys: ['entrance', 'ref', 'name', 'wheelchair', 'access'],
     },
   },
   {
@@ -357,11 +358,18 @@ export const sources: MapDataSource<SourcesId>[] = [
       enabled: true,
       highlightingKey: 'id',
       documentedKeys: [
+        'kind',
         'capacity',
-        'capacity:cargo_bike__if_present',
         'access',
         'covered',
+        'name__if_present',
+        'operator__if_present',
         'operator_type__if_present',
+        'network__if_present',
+        'stand_type__if_present',
+        'rental_type__if_present',
+        'position__if_present',
+        'in_mobility_hub__if_present',
         'lit__if_present',
         'description__if_present',
         // Last: links to photos, not a property of the object.

@@ -7,14 +7,14 @@ export const Route = createFileRoute('/api/notes/$regionSlug/$folderId/$noteId')
   ssr: false,
   server: {
     handlers: {
-      OPTIONS: ({ request }) => externalApiPreflightResponse(request),
+      OPTIONS: () => externalApiPreflightResponse(),
       GET: ({ request, params }) =>
-        handleExternalApiRequest(request, async () => ({
+        handleExternalApiRequest(async () => ({
           status: 200,
           body: await getExternalNote(request, params),
         })),
       PATCH: ({ request, params }) =>
-        handleExternalApiRequest(request, async () => ({
+        handleExternalApiRequest(async () => ({
           status: 200,
           body: await updateExternalNote(request, params),
         })),

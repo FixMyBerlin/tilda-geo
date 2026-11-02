@@ -1,16 +1,16 @@
--- Tile-Funktionen für das planning-Schema.
--- Sie liegen bewusst im planning-Schema und NICHT in public: Martin publiziert
--- jede Funktion aus public (configs/martin.yaml) auf den öffentlichen Tile-Hosts,
--- ohne Session- oder Regionsprüfung. Ausgeliefert werden die Kacheln von der
--- authentifizierten App-Route (app/src/server/planning/servePlanningTile.server.ts).
+-- Tile functions for the planning schema.
+-- They live in the planning schema on purpose and NOT in public: Martin publishes
+-- every function in public (configs/martin.yaml) on the public tile hosts,
+-- without any session or region check. The tiles are served by the
+-- authenticated app route (app/src/server/planning/servePlanningTile.server.ts).
 --
--- Signatur (z int, x int, y int, query_params json) → bytea. Muss in lockstep mit
--- app/src/server/instrumentation/registerPlanningFunctions.server.ts bleiben.
+-- Signature (z int, x int, y int, query_params json) → bytea. Must stay in lockstep with
+-- app/src/server/instrumentation/registerPlanningFunctions.server.ts.
 --
 -- query_params: { "run_id": "<int>" }
 
--- Frühere Fassungen in public (Martin-publiziert) entfernen, auch wenn ein älteres
--- Worker-Image sie nicht mehr anlegt.
+-- Drop earlier versions in public (published by Martin), even if an older
+-- worker image no longer creates them.
 DROP FUNCTION IF EXISTS public.planning_hexagons(int, int, int, json);
 DROP FUNCTION IF EXISTS public.planning_vegetation(int, int, int, json);
 DROP FUNCTION IF EXISTS public.planning_carriageways(int, int, int, json);
@@ -23,9 +23,9 @@ RETURNS bytea LANGUAGE plpgsql STABLE PARALLEL SAFE AS $$
 DECLARE
     run_id_val bigint := (query_params->>'run_id')::bigint;
     bounds     geometry := ST_TileEnvelope(z, x, y);
-    -- Ab z16 das feine BASE-Gitter (Res 13), darunter das grobe Aggregat
-    -- (Res 11, ~49× weniger Features). Muss mit AGG_H3_RES/BASE_H3_RES in
-    -- planning-worker/flaechenfinder/scorer.py übereinstimmen.
+    -- From z16 the fine BASE grid (res 13), below that the coarse aggregate
+    -- (res 11, ~49× fewer features). Must match AGG_H3_RES/BASE_H3_RES in
+    -- planning-worker/flaechenfinder/scorer.py.
     res_val    smallint := CASE WHEN z >= 16 THEN 13 ELSE 11 END;
     hex_mvt    bytea;
     label_mvt  bytea;
@@ -55,6 +55,7 @@ BEGIN
             gebaeude,
             fahrbahn,
             eigendaten_ausschluss,
+            eigendaten_details,
             ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom
         FROM planning.scenario_hexagons
         WHERE run_id = run_id_val
@@ -63,15 +64,14 @@ BEGIN
     ) t
     WHERE t.geom IS NOT NULL;
 
-    -- Eigener Punkt-Layer für das Label (nur ab z18, siehe HEXAGON_LABEL_MIN_ZOOM in
-    -- SourcesLayersSpaceFinder.tsx): der Fläche-Layer oben puffert & schneidet die
-    -- Hexagon-Polygone pro Kachel (buffer=256), damit die Füllung an Kachelgrenzen
-    -- nahtlos bleibt — dasselbe Polygon liegt dadurch aber oft in mehreren Kacheln,
-    -- je mit einem eigenen, zur sichtbaren Teilfläche versetzten Zentroid. Ein darauf
-    -- basierendes Symbol-Layer würde also mehrfache, außermittige Labels je Hexagon
-    -- erzeugen. Der Label-Layer nimmt stattdessen den echten Hexagon-Mittelpunkt,
-    -- ungepuffert (buffer=0) und via ST_Contains auf die ungeweiteten Kachelgrenzen
-    -- gefiltert — jedes Hexagon liefert seinen Mittelpunkt so in genau einer Kachel.
+    -- Separate point layer for the label (only from z18, see HEXAGON_LABEL_MIN_ZOOM in
+    -- SourcesLayersSpaceFinder.tsx): the fill layer above buffers & clips the hexagon
+    -- polygons per tile (buffer=256) so the fill stays seamless at tile edges — but the
+    -- same polygon then often lands in several tiles, each with its own centroid shifted
+    -- toward the visible part. A symbol layer based on that would produce multiple,
+    -- off-center labels per hexagon. Instead the label layer uses the true hexagon
+    -- center, unbuffered (buffer=0) and filtered via ST_Contains against the unexpanded
+    -- tile bounds — so each hexagon yields its center in exactly one tile.
     IF z >= 18 THEN
         SELECT ST_AsMVT(t, 'planning_hexagons_label', 4096, 'geom')
         INTO label_mvt
@@ -142,19 +142,19 @@ BEGIN
 END;
 $$;
 
--- Zensus-Einwohnerpunkte (Bewohnerbedarf-Faktor) als Punktlayer.
+-- Census population points (resident demand factor) as a point layer.
 --
--- Liest direkt aus `data.census_population_point` – KEINE Kopie pro Lauf: die
--- Tabelle deckt ganz Deutschland ab (~24 Mio. Punkte, EPSG:5243) und liegt
--- ohnehin in dieser DB. Gezeigt wird genau der Ausschnitt, den auch das Scoring
--- benutzt: `PostgisLoader.load_census_population()` filtert mit
--- `geom && ST_Transform(study_area, 5243)`, also über die Bounding-Box des
--- Planungsgebiets – dieselbe Bedingung steht unten. Das Planungsgebiet kommt aus
--- dem eingefrorenen `factorConfigSnapshot` des Laufs, damit der Layer zum
--- Ergebnis passt, auch wenn das Gebiet später bearbeitet wurde.
+-- Reads directly from `data.census_population_point` – NO copy per run: the
+-- table covers all of Germany (~24M points, EPSG:5243) and lives in this DB
+-- anyway. It shows exactly the extent the scoring uses:
+-- `PostgisLoader.load_census_population()` filters with
+-- `geom && ST_Transform(study_area, 5243)`, i.e. the Planungsgebiet bounding
+-- box – the same condition is below. The Planungsgebiet comes from the run's
+-- frozen `factorConfigSnapshot`, so the layer matches the result even if the
+-- area was edited later.
 --
--- Fehlt das Data-Schema auf dieser Umgebung (Tabelle nicht importiert), liefert
--- die Funktion NULL statt eines Fehlers – wie die graceful Fallbacks im Worker.
+-- If the data schema is missing on this environment (table not imported), the
+-- function returns NULL instead of an error – like the graceful fallbacks in the worker.
 CREATE OR REPLACE FUNCTION planning.planning_census(
     z int, x int, y int, query_params json DEFAULT '{}'
 )
@@ -174,7 +174,7 @@ BEGIN
     IF geo IS NULL THEN
         RETURN NULL;
     END IF;
-    -- Wie _study_area_from_config() im Worker: Feature/FeatureCollection auspacken.
+    -- Like _study_area_from_config() in the worker: unwrap Feature/FeatureCollection.
     IF geo->>'type' = 'FeatureCollection' THEN
         geo := geo->'features'->0->'geometry';
     ELSIF geo->>'type' = 'Feature' THEN
@@ -189,10 +189,10 @@ BEGIN
                 c.total AS einwohner,
                 ST_AsMVTGeom(ST_Transform(c.geom, 3857), bounds, 4096, 256, true) AS geom
             FROM data.census_population_point c
-            -- Beide Bedingungen laufen über den GiST-Index im Quell-CRS. Die
-            -- Kachel wird vor dem Transformieren um 10 % geweitet, damit die
-            -- Projektionsverzerrung 3857 → 5243 an den Kachelrändern keine
-            -- Punkte verschluckt; ST_AsMVTGeom schneidet danach exakt zu.
+            -- Both conditions use the GiST index in the source CRS. The tile
+            -- is expanded by 10 % before transforming so the projection
+            -- distortion 3857 → 5243 does not drop points at tile edges;
+            -- ST_AsMVTGeom then clips exactly.
             WHERE c.total > 0
               AND c.geom && ST_Transform(ST_Expand(bounds, (ST_XMax(bounds) - ST_XMin(bounds)) * 0.1), 5243)
               AND c.geom && area_5243

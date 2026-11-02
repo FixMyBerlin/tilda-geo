@@ -1,6 +1,6 @@
 -- place=square polygons for the `_places_squares` PROCESSING-ONLY table (geometry only — no
--- tags/meta, no minzoom). The leading `_` keeps it out of Martin's tile sources; the
--- planning-worker uses it to score proximity to / coverage by public squares.
+-- tags/meta, no minzoom). The leading `_` marks it internal: no map layer, Martin only serves it
+-- for inspection. The planning-worker uses it to score proximity to / coverage by public squares.
 --
 -- MVP: closed ways only, no multipolygon relations (squares as relations are rare; mirrors the
 -- pedestrian-zone MVP decision elsewhere in the planning module).

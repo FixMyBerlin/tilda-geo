@@ -3,8 +3,8 @@ import {
   litLineCompletenessLayersRadinfra,
   litLineLegends,
   litMissingDataLegendRadinfra,
-} from './manualStyles/lit'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+} from './layers/lit'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'lit_bikelanes'
 const source = 'atlas_bikelanes'
@@ -24,7 +24,7 @@ export const subcat_radinfra_lit_bikelanes: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'RVA Beleuchtung',
-      layers: mapboxStyleLayers({
+      layers: wrapSourceLayers({
         layers: litLineCompletenessLayersRadinfra(),
         source,
         sourceLayer,

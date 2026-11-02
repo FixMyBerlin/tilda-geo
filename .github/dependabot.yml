@@ -69,7 +69,6 @@ updates:
           - 'preview-email'
           - 'react-email'
           - 'sharp'
-          - 'spritesmith'
           - 'vitest'
           - 'vite'
           - '@types/*'

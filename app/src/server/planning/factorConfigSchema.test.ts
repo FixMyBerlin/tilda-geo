@@ -1,11 +1,12 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { DEFAULT_FACTOR_TEMPLATE } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/spaceFinderDefaults'
 import {
   parseFactorConfigSnapshot,
   parseVariantFactorConfig,
   VariantFactorConfigSchema,
 } from './factorConfigSchema'
 import { runFreshnessAfterFactorSave } from './factorFingerprint'
-import { mergeFactorConfig, type PlanningAreaInput } from './mergeFactorConfig'
+import { mergeFactorConfig, type PlanningAreaInput, stripAutoSaettigung } from './mergeFactorConfig'
 
 const area: PlanningAreaInput = {
   studyArea: { type: 'Polygon', coordinates: [] },
@@ -46,6 +47,40 @@ describe('parseVariantFactorConfig', () => {
 
   it('leaves the input schema strict', () => {
     expect(VariantFactorConfigSchema.safeParse(oldStored).success).toBe(false)
+  })
+
+  it('keeps stored weights the input schema would reject', () => {
+    expect(parseVariantFactorConfig({ weights: { w_cyclepath: 2 } }).weights).toEqual({
+      w_cyclepath: 2,
+    })
+  })
+})
+
+describe('VariantFactorConfigSchema', () => {
+  it('accepts the default template unchanged', () => {
+    expect(VariantFactorConfigSchema.parse(DEFAULT_FACTOR_TEMPLATE)).toEqual(
+      DEFAULT_FACTOR_TEMPLATE,
+    )
+  })
+
+  it('drops unknown keys', () => {
+    expect(VariantFactorConfigSchema.parse({ min_score_threshold: 50, foo: 1 })).toEqual({
+      min_score_threshold: 50,
+    })
+  })
+
+  it('rejects weights outside 0–1 and negative radii', () => {
+    expect(VariantFactorConfigSchema.safeParse({ weights: { w_target: 2 } }).success).toBe(false)
+    expect(VariantFactorConfigSchema.safeParse({ parken_radius_m: -1 }).success).toBe(false)
+  })
+
+  it('keeps the census marker so the suggestion is not stored as a user value', () => {
+    const parsed = VariantFactorConfigSchema.parse({
+      bewohnerbedarf_saettigung_ew: 42,
+      bewohnerbedarf_saettigung_auto: true,
+      bewohnerbedarf_saettigung_auto_ew: 42,
+    })
+    expect(stripAutoSaettigung(parsed)).toEqual({})
   })
 })
 

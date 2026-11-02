@@ -1,10 +1,10 @@
 [project]
 name = "planning-worker"
 version = "0.1.0"
-description = "Python-Worker des Planungsmoduls (Flächenfinder)"
+description = "Python worker of the planning module (Flächenfinder)"
 requires-python = ">=3.12"
 dependencies = [
-  # Geo-Stack (binäre Wheels, kein System-GDAL nötig)
+  # Geo stack (binary wheels, no system GDAL needed)
   "geopandas>=1.0",
   "shapely>=2.0",
   "h3>=4.1",
@@ -12,15 +12,15 @@ dependencies = [
   "numpy>=1.26",
   "pandas>=2.2",
   "rasterio>=1.3",
-  "scipy>=1.11", # morphologisches Closing (vegetation.py NDVI-Maske)
-  "Pillow>=10.0", # WebP-Decoding für Mapterhorn-DEM-Kacheln (dem.py)
-  # DB-Zugriff
+  "scipy>=1.11", # morphological closing (vegetation.py NDVI mask)
+  "Pillow>=10.0", # WebP decoding for Mapterhorn DEM tiles (dem.py)
+  # DB access
   "SQLAlchemy>=2.0",
-  "GeoAlchemy2>=0.15", # von geopandas.to_postgis benötigt
-  "psycopg[binary]>=3.2", # notifies(timeout=...) seit 3.2
+  "GeoAlchemy2>=0.15", # required by geopandas.to_postgis
+  "psycopg[binary]>=3.2", # notifies(timeout=...) since 3.2
 ]
 
 [tool.uv]
 package = false
-# Vermeidet Breaking Changes durch taggleiche PyPI-Releases (Supply-Chain-Absicherung).
+# Avoids breaking changes from same-day PyPI releases (supply-chain protection).
 exclude-newer = "5 days"

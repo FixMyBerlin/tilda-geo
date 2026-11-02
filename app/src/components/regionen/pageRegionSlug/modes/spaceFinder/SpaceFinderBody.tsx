@@ -1,6 +1,6 @@
+import { feature, featureCollection } from '@turf/helpers'
 import { useEffect } from 'react'
 import { twJoin } from 'tailwind-merge'
-import { formatDate } from '@/components/shared/date/formatDate'
 import { comparableRunSnapshot } from '@/server/planning/factorFingerprint'
 import { areaInputFromRow } from '@/server/planning/mergeFactorConfig'
 import { useSpaceFinderBoundaryActions } from '../../hooks/mapState/space-finder-boundary-store'
@@ -14,8 +14,7 @@ import type { PlanningVariantDetail } from './spaceFinderVariantDetail'
 
 /** Status line (D5): same run state as the Varianten dropdown and the run button. */
 const StatusSection = ({ variant }: { variant: PlanningVariantDetail }) => {
-  const { status, outdatedReason, latestJob, latestRun, hasCompleteRun } =
-    spaceFinderOpenRunStatus(variant)
+  const { status, outdatedReason, latestJob } = spaceFinderOpenRunStatus(variant)
 
   return (
     <div className="flex flex-col gap-2 px-4 py-2">
@@ -25,9 +24,6 @@ const StatusSection = ({ variant }: { variant: PlanningVariantDetail }) => {
         </p>
       )}
       {latestJob != null && <JobStatusBadge jobId={latestJob.id} variantId={variant.id} />}
-      {status === 'complete' && latestJob == null && latestRun != null && hasCompleteRun && (
-        <p className="text-xs text-green-700">✓ Ergebnis vom {formatDate(latestRun.createdAt)}</p>
-      )}
       {status === 'none' && latestJob == null && (
         <p className={modePanelMutedClassName}>Noch nicht berechnet.</p>
       )}
@@ -37,8 +33,7 @@ const StatusSection = ({ variant }: { variant: PlanningVariantDetail }) => {
 
 /**
  * Flächenfinder panel body (D5): status line, Faktoren, Anzeige and Auswahl as
- * collapsible sections, not a list. Anzeige appears before the first run only when
- * Eigene Daten are uploaded (that layer toggle alone); the rest needs a complete run.
+ * collapsible sections, not a list. Anzeige needs a complete run and is hidden before.
  */
 export const SpaceFinderBody = ({
   variant,
@@ -60,11 +55,28 @@ export const SpaceFinderBody = ({
     return () => setVegetationAttribution(null)
   }, [variant, setVegetationAttribution])
 
-  const userGeojson = variant?.factorConfig.user_geojson
-  useEffect(() => {
-    setUserObstaclesGeom((userGeojson as object | undefined) ?? null)
-    return () => setUserObstaclesGeom(null)
-  }, [userGeojson, setUserObstaclesGeom])
+  // All "Eigene Daten" datasets as one control layer; the name is on every object.
+  const userDatasets = variant?.factorConfig.user_datasets
+  useEffect(
+    function syncUserDatasetsToMapStore() {
+      if (!userDatasets || userDatasets.length === 0) {
+        setUserObstaclesGeom(null)
+        return
+      }
+      const collection = featureCollection(
+        userDatasets.flatMap((dataset) =>
+          dataset.geojson.features.map(({ geometry }) =>
+            feature(geometry, { dataset: dataset.name }),
+          ),
+        ),
+      )
+      setUserObstaclesGeom(collection)
+      return function clearUserDatasetsFromMapStore() {
+        setUserObstaclesGeom(null)
+      }
+    },
+    [userDatasets, setUserObstaclesGeom],
+  )
 
   if (!variant) return null
 

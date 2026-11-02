@@ -1,28 +1,16 @@
 import { Disclosure, DisclosureButton, DisclosurePanel, Transition } from '@headlessui/react'
-import { ChevronRightIcon } from '@heroicons/react/20/solid'
 import { useState } from 'react'
-import { twJoin } from 'tailwind-merge'
+import { DisclosureChevron } from '@/components/shared/DisclosureChevron/DisclosureChevron'
 import { collapsibleBoxClass, collapsibleBoxHeaderClass } from './collapsibleBoxStyles'
 
-/**
- * Chevron der Klapp-Boxen. Zugeklappt sitzt er in einem weißen Chip — zusammen mit dem gefüllten
- * Kopf (siehe `collapsibleBoxHeaderClass`) ist die Zeile so auch ohne sichtbaren Inhalt klar
- * als aufklappbar zu erkennen.
- */
+/** Chevron of the collapsible boxes — the shared TILDA disclosure chevron at the row's end. */
 export const CollapsibleBoxChevron = ({ open }: { open: boolean }) => (
-  <span
-    className={twJoin(
-      'flex size-5 shrink-0 items-center justify-center rounded-full transition-colors',
-      open ? 'text-gray-500' : 'border border-gray-300 bg-white text-gray-700 shadow-sm',
-    )}
-  >
-    <ChevronRightIcon className={twJoin('size-4 transition-transform', open && 'rotate-90')} />
-  </span>
+  <DisclosureChevron open={open} side="trailing" className="size-5 text-gray-500" />
 )
 
 /**
- * Auf-/zuklappbare Box mit Titelzeile. Basis für die Flächenfinder-Abschnitte, damit sie im
- * Planungspanel identisch aussehen und sich gleich verhalten.
+ * Collapsible box with a title row. Base for the Flächenfinder sections, so they look and behave
+ * the same in the planning panel.
  */
 export const CollapsibleBox = ({
   title,

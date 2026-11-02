@@ -1,4 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { buttonStylesOnYellow } from '@/components/shared/links/styles'
 import { runPlanningVariantFn } from '@/server/planning/planning.functions'
 import {
   planningAreasQueryOptions,
@@ -9,6 +10,7 @@ import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import {
   type SpaceFinderVariantStatus,
   spaceFinderRunNeedsRerun,
+  spaceFinderRunUpToDate,
 } from '../collection/spaceFinderCollectionOptions'
 import { JobStatusBadge } from './JobStatusBadge'
 
@@ -41,9 +43,11 @@ export const RunButton = ({
 
   const isInFlight = status === 'running'
   const hasFinishedRun = spaceFinderRunNeedsRerun(status, latestJob?.status)
-  // Faktoren speichern sich automatisch; bis das durch ist, würde der Lauf serverseitig noch
-  // mit dem alten Stand rechnen (siehe FactorEditorPanel).
+  // Factors save automatically; until that is done, the run would still compute server-side
+  // with the old state (see FactorEditorPanel).
   const factorSavePending = useSpaceFinderFactorSavePending()
+  // Up to date: no button, the status line in the panel body says so (`SpaceFinderBody`).
+  const upToDate = spaceFinderRunUpToDate(status, latestJob?.status)
 
   const label = mutation.isPending
     ? 'Wird gestartet…'
@@ -53,6 +57,8 @@ export const RunButton = ({
         ? 'Neu berechnen'
         : 'Berechnung starten'
 
+  if (upToDate) return null
+
   return (
     <div className="flex flex-col gap-2">
       {!isInFlight && (
@@ -60,7 +66,7 @@ export const RunButton = ({
           type="button"
           onClick={() => mutation.mutate()}
           disabled={mutation.isPending || factorSavePending}
-          className="rounded bg-blue-600 px-3 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          className={buttonStylesOnYellow}
         >
           {label}
         </button>

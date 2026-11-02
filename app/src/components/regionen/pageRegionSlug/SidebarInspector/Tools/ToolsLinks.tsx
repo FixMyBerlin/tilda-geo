@@ -4,6 +4,12 @@ import type {
   MapDataSourceInspectorEditor,
 } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { Link } from '@/components/shared/links/Link'
+import {
+  routeRelationShortTitle,
+  routeRelationsKey,
+  routeRelationTitle,
+} from '../../routeRelations/routeRelations'
+import { useRouteRelations } from '../../routeRelations/useRouteRelations'
 import type { InspectorFeature } from '../Inspector'
 import { editorUrl } from './osmUrls/editorUrl'
 import { extractOsmTypeIdByConfig } from './osmUrls/extractOsmTypeIdByConfig'
@@ -24,6 +30,16 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: ToolsLinksProps) =
   const osmUrlHref = osmOrgUrl(osmTypeId)
   const osmEditIdUrlHref = osmEditIdUrl(osmTypeId)
   const osmEditJosmUrlHref = osmEditJosmUrl(osmTypeId)
+  const routeRelationLinks = useRouteRelations(
+    feature.properties[routeRelationsKey],
+  ).routes.flatMap(({ relations }) =>
+    relations.map(({ relationId, detail }) => ({
+      label: routeRelationShortTitle(relationId, detail),
+      // Both directions of a bus line share the ref; the full title tells them apart.
+      title: routeRelationTitle(relationId, detail),
+      url: `${osmOrgUrl({ osmType: 'relation', osmId: relationId })}/history`,
+    })),
+  )
   // const osmEditKyleKiwiIdUrlHref = osmEditKyleKiwiIdUrl(osmTypeId)
   // const osmEditRapidUrlHref = osmEditRapidUrl(osmTypeId)
 
@@ -114,6 +130,20 @@ export const ToolsLinks = ({ feature, editors, osmIdConfig }: ToolsLinksProps) =
           )
         })}
       </div>
+
+      {routeRelationLinks.length > 0 && (
+        <div className="mt-3">
+          <span className="text-gray-600">Routen: </span>
+          {routeRelationLinks.map(({ label, title, url }, index) => (
+            <Fragment key={url}>
+              <Link blank href={url} title={title}>
+                {label}
+              </Link>
+              {index < routeRelationLinks.length - 1 && ', '}
+            </Fragment>
+          ))}
+        </div>
+      )}
 
       {feature.properties.geom_sources === feature.properties.tag_sources ? (
         <OsmSources idString={feature.properties.geom_sources} title="OpenStreetMap" />

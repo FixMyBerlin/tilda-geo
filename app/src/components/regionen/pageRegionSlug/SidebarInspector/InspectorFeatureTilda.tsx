@@ -3,10 +3,7 @@ import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/util
 import { parseSourceKeyAtlasGeo } from '../utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
 import { Disclosure } from './Disclosure/Disclosure'
 import type { InspectorFeature } from './Inspector'
-import {
-  NoticeMaproulette,
-  useNoticeMaprouletteVisible,
-} from './InspectorFeatureSource/NoticeMaproulette'
+import { NoticeMaproulette } from './InspectorFeatureSource/NoticeMaproulette'
 import { NoticeTransformedGeometry } from './InspectorFeatureSource/NoticeTransformedGeometry'
 import { TagsTable } from './TagsTable/TagsTable'
 import { translations } from './TagsTable/translations/translations.const'
@@ -26,35 +23,24 @@ export const InspectorFeatureTilda = ({ sourceKey, feature }: InspectorFeature) 
       : { osmType: undefined, osmId: undefined }
   const osmTypeId = osmType && osmId ? osmTypeIdString(osmType, osmId) : undefined
 
-  const showMaprouletteNotice = useNoticeMaprouletteVisible({
-    sourceId,
-    osmTypeIdString: osmTypeId,
-    kind: properties?.category || properties?.road,
-    properties: properties ?? {},
-    geometry,
-  })
-
   if (!sourceKey || !properties) return null
   if (!sourceData?.inspector.enabled) return null
   if (!sourceId) return null
 
-  const showTransformedGeometryNotice = !!properties.prefix
-  const hasPreTableContent = showTransformedGeometryNotice || showMaprouletteNotice
-
   return (
     <IntlProvider messages={translations} locale="de" defaultLocale="de">
       <Disclosure title={<FormattedMessage id={`${sourceId}--title`} />} objectId={osmTypeId}>
-        <NoticeTransformedGeometry visible={properties?.prefix} />
-
-        <NoticeMaproulette
-          sourceId={sourceId}
-          osmTypeIdString={osmTypeId}
-          kind={properties?.category || properties?.road}
-          properties={properties}
-          geometry={geometry}
-        />
-
-        {hasPreTableContent && <div className="py-1" />}
+        {/* Takes no space when empty; `pb-2` spaces the notices from the table */}
+        <div className="pb-2 empty:hidden">
+          <NoticeTransformedGeometry sourceId={sourceId} properties={properties} />
+          <NoticeMaproulette
+            sourceId={sourceId}
+            osmTypeIdString={osmTypeId}
+            kind={properties?.category || properties?.road}
+            properties={properties}
+            geometry={geometry}
+          />
+        </div>
 
         <TagsTable
           properties={properties}

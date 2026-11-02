@@ -30,7 +30,7 @@ const RUN_DAYS = 15
 /** Rough per-topic durations for plausible admin chart seed data (ms). */
 const topicDurationsMs = {
   roads_bikelanes: { lua: 50 * 60_000, sql: 12 * 60_000, diff: 8 * 60_000 },
-  bikeroutes: { lua: 8 * 60_000, sql: 3 * 60_000, diff: 2 * 60_000 },
+  routes: { lua: 8 * 60_000, sql: 3 * 60_000, diff: 2 * 60_000 },
   bicycleParking: { lua: 6 * 60_000, sql: 2 * 60_000, diff: 60_000 },
   trafficSigns: { lua: 10 * 60_000, sql: 4 * 60_000, diff: 2 * 60_000 },
   boundaries: { lua: 5 * 60_000, sql: 2 * 60_000, diff: 60_000 },
@@ -42,11 +42,7 @@ const topicDurationsMs = {
   parking: { lua: 25 * 60_000, sql: 8 * 60_000, diff: 4 * 60_000 },
 } as const satisfies Record<TopicId, { lua: number; sql: number; diff: number }>
 
-const unchangedSkipTopics = [
-  'bikeroutes',
-  'places',
-  'barriers',
-] as const satisfies readonly TopicId[]
+const unchangedSkipTopics = ['routes', 'places', 'barriers'] as const satisfies readonly TopicId[]
 
 const durationJitter = (baseMs: number, dayIndex: number, topicId: TopicId) => {
   const factor = 0.88 + ((dayIndex * 17 + topicId.length * 13) % 25) / 100

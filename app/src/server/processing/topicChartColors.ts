@@ -15,7 +15,7 @@ type TopicChartHue =
 
 const topicChartHueById: Record<TopicId, TopicChartHue> = {
   roads_bikelanes: 'blue',
-  bikeroutes: 'indigo',
+  routes: 'indigo',
   bicycleParking: 'violet',
   trafficSigns: 'purple',
   boundaries: 'pink',

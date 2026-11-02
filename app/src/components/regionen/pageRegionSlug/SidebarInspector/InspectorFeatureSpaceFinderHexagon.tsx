@@ -1,67 +1,58 @@
 import { twJoin } from 'tailwind-merge'
 import { useSpaceFinderMinAreaDraft } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-boundary-store'
 import type { StoreFeaturesInspector } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
-import { WEIGHT_GROUPS } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/spaceFinderDefaults'
+import {
+  factorRangeHint,
+  WEIGHT_GROUPS,
+} from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/spaceFinderDefaults'
 import {
   criterionShares,
   groupShare,
   MODIFIER_MAX_POINTS,
   weightToPoints,
+  weightToStep,
 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/weightScale'
+import { isCoarseHexagon } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/planningHexagonResolution'
 import { appliedMinAreaM2 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderModeParam'
 import {
+  spaceFinderFactorActiveTextClass,
+  spaceFinderFactorEmptyValueClass,
+  spaceFinderFactorHintClass,
+  spaceFinderFactorMutedTextClass,
+  spaceFinderFactorGroupLabelClass,
+  spaceFinderFactorGroupRowsClass,
   spaceFinderGroupBarStyle,
+  spaceFinderGroupHeadingClass,
   spaceFinderGroupStyle,
 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderPanelStyles'
+import { spaceFinderOpenRunStatus } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderRunStatus'
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
-import { PLANNING_SCORE_LABELS as SCORE_LABELS } from '@/shared/regionen/planningScoreLabels.const'
+import { parseEigendatenDetails } from '@/shared/regionen/planningEigendatenDetails'
+import {
+  PLANNING_SCORE_GROUPS,
+  PLANNING_SCORE_LABELS as SCORE_LABELS,
+} from '@/shared/regionen/planningScoreLabels.const'
 import { Disclosure } from './Disclosure/Disclosure'
 
 type Props = {
   feature: StoreFeaturesInspector['inspectorFeatures'][number]
 }
 
-// Per-hexagon factor breakdown grouped by the two probabilities (Issue #3415).
-// `scoreKey` is the persisted sub-score for the whole group. Innerhalb der Gruppe
-// unterscheiden sich die beiden Faktorarten auch in der Anzeige, weil sie andere
-// Werte halten (mirrors scorer.py):
-//   criteria  → 0–100-Teilscore, gewichteter Durchschnitt → Balken
-//   modifiers → Zu-/Abschlag in Punkten (kann negativ sein) → Balken relativ zum Maximaleffekt
-const SCORE_GROUPS: {
-  // Gruppenschlüssel wie in WEIGHT_GROUPS — verbindet die Sidebar mit den Gewichten der Variante
-  // und mit den Gruppenfarben (`spaceFinderGroupStyle`) des Flächenfinder-Panels.
-  key: 'bedarf' | 'bebauung'
-  label: string
-  scoreKey: string
-  criteria: string[]
-  modifiers: string[]
-  // Angekündigte, aber noch nicht integrierte Kriterien (keine Daten am Hexagon) — werden nur als
-  // deaktivierte Zeile mit "bald verfügbar"-Hinweis angezeigt.
-  comingSoon?: string[]
-}[] = [
-  {
-    key: 'bedarf',
-    label: 'Bedarf',
-    scoreKey: 'score_bedarf',
-    criteria: ['score_radweg', 'score_oepnv'],
-    modifiers: ['score_fussgaengerzone', 'score_bewohnerbedarf', 'score_zielorte', 'score_bestand'],
-  },
-  {
-    key: 'bebauung',
-    label: 'Bebauung',
-    scoreKey: 'score_bebauung',
-    criteria: ['score_hangneigung'],
-    modifiers: ['score_vegetation', 'score_platz', 'score_kreuzung', 'score_parken'],
-  },
-]
+// Per-hexagon factor breakdown grouped by the two probabilities (Issue #3415), see
+// `PLANNING_SCORE_GROUPS`. Within a group the two factor kinds are also displayed differently
+// because they hold different values (mirrors scorer.py):
+//   criteria  → 0–100 Teilscore, weighted average → bar
+//   modifiers → bonus/penalty in points (can be negative) → bar relative to the max effect
+const SCORE_GROUPS = PLANNING_SCORE_GROUPS
 
-// `score_*` (Ergebnis pro Hexagon) → `w_*` (Gewicht der Variante) — nötig, um den maximal
-// möglichen Effekt (`weightToPoints`) für den Anteils-Balken zu bestimmen (mirrors weightScale.ts).
+// `score_*` (result per hexagon) → `w_*` (variant weight) — needed to determine the maximum
+// possible effect (`weightToPoints`) for the share bar (mirrors weightScale.ts).
 const MODIFIER_WEIGHT_KEYS: Record<string, string> = {
   score_fussgaengerzone: 'w_fussgaengerzone',
   score_bestand: 'w_bestand',
   score_vegetation: 'w_vegetation',
+  score_bewohnerbedarf: 'w_bewohnerbedarf',
   score_kreuzung: 'w_intersection',
   score_parken: 'w_parken',
   score_platz: 'w_platz',
@@ -69,22 +60,37 @@ const MODIFIER_WEIGHT_KEYS: Record<string, string> = {
   score_zielorte: 'w_target',
 }
 
-// Dasselbe für die Kriterien — `criterionShares` (weightScale.ts) ist nach Gewichts-Namen
-// indiziert, die Sidebar zeigt aber Score-Namen.
+// Same for the criteria — `criterionShares` (weightScale.ts) is keyed by weight names,
+// but the sidebar shows score names.
 const CRITERION_WEIGHT_KEYS: Record<string, string> = {
   score_radweg: 'w_cyclepath',
   score_oepnv: 'w_transit',
   score_hangneigung: 'w_slope',
 }
 
-// Vollständige Ausschlussgründe (nullen mce_gesamtscore, siehe scorer.py
-// Z. 966-975 `exclusion` bzw. Z. 902-906 `eigendaten_exclude`), jeweils mit
-// erklärendem Sidebar-Hinweis. Gebäude/Fahrbahn/Eigene-Flächen haben dafür ein
-// eigenes persistiertes Flag (analog `gebaeude`); Steilhang braucht keins –
-// `score_hangneigung` ist nur bei Gewicht > 0 gesetzt (sonst NULL) und exakt 0
-// nur bei Hangneigung > 10°, identisch zur Ausschlussbedingung im Worker. Bei
-// Gewicht 0 ist `score_hangneigung` NULL, der Check greift dann also nicht –
-// wie bei jedem anderen ausgeschalteten Faktor entfällt der Ausschluss.
+// Row order follows the factor editor (`WEIGHT_GROUPS`), so the same factor sits at the same
+// position in the editor and here. `PLANNING_SCORE_GROUPS` is shared with the Prüfliste
+// take-over and has its own order, so it is only re-sorted here.
+const EDITOR_ORDER = new Map(
+  WEIGHT_GROUPS.flatMap((group) => [...group.criteria, ...group.modifiers.map((m) => m.key)]).map(
+    (weightKey, index) => [weightKey, index],
+  ),
+)
+const inEditorOrder = (scoreKeys: string[]) => {
+  const position = (scoreKey: string) =>
+    EDITOR_ORDER.get(CRITERION_WEIGHT_KEYS[scoreKey] ?? MODIFIER_WEIGHT_KEYS[scoreKey] ?? '') ??
+    Number.MAX_SAFE_INTEGER
+  return [...scoreKeys].sort((a, b) => position(a) - position(b))
+}
+
+// Hard exclusion reasons (zero out mce_gesamtscore, see scorer.py
+// l. 966-975 `exclusion` and l. 902-906 `eigendaten_exclude`), each with an
+// explanatory sidebar note. Building/carriageway/user areas have their own
+// persisted flag for this (like `gebaeude`); steep slope needs none –
+// `score_hangneigung` is only set with weight > 0 (otherwise NULL) and exactly 0
+// only for slope > 10°, identical to the exclusion condition in the worker. With
+// weight 0, `score_hangneigung` is NULL, so the check does not apply –
+// like any other disabled factor, the exclusion is dropped.
 const EXCLUSION_REASONS: { check: (props: Record<string, any>) => boolean; text: string }[] = [
   {
     check: (props) => !!props.gebaeude,
@@ -98,10 +104,6 @@ const EXCLUSION_REASONS: { check: (props: Record<string, any>) => boolean; text:
     check: (props) => props.score_hangneigung === 0,
     text: 'Diese Fläche ist zu steil (Hangneigung > 10°) – eine Bebauung ist hier nicht möglich.',
   },
-  {
-    check: (props) => !!props.eigendaten_ausschluss,
-    text: 'Diese Fläche liegt im Ausschlussbereich eigener Daten.',
-  },
 ]
 
 const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
@@ -112,11 +114,37 @@ const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
   'sehr gut': 'bg-green-100 text-green-800',
 }
 
-// Gemeinsames Spaltenraster für alle Faktor-Zeilen (Kriterien, Zu-/Abschläge, "bald verfügbar"):
-// Label bekommt den Restplatz, Balken/Wert/Prozent haben feste Breiten. Nur so bleiben die Balken
-// exakt untereinander ausgerichtet — unabhängig davon, ob eine Zeile einen Prozent-Anteil zeigt
-// (Kriterien) oder nicht (Zu-/Abschläge), und über beide Gruppen-Tabellen (Bedarf/Bebauung) hinweg.
+// Shared column grid for all factor rows (criteria, bonuses/penalties, "bald verfügbar"):
+// the label gets the remaining space, bar/value/percent have fixed widths. This keeps the bars
+// aligned exactly — whether a row shows a percent share (criteria) or not
+// (bonuses/penalties), and across both group tables (Bedarf/Bebauung).
 const ROW_GRID = 'grid grid-cols-[1fr_6rem_2.75rem_2.5rem] items-center gap-x-2'
+
+// Factor label with the configured reach (active factors). Disabled factors (weight 0) are muted.
+const FactorLabel = ({
+  label,
+  active,
+  hint,
+}: {
+  label: string
+  active: boolean
+  hint?: string
+}) => (
+  <span className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5 pr-3">
+    <span className={active ? spaceFinderFactorActiveTextClass : spaceFinderFactorMutedTextClass}>
+      {label}
+    </span>
+    {active && hint && <span className={spaceFinderFactorHintClass}>{hint}</span>}
+  </span>
+)
+
+/** Value color: darker for factors that count, light gray for "–" and zeros, muted when disabled. */
+const factorValueClassName = (active: boolean, rounded: number | null) =>
+  !active
+    ? spaceFinderFactorMutedTextClass
+    : rounded == null || rounded === 0
+      ? spaceFinderFactorEmptyValueClass
+      : spaceFinderFactorActiveTextClass
 
 const BarTrack = ({
   pct,
@@ -138,12 +166,12 @@ const BarTrack = ({
 )
 
 /**
- * Zu-/Abschlag in Punkten — anders als die Kriterien vorzeichenbehaftet und ohne 0–100-Skala.
- * Die Füllung zeigt den Anteil am maximal möglichen Effekt dieses Faktors (`max` =
- * `weightToPoints(Gewicht)`, siehe `weightScale.ts`) und ist grün (Zuschlag) bzw. rot (Abschlag)
- * eingefärbt. Statt eines Prozentanteils (bei vorzeichenbehafteten Punkten ohne gemeinsame
- * Bezugsgröße wenig aussagekräftig) zeigt der Wert direkt den Bruch aus angewandtem Effekt und dem
- * im Faktor eingestellten Maximum, z. B. „5/15".
+ * Bonus/penalty in points — unlike the criteria, signed and without a 0–100 scale.
+ * The fill shows the share of this factor's maximum possible effect (`max` =
+ * `weightToPoints(weight)`, see `weightScale.ts`) and is green (bonus) or red (penalty).
+ * Instead of a percent share (not very meaningful for signed points without a common
+ * reference), the value directly shows the applied effect over the maximum configured
+ * in the factor, e.g. „5/15".
  */
 const formatModifierValue = (value: number | null | undefined, max: number) =>
   value == null
@@ -174,28 +202,76 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
       minAreaDraft,
     ) > 0
 
-  // Gewichte des Laufs, der die hier angezeigten Werte tatsächlich erzeugt hat — NICHT die
-  // (womöglich seither ohne Neuberechnung veränderten) aktuellen Variantengewichte. Sonst würden
-  // Balkenmaximum und Prozentanteile einer nicht mehr aktuellen Faktor-Konfiguration entsprechen.
+  // Weights of the run that actually produced the values shown here — NOT the current variant
+  // weights (which may have changed since without a recompute). Otherwise bar maximum and
+  // percent shares would reflect an outdated factor configuration.
   const run = variant?.runs?.find((r) => r.id === runId)
   const snapshot = run?.factorConfigSnapshot
   const weights = snapshot?.weights
   const shares = weights ? criterionShares(weights) : undefined
+  // Without a snapshot (legacy run) nothing is known about the weights: treat all as active.
+  const criterionActive = (scoreKey: string) =>
+    !weights || weightToStep(weights[CRITERION_WEIGHT_KEYS[scoreKey] ?? scoreKey]) > 0
+  const modifierActive = (scoreKey: string) =>
+    !weights || weightToPoints(weights[MODIFIER_WEIGHT_KEYS[scoreKey] ?? scoreKey]) > 0
   const modifierMax = (scoreKey: string) => {
     const weightKey = MODIFIER_WEIGHT_KEYS[scoreKey]
     return weightKey ? weightToPoints(weights?.[weightKey]) : MODIFIER_MAX_POINTS
   }
-  // Verteilung zwischen Bedarf und Bebauung: Anteil der Kriterien dieser Gruppe am Grundscore
-  // (dieselbe Größe, die FactorEditorPanel als "XX % des Grundscores" neben der Gruppen-
-  // überschrift zeigt) — hier auf den Gewichten des Laufs statt der Live-Variante.
+  // Split between Bedarf and Bebauung: share of this group's criteria in the base score
+  // (the same value FactorEditorPanel shows as "XX % des Grundscores" next to the group
+  // heading) — here based on the run's weights instead of the live variant.
   const groupSharePct = (groupKey: 'bedarf' | 'bebauung') => {
     if (!shares) return undefined
     const weightGroup = WEIGHT_GROUPS.find((g) => g.key === groupKey)
     return weightGroup ? groupShare(shares, weightGroup.criteria) : undefined
   }
 
+  // Eigene Daten: names and strengths from the run snapshot (as computed then), otherwise from the
+  // current variant.
+  const datasetsById = new Map(
+    (snapshot?.user_datasets ?? variant?.factorConfig.user_datasets ?? []).map((dataset) => [
+      dataset.id,
+      dataset,
+    ]),
+  )
+  const datasetName = (id: string) => datasetsById.get(id)?.name ?? 'Eigene Daten'
+  // Exclusion text per mode: „Ausschluss außen“ hits areas OUTSIDE the dataset.
+  const datasetExclusionText = (id: string) => {
+    const name = `„${datasetName(id)}“`
+    switch (datasetsById.get(id)?.mode) {
+      case 'exclude_inside':
+        return `Diese Fläche liegt innerhalb der eigenen Daten ${name} (Ausschluss innen).`
+      case 'exclude_outside':
+        return `Diese Fläche liegt außerhalb der eigenen Daten ${name} (Ausschluss außen).`
+      case 'bonus':
+      case 'penalty':
+      case undefined:
+        return `Diese Fläche ist durch die eigenen Daten ${name} ausgeschlossen.`
+    }
+  }
+  const datasetMax = (id: string) => weightToPoints(snapshot?.eigendaten_weights?.[id])
+
+  const runStatus = variant ? spaceFinderOpenRunStatus(variant) : null
+
   const props = feature.properties
   if (!props) return null
+
+  // Coarse cells (aggregate grid below zoom 16) only carry averages: no exclusion reasons
+  // and no per-dataset breakdown (see `aggregate_hexagons` in the worker).
+  const coarseCell = isCoarseHexagon(props.h3_id)
+  const eigendatenDetails = parseEigendatenDetails(props.eigendaten_details)
+  const eigendatenExcludedBy = eigendatenDetails.filter((detail) => detail.x != null)
+  const exclusionTexts = [
+    ...EXCLUSION_REASONS.filter((reason) => reason.check(props)).map((reason) => reason.text),
+    ...(props.eigendaten_ausschluss
+      ? eigendatenExcludedBy.length > 0
+        ? eigendatenExcludedBy.map((detail) => datasetExclusionText(detail.id))
+        : ['Diese Fläche liegt im Ausschlussbereich eigener Daten.']
+      : []),
+  ]
+  const showEigendaten =
+    eigendatenDetails.length > 0 || Math.round(props.score_eigendaten ?? 0) !== 0
 
   const gesamtscore: number | null = props.mce_gesamtscore ?? null
   const eignungsklasse: string | null = props.eignungsklasse ?? null
@@ -207,6 +283,13 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
   return (
     <Disclosure title="Potenzialflächen-Hexagon">
       <div className="space-y-3 px-4 py-3">
+        {runStatus?.status === 'stale' && (
+          <p className="rounded bg-amber-50 px-2 py-1 text-xs text-amber-800">
+            {runStatus.outdatedReason ? `${runStatus.outdatedReason} — ` : ''}Ergebnis veraltet. Die
+            Werte stammen aus der letzten Berechnung. Bitte neu berechnen.
+          </p>
+        )}
+
         <div className="flex items-center justify-between rounded-r border-l-[3px] border-gray-400 bg-gray-50 py-1.5 pr-2 pl-2">
           <span className="text-xs font-bold text-gray-700 uppercase">Gesamtscore</span>
           <div className="flex items-center gap-2">
@@ -221,11 +304,18 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
           </div>
         </div>
 
-        {EXCLUSION_REASONS.filter((reason) => reason.check(props)).map((reason) => (
-          <div key={reason.text} className="rounded bg-amber-100 px-3 py-2 text-xs text-amber-900">
-            <strong>Hinweis:</strong> {reason.text}
+        {exclusionTexts.map((text) => (
+          <div key={text} className="rounded bg-amber-100 px-3 py-2 text-xs text-amber-900">
+            <strong>Hinweis:</strong> {text}
           </div>
         ))}
+
+        {coarseCell && (
+          <p className="rounded bg-gray-50 px-3 py-2 text-xs text-gray-600">
+            Grobe Ansicht: Die Werte sind über mehrere Flächen gemittelt. Ausschlussgründe und die
+            Wirkung einzelner Datensätze erscheinen beim Hineinzoomen.
+          </p>
+        )}
 
         {areaFilterOn && props.cluster_area_m2 != null && (
           <div className="flex items-center justify-between text-xs">
@@ -243,8 +333,8 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
             const groupVal = props[group.scoreKey]
             const sharePct = groupSharePct(group.key)
             return (
-              // Gleiche Gruppenfarben wie im Flächenfinder-Panel, damit die lange Faktorenliste hier
-              // und die Gewichte dort ohne Suchen zusammenzubringen sind.
+              // Same group colors as in the Flächenfinder panel, so the long factor list here
+              // and the weights there can be matched up at a glance.
               <div
                 key={group.scoreKey}
                 className={twJoin(
@@ -252,11 +342,16 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
                   spaceFinderGroupStyle[group.key].block,
                 )}
               >
-                <div className="mb-5 flex items-center justify-between">
+                <div
+                  className={twJoin(
+                    'mb-2 flex items-center justify-between border-b pb-0.5',
+                    spaceFinderGroupStyle[group.key].headline,
+                  )}
+                >
                   <div
                     className={twJoin(
-                      'text-xs font-semibold uppercase',
-                      spaceFinderGroupStyle[group.key].text,
+                      spaceFinderGroupHeadingClass,
+                      spaceFinderGroupStyle[group.key].title,
                     )}
                   >
                     {group.label}
@@ -276,71 +371,97 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
                   </span>
                 </div>
                 <div className="space-y-0 text-xs">
-                  {group.criteria.map((key) => {
-                    const value = props[key] as number | null | undefined
-                    const pct = value != null ? Math.max(0, Math.min(100, value)) : 0
-                    const sharePct = shares?.[CRITERION_WEIGHT_KEYS[key] ?? key]
-                    return (
-                      <div
-                        key={key}
-                        className={twJoin(ROW_GRID, 'border-b border-gray-100 py-1.5')}
-                      >
-                        <span className="pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</span>
-                        <BarTrack
-                          pct={pct}
-                          fillClassName={spaceFinderGroupBarStyle[group.key].full}
-                        />
-                        <span className="text-right font-mono text-gray-600">
-                          {value != null ? Math.round(value) : '–'}
+                  <div className={spaceFinderFactorGroupLabelClass}>Kriterien</div>
+                  <div className={spaceFinderFactorGroupRowsClass}>
+                    {inEditorOrder(group.criteria).map((key) => {
+                      const value = props[key] as number | null | undefined
+                      const pct = value != null ? Math.max(0, Math.min(100, value)) : 0
+                      const weightKey = CRITERION_WEIGHT_KEYS[key] ?? key
+                      const sharePct = shares?.[weightKey]
+                      const active = criterionActive(key)
+                      const rounded = value != null ? Math.round(value) : null
+                      return (
+                        <div key={key} className={twJoin(ROW_GRID, 'py-1')}>
+                          <FactorLabel
+                            label={SCORE_LABELS[key] ?? key}
+                            active={active}
+                            hint={factorRangeHint(weightKey, snapshot)}
+                          />
+                          <BarTrack
+                            pct={pct}
+                            fillClassName={spaceFinderGroupBarStyle[group.key].full}
+                          />
+                          <span
+                            className={twJoin(
+                              'text-right font-mono',
+                              factorValueClassName(active, rounded),
+                            )}
+                          >
+                            {rounded ?? '–'}
+                          </span>
+                          <span className="text-right text-[10px] text-gray-400 tabular-nums">
+                            {active && sharePct != null ? `(${Math.round(sharePct)}%)` : null}
+                          </span>
+                        </div>
+                      )
+                    })}
+                    {group.comingSoon?.map((key) => (
+                      <div key={key} className={twJoin(ROW_GRID, 'py-1')}>
+                        <span className={twJoin('pr-3', spaceFinderFactorMutedTextClass)}>
+                          {SCORE_LABELS[key] ?? key}
                         </span>
-                        <span className="text-right text-[10px] text-gray-400 tabular-nums">
-                          {sharePct != null ? `(${Math.round(sharePct)}%)` : null}
+                        <BarTrack pct={0} trackClassName="bg-gray-100" />
+                        <span className="col-span-2 text-right text-[10px] text-gray-400">
+                          bald
                         </span>
                       </div>
-                    )
-                  })}
-                  {group.comingSoon?.map((key) => (
-                    <div key={key} className={twJoin(ROW_GRID, 'border-b border-gray-100 py-1.5')}>
-                      <span className="pr-3 text-gray-400">{SCORE_LABELS[key] ?? key}</span>
-                      <BarTrack pct={0} trackClassName="bg-gray-100" />
-                      <span className="col-span-2 text-right text-[10px] text-gray-400">bald</span>
-                    </div>
-                  ))}
-                  <div className="pt-1.5 text-[10px] tracking-wide text-gray-400 uppercase">
+                    ))}
+                  </div>
+                  <div className={twJoin('pt-2', spaceFinderFactorGroupLabelClass)}>
                     Zu- und Abschläge
                   </div>
-                  {group.modifiers.map((key) => {
-                    const value = props[key] as number | null | undefined
-                    const max = modifierMax(key)
-                    return (
-                      <div
-                        key={key}
-                        className={twJoin(
-                          ROW_GRID,
-                          'border-b border-gray-100 py-1.5 last:border-0',
-                        )}
-                      >
-                        <span className="pr-3 text-gray-500">{SCORE_LABELS[key] ?? key}</span>
-                        <BarTrack
-                          pct={modifierBarPct(value, max)}
-                          fillClassName={modifierFillClassName(value, group.key)}
-                        />
-                        <span className="col-span-2 text-right font-mono text-black">
-                          {formatModifierValue(value, max)}
-                        </span>
-                      </div>
-                    )
-                  })}
+                  <div className={spaceFinderFactorGroupRowsClass}>
+                    {inEditorOrder(group.modifiers).map((key) => {
+                      const value = props[key] as number | null | undefined
+                      const max = modifierMax(key)
+                      const active = modifierActive(key)
+                      return (
+                        <div key={key} className={twJoin(ROW_GRID, 'py-1')}>
+                          <FactorLabel
+                            label={SCORE_LABELS[key] ?? key}
+                            active={active}
+                            hint={factorRangeHint(MODIFIER_WEIGHT_KEYS[key] ?? key, snapshot)}
+                          />
+                          <BarTrack
+                            pct={modifierBarPct(value, max)}
+                            fillClassName={modifierFillClassName(value, group.key)}
+                          />
+                          <span
+                            className={twJoin(
+                              'col-span-2 text-right font-mono',
+                              factorValueClassName(
+                                active,
+                                value != null ? Math.round(value) : null,
+                              ),
+                            )}
+                          >
+                            {formatModifierValue(value, max)}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
               </div>
             )
           })}
 
-          {/* Eigene Daten: eigene Kategorie (nicht in Bedarf/Bebauung), Amber (größter
-              Farbabstand zu Blau/Lila auf dem Farbkreis, siehe spaceFinderPanelStyles.ts) —
-              unabhängig von der Kartenlayer-Farbe der hochgeladenen Flächen (Violett).
-              Signierter Effekt in Punkten; NULL bei Ausschluss-Modi (dort wirkt der harte Cut). */}
-          {props.score_eigendaten != null && (
+          {/* Eigene Daten: its own category (not in Bedarf/Bebauung), amber (largest
+              hue distance to blue/purple on the color wheel, see spaceFinderPanelStyles.ts) —
+              independent of the map layer color of the uploaded areas (violet).
+              One row per dataset: bonus/penalty in points or „ausgeschlossen“ (hard cut,
+              no points). Without breakdown (legacy runs, coarse cells) only the total effect. */}
+          {showEigendaten && (
             <div
               className={twJoin(
                 'rounded-r border-l-[3px] py-1 pr-1 pl-2',
@@ -349,22 +470,75 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
             >
               <div
                 className={twJoin(
-                  'mb-1 text-xs font-semibold uppercase',
-                  spaceFinderGroupStyle.eigendaten.text,
+                  'mb-1 border-b pb-0.5',
+                  spaceFinderGroupHeadingClass,
+                  spaceFinderGroupStyle.eigendaten.headline,
+                  spaceFinderGroupStyle.eigendaten.title,
                 )}
               >
                 Eigene Daten
               </div>
-              <div className={twJoin(ROW_GRID, 'py-1.5 text-xs')}>
-                <span className="pr-3 text-gray-500">{SCORE_LABELS.score_eigendaten}</span>
-                <BarTrack
-                  pct={modifierBarPct(props.score_eigendaten, modifierMax('score_eigendaten'))}
-                  fillClassName={modifierFillClassName(props.score_eigendaten, 'eigendaten')}
-                />
-                <span className="col-span-2 text-right font-mono text-black">
-                  {formatModifierValue(props.score_eigendaten, modifierMax('score_eigendaten'))}
-                </span>
-              </div>
+              {eigendatenDetails.length > 0 ? (
+                // One row per dataset with its name; the sum is in the total score.
+                eigendatenDetails.map((detail) =>
+                  detail.p != null ? (
+                    <div key={detail.id} className={twJoin(ROW_GRID, 'py-1 text-xs')}>
+                      <span
+                        className={twJoin('truncate pr-3', spaceFinderFactorActiveTextClass)}
+                        title={datasetName(detail.id)}
+                      >
+                        {datasetName(detail.id)}
+                      </span>
+                      <BarTrack
+                        pct={modifierBarPct(detail.p, datasetMax(detail.id))}
+                        fillClassName={modifierFillClassName(detail.p, 'eigendaten')}
+                      />
+                      <span
+                        className={twJoin(
+                          'col-span-2 text-right font-mono',
+                          factorValueClassName(true, Math.round(detail.p)),
+                        )}
+                      >
+                        {formatModifierValue(detail.p, datasetMax(detail.id))}
+                      </span>
+                    </div>
+                  ) : (
+                    <div key={detail.id} className={twJoin(ROW_GRID, 'py-1 text-xs')}>
+                      <span
+                        className={twJoin('truncate pr-3', spaceFinderFactorActiveTextClass)}
+                        title={datasetName(detail.id)}
+                      >
+                        {datasetName(detail.id)}
+                      </span>
+                      <span className="col-span-3 text-right font-semibold text-gray-800">
+                        ausgeschlossen
+                      </span>
+                    </div>
+                  ),
+                )
+              ) : (
+                // Runs from before the per-dataset breakdown: only the total effect is known.
+                <div className={twJoin(ROW_GRID, 'py-1 text-xs')}>
+                  <span className={twJoin('pr-3', spaceFinderFactorActiveTextClass)}>
+                    {SCORE_LABELS.score_eigendaten}
+                  </span>
+                  <BarTrack
+                    pct={modifierBarPct(props.score_eigendaten, modifierMax('score_eigendaten'))}
+                    fillClassName={modifierFillClassName(props.score_eigendaten, 'eigendaten')}
+                  />
+                  <span
+                    className={twJoin(
+                      'col-span-2 text-right font-mono',
+                      factorValueClassName(
+                        true,
+                        props.score_eigendaten != null ? Math.round(props.score_eigendaten) : null,
+                      ),
+                    )}
+                  >
+                    {formatModifierValue(props.score_eigendaten, modifierMax('score_eigendaten'))}
+                  </span>
+                </div>
+              )}
             </div>
           )}
         </div>

@@ -19,12 +19,16 @@ const ensureDir = async (dirPath: string) => {
 
 export const readTopicYamlFiles = async () => {
   await ensureDir(inputRoot)
-  const topLevel = await readdir(inputRoot, { withFileTypes: true })
+  // Sorted: readdir order differs between filesystems and runtimes, and the file order decides
+  // the order of keys in the generated files.
+  const byName = (a: { name: string }, b: { name: string }) =>
+    a.name < b.name ? -1 : a.name > b.name ? 1 : 0
+  const topLevel = (await readdir(inputRoot, { withFileTypes: true })).sort(byName)
   const files: Array<string> = []
   for (const entry of topLevel) {
     if (!entry.isDirectory() || entry.name.startsWith('_')) continue
     const dirPath = path.resolve(inputRoot, entry.name)
-    const children = await readdir(dirPath, { withFileTypes: true })
+    const children = (await readdir(dirPath, { withFileTypes: true })).sort(byName)
     for (const child of children) {
       if (!child.isFile()) continue
       if (child.name === 'groups.yaml' || child.name === 'groups.yml') continue

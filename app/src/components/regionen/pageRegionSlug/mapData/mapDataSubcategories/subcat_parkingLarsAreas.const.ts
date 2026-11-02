@@ -1,7 +1,7 @@
 import type { FileMapDataSubcategory, FileMapDataSubcategoryStyleLegend } from '../types'
 import { defaultStyleHidden } from './defaultStyle/defaultStyleHidden'
-import { mapboxStyleGroupLayers_parking_areas } from './mapboxStyles/groups/parking_areas'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { layers_parkingLars_areas } from './layers/parkingLars_areas'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'parkingAreas'
 const source = 'lars_parking_areas'
@@ -43,8 +43,8 @@ export const subcat_parkingLarsAreas: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_parking_areas,
+      layers: wrapSourceLayers({
+        layers: layers_parkingLars_areas,
         source,
         sourceLayer,
         additionalFilter: ['match', ['get', 'parking'], ['street_side'], false, true],
@@ -54,8 +54,8 @@ export const subcat_parkingLarsAreas: FileMapDataSubcategory = {
     {
       id: 'street_side',
       name: 'Parkbuchten',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_parking_areas,
+      layers: wrapSourceLayers({
+        layers: layers_parkingLars_areas,
         source,
         sourceLayer,
       }),

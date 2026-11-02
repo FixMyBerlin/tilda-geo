@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
+import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { Spinner } from '@/components/shared/Spinner/Spinner'
 import {
   planningJobQueryOptions,
@@ -24,6 +25,7 @@ const COLORS: Record<string, string> = {
 /** Polls a job until DONE/FAILED. On DONE, shows the run on the map + refreshes variant. */
 export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId: number }) => {
   const queryClient = useQueryClient()
+  const { clearInspectorFeatures } = useMapActions()
 
   const { data } = useQuery({
     ...planningJobQueryOptions(jobId),
@@ -39,9 +41,11 @@ export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId:
     // the worker already set server-side — this invalidation just refetches it.
     queryClient.invalidateQueries(planningVariantQueryOptions(variantId))
     queryClient.invalidateQueries({ queryKey: ['planning', 'areas'] })
-  }, [data?.status, data?.resultRunId, variantId, queryClient])
+    // An open hexagon inspector shows the previous run's frozen snapshot.
+    clearInspectorFeatures()
+  }, [data?.status, data?.resultRunId, variantId, queryClient, clearInspectorFeatures])
 
-  // Der "Neu berechnen"-Button in RunButton zeigt den fertigen Zustand schon an.
+  // The "Neu berechnen" button in RunButton already shows the finished state.
   if (!data || data.status === 'DONE') return null
 
   const showProgress =
@@ -50,8 +54,8 @@ export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId:
   const jobActive = data.status === 'RUNNING' || data.status === 'QUEUED'
 
   const currentStep = deriveScoringStep(data.status, data.progress, data.progressLabel)
-  // Das numerische "n/total · "-Präfix der Scoring-Schritte zeigt schon die
-  // Schrittliste – im Header nur den reinen Namen anhängen.
+  // The step list already shows the numeric "n/total · " prefix of the scoring
+  // steps – only append the plain name in the header.
   const headerLabel = data.progressLabel?.replace(/^\d+\/\d+\s*·\s*/, '')
 
   return (
@@ -80,7 +84,7 @@ export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId:
         <SpaceFinderRunSteps
           currentStep={currentStep}
           weights={data.weights}
-          userObstacles={{ present: data.userGeojsonPresent, mode: data.userGeojsonMode }}
+          hasUserDatasets={data.hasUserDatasets}
         />
       ) : null}
       {data.status === 'FAILED' && data.errorMessage ? (

@@ -1,6 +1,6 @@
 import type { FileMapDataSubcategory } from '../types'
-import { mapboxStyleGroupLayers_park_street_no } from './mapboxStyles/groups/park_street_no'
-import { mapboxStyleLayers } from './mapboxStyles/mapboxStyleLayers'
+import { layers_parkingTilda_street_no } from './layers/parkingTilda_street_no'
+import { wrapSourceLayers } from './layers/utils/wrapSourceLayers'
 
 const subcatId = 'parkingTildaNo'
 const source = 'tilda_parkings_no'
@@ -18,8 +18,8 @@ export const subcat_parkingTilda_street_no: FileMapDataSubcategory = {
     {
       id: 'default',
       name: 'Standard',
-      layers: mapboxStyleLayers({
-        layers: mapboxStyleGroupLayers_park_street_no,
+      layers: wrapSourceLayers({
+        layers: layers_parkingTilda_street_no,
         source,
         sourceLayer,
       }),

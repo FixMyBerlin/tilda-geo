@@ -1382,7 +1382,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 paint: {
                   'fill-opacity': 0.5,
                   'fill-translate': [0, 0],
-                  'fill-pattern': 'cross-hatch-barriers',
+                  'fill-pattern': 'pattern-hatch',
                 },
                 source: 'atlas_barriers',
                 'source-layer': 'barrierAreas',
@@ -1522,13 +1522,13 @@ export const freshConfig: MapDataCategoryConfig[] = [
                     ['ferry_station'],
                     'ferry',
                     ['railway_station'],
-                    'singapore-mrt',
+                    'train',
                     ['light_rail_station'],
-                    'S-Bahn_MB',
+                    's-bahn',
                     ['tram_station'],
-                    'rail-metro',
+                    'tram',
                     ['subway_station'],
-                    'de-u-bahn',
+                    'u-bahn',
                     '',
                   ],
                   'icon-padding': 1,
@@ -1887,7 +1887,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 type: 'line',
                 id: 'roads-onewaybikeyes-pattern-all',
                 paint: {
-                  'line-pattern': 'arrow-blue-dots-gap(1)',
+                  'line-pattern': 'pattern-oneway-bicycle',
                   'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3, 15, 5, 22, 10],
                   'line-opacity': 0.8,
                 },
@@ -1922,7 +1922,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 type: 'line',
                 id: 'roads-oneway-pattern-all',
                 paint: {
-                  'line-pattern': 'arrow-grey-gap(1)',
+                  'line-pattern': 'pattern-oneway',
                   'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3, 15, 5, 22, 10],
                   'line-opacity': 0.7,
                 },
@@ -2161,7 +2161,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 type: 'line',
                 id: 'roads-onewaybikeyes-pattern sidestreets',
                 paint: {
-                  'line-pattern': 'arrow-blue-dots-gap(1)',
+                  'line-pattern': 'pattern-oneway-bicycle',
                   'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3, 15, 5, 22, 10],
                   'line-opacity': 0.8,
                 },
@@ -2195,7 +2195,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 type: 'line',
                 id: 'roads-oneway-pattern sidestreets',
                 paint: {
-                  'line-pattern': 'arrow-grey-gap(1)',
+                  'line-pattern': 'pattern-oneway',
                   'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3, 15, 5, 22, 10],
                   'line-opacity': 0.7,
                 },
@@ -2312,7 +2312,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 layout: {
                   'text-size': 9,
                   'icon-text-fit': 'width',
-                  'icon-image': 'rectangle-yellow-3',
+                  'icon-image': 'label-box-yellow',
                   'icon-rotation-alignment': 'viewport',
                   'text-transform': 'uppercase',
                   'symbol-spacing': 700,
@@ -2746,7 +2746,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 type: 'line',
                 id: 'roads-onewaybikeyes-pattern plus',
                 paint: {
-                  'line-pattern': 'arrow-blue-dots-gap(1)',
+                  'line-pattern': 'pattern-oneway-bicycle',
                   'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3, 15, 5, 22, 10],
                   'line-opacity': 0.8,
                 },
@@ -2787,7 +2787,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 type: 'line',
                 id: 'roads-oneway-pattern plus',
                 paint: {
-                  'line-pattern': 'arrow-grey-gap(1)',
+                  'line-pattern': 'pattern-oneway',
                   'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3, 15, 5, 22, 10],
                   'line-opacity': 0.7,
                 },
@@ -2889,7 +2889,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 type: 'line',
                 id: 'roads-onewaybikeyes-pattern fusswege',
                 paint: {
-                  'line-pattern': 'arrow-blue-dots-gap(1)',
+                  'line-pattern': 'pattern-oneway-bicycle',
                   'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3, 15, 5, 22, 10],
                   'line-opacity': 0.8,
                 },
@@ -2913,7 +2913,7 @@ export const freshConfig: MapDataCategoryConfig[] = [
                 type: 'line',
                 id: 'roads-oneway-pattern',
                 paint: {
-                  'line-pattern': 'arrow-grey-gap(1)',
+                  'line-pattern': 'pattern-oneway',
                   'line-width': ['interpolate', ['linear'], ['zoom'], 13, 3, 15, 5, 22, 10],
                   'line-opacity': 0.7,
                 },

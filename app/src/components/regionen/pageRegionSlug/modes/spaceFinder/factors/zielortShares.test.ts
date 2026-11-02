@@ -12,13 +12,13 @@ const total = (shares: ZielortShares) =>
   Object.values(shares).reduce((sum, value) => sum + value, 0)
 
 describe('readZielortShares', () => {
-  it('fällt ohne gespeicherten Wert auf Gleichverteilung zurück', () => {
+  it('falls back to an equal split without a stored value', () => {
     expect(readZielortShares(undefined)).toEqual(DEFAULT_ZIELORT_SHARES)
     expect(readZielortShares({})).toEqual(DEFAULT_ZIELORT_SHARES)
     expect(readZielortShares({ Bildung: 25 })).toEqual(DEFAULT_ZIELORT_SHARES)
   })
 
-  it('normiert Altstände auf 100', () => {
+  it('normalizes old stored values to 100', () => {
     const shares = readZielortShares({
       Grundversorgung: 2,
       Bildung: 1,
@@ -30,15 +30,15 @@ describe('readZielortShares', () => {
 })
 
 describe('rebalanceZielortShares', () => {
-  it('hält die Summe bei 100 und setzt den gezogenen Regler exakt', () => {
+  it('keeps the sum at 100 and sets the dragged slider exactly', () => {
     const shares = rebalanceZielortShares(DEFAULT_ZIELORT_SHARES, 'Bildung', 40)
     expect(shares.Bildung).toBe(40)
     expect(total(shares)).toBe(ZIELORT_SHARE_TOTAL)
-    // Die übrigen drei geben gleichmäßig ab, weil sie vorher gleich standen.
+    // The other three give up evenly because they were equal before.
     expect(shares).toEqual({ Grundversorgung: 20, Bildung: 40, Einkauf: 20, Freizeit: 20 })
   })
 
-  it('erhält das Verhältnis der übrigen Kategorien untereinander', () => {
+  it('keeps the ratio of the other categories to each other', () => {
     const start: ZielortShares = {
       Grundversorgung: 40,
       Bildung: 20,
@@ -51,7 +51,7 @@ describe('rebalanceZielortShares', () => {
     expect(shares.Grundversorgung).toBe(2 * shares.Bildung)
   })
 
-  it('verteilt gleichmäßig, wenn die übrigen alle auf 0 stehen', () => {
+  it('splits evenly when the others are all at 0', () => {
     const start: ZielortShares = {
       Grundversorgung: 100,
       Bildung: 0,
@@ -62,20 +62,20 @@ describe('rebalanceZielortShares', () => {
     expect(shares).toEqual({ Grundversorgung: 40, Bildung: 20, Einkauf: 20, Freizeit: 20 })
   })
 
-  it('lässt eine Kategorie auf 100 und die anderen auf 0 zu', () => {
+  it('allows one category at 100 and the others at 0', () => {
     const shares = rebalanceZielortShares(DEFAULT_ZIELORT_SHARES, 'Einkauf', 100)
     expect(shares).toEqual({ Grundversorgung: 0, Bildung: 0, Einkauf: 100, Freizeit: 0 })
   })
 })
 
 describe('zielortCategoryEffect', () => {
-  it('lässt bei Gleichverteilung jede Kategorie voll wirken', () => {
+  it('applies every category fully with an equal split', () => {
     for (const key of ['Grundversorgung', 'Bildung', 'Einkauf', 'Freizeit'] as const) {
       expect(zielortCategoryEffect(DEFAULT_ZIELORT_SHARES, key)).toBe(1)
     }
   })
 
-  it('normiert auf den größten Anteil — wie `zielort_category_factors` im Worker', () => {
+  it('normalizes to the largest share — like `zielort_category_factors` in the worker', () => {
     const shares: ZielortShares = {
       Grundversorgung: 25,
       Bildung: 40,

@@ -1,1 +1,0 @@
-See `/scripts/MapboxStyles/`

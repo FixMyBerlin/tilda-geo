@@ -2,7 +2,6 @@ import type { FileMapDataSubcategoryStyleLegend } from '../types'
 
 /**
  * Legend colors align with `park_street_default`, `park_off_default_area`, etc.
- * (see scripts/MapboxStyles — generated mapbox style groups).
  */
 
 const parkingTildaLegendSeparateAreasShadow = {

@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { planningVariantQueryOptions } from '@/server/planning/planningQueryOptions'
+import { candidateRunKey } from '../../hooks/mapState/space-finder-candidates-store'
 import { useCurrentMode } from '../useCurrentMode'
 import { isSpaceFinderAreaFormOpen } from './spaceFinderModeParam'
 import { useSpaceFinderModeParam } from './useSpaceFinderModeParam'
@@ -25,10 +26,15 @@ export const useSpaceFinderSelection = () => {
     enabled: isSpaceFinder && variantId != null,
   })
 
+  const runId = areaFormOpen ? null : (variant?.currentRunId ?? null)
+  const run = runId == null ? undefined : variant?.runs.find((candidate) => candidate.id === runId)
+
   return {
     variantId,
     areaId: variant?.area.id ?? null,
-    runId: areaFormOpen ? null : (variant?.currentRunId ?? null),
+    runId,
+    /** Key of the shown run in the candidate store (`candidateRunKey`); null without a run. */
+    candidateRunKey: run ? candidateRunKey(run) : null,
     variant,
     areaFormOpen,
   }

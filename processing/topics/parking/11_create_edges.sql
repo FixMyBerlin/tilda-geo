@@ -12,17 +12,21 @@
 -- * Does not spatially split ways; cuts only at node indexes from `_parking_node_road_mapping`
 -- * On-street parking lines (`parkings`) are tiled from z14; this table is the zoomed-out view
 -- INPUT: `_parking_node_road_mapping`, `_parking_roads` (linestring 5243), `_parking_kerbs`, `parkings`
--- OUTPUT: `parkings_edges` (linestring, 3857)
+-- OUTPUT: `parkings_edges` (linestring, 3857), `parkings_edges_labels` (point, 3857)
 -- Intermediates (`_parking_edges_*`) are TEMP. Only this script reads them.
 --
 -- minzoom by length (meters in 5243): <50 → 13, else 0
 -- Mid/long edges stay on the map when zooming out; style collapses left/right to a flush centerline.
+-- `parkings_edges_labels`: one point at 50% of each edge with capacity, so the map shows each
+-- capacity once (a line-placed label repeats along the line and per tile). minzoom 14.
 --
 DO $$ BEGIN RAISE NOTICE 'START creating parking edges at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
--- 1. Clear the osm2pgsql table (do not DROP, that table is the tile source).
+-- 1. Clear the osm2pgsql tables (do not DROP, those tables are the tile source).
 -- Skip the rest of the graph when `parkings` is empty so a parking-less extract stays a no-op.
 DELETE FROM parkings_edges;
+
+DELETE FROM parkings_edges_labels;
 
 DROP TABLE IF EXISTS _parking_edges_has_parkings;
 
@@ -1248,6 +1252,48 @@ CREATE INDEX parkings_edges_geom_idx ON parkings_edges USING GIST (geom);
 DROP INDEX IF EXISTS unique_parkings_edges_id_idx;
 
 CREATE UNIQUE INDEX unique_parkings_edges_id_idx ON parkings_edges (id);
+
+-- 12. Label points: 50% along the edge, only where a side has capacity.
+-- `angle` is upright text along the edge. `flipped` means the text was turned by 180°, so the
+-- edge's left side is below the text; the style swaps the left/right text offset then.
+INSERT INTO
+  parkings_edges_labels (id, tags, meta, geom, minzoom)
+SELECT
+  e.id,
+  jsonb_strip_nulls (
+    jsonb_build_object(
+      /* sql-formatter-disable */
+      'capacity_left', e.tags -> 'capacity_left',
+      'capacity_right', e.tags -> 'capacity_right',
+      'capacity_private_left', e.tags -> 'capacity_private_left',
+      'capacity_private_right', e.tags -> 'capacity_private_right',
+      'operator_type_left', e.tags -> 'operator_type_left',
+      'operator_type_right', e.tags -> 'operator_type_right',
+      'angle', ROUND(tilda_upright_label_angle(a.angle)::NUMERIC, 1),
+      'flipped', ABS(a.angle) > 90
+      /* sql-formatter-enable */
+    )
+  ),
+  '{}'::JSONB,
+  ST_LineInterpolatePoint (e.geom, 0.5),
+  14
+FROM
+  parkings_edges e
+  CROSS JOIN LATERAL (
+    SELECT
+      tilda_line_label_angle (e.geom, 0.5) AS angle
+  ) a
+WHERE
+  e.tags ?| ARRAY[
+    'capacity_left',
+    'capacity_right',
+    'capacity_private_left',
+    'capacity_private_right'
+  ];
+
+DROP INDEX IF EXISTS parkings_edges_labels_geom_idx;
+
+CREATE INDEX parkings_edges_labels_geom_idx ON parkings_edges_labels USING GIST (geom);
 
 -- Coverage vs `parkings.capacity`, suffix collisions, empty way_ids, vertex-count histogram.
 DO $$

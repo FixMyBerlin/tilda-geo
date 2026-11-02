@@ -17,6 +17,74 @@ const rowsOf = (area: string, inputs: RowInput[], withCombined = true) =>
   }) satisfies CalculatorRow[]
 
 describe('calculateMetricSummaryForAreas', () => {
+  const bicycleParkingRows = [
+    {
+      area: 'combined',
+      properties: { kind: 'bicycle_parking' },
+      sums: { capacity: 38, objects: 6 },
+    },
+    {
+      area: 'combined',
+      properties: { kind: 'bicycle_parking' },
+      sums: { objects: 12 },
+      missing: { capacity: 12 },
+    },
+    {
+      area: 'combined',
+      properties: { kind: 'small_electric_vehicle_parking' },
+      sums: { objects: 2 },
+      missing: { capacity: 2 },
+    },
+  ] satisfies CalculatorRow[]
+
+  test('sums every metric in a column, and counts the features without the first in its own', () => {
+    const result = calculateMetricSummaryForAreas({
+      rows: bicycleParkingRows,
+      areaIds: [],
+      metrics: ['capacity', 'objects'],
+      groupByKeys: ['kind'],
+    })
+
+    expect(result.columns).toEqual(['capacity', 'objects', 'missing'])
+    expect(result.combined.totals).toEqual({ capacity: 38, objects: 20, missing: 14 })
+    expect(result.combined.groups[0]?.values).toEqual([
+      expect.objectContaining({
+        filterValue: 'bicycle_parking',
+        amounts: { capacity: 38, objects: 18, missing: 12 },
+      }),
+      // No capacity at all: the column has no value, the others count it.
+      expect.objectContaining({
+        filterValue: 'small_electric_vehicle_parking',
+        amounts: { objects: 2, missing: 2 },
+        ratios: { objects: 2 / 20, missing: 2 / 14 },
+      }),
+    ])
+  })
+
+  test('a filter narrows every column', () => {
+    const { totals } = calculateMetricSummaryForAreas({
+      rows: bicycleParkingRows,
+      areaIds: [],
+      metrics: ['capacity', 'objects'],
+      groupByKeys: ['kind'],
+      filter: { kind: ['bicycle_parking'] },
+    }).combined
+
+    expect(totals).toEqual({ capacity: 38, objects: 18, missing: 12 })
+  })
+
+  test('has no missing column when every feature has a value', () => {
+    const result = calculateMetricSummaryForAreas({
+      rows: rowsOf('a1', [{ capacity: 5, area: 10, parking: 'lane' }]),
+      areaIds: ['a1'],
+      metrics: ['capacity', 'area'],
+      groupByKeys: ['parking'],
+    })
+
+    expect(result.columns).toEqual(['capacity', 'area'])
+    expect(result.combined.totals).toEqual({ capacity: 5, area: 10 })
+  })
+
   test('a filter does not reorder groups or values', () => {
     const rows = rowsOf('a1', [
       { capacity: 5, surface: 'asphalt', parking: 'lane' },
@@ -27,7 +95,7 @@ describe('calculateMetricSummaryForAreas', () => {
       calculateMetricSummaryForAreas({
         rows,
         areaIds: ['a1'],
-        metric: 'capacity',
+        metrics: ['capacity'],
         groupByKeys: ['surface', 'parking'],
         filter,
       }).combined.groups.map((group) => [group.key, ...group.values.map((v) => v.filterValue)])
@@ -41,6 +109,23 @@ describe('calculateMetricSummaryForAreas', () => {
     expect(order({ parking: ['lane'] })).toEqual(unfiltered)
   })
 
+  test('values without the first metric are ranked by the next column', () => {
+    const rows = rowsOf('a1', [
+      { capacity: 5, kind: 'bicycle_parking' },
+      { area: 30, kind: 'small_electric_vehicle_parking' },
+      { area: 10, kind: 'bicycle_rental' },
+    ])
+
+    const values = calculateMetricSummaryForAreas({
+      rows,
+      areaIds: ['a1'],
+      metrics: ['capacity', 'area'],
+      groupByKeys: ['kind'],
+    }).combined.groups[0]?.values.map((value) => value.filterValue)
+
+    expect(values).toEqual(['bicycle_parking', 'small_electric_vehicle_parking', 'bicycle_rental'])
+  })
+
   test('all areas together are the rows of their union, not the sum of the areas', () => {
     const rows = [
       ...rowsOf('a1', [{ capacity: 10 }], false),
@@ -52,17 +137,17 @@ describe('calculateMetricSummaryForAreas', () => {
     const result = calculateMetricSummaryForAreas({
       rows,
       areaIds: ['a1', 'a2', 'a3'],
-      metric: 'capacity',
+      metrics: ['capacity'],
       groupByKeys: [],
     })
 
-    expect(result.byArea.map(({ key, summary }) => [key, summary.total])).toEqual([
+    expect(result.byArea.map(({ key, summary }) => [key, summary.totals.capacity])).toEqual([
       ['a1', 10],
       ['a2', 8],
       // An area without a row sums nothing.
-      ['a3', 0],
+      ['a3', undefined],
     ])
-    expect(result.combined.total).toBe(15)
+    expect(result.combined.totals.capacity).toBe(15)
   })
 
   test('calculates totals and sub sums for configured group keys', () => {
@@ -70,22 +155,22 @@ describe('calculateMetricSummaryForAreas', () => {
       { capacity: 20, operator_type: 'public', parking: 'surface' },
       { capacity: 10.5, operator_type: 'private', parking: 'surface' },
       { capacity: 5, operator_type: 'private', parking: 'underground' },
-      // Summed by another metric only.
+      // Summed by a metric the dataset does not show only.
       { area: 12, operator_type: 'public', parking: 'surface' },
     ])
 
     const result = calculateMetricSummaryForAreas({
       rows,
       areaIds: ['a1'],
-      metric: 'capacity',
+      metrics: ['capacity'],
       groupByKeys: ['operator_type', 'parking'],
     })
 
+    expect(result.combined.totals).toEqual({ capacity: 35.5 })
     const operatorTypeGroup = result.combined.groups.find((group) => group.key === 'operator_type')
-    expect(operatorTypeGroup?.sum).toBe(35.5)
     expect(operatorTypeGroup?.values).toEqual([
-      expect.objectContaining({ value: 'public', sum: 20 }),
-      expect.objectContaining({ value: 'private', sum: 15.5 }),
+      expect.objectContaining({ value: 'public', amounts: { capacity: 20 } }),
+      expect.objectContaining({ value: 'private', amounts: { capacity: 15.5 } }),
     ])
   })
 
@@ -99,19 +184,39 @@ describe('calculateMetricSummaryForAreas', () => {
     const result = calculateMetricSummaryForAreas({
       rows,
       areaIds: ['a1'],
-      metric: 'capacity',
+      metrics: ['capacity'],
       groupByKeys: ['operator_type', 'parking'],
       filter: { operator_type: ['private'] },
     }).combined
 
-    expect(result.total).toBe(15)
+    expect(result.totals.capacity).toBe(15)
     expect(result.groups.find((group) => group.key === 'operator_type')?.values).toEqual([
-      { value: 'public', filterValue: 'public', sum: 20, ratio: 20 / 35 },
-      { value: 'private', filterValue: 'private', sum: 15, ratio: 15 / 35 },
+      {
+        value: 'public',
+        filterValue: 'public',
+        amounts: { capacity: 20 },
+        ratios: { capacity: 20 / 35 },
+      },
+      {
+        value: 'private',
+        filterValue: 'private',
+        amounts: { capacity: 15 },
+        ratios: { capacity: 15 / 35 },
+      },
     ])
     expect(result.groups.find((group) => group.key === 'parking')?.values).toEqual([
-      { value: 'lane', filterValue: 'lane', sum: 10, ratio: 10 / 15 },
-      { value: '(Ohne Angabe)', filterValue: '', sum: 5, ratio: 5 / 15 },
+      {
+        value: 'lane',
+        filterValue: 'lane',
+        amounts: { capacity: 10 },
+        ratios: { capacity: 10 / 15 },
+      },
+      {
+        value: '(Ohne Angabe)',
+        filterValue: '',
+        amounts: { capacity: 5 },
+        ratios: { capacity: 5 / 15 },
+      },
     ])
   })
 
@@ -125,13 +230,13 @@ describe('calculateMetricSummaryForAreas', () => {
     const result = calculateMetricSummaryForAreas({
       rows,
       areaIds: ['a1'],
-      metric: 'capacity',
+      metrics: ['capacity'],
       groupByKeys: ['part'],
       filter: { part: ['bikelanes', 'paths'] },
     }).combined
 
-    expect(result.total).toBe(25)
-    expect(result.groups[0]?.values.map((value) => value.sum)).toEqual([20, 10, 5])
+    expect(result.totals.capacity).toBe(25)
+    expect(result.groups[0]?.values.map((value) => value.amounts.capacity)).toEqual([20, 10, 5])
   })
 
   test('empty and missing values share the fallback label, and a filter on it matches both', () => {
@@ -144,15 +249,15 @@ describe('calculateMetricSummaryForAreas', () => {
     const result = calculateMetricSummaryForAreas({
       rows,
       areaIds: ['a1'],
-      metric: 'area',
+      metrics: ['area'],
       groupByKeys: ['surface'],
       filter: { surface: [''] },
     })
 
-    expect(result.combined.total).toBe(15)
+    expect(result.combined.totals.area).toBe(15)
     expect(result.combined.groups[0]?.values).toEqual([
-      expect.objectContaining({ value: '(Ohne Angabe)', filterValue: '', sum: 15 }),
-      expect.objectContaining({ value: 'asphalt', sum: 3 }),
+      expect.objectContaining({ value: '(Ohne Angabe)', filterValue: '', amounts: { area: 15 } }),
+      expect.objectContaining({ value: 'asphalt', amounts: { area: 3 } }),
     ])
   })
 })
