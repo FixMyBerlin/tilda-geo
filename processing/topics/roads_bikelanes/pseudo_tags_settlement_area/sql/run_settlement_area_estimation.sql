@@ -32,14 +32,15 @@ CREATE INDEX ON _settlement_estimation_ways USING GIST (geom);
 ANALYZE _settlement_estimation_ways;
 
 -- Export the minority class: ways that intersect NO settlement area (außerorts).
+-- COPY streams the rows to the file, so psql does not hold the result in memory.
 \o :outfile
-\pset format csv
-\pset tuples_only off
-SELECT DISTINCT
-  osm_id,
-  'assumed_no' AS in_settlement_area
-FROM _settlement_estimation_ways w
-WHERE NOT EXISTS (
-  SELECT 1 FROM public._settlement_areas s WHERE ST_Intersects (w.geom, s.geom)
-);
+COPY (
+  SELECT DISTINCT
+    osm_id,
+    'assumed_no' AS in_settlement_area
+  FROM _settlement_estimation_ways w
+  WHERE NOT EXISTS (
+    SELECT 1 FROM public._settlement_areas s WHERE ST_Intersects (w.geom, s.geom)
+  )
+) TO STDOUT WITH (FORMAT csv, HEADER);
 \o

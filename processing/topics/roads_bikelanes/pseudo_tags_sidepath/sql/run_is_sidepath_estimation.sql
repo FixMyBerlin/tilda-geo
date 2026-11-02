@@ -82,15 +82,16 @@ JOIN "_roads_bikelanes_sidepath_source_paths" p ON p.osm_id = s.osm_id;
 -- Redirect query output to the file passed as -v outfile=... (required)
 \o :outfile
 
-\pset format csv
-\pset tuples_only off
 -- Export only rows that carry information; Lua infers assumed_no for path IDs not in CSV.
 -- false-rows with adjoining data feed roadsPathClasses.adjoining_* (the path writer
 -- resolves adjoining context without the sidepath gate).
-SELECT osm_id, is_sidepath_estimation, adjoining_road, adjoining_maxspeed
-FROM public._sidepath_estimation_result
-WHERE is_sidepath_estimation::boolean IS TRUE
-   OR adjoining_road IS NOT NULL;
+-- COPY streams the rows to the file, so psql does not hold the result in memory.
+COPY (
+  SELECT osm_id, is_sidepath_estimation, adjoining_road, adjoining_maxspeed
+  FROM public._sidepath_estimation_result
+  WHERE is_sidepath_estimation::boolean IS TRUE
+     OR adjoining_road IS NOT NULL
+) TO STDOUT WITH (FORMAT csv, HEADER);
 
 \o
 
