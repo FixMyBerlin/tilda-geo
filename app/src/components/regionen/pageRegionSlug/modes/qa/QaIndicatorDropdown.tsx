@@ -1,4 +1,4 @@
-import { Menu, MenuButton, MenuItems } from '@headlessui/react'
+import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/24/outline'
 import { twJoin } from 'tailwind-merge'
 import { useQaParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useQaParam'
@@ -40,8 +40,8 @@ export const QaIndicatorDropdown = ({ indicators }: Props) => {
       : `${selectedKeys.length} ausgewählt`
 
   return (
-    <Menu as="div" className="max-w-28 min-w-0">
-      <MenuButton
+    <Popover className="max-w-28 min-w-0">
+      <PopoverButton
         aria-label={`Attribute: ${triggerLabel}`}
         title="Attribute"
         className={twJoin(modePanelFilterControlClassName, 'w-full justify-between gap-1 px-1.5')}
@@ -51,10 +51,10 @@ export const QaIndicatorDropdown = ({ indicators }: Props) => {
           <span className="truncate">{triggerLabel}</span>
         </span>
         <ChevronDownIcon className="size-3.5 shrink-0" aria-hidden="true" />
-      </MenuButton>
-      <MenuItems
+      </PopoverButton>
+      <PopoverPanel
         anchor="bottom start"
-        modal={false}
+        focus
         className={twJoin(
           'z-40 min-w-56 space-y-0.5 px-2 pb-2 [--anchor-gap:4px]',
           mapOverlayMenuClassName,
@@ -87,7 +87,7 @@ export const QaIndicatorDropdown = ({ indicators }: Props) => {
           />
           <span>Alle Attribute</span>
         </label>
-      </MenuItems>
-    </Menu>
+      </PopoverPanel>
+    </Popover>
   )
 }

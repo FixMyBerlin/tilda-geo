@@ -1,4 +1,4 @@
-import { Menu, MenuButton, MenuItems } from '@headlessui/react'
+import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/24/outline'
 import { useQuery } from '@tanstack/react-query'
 import { twJoin } from 'tailwind-merge'
@@ -68,8 +68,8 @@ export const QaUserDropdown = ({ configId, regionSlug }: Props) => {
       : `${selectedUserIds.length} ausgewählt`
 
   return (
-    <Menu as="div" className="max-w-28 min-w-0">
-      <MenuButton
+    <Popover className="max-w-28 min-w-0">
+      <PopoverButton
         aria-label={`Nutzer:innen: ${triggerLabel}`}
         title="Nutzer:innen"
         className={twJoin(modePanelFilterControlClassName, 'w-full justify-between gap-1 px-1.5')}
@@ -83,10 +83,10 @@ export const QaUserDropdown = ({ configId, regionSlug }: Props) => {
         ) : (
           <ChevronDownIcon className="size-3.5 shrink-0" aria-hidden="true" />
         )}
-      </MenuButton>
-      <MenuItems
+      </PopoverButton>
+      <PopoverPanel
         anchor="bottom start"
-        modal={false}
+        focus
         className={twJoin(
           'z-40 min-w-56 space-y-0.5 px-2 pb-2 [--anchor-gap:4px]',
           mapOverlayMenuClassName,
@@ -127,7 +127,7 @@ export const QaUserDropdown = ({ configId, regionSlug }: Props) => {
             <span>Alle Nutzer:innen</span>
           </label>
         </fieldset>
-      </MenuItems>
-    </Menu>
+      </PopoverPanel>
+    </Popover>
   )
 }
