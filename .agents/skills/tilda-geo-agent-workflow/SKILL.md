@@ -27,7 +27,7 @@ Everyday conventions live in [AGENTS.md](../../../AGENTS.md).
 - Dedicated feature that should not dirty the main `develop` checkout
 - Task needs **processing**, **fresh seed DB**, **parallel Docker**, or **static-data worktrees**
 - Map/UI debugging with `bun run dev` + agent-browser ([section 4](#4-agent-browser-and-map-state) — no worktree ceremony unless isolation is also needed)
-- Implementer hits Docker / processing / static-data setup questions
+- Work hits Docker / processing / static-data setup questions
 
 ### When not to use
 
