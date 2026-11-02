@@ -10,7 +10,7 @@ type Props = {
   showOsmHandle?: boolean
 }
 
-/** Author / evaluator label without icon (icons unused elsewhere in the QA UI). */
+/** Author / evaluator label without icon (see `QaEvaluatorIcon`). */
 export const QaEvaluatorDisplay = ({
   evaluation,
   className = '',

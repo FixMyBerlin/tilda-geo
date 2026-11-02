@@ -81,10 +81,13 @@ test.describe('QA mode (stubbed admin login)', () => {
     await qaHeading.click()
     await page.getByRole('option', { name: activeConfig.label, exact: true }).click()
 
-    const statusSelect = page.getByLabel('Status')
-    await expect(statusSelect).toBeEnabled()
-    await statusSelect.click()
-    await page.getByRole('option', { name: /Problematisch/ }).click()
+    const statusButton = page.getByRole('button', { name: /^Status:/ })
+    await expect(statusButton).toBeEnabled()
+    await statusButton.click()
+    await expect(statusButton).toContainText('Zu prüfen')
+    await page.getByRole('checkbox', { name: /Überprüfung erforderlich/ }).uncheck()
+    await expect(statusButton).toContainText('Problematisch')
+    await page.keyboard.press('Escape')
     await expect(page.getByText(/Bereiche mit diesem Status|Bereich|Lädt/).first()).toBeVisible({
       timeout: 10_000,
     })

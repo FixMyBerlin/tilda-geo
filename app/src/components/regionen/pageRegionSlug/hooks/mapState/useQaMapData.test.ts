@@ -45,16 +45,23 @@ describe('selectQaIndicatorPairs', () => {
 describe('qaMapRowMatchesStatus', () => {
   test('matches when ANY selected indicator matches (not just the worst one)', () => {
     const pairs = [pair('GOOD'), pair('NEEDS_REVIEW')]
-    expect(qaMapRowMatchesStatus(pairs, 'pending-needs-review')).toBe(true)
-    expect(qaMapRowMatchesStatus([pair('GOOD'), pair('PROBLEMATIC')], 'pending-needs-review')).toBe(
-      false,
-    )
+    expect(qaMapRowMatchesStatus(pairs, ['pending-needs-review'])).toBe(true)
+    expect(
+      qaMapRowMatchesStatus([pair('GOOD'), pair('PROBLEMATIC')], ['pending-needs-review']),
+    ).toBe(false)
+  })
+
+  test('matches when ANY selected status matches; undefined is Alle', () => {
+    const statusKeys = ['pending-needs-review', 'pending-problematic']
+    expect(qaMapRowMatchesStatus([pair('PROBLEMATIC')], statusKeys)).toBe(true)
+    expect(qaMapRowMatchesStatus([pair('GOOD')], statusKeys)).toBe(false)
+    expect(qaMapRowMatchesStatus([pair('GOOD')], undefined)).toBe(true)
   })
 
   test('user-status filters ignore system Gut', () => {
-    expect(qaMapRowMatchesStatus([pair('GOOD')], 'ok-construction')).toBe(false)
+    expect(qaMapRowMatchesStatus([pair('GOOD')], ['ok-construction'])).toBe(false)
     expect(
-      qaMapRowMatchesStatus([pair('NEEDS_REVIEW', 'OK_STRUCTURAL_CHANGE')], 'ok-construction'),
+      qaMapRowMatchesStatus([pair('NEEDS_REVIEW', 'OK_STRUCTURAL_CHANGE')], ['ok-construction']),
     ).toBe(true)
   })
 })

@@ -1,81 +1,91 @@
 import { z } from 'zod'
-import { frenchQuote } from '@/components/shared/text/Quotes'
 import type { QaEvaluationStatus, QaSystemStatus } from '@/prisma/generated/client'
-import { systemStatusConfig, userStatusConfig } from './detail/qaConfigs'
+import { systemStatusConfig } from './detail/qaConfigs'
 
-type QaStatusOption =
-  | { key: string; label: string; userStatus: null; systemStatus: QaSystemStatus }
-  | { key: string; label: string; userStatus: QaEvaluationStatus; systemStatus: null }
+type QaStatusOption = { key: string; group: string; label: string } & (
+  | { userStatus: null; systemStatus: QaSystemStatus }
+  | { userStatus: QaEvaluationStatus; systemStatus: null }
+)
+
+export const QA_STATUS_GROUPS = ['Zu prüfen', 'Bewertet: Nicht OK', 'Bewertet: OK'] as const
 
 export const QA_STATUS_OPTIONS = [
   {
     key: 'pending-needs-review',
-    label: `Zu prüfen: System-Entscheidung ${frenchQuote(systemStatusConfig.NEEDS_REVIEW.label)}`,
+    group: 'Zu prüfen',
+    label: systemStatusConfig.NEEDS_REVIEW.label,
     userStatus: null,
     systemStatus: 'NEEDS_REVIEW',
   },
   {
     key: 'pending-problematic',
-    label: `Zu prüfen: System-Entscheidung ${frenchQuote(systemStatusConfig.PROBLEMATIC.label)}`,
+    group: 'Zu prüfen',
+    label: systemStatusConfig.PROBLEMATIC.label,
     userStatus: null,
     systemStatus: 'PROBLEMATIC',
   },
   {
-    key: 'pending-trusted-editor-change',
-    label: `System-Entscheidung ${frenchQuote(systemStatusConfig.TRUSTED_EDITOR_CHANGE.label)}`,
-    userStatus: null,
-    systemStatus: 'TRUSTED_EDITOR_CHANGE',
-  },
-  {
     key: 'not-ok-processing',
-    label: `Nutzer: ${userStatusConfig.NOT_OK_PROCESSING_ERROR.label}`,
+    group: 'Bewertet: Nicht OK',
+    label: 'Prozessierung',
     userStatus: 'NOT_OK_PROCESSING_ERROR',
     systemStatus: null,
   },
   {
     key: 'not-ok-osm',
-    label: `Nutzer: ${userStatusConfig.NOT_OK_DATA_ERROR.label}`,
+    group: 'Bewertet: Nicht OK',
+    label: 'OSM',
     userStatus: 'NOT_OK_DATA_ERROR',
     systemStatus: null,
   },
   {
     key: 'ok-construction',
-    label: `Nutzer: ${userStatusConfig.OK_STRUCTURAL_CHANGE.label}`,
+    group: 'Bewertet: OK',
+    label: 'Strukturelle Änderung',
     userStatus: 'OK_STRUCTURAL_CHANGE',
     systemStatus: null,
   },
   {
     key: 'ok-reference-error',
-    label: `Nutzer: ${userStatusConfig.OK_REFERENCE_ERROR.label}`,
+    group: 'Bewertet: OK',
+    label: 'Fehler Referenzdaten',
     userStatus: 'OK_REFERENCE_ERROR',
     systemStatus: null,
   },
   {
     key: 'ok-qa-tooling-error',
-    label: `Nutzer: ${userStatusConfig.OK_QA_TOOLING_ERROR.label}`,
+    group: 'Bewertet: OK',
+    label: 'QA-Tooling-Fehler',
     userStatus: 'OK_QA_TOOLING_ERROR',
     systemStatus: null,
   },
-] as const satisfies readonly QaStatusOption[]
+  {
+    key: 'pending-trusted-editor-change',
+    group: 'Bewertet: OK',
+    label: systemStatusConfig.TRUSTED_EDITOR_CHANGE.label,
+    userStatus: null,
+    systemStatus: 'TRUSTED_EDITOR_CHANGE',
+  },
+] as const satisfies readonly (QaStatusOption & { group: (typeof QA_STATUS_GROUPS)[number] })[]
 
 export type QaStatusKey = (typeof QA_STATUS_OPTIONS)[number]['key']
 
-export const zodQaStatusKey = z.enum(
+const zodQaStatusKey = z.enum(
   QA_STATUS_OPTIONS.map((option) => option.key) as [QaStatusKey, ...QaStatusKey[]],
 )
 
 export const QA_STATUS_SELECT_ALL = 'all'
 
-export const QA_DEFAULT_STATUS_KEY = QA_STATUS_OPTIONS[0]!.key
+export const QA_DEFAULT_STATUS_KEYS = QA_STATUS_OPTIONS.filter(
+  (option) => option.group === 'Zu prüfen',
+).map((option) => option.key)
 
-/** Status dropdown: default first, then Alle Status, then the remaining statuses. */
-export const QA_STATUS_FILTER_OPTIONS = [
-  { value: QA_DEFAULT_STATUS_KEY, label: QA_STATUS_OPTIONS[0]!.label },
-  { value: QA_STATUS_SELECT_ALL, label: 'Alle' },
-  ...QA_STATUS_OPTIONS.slice(1).map((option) => ({ value: option.key, label: option.label })),
-] as const
-
-export const zodQaParamStatus = z.union([zodQaStatusKey, z.literal(QA_STATUS_SELECT_ALL)])
+// One key is the older URL form; it stays valid so existing links keep working.
+export const zodQaParamStatus = z.union([
+  zodQaStatusKey,
+  z.literal(QA_STATUS_SELECT_ALL),
+  z.array(zodQaStatusKey).min(1),
+])
 
 export type QaStatusParam = z.infer<typeof zodQaParamStatus>
 
@@ -113,12 +123,9 @@ export const compactQaParam = (data: QaParamData) => {
 export const resolvedQaIndicatorKeys = (ind: QaParamData['ind'], allKeys: readonly string[]) =>
   ind && ind.length > 0 ? allKeys.filter((key) => ind.includes(key)) : [...allKeys]
 
-/** Missing URL status is the default filter, not Alle Status. */
-export const resolvedQaStatusSelectValue = (status: QaParamData['status']) =>
-  status ?? QA_DEFAULT_STATUS_KEY
-
-/** `undefined` = show every area on the map (Alle Status). */
-export const qaStatusForMapFilter = (status: QaParamData['status']) => {
-  const resolved = resolvedQaStatusSelectValue(status)
-  return resolved === QA_STATUS_SELECT_ALL ? undefined : resolved
+/** Selected statuses; a missing URL status is the default. `undefined` = Alle Status. */
+export const resolvedQaStatusKeys = (status: QaParamData['status']) => {
+  const resolved = status ?? QA_DEFAULT_STATUS_KEYS
+  if (resolved === QA_STATUS_SELECT_ALL) return undefined
+  return Array.isArray(resolved) ? resolved : [resolved]
 }

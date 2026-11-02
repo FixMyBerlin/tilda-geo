@@ -1,8 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import {
   compactQaParam,
-  qaStatusForMapFilter,
-  resolvedQaStatusSelectValue,
+  resolvedQaStatusKeys,
 } from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
 import {
   defaultMapSearchValue,
@@ -101,9 +100,15 @@ describe('regionSearchSchema', () => {
   })
 
   test('missing qa status is the default filter, not Alle Status', () => {
-    expect(resolvedQaStatusSelectValue(undefined)).toBe('pending-needs-review')
-    expect(qaStatusForMapFilter(undefined)).toBe('pending-needs-review')
-    expect(qaStatusForMapFilter('all')).toBeUndefined()
+    expect(resolvedQaStatusKeys(undefined)).toEqual(['pending-needs-review', 'pending-problematic'])
+    expect(resolvedQaStatusKeys('all')).toBeUndefined()
+  })
+
+  test('parses several qa statuses and keeps links with a single status working', () => {
+    const statuses = ['pending-needs-review', 'ok-construction']
+    const parsed = parseRegionSearch({ qa: { key: 'cfg', status: statuses } })
+    expect(getQaParamFromSearch(parsed).status).toEqual(statuses)
+    expect(resolvedQaStatusKeys('pending-problematic')).toEqual(['pending-problematic'])
   })
 
   test('parses qa Alle Status', () => {
