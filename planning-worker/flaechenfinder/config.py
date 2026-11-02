@@ -228,6 +228,14 @@ class UseCaseConfig:
     cir_source: str = "auto"
 
 
+# ── Census point → building assignment (fixed) ────────────────────────────────
+# Resident demand assigns each census point to the nearest OSM building within this distance
+# (scorer.py `_census_demand_sources`): the census places residents on ALKIS buildings, whose
+# outlines often lie a few metres off the OSM ones. Must match the same constant in
+# app/src/server/planning/censusSaettigung.server.ts.
+CENSUS_BUILDING_TOLERANCE_M = 5.0
+
+
 # ── Buffers for user data geometries (fixed) ──────────────────────────────────
 # Points/lines have no area; they are buffered before intersecting.
 USER_POINT_BUFFER_M = 1.5

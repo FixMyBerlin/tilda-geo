@@ -11,8 +11,8 @@ import { geoDataClient } from '@/server/prisma-client.server'
  * residents/ha — measured on three real runs the ratio varies by a factor of 2.3, because gross
  * density depends on how much park, commercial and water lies in the drawn polygon. So we
  * estimate the same quantity directly: grid sample over the area, census points aggregated onto
- * OSM buildings, same ramp. Against the back-calculated distributions of those runs, p50/p75/p90
- * matched within a few percent.
+ * the nearest OSM building within a tolerance, same ramp. Against the back-calculated
+ * distributions of those runs, p50/p75/p90 matched within a few percent.
  *
  * We suggest p90: the top tenth of the inhabited area gets the full bonus, the rest is spread
  * over the full range. The value is a starting point — the UI shows it as auto-detected and
@@ -26,6 +26,10 @@ const SAMPLE_GRID_M = Prisma.raw('40')
 /** Reach of the factor from the building edge — must match `UseCaseConfig.bewohnerbedarf_radius_m`
  * in `flaechenfinder/config.py` (deliberately not configurable in the UI there). */
 const DEMAND_RADIUS_M = Prisma.raw('20.0')
+
+/** Census points go to the nearest OSM building within this distance (ALKIS and OSM outlines
+ * rarely line up) — must match `CENSUS_BUILDING_TOLERANCE_M` in `flaechenfinder/config.py`. */
+const CENSUS_BUILDING_TOLERANCE_M = Prisma.raw('5.0')
 
 /** Metric CRS of the computation — same as in the worker. */
 const METRIC_SRID = Prisma.raw('25832')
@@ -77,11 +81,13 @@ async function computeCensusStats(studyArea: unknown) {
 
         // Buildings in the area. The ramp measures from the building edge, so the polygons are
         // the source geometry, not the census points (which sit on the building centroid).
+        // Includes buildings up to the tolerance outside the area: a census point at the edge
+        // may belong to one of them. (EPSG:5243 is metric.)
         await tx.$executeRaw`
           CREATE TEMP TABLE census_buildings ON COMMIT DROP AS
           SELECT row_number() OVER () AS bid, ST_Transform(b.geom, ${METRIC_SRID}) AS geom
           FROM census_area a
-          JOIN public."_buildings" b ON b.geom && a.source AND ST_Intersects(b.geom, a.source)`
+          JOIN public."_buildings" b ON ST_DWithin(b.geom, a.source, ${CENSUS_BUILDING_TOLERANCE_M})`
         await tx.$executeRaw`CREATE INDEX ON census_buildings USING gist (geom)`
 
         await tx.$executeRaw`
@@ -93,13 +99,19 @@ async function computeCensusStats(studyArea: unknown) {
         await tx.$executeRaw`CREATE INDEX ON census_points USING gist (geom)`
         await tx.$executeRaw`ANALYZE census_buildings, census_points`
 
-        // Aggregate points onto their building via point-in-polygon; points hitting no building
-        // (the census uses ALKIS, we use OSM) stay point sources so no residents get lost.
+        // Aggregate points onto the nearest building within the tolerance (a point inside a
+        // building has distance 0 and keeps it); points with no building nearby stay point
+        // sources so no residents get lost. Same rule as `_census_demand_sources` in the worker.
         await tx.$executeRaw`
           CREATE TEMP TABLE census_sources ON COMMIT DROP AS
           WITH matched AS (
             SELECT p.ew, p.geom,
-              (SELECT b.bid FROM census_buildings b WHERE ST_Within(p.geom, b.geom) LIMIT 1) AS bid
+              (
+                SELECT b.bid FROM census_buildings b
+                WHERE ST_DWithin(p.geom, b.geom, ${CENSUS_BUILDING_TOLERANCE_M})
+                ORDER BY ST_Distance(p.geom, b.geom)
+                LIMIT 1
+              ) AS bid
             FROM census_points p
           )
           SELECT sum(m.ew) AS ew, (SELECT b.geom FROM census_buildings b WHERE b.bid = m.bid) AS geom
