@@ -1,5 +1,4 @@
 import { feature, featureCollection } from '@turf/helpers'
-import { useEffect } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import {
   useSpaceFinderBoundaryHighlightFilled,
@@ -21,7 +20,9 @@ import { useHoveredListItem } from '@/components/regionen/pageRegionSlug/modes/m
 import { appliedMinAreaM2 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderModeParam'
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
-import { getTilesUrl } from '@/components/shared/utils/getTilesUrl'
+import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
+import { getAppBaseUrl } from '@/components/shared/utils/getAppBaseUrl'
+import { planningTilesPath } from '@/server/planning/planningTilesPath'
 import {
   PLANNING_SCORE_PROPERTY,
   type PlanningScoreMode,
@@ -49,7 +50,7 @@ export const planningHexagonsLayerId = 'planning-hexagons'
  */
 const planningOverlayFloorLayerId = 'planning-overlay-floor'
 const planningOverlayCeilingLayerId = 'planning-overlay-ceiling'
-/** MVT layer name of the Martin function source (see registerPlanningFunctions.server.ts). */
+/** MVT layer name of the `planning_hexagons` tile function (see registerPlanningFunctions.server.ts). */
 export const planningHexagonsSourceLayer = 'planning_hexagons'
 /**
  * Separate point layer with the hexagon center, each hexagon contained in exactly one
@@ -69,10 +70,10 @@ const HEXAGON_LABEL_MIN_ZOOM = 18
 
 // Planning module result layers (Flächenfinder).
 //
-// Renders the immutable result of one PlanningRun via the Martin function source
-// `planning_hexagons`, keyed by `?run_id=N`. Because a run is immutable, the
-// run_id-keyed tile URL is cached effectively forever (separate nginx
-// `planning_cache` zone, see configs/nginx.conf).
+// Renders the immutable result of one PlanningRun from the authenticated app route
+// `/api/regions/:slug/planning-tiles/:layer/{z}/{x}/{y}?run_id=N` (see planningTilesPath). Scores
+// and census population are member-only, so the tiles do not come from Martin's public hosts. A
+// finished run is immutable; the route answers with a private 7-day browser cache.
 //
 // When the active variant has no run yet (`runId` from `useSpaceFinderSelection`), this renders
 // nothing — this component only mounts inside the Flächenfinder mode anyway (`RegionMap`).
@@ -184,8 +185,8 @@ const hexagonLabelLayerProps = (property: string) => ({
 
 // Census population points (factor „Bewohnerbedarf"). Tiles come directly from
 // `data.census_population_point`, limited to the study area's bounding box —
-// nothing is stored per run in the planning schema (see the Martin function
-// `planning_census`). A point usually sits on the building center and carries its
+// nothing is stored per run in the planning schema (see the tile function
+// `planning.planning_census`). A point usually sits on the building center and carries its
 // population.
 const planningCensusSourceId = 'planning-census-source'
 
@@ -398,6 +399,7 @@ const CandidateHighlightLayer = ({ runKey }: { runKey: string | null }) => {
 }
 
 export const SourcesLayersSpaceFinder = () => {
+  const regionSlug = useRegionSlug()
   const { runId, candidateRunKey, variant } = useSpaceFinderSelection()
   const { spaceFinderMode } = useSpaceFinderModeParam()
   const minAreaDraft = useSpaceFinderMinAreaDraft()
@@ -414,16 +416,6 @@ export const SourcesLayersSpaceFinder = () => {
   const carriagewaysOn = useSpaceFinderCarriagewaysVisible()
   const censusOn = useSpaceFinderCensusVisible()
 
-  useEffect(() => {
-    if (runId != null) {
-      console.debug('[Planning] runId changed →', runId)
-      console.debug(
-        '[Planning] hexagons URL:',
-        getTilesUrl(`/planning_hexagons/{z}/{x}/{y}?run_id=${runId}`),
-      )
-    }
-  }, [runId])
-
   if (runId == null)
     return (
       <>
@@ -433,10 +425,11 @@ export const SourcesLayersSpaceFinder = () => {
       </>
     )
 
-  const hexagonsUrl = getTilesUrl(`/planning_hexagons/{z}/{x}/{y}?run_id=${runId}`)
-  const vegetationUrl = getTilesUrl(`/planning_vegetation/{z}/{x}/{y}?run_id=${runId}`)
-  const carriagewaysUrl = getTilesUrl(`/planning_carriageways/{z}/{x}/{y}?run_id=${runId}`)
-  const censusUrl = getTilesUrl(`/planning_census/{z}/{x}/{y}?run_id=${runId}`)
+  // MapLibre needs absolute tile URLs (same as private backgrounds in useRegionBackgrounds).
+  const hexagonsUrl = getAppBaseUrl(planningTilesPath(regionSlug, 'hexagons', runId))
+  const vegetationUrl = getAppBaseUrl(planningTilesPath(regionSlug, 'vegetation', runId))
+  const carriagewaysUrl = getAppBaseUrl(planningTilesPath(regionSlug, 'carriageways', runId))
+  const censusUrl = getAppBaseUrl(planningTilesPath(regionSlug, 'census', runId))
   const fillLayerProps = hexagonFillLayerProps(
     PLANNING_SCORE_PROPERTY[scoreMode],
     scoreMode,

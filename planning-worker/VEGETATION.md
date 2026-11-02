@@ -82,8 +82,9 @@ variant empty.
 
 - Table `planning.scenario_vegetation` (`run_id`, `geom` MultiPolygon/3857, `ndvi`,
   `flaeche_m2`) – per run, immutable. Schema: [`sql/schema.sql`](sql/schema.sql).
-- Martin tile function `public.planning_vegetation(z,x,y,{run_id})` – see
-  [`sql/martin_functions.sql`](sql/martin_functions.sql).
+- Tile function `planning.planning_vegetation(z,x,y,{run_id})` – see
+  [`sql/martin_functions.sql`](sql/martin_functions.sql). Not published through Martin; the app
+  serves the tiles to members only (`/api/regions/:slug/planning-tiles/vegetation/...`).
 - `score_vegetation` is also a column in `planning.scenario_hexagons` and part of the
   `planning_hexagons` tile (sidebar inspection).
 

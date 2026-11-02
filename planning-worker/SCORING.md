@@ -47,5 +47,5 @@ For low zoom levels (z < 16) the fine res-13 hexagons are additionally
 aggregated to H3 res. 11 (`AGG_H3_RES`) via `aggregate_hexagons()` – a plain
 mean of the score columns per `h3.cell_to_parent`; `eignungsklasse` is derived
 again from that. No re-scoring, no spatial joins. The zoom branch
-(`z >= 16 → res 13, otherwise res 11`) must match the Martin function
-`planning_hexagons` in [`sql/martin_functions.sql`](sql/martin_functions.sql).
+(`z >= 16 → res 13, otherwise res 11`) must match the tile function
+`planning.planning_hexagons` in [`sql/martin_functions.sql`](sql/martin_functions.sql).

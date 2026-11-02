@@ -77,7 +77,7 @@ ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS cluster_area_m2 
 
 -- H3 resolution of the row: BASE (13) = fine scoring grid for high zoom
 -- levels, AGG (11) = coarse aggregate for z < 16. Both grids of the same
--- run live in this table; the Martin function planning_hexagons picks one
+-- run live in this table; the tile function planning.planning_hexagons picks one
 -- per zoom level. Default 13 so existing rows count as BASE grid.
 ALTER TABLE planning.scenario_hexagons ADD COLUMN IF NOT EXISTS resolution smallint NOT NULL DEFAULT 13;
 

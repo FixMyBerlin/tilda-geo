@@ -1,12 +1,22 @@
--- Martin-compatible tile functions for the planning schema.
--- Martin auto-discovers functions in the public schema with the signature
---   (z int, x int, y int, query_params json) → bytea
--- so planning_hexagons and planning_vegetation are served by the same
--- Martin server as all other public sources.
+-- Tile functions for the planning schema.
+-- They live in the planning schema on purpose and NOT in public: Martin publishes
+-- every function in public (configs/martin.yaml) on the public tile hosts,
+-- without any session or region check. The tiles are served by the
+-- authenticated app route (app/src/server/planning/servePlanningTile.server.ts).
+--
+-- Signature (z int, x int, y int, query_params json) → bytea. Must stay in lockstep with
+-- app/src/server/instrumentation/registerPlanningFunctions.server.ts.
 --
 -- query_params: { "run_id": "<int>" }
 
-CREATE OR REPLACE FUNCTION public.planning_hexagons(
+-- Drop earlier versions in public (published by Martin), even if an older
+-- worker image no longer creates them.
+DROP FUNCTION IF EXISTS public.planning_hexagons(int, int, int, json);
+DROP FUNCTION IF EXISTS public.planning_vegetation(int, int, int, json);
+DROP FUNCTION IF EXISTS public.planning_carriageways(int, int, int, json);
+DROP FUNCTION IF EXISTS public.planning_census(int, int, int, json);
+
+CREATE OR REPLACE FUNCTION planning.planning_hexagons(
     z int, x int, y int, query_params json DEFAULT '{}'
 )
 RETURNS bytea LANGUAGE plpgsql STABLE PARALLEL SAFE AS $$
@@ -85,7 +95,7 @@ $$;
 
 DROP FUNCTION IF EXISTS public.planning_areas(int, int, int, json);
 
-CREATE OR REPLACE FUNCTION public.planning_vegetation(
+CREATE OR REPLACE FUNCTION planning.planning_vegetation(
     z int, x int, y int, query_params json DEFAULT '{}'
 )
 RETURNS bytea LANGUAGE plpgsql STABLE PARALLEL SAFE AS $$
@@ -109,7 +119,7 @@ BEGIN
 END;
 $$;
 
-CREATE OR REPLACE FUNCTION public.planning_carriageways(
+CREATE OR REPLACE FUNCTION planning.planning_carriageways(
     z int, x int, y int, query_params json DEFAULT '{}'
 )
 RETURNS bytea LANGUAGE plpgsql STABLE PARALLEL SAFE AS $$
@@ -145,7 +155,7 @@ $$;
 --
 -- If the data schema is missing on this environment (table not imported), the
 -- function returns NULL instead of an error – like the graceful fallbacks in the worker.
-CREATE OR REPLACE FUNCTION public.planning_census(
+CREATE OR REPLACE FUNCTION planning.planning_census(
     z int, x int, y int, query_params json DEFAULT '{}'
 )
 RETURNS bytea LANGUAGE plpgsql STABLE PARALLEL SAFE AS $$
