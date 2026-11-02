@@ -140,6 +140,7 @@
     "@tanstack/react-form",
     "motion",
     "eslint-plugin-compat",
+    "nitro-nightly",
     "@headlessui/react",
     "framer-motion",
   ],
