@@ -7,15 +7,15 @@ import {
 import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
 import { updateSpaceFinderVariantFn } from '@/server/space-finder/space-finder.functions'
 import { spaceFinderVariantQueryOptions } from '@/server/space-finder/spaceFinderQueryOptions'
+import { ToggleSwitch } from '../display/LayerToggles'
 import { MIN_AREA_FILTER_LABEL, MIN_SCORE_THRESHOLD_LABEL } from '../factors/spaceFinderDefaults'
 import { spaceFinderNumberInputClass } from '../spaceFinderPanelStyles'
 import { useSpaceFinderModeParam } from '../useSpaceFinderModeParam'
-import { ToggleSwitch } from './LayerToggles'
 
 /**
  * Target size filter of the area search. The square meters belong to the variant
- * (`factorConfig.min_area_m2`, prefilled from the Planungsgebiet's size on creation) and are
- * saved on blur.
+ * (`factorConfig.min_area_m2`, prefilled from the Planungsgebiet's size on creation, 1 m² when
+ * the filter is switched on without one) and are saved on blur.
  * `space.minArea: true` only switches the filter on (missing = off). The store draft applies
  * while typing, so the map reacts before saving and a cleared number does not fall back to the
  * saved value. Local state keeps the number visible while the filter is switched off.
@@ -36,9 +36,9 @@ const MinAreaFilterForm = ({
   const { setMinAreaDraft } = useSpaceFinderBoundaryActions()
   const filterOn = spaceFinderMode.minArea === true
   const [minArea, setLocalMinArea] = useState(savedMinArea)
-  // Switch on but no number > 0 yet: the filter does not apply yet, but the field must still be
-  // enabled — otherwise without a saved value you could never enter it, and the field would lock
-  // as soon as you clear the number to retype it.
+  // Switch on but no number > 0 (field cleared to retype, or the URL turned it on without a saved
+  // value): the filter does not apply yet, but the field must stay visible — otherwise it would
+  // lock as soon as you clear the number.
   const [awaitingValue, setAwaitingValue] = useState(() => filterOn && savedMinArea <= 0)
   const checked = filterOn || awaitingValue
   const lastSaved = useRef(savedMinArea)
@@ -77,10 +77,17 @@ const MinAreaFilterForm = ({
   }
 
   const setFilterOn = (on: boolean) => {
-    setAwaitingValue(on && minArea <= 0)
+    // Switching on without a size starts at 1 m²: every contiguous area counts, so the map reacts
+    // right away instead of a switch that seems to do nothing. A size set before is kept.
+    const value = on && minArea <= 0 ? 1 : minArea
+    if (value !== minArea) {
+      setLocalMinArea(value)
+      if (value !== lastSaved.current) mutation.mutate(value)
+    }
+    setAwaitingValue(false)
     // Draft stays while the URL flag is still on, so the map does not fall back to the saved
     // number for one navigation. `appliedMinAreaM2` ignores the draft once the flag is off.
-    if (on) publishDraft(minArea)
+    if (on) publishDraft(value)
     setSpaceFinderModeParam({
       ...spaceFinderMode,
       minArea: on ? true : undefined,
@@ -94,7 +101,7 @@ const MinAreaFilterForm = ({
   }
 
   return (
-    <div className="space-y-2 rounded border border-gray-200 px-2.5 py-2 text-sm">
+    <div className="space-y-2 text-sm">
       <div className="flex items-center justify-between gap-2">
         <span className="flex items-center gap-1 font-medium text-gray-800">
           {MIN_AREA_FILTER_LABEL}

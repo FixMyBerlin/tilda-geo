@@ -159,7 +159,7 @@ export const stripAutoSaettigung = (config: MergedFactorConfig) => {
 
 /**
  * Saving factors must not touch the target size of the area search: it belongs to the filter in
- * »Anzeige« (`minAreaM2`). Otherwise an auto-save with an older draft could revert a value that was
+ * »Suche« (`minAreaM2`). Otherwise an auto-save with an older draft could revert a value that was
  * just saved.
  */
 export const keepStoredMinArea = <T extends VariantFactorConfig>(

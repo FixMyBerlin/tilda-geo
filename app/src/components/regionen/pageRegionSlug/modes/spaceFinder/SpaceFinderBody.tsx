@@ -9,6 +9,7 @@ import { SpaceFinderCandidatesSection } from './candidates/SpaceFinderCandidates
 import { DisplaySection } from './display/DisplaySection'
 import { FactorEditorPanel } from './factors/FactorEditorPanel'
 import { JobStatusBadge } from './run/JobStatusBadge'
+import { SearchSection } from './search/SearchSection'
 import { spaceFinderOpenRunStatus } from './spaceFinderRunStatus'
 import type { SpaceFinderVariantDetail } from './spaceFinderVariantDetail'
 
@@ -32,8 +33,8 @@ const StatusSection = ({ variant }: { variant: SpaceFinderVariantDetail }) => {
 }
 
 /**
- * Flächenfinder panel body (D5): status line, Faktoren, Anzeige and Auswahl as
- * collapsible sections, not a list. Anzeige needs a complete run and is hidden before.
+ * Flächenfinder panel body (D5): status line, Faktoren, Anzeige, Suche and Auswahl as
+ * collapsible sections, not a list. Anzeige and Suche need a complete run and are hidden before.
  */
 export const SpaceFinderBody = ({
   variant,
@@ -42,8 +43,8 @@ export const SpaceFinderBody = ({
   variant: SpaceFinderVariantDetail | undefined
   /**
    * Desktop only (D10): hides Faktoren editing, the run button (footer, handled by the caller)
-   * and candidate selection behind a short notice. Status and Anzeige
-   * (view-only controls) stay visible.
+   * and candidate selection behind a short notice. Status, Anzeige (view-only controls) and Suche
+   * stay visible.
    */
   editable?: boolean
 }) => {
@@ -111,6 +112,8 @@ export const SpaceFinderBody = ({
           </p>
         )}
         <DisplaySection variant={variant} />
+        {/* Keyed by run: a new result opens the section again, even if it was collapsed. */}
+        <SearchSection key={latestRun?.id ?? 'none'} variant={variant} />
         {editable && variant.currentRunId != null && (
           <SpaceFinderCandidatesSection variantId={variant.id} runId={variant.currentRunId} />
         )}

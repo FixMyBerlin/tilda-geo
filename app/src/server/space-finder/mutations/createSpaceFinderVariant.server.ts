@@ -27,10 +27,16 @@ export async function createSpaceFinderVariant(
     db.spaceFinderVariant.count({ where: { areaId: data.areaId } }),
     db.spaceFinderArea.findFirstOrThrow({
       where: { id: data.areaId },
-      select: { userDatasets: true },
+      select: { userDatasets: true, areaSizeM2: true },
     }),
   ])
   const userDatasets = StoredUserDatasetsSchema.parse(area.userDatasets)
+  // Like the first variant from the wizard: the Planungsgebiet's area size prefills the area
+  // search, unless the caller sets one.
+  const factorConfig = {
+    ...data.factorConfig,
+    min_area_m2: data.factorConfig?.min_area_m2 ?? area.areaSizeM2,
+  }
   const created = await runWithAuditContextAsync(
     memberFormAuditContext(headers, session.userId),
     () =>
@@ -40,7 +46,7 @@ export async function createSpaceFinderVariant(
           createdById: session.userId,
           title: data.title ?? `Variante ${variantCount + 1}`,
           factorConfig: syncEigendatenWeights(
-            stripAutoSaettigung(data.factorConfig ?? {}),
+            stripAutoSaettigung(factorConfig),
             userDatasets,
           ) as Prisma.InputJsonValue,
         },
