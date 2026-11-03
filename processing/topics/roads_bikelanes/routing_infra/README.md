@@ -55,6 +55,8 @@ Unlike CQI scoring, **non-indexable categories** (`needsClarification`, `data_no
 build_segments → inclusion_rules.exclude_segment → resolve_motor_road_context → build_public_tags → routing
 ```
 
+`segment.tags` of carriageway and path edges is the raw OSM way, for the two steps in the middle. `build_public_tags` never publishes from it: those edges take `shared_result_tags` (same values as `roads` / `roadsPathClasses`), bikelane edges take their row from `extract_bikelanes`.
+
 Writer: `roads_bikelanes_routing_infra.lua`. Topic-docs: `topic-docs/roads_bikelanes/routing.yaml`.
 
 CQI scoring lives on the CQI branch — see `cycling_quality_index/README.md`.

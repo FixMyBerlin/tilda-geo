@@ -24,9 +24,9 @@ bun run dev
 
 Use a short 1-3 word kebab-case branch name like `my-branch`. The setup script applies the folder naming convention, copies `.env`, and prepares hooks.
 
-For agent guidance, static-data symlink rules, processing, seed data, browser debugging, and checks, read the agent workflow skill. Fresh setup: `bun run seed`, then `bun run dev`.
+For agent guidance, static-data symlink rules, seed data, and the built-in browser, read the agent workflow skill. Fresh setup: `bun run seed`, then `bun run dev`.
 
-**Parallel worktrees:** when another checkout already uses ports 5432/3000/5173, add `DEV_PORT_SLOT=1` (through `5`) to `.env.local` in the second worktree. Each slot offsets db, tiles, and Vite by the same number; register the matching `http://127.0.0.1:517X` OAuth redirect URL. See the agent workflow skill for the port table.
+**Parallel worktrees:** when another checkout already uses ports 5432/3000/5173, add `DEV_PORT_SLOT=1` (through `5`) to `.env.local` in the second worktree. Each slot offsets db, tiles, and Vite by the same number; register the matching `http://127.0.0.1:517X/api/auth/callback/osm` OAuth redirect URL. See the agent workflow skill for the port table.
 
 ## Docker disk cleanup
 

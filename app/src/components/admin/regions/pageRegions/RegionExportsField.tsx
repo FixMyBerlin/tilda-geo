@@ -9,21 +9,27 @@ type Props = {
   form: FormApi<RegionFormInput>
 }
 
-const exportLabelById = new Map(catalogOptions.exports.map((entry) => [entry.id, entry.label]))
+const exportLabelById = new Map<string, string>(
+  catalogOptions.exports.map((entry) => [entry.id, entry.label]),
+)
 
 export function RegionExportsField({ form }: Props) {
   return (
-    <form.Subscribe selector={(state) => state.values.categories}>
-      {(categoriesValue) => {
+    <form.Subscribe selector={(state) => [state.values.categories, state.values.exports] as const}>
+      {([categoriesValue, exportsValue]) => {
         const categories = parseCommaList(String(categoriesValue ?? '')) as MapDataCategoryId[]
-        const orderedExportIds = getExportIdsOrderedByRegionCategories(categories)
+        const orderedExportIds: string[] = getExportIdsOrderedByRegionCategories(categories)
+        // Stored ids outside the catalog block saving, so they stay listed until they are unticked.
+        const staleExportIds = parseCommaList(String(exportsValue ?? '')).filter(
+          (exportId) => !exportLabelById.has(exportId),
+        )
 
         return (
           <CheckboxGroup
             form={form}
             name="exports"
             label="Export-IDs"
-            options={orderedExportIds.map((exportId) => ({
+            options={[...orderedExportIds, ...staleExportIds].map((exportId) => ({
               value: exportId,
               label: exportLabelById.get(exportId) ?? exportId,
             }))}

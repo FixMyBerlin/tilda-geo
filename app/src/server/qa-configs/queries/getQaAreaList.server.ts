@@ -80,38 +80,38 @@ const emptyResult = (limit: number) =>
 
 /**
  * Status filter on the latest-per-(area, indicator) CTE alias `l`. `'all'` / undefined → no
- * constraint. The caller wraps this in `bool_or(...)` per area: a cell matches when ANY selected
- * indicator matches.
+ * constraint; several keys match when ANY of them matches. The caller wraps this in `bool_or(...)`
+ * per area: a cell matches when ANY selected indicator matches.
  */
 export function qaStatusSqlPredicate(status: QaStatusParam | undefined, nextParamIndex: number) {
   if (status === undefined || status === QA_STATUS_SELECT_ALL) {
     return { sql: 'TRUE', params: [] } satisfies SqlFragment
   }
-  const option = QA_STATUS_OPTIONS.find((entry) => entry.key === status)
-  // Unreachable: `zodQaParamStatus` is built from these same options. Fail loudly rather than
-  // falling back to no constraint, which would answer a status filter with every area.
-  if (!option) {
-    throw new Error(`Unknown QA status key: ${status}`)
-  }
-
-  const clauses: string[] = []
   const params: unknown[] = []
-  let index = nextParamIndex
+  const optionClauses = (Array.isArray(status) ? status : [status]).map((key) => {
+    const option = QA_STATUS_OPTIONS.find((entry) => entry.key === key)
+    // Unreachable: `zodQaParamStatus` is built from these same options. Fail loudly rather than
+    // falling back to no constraint, which would answer a status filter with every area.
+    if (!option) {
+      throw new Error(`Unknown QA status key: ${key}`)
+    }
 
-  if (option.userStatus === null) {
-    clauses.push('l."userStatus" IS NULL')
-  } else {
-    clauses.push(`l."userStatus"::text = $${index}`)
-    params.push(option.userStatus)
-    index += 1
-  }
+    const clauses: string[] = []
+    if (option.userStatus === null) {
+      clauses.push('l."userStatus" IS NULL')
+    } else {
+      clauses.push(`l."userStatus"::text = $${nextParamIndex + params.length}`)
+      params.push(option.userStatus)
+    }
 
-  if (option.systemStatus !== null) {
-    clauses.push(`l."systemStatus"::text = $${index}`)
-    params.push(option.systemStatus)
-  }
+    if (option.systemStatus !== null) {
+      clauses.push(`l."systemStatus"::text = $${nextParamIndex + params.length}`)
+      params.push(option.systemStatus)
+    }
+    return `(${clauses.join(' AND ')})`
+  })
 
-  return { sql: clauses.join(' AND '), params } satisfies SqlFragment
+  return { sql: optionClauses.join(' OR '), params } satisfies SqlFragment
 }
 
 /**

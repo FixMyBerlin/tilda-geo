@@ -386,6 +386,8 @@ export const RegionMap = () => {
 
   return (
     <MapGl
+      // The router keeps this component when only the region changes, but `initialViewState` is read once.
+      key={region.slug}
       id="mainMap"
       initialViewState={{
         longitude: mapParam.lng,

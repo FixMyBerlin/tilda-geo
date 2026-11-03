@@ -4,6 +4,7 @@ import { ModePanelPill } from '../../ModePanelPill'
 import { QaAttributeLabel } from './QaAttributeLabel'
 import { qaStatusPillConfig } from './qaConfigs'
 import { QaDecisionData } from './QaDecisionData'
+import { QaEvaluatorIcon } from './QaEvaluatorIcon'
 
 type Props = {
   indicators: QaDecisionDataIndicator[]
@@ -26,7 +27,10 @@ export const QaIndicatorValues = ({ indicators }: Props) => {
           <li key={indicator.key} className="space-y-1.5">
             <div className="flex flex-wrap items-center justify-between gap-2">
               <QaAttributeLabel label={indicator.label} className="font-medium text-gray-900" />
-              <ModePanelPill backgroundColor={pill.hexColor}>{pill.label}</ModePanelPill>
+              <span className="flex items-center gap-1">
+                <QaEvaluatorIcon evaluatorType={indicator.userStatus ? 'USER' : 'SYSTEM'} />
+                <ModePanelPill backgroundColor={pill.hexColor}>{pill.label}</ModePanelPill>
+              </span>
             </div>
             <QaDecisionData decisionData={indicator.decisionData} indicator={indicator} />
           </li>

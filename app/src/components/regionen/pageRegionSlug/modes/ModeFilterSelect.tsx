@@ -12,7 +12,7 @@ import {
 import type { ComponentType, SVGProps } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { mapOverlayMenuClassName } from '../mapOverlayChrome.const'
-import { modePanelFilterControlClassName } from './modePanel.const'
+import { modeFilterMenuHeadingClassName, modePanelFilterControlClassName } from './modePanel.const'
 
 type ModeFilterSelectOption<T extends string> = {
   value: T
@@ -84,11 +84,11 @@ export const ModeFilterSelect = <T extends string>({
         anchor="bottom start"
         modal={false}
         className={twJoin(
-          'z-40 max-h-72 min-w-44 overflow-auto py-1 [--anchor-gap:4px]',
+          'z-40 max-h-72 min-w-44 overflow-auto pb-1 [--anchor-gap:4px]',
           mapOverlayMenuClassName,
         )}
       >
-        <div className="flex items-center gap-1.5 px-3 py-1 text-[11px] font-medium text-gray-500">
+        <div className={modeFilterMenuHeadingClassName}>
           <Icon className="size-3.5 shrink-0" aria-hidden="true" />
           {label}
         </div>

@@ -8,6 +8,7 @@ import { ModeFormSubmit } from '../../ModeFormSubmit'
 import { ModePanelPill } from '../../ModePanelPill'
 import { QaAttributeLabel } from './QaAttributeLabel'
 import { qaStatusPillConfig, userStatusOptions } from './qaConfigs'
+import { QaEvaluatorIcon } from './QaEvaluatorIcon'
 
 export type QaEvaluationDecisionInput = {
   indicatorKey: string
@@ -68,7 +69,10 @@ export const QaDecisionForm = ({ indicators, onSubmit, isSubmitting }: Props) =>
 
   return (
     <form onSubmit={handleSubmit} className="space-y-3">
-      <h4 className="font-medium text-gray-900">Bewertung hinzufügen</h4>
+      <h4 className="flex items-center gap-1 font-medium text-gray-900">
+        <QaEvaluatorIcon evaluatorType="USER" />
+        Bewertung hinzufügen
+      </h4>
 
       {indicators.length > 1 && (
         <fieldset>
@@ -92,7 +96,10 @@ export const QaDecisionForm = ({ indicators, onSubmit, isSubmitting }: Props) =>
                       label={indicator.label}
                       className="font-medium text-gray-900"
                     />
-                    <ModePanelPill backgroundColor={pill.hexColor}>{pill.label}</ModePanelPill>
+                    <span className="flex items-center gap-1">
+                      <QaEvaluatorIcon evaluatorType={indicator.userStatus ? 'USER' : 'SYSTEM'} />
+                      <ModePanelPill backgroundColor={pill.hexColor}>{pill.label}</ModePanelPill>
+                    </span>
                   </span>
                 </label>
               )

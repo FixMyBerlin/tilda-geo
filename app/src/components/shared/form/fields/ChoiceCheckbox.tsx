@@ -38,6 +38,7 @@ export function ChoiceCheckbox({
         checked={checked}
         disabled={disabled}
         aria-label={ariaLabel}
+        aria-invalid={hasError}
         onBlur={onBlur}
         onChange={(event) => onChange(event.target.checked)}
         className={choiceCheckboxClassName(hasError)}

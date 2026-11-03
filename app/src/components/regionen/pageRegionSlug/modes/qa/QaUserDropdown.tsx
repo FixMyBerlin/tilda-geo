@@ -1,4 +1,4 @@
-import { Menu, MenuButton, MenuItems } from '@headlessui/react'
+import { Popover, PopoverButton, PopoverPanel } from '@headlessui/react'
 import { ChevronDownIcon } from '@heroicons/react/24/outline'
 import { useQuery } from '@tanstack/react-query'
 import { twJoin } from 'tailwind-merge'
@@ -9,8 +9,10 @@ import { getQaUsersForConfigFn } from '@/server/qa-configs/qa-configs.functions'
 import { mapOverlayMenuClassName } from '../../mapOverlayChrome.const'
 import { modeFilterIcons } from '../ModeFilterSelect'
 import {
+  modeFilterCheckboxClassName,
+  modeFilterCheckboxRowClassName,
+  modeFilterMenuHeadingClassName,
   modePanelFilterControlClassName,
-  modePanelListItemHoverClassName,
 } from '../modePanel.const'
 
 const UsersIcon = modeFilterIcons.users
@@ -66,8 +68,8 @@ export const QaUserDropdown = ({ configId, regionSlug }: Props) => {
       : `${selectedUserIds.length} ausgewählt`
 
   return (
-    <Menu as="div" className="max-w-28 min-w-0">
-      <MenuButton
+    <Popover className="max-w-28 min-w-0">
+      <PopoverButton
         aria-label={`Nutzer:innen: ${triggerLabel}`}
         title="Nutzer:innen"
         className={twJoin(modePanelFilterControlClassName, 'w-full justify-between gap-1 px-1.5')}
@@ -81,35 +83,30 @@ export const QaUserDropdown = ({ configId, regionSlug }: Props) => {
         ) : (
           <ChevronDownIcon className="size-3.5 shrink-0" aria-hidden="true" />
         )}
-      </MenuButton>
-      <MenuItems
+      </PopoverButton>
+      <PopoverPanel
         anchor="bottom start"
-        modal={false}
+        focus
         className={twJoin(
-          'z-40 min-w-56 space-y-0.5 px-2 py-2 [--anchor-gap:4px]',
+          'z-40 min-w-56 space-y-0.5 px-2 pb-2 [--anchor-gap:4px]',
           mapOverlayMenuClassName,
         )}
       >
+        <div className={twJoin(modeFilterMenuHeadingClassName, '-mx-2')} aria-hidden="true">
+          <UsersIcon className="size-3.5 shrink-0" />
+          Nutzer:innen
+        </div>
         <fieldset className="space-y-0.5">
-          <legend className="flex items-center gap-1.5 px-1 pb-1 text-[11px] font-medium text-gray-500">
-            <UsersIcon className="size-3.5 shrink-0" aria-hidden="true" />
-            Nutzer:innen
-          </legend>
+          <legend className="sr-only">Nutzer:innen</legend>
           {qaUsers?.map((user) => {
             const isUserSelected = selectedUserIds.includes(user.id)
             return (
-              <label
-                key={user.id}
-                className={twJoin(
-                  'flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-xs',
-                  modePanelListItemHoverClassName,
-                )}
-              >
+              <label key={user.id} className={modeFilterCheckboxRowClassName}>
                 <input
                   type="checkbox"
                   checked={isUserSelected}
                   onChange={() => toggleUser(user.id)}
-                  className="size-4 rounded border-gray-300 text-brand focus:ring-brand"
+                  className={modeFilterCheckboxClassName}
                 />
                 <span>
                   {user.currentUser
@@ -120,22 +117,17 @@ export const QaUserDropdown = ({ configId, regionSlug }: Props) => {
               </label>
             )
           })}
-          <label
-            className={twJoin(
-              'flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-xs',
-              modePanelListItemHoverClassName,
-            )}
-          >
+          <label className={modeFilterCheckboxRowClassName}>
             <input
               type="checkbox"
               checked={noFilterActive}
               onChange={clearUsers}
-              className="size-4 rounded border-gray-300 text-brand focus:ring-brand"
+              className={modeFilterCheckboxClassName}
             />
             <span>Alle Nutzer:innen</span>
           </label>
         </fieldset>
-      </MenuItems>
-    </Menu>
+      </PopoverPanel>
+    </Popover>
   )
 }

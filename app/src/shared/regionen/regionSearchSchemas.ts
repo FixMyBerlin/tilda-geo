@@ -96,8 +96,14 @@ export const defaultRegionSearch = () => regionSearchSchema.parse({})
 export const parseRegionSearch = (search: Record<string, unknown>) =>
   regionSearchSchema.parse(search)
 
-export const getMapParamFromSearch = (search: RegionSearch): MapParam => {
-  return parseMapParam(search[searchParamsRegistry.map]) ?? mapParamFallback
+/**
+ * The URL viewport, else the start view of the region. A `Link` without `map` carries the sentinel
+ * until the loader redirect is through, and with cached loader data the page already renders then.
+ */
+export const getMapParamFromSearch = (search: RegionSearch, regionMap: MapParam): MapParam => {
+  const wire = search[searchParamsRegistry.map]
+  if (wire === defaultMapSearchValue) return regionMap
+  return parseMapParam(wire) ?? regionMap
 }
 
 export const getQaParamFromSearch = (search: RegionSearch) => {

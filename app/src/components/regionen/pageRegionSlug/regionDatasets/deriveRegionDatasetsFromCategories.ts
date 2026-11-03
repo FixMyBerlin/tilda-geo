@@ -96,10 +96,14 @@ export const getExportIdsOrderedByRegionCategories = (
   catalogExportIds: readonly ExportId[] = allExportIds,
   allRegionExportTables: Iterable<string> = exportApiIdentifier,
 ) => {
+  // Region writes only accept catalog ids; category tables without a catalog entry can't be saved.
+  const catalogSet = new Set(catalogExportIds)
   const orderedFromCategories = deriveRegionDatasetsFromCategories(
     { categories, exports: null },
     allRegionExportTables,
-  ).map((dataset) => dataset.tableName)
+  )
+    .map((dataset) => dataset.tableName)
+    .filter((tableName) => catalogSet.has(tableName))
 
   const orderedSet = new Set(orderedFromCategories)
   const remainder = catalogExportIds.filter((exportId) => !orderedSet.has(exportId))

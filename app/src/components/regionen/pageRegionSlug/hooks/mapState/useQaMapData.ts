@@ -58,20 +58,28 @@ export const selectQaIndicatorPairs = <T>(
   return pairs.filter((_, index) => selectedKeys.includes(indicators[index]!.key))
 }
 
-/** A cell matches a status option when ANY of its (already indicator-selected) pairs matches. */
+/**
+ * A cell matches when ANY of its (already indicator-selected) pairs matches ANY selected status
+ * option. `undefined` = Alle Status.
+ */
 export const qaMapRowMatchesStatus = (
   pairs: QaIndicatorStatusPair[],
-  status: string | undefined,
+  statusKeys: readonly string[] | undefined,
 ) => {
-  const option = status ? QA_STATUS_OPTIONS.find((entry) => entry.key === status) : undefined
-  if (!option) return true
+  const options = QA_STATUS_OPTIONS.filter((entry) => statusKeys?.includes(entry.key))
+  if (options.length === 0) return true
 
-  return pairs.some((pair) => {
-    const userMatches =
-      option.userStatus === null ? pair.userStatus === null : pair.userStatus === option.userStatus
-    const systemMatches = option.systemStatus === null || pair.systemStatus === option.systemStatus
-    return userMatches && systemMatches
-  })
+  return pairs.some((pair) =>
+    options.some((option) => {
+      const userMatches =
+        option.userStatus === null
+          ? pair.userStatus === null
+          : pair.userStatus === option.userStatus
+      const systemMatches =
+        option.systemStatus === null || pair.systemStatus === option.systemStatus
+      return userMatches && systemMatches
+    }),
+  )
 }
 
 /**

@@ -6,15 +6,13 @@ local road_width = require('topics.helper.road_width')
 local derive_surface = require('topics.helper.derive_surface')
 local derive_smoothness = require('topics.helper.derive_smoothness')
 local bikelane_todo_categories = require('topics.roads_bikelanes.bikelanes.bikelane_todo_categories')
-local adjoining_of_vs_csv_todo = require('topics.roads_bikelanes.pseudo_tags_sidepath.adjoining_of_vs_csv_todo')
-local bikelane_todos = adjoining_of_vs_csv_todo.append_to(bikelane_todo_categories)
 local collect_todos = require('topics.helper.collect_todos')
 local derive_oneway = require('topics.roads_bikelanes.bikelanes.derive_oneway')
 local default_id = require('topics.helper.default_id')
 local derive_traffic_signs = require('topics.helper.derive_traffic_signs')
 local to_markdown_list = require('topics.helper.to_markdown_list')
 local to_todo_tags = require('topics.helper.to_todo_tags')
-local parse_length = require('topics.helper.parse_length')
+local parse_width = require('topics.helper.parse_width')
 local SANITIZE_ROAD_TAGS = require('topics.roads_bikelanes.helper.sanitize_road_tags')
 local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
 local extract_public_tags = require('topics.helper.extract_public_tags')
@@ -93,9 +91,9 @@ local function bikelanes(object_tags, object_geom)
           _infrastructureExists = true,
           prefix = transformed_tags._prefix,
           lifecycle = transformed_tags.lifecycle or SANITIZE_ROAD_TAGS.temporary(transformed_tags) or object_tags.lifecycle,
-          width = parse_length(transformed_tags.width),
+          width = parse_width(transformed_tags.width),
           width_source = transformed_tags['source:width'],
-          width_effective = parse_length(transformed_tags['width:effective']),
+          width_effective = parse_width(transformed_tags['width:effective']),
           oneway = derive_oneway(transformed_tags, category),
           bridge = SANITIZE_TAGS.boolean_yes(object_tags.bridge),
           tunnel = SANITIZE_TAGS.tunnel(object_tags.tunnel),
@@ -166,7 +164,7 @@ local function bikelanes(object_tags, object_geom)
           object_geom
         )
 
-        local todos = collect_todos(bikelane_todos, transformed_tags, result_tags)
+        local todos = collect_todos(bikelane_todo_categories, transformed_tags, result_tags)
         result_tags._todo_list = to_todo_tags(todos)
         result_tags.todos = to_markdown_list(todos)
       end

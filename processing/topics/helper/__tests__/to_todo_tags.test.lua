@@ -1,3 +1,5 @@
+require('topics.helper.osm2pgsql')
+
 describe('to_todo_tags', function()
   local to_todo_tags = require('topics.helper.to_todo_tags')
   local collect_todos = require('topics.helper.collect_todos')

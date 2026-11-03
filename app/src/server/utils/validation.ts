@@ -11,10 +11,11 @@ import { z } from 'zod'
  * Use when catching ZodError from form validation.
  */
 export function validationErrorState(error: z.ZodError) {
+  const { formErrors, fieldErrors } = z.flattenError(error)
   return {
     success: false as const,
-    message: 'Bitte korrigieren Sie die Fehler im Formular',
-    errors: z.flattenError(error).fieldErrors,
+    message: formErrors.join(' ') || 'Bitte korrigieren Sie die Fehler im Formular',
+    errors: fieldErrors,
   }
 }
 

@@ -1,18 +1,18 @@
 ---
 name: tilda-geo-agent-workflow
 description: >-
-  Guides isolated feature / local-stack setup in tilda-geo: sibling worktrees,
-  predev Docker, `.env.local`, reusing the develop db (`DEV_ATTACH_STACK`),
-  seed, processing, static-data symlinks, agent-browser map debug. Use when
-  creating a feature worktree, needing an isolated Docker stack, reusing another
-  checkout's db, running processing/seed, touching static datasets, or debugging
-  maps. Do not use for ordinary edits on develop/main or when already on an
-  existing branch — stay in the current checkout.
+  Development setup and workflow for tilda-geo: sibling worktrees, predev Docker
+  stacks, `.env.local`, ports, reusing the develop db (`DEV_ATTACH_STACK`), seed,
+  static-data symlink, closing a worktree. Use when creating a feature worktree,
+  needing an isolated Docker stack, reusing another checkout's db, resetting the
+  local db, or when predev, Docker or ports fail. Do not use for ordinary edits
+  on develop/main or when already on an existing branch — stay in the current
+  checkout.
 ---
 
 # TILDA Geo agent workflow
 
-Local isolation / stack playbook for **tilda-geo**. Not the everyday coding entrypoint.
+Local setup and worktree playbook for **tilda-geo**. Not the everyday coding entrypoint.
 
 ## Default: stay where you are
 
@@ -25,9 +25,8 @@ Everyday conventions live in [AGENTS.md](../../../AGENTS.md).
 - User asks for a **new branch / worktree / isolated stack**
 - User asks to **reuse the develop db**, **attach to develop**, or test on the **default local Postgres** without a private stack
 - Dedicated feature that should not dirty the main `develop` checkout
-- Task needs **processing**, **fresh seed DB**, **parallel Docker**, or **static-data worktrees**
-- Map/UI debugging with `bun run dev` + agent-browser ([section 4](#4-agent-browser-and-map-state) — no worktree ceremony unless isolation is also needed)
-- Implementer hits Docker / processing / static-data setup questions
+- Task needs a **fresh seed DB**, **parallel Docker**, or **static-data worktrees**
+- Work hits Docker / predev / port setup questions
 
 ### When not to use
 
@@ -42,11 +41,10 @@ Jump to the section that matches the task:
 
 - New branch or checkout setup: [Git worktrees](#1-git-worktrees)
 - Docker, ports, `.env.local`, develop db reuse, or `bun run dev`: [Docker and predev](#2-docker-and-predev-envlocal)
-- Processing, seed data, or static dataset commands: [Processing and local data](#3-processing-and-local-data)
-- Browser or map debugging: [agent-browser and map state](#4-agent-browser-and-map-state)
-- Static dataset files or symlinks: [`tilda-static-data` symlink](#5-tilda-static-data-symlink)
+- Seed, processing, or static data: [Local data](#3-local-data)
+- Open the running app: [See the running app](#4-see-the-running-app)
+- Finishing and closing work, MCP tools, command locations: [Wrapping up and reference](#5-wrapping-up-and-reference)
 - Private experimental repo / two remotes: [tilda-geo-private-repo](../tilda-geo-private-repo/SKILL.md)
-- Env, MCP tools, checks, or command locations: [What else agents need](#6-what-else-agents-need)
 
 **Repo layout:** `app/` (TanStack Start frontend + API), `processing/` (osm2pgsql pipeline + tiles). Most agent commands run from **`app/`**. Root **`.env`** holds secrets; **`app/` scripts load `../.env` and `../.env.local`**.
 
@@ -61,7 +59,7 @@ When isolating feature work, use a **sibling checkout** next to the main repo. D
 |-- tilda-geo/                    # main checkout: develop or main
 |-- tilda-geo--my-branch/         # worktree for branch my-branch
 |-- tilda-geo--other-branch/      # another worktree
-`-- tilda-static-data/            # separate repo (see static-data section)
+`-- tilda-static-data/            # separate repo (see static data below)
 ```
 
 ### Default setup
@@ -101,6 +99,8 @@ Run `bun run dev` from `app/` and let **predev** manage env, ports, Docker, and 
 
 Predev: `ensureEnv` (root `.env`) → `ensureDevStack` (worktree `.env.local` if missing) → `checkDocker` (stop other default-port stacks, start db+tiles or verify attach) → migrations / topic-docs.
 
+`setup-worktree` copies root `.env`, and predev validates the required local setup. Do not proactively audit env or auth values; only inspect `.env` if a command fails with a concrete env/auth error.
+
 ### Which db stack?
 
 | Where           | Branch             | `.env.local`                                  | Stack                                                                |
@@ -138,31 +138,15 @@ Add `DEV_PORT_SLOT=1` (or another slot) if Vite **5173** is already taken, e.g. 
 | 4    | 5436 | 3004  | 5177 | `http://127.0.0.1:5177` |
 | 5    | 5437 | 3005  | 5178 | `http://127.0.0.1:5178` |
 
-Predev derives `DATABASE_PORT`, `TILES_PORT`, `VITE_TILES_PORT`, `VITE_APP_ORIGIN`, Vite/HMR from the slot. Prisma CLI uses the same mapping. `listRunningDevStacks` (stop-others) only sees default ports; attach resolves any running stack id including slots. Each slot origin needs an OSM OAuth redirect URL. Predev also writes the git-ignored `app/.claude/launch.json` (Claude desktop preview) with the slot's Vite port.
+Predev derives `DATABASE_PORT`, `TILES_PORT`, `VITE_TILES_PORT`, `VITE_APP_ORIGIN`, Vite/HMR from the slot. Prisma CLI uses the same mapping. `listRunningDevStacks` (stop-others) only sees default ports; attach resolves any running stack id including slots. Each slot origin needs an OSM OAuth redirect URL (`<origin>/api/auth/callback/osm`).
 
 Editing predev: `docker compose -p <DEV_STACK_ID>` (never `COMPOSE_PROJECT_NAME` in YAML); `COMPOSE_DEV_CONTAINER_PREFIX` is runtime-only. Files: `app/scripts/setup-worktree.ts`, `app/scripts/predev/{ensureDevStack,devPortSlot,envLocalBranch,devStackDiscovery,checkDocker,syncEnvLocal,writeLaunchJson}.ts`, `app/.husky/post-checkout`.
 
 ---
 
-## 3. Processing and local data
+## 3. Local data
 
-### OSM processing (`bun run processing`)
-
-From **`app/`**. `bun run processing` generates a **single shell line** that cds to repo root and runs `docker compose` with env overrides. Use that printed line; do not invent compose commands.
-
-```bash
-bun run processing -- --help   # full contract
-```
-
-**Agents (no TTY):** pass the complete non-interactive flag set (bbox/preset, `--diff-mode`, topics, skip flags, `--foreground`/`--detach`/`--dry-run`). For exact flags and diff validation, load [test-processing-diff](../test-processing-diff/SKILL.md).
-
-**Worktree stacks:** the printed command uses this worktree's `DEV_STACK_ID` and default ports 5432/3000, or offset ports when `DEV_PORT_SLOT` is set (the printed line includes `DATABASE_PORT` / `TILES_PORT`). Prefer the line from `bun run processing` over manual env.
-
-**Reference -> fixed diff workflow:** run `reference` on baseline commit, then `fixed` on your branch; inspect `public.*_diff` tables. Full steps in [test-processing-diff](../test-processing-diff/SKILL.md).
-
-**Lua unit tests** (from `processing/`): `bun run test`.
-
-### App DB setup (agents)
+### App DB
 
 ```bash
 bun run seed   # fresh local DB (~30s); pulls data-schema specs
@@ -175,117 +159,53 @@ If processing needs `data.*` after seed: Import on http://127.0.0.1:5173/admin/d
 
 If you run `dev` without seeding first, predev warns — warn-only, does not block.
 
-### Static datasets
+### OSM processing
 
-Most agent tasks do **not** need `app/scripts/StaticDatasets/geojson` at all. If static datasets are unrelated, leave the symlink absent or untouched and do not run static-dataset update commands.
+From **`app/`**. `bun run processing` generates a **single shell line** that cds to repo root and runs `docker compose` with env overrides. Use that printed line; do not invent compose commands. It already carries this worktree's `DEV_STACK_ID` and, with `DEV_PORT_SLOT`, the offset ports.
 
-If a task needs to read existing static datasets or run the upload pipeline without data changes, use the regular sibling repo symlink:
+Flags and the reference → fixed diff workflow: [test-processing-diff](../test-processing-diff/SKILL.md). Lua unit tests: `bun run test` from `processing/`.
 
-```bash
-# from app/: creates symlink to ../../../../tilda-static-data/geojson
-bun run static-datasets-link
-```
+### Static data
 
-Update local dev uploads only when the task explicitly needs it:
+`app/scripts/StaticDatasets/geojson` is a symlink to `../../../../tilda-static-data/geojson`, a separate repo.
 
-```bash
-bun run static-datasets-update -- --folder-filter=<dataset-folder> --env=dev
-```
+1. **No static data needed (most tasks):** do not create or change the symlink, do not run static-dataset commands.
+2. **Read or upload existing data:** `bun run static-datasets-link` from `app/`, and `bun run static-datasets-update -- --folder-filter=<dataset-folder> --env=dev` only when the task needs it.
+3. **Edit data files:** create a matching `tilda-static-data` worktree and point the symlink there, see step 0 of [add-static-dataset](../add-static-dataset/SKILL.md). Commits for data files belong in **`tilda-static-data`**. Never edit through a symlink that points at the regular sibling checkout.
 
-If a task needs to edit static dataset files, create a `tilda-static-data` worktree and relink `geojson` to that worktree instead. See the static-data symlink section below.
-
-`setup-worktree` copies root `.env`, so static-dataset update keys should already be available in normal agent worktrees. If `static-datasets-update` fails with auth or upload errors, verify `ATLAS_API_KEY` (dev) and S3 credentials in root `.env`. More details: [app/scripts/StaticDatasets/README.md](../../../app/scripts/StaticDatasets/README.md).
+Auth or upload errors: check `ATLAS_API_KEY` (dev) and the S3 credentials in root `.env`, see [app/scripts/StaticDatasets/README.md](../../../app/scripts/StaticDatasets/README.md). `type-check-deploy` unlinks the symlink temporarily during CI-like typecheck.
 
 ---
 
-## 4. agent-browser and map state
+## 4. See the running app
 
-**Prerequisite:** `bun run dev` running at **http://127.0.0.1:5173** (use `127.0.0.1`, not `localhost`).
+Use the **built-in browser** of Claude Code (preview pane). Predev writes the git-ignored `app/.claude/launch.json` with this checkout's Vite port; it starts Vite only, so `bun run dev` has to have run once for Docker and migrations.
 
-Use **agent-browser MCP** (`agent_browser_open` -> `agent_browser_snapshot` -> click/fill -> `agent_browser_console` / screenshots). Setup: [agent-browser-mcp.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/tech-stack/references/agent-browser-mcp.md).
+- Use `http://127.0.0.1:<port>`, not `localhost`: OSM OAuth only accepts the registered `127.0.0.1` origins.
+- A hidden pane runs the page as a background tab, so the map stays blank and never fires `load`. Front the tab, reload, hover the map.
+- `/admin` needs OSM OAuth, which the pane cannot complete. Create a stubbed session with `createStubbedAdminSession` from `app/tests/fixtures/auth.ts`, then set its cookies in the pane.
+- Runtime map state is on `window.__mainMap` in dev, see skill `react-map-gl`.
 
-**Playwright** (`bun run e2e`) is for committed regression tests, not interactive agent debugging.
-
-### `window.__mainMap`
-
-In dev and Playwright mode, `onLoad` exposes the MapLibre instance as `window.__mainMap` so agents and tests can inspect runtime map state via `agent_browser_eval` or Playwright `page.evaluate`.
-
-Wiring: skill `react-map-gl` → [map-debug-exposure.md](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/react-map-gl/references/map-debug-exposure.md). In `RegionMap.tsx`, `handleLoad` calls `exposeMainMapForDebugging(event.target)` — inside Map handlers, **`event.target` is the MapLibre map**; use it directly, not `useMap()` / `getMap()`.
-
-```js
-window.__mainMap?.getZoom()
-window.__mainMap?.getStyle().layers.map((layer) => layer.id)
-window.__mainMap?.queryRenderedFeatures({ layers: ['some-layer'] })
-```
-
-`window.__mainMap` is set during map load in dev, or when `VITE_PLAYWRIGHT_ENABLED=true` / `window.__PLAYWRIGHT_ENABLED === 'true'`. The `mapLoaded` event remains Playwright-gated. If `__mainMap` is unavailable, prefer:
-
-- Annotated screenshots for visual checks
-- `agent_browser_react_tree` around map components (`MapInterface`, `SourcesLayersAtlasGeo`)
-- Playwright helpers: `window.__mapLoaded`, `mapLoaded` event (when `VITE_PLAYWRIGHT_ENABLED=true`)
-
-After load, elsewhere in React: `<Map id="mainMap">` → `useMap()` → `mainMap` (`MapRef`; `mainMap.getMap()` for maplibregl APIs outside event handlers). E2E helpers: skill `playwright-skill`.
+**Playwright** (`bun run e2e`) is for committed regression tests, not interactive debugging: skill `playwright-skill`.
 
 ---
 
-## 5. `tilda-static-data` symlink
-
-`app/scripts/StaticDatasets/geojson` -> `../../../../tilda-static-data/geojson`.
-
-Decision order for agents:
-
-1. **No static data needed:** do not create or change the symlink.
-2. **Read/use existing static data only:** use the regular symlink to `../tilda-static-data/geojson`.
-3. **Edit static data:** create a matching `tilda-static-data` worktree and point the symlink there.
-
-**Do not edit symlinked GeoJSON from a tilda-geo worktree when the symlink points at regular `tilda-static-data`.** That would change the shared sibling checkout. Commits for data files belong in **`tilda-static-data`**, not tilda-geo.
-
-### When the task needs static data changes
-
-1. **Create a `tilda-static-data` worktree too** (sibling to tilda-geo):
-
-   ```bash
-   cd ../tilda-static-data
-   git worktree add ../tilda-static-data--my-branch my-branch
-   ```
-
-2. Point the matching **tilda-geo** worktree at that static-data worktree:
-
-   ```bash
-   cd ../tilda-geo--my-branch/app
-   rm -f scripts/StaticDatasets/geojson
-   ln -s ../../../../tilda-static-data--my-branch/geojson scripts/StaticDatasets/geojson
-   ```
-
-3. Edit files under `../tilda-static-data--my-branch/geojson/`.
-4. Run `bun run static-datasets-update` from the matching **tilda-geo** worktree only if the task needs local upload data.
-
-### When the task does **not** need static data
-
-- **Do not touch `geojson/`**. Most app/processing work does not need the symlink.
-- Optional: `bun run static-datasets-unlink` in `app/` to drop the symlink (restore with `static-datasets-link`). `type-check-deploy` unlinks temporarily during CI-like typecheck.
-
-For adding datasets, follow skill `add-static-dataset`, but perform file edits in **`tilda-static-data`**, not through the symlink from a throwaway path.
-
----
-
-## 6. What else agents need
-
-### Environment
-
-`setup-worktree` copies root `.env`, and `bun run dev` / predev validates the required local setup. Do not proactively audit env or auth values; only inspect `.env` if a command fails with a concrete env/auth error.
-
-### MCP tools (user-level, not in repo)
-
-| MCP                         | Use for                                              |
-| --------------------------- | ---------------------------------------------------- |
-| `user-postgres-tilda-dev`   | SQL against local dummy db or processing diff tables |
-| `user-tilda-geo-admin--DEV` | Admin-only API tasks                                 |
-| `user-agent-browser`        | Interactive UI/map debugging                         |
+## 5. Wrapping up and reference
 
 ### Finishing work
 
-Load [finish-work](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/finish-work/SKILL.md) when wrapping up. It covers `bun run check` (includes advisory knip), lint/format staging, and commit messages. **Default: commit** with a user-facing message; draft only when the user clearly did not want a commit ("don't commit", "draft only", review-only turns, etc.).
+Load skill `finish-work` when wrapping up, and skill `close-worktree` when a worktree is done (it lands the branch and removes the worktree and its Docker stack).
+
+### MCP tools (user-level, not in repo)
+
+| MCP                        | Use for                                              |
+| -------------------------- | ---------------------------------------------------- |
+| `tilda-geo-postgres--DEV`  | SQL against local dummy db or processing diff tables |
+| `tilda-geo-admin--DEV`     | Admin tasks against the local app                    |
+| `tilda-geo-postgres--STG`  | SQL against staging                                  |
+| `tilda-geo-admin--STG/PRD` | Admin tasks on staging / production                  |
+
+The DEV servers follow the default ports, so they do not reach a worktree's own stack on a slot port.
 
 ### Command locations (common mistakes)
 
@@ -313,9 +233,7 @@ Load [finish-work](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/f
 - [ ] Which db? -> [section 2](#which-db-stack); do not invent `.env.local` on the main checkout
 - [ ] Local app/db needed? -> trust predev from `bun run dev`; do not hand-craft Docker or re-audit env
 - [ ] Fresh local db? -> `bun run seed`, then `bun run dev` (not db-pull)
-- [ ] Processing change? -> load [test-processing-diff](../test-processing-diff/SKILL.md)
-- [ ] Static dataset change? -> worktree `tilda-static-data`, relink `geojson`, then load [add-static-dataset](../add-static-dataset/SKILL.md)
-- [ ] Map/UI bug? -> use agent-browser MCP; inspect `window.__mainMap` when available
+- [ ] Static data edits? -> worktree `tilda-static-data`, relink `geojson`, see [section 3](#static-data)
 - [ ] Private experiment? -> load [tilda-geo-private-repo](../tilda-geo-private-repo/SKILL.md)
-- [ ] Done? -> load [finish-work](https://github.com/FixMyBerlin/fixmyskills/blob/main/skills/finish-work/SKILL.md)
+- [ ] Done? -> skill `finish-work`, then skill `close-worktree` in a worktree
 ```

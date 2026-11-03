@@ -1,6 +1,9 @@
 import {
   compactQaParam,
+  QA_STATUS_SELECT_ALL,
+  resolvedQaStatusKeys,
   type QaParamData,
+  type QaStatusKey,
 } from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
 import { getQaParamFromSearch } from '@/shared/regionen/regionSearchSchemas'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
@@ -24,6 +27,21 @@ export const useQaParam = () => {
       },
       { replace: true },
     )
+  }
+
+  /** Toggles one status. Removing the last one falls back to Alle. */
+  const toggleStatus = (statusKey: QaStatusKey) => {
+    updateQaParamData((current) => {
+      const currentKeys = resolvedQaStatusKeys(current.status) ?? []
+      const nextKeys = currentKeys.includes(statusKey)
+        ? currentKeys.filter((key) => key !== statusKey)
+        : [...currentKeys, statusKey]
+      return { ...current, status: nextKeys.length > 0 ? nextKeys : QA_STATUS_SELECT_ALL }
+    })
+  }
+
+  const clearStatuses = () => {
+    updateQaParamData((current) => ({ ...current, status: QA_STATUS_SELECT_ALL }))
   }
 
   const toggleUser = (userId: string) => {
@@ -59,6 +77,8 @@ export const useQaParam = () => {
   return {
     qaParamData,
     setQaParamData,
+    toggleStatus,
+    clearStatuses,
     toggleUser,
     clearUsers,
     toggleIndicator,

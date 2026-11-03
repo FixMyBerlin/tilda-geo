@@ -19,14 +19,14 @@ describe('resolve_motor_road_context (sidepath branch)', function()
     assert.are.equal(result.adjoining_maxspeed, 50)
   end)
 
-  it('prefers explicit adjoining_road / adjoining_maxspeed tags over pseudo tags', function()
+  it('ignores raw OSM adjoining_road / adjoining_maxspeed tags on path edges', function()
     local segment = {
       source_table = 'roadsPathClasses',
       tags = {
         highway = 'cycleway',
         footway = 'sidewalk',
         adjoining_road = 'primary',
-        adjoining_maxspeed = 70,
+        adjoining_maxspeed = 'fast',
       },
     }
     local context = {
@@ -40,8 +40,8 @@ describe('resolve_motor_road_context (sidepath branch)', function()
     }
     local result = resolve_motor_road_context(segment, context)
     assert.are.equal(result.sidepath, 'yes')
-    assert.are.equal(result.adjoining_road, 'primary')
-    assert.are.equal(result.adjoining_maxspeed, 70)
+    assert.are.equal(result.adjoining_road, 'secondary')
+    assert.are.equal(result.adjoining_maxspeed, 50)
   end)
 
   it('marks a path with no sidepath context as sidepath=no but still copies CSV adjoining', function()

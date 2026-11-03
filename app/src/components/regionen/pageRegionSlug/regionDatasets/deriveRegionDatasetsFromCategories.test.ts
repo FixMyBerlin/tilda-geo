@@ -37,9 +37,9 @@ describe('getExportIdsOrderedByRegionCategories', () => {
       allExportIds,
       bibiExports,
     )
-    const modalOrder = getRegionModalDatasets(bibi, bibiExports).all.map(
-      (dataset) => dataset.tableName,
-    )
+    const modalOrder = getRegionModalDatasets(bibi, bibiExports)
+      .all.map((dataset) => dataset.tableName)
+      .filter((tableName) => allExportIds.includes(tableName))
 
     expect(ordered.slice(0, modalOrder.length)).toEqual(modalOrder)
   })
@@ -50,12 +50,18 @@ describe('getExportIdsOrderedByRegionCategories', () => {
       allExportIds,
       bibiExports,
     )
-    const categoryDerived = deriveRegionDatasetsFromCategories(bibi, bibiExports).map(
-      (dataset) => dataset.tableName,
-    )
+    const categoryDerived = deriveRegionDatasetsFromCategories(bibi, bibiExports)
+      .map((dataset) => dataset.tableName)
+      .filter((tableName) => allExportIds.includes(tableName))
     const remainder = allExportIds.filter((exportId) => !categoryDerived.includes(exportId))
 
     expect(ordered).toEqual([...categoryDerived, ...remainder])
+  })
+
+  test('only offers catalog ids, the region write schema rejects everything else', () => {
+    const ordered = getExportIdsOrderedByRegionCategories(['poi', 'bikelanes', 'roads'])
+
+    expect([...ordered].sort()).toEqual([...allExportIds].sort())
   })
 
   test('falls back to catalog order when no categories are selected', () => {

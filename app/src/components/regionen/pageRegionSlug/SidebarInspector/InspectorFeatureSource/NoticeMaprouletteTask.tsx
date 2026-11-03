@@ -8,7 +8,7 @@ import { campaigns } from '@/data/radinfra-de/campaigns'
 import { buildHashtags } from '@/data/radinfra-de/utils/buildHashtags'
 import { buildTaskInstructions } from '@/data/radinfra-de/utils/buildTaskInstructions'
 import { osmEditIdUrl, osmEditJosmUrl } from '../Tools/osmUrls/osmUrls'
-import { pointFromGeometry } from '../Tools/osmUrls/pointFromGeometry'
+// import { pointFromGeometry } from '../Tools/osmUrls/pointFromGeometry'
 import type { NoticeMaproulette } from './NoticeMaproulette'
 
 // const maprouletteStatus = new Map([
@@ -90,19 +90,20 @@ export const NoticeMaprouletteTask = ({
     return <p>(Die Aufgabenbeschreibung ist noch in Arbeit)</p>
   }
 
+  // Hidden while the MapRoulette integration in iD and Rapid is broken. Users start on maproulette.org instead.
   // The location of the MR pin is the best we can use, but we can always fall back to the one we use internally elsewhere
-  const [centerLng, centerLat] = data?.location?.coordinates || pointFromGeometry(geometry)
-  const paramsMap = `map=19.5/${centerLat}/${centerLng}`
-  const paramsDisabled =
-    'disable_features=points,building_parts,indoor,boundaries,pistes,aerialways,power'
-  const paramsMaproulette = `maproulette=${mapRouletteId}`
-  const paramsMapillary = projectKey.endsWith('__mapillary') ? 'photo_dates=2024-02-23_' : undefined
-  const campaignParams = [paramsMap, paramsMaproulette, paramsDisabled, paramsMapillary].filter(
-    Boolean,
-  )
+  // const [centerLng, centerLat] = data?.location?.coordinates || pointFromGeometry(geometry)
+  // const paramsMap = `map=19.5/${centerLat}/${centerLng}`
+  // const paramsDisabled =
+  //   'disable_features=points,building_parts,indoor,boundaries,pistes,aerialways,power'
+  // const paramsMaproulette = `maproulette=${mapRouletteId}`
+  // const paramsMapillary = projectKey.endsWith('__mapillary') ? 'photo_dates=2024-02-23_' : undefined
+  // const campaignParams = [paramsMap, paramsMaproulette, paramsDisabled, paramsMapillary].filter(
+  //   Boolean,
+  // )
   // const rapidCampaignLink = `https://rapideditor.org/edit#${campaignParams.join('&')}`
   // Experimental MapRoulette-in-iD (https://github.com/tordans/iD/pull/4)
-  const idMaprouletteCampaignLink = `https://deploy-preview-4--tordans-id-experiments.netlify.app/#${campaignParams.join('&')}`
+  // const idMaprouletteCampaignLink = `https://deploy-preview-4--tordans-id-experiments.netlify.app/#${campaignParams.join('&')}`
 
   const maprouletteTaskLink = isLoading
     ? undefined
@@ -143,9 +144,9 @@ export const NoticeMaprouletteTask = ({
       <div className="mb-4 flex flex-col items-center gap-1.5 rounded-sm bg-white/80 p-3">
         {showMaproulette && (
           <>
-            <Link href={idMaprouletteCampaignLink} blank button>
+            {/* <Link href={idMaprouletteCampaignLink} blank button>
               Kampagne im iD Editor bearbeiten
-            </Link>
+            </Link> */}
             {/* {osmEditIdUrlHref && (
               <Link href={osmEditIdUrlHref} blank button>
                 Kampagne bearbeiten
@@ -158,12 +159,14 @@ export const NoticeMaprouletteTask = ({
             ) : maprouletteTaskLink ? (
               <>
                 {completed ? <strong>🎉 Die Aufgabe wurde bereits erledigt.</strong> : null}
-                <Link href={maprouletteTaskLink} blank>
+                <Link href={maprouletteTaskLink} blank button={!completed}>
                   {completed ? 'MapRoulette öffnen' : 'Als MapRoulette Aufgabe bearbeiten'}
                 </Link>
               </>
             ) : (
-              <span className="text-gray-500">Fehler: Konnte MapRoulette URL nicht generieren</span>
+              <Link href={maprouletteCampaignLink} blank button>
+                Kampagne in MapRoulette öffnen
+              </Link>
             )}
           </>
         )}

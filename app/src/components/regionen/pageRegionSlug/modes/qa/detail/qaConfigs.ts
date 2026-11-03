@@ -1,4 +1,5 @@
 import { CheckCircleIcon, ExclamationTriangleIcon } from '@heroicons/react/20/solid'
+import { CpuChipIcon, UserIcon } from '@heroicons/react/24/outline'
 import type { QaEvaluatorType } from '@/prisma/generated/browser'
 import { QaEvaluationStatus, QaSystemStatus } from '@/prisma/generated/browser'
 
@@ -88,9 +89,11 @@ export const userStatusConfig = {
 export const evaluatorTypeConfig = {
   SYSTEM: {
     label: 'System',
+    icon: CpuChipIcon,
   },
   USER: {
     label: 'Benutzer',
+    icon: UserIcon,
   },
 } as const satisfies Record<QaEvaluatorType, object>
 

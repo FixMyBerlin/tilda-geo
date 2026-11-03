@@ -1,4 +1,4 @@
-import { adapterById, sequenceTilesSourceId } from '@osm-editor-kit/street-imagery'
+import { getProviderAdapter, sequenceTilesSourceId } from '@osm-editor-kit/street-imagery'
 import {
   useAllProviderPhotos,
   useMapViewportBbox,
@@ -26,7 +26,7 @@ const useLineTileCapturedAt = (
         // A line is cut at tile borders: count each sequence once.
         const bySequence = new Map<unknown, number>()
         for (const providerId of providersKey.split(',')) {
-          const tiles = adapterById[providerId as StreetImageryProviderId]?.sequenceTiles?.()
+          const tiles = getProviderAdapter(providerId as StreetImageryProviderId)?.sequenceTiles?.()
           const sourceId = sequenceTilesSourceId(providerId as StreetImageryProviderId)
           if (!tiles || !mainMap.getSource(sourceId)) continue
           for (const feature of mainMap.querySourceFeatures(sourceId, {

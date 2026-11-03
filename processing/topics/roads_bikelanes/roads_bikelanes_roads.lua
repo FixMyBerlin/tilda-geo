@@ -6,8 +6,6 @@ local default_id = require('topics.helper.default_id')
 local paths_generalization = require('topics.roads_bikelanes.paths.paths_generalization')
 local road_generalization = require('topics.roads_bikelanes.roads.road_generalization')
 local road_todo_categories = require('topics.roads_bikelanes.roads.road_todo_categories')
-local adjoining_of_vs_csv_todo = require('topics.roads_bikelanes.pseudo_tags_sidepath.adjoining_of_vs_csv_todo')
-local road_todos = adjoining_of_vs_csv_todo.append_to(road_todo_categories)
 local collect_todos = require('topics.helper.collect_todos')
 local to_markdown_list = require('topics.helper.to_markdown_list')
 local to_todo_tags = require('topics.helper.to_todo_tags')
@@ -15,6 +13,7 @@ local categorize_bike_suitability = require('topics.roads_bikelanes.roads.bike_s
 local road_classification_road_value = require('topics.roads_bikelanes.roads.road_classification_road_value')
 local transform_highway_path_with_foot_or_bicycle_no = require('topics.roads_bikelanes.helper.transform_tags.transform_highway_path_with_foot_or_bicycle_no')
 local excluded_from_roads_tables = require('topics.roads_bikelanes.helper.excluded_from_roads_tables')
+local self_bikelane_has_todo = require('topics.roads_bikelanes.helper.self_bikelane_has_todo')
 local SANITIZE_ROAD_TAGS = require('topics.roads_bikelanes.helper.sanitize_road_tags')
 local CLEANER = require('topics.helper.sanitize_cleaner')
 local LOG_ERROR = require('topics.roads_bikelanes.roads_bikelanes_errors')
@@ -37,11 +36,12 @@ local function roads_bikelanes_roads(context)
 
   local result_tags = merge_table({}, context.shared_result_tags)
   merge_table(result_tags, context.cycleway_presence)
+  result_tags._self_bikelane_has_unusual_width = self_bikelane_has_todo(context.cycleways, 'unusual_width')
 
   if not highway_classes.sidepath_highway_classes[object_tags.highway] then
     merge_table(result_tags, maxspeed(object_tags))
   end
-  local todos = collect_todos(road_todos, object_tags, result_tags)
+  local todos = collect_todos(road_todo_categories, object_tags, result_tags)
   result_tags._todo_list = to_todo_tags(todos)
   result_tags.todos = to_markdown_list(todos)
 
