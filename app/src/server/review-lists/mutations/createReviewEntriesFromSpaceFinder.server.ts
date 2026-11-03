@@ -7,8 +7,8 @@ import {
   requireMemberSession,
 } from '@/server/auth/memberCaller.server'
 import db from '@/server/db.server'
-import { authorizeSpaceFinderRegion } from '@/server/spaceFinder/authorizeSpaceFinderRegion.server'
-import { parseFactorConfigSnapshot } from '@/server/spaceFinder/factorConfigSchema'
+import { authorizeSpaceFinderRegion } from '@/server/space-finder/authorizeSpaceFinderRegion.server'
+import { parseFactorConfigSnapshot } from '@/server/space-finder/factorConfigSchema'
 import { REVIEW_UPLOAD_MAX_FEATURES } from '@/shared/reviewLists/reviewEntryImport'
 import {
   buildSpaceFinderReviewProperties,

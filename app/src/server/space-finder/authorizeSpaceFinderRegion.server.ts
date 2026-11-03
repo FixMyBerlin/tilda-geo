@@ -1,4 +1,5 @@
 import { AuthorizationError } from '@/server/auth/errors'
+import { requireAuth } from '@/server/auth/session.server'
 import type { SessionActor } from '@/server/auth/types'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
@@ -17,4 +18,24 @@ export async function authorizeSpaceFinderRegion(session: SessionActor, regionSl
   if (!region.spaceFinderEnabled) {
     throw new AuthorizationError('Flächenfinder is not enabled for this region')
   }
+}
+
+export async function authorizeSpaceFinderArea(headers: Headers, areaId: number) {
+  const session = await requireAuth(headers)
+  const area = await db.spaceFinderArea.findFirstOrThrow({
+    where: { id: areaId },
+    select: { id: true, region: { select: { slug: true } } },
+  })
+  await authorizeSpaceFinderRegion(session, area.region.slug)
+  return session
+}
+
+export async function authorizeSpaceFinderVariant(headers: Headers, variantId: number) {
+  const session = await requireAuth(headers)
+  const variant = await db.spaceFinderVariant.findFirstOrThrow({
+    where: { id: variantId },
+    select: { id: true, area: { select: { region: { select: { slug: true } } } } },
+  })
+  await authorizeSpaceFinderRegion(session, variant.area.region.slug)
+  return session
 }

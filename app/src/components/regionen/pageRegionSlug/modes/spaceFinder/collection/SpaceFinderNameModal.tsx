@@ -6,7 +6,7 @@ import { Form } from '@/components/shared/form/Form'
 import { buttonStylesOnYellow } from '@/components/shared/links/styles'
 import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
 import { getErrorMessage } from '@/components/shared/toast/toastError'
-import { spaceFinderTitleSchema } from '@/server/spaceFinder/spaceFinderFormSchemas'
+import { spaceFinderTitleSchema } from '@/server/space-finder/spaceFinderFormSchemas'
 import type { SpaceFinderNameModalKind } from './useSpaceFinderCommands'
 
 const NameSchema = z.object({

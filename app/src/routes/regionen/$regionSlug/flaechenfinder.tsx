@@ -6,7 +6,7 @@ import { PageModeSpaceFinder } from '@/components/regionen/pageRegionSlug/modes/
 import {
   spaceFinderAreasQueryOptions,
   spaceFinderVariantQueryOptions,
-} from '@/server/spaceFinder/spaceFinderQueryOptions'
+} from '@/server/space-finder/spaceFinderQueryOptions'
 import { getSafeSignInCallbackURL } from '@/shared/auth/safeSignInCallbackURL'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 

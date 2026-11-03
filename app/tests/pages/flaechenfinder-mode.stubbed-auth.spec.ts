@@ -103,12 +103,13 @@ test.describe('Flächenfinder mode (stubbed admin login)', () => {
         const create = page.getByRole('button', { name: 'Anlegen', exact: true })
         await expect(create).toBeVisible({ timeout: 30_000 })
 
-        // Errors appear only after the first submit, next to their fields.
-        await expect(page.getByText('Bitte einen Namen angeben.')).toHaveCount(0)
+        // Errors appear only after the first submit, next to their fields (exact: the form's
+        // summary above the buttons repeats them in one line).
+        await expect(page.getByText('Bitte einen Namen angeben.', { exact: true })).toHaveCount(0)
         await create.click()
-        await expect(page.getByText('Bitte einen Namen angeben.')).toBeVisible()
+        await expect(page.getByText('Bitte einen Namen angeben.', { exact: true })).toBeVisible()
         await expect(
-          page.getByText('Bitte ein Gebiet auswählen, zeichnen oder hochladen.'),
+          page.getByText('Bitte ein Gebiet auswählen, zeichnen oder hochladen.', { exact: true }),
         ).toBeVisible()
 
         // A typed name stays when a file brings its own name.
@@ -121,7 +122,7 @@ test.describe('Flächenfinder mode (stubbed admin login)', () => {
           .setInputFiles(studyAreaFile(`${AREA_PREFIX} Datei.geojson`))
         await expect(page.getByLabel('Name', { exact: true })).toHaveValue(title)
         await expect(
-          page.getByText('Bitte ein Gebiet auswählen, zeichnen oder hochladen.'),
+          page.getByText('Bitte ein Gebiet auswählen, zeichnen oder hochladen.', { exact: true }),
         ).toHaveCount(0)
 
         await create.click()
@@ -140,7 +141,10 @@ test.describe('Flächenfinder mode (stubbed admin login)', () => {
         await expect(name).toHaveValue(title, { timeout: 30_000 })
         await name.fill('  ')
         await page.getByRole('button', { name: 'Speichern', exact: true }).click()
-        await expect(page.getByText('Bitte einen Namen angeben.')).toBeVisible()
+        // First match is the field error; the form's summary repeats the single error below it.
+        await expect(
+          page.getByText('Bitte einen Namen angeben.', { exact: true }).first(),
+        ).toBeVisible()
         await name.fill(`${title} geändert`)
         await page.getByRole('button', { name: 'Speichern', exact: true }).click()
         await expect(page.getByText('Planungsgebiet gespeichert.')).toBeVisible({
@@ -152,7 +156,7 @@ test.describe('Flächenfinder mode (stubbed admin login)', () => {
         await page.getByRole('button', { name: /Variante »Variante 1«/ }).click()
         await page.getByRole('button', { name: 'Neue Variante mit Standardwerten…' }).click()
         const modal = page.getByRole('dialog')
-        await expect(modal.getByLabel('Name der Variante')).toHaveValue('Variante 2')
+        await expect(modal.getByLabel('Name', { exact: true })).toHaveValue('Variante 2')
         await modal.getByRole('button', { name: 'Anlegen', exact: true }).click()
         await expect(page.getByText('Variante angelegt.', { exact: false })).toBeVisible({
           timeout: 30_000,

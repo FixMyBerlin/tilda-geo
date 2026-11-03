@@ -3,17 +3,17 @@ import { twJoin } from 'tailwind-merge'
 import { fieldErrorClass } from '@/components/shared/form/fields/sharedStyles'
 import { Form } from '@/components/shared/form/Form'
 import { getErrorMessage } from '@/components/shared/toast/toastError'
-import { updateSpaceFinderAreaFn } from '@/server/spaceFinder/spaceFinder.functions'
+import { updateSpaceFinderAreaFn } from '@/server/space-finder/space-finder.functions'
 import {
   SpaceFinderAreaFormSchema,
   type SpaceFinderAreaFormValues,
   type SpaceFinderUseCase,
-} from '@/server/spaceFinder/spaceFinderFormSchemas'
+} from '@/server/space-finder/spaceFinderFormSchemas'
 import {
   spaceFinderAreaQueryOptions,
   spaceFinderAreasQueryOptions,
   spaceFinderVariantQueryOptions,
-} from '@/server/spaceFinder/spaceFinderQueryOptions'
+} from '@/server/space-finder/spaceFinderQueryOptions'
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import { ModeFormSubmit } from '../../ModeFormSubmit'
 import type { SpaceFinderAreaVariantRow } from '../collection/spaceFinderCollectionOptions'

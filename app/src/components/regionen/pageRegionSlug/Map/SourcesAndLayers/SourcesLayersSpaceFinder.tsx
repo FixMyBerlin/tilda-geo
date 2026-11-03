@@ -22,7 +22,7 @@ import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/mo
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { getAppBaseUrl } from '@/components/shared/utils/getAppBaseUrl'
-import { spaceFinderTilesPath } from '@/server/spaceFinder/spaceFinderTilesPath'
+import { spaceFinderTilesPath } from '@/server/space-finder/spaceFinderTilesPath'
 import {
   SPACE_FINDER_SCORE_PROPERTY,
   type SpaceFinderScoreMode,

@@ -1,4 +1,4 @@
-import type { getSpaceFinderAreasFn } from '@/server/spaceFinder/spaceFinder.functions'
+import type { getSpaceFinderAreasFn } from '@/server/space-finder/space-finder.functions'
 
 export type SpaceFinderAreasRow = Awaited<ReturnType<typeof getSpaceFinderAreasFn>>[number]
 export type SpaceFinderAreaVariantRow = SpaceFinderAreasRow['variants'][number]

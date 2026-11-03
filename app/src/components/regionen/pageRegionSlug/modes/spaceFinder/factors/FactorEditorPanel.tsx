@@ -16,18 +16,18 @@ import {
   userDatasetCoverage,
   userDatasetCoverageMessage,
 } from '@/lib/spaceFinderUserGeojson'
-import { factorFingerprint, factorsDiffer } from '@/server/spaceFinder/factorFingerprint'
+import { factorFingerprint, factorsDiffer } from '@/server/space-finder/factorFingerprint'
 import {
   syncEigendatenWeights,
   type VariantFactorConfig,
-} from '@/server/spaceFinder/mergeFactorConfig'
-import type { FactorConfig } from '@/server/spaceFinder/spaceFinder.functions'
-import { updateSpaceFinderVariantFn } from '@/server/spaceFinder/spaceFinder.functions'
+} from '@/server/space-finder/mergeFactorConfig'
+import type { FactorConfig } from '@/server/space-finder/schemas'
+import { updateSpaceFinderVariantFn } from '@/server/space-finder/space-finder.functions'
 import {
   spaceFinderAreaQueryOptions,
   spaceFinderAreasQueryOptions,
   spaceFinderVariantQueryOptions,
-} from '@/server/spaceFinder/spaceFinderQueryOptions'
+} from '@/server/space-finder/spaceFinderQueryOptions'
 import { useSpaceFinderBoundaryActions } from '../../../hooks/mapState/space-finder-boundary-store'
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import { USER_DATASET_MODE_OPTIONS, UserDatasetCoverageHint } from '../area/UserDatasetsField'

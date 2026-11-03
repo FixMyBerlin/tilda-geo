@@ -8,7 +8,7 @@ import { RunButton } from '@/components/regionen/pageRegionSlug/modes/spaceFinde
 import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { frenchQuote } from '@/components/shared/text/Quotes'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
-import { spaceFinderAreasQueryOptions } from '@/server/spaceFinder/spaceFinderQueryOptions'
+import { spaceFinderAreasQueryOptions } from '@/server/space-finder/spaceFinderQueryOptions'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 import {
   getLastFittedBoundaryKey,

@@ -1,7 +1,7 @@
 import { DEFAULT_FACTOR_TEMPLATE } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/spaceFinderDefaults'
 import { sanitizeUserGeojson } from '@/lib/spaceFinderUserGeojson'
 import type { Prisma } from '@/prisma/generated/client'
-import type { VariantFactorConfig } from '@/server/spaceFinder/mergeFactorConfig'
+import type { VariantFactorConfig } from '@/server/space-finder/mergeFactorConfig'
 import db from '../../src/server/db.server'
 import { generateUserEmail } from './users'
 

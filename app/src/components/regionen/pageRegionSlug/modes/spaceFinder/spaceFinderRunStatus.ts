@@ -3,8 +3,8 @@ import {
   comparableRunSnapshot,
   factorsDiffer,
   outdatedBannerReason,
-} from '@/server/spaceFinder/factorFingerprint'
-import { areaInputFromRow } from '@/server/spaceFinder/mergeFactorConfig'
+} from '@/server/space-finder/factorFingerprint'
+import { areaInputFromRow } from '@/server/space-finder/mergeFactorConfig'
 import {
   type SpaceFinderVariantStatus,
   spaceFinderVariantStatus,

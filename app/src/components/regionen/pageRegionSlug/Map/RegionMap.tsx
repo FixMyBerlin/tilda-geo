@@ -46,7 +46,7 @@ import {
 } from '@/components/shared/utils/playwright'
 import { MAP_STYLE_URL } from '@/server/api/map-style/mapStyleUrl.const'
 import { SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
-import { getSpaceFinderHexagonGeomFn } from '@/server/spaceFinder/spaceFinder.functions'
+import { getSpaceFinderHexagonGeomFn } from '@/server/space-finder/space-finder.functions'
 import { CalculatorMap } from '../modes/calculator/CalculatorMap'
 import { useCalculatorDraw } from '../modes/calculator/drawing/useCalculatorDraw'
 import { useModeListActions } from '../modes/mode-list-store'

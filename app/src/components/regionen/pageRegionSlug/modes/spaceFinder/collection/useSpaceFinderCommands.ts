@@ -9,12 +9,12 @@ import {
   duplicateSpaceFinderVariantFn,
   updateSpaceFinderAreaFn,
   updateSpaceFinderVariantFn,
-} from '@/server/spaceFinder/spaceFinder.functions'
+} from '@/server/space-finder/space-finder.functions'
 import {
   spaceFinderAreaQueryOptions,
   spaceFinderAreasQueryOptions,
   spaceFinderVariantQueryOptions,
-} from '@/server/spaceFinder/spaceFinderQueryOptions'
+} from '@/server/space-finder/spaceFinderQueryOptions'
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import { DEFAULT_FACTOR_TEMPLATE } from '../factors/spaceFinderDefaults'
 import {

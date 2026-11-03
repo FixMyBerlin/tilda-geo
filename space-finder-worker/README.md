@@ -23,7 +23,7 @@ it needs: [`SCORING.md`](SCORING.md) and [`ALKIS.md`](ALKIS.md) (data sources pe
 - `worker.py`: job loop. `LISTEN space_finder_jobs` + 15s poll fallback, claims jobs with
   `FOR UPDATE SKIP LOCKED`, lifecycle QUEUED → RUNNING → DONE/FAILED, writes progress.
 - `merge_factor_config.py`: merges area + variant into the run snapshot (mirror of
-  `app/src/server/spaceFinder/mergeFactorConfig.ts`).
+  `app/src/server/space-finder/mergeFactorConfig.ts`).
 - `db.py`, `results.py`: connections, `space_finder` schema setup, writing results per `run_id`.
 - `scoring/`: the scoring itself (Python package). It started as the standalone
   "flaechenfinder" project; here it reads from PostGIS instead of an OSM PBF and returns

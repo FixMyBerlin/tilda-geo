@@ -12,7 +12,7 @@ import { geoDataClient } from '@/server/prisma-client.server'
 import {
   spaceFinderTileLayers,
   type SpaceFinderTileLayer,
-} from '@/server/spaceFinder/spaceFinderTilesPath'
+} from '@/server/space-finder/spaceFinderTilesPath'
 
 // Digits only (no `1e3`, no blanks), then the numeric range. `SpaceFinderRun.id` is int4, and
 // `ST_TileEnvelope` raises for z > 30 or x/y outside 0…2^z-1; both would otherwise end in a 500.

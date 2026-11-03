@@ -2,7 +2,7 @@
 -- They live in the space_finder schema on purpose and NOT in public: Martin publishes
 -- every function in public (configs/martin.yaml) on the public tile hosts,
 -- without any session or region check. The tiles are served by the
--- authenticated app route (app/src/server/spaceFinder/serveSpaceFinderTile.server.ts).
+-- authenticated app route (app/src/server/space-finder/serveSpaceFinderTile.server.ts).
 --
 -- Signature (z int, x int, y int, query_params json) → bytea. Must stay in lockstep with
 -- app/src/server/instrumentation/registerSpaceFinderFunctions.server.ts.

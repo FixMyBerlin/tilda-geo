@@ -12,7 +12,7 @@ import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
 import { radioButtonClass } from '@/components/shared/SegmentedChoice/radioButtonClass'
 import { MAX_STUDY_AREA_KM2, studyAreaSizeKm2 } from '@/lib/spaceFinderStudyAreaLimit'
 import type { UserDataset } from '@/lib/spaceFinderUserGeojson'
-import type { SpaceFinderAreaFormValues } from '@/server/spaceFinder/spaceFinderFormSchemas'
+import type { SpaceFinderAreaFormValues } from '@/server/space-finder/spaceFinderFormSchemas'
 import {
   useSpaceFinderBoundaryActions,
   useSpaceFinderDrawnGeometry,

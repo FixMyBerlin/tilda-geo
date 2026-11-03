@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { spaceFinderVariantQueryOptions } from '@/server/spaceFinder/spaceFinderQueryOptions'
+import { spaceFinderVariantQueryOptions } from '@/server/space-finder/spaceFinderQueryOptions'
 import { candidateRunKey } from '../../hooks/mapState/space-finder-candidates-store'
 import { useCurrentMode } from '../useCurrentMode'
 import { isSpaceFinderAreaFormOpen } from './spaceFinderModeParam'

@@ -6,7 +6,7 @@ import { geoDataClient } from '@/server/prisma-client.server'
 // auto-publishes every function in `public` (configs/martin.yaml) and would serve
 // them on the public tiles hosts without any session or region check. They are
 // called only by the authenticated app route
-// (app/src/server/spaceFinder/serveSpaceFinderTile.server.ts, docs/Permissions.md).
+// (app/src/server/space-finder/serveSpaceFinderTile.server.ts, docs/Permissions.md).
 //
 // Signature and body must match space-finder-worker/sql/martin_functions.sql:
 // both sides create the same functions (the app on startup, the worker per

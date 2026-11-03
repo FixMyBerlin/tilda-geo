@@ -23,7 +23,7 @@ vi.mock('@/server/auth/memberCaller.server', () => ({
 vi.mock('@/server/audit/auditContext.server', () => ({
   runWithAuditContextAsync: (_ctx: unknown, fn: () => unknown) => fn(),
 }))
-vi.mock('@/server/spaceFinder/authorizeSpaceFinderRegion.server', () => ({
+vi.mock('@/server/space-finder/authorizeSpaceFinderRegion.server', () => ({
   authorizeSpaceFinderRegion,
 }))
 vi.mock('../queries/assertListInRegion.server', () => ({ assertListInRegion }))

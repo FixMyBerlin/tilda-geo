@@ -5,8 +5,8 @@ import {
   useSpaceFinderMinAreaDraft,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-boundary-store'
 import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
-import { updateSpaceFinderVariantFn } from '@/server/spaceFinder/spaceFinder.functions'
-import { spaceFinderVariantQueryOptions } from '@/server/spaceFinder/spaceFinderQueryOptions'
+import { updateSpaceFinderVariantFn } from '@/server/space-finder/space-finder.functions'
+import { spaceFinderVariantQueryOptions } from '@/server/space-finder/spaceFinderQueryOptions'
 import { MIN_AREA_FILTER_LABEL, MIN_SCORE_THRESHOLD_LABEL } from '../factors/spaceFinderDefaults'
 import { spaceFinderNumberInputClass } from '../spaceFinderPanelStyles'
 import { useSpaceFinderModeParam } from '../useSpaceFinderModeParam'

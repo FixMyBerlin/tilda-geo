@@ -5,7 +5,7 @@ import { Spinner } from '@/components/shared/Spinner/Spinner'
 import {
   spaceFinderJobQueryOptions,
   spaceFinderVariantQueryOptions,
-} from '@/server/spaceFinder/spaceFinderQueryOptions'
+} from '@/server/space-finder/spaceFinderQueryOptions'
 import { deriveScoringStep, SpaceFinderRunSteps } from './SpaceFinderRunSteps'
 
 const LABELS: Record<string, string> = {

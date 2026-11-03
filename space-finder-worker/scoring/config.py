@@ -232,7 +232,7 @@ class UseCaseConfig:
 # Resident demand assigns each census point to the nearest OSM building within this distance
 # (scorer.py `_census_demand_sources`): the census places residents on ALKIS buildings, whose
 # outlines often lie a few metres off the OSM ones. Must match the same constant in
-# app/src/server/spaceFinder/censusSaettigung.server.ts.
+# app/src/server/space-finder/censusSaettigung.server.ts.
 CENSUS_BUILDING_TOLERANCE_M = 5.0
 
 

@@ -4,16 +4,16 @@ import { fieldErrorClass } from '@/components/shared/form/fields/sharedStyles'
 import { Form } from '@/components/shared/form/Form'
 import { frenchQuote } from '@/components/shared/text/Quotes'
 import { getErrorMessage } from '@/components/shared/toast/toastError'
-import { createSpaceFinderAreaFn } from '@/server/spaceFinder/spaceFinder.functions'
+import { createSpaceFinderAreaFn } from '@/server/space-finder/space-finder.functions'
 import {
   SpaceFinderAreaFormSchema,
   type SpaceFinderAreaFormValues,
-} from '@/server/spaceFinder/spaceFinderFormSchemas'
+} from '@/server/space-finder/spaceFinderFormSchemas'
 import {
   spaceFinderAreaQueryOptions,
   spaceFinderAreasQueryOptions,
   spaceFinderVariantQueryOptions,
-} from '@/server/spaceFinder/spaceFinderQueryOptions'
+} from '@/server/space-finder/spaceFinderQueryOptions'
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import { ModeFormSubmit } from '../../ModeFormSubmit'
 import { DEFAULT_FACTOR_TEMPLATE } from '../factors/spaceFinderDefaults'

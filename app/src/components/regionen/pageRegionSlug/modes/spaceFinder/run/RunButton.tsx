@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { buttonStylesOnYellow } from '@/components/shared/links/styles'
-import { runSpaceFinderVariantFn } from '@/server/spaceFinder/spaceFinder.functions'
+import { runSpaceFinderVariantFn } from '@/server/space-finder/space-finder.functions'
 import {
   spaceFinderAreasQueryOptions,
   spaceFinderVariantQueryOptions,
-} from '@/server/spaceFinder/spaceFinderQueryOptions'
+} from '@/server/space-finder/spaceFinderQueryOptions'
 import { useSpaceFinderFactorSavePending } from '../../../hooks/mapState/space-finder-boundary-store'
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import {

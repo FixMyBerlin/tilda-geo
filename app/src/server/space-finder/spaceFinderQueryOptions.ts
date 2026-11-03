@@ -6,7 +6,7 @@ import {
   getSpaceFinderAreasFn,
   getSpaceFinderJobFn,
   getSpaceFinderVariantFn,
-} from './spaceFinder.functions'
+} from './space-finder.functions'
 
 export const spaceFinderAreasQueryOptions = (regionSlug: string) =>
   queryOptions({

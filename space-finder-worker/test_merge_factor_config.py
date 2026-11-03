@@ -1,4 +1,4 @@
-"""Mirrors the cases in `app/src/server/spaceFinder/mergeFactorConfig.test.ts`."""
+"""Mirrors the cases in `app/src/server/space-finder/mergeFactorConfig.test.ts`."""
 
 import unittest
 

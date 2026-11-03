@@ -1,4 +1,4 @@
-"""Mirror of `app/src/server/spaceFinder/mergeFactorConfig.ts`.
+"""Mirror of `app/src/server/space-finder/mergeFactorConfig.ts`.
 
 Fallback 30 must match `UseCaseConfig.bewohnerbedarf_saettigung_ew` in
 `scoring/config.py` and `FALLBACK_SAETTIGUNG_EW` in the TS file.
