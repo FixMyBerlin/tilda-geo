@@ -36,10 +36,10 @@ export const DisplaySection = ({ variant }: { variant: SpaceFinderVariantDetail 
       <ScoreModeSwitcher />
       {(latestRun?.vegCount ?? 0) > 0 && <VegetationToggle />}
       {factorConfig?.exclude_carriageways && <CarriagewaysToggle />}
-      {/* From the run snapshot, not the current config: the tiles are clipped to the
-              Planungsgebiet of THIS run (see space_finder_census), so the toggle should appear exactly
-              when resident demand was actually included. */}
-      {(lastRunConfig?.weights?.w_bewohnerbedarf ?? 0) > 0 && <CensusToggle />}
+      {/* Always available: the tiles read the census table directly, clipped to the
+              Planungsgebiet of the run (see space_finder_census), whether or not resident demand was
+              weighted. */}
+      <CensusToggle />
       {hasUserDatasets && <UserObstaclesToggle />}
     </CollapsibleBox>
   )

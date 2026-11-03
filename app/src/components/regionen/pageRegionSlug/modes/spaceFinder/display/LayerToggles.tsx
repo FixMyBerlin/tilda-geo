@@ -100,7 +100,7 @@ export const CensusToggle = () => {
       checked={censusOn}
       onChange={setCensusOn}
       onColorClass="bg-blue-700"
-      info="Die Einwohnerpunkte aus dem Zensus 2022 (Destatis, auf Gebäude verteilt), die in den Faktor „Bewohnerbedarf“ eingehen. Punktgröße und -farbe zeigen die Einwohnerzahl, ab Zoom 17 auch als Zahl. Nur eine Anzeige in der Karte — das Ausblenden ändert die Berechnung nicht."
+      info="Die Einwohnerpunkte aus dem Zensus 2022 (Destatis, auf Gebäude verteilt). Sie gehen in den Faktor „Bewohnerbedarf“ ein, wenn er gewichtet ist. Punktgröße und -farbe zeigen die Einwohnerzahl, ab Zoom 17 auch als Zahl. Nur eine Anzeige in der Karte — das Ausblenden ändert die Berechnung nicht."
     />
   )
 }
