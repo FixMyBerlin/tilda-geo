@@ -1,8 +1,15 @@
-title: Gebäudeeingänge
-summary: Eingänge an Gebäuden (`entrance=*`) aus OpenStreetMap. Haupt- und Wohneingänge sind farblich hervorgehoben.
+title: Eingänge
+summary: Eingänge an Gebäuden (`entrance=*`) und U-Bahn-Eingänge (`railway=subway_entrance`) aus OpenStreetMap. U-Bahn-Eingänge sowie Haupt- und Wohneingänge sind farblich hervorgehoben.
 sourceIds:
-  - atlas_buildingEntrances
+  - atlas_entrances
 attributes:
+  - key: category
+    label: Kategorie
+    values:
+      - value: building
+        label: Gebäudeeingang
+      - value: public_transport
+        label: U-Bahn-Eingang
   - key: entrance
     label: Art des Eingangs
     values:

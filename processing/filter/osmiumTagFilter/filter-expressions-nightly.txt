@@ -22,6 +22,9 @@ wr/aeroway
 # Topic: Public transport
 w/public_transport
 n/public_transport
+
+# Topic: Entrances (building entrances + subway entrances, one `entrances` table)
+n/entrance
 n/railway=subway_entrance
 
 # Topic: poiClassification

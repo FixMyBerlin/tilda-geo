@@ -28,8 +28,8 @@ def _sql_literal(v) -> str:
 # Values are lists of category strings stored in tags->>'category' in the DB.
 # Bus stops (highway=bus_stop) land in the same table with category='bus_stop'
 # (see processing/topics/publicTransport/helper/result_tags.lua).
-# subway_entrance is not mapped here: it has its own table/loader (`_publicTransport_entrances`,
-# `PostgisLoader.load_subway_entrances`), not a publicTransport category.
+# subway_entrance is not mapped here: it lives in `public.entrances` (category=public_transport,
+# `PostgisLoader.load_subway_entrances`), not in publicTransport.
 _TRANSIT_TAG_MAP: list[tuple[dict, list[str]]] = [
     ({"highway": "bus_stop"},              ["bus_stop"]),
     ({"railway": "tram_stop"},             ["tram_station"]),
@@ -91,10 +91,14 @@ class PostgisLoader:
             return _empty()
 
     def load_buildings(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
-        """Building polygons from `public._buildings` (EPSG:5243 → returns EPSG:4326)."""
+        """Building polygons from `public._buildings` (EPSG:5243 → returns EPSG:4326).
+
+        Returns `geom` and the sanitized `category` column (`train_station` or NULL, see
+        processing/topics/landcover/buildings/buildings.lua).
+        """
         wkt = polygon_4326.wkt
         sql = f"""
-            SELECT ST_Transform(geom, 4326) AS geom
+            SELECT category, ST_Transform(geom, 4326) AS geom
             FROM public."_buildings"
             WHERE geom && ST_Transform(ST_GeomFromText('{wkt}', 4326), 5243)
         """
@@ -109,26 +113,26 @@ class PostgisLoader:
             return _empty("EPSG:4326")
 
     def load_train_station_buildings(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
-        """Train station buildings (building=train_station) from `public._buildings_train_station`.
+        """Train station buildings (building=train_station) from `public._buildings`.
 
-        Processing-side `_` table (see processing/topics/landcover/buildings/
-        buildings_train_station.lua), EPSG:5243 like `_buildings`. Separate table instead of
-        `_buildings` because that one stores no tags and drops buildings < 100 m².
+        `category = 'train_station'` (see processing/topics/landcover/buildings/buildings.lua);
+        buildings/filter.sql keeps them below 100 m², so small station buildings are included.
         """
         wkt = polygon_4326.wkt
         sql = f"""
             SELECT ST_Transform(geom, 4326) AS geom
-            FROM public."_buildings_train_station"
+            FROM public."_buildings"
             WHERE geom && ST_Transform(ST_GeomFromText('{wkt}', 4326), 5243)
+              AND category = 'train_station'
         """
         try:
             gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
             if gdf.crs is None:
                 gdf = gdf.set_crs("EPSG:4326")
-            print(f"   ✓ PostGIS: {len(gdf)} train station buildings from public._buildings_train_station")
+            print(f"   ✓ PostGIS: {len(gdf)} train station buildings from public._buildings")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS query public._buildings_train_station failed: {e}")
+            print(f"   ⚠️  PostGIS query public._buildings (train_station) failed: {e}")
             return _empty("EPSG:4326")
 
     def load_building_entrances(
@@ -136,19 +140,18 @@ class PostgisLoader:
         polygon_4326: BaseGeometry,
         kinds: tuple[str, ...] = ("yes", "main", "home", "staircase"),
     ) -> gpd.GeoDataFrame:
-        """Building entrances (`entrance=*`) from `public."buildingEntrances"`.
+        """Building entrances (`entrance=*`) from `public.entrances` (`category=building`).
 
-        Map layer in the standard topic shape (see processing/topics/landcover/buildings/
-        building_entrances.lua), EPSG:3857 like the other `public.*` tables; the value
+        Map layer in the standard topic shape (see processing/topics/entrances/
+        entrance_nodes.lua), EPSG:3857 like the other `public.*` tables; the value
         lives in `tags->>'entrance'`. The table holds all entrance values; `kinds` filters
         them. Default is the entrances relevant to residents: `yes`/`main` plus
         `home`/`staircase`, which are the norm on residential blocks in Germany.
         `kinds=()` returns all (incl. `service`, `emergency`). Keep the default in sync with
-        `mainEntranceValues` in the map style (`subcat_poi_plus_buildingEntrances.const.ts`).
+        `mainEntranceValues` in the map style (`subcat_poi_plus_entrances.const.ts`).
 
         Returns `geom` (EPSG:4326) and the `entrance` column. The table is built by the
-        weekend topic `landcover`; if it is missing (instance without a landcover run), an
-        empty GeoDataFrame is returned – like `load_train_station_buildings`.
+        nightly topic `entrances`; if it is missing, an empty GeoDataFrame is returned.
         """
         wkt = polygon_4326.wkt
         kind_filter = ""
@@ -157,17 +160,18 @@ class PostgisLoader:
             kind_filter = f" AND tags->>'entrance' IN ({values})"
         sql = f"""
             SELECT tags->>'entrance' AS entrance, ST_Transform(geom, 4326) AS geom
-            FROM public."buildingEntrances"
-            WHERE geom && ST_Transform(ST_GeomFromText('{wkt}', 4326), 3857){kind_filter}
+            FROM public."entrances"
+            WHERE geom && ST_Transform(ST_GeomFromText('{wkt}', 4326), 3857)
+              AND tags->>'category' = 'building'{kind_filter}
         """
         try:
             gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
             if gdf.crs is None:
                 gdf = gdf.set_crs("EPSG:4326")
-            print(f"   ✓ PostGIS: {len(gdf)} building entrances from public.buildingEntrances")
+            print(f"   ✓ PostGIS: {len(gdf)} building entrances from public.entrances")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS query public.buildingEntrances failed: {e}")
+            print(f"   ⚠️  PostGIS query public.entrances (building) failed: {e}")
             return _empty("EPSG:4326")
 
     def load_cycleways(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
@@ -176,14 +180,13 @@ class PostgisLoader:
         return gdf.to_crs("EPSG:4326") if len(gdf) else _empty("EPSG:4326")
 
     def load_subway_entrances(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
-        """Subway entrances (railway=subway_entrance) from `public._publicTransport_entrances`.
+        """Subway entrances (railway=subway_entrance) from `public.entrances`.
 
-        Processing-side `_` table (see processing/topics/publicTransport/
-        public_transport_entrances.lua), EPSG:3857 like the main publicTransport table.
-        Replaces the earlier stopgap that scored the station point
-        (category='subway_station') instead.
+        `category=public_transport` (see processing/topics/entrances/entrance_nodes.lua),
+        EPSG:3857 like the other `public.*` tables. Replaces the earlier stopgap that scored
+        the station point (category='subway_station') instead.
         """
-        gdf = self._read_table("_publicTransport_entrances", polygon_4326)
+        gdf = self._read_table("entrances", polygon_4326, "tags->>'category' = 'public_transport'")
         return gdf.to_crs("EPSG:4326") if len(gdf) else _empty("EPSG:4326")
 
     def load_squares(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:

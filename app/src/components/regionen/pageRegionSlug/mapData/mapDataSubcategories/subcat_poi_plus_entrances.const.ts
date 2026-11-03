@@ -1,12 +1,13 @@
 import type { ExpressionSpecification } from 'maplibre-gl'
 import type { FileMapDataSubcategory } from '../types'
 
-const subcatId = 'poiPlusBuildingEntrances'
-const source = 'atlas_buildingEntrances'
-const sourceLayer = 'buildingEntrances'
-export type SubcatPoiPlusBuildingEntrancesId = typeof subcatId
-export type SubcatPoiPlusBuildingEntrancesStyleIds = 'default'
+const subcatId = 'poiPlusEntrances'
+const source = 'atlas_entrances'
+const sourceLayer = 'entrances'
+export type SubcatPoiPlusEntrancesId = typeof subcatId
+export type SubcatPoiPlusEntrancesStyleIds = 'default'
 
+const isPublicTransport: ExpressionSpecification = ['==', ['get', 'category'], 'public_transport']
 // Same values the space-finder-worker counts as residents' entrances
 // (`PostgisLoader.load_building_entrances`, default `kinds`).
 const mainEntranceValues = ['yes', 'main', 'home', 'staircase']
@@ -15,12 +16,13 @@ const isMainEntrance: ExpressionSpecification = [
   ['get', 'entrance'],
   ['literal', mainEntranceValues],
 ]
+const publicTransportColor = '#1d4ed8'
 const mainColor = '#be185d'
 const otherColor = '#94a3b8'
 
-export const subcat_poi_plus_buildingEntrances: FileMapDataSubcategory = {
+export const subcat_poi_plus_entrances: FileMapDataSubcategory = {
   id: subcatId,
-  name: 'Gebäudeeingänge',
+  name: 'Eingänge',
   ui: 'checkbox',
   sourceId: source,
   styles: [
@@ -29,13 +31,20 @@ export const subcat_poi_plus_buildingEntrances: FileMapDataSubcategory = {
       name: 'Standard',
       layers: [
         {
-          id: 'building-entrances',
+          id: 'entrances',
           type: 'circle',
           source,
           'source-layer': sourceLayer,
           minzoom: 16,
           paint: {
-            'circle-color': ['case', isMainEntrance, mainColor, otherColor],
+            'circle-color': [
+              'case',
+              isPublicTransport,
+              publicTransportColor,
+              isMainEntrance,
+              mainColor,
+              otherColor,
+            ],
             'circle-radius': ['interpolate', ['linear'], ['zoom'], 16, 3, 20, 6],
             'circle-stroke-color': '#ffffff',
             'circle-stroke-width': 1,
@@ -44,8 +53,14 @@ export const subcat_poi_plus_buildingEntrances: FileMapDataSubcategory = {
       ],
       legends: [
         {
+          id: 'public_transport',
+          name: 'U-Bahn-Eingang',
+          desc: ['`railway=subway_entrance`'],
+          style: { type: 'circle', color: publicTransportColor },
+        },
+        {
           id: 'main',
-          name: 'Eingang',
+          name: 'Gebäudeeingang',
           desc: [
             '`entrance=main`, `entrance=home`, `entrance=staircase`',
             '`entrance=yes`: Eingänge ohne nähere Angabe',

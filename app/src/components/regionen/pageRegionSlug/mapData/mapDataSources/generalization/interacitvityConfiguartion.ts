@@ -98,8 +98,8 @@ export const interactivityConfiguration: InteracitvityConfiguartion = {
     stylingKeys: ['category'],
     minzoom: 11,
   },
-  buildingEntrances: {
-    stylingKeys: ['entrance'],
+  entrances: {
+    stylingKeys: ['category', 'entrance'],
     minzoom: 14,
   },
   trafficSigns: { stylingKeys: [], minzoom: 0 },

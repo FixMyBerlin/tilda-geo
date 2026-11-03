@@ -3511,13 +3511,91 @@ const data = {
     ],
     chapters: [],
   },
-  buildingEntrances: {
-    topic: 'landcover',
-    tableName: 'buildingEntrances',
-    sourceIds: ['atlas_buildingEntrances'],
-    title: 'Gebäudeeingänge',
+  busroutes: {
+    topic: 'routes',
+    tableName: 'busroutes',
+    sourceIds: [],
+    title: 'Buslinien',
     summary:
-      'Eingänge an Gebäuden (`entrance=*`) aus OpenStreetMap. Haupt- und Wohneingänge sind farblich hervorgehoben.',
+      'OSM-Relationen mit `type=route` und `route=bus`. Noch ohne Kartenebene; die Wege der Routen verweisen über `route_relations` hierher.',
+    groups: [],
+    attributes: [
+      {
+        key: 'route',
+        type: 'string',
+        label: 'Routentyp (`route=*`)',
+        values: [],
+      },
+      {
+        key: 'name',
+        type: 'sanitized_strings',
+        label: 'Name',
+        values: [],
+      },
+      {
+        key: 'ref',
+        type: 'sanitized_strings',
+        label: 'Referenz',
+        values: [],
+      },
+      {
+        key: 'network',
+        type: 'sanitized_strings',
+        label: 'Netz (`network=*`)',
+        values: [],
+      },
+      {
+        key: 'operator',
+        type: 'sanitized_strings',
+        label: 'Betreiber',
+        values: [],
+      },
+      {
+        key: 'from',
+        type: 'sanitized_strings',
+        label: 'Start',
+        values: [],
+      },
+      {
+        key: 'to',
+        type: 'sanitized_strings',
+        label: 'Ziel',
+        values: [],
+      },
+      {
+        key: 'route_description',
+        type: 'sanitized_strings',
+        label: 'Freitext zur Route',
+        values: [],
+      },
+      {
+        key: 'colours',
+        type: 'string',
+        label: 'Farben (mit `/` getrennt)',
+        values: [],
+      },
+      {
+        key: 'website',
+        type: 'sanitized_strings',
+        label: 'Website',
+        values: [],
+      },
+      {
+        key: 'wikipedia',
+        type: 'sanitized_strings',
+        label: 'Wikipedia',
+        values: [],
+      },
+    ],
+    chapters: [],
+  },
+  entrances: {
+    topic: 'entrances',
+    tableName: 'entrances',
+    sourceIds: ['atlas_entrances'],
+    title: 'Eingänge',
+    summary:
+      'Eingänge an Gebäuden (`entrance=*`) und U-Bahn-Eingänge (`railway=subway_entrance`) aus OpenStreetMap. U-Bahn-Eingänge sowie Haupt- und Wohneingänge sind farblich hervorgehoben.',
     groups: [
       {
         id: 'atlas',
@@ -3525,6 +3603,21 @@ const data = {
       },
     ],
     attributes: [
+      {
+        key: 'category',
+        type: 'string',
+        label: 'Kategorie',
+        values: [
+          {
+            value: 'building',
+            label: 'Gebäudeeingang',
+          },
+          {
+            value: 'public_transport',
+            label: 'U-Bahn-Eingang',
+          },
+        ],
+      },
       {
         key: 'entrance',
         type: 'string',
@@ -3653,84 +3746,6 @@ const data = {
             label: 'Kein Zugang',
           },
         ],
-      },
-    ],
-    chapters: [],
-  },
-  busroutes: {
-    topic: 'routes',
-    tableName: 'busroutes',
-    sourceIds: [],
-    title: 'Buslinien',
-    summary:
-      'OSM-Relationen mit `type=route` und `route=bus`. Noch ohne Kartenebene; die Wege der Routen verweisen über `route_relations` hierher.',
-    groups: [],
-    attributes: [
-      {
-        key: 'route',
-        type: 'string',
-        label: 'Routentyp (`route=*`)',
-        values: [],
-      },
-      {
-        key: 'name',
-        type: 'sanitized_strings',
-        label: 'Name',
-        values: [],
-      },
-      {
-        key: 'ref',
-        type: 'sanitized_strings',
-        label: 'Referenz',
-        values: [],
-      },
-      {
-        key: 'network',
-        type: 'sanitized_strings',
-        label: 'Netz (`network=*`)',
-        values: [],
-      },
-      {
-        key: 'operator',
-        type: 'sanitized_strings',
-        label: 'Betreiber',
-        values: [],
-      },
-      {
-        key: 'from',
-        type: 'sanitized_strings',
-        label: 'Start',
-        values: [],
-      },
-      {
-        key: 'to',
-        type: 'sanitized_strings',
-        label: 'Ziel',
-        values: [],
-      },
-      {
-        key: 'route_description',
-        type: 'sanitized_strings',
-        label: 'Freitext zur Route',
-        values: [],
-      },
-      {
-        key: 'colours',
-        type: 'string',
-        label: 'Farben (mit `/` getrennt)',
-        values: [],
-      },
-      {
-        key: 'website',
-        type: 'sanitized_strings',
-        label: 'Website',
-        values: [],
-      },
-      {
-        key: 'wikipedia',
-        type: 'sanitized_strings',
-        label: 'Wikipedia',
-        values: [],
       },
     ],
     chapters: [],

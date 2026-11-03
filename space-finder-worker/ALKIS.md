@@ -16,7 +16,7 @@ See [`SCORING.md`](SCORING.md), loaders in [`scoring/postgis_loader.py`](scoring
 | ----------------------------------------- | ----------------------------------------------------------------------------------------------- | ------------------------------------------------ |
 | `score_radweg`                            | `public.bikelanes`                                                                              | OSM                                              |
 | `score_zielorte`                          | OSM tags per scenario `targets`                                                                 | OSM                                              |
-| `score_oepnv`                             | `public.publicTransport`, `public._publicTransport_entrances`                                   | OSM                                              |
+| `score_oepnv`                             | `public.publicTransport`, `public.entrances`, `public._buildings`                               | OSM                                              |
 | `score_kreuzung`, `score_fussgaengerzone` | `public._parking_intersection_corners` (+ `_parking_kerbs`/`_parking_roads`)                    | OSM (parking topic)                              |
 | `score_parken`                            | `public.parkings`, `public.parkings_separate`                                                   | OSM (parking topic)                              |
 | `score_bestand`                           | `public.bicycleParking_points`                                                                  | OSM                                              |
@@ -26,7 +26,8 @@ See [`SCORING.md`](SCORING.md), loaders in [`scoring/postgis_loader.py`](scoring
 | `score_eigendaten`                        | User GeoJSON upload                                                                             | user data                                        |
 
 The building flag is the only factor that looks like ALKIS content-wise — but it comes
-from OSM (`processing/topics/landcover/buildings/`, filter: < 100 m² discarded).
+from OSM (`processing/topics/landcover/buildings/`, filter: < 100 m² discarded, except
+train station buildings, `category = 'train_station'`).
 
 ### Refilling `public._buildings`: how and when
 

@@ -8,7 +8,7 @@ if type(osm2pgsql) ~= 'table' or osm2pgsql.define_table == nil then
 end
 
 local db_table = osm2pgsql.define_table({
-  name = 'buildingEntrances_errors',
+  name = 'entrances_errors',
   ids = { type = 'any', id_column = 'osm_id', type_column = 'osm_type' },
   columns = {
     { column = 'serial_id', sql_type = 'serial', create_only = true },

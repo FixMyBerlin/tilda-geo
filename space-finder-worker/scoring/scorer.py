@@ -189,8 +189,8 @@ def _census_demand_sources(
 
     The points from `data.census_population_point` sit on the centroid of an ALKIS
     building. For a distance ramp that starts at the building edge, each point is
-    assigned to the nearest OSM building (`public._buildings`) within
-    `CENSUS_BUILDING_TOLERANCE_M` and summed per building; the polygon is then the
+    assigned to the nearest OSM building (`public._buildings` without train stations, see
+    step 4) within `CENSUS_BUILDING_TOLERANCE_M` and summed per building; the polygon is then the
     source. A point inside a building has distance 0 and keeps that building; the
     tolerance covers ALKIS (census) and OSM outlines that do not line up.
     Points without a building within the tolerance – `cluster_typ='gitter_mitte'`,
@@ -394,6 +394,7 @@ def run_flaechenfinder(
         or (use_case.weights.get("w_target", 0) or 0) > 0
     )
     buildings_for_demand = None
+    buildings_for_census = None
     if len(buildings):
         # load_buildings() returns the geometry in the column "geom" (SELECT … AS geom);
         # normalize to "geometry" so the column selection below works.
@@ -415,6 +416,12 @@ def run_flaechenfinder(
         hex_proj["gebaeude"] = (coverage / hex_area) >= GEBAEUDE_EXCLUSION_COVERAGE
         if keep_buildings:
             buildings_for_demand = buildings_proj[["geometry"]].reset_index(drop=True)
+            # Train station buildings have no residents: census points must not snap onto
+            # them. They stay in the building exclusion above and as target buildings.
+            buildings_for_census = (
+                buildings_proj.loc[buildings_proj["category"] != "train_station", ["geometry"]]
+                .reset_index(drop=True)
+            )
         del hexes, pairs, buildings_proj
     else:
         hex_proj["gebaeude"] = False
@@ -472,7 +479,7 @@ def run_flaechenfinder(
                 .rename_geometry("geometry")[["geometry", "total"]]
                 .reset_index(drop=True)
             )
-            sources = _census_demand_sources(census_proj, buildings_for_demand)
+            sources = _census_demand_sources(census_proj, buildings_for_census)
             hex_proj["bewohner_ew"] = weighted_proximity_sum(
                 centroids, sources, "einwohner", use_case.bewohnerbedarf_radius_m
             )

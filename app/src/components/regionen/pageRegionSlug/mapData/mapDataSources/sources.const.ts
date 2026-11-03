@@ -11,7 +11,7 @@ type TildaSourceId =
   | 'atlas_bikelanes'
   | 'atlas_bikeroutes'
   | 'atlas_boundaries'
-  | 'atlas_buildingEntrances'
+  | 'atlas_entrances'
   | 'atlas_landuse'
   | 'atlas_places'
   | 'atlas_poiClassification'
@@ -285,8 +285,8 @@ export const sources: MapDataSource<SourcesId>[] = [
     },
   },
   {
-    id: 'atlas_buildingEntrances',
-    tileTables: ['buildingEntrances'],
+    id: 'atlas_entrances',
+    tileTables: ['entrances'],
     minzoom: SIMPLIFY_MIN_ZOOM,
     maxzoom: SIMPLIFY_MAX_ZOOM,
     attributionHtml:
@@ -297,7 +297,7 @@ export const sources: MapDataSource<SourcesId>[] = [
     inspector: {
       enabled: true,
       highlightingKey: 'id',
-      documentedKeys: ['entrance', 'ref', 'name', 'wheelchair', 'access'],
+      documentedKeys: ['category', 'entrance', 'ref', 'name', 'wheelchair', 'access'],
     },
   },
   {

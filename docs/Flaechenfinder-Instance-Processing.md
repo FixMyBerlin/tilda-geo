@@ -13,7 +13,7 @@ starts every service except `processing` (`infra-code/templates/tilda-autodeploy
 **Scheduled processing:** a second systemd timer runs a full processing run every
 **Saturday 01:00 (Berlin time)** (`tilda-processing.timer`,
 `infra-code/playbooks/tilda-processing-timer.yml`). Because it starts on a Saturday, it also
-runs the `weekend` topics (`landcover` → `_buildings`, `_building_entrances`, `landuse`), and
+runs the `weekend` topics (`landcover` → `_buildings`, `landuse`), and
 because it downloads a fresh extract, `weekend_filtered.osm.pbf` is rebuilt too (see the
 pitfall below). There is no nightly run on this instance, so data is up to one week old.
 
@@ -70,10 +70,6 @@ Expect several hours, and raise `mem_limit`/`cpus` of the `processing` container
 `docker-compose.override.yml` (default 4 GB) if needed.
 
 ## Rebuild buildings (`_buildings`)
-
-The same applies to `public."buildingEntrances"` (building entrances, `entrance=*`): also built
-from `landcover`, so it only exists after an explicit run. Until then
-`PostgisLoader.load_building_entrances()` returns an empty GeoDataFrame.
 
 `public._buildings` is not a topic of its own but part of **`landcover`**
 (`schedule: 'weekend'`). It runs with the Saturday timer run (see above). To rebuild it

@@ -38,6 +38,7 @@ const topicDurationsMs = {
   publicTransport: { lua: 12 * 60_000, sql: 5 * 60_000, diff: 3 * 60_000 },
   poiClassification: { lua: 15 * 60_000, sql: 6 * 60_000, diff: 3 * 60_000 },
   barriers: { lua: 7 * 60_000, sql: 2 * 60_000, diff: 60_000 },
+  entrances: { lua: 3 * 60_000, sql: 0, diff: 30_000 },
   landcover: { lua: 120 * 60_000, sql: 35 * 60_000, diff: 20 * 60_000 },
   parking: { lua: 25 * 60_000, sql: 8 * 60_000, diff: 4 * 60_000 },
 } as const satisfies Record<TopicId, { lua: number; sql: number; diff: number }>

@@ -42,22 +42,20 @@ Each leg starts detached and follows logs until the container exits; `docker log
 
 ## Datasets
 
-`landcover.lua` is one osm2pgsql entrypoint that delegates to per-dataset area handlers (plus one
-node handler for `buildingEntrances`); each dataset lives in its own folder (handler + helpers +
-SQL + docs):
+`landcover.lua` is one osm2pgsql entrypoint that delegates to per-dataset area handlers; each
+dataset lives in its own folder (handler + helpers + SQL + docs):
 
-| table                      | folder                                   | notes                                                                   |
-| -------------------------- | ---------------------------------------- | ----------------------------------------------------------------------- |
-| `landuse`                  | [`landuse/`](landuse/)                   | land use display table                                                  |
-| `_settlement_areas`        | [`settlement_areas/`](settlement_areas/) | innerorts/außerorts heuristic — details in its README                   |
-| `_settlement_source_areas` | [`settlement_areas/`](settlement_areas/) | dissolve source (geometry-only)                                         |
-| `_buildings`               | [`buildings/`](buildings/)               | building geometries ≥ 100 m² (geometry-only)                            |
-| `_buildings_train_station` | [`buildings/`](buildings/)               | `building=train_station` geometries, no size filter (geometry-only)     |
-| `buildingEntrances`        | [`buildings/`](buildings/)               | `entrance=*` nodes except subway entrances, map layer "Gebäudeeingänge" |
+| table                      | folder                                   | notes                                                                       |
+| -------------------------- | ---------------------------------------- | --------------------------------------------------------------------------- |
+| `landuse`                  | [`landuse/`](landuse/)                   | land use display table                                                      |
+| `_settlement_areas`        | [`settlement_areas/`](settlement_areas/) | innerorts/außerorts heuristic — details in its README                       |
+| `_settlement_source_areas` | [`settlement_areas/`](settlement_areas/) | dissolve source (geometry-only)                                             |
+| `_buildings`               | [`buildings/`](buildings/)               | building geometries ≥ 100 m² + `category` (`train_station`: no size filter) |
 
 The `_` prefix marks a table **internal/debug**: still exposed to Martin for inspection, but not a
 curated display layer (no `atlas_*` function). `_settlement_areas` carries the standard shape
-(id/tags/meta/geom/minzoom) so it previews cleanly; the other `_` tables are geometry-only.
+(id/tags/meta/geom/minzoom) so it previews cleanly; the other `_` tables are geometry-only
+(`_buildings` plus a sanitized `category`).
 `landuse` is the only curated display table.
 
 > [!NOTE]

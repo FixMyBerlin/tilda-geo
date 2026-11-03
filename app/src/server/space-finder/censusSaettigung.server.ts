@@ -82,12 +82,14 @@ async function computeCensusStats(studyArea: unknown) {
         // Buildings in the area. The ramp measures from the building edge, so the polygons are
         // the source geometry, not the census points (which sit on the building centroid).
         // Includes buildings up to the tolerance outside the area: a census point at the edge
-        // may belong to one of them. (EPSG:5243 is metric.)
+        // may belong to one of them. (EPSG:5243 is metric.) Train station buildings have no
+        // residents and are skipped, like `buildings_for_census` in the worker.
         await tx.$executeRaw`
           CREATE TEMP TABLE census_buildings ON COMMIT DROP AS
           SELECT row_number() OVER () AS bid, ST_Transform(b.geom, ${METRIC_SRID}) AS geom
           FROM census_area a
-          JOIN public."_buildings" b ON ST_DWithin(b.geom, a.source, ${CENSUS_BUILDING_TOLERANCE_M})`
+          JOIN public."_buildings" b ON ST_DWithin(b.geom, a.source, ${CENSUS_BUILDING_TOLERANCE_M})
+          WHERE b.category IS DISTINCT FROM 'train_station'`
         await tx.$executeRaw`CREATE INDEX ON census_buildings USING gist (geom)`
 
         await tx.$executeRaw`

@@ -1364,8 +1364,32 @@ const data = {
       category_district: 'Kreiskategorie',
     },
   },
-  buildingEntrances: {
+  busroutes: {
     gfiAttributes: {
+      route: 'Routentyp (`route=*`)',
+      name: 'Name',
+      ref: 'Referenz',
+      network: 'Netz (`network=*`)',
+      operator: 'Betreiber',
+      from: 'Start',
+      to: 'Ziel',
+      route_description: 'Freitext zur Route',
+      colours: 'Farben (mit `/` getrennt)',
+      website: 'Website',
+      wikipedia: 'Wikipedia',
+    },
+  },
+  entrances: {
+    gfiAttributes: {
+      category: {
+        name: 'Kategorie',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          building: 'Gebäudeeingang',
+          public_transport: 'U-Bahn-Eingang',
+        },
+      },
       entrance: {
         name: 'Art des Eingangs',
         condition: 'contains',
@@ -1413,21 +1437,6 @@ const data = {
           no: 'Kein Zugang',
         },
       },
-    },
-  },
-  busroutes: {
-    gfiAttributes: {
-      route: 'Routentyp (`route=*`)',
-      name: 'Name',
-      ref: 'Referenz',
-      network: 'Netz (`network=*`)',
-      operator: 'Betreiber',
-      from: 'Start',
-      to: 'Ziel',
-      route_description: 'Freitext zur Route',
-      colours: 'Farben (mit `/` getrennt)',
-      website: 'Website',
-      wikipedia: 'Wikipedia',
     },
   },
   footroutes: {

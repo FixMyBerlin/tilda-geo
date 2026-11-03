@@ -1,5 +1,6 @@
 -- WHAT IT DOES:
--- Drop small buildings (< 100 m²) from `_buildings`.
+-- Drop small buildings (< 100 m²) from `_buildings`, except train station buildings
+-- (`category = 'train_station'`): small station buildings are ÖPNV score targets of the space-finder-worker.
 -- INPUT: `public._buildings` (polygon, from buildings.lua)
 -- OUTPUT: `public._buildings` (filtered in place)
 --
@@ -11,6 +12,9 @@
 --
 DO $$ BEGIN RAISE NOTICE 'START filtering buildings at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
 
-DELETE FROM public._buildings WHERE ST_Area (geom) < 100; -- drop buildings < 100 m²
+DELETE FROM public._buildings
+WHERE
+  ST_Area (geom) < 100 -- drop buildings < 100 m²
+  AND category IS DISTINCT FROM 'train_station';
 
 DO $$ BEGIN RAISE NOTICE 'END filtering buildings at %', clock_timestamp() AT TIME ZONE 'Europe/Berlin'; END $$;
