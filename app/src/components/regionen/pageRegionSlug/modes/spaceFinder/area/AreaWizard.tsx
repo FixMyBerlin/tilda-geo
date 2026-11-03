@@ -4,22 +4,22 @@ import { fieldErrorClass } from '@/components/shared/form/fields/sharedStyles'
 import { Form } from '@/components/shared/form/Form'
 import { frenchQuote } from '@/components/shared/text/Quotes'
 import { getErrorMessage } from '@/components/shared/toast/toastError'
-import { createPlanningAreaFn } from '@/server/planning/planning.functions'
+import { createSpaceFinderAreaFn } from '@/server/spaceFinder/spaceFinder.functions'
 import {
-  PlanningAreaFormSchema,
-  type PlanningAreaFormValues,
-} from '@/server/planning/planningFormSchemas'
+  SpaceFinderAreaFormSchema,
+  type SpaceFinderAreaFormValues,
+} from '@/server/spaceFinder/spaceFinderFormSchemas'
 import {
-  planningAreaQueryOptions,
-  planningAreasQueryOptions,
-  planningVariantQueryOptions,
-} from '@/server/planning/planningQueryOptions'
+  spaceFinderAreaQueryOptions,
+  spaceFinderAreasQueryOptions,
+  spaceFinderVariantQueryOptions,
+} from '@/server/spaceFinder/spaceFinderQueryOptions'
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import { ModeFormSubmit } from '../../ModeFormSubmit'
 import { DEFAULT_FACTOR_TEMPLATE } from '../factors/spaceFinderDefaults'
 import { AreaFormFields } from './AreaFormFields'
 
-const emptyValues: PlanningAreaFormValues = {
+const emptyValues: SpaceFinderAreaFormValues = {
   title: '',
   studyArea: null,
   userDatasets: [],
@@ -43,12 +43,12 @@ export const AreaWizard = ({
       className="flex flex-col space-y-0"
       actionBarPlacement="none"
       showFormErrors={false}
-      schema={PlanningAreaFormSchema}
+      schema={SpaceFinderAreaFormSchema}
       defaultValues={emptyValues}
       onSubmit={async (values) => {
         const title = values.title.trim()
         try {
-          const created = await createPlanningAreaFn({
+          const created = await createSpaceFinderAreaFn({
             data: {
               regionSlug,
               title,
@@ -67,9 +67,9 @@ export const AreaWizard = ({
           // Wait for the refetch: selecting the new variant while the area list is still the old
           // one looks like an orphaned key, and the page's auto-select would jump to the first Gebiet.
           await Promise.all([
-            queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug)),
-            queryClient.invalidateQueries(planningAreaQueryOptions(created.areaId)),
-            queryClient.invalidateQueries(planningVariantQueryOptions(created.variantId)),
+            queryClient.invalidateQueries(spaceFinderAreasQueryOptions(regionSlug)),
+            queryClient.invalidateQueries(spaceFinderAreaQueryOptions(created.areaId)),
+            queryClient.invalidateQueries(spaceFinderVariantQueryOptions(created.variantId)),
           ])
           onCreated(created.areaId, created.variantId)
           return { success: true, message: `Planungsgebiet ${frenchQuote(title)} angelegt.` }

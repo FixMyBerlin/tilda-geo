@@ -46,7 +46,7 @@ import {
 } from '@/components/shared/utils/playwright'
 import { MAP_STYLE_URL } from '@/server/api/map-style/mapStyleUrl.const'
 import { SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
-import { getPlanningHexagonGeomFn } from '@/server/planning/planning.functions'
+import { getSpaceFinderHexagonGeomFn } from '@/server/spaceFinder/spaceFinder.functions'
 import { CalculatorMap } from '../modes/calculator/CalculatorMap'
 import { useCalculatorDraw } from '../modes/calculator/drawing/useCalculatorDraw'
 import { useModeListActions } from '../modes/mode-list-store'
@@ -59,7 +59,7 @@ import { useReviewDraw } from '../modes/reviewLists/drawing/useReviewDraw'
 import { useReviewDrawActive } from '../modes/reviewLists/useReviewDrawActive'
 import { SpaceFinderMapDrawing } from '../modes/spaceFinder/drawing/SpaceFinderMapDrawing'
 import { useSpaceFinderDraw } from '../modes/spaceFinder/drawing/useSpaceFinderDraw'
-import { isCoarseHexagon } from '../modes/spaceFinder/planningHexagonResolution'
+import { isCoarseHexagon } from '../modes/spaceFinder/spaceFinderHexagonResolution'
 import { useSpaceFinderSelection } from '../modes/spaceFinder/useSpaceFinderSelection'
 import { useCurrentMode } from '../modes/useCurrentMode'
 import { useRegion } from '../regionUtils/useRegion'
@@ -75,7 +75,7 @@ import { AllSources } from './SourcesAndLayers/AllSources'
 import { MAPTERHORN_DEM_SOURCE_ID } from './SourcesAndLayers/mapterhornDem'
 import { SourcesLayersReviewEntries } from './SourcesAndLayers/SourcesLayersReviewEntries'
 import {
-  planningHexagonsSourceLayer,
+  spaceFinderHexagonsSourceLayer,
   SourcesLayersSpaceFinder,
 } from './SourcesAndLayers/SourcesLayersSpaceFinder'
 import { TerrainProfileHoverMarkerLayer } from './SourcesAndLayers/TerrainProfileHoverMarkerLayer'
@@ -157,7 +157,7 @@ export const RegionMap = () => {
     // leaves the selection untouched. Coarse cells (below zoom 16) are only averages over many
     // areas and don't work as candidates — the panel asks the user to zoom in.
     if (currentMode.isSpaceFinder && candidateSelectActive) {
-      const hexagon = features?.find((f) => f.sourceLayer === planningHexagonsSourceLayer)
+      const hexagon = features?.find((f) => f.sourceLayer === spaceFinderHexagonsSourceLayer)
       const h3Id = hexagon?.properties?.h3_id
       if (
         hexagon &&
@@ -176,7 +176,7 @@ export const RegionMap = () => {
         })
         // The tile geometry is clipped at tile borders; replace it with the full hexagon.
         if (added) {
-          getPlanningHexagonGeomFn({ data: { runId, h3Id: candidateId } })
+          getSpaceFinderHexagonGeomFn({ data: { runId, h3Id: candidateId } })
             .then((geometry) => setCandidateGeometry(runKey, candidateId, geometry))
             .catch((error) => console.error('Candidate geometry not loaded', error))
         }

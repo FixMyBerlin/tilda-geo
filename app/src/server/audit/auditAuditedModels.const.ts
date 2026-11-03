@@ -24,7 +24,7 @@ export const AUDITED_MODELS = [
   'ReviewEntryComment',
   'QaConfig',
   'QaEvaluation',
-  'PlanningArea',
-  'PlanningVariant',
+  'SpaceFinderArea',
+  'SpaceFinderVariant',
   'AdminApiToken',
 ] as const

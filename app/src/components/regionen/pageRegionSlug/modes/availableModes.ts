@@ -39,7 +39,7 @@ export const deriveAvailableModes = ({
 }
 
 /**
- * QA, Prüflisten and Flächenfinder are always member-only (every planning server function already
+ * QA, Prüflisten and Flächenfinder are always member-only (every Flächenfinder server function already
  * requires membership). Hinweise is member-only when the region has only internal notes.
  * Summieren and Messen are open to everyone who can see the region.
  */

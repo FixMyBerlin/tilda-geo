@@ -1,6 +1,6 @@
 import type { StoreFeaturesInspector } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
-import { planningHexagonsSourceId } from '../Map/SourcesAndLayers/SourcesLayersSpaceFinder'
+import { spaceFinderHexagonsSourceId } from '../Map/SourcesAndLayers/SourcesLayersSpaceFinder'
 import { SelectedFeatureTerrainProfilePanel } from '../terrainProfile/ui/SelectedFeatureTerrainProfilePanel'
 import { createInspectorFeatureKey } from '../utils/sourceKeyUtils/createInspectorFeatureKey'
 import { parseSourceKeyStaticDatasets } from '../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
@@ -32,7 +32,7 @@ export const Inspector = ({ features }: Props) => {
 
         const key = createInspectorFeatureKey(inspectObject)
         const content =
-          inspectObject.source === planningHexagonsSourceId ? (
+          inspectObject.source === spaceFinderHexagonsSourceId ? (
             <InspectorFeatureSpaceFinderHexagon feature={inspectObject} />
           ) : regionDatasets.some(
               (d) => d.id === parseSourceKeyStaticDatasets(sourceKey).sourceId,

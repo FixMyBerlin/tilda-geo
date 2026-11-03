@@ -4,13 +4,13 @@ import { AuthorizationError } from '@/server/auth/errors'
 // Guard + behavior test for the Flächenfinder take-over: authorization aborts before any write,
 // duplicates are skipped, and a freshly created list does not stay behind when the insert fails.
 
-const { db, authorizePlanningRegion, assertListInRegion, createReviewList } = vi.hoisted(() => ({
+const { db, authorizeSpaceFinderRegion, assertListInRegion, createReviewList } = vi.hoisted(() => ({
   db: {
-    planningRun: { findUnique: vi.fn() },
+    spaceFinderRun: { findUnique: vi.fn() },
     reviewEntry: { findMany: vi.fn(), createMany: vi.fn() },
     reviewList: { delete: vi.fn() },
   },
-  authorizePlanningRegion: vi.fn(),
+  authorizeSpaceFinderRegion: vi.fn(),
   assertListInRegion: vi.fn(),
   createReviewList: vi.fn(),
 }))
@@ -23,7 +23,9 @@ vi.mock('@/server/auth/memberCaller.server', () => ({
 vi.mock('@/server/audit/auditContext.server', () => ({
   runWithAuditContextAsync: (_ctx: unknown, fn: () => unknown) => fn(),
 }))
-vi.mock('@/server/planning/authorizePlanningRegion.server', () => ({ authorizePlanningRegion }))
+vi.mock('@/server/spaceFinder/authorizeSpaceFinderRegion.server', () => ({
+  authorizeSpaceFinderRegion,
+}))
 vi.mock('../queries/assertListInRegion.server', () => ({ assertListInRegion }))
 vi.mock('./createReviewList.server', () => ({ createReviewList }))
 
@@ -66,9 +68,9 @@ const input = (
 
 beforeEach(() => {
   vi.clearAllMocks()
-  authorizePlanningRegion.mockResolvedValue(undefined)
+  authorizeSpaceFinderRegion.mockResolvedValue(undefined)
   assertListInRegion.mockResolvedValue(1)
-  db.planningRun.findUnique.mockResolvedValue(run())
+  db.spaceFinderRun.findUnique.mockResolvedValue(run())
   db.reviewEntry.findMany.mockResolvedValue([])
   db.reviewEntry.createMany.mockImplementation(async ({ data }: { data: unknown[] }) => ({
     count: data.length,
@@ -78,18 +80,18 @@ beforeEach(() => {
 })
 
 describe('createReviewEntriesFromSpaceFinder', () => {
-  test('rejects before any lookup or write when the planning authorization fails', async () => {
-    authorizePlanningRegion.mockRejectedValue(new AuthorizationError('no'))
+  test('rejects before any lookup or write when the Flächenfinder authorization fails', async () => {
+    authorizeSpaceFinderRegion.mockRejectedValue(new AuthorizationError('no'))
     await expect(createReviewEntriesFromSpaceFinder(input({ listId: 1 }), headers)).rejects.toThrow(
       AuthorizationError,
     )
-    expect(db.planningRun.findUnique).not.toHaveBeenCalled()
+    expect(db.spaceFinderRun.findUnique).not.toHaveBeenCalled()
     expect(createReviewList).not.toHaveBeenCalled()
     expect(db.reviewEntry.createMany).not.toHaveBeenCalled()
   })
 
   test('rejects a run of another region', async () => {
-    db.planningRun.findUnique.mockResolvedValue(
+    db.spaceFinderRun.findUnique.mockResolvedValue(
       run({
         variant: { id: 5, title: 'x', area: { id: 3, title: 'y', region: { slug: 'koeln' } } },
       }),
@@ -101,7 +103,7 @@ describe('createReviewEntriesFromSpaceFinder', () => {
   })
 
   test('rejects a run that is not complete', async () => {
-    db.planningRun.findUnique.mockResolvedValue(run({ status: 'RUNNING' }))
+    db.spaceFinderRun.findUnique.mockResolvedValue(run({ status: 'RUNNING' }))
     await expect(createReviewEntriesFromSpaceFinder(input({ listId: 1 }), headers)).rejects.toThrow(
       'abgeschlossen',
     )

@@ -1,11 +1,11 @@
-import type { VariantFactorConfig } from '@/server/planning/mergeFactorConfig'
-import type { FactorConfig } from '@/server/planning/planning.functions'
-import type { PlanningUseCase } from '@/server/planning/planningFormSchemas'
-import { PLANNING_USE_CASE_LABELS } from '@/shared/regionen/planningScoreLabels.const'
+import type { VariantFactorConfig } from '@/server/spaceFinder/mergeFactorConfig'
+import type { FactorConfig } from '@/server/spaceFinder/spaceFinder.functions'
+import type { SpaceFinderUseCase } from '@/server/spaceFinder/spaceFinderFormSchemas'
+import { SPACE_FINDER_USE_CASE_LABELS } from '@/shared/regionen/spaceFinderScoreLabels.const'
 import { DEFAULT_OEPNV_SHARES } from './oepnvCategories'
 import { DEFAULT_ZIELORT_SHARES } from './zielortCategories'
 
-// Default factor template (mirrors flaechenfinder/config.py USE_CASE_FAHRRADBOX).
+// Default factor template (mirrors scoring/config.py USE_CASE_FAHRRADBOX).
 export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
   name: 'Fahrradbox',
   h3_resolution: 13,
@@ -43,42 +43,42 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
   // from before category weighting (see `oepnvCategories.ts`).
   oepnv_category_shares: { ...DEFAULT_OEPNV_SHARES },
   // `bewohnerbedarf_saettigung_ew` is deliberately missing: without a value in the variant config,
-  // the planning area's census suggestion applies (see `mergeFactorConfig`). Only once someone
+  // the Planungsgebiet's census suggestion applies (see `mergeFactorConfig`). Only once someone
   // edits the field by hand does the variant hold a number.
   min_score_threshold: 60,
 }
 
 // TODO Flächenfinder: the "Art & Größe der gesuchten Fläche" selection is temporarily disabled.
-// Reason: the selection is saved on the planning area but so far has no effect on the score or
+// Reason: the selection is saved on the Planungsgebiet but so far has no effect on the score or
 // the area search. Until the automatic area search uses it, we hide the fields — all the code
 // (state, server fields, DB columns) intentionally stays.
 // To re-enable: set this to `true`; the UI is in `AreaFormFields.tsx`, fed from
 // `AreaWizard.tsx` and `AreaEditor.tsx`. The defaults below then apply again.
-export const SHOW_PLANNING_USE_CASE_UI = false
+export const SHOW_SPACE_FINDER_USE_CASE_UI = false
 
-// Use cases for the planning area ("Art & Größe der gesuchten Fläche").
+// Use cases for the Planungsgebiet ("Art & Größe der gesuchten Fläche").
 // `defaultAreaM2` is the prefilled area size; "Sonstiges" has no default, the size is entered
-// freely. The area is stored on the planning area (not in the variant factorConfig) and is
+// freely. The area is stored on the Planungsgebiet (not in the variant factorConfig) and is
 // currently only saved — preparation for the future automatic area search.
-export type { PlanningUseCase }
+export type { SpaceFinderUseCase }
 
-export const PLANNING_USE_CASES: {
-  key: PlanningUseCase
+export const SPACE_FINDER_USE_CASES: {
+  key: SpaceFinderUseCase
   label: string
   defaultAreaM2: number | null
 }[] = [
-  { key: 'fahrradbox', label: PLANNING_USE_CASE_LABELS.fahrradbox!, defaultAreaM2: 2 },
+  { key: 'fahrradbox', label: SPACE_FINDER_USE_CASE_LABELS.fahrradbox!, defaultAreaM2: 2 },
   {
     key: 'fahrradabstellanlage',
-    label: PLANNING_USE_CASE_LABELS.fahrradabstellanlage!,
+    label: SPACE_FINDER_USE_CASE_LABELS.fahrradabstellanlage!,
     defaultAreaM2: 20,
   },
   {
     key: 'mobilitaetsstation',
-    label: PLANNING_USE_CASE_LABELS.mobilitaetsstation!,
+    label: SPACE_FINDER_USE_CASE_LABELS.mobilitaetsstation!,
     defaultAreaM2: 50,
   },
-  { key: 'sonstiges', label: PLANNING_USE_CASE_LABELS.sonstiges!, defaultAreaM2: null },
+  { key: 'sonstiges', label: SPACE_FINDER_USE_CASE_LABELS.sonstiges!, defaultAreaM2: null },
 ]
 
 export const GROUP_HELP: Record<'bedarf' | 'bebauung' | 'eigendaten', string> = {
@@ -135,7 +135,7 @@ export const FACTOR_PARAMS: Record<
   w_parken: [{ key: 'parken_radius_m', label: 'Radius (m)', step: 1, min: 0 }],
   // No entry for w_platz: no radius/distance decay, only effective directly on the square.
   // The 20 m radius is deliberately hard-wired (no UI field) and is a constant in
-  // flaechenfinder/config.py. Only saturation is adjustable; its label names the unit, because
+  // scoring/config.py. Only saturation is adjustable; its label names the unit, because
   // "Einwohner" alone doesn't show that the distance is already factored in.
   w_bewohnerbedarf: [
     {
@@ -146,7 +146,7 @@ export const FACTOR_PARAMS: Record<
     },
   ],
   // No entry for w_target: radius (20 m) AND saturation (fixed 1.0) are both not adjustable
-  // in the UI (see the comment in flaechenfinder/config.py).
+  // in the UI (see the comment in scoring/config.py).
 }
 
 /**
@@ -177,7 +177,7 @@ export const factorRangeHint = (weightKey: string, config: Partial<FactorConfig>
 
 /** Factors that read `public._parking_*` tables (see `postgis_loader.py`) — the `parking` topic
  * only runs in fixed bboxes (`processing/constants/topics.const.ts`); outside them there is no
- * data. `parkingDataAvailable` (from `getPlanningVariantFn`) hides these factors in
+ * data. `parkingDataAvailable` (from `getSpaceFinderVariantFn`) hides these factors in
  * `FactorEditorPanel` instead of silently contributing 0. `exclude_carriageways` belongs here
  * too, but isn't a weight and is handled separately there. */
 export const PARKING_DATA_DEPENDENT_KEYS = ['w_parken', 'w_intersection', 'w_fussgaengerzone']
@@ -203,7 +203,7 @@ export type ModifierDirection = 'positive' | 'negative' | 'vegetation' | 'platz'
 
 // Factor → probability grouping (Issue #3415). The weight sliders and the
 // per-hexagon sidebar breakdown are grouped by these two categories. Must stay in
-// sync with the backend split in flaechenfinder/scorer.py (_group_score):
+// sync with the backend split in scoring/scorer.py (_group_score):
 //   Bedarf   → Radwegnähe, ÖPNV + modifiers Bestandsanlagen (penalty), Bewohnerbedarf
 //              (bonus), Zielorte (bonus) and Fußgängerzonen (bonus)
 //   Bebauung → Hangneigung + modifiers

@@ -20,7 +20,7 @@ jobs:
         with:
           fail-on-severity: high
           comment-summary-in-pr: true
-          # LGPL/GPL-3.0 are compatible with our AGPL-3.0 (planning-worker: shapely, psycopg)
+          # LGPL/GPL-3.0 are compatible with our AGPL-3.0 (space-finder-worker: shapely, psycopg)
           allow-licenses: MIT, MIT-CMU, Apache-2.0, BSD-2-Clause, BSD-3-Clause, ISC, MPL-2.0, 0BSD, Unlicense, CC0-1.0, Zlib, PSF-2.0, Python-2.0, LGPL-2.1-only, LGPL-3.0, LGPL-3.0-only, GPL-3.0-or-later, AGPL-3.0, AGPL-3.0-or-later
           # Misdetected licenses: typing-extensions is PSF (scanner reports GPL-1.0-or-later), pyproj is MIT + US gov public domain
           allow-dependencies-licenses: pkg:pypi/typing-extensions, pkg:pypi/pyproj

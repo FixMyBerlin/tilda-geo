@@ -22,19 +22,19 @@ import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/mo
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { getAppBaseUrl } from '@/components/shared/utils/getAppBaseUrl'
-import { planningTilesPath } from '@/server/planning/planningTilesPath'
+import { spaceFinderTilesPath } from '@/server/spaceFinder/spaceFinderTilesPath'
 import {
-  PLANNING_SCORE_PROPERTY,
-  type PlanningScoreMode,
-} from '@/shared/regionen/planningScoreMode.const'
+  SPACE_FINDER_SCORE_PROPERTY,
+  type SpaceFinderScoreMode,
+} from '@/shared/regionen/spaceFinderScoreMode.const'
 import { getLayerHighlightId } from '../utils/layerHighlight'
 import { LayerHighlight } from './LayerHighlight'
 
-export const planningHexagonsSourceId = 'planning-hexagons-source'
-export const planningHexagonsLayerId = 'planning-hexagons'
+export const spaceFinderHexagonsSourceId = 'space-finder-hexagons-source'
+export const spaceFinderHexagonsLayerId = 'space-finder-hexagons'
 /**
  * Two invisible anchor layers, mounted on the first render (with or without a `runId`) and
- * never removed or recreated afterwards. `PlanningOverlayAnchors` sits at the same position
+ * never removed or recreated afterwards. `SpaceFinderOverlayAnchors` sits at the same position
  * in both returns of `SourcesLayersSpaceFinder`, so React keeps it mounted when `runId`
  * changes.
  *
@@ -48,30 +48,30 @@ export const planningHexagonsLayerId = 'planning-hexagons'
  * would add a layer without `beforeId` at the very top, above other layers already
  * visible.
  */
-const planningOverlayFloorLayerId = 'planning-overlay-floor'
-const planningOverlayCeilingLayerId = 'planning-overlay-ceiling'
-/** MVT layer name of the `planning_hexagons` tile function (see registerPlanningFunctions.server.ts). */
-export const planningHexagonsSourceLayer = 'planning_hexagons'
+const spaceFinderOverlayFloorLayerId = 'space-finder-overlay-floor'
+const spaceFinderOverlayCeilingLayerId = 'space-finder-overlay-ceiling'
+/** MVT layer name of the `space_finder_hexagons` tile function (see registerSpaceFinderFunctions.server.ts). */
+export const spaceFinderHexagonsSourceLayer = 'space_finder_hexagons'
 /**
  * Separate point layer with the hexagon center, each hexagon contained in exactly one
- * tile (see registerPlanningFunctions.server.ts). The fill layer
- * `planningHexagonsSourceLayer` buffers & clips polygons per tile, so the same hexagon
+ * tile (see registerSpaceFinderFunctions.server.ts). The fill layer
+ * `spaceFinderHexagonsSourceLayer` buffers & clips polygons per tile, so the same hexagon
  * often appears in several tiles with shifted centroids — a label on it would be
  * duplicated and off-center. Hence a separate, unbuffered point layer just for the
  * label.
  */
-const planningHexagonsLabelSourceLayer = 'planning_hexagons_label'
-const planningHexagonsLabelLayerId = 'planning-hexagons-label'
+const spaceFinderHexagonsLabelSourceLayer = 'space_finder_hexagons_label'
+const spaceFinderHexagonsLabelLayerId = 'space-finder-hexagons-label'
 
 // From zoom 18 on, the score of the active display mode (Kombination/Bedarf/
 // Bebauung) is shown as a readable label in the hexagon. Below zoom 18 there is
 // only the fill color, no label.
 const HEXAGON_LABEL_MIN_ZOOM = 18
 
-// Planning module result layers (Flächenfinder).
+// Flächenfinder result layers (Flächenfinder).
 //
-// Renders the immutable result of one PlanningRun from the authenticated app route
-// `/api/regions/:slug/planning-tiles/:layer/{z}/{x}/{y}?run_id=N` (see planningTilesPath). Scores
+// Renders the immutable result of one SpaceFinderRun from the authenticated app route
+// `/api/regions/:slug/space-finder-tiles/:layer/{z}/{x}/{y}?run_id=N` (see spaceFinderTilesPath). Scores
 // and census population are member-only, so the tiles do not come from Martin's public hosts. A
 // finished run is immutable; the route answers with a private 7-day browser cache.
 //
@@ -88,7 +88,7 @@ const HEXAGON_LABEL_MIN_ZOOM = 18
 // positive yellow-green/lime (red reads as negative, good areas should read positive).
 // The vegetation layer uses a bluish emerald so both stay distinguishable.
 const HEXAGON_FADE_IN_THRESHOLD = 10
-const HEXAGON_SCORE_RAMP: Record<PlanningScoreMode, { fadeFrom: string; stops: string[] }> = {
+const HEXAGON_SCORE_RAMP: Record<SpaceFinderScoreMode, { fadeFrom: string; stops: string[] }> = {
   kombination: {
     fadeFrom: 'rgba(247,254,231,0)',
     stops: ['#f7fee7', '#bef264', '#84cc16', '#3f6212'],
@@ -102,7 +102,7 @@ const HEXAGON_SCORE_RAMP: Record<PlanningScoreMode, { fadeFrom: string; stops: s
     stops: ['#faf5ff', '#c084fc', '#9333ea', '#581c87'],
   },
 }
-const scoreColor = (property: string, mode: PlanningScoreMode) => {
+const scoreColor = (property: string, mode: SpaceFinderScoreMode) => {
   const { fadeFrom, stops } = HEXAGON_SCORE_RAMP[mode]
   return [
     'interpolate',
@@ -148,14 +148,14 @@ const clusterOpacity = (filterOn: boolean, minArea: number, maxOpacity: number) 
 
 const hexagonFillLayerProps = (
   property: string,
-  mode: PlanningScoreMode,
+  mode: SpaceFinderScoreMode,
   filterOn: boolean,
   minArea: number,
   opacityPct: number,
 ) => ({
-  id: planningHexagonsLayerId,
-  source: planningHexagonsSourceId,
-  'source-layer': planningHexagonsSourceLayer,
+  id: spaceFinderHexagonsLayerId,
+  source: spaceFinderHexagonsSourceId,
+  'source-layer': spaceFinderHexagonsSourceLayer,
   type: 'fill' as const,
   paint: {
     'fill-color': scoreColor(property, mode) as any,
@@ -165,9 +165,9 @@ const hexagonFillLayerProps = (
 })
 
 const hexagonLabelLayerProps = (property: string) => ({
-  id: planningHexagonsLabelLayerId,
-  source: planningHexagonsSourceId,
-  'source-layer': planningHexagonsLabelSourceLayer,
+  id: spaceFinderHexagonsLabelLayerId,
+  source: spaceFinderHexagonsSourceId,
+  'source-layer': spaceFinderHexagonsLabelSourceLayer,
   type: 'symbol' as const,
   minzoom: HEXAGON_LABEL_MIN_ZOOM,
   layout: {
@@ -185,10 +185,10 @@ const hexagonLabelLayerProps = (property: string) => ({
 
 // Census population points (factor „Bewohnerbedarf"). Tiles come directly from
 // `data.census_population_point`, limited to the study area's bounding box —
-// nothing is stored per run in the planning schema (see the tile function
-// `planning.planning_census`). A point usually sits on the building center and carries its
+// nothing is stored per run in the space_finder schema (see the tile function
+// `space_finder.space_finder_census`). A point usually sits on the building center and carries its
 // population.
-const planningCensusSourceId = 'planning-census-source'
+const spaceFinderCensusSourceId = 'space-finder-census-source'
 
 const CENSUS_ATTRIBUTION =
   '<a href="https://www.zensus2022.de/" target="_blank" rel="noopener">Zensus 2022</a> (Destatis, auf Gebäude disaggregiert)'
@@ -198,9 +198,9 @@ const CENSUS_ATTRIBUTION =
 const CENSUS_LABEL_MIN_ZOOM = 17
 
 const censusCircleLayerProps = {
-  id: 'planning-census-circle',
-  source: planningCensusSourceId,
-  'source-layer': 'planning_census',
+  id: 'space-finder-census-circle',
+  source: spaceFinderCensusSourceId,
+  'source-layer': 'space_finder_census',
   type: 'circle' as const,
   paint: {
     // Radius grows with zoom AND population, so an apartment building can be told
@@ -234,9 +234,9 @@ const censusCircleLayerProps = {
 }
 
 const censusLabelLayerProps = {
-  id: 'planning-census-label',
-  source: planningCensusSourceId,
-  'source-layer': 'planning_census',
+  id: 'space-finder-census-label',
+  source: spaceFinderCensusSourceId,
+  'source-layer': 'space_finder_census',
   type: 'symbol' as const,
   minzoom: CENSUS_LABEL_MIN_ZOOM,
   layout: {
@@ -257,11 +257,15 @@ const censusLabelLayerProps = {
 const VEGETATION_FILL_COLOR = '#6ee7b7'
 const VEGETATION_LINE_COLOR = '#047857'
 
-// See comment at planningOverlayCeilingLayerId.
-const PlanningOverlayAnchors = () => (
+// See comment at spaceFinderOverlayCeilingLayerId.
+const SpaceFinderOverlayAnchors = () => (
   <>
-    <Layer id={planningOverlayFloorLayerId} type="background" layout={{ visibility: 'none' }} />
-    <Layer id={planningOverlayCeilingLayerId} type="background" layout={{ visibility: 'none' }} />
+    <Layer id={spaceFinderOverlayFloorLayerId} type="background" layout={{ visibility: 'none' }} />
+    <Layer
+      id={spaceFinderOverlayCeilingLayerId}
+      type="background"
+      layout={{ visibility: 'none' }}
+    />
   </>
 )
 
@@ -271,19 +275,19 @@ const BoundaryHighlightLayer = () => {
   if (!geom) return null
   return (
     <Source
-      id="planning-boundary-highlight"
+      id="space-finder-boundary-highlight"
       type="geojson"
       data={feature(geom as GeoJSON.Geometry)}
     >
       {filled && (
         <Layer
-          id="planning-boundary-highlight-fill"
+          id="space-finder-boundary-highlight-fill"
           type="fill"
           paint={{ 'fill-color': '#3b82f6', 'fill-opacity': 0.1 }}
         />
       )}
       <Layer
-        id="planning-boundary-highlight-outline"
+        id="space-finder-boundary-highlight-outline"
         type="line"
         paint={{ 'line-color': '#2563eb', 'line-width': 2, 'line-dasharray': [4, 2] }}
       />
@@ -300,24 +304,24 @@ const UserObstaclesLayer = () => {
   const visible = useSpaceFinderUserObstaclesVisible()
   if (!geom || !visible) return null
   return (
-    <Source id="planning-user-obstacles" type="geojson" data={geom as any}>
+    <Source id="space-finder-user-obstacles" type="geojson" data={geom as any}>
       <Layer
-        id="planning-user-obstacles-fill"
-        beforeId={planningOverlayFloorLayerId}
+        id="space-finder-user-obstacles-fill"
+        beforeId={spaceFinderOverlayFloorLayerId}
         type="fill"
         filter={['==', ['geometry-type'], 'Polygon']}
         paint={{ 'fill-color': '#7c3aed', 'fill-opacity': 0.2 }}
       />
       <Layer
-        id="planning-user-obstacles-line"
-        beforeId={planningOverlayFloorLayerId}
+        id="space-finder-user-obstacles-line"
+        beforeId={spaceFinderOverlayFloorLayerId}
         type="line"
         filter={['in', ['geometry-type'], ['literal', ['LineString', 'Polygon']]]}
         paint={{ 'line-color': '#6d28d9', 'line-width': 2 }}
       />
       <Layer
-        id="planning-user-obstacles-circle"
-        beforeId={planningOverlayFloorLayerId}
+        id="space-finder-user-obstacles-circle"
+        beforeId={spaceFinderOverlayFloorLayerId}
         type="circle"
         filter={['==', ['geometry-type'], 'Point']}
         paint={{
@@ -362,33 +366,33 @@ const CandidateHighlightLayer = ({ runKey }: { runKey: string | null }) => {
   return (
     <>
       <Source
-        id="planning-candidates"
+        id="space-finder-candidates"
         type="geojson"
         data={featureCollection(
           outlined.map((candidate) => feature(candidate.geometry, {}, { id: candidate.h3Id })),
         )}
       >
         <Layer
-          id="planning-candidates-outline"
+          id="space-finder-candidates-outline"
           type="line"
           paint={{ 'line-color': '#eab308', 'line-width': 2.5 }}
         />
       </Source>
       {emphasized.length > 0 && (
         <Source
-          id="planning-candidates-emphasis"
+          id="space-finder-candidates-emphasis"
           type="geojson"
           data={featureCollection(
             emphasized.map((candidate) => feature(candidate.geometry, {}, { id: candidate.h3Id })),
           )}
         >
           <Layer
-            id="planning-candidates-emphasis-fill"
+            id="space-finder-candidates-emphasis-fill"
             type="fill"
             paint={{ 'fill-color': '#eab308', 'fill-opacity': 0.35 }}
           />
           <Layer
-            id="planning-candidates-emphasis-outline"
+            id="space-finder-candidates-emphasis-outline"
             type="line"
             paint={{ 'line-color': '#a16207', 'line-width': 4 }}
           />
@@ -420,18 +424,18 @@ export const SourcesLayersSpaceFinder = () => {
     return (
       <>
         <BoundaryHighlightLayer />
-        <PlanningOverlayAnchors />
+        <SpaceFinderOverlayAnchors />
         <UserObstaclesLayer />
       </>
     )
 
   // MapLibre needs absolute tile URLs (same as private backgrounds in useRegionBackgrounds).
-  const hexagonsUrl = getAppBaseUrl(planningTilesPath(regionSlug, 'hexagons', runId))
-  const vegetationUrl = getAppBaseUrl(planningTilesPath(regionSlug, 'vegetation', runId))
-  const carriagewaysUrl = getAppBaseUrl(planningTilesPath(regionSlug, 'carriageways', runId))
-  const censusUrl = getAppBaseUrl(planningTilesPath(regionSlug, 'census', runId))
+  const hexagonsUrl = getAppBaseUrl(spaceFinderTilesPath(regionSlug, 'hexagons', runId))
+  const vegetationUrl = getAppBaseUrl(spaceFinderTilesPath(regionSlug, 'vegetation', runId))
+  const carriagewaysUrl = getAppBaseUrl(spaceFinderTilesPath(regionSlug, 'carriageways', runId))
+  const censusUrl = getAppBaseUrl(spaceFinderTilesPath(regionSlug, 'census', runId))
   const fillLayerProps = hexagonFillLayerProps(
-    PLANNING_SCORE_PROPERTY[scoreMode],
+    SPACE_FINDER_SCORE_PROPERTY[scoreMode],
     scoreMode,
     areaFilterOn,
     minArea,
@@ -441,25 +445,25 @@ export const SourcesLayersSpaceFinder = () => {
   return (
     <>
       <BoundaryHighlightLayer />
-      <PlanningOverlayAnchors />
+      <SpaceFinderOverlayAnchors />
 
       {hexagonsOpacityPct > 0 && (
         <>
           <Source
-            id={planningHexagonsSourceId}
+            id={spaceFinderHexagonsSourceId}
             type="vector"
             tiles={[hexagonsUrl]}
             promoteId="h3_id"
           />
-          <Layer {...fillLayerProps} beforeId={planningOverlayCeilingLayerId} />
+          <Layer {...fillLayerProps} beforeId={spaceFinderOverlayCeilingLayerId} />
           <LayerHighlight
             {...fillLayerProps}
-            id={getLayerHighlightId(planningHexagonsLayerId)}
-            beforeId={planningOverlayCeilingLayerId}
+            id={getLayerHighlightId(spaceFinderHexagonsLayerId)}
+            beforeId={spaceFinderOverlayCeilingLayerId}
           />
           <Layer
-            {...hexagonLabelLayerProps(PLANNING_SCORE_PROPERTY[scoreMode])}
-            beforeId={planningOverlayCeilingLayerId}
+            {...hexagonLabelLayerProps(SPACE_FINDER_SCORE_PROPERTY[scoreMode])}
+            beforeId={spaceFinderOverlayCeilingLayerId}
           />
         </>
       )}
@@ -472,24 +476,24 @@ export const SourcesLayersSpaceFinder = () => {
       {vegetationOn && (
         <>
           <Source
-            id="planning-vegetation-source"
+            id="space-finder-vegetation-source"
             type="vector"
             tiles={[vegetationUrl]}
             attribution={vegetationAttribution ?? undefined}
           />
           <Layer
-            id="planning-vegetation-fill"
-            beforeId={planningOverlayFloorLayerId}
-            source="planning-vegetation-source"
-            source-layer="planning_vegetation"
+            id="space-finder-vegetation-fill"
+            beforeId={spaceFinderOverlayFloorLayerId}
+            source="space-finder-vegetation-source"
+            source-layer="space_finder_vegetation"
             type="fill"
             paint={{ 'fill-color': VEGETATION_FILL_COLOR, 'fill-opacity': 0.45 }}
           />
           <Layer
-            id="planning-vegetation-outline"
-            beforeId={planningOverlayFloorLayerId}
-            source="planning-vegetation-source"
-            source-layer="planning_vegetation"
+            id="space-finder-vegetation-outline"
+            beforeId={spaceFinderOverlayFloorLayerId}
+            source="space-finder-vegetation-source"
+            source-layer="space_finder_vegetation"
             type="line"
             paint={{ 'line-color': VEGETATION_LINE_COLOR, 'line-width': 0.5, 'line-opacity': 0.8 }}
           />
@@ -498,20 +502,20 @@ export const SourcesLayersSpaceFinder = () => {
 
       {carriagewaysOn && (
         <>
-          <Source id="planning-carriageways-source" type="vector" tiles={[carriagewaysUrl]} />
+          <Source id="space-finder-carriageways-source" type="vector" tiles={[carriagewaysUrl]} />
           <Layer
-            id="planning-carriageways-fill"
-            beforeId={planningOverlayFloorLayerId}
-            source="planning-carriageways-source"
-            source-layer="planning_carriageways"
+            id="space-finder-carriageways-fill"
+            beforeId={spaceFinderOverlayFloorLayerId}
+            source="space-finder-carriageways-source"
+            source-layer="space_finder_carriageways"
             type="fill"
             paint={{ 'fill-color': '#b45309', 'fill-opacity': 0.45 }}
           />
           <Layer
-            id="planning-carriageways-outline"
-            beforeId={planningOverlayFloorLayerId}
-            source="planning-carriageways-source"
-            source-layer="planning_carriageways"
+            id="space-finder-carriageways-outline"
+            beforeId={spaceFinderOverlayFloorLayerId}
+            source="space-finder-carriageways-source"
+            source-layer="space_finder_carriageways"
             type="line"
             paint={{ 'line-color': '#78350f', 'line-width': 0.5, 'line-opacity': 0.6 }}
           />
@@ -521,13 +525,13 @@ export const SourcesLayersSpaceFinder = () => {
       {censusOn && (
         <>
           <Source
-            id={planningCensusSourceId}
+            id={spaceFinderCensusSourceId}
             type="vector"
             tiles={[censusUrl]}
             attribution={CENSUS_ATTRIBUTION}
           />
-          <Layer {...censusCircleLayerProps} beforeId={planningOverlayFloorLayerId} />
-          <Layer {...censusLabelLayerProps} beforeId={planningOverlayFloorLayerId} />
+          <Layer {...censusCircleLayerProps} beforeId={spaceFinderOverlayFloorLayerId} />
+          <Layer {...censusLabelLayerProps} beforeId={spaceFinderOverlayFloorLayerId} />
         </>
       )}
     </>

@@ -7,7 +7,7 @@ const sourceLayer = 'buildingEntrances'
 export type SubcatPoiPlusBuildingEntrancesId = typeof subcatId
 export type SubcatPoiPlusBuildingEntrancesStyleIds = 'default'
 
-// Same values the planning-worker counts as residents' entrances
+// Same values the space-finder-worker counts as residents' entrances
 // (`PostgisLoader.load_building_entrances`, default `kinds`).
 const mainEntranceValues = ['yes', 'main', 'home', 'staircase']
 const isMainEntrance: ExpressionSpecification = [

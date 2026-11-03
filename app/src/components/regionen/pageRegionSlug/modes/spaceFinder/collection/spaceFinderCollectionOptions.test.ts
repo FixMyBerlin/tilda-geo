@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import {
   firstSpaceFinderVariantId,
-  type PlanningAreasRow,
+  type SpaceFinderAreasRow,
   sortedSpaceFinderAreas,
   spaceFinderActiveSelection,
   spaceFinderSelectedVariant,
@@ -10,14 +10,14 @@ import {
   spaceFinderVariantStatus,
 } from './spaceFinderCollectionOptions'
 
-const area = (overrides: Partial<PlanningAreasRow>) =>
+const area = (overrides: Partial<SpaceFinderAreasRow>) =>
   ({
     id: 1,
     title: 'Gebiet',
     createdAt: new Date('2026-01-01'),
     variants: [],
     ...overrides,
-  }) as PlanningAreasRow
+  }) as SpaceFinderAreasRow
 
 const variant = (id: number, title = 'Variante') =>
   ({ id, title, currentRunId: null, jobs: [], runs: [] }) as never

@@ -30,8 +30,8 @@ import {
   modePanelSmallButtonClassName,
   modePanelTintHairlineTopClassName,
 } from '../../modePanel.const'
-import { FINE_HEXAGON_MIN_ZOOM } from '../planningHexagonResolution'
 import { RemoveIconButton } from '../RemoveIconButton'
+import { FINE_HEXAGON_MIN_ZOOM } from '../spaceFinderHexagonResolution'
 import { spaceFinderDiscardLinkClass, spaceFinderDiscardRowClass } from '../spaceFinderPanelStyles'
 import { useSpaceFinderSelection } from '../useSpaceFinderSelection'
 import { candidateExportFileName, downloadCandidatesGeojson } from './spaceFinderCandidateExport'

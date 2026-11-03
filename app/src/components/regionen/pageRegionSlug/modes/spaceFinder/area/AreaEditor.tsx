@@ -3,30 +3,30 @@ import { twJoin } from 'tailwind-merge'
 import { fieldErrorClass } from '@/components/shared/form/fields/sharedStyles'
 import { Form } from '@/components/shared/form/Form'
 import { getErrorMessage } from '@/components/shared/toast/toastError'
-import { updatePlanningAreaFn } from '@/server/planning/planning.functions'
+import { updateSpaceFinderAreaFn } from '@/server/spaceFinder/spaceFinder.functions'
 import {
-  PlanningAreaFormSchema,
-  type PlanningAreaFormValues,
-  type PlanningUseCase,
-} from '@/server/planning/planningFormSchemas'
+  SpaceFinderAreaFormSchema,
+  type SpaceFinderAreaFormValues,
+  type SpaceFinderUseCase,
+} from '@/server/spaceFinder/spaceFinderFormSchemas'
 import {
-  planningAreaQueryOptions,
-  planningAreasQueryOptions,
-  planningVariantQueryOptions,
-} from '@/server/planning/planningQueryOptions'
+  spaceFinderAreaQueryOptions,
+  spaceFinderAreasQueryOptions,
+  spaceFinderVariantQueryOptions,
+} from '@/server/spaceFinder/spaceFinderQueryOptions'
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import { ModeFormSubmit } from '../../ModeFormSubmit'
-import type { PlanningAreaVariantRow } from '../collection/spaceFinderCollectionOptions'
-import type { PlanningVariantDetail } from '../spaceFinderVariantDetail'
+import type { SpaceFinderAreaVariantRow } from '../collection/spaceFinderCollectionOptions'
+import type { SpaceFinderVariantDetail } from '../spaceFinderVariantDetail'
 import { AreaFormFields } from './AreaFormFields'
 import type { StudyAreaGeometry } from './extractStudyAreaGeometry'
 
-type EditorArea = PlanningVariantDetail['area']
+type EditorArea = SpaceFinderVariantDetail['area']
 
 const jsonEqual = (a: unknown, b: unknown) => JSON.stringify(a) === JSON.stringify(b)
 
-/** Do the changes outdate existing results? Same rule as `updatePlanningAreaFn` on the server. */
-const areaInputsChanged = (values: PlanningAreaFormValues, saved: PlanningAreaFormValues) =>
+/** Do the changes outdate existing results? Same rule as `updateSpaceFinderAreaFn` on the server. */
+const areaInputsChanged = (values: SpaceFinderAreaFormValues, saved: SpaceFinderAreaFormValues) =>
   (values.studyArea != null && !jsonEqual(values.studyArea, saved.studyArea)) ||
   !jsonEqual(values.userDatasets, saved.userDatasets) ||
   values.useCase !== saved.useCase ||
@@ -39,17 +39,17 @@ const AreaEditorForm = ({
 }: {
   /** Full Gebiet from the open variant. The areas list does not carry geometry or own data. */
   area: EditorArea
-  variants: PlanningAreaVariantRow[]
+  variants: SpaceFinderAreaVariantRow[]
   onClose: () => void
 }) => {
   const regionSlug = useRegionSlug()
   const queryClient = useQueryClient()
   const originalStudyArea = area.studyArea as unknown as StudyAreaGeometry
-  const savedValues: PlanningAreaFormValues = {
+  const savedValues: SpaceFinderAreaFormValues = {
     title: area.title,
     studyArea: originalStudyArea,
     userDatasets: area.userDatasets,
-    useCase: (area.useCase as PlanningUseCase) ?? 'fahrradbox',
+    useCase: (area.useCase as SpaceFinderUseCase) ?? 'fahrradbox',
     areaSizeM2: area.areaSizeM2,
   }
   const hasCompleteRuns = variants.some((v) => v.runs[0]?.status === 'COMPLETE')
@@ -59,11 +59,11 @@ const AreaEditorForm = ({
       className="flex flex-col space-y-0 text-sm"
       actionBarPlacement="none"
       showFormErrors={false}
-      schema={PlanningAreaFormSchema}
+      schema={SpaceFinderAreaFormSchema}
       defaultValues={savedValues}
       onSubmit={async (values) => {
         try {
-          await updatePlanningAreaFn({
+          await updateSpaceFinderAreaFn({
             data: {
               areaId: area.id,
               title: values.title.trim(),
@@ -82,10 +82,10 @@ const AreaEditorForm = ({
             message: getErrorMessage(error, 'Planungsgebiet konnte nicht gespeichert werden.'),
           }
         }
-        queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
-        queryClient.invalidateQueries(planningAreaQueryOptions(area.id))
+        queryClient.invalidateQueries(spaceFinderAreasQueryOptions(regionSlug))
+        queryClient.invalidateQueries(spaceFinderAreaQueryOptions(area.id))
         for (const v of variants) {
-          queryClient.invalidateQueries(planningVariantQueryOptions(v.id))
+          queryClient.invalidateQueries(spaceFinderVariantQueryOptions(v.id))
         }
         onClose()
         return { success: true, message: 'Planungsgebiet gespeichert.' }
@@ -142,6 +142,6 @@ export const AreaEditor = ({
   onClose,
 }: {
   area: EditorArea
-  variants: PlanningAreaVariantRow[]
+  variants: SpaceFinderAreaVariantRow[]
   onClose: () => void
 }) => <AreaEditorForm key={area.id} area={area} variants={variants} onClose={onClose} />

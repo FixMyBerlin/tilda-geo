@@ -1,3 +1,3 @@
-import type { getPlanningVariantFn } from '@/server/planning/planning.functions'
+import type { getSpaceFinderVariantFn } from '@/server/spaceFinder/spaceFinder.functions'
 
-export type PlanningVariantDetail = Awaited<ReturnType<typeof getPlanningVariantFn>>
+export type SpaceFinderVariantDetail = Awaited<ReturnType<typeof getSpaceFinderVariantFn>>

@@ -4,18 +4,18 @@ import { modeScopedSearchMiddleware } from '@/components/regionen/pageRegionSlug
 import { spaceFinderVariantIdToPrime } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/collection/spaceFinderCollectionOptions'
 import { PageModeSpaceFinder } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/PageModeSpaceFinder'
 import {
-  planningAreasQueryOptions,
-  planningVariantQueryOptions,
-} from '@/server/planning/planningQueryOptions'
+  spaceFinderAreasQueryOptions,
+  spaceFinderVariantQueryOptions,
+} from '@/server/spaceFinder/spaceFinderQueryOptions'
 import { getSafeSignInCallbackURL } from '@/shared/auth/safeSignInCallbackURL'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 
 /**
  * Flächenfinder mode ("spaceFinder"). Redirects to the region root unless the region has
  * `spaceFinderEnabled` and the user can manage it (`availableModes.ts` — D8, unlike the other
- * modes this one needs an explicit flag because the planning worker only runs on some instances).
+ * modes this one needs an explicit flag because the space-finder-worker only runs on some instances).
  * `space` JSON is validated on the parent region route. Guests are redirected to /access-denied here
- * (always member-only, every planning server function already requires membership).
+ * (always member-only, every Flächenfinder server function already requires membership).
  */
 export const Route = createFileRoute('/regionen/$regionSlug/flaechenfinder')({
   ssr: 'data-only',
@@ -49,10 +49,10 @@ export const Route = createFileRoute('/regionen/$regionSlug/flaechenfinder')({
     }
 
     const { queryClient } = context
-    const areas = await queryClient.ensureQueryData(planningAreasQueryOptions(params.regionSlug))
+    const areas = await queryClient.ensureQueryData(spaceFinderAreasQueryOptions(params.regionSlug))
     const variantId = spaceFinderVariantIdToPrime(areas, deps.key)
     if (variantId != null) {
-      await queryClient.ensureQueryData(planningVariantQueryOptions(variantId))
+      await queryClient.ensureQueryData(spaceFinderVariantQueryOptions(variantId))
     }
   },
   component: PageModeSpaceFinder,

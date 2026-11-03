@@ -5,8 +5,8 @@ import {
   useSpaceFinderMinAreaDraft,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-boundary-store'
 import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
-import { updatePlanningVariantFn } from '@/server/planning/planning.functions'
-import { planningVariantQueryOptions } from '@/server/planning/planningQueryOptions'
+import { updateSpaceFinderVariantFn } from '@/server/spaceFinder/spaceFinder.functions'
+import { spaceFinderVariantQueryOptions } from '@/server/spaceFinder/spaceFinderQueryOptions'
 import { MIN_AREA_FILTER_LABEL, MIN_SCORE_THRESHOLD_LABEL } from '../factors/spaceFinderDefaults'
 import { spaceFinderNumberInputClass } from '../spaceFinderPanelStyles'
 import { useSpaceFinderModeParam } from '../useSpaceFinderModeParam'
@@ -61,10 +61,10 @@ const MinAreaFilterForm = ({
 
   const mutation = useMutation({
     mutationFn: (value: number) =>
-      updatePlanningVariantFn({ data: { variantId, minAreaM2: value } }),
+      updateSpaceFinderVariantFn({ data: { variantId, minAreaM2: value } }),
     onSuccess: (_, value) => {
       lastSaved.current = value
-      queryClient.invalidateQueries(planningVariantQueryOptions(variantId))
+      queryClient.invalidateQueries(spaceFinderVariantQueryOptions(variantId))
     },
   })
 

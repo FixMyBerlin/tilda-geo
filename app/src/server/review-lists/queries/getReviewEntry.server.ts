@@ -53,7 +53,7 @@ export async function getReviewEntry(input: z.infer<typeof Schema>, caller: Memb
     entry.source === 'SPACE_FINDER' ? parseSpaceFinderSourceMeta(entry.sourceMeta) : null
   const spaceFinderVariant =
     origin?.variantId != null
-      ? await db.planningVariant.findFirst({
+      ? await db.spaceFinderVariant.findFirst({
           where: { id: origin.variantId, area: { region: { slug: regionSlug } } },
           select: { id: true, currentRunId: true },
         })

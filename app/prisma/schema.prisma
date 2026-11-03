@@ -33,31 +33,29 @@ model User {
   lastName  String? // User's last name (editable via UserForm)
 
   // App-managed fields
-  role                     UserRoleEnum         @default(USER) // User role (USER/ADMIN) - set on user creation, managed by admins
-  accessedRegions          Json?                @default("[]") // Region access tracking (JSON array) - managed by app logic
+  role                       UserRoleEnum         @default(USER) // User role (USER/ADMIN) - set on user creation, managed by admins
+  accessedRegions            Json?                @default("[]") // Region access tracking (JSON array) - managed by app logic
   //
-  sessions                 Session[]
-  accounts                 Account[]
-  verifications            Verification[]
-  memberships              Membership[]
-  notes                    Note[]
-  noteComments             NoteComment[]
-  qaEvaluations            QaEvaluation[]
-  adminApiTokens           AdminApiToken[]
-  externalApiTokens        ExternalApiToken[]
-  dataSchemaImportsCreated DataSchemaImport[]   @relation("DataSchemaImportCreatedBy")
-  dataSchemaImportsUpdated DataSchemaImport[]   @relation("DataSchemaImportUpdatedBy")
-  reviewEntryComments      ReviewEntryComment[]
-  reviewListsCreated       ReviewList[]         @relation("ReviewListCreatedBy")
-  reviewListsUpdated       ReviewList[]         @relation("ReviewListUpdatedBy")
-  reviewEntriesCreated     ReviewEntry[]        @relation("ReviewEntryCreatedBy")
-  reviewEntriesUpdated     ReviewEntry[]        @relation("ReviewEntryUpdatedBy")
-  noteFoldersCreated       NoteFolder[]         @relation("NoteFolderCreatedBy")
-  noteFoldersUpdated       NoteFolder[]         @relation("NoteFolderUpdatedBy")
-  //
-  // Planning module: areas/variants this user created (any region member may still edit them).
-  planningAreasCreated     PlanningArea[]       @relation("PlanningAreaCreatedBy")
-  planningVariantsCreated  PlanningVariant[]    @relation("PlanningVariantCreatedBy")
+  sessions                   Session[]
+  accounts                   Account[]
+  verifications              Verification[]
+  memberships                Membership[]
+  notes                      Note[]
+  noteComments               NoteComment[]
+  qaEvaluations              QaEvaluation[]
+  adminApiTokens             AdminApiToken[]
+  externalApiTokens          ExternalApiToken[]
+  dataSchemaImportsCreated   DataSchemaImport[]   @relation("DataSchemaImportCreatedBy")
+  dataSchemaImportsUpdated   DataSchemaImport[]   @relation("DataSchemaImportUpdatedBy")
+  reviewEntryComments        ReviewEntryComment[]
+  reviewListsCreated         ReviewList[]         @relation("ReviewListCreatedBy")
+  reviewListsUpdated         ReviewList[]         @relation("ReviewListUpdatedBy")
+  reviewEntriesCreated       ReviewEntry[]        @relation("ReviewEntryCreatedBy")
+  reviewEntriesUpdated       ReviewEntry[]        @relation("ReviewEntryUpdatedBy")
+  noteFoldersCreated         NoteFolder[]         @relation("NoteFolderCreatedBy")
+  noteFoldersUpdated         NoteFolder[]         @relation("NoteFolderUpdatedBy")
+  spaceFinderAreasCreated    SpaceFinderArea[]    @relation("SpaceFinderAreaCreatedBy")
+  spaceFinderVariantsCreated SpaceFinderVariant[] @relation("SpaceFinderVariantCreatedBy")
 
   @@map("User")
   @@schema("prisma")
@@ -180,7 +178,6 @@ model Region {
   notesInternal Boolean       @default(false)
   showSearch    Boolean       @default(false)
 
-  /// Flächenfinder (planning mode). Off by default; regions enable it in the admin.
   spaceFinderEnabled Boolean @default(false)
 
   mapLat  Float @default(0)
@@ -226,7 +223,7 @@ model Region {
   qaConfigs                QaConfig[]
   reviewLists              ReviewList[]
   noteFolders              NoteFolder[]
-  planningAreas            PlanningArea[]
+  spaceFinderAreas         SpaceFinderArea[]
   privateBackgroundSources PrivateBackgroundSource[]
 
   @@index([contractId])
@@ -814,144 +811,119 @@ enum QaEvaluatorType {
   @@schema("prisma")
 }
 
-// ── Planning module (Flächenfinder) ──────────────────────────────────────────
-// Planungsgebiet (rarely changed: geometry, user datasets) + variant
-// (often: weights, thresholds, use case). A run merges both into
-// factorConfigSnapshot; PostGIS results hang off PlanningRun.id.
-//
-// Permissions: any region member may edit/run any area/variant of that region;
-// createdBy is tracked for attribution only (and is cleared when the user is deleted). Variants duplicate via `parentId`.
+// Flächenfinder
 
-model PlanningArea {
-  id                 Int               @id @default(autoincrement())
-  createdAt          DateTime          @default(now())
-  updatedAt          DateTime          @updatedAt
+model SpaceFinderArea {
+  id                 Int                  @id @default(autoincrement())
+  createdAt          DateTime             @default(now())
+  updatedAt          DateTime             @updatedAt
   //
   title              String
   //
-  region             Region            @relation(fields: [regionId], references: [id])
+  region             Region               @relation(fields: [regionId], references: [id])
   regionId           Int
   //
-  createdBy          User?             @relation("PlanningAreaCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy          User?                @relation("SpaceFinderAreaCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   createdById        String?
   //
-  // GeoJSON geometry (EPSG:4326) and the user-uploaded "Eigene Daten" datasets:
-  // [{ id, name, mode: bonus|penalty|exclude_inside|exclude_outside, geojson: FeatureCollection }].
-  // The per-dataset strength lives per variant in factorConfig.eigendaten_weights[id].
-  studyArea          Json
-  userDatasets       Json              @default("[]")
-  // Deprecated: the single upload before `userDatasets` (backfilled as dataset "d1"). No longer
-  // written or read by the app; kept so a planning-worker still on the old image keeps working
-  // during the rollout. Drop both in a follow-up migration once the new worker runs everywhere.
-  userGeojson        Json?
-  userGeojsonMode    String?
-  // Shared by all variants of this area; merged into worker snapshots as use_case / area_size_m2.
-  useCase            String            @default("fahrradbox")
+  studyArea          Json // GeoJSON geometry (EPSG:4326)
+  userDatasets       Json                 @default("[]") // [{ id, name, mode, geojson }]; strength per variant in factorConfig.eigendaten_weights
+  useCase            String               @default("fahrradbox")
   areaSizeM2         Float?
-  // Bumped when geometry/obstacles/use-case/size change — marks existing COMPLETE runs stale.
-  inputUpdatedAt     DateTime          @default(now())
+  // Bumped when geometry, datasets, use case or size change; marks existing runs stale.
+  inputUpdatedAt     DateTime             @default(now())
   //
-  // Census figures of the Planungsgebiet, computed once per area from `data.census_population_point`
-  // (see server/planning/censusSaettigung.server.ts). They prefill the factor parameter
-  // `bewohnerbedarf_saettigung_ew`; all variants of the area start on the same value.
-  // `censusComputedAt` distinguishes "never computed" from "computed, nothing found"
-  // (then both values stay NULL and the worker default applies).
+  // Prefill for `bewohnerbedarf_saettigung_ew` (censusSaettigung.server.ts). `censusComputedAt` is
+  // also set when nothing was found (both values NULL, the worker default applies).
   censusSaettigungEw Float?
   censusEwPerHa      Float?
   censusComputedAt   DateTime?
   //
-  variants           PlanningVariant[]
+  variants           SpaceFinderVariant[]
 
   @@index([regionId])
-  @@map("PlanningArea")
+  @@map("SpaceFinderArea")
   @@schema("prisma")
 }
 
-model PlanningVariant {
-  id           Int               @id @default(autoincrement())
-  createdAt    DateTime          @default(now())
-  updatedAt    DateTime          @updatedAt
+model SpaceFinderVariant {
+  id           Int                  @id @default(autoincrement())
+  createdAt    DateTime             @default(now())
+  updatedAt    DateTime             @updatedAt
   //
   title        String
   description  String?
   //
-  area         PlanningArea      @relation(fields: [areaId], references: [id], onDelete: Cascade)
+  area         SpaceFinderArea      @relation(fields: [areaId], references: [id], onDelete: Cascade)
   areaId       Int
   //
-  createdBy    User?             @relation("PlanningVariantCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
+  createdBy    User?                @relation("SpaceFinderVariantCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)
   createdById  String?
   //
-  // Lineage: duplicate creates a child variant seeded from the parent's config.
-  parent       PlanningVariant?  @relation("Lineage", fields: [parentId], references: [id], onDelete: SetNull)
+  parent       SpaceFinderVariant?  @relation("Lineage", fields: [parentId], references: [id], onDelete: SetNull)
   parentId     Int?
-  children     PlanningVariant[] @relation("Lineage")
+  children     SpaceFinderVariant[] @relation("Lineage")
   //
-  // Editable UseCaseConfig without geometry: weights and thresholds only (use-case/size live on PlanningArea).
-  factorConfig Json
+  factorConfig Json // weights and thresholds; geometry and use case live on the area
   //
-  // Pointer to the latest successful run used for display. Plain Int (logical FK
-  // to PlanningRun.id) to avoid a relation cycle.
+  // Run shown on the map. Plain Int (no relation to SpaceFinderRun) to avoid a relation cycle.
   currentRunId Int?
   //
-  runs         PlanningRun[]
-  jobs         PlanningJob[]
+  runs         SpaceFinderRun[]
+  jobs         SpaceFinderJob[]
 
   @@index([areaId])
-  @@map("PlanningVariant")
+  @@map("SpaceFinderVariant")
   @@schema("prisma")
 }
 
-model PlanningRun {
-  id                   Int               @id @default(autoincrement())
-  createdAt            DateTime          @default(now())
+model SpaceFinderRun {
+  id                   Int                  @id @default(autoincrement())
+  createdAt            DateTime             @default(now())
   //
-  variant              PlanningVariant   @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variant              SpaceFinderVariant   @relation(fields: [variantId], references: [id], onDelete: Cascade)
   variantId            Int
   //
-  // Frozen merge of area geometry + use-case/size + variant assumptions (reproducibility).
-  factorConfigSnapshot Json
+  factorConfigSnapshot Json // area + variant merged at run time, what the worker computed
   //
-  // true when the parent area's geometry, obstacles, use-case, or size changed after this run completed.
-  stale                Boolean           @default(false)
-  status               PlanningRunStatus @default(PENDING)
+  stale                Boolean              @default(false)
+  status               SpaceFinderRunStatus @default(PENDING)
   hexCount             Int?
   vegCount             Int?
   cirAttribution       String?
   //
-  job                  PlanningJob?
+  job                  SpaceFinderJob?
 
   @@index([variantId])
-  @@map("PlanningRun")
+  @@map("SpaceFinderRun")
   @@schema("prisma")
 }
 
-model PlanningJob {
-  id            Int               @id @default(autoincrement())
-  createdAt     DateTime          @default(now())
-  updatedAt     DateTime          @updatedAt
+model SpaceFinderJob {
+  id            Int                  @id @default(autoincrement())
+  createdAt     DateTime             @default(now())
+  updatedAt     DateTime             @updatedAt
   //
-  variant       PlanningVariant   @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  variant       SpaceFinderVariant   @relation(fields: [variantId], references: [id], onDelete: Cascade)
   variantId     Int
   //
-  status        PlanningJobStatus @default(QUEUED)
+  status        SpaceFinderJobStatus @default(QUEUED)
   startedAt     DateTime?
   finishedAt    DateTime?
   errorMessage  String?
-  // Progress 0–100 + short label, set by the planning-worker during computation.
   progress      Int?
   progressLabel String?
   //
-  // Set when DONE — links to the immutable run used for tile display.
-  resultRun     PlanningRun?      @relation(fields: [resultRunId], references: [id])
-  resultRunId   Int?              @unique
+  resultRun     SpaceFinderRun?      @relation(fields: [resultRunId], references: [id])
+  resultRunId   Int?                 @unique
 
   @@index([status])
   @@index([variantId])
-  @@map("PlanningJob")
+  @@map("SpaceFinderJob")
   @@schema("prisma")
 }
 
-enum PlanningRunStatus {
+enum SpaceFinderRunStatus {
   PENDING
   COMPLETE
   EMPTY
@@ -959,7 +931,7 @@ enum PlanningRunStatus {
   @@schema("prisma")
 }
 
-enum PlanningJobStatus {
+enum SpaceFinderJobStatus {
   QUEUED
   RUNNING
   DONE

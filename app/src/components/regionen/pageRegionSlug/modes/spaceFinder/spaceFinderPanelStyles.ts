@@ -3,7 +3,7 @@ import {
   toggleButtonBase,
   toggleButtonInactive,
 } from '@/components/shared/SegmentedChoice/radioButtonClass'
-import type { PlanningScoreMode } from '@/shared/regionen/planningScoreMode.const'
+import type { SpaceFinderScoreMode } from '@/shared/regionen/spaceFinderScoreMode.const'
 
 /**
  * Color of the factor groups. Only serves to tell the groups apart at a glance — share chip in
@@ -73,7 +73,7 @@ export const spaceFinderGroupBarStyle: Record<
  * Toggle button in the group color (active) or neutral (inactive) — for `ScoreModeSwitcher`.
  * Kombination has no group color and falls back to the original green accent.
  */
-export const spaceFinderGroupButtonClass = (active: boolean, mode: PlanningScoreMode) =>
+export const spaceFinderGroupButtonClass = (active: boolean, mode: SpaceFinderScoreMode) =>
   twJoin(
     toggleButtonBase,
     active

@@ -6,7 +6,7 @@ const TOOLTIP_WIDTH = 320 // = w-80, for clamping at the right window edge
 
 /**
  * Info icon with hover/focus tooltip. The tooltip is portaled to `document.body` and positioned
- * `fixed` — otherwise the planning panel, a scroll container (`overflow-auto`), clips it;
+ * `fixed` — otherwise the Flächenfinder panel, a scroll container (`overflow-auto`), clips it;
  * a higher z-index doesn't help.
  */
 export const InfoTooltip = ({ children }: { children: ReactNode }) => {

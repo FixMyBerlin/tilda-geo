@@ -12,7 +12,7 @@ import {
   weightToPoints,
   weightToStep,
 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/weightScale'
-import { isCoarseHexagon } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/planningHexagonResolution'
+import { isCoarseHexagon } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderHexagonResolution'
 import { appliedMinAreaM2 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderModeParam'
 import {
   spaceFinderFactorActiveTextClass,
@@ -28,11 +28,11 @@ import {
 import { spaceFinderOpenRunStatus } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderRunStatus'
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
-import { parseEigendatenDetails } from '@/shared/regionen/planningEigendatenDetails'
+import { parseEigendatenDetails } from '@/shared/regionen/spaceFinderEigendatenDetails'
 import {
-  PLANNING_SCORE_GROUPS,
-  PLANNING_SCORE_LABELS as SCORE_LABELS,
-} from '@/shared/regionen/planningScoreLabels.const'
+  SPACE_FINDER_SCORE_GROUPS,
+  SPACE_FINDER_SCORE_LABELS as SCORE_LABELS,
+} from '@/shared/regionen/spaceFinderScoreLabels.const'
 import { Disclosure } from './Disclosure/Disclosure'
 
 type Props = {
@@ -40,11 +40,11 @@ type Props = {
 }
 
 // Per-hexagon factor breakdown grouped by the two probabilities (Issue #3415), see
-// `PLANNING_SCORE_GROUPS`. Within a group the two factor kinds are also displayed differently
+// `SPACE_FINDER_SCORE_GROUPS`. Within a group the two factor kinds are also displayed differently
 // because they hold different values (mirrors scorer.py):
 //   criteria  → 0–100 Teilscore, weighted average → bar
 //   modifiers → bonus/penalty in points (can be negative) → bar relative to the max effect
-const SCORE_GROUPS = PLANNING_SCORE_GROUPS
+const SCORE_GROUPS = SPACE_FINDER_SCORE_GROUPS
 
 // `score_*` (result per hexagon) → `w_*` (variant weight) — needed to determine the maximum
 // possible effect (`weightToPoints`) for the share bar (mirrors weightScale.ts).
@@ -69,7 +69,7 @@ const CRITERION_WEIGHT_KEYS: Record<string, string> = {
 }
 
 // Row order follows the factor editor (`WEIGHT_GROUPS`), so the same factor sits at the same
-// position in the editor and here. `PLANNING_SCORE_GROUPS` is shared with the Prüfliste
+// position in the editor and here. `SPACE_FINDER_SCORE_GROUPS` is shared with the Prüfliste
 // take-over and has its own order, so it is only re-sorted here.
 const EDITOR_ORDER = new Map(
   WEIGHT_GROUPS.flatMap((group) => [...group.criteria, ...group.modifiers.map((m) => m.key)]).map(

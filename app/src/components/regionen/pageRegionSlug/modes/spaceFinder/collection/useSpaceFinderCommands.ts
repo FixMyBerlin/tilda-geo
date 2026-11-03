@@ -3,30 +3,30 @@ import { useState } from 'react'
 import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
 import { toastSuccess } from '@/components/shared/toast/toastSuccess'
 import {
-  createPlanningVariantFn,
-  deletePlanningAreaFn,
-  deletePlanningVariantFn,
-  duplicatePlanningVariantFn,
-  updatePlanningAreaFn,
-  updatePlanningVariantFn,
-} from '@/server/planning/planning.functions'
+  createSpaceFinderVariantFn,
+  deleteSpaceFinderAreaFn,
+  deleteSpaceFinderVariantFn,
+  duplicateSpaceFinderVariantFn,
+  updateSpaceFinderAreaFn,
+  updateSpaceFinderVariantFn,
+} from '@/server/spaceFinder/spaceFinder.functions'
 import {
-  planningAreaQueryOptions,
-  planningAreasQueryOptions,
-  planningVariantQueryOptions,
-} from '@/server/planning/planningQueryOptions'
+  spaceFinderAreaQueryOptions,
+  spaceFinderAreasQueryOptions,
+  spaceFinderVariantQueryOptions,
+} from '@/server/spaceFinder/spaceFinderQueryOptions'
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import { DEFAULT_FACTOR_TEMPLATE } from '../factors/spaceFinderDefaults'
 import {
   firstSpaceFinderVariantId,
-  type PlanningAreasRow,
+  type SpaceFinderAreasRow,
   type SpaceFinderSelectedVariant,
 } from './spaceFinderCollectionOptions'
 
 export type SpaceFinderNameModalKind = 'newVariant' | 'renameVariant' | 'renameArea'
 
 type UseSpaceFinderCommandsInput = {
-  areas: readonly PlanningAreasRow[]
+  areas: readonly SpaceFinderAreasRow[]
   selectedOption: SpaceFinderSelectedVariant | undefined
   /** Writes `space.key`. `undefined` clears the selection (e.g. the last Gebiet was deleted). */
   onSelect: (variantId: number | undefined) => void
@@ -54,17 +54,20 @@ export const useSpaceFinderCommands = ({
   }
   const closeNameModal = () => setNameModal(null)
 
-  const invalidateAreas = () => queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
+  const invalidateAreas = () =>
+    queryClient.invalidateQueries(spaceFinderAreasQueryOptions(regionSlug))
 
   const renameVariant = useMutation({
     mutationFn: (title: string) => {
       if (!selectedOption) throw new Error('Keine Variante ausgewählt.')
-      return updatePlanningVariantFn({ data: { variantId: selectedOption.variantId, title } })
+      return updateSpaceFinderVariantFn({ data: { variantId: selectedOption.variantId, title } })
     },
     onSuccess: async () => {
       await invalidateAreas()
       if (selectedOption) {
-        await queryClient.invalidateQueries(planningVariantQueryOptions(selectedOption.variantId))
+        await queryClient.invalidateQueries(
+          spaceFinderVariantQueryOptions(selectedOption.variantId),
+        )
       }
     },
   })
@@ -72,18 +75,18 @@ export const useSpaceFinderCommands = ({
   const renameArea = useMutation({
     mutationFn: (title: string) => {
       if (!selectedOption) throw new Error('Kein Planungsgebiet ausgewählt.')
-      return updatePlanningAreaFn({
+      return updateSpaceFinderAreaFn({
         data: { areaId: selectedOption.areaId, title },
       })
     },
     onSuccess: async () => {
       await invalidateAreas()
       if (!selectedOption) return
-      await queryClient.invalidateQueries(planningAreaQueryOptions(selectedOption.areaId))
+      await queryClient.invalidateQueries(spaceFinderAreaQueryOptions(selectedOption.areaId))
       const area = areas.find((candidate) => candidate.id === selectedOption.areaId)
       await Promise.all(
         (area?.variants ?? []).map((variant) =>
-          queryClient.invalidateQueries(planningVariantQueryOptions(variant.id)),
+          queryClient.invalidateQueries(spaceFinderVariantQueryOptions(variant.id)),
         ),
       )
     },
@@ -92,29 +95,29 @@ export const useSpaceFinderCommands = ({
   const createVariant = useMutation({
     mutationFn: (title: string) => {
       if (!selectedOption) throw new Error('Kein Planungsgebiet ausgewählt.')
-      return createPlanningVariantFn({
+      return createSpaceFinderVariantFn({
         data: { areaId: selectedOption.areaId, title, factorConfig: DEFAULT_FACTOR_TEMPLATE },
       })
     },
     onSuccess: async (created) => {
       await invalidateAreas()
-      await queryClient.invalidateQueries(planningVariantQueryOptions(created.id))
+      await queryClient.invalidateQueries(spaceFinderVariantQueryOptions(created.id))
       onSelect(created.id)
     },
   })
 
   const duplicateVariant = useMutation({
-    mutationFn: (variantId: number) => duplicatePlanningVariantFn({ data: { variantId } }),
+    mutationFn: (variantId: number) => duplicateSpaceFinderVariantFn({ data: { variantId } }),
     onSuccess: async (created) => {
       await invalidateAreas()
-      await queryClient.invalidateQueries(planningVariantQueryOptions(created.id))
+      await queryClient.invalidateQueries(spaceFinderVariantQueryOptions(created.id))
       toastSuccess('Variante dupliziert.')
       onSelect(created.id)
     },
   })
 
   const deleteVariant = useMutation({
-    mutationFn: (variantId: number) => deletePlanningVariantFn({ data: { variantId } }),
+    mutationFn: (variantId: number) => deleteSpaceFinderVariantFn({ data: { variantId } }),
     onSuccess: async (_result, variantId) => {
       await invalidateAreas()
       if (selectedOption?.variantId !== variantId) return
@@ -125,7 +128,7 @@ export const useSpaceFinderCommands = ({
   })
 
   const deleteArea = useMutation({
-    mutationFn: (areaId: number) => deletePlanningAreaFn({ data: { areaId } }),
+    mutationFn: (areaId: number) => deleteSpaceFinderAreaFn({ data: { areaId } }),
     onSuccess: async (_result, areaId) => {
       await invalidateAreas()
       if (selectedOption?.areaId !== areaId) return

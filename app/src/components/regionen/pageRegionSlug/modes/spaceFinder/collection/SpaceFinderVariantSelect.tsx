@@ -6,7 +6,7 @@ import { ModeCollectionSelect } from '../../ModeCollectionSelect'
 import { modeIdentity } from '../../modeIdentity'
 import { ModePanelCollectionDisclosure } from '../../ModePanelCollectionDisclosure'
 import {
-  type PlanningAreaVariantRow,
+  type SpaceFinderAreaVariantRow,
   type SpaceFinderSelectedVariant,
   type SpaceFinderVariantStatus,
   spaceFinderVariantStatus,
@@ -38,7 +38,7 @@ const StatusIcon = ({ status }: { status: SpaceFinderVariantStatus }) => {
 }
 
 type Props = {
-  variants: PlanningAreaVariantRow[]
+  variants: SpaceFinderAreaVariantRow[]
   selected: SpaceFinderSelectedVariant
   onSelect: (variantId: number) => void
   /** Desktop only (D10): creating, duplicating, renaming and deleting variants. */

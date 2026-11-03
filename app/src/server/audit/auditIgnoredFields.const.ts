@@ -18,14 +18,7 @@ export const AUDIT_IGNORED_FIELDS = {
   // column, and every update would copy the old and the new version (other uploads live on S3).
   // A change still shows as `inputUpdatedAt`. The census figures are computed from the geometry.
   // `studyArea` is logged like other drawn geometries (e.g. `ReviewEntry.geometry`).
-  PlanningArea: [
-    'userDatasets',
-    'userGeojson',
-    'userGeojsonMode',
-    'censusSaettigungEw',
-    'censusEwPerHa',
-    'censusComputedAt',
-  ],
-  // Set by the planning-worker when a run finishes.
-  PlanningVariant: ['currentRunId'],
+  SpaceFinderArea: ['userDatasets', 'censusSaettigungEw', 'censusEwPerHa', 'censusComputedAt'],
+  // Set by the space-finder-worker when a run finishes.
+  SpaceFinderVariant: ['currentRunId'],
 } as const

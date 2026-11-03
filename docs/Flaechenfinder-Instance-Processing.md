@@ -109,8 +109,8 @@ SELECT count(*), round(min(ST_XMin(ST_Transform(geom,4326)))::numeric,2) AS minx
 FROM public._buildings;
 ```
 
-More notes: `processing/topics/landcover/README.md`, `planning-worker/ALKIS.md`.
+More notes: `processing/topics/landcover/README.md`, `space-finder-worker/ALKIS.md`.
 
 ## Enable the Flächenfinder per region
 
-`spaceFinderEnabled` defaults to `false` for new regions (admin: "Flächenfinder aktiv"). The migration `region_space_finder_default_off` switches off all regions without a Planungsgebiet on deploy. If such a region on the instance should use the Flächenfinder, switch it back on in the admin afterwards.
+`spaceFinderEnabled` defaults to `false` for new regions (admin: "Flächenfinder aktiv"). Switch it on in the admin for every region that should use the Flächenfinder.

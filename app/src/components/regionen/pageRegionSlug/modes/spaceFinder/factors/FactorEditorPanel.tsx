@@ -15,19 +15,19 @@ import {
   type UserDataset,
   userDatasetCoverage,
   userDatasetCoverageMessage,
-} from '@/lib/planningUserGeojson'
-import { factorFingerprint, factorsDiffer } from '@/server/planning/factorFingerprint'
+} from '@/lib/spaceFinderUserGeojson'
+import { factorFingerprint, factorsDiffer } from '@/server/spaceFinder/factorFingerprint'
 import {
   syncEigendatenWeights,
   type VariantFactorConfig,
-} from '@/server/planning/mergeFactorConfig'
-import type { FactorConfig } from '@/server/planning/planning.functions'
-import { updatePlanningVariantFn } from '@/server/planning/planning.functions'
+} from '@/server/spaceFinder/mergeFactorConfig'
+import type { FactorConfig } from '@/server/spaceFinder/spaceFinder.functions'
+import { updateSpaceFinderVariantFn } from '@/server/spaceFinder/spaceFinder.functions'
 import {
-  planningAreaQueryOptions,
-  planningAreasQueryOptions,
-  planningVariantQueryOptions,
-} from '@/server/planning/planningQueryOptions'
+  spaceFinderAreaQueryOptions,
+  spaceFinderAreasQueryOptions,
+  spaceFinderVariantQueryOptions,
+} from '@/server/spaceFinder/spaceFinderQueryOptions'
 import { useSpaceFinderBoundaryActions } from '../../../hooks/mapState/space-finder-boundary-store'
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import { USER_DATASET_MODE_OPTIONS, UserDatasetCoverageHint } from '../area/UserDatasetsField'
@@ -636,7 +636,7 @@ const AUTOSAVE_DELAY_MS = 700
  *
  * Changes save themselves (see auto-save below) — there is no save button.
  * `lastRunConfig` is the frozen factor state of the last run
- * (`PlanningRun.factorConfigSnapshot`) and is the reference point for „Änderungen verwerfen".
+ * (`SpaceFinderRun.factorConfigSnapshot`) and is the reference point for „Änderungen verwerfen".
  */
 export const FactorEditorPanel = (props: {
   variantId: number
@@ -715,7 +715,7 @@ const FactorEditorPanelForm = ({
 
   const mutation = useMutation({
     mutationFn: (next: FactorConfig) =>
-      updatePlanningVariantFn({
+      updateSpaceFinderVariantFn({
         data: {
           variantId,
           // `min_area_m2` belongs to the area search filter; the server keeps the stored value.
@@ -723,10 +723,10 @@ const FactorEditorPanelForm = ({
         },
       }),
     onSuccess: () => {
-      toastSuccess('Faktoren gespeichert', { id: 'planning-factors-saved' })
-      queryClient.invalidateQueries(planningVariantQueryOptions(variantId))
-      queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
-      queryClient.invalidateQueries(planningAreaQueryOptions(areaId))
+      toastSuccess('Faktoren gespeichert', { id: 'space-finder-factors-saved' })
+      queryClient.invalidateQueries(spaceFinderVariantQueryOptions(variantId))
+      queryClient.invalidateQueries(spaceFinderAreasQueryOptions(regionSlug))
+      queryClient.invalidateQueries(spaceFinderAreaQueryOptions(areaId))
     },
     onError: (error) => {
       // Drop the fingerprint: the server doesn't have this state — the next change should trigger

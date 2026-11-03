@@ -112,7 +112,7 @@ const parkraumRegionConfig = {
   welcome: regionWelcomeDemoSpecToWriteInput(regionWelcomeDemoSpecs.parkraum, null),
 } satisfies Omit<RegionWriteInput, 'slug' | 'name' | 'fullName'>
 
-/** `parkraum` with the Flächenfinder on, centered on the Planungsgebiete in `planning.ts`. */
+/** Dev region for the Flächenfinder: the `parkraum` config with the mode on and the map centered on the Planungsgebiete from `spaceFinder.ts`. */
 const flaechenfinderDevRegionConfig = {
   ...parkraumRegionConfig,
   promoted: false,
@@ -339,7 +339,7 @@ export const seedRegionCatalog: SeedRegionEntry[] = [
     },
   },
   // Flächenfinder test regions: `parkraum` setup (Neukölln) with the mode switched on.
-  // Planungsgebiete are seeded in `planning.ts`.
+  // Planungsgebiete are seeded in `spaceFinder.ts`.
   {
     slug: 'dev-flaechenfinder',
     config: {

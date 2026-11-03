@@ -5,7 +5,7 @@ import { expectNoConsoleErrors } from '../utils/console'
 import { waitForMapLoad } from '../utils/maps'
 
 // Seed regions with `spaceFinderEnabled` on: `dev-flaechenfinder` has two Planungsgebiete
-// (`seedPlanning`: Schillerkiez, Herrfurthplatz (mit Eigenen Daten)), `dev-flaechenfinder-empty` has none.
+// (`seedSpaceFinder`: Schillerkiez, Herrfurthplatz (mit Eigenen Daten)), `dev-flaechenfinder-empty` has none.
 const REGION = 'dev-flaechenfinder'
 const EMPTY_REGION = 'dev-flaechenfinder-empty'
 const MODE_URL = `/regionen/${REGION}/flaechenfinder`
@@ -128,7 +128,7 @@ test.describe('Flächenfinder mode (stubbed admin login)', () => {
         await expect(page.getByText(`Planungsgebiet »${title}« angelegt.`)).toBeVisible({
           timeout: 30_000,
         })
-        const area = await db.planningArea.findFirstOrThrow({
+        const area = await db.spaceFinderArea.findFirstOrThrow({
           where: { title },
           select: { id: true, variants: { select: { id: true } } },
         })
@@ -157,14 +157,14 @@ test.describe('Flächenfinder mode (stubbed admin login)', () => {
         await expect(page.getByText('Variante angelegt.', { exact: false })).toBeVisible({
           timeout: 30_000,
         })
-        const variants = await db.planningVariant.findMany({
+        const variants = await db.spaceFinderVariant.findMany({
           where: { areaId: area.id },
           select: { title: true },
           orderBy: { id: 'asc' },
         })
         expect(variants.map((variant) => variant.title)).toEqual(['Variante 1', 'Variante 2'])
       } finally {
-        await db.planningArea.deleteMany({ where: { title: { startsWith: AREA_PREFIX } } })
+        await db.spaceFinderArea.deleteMany({ where: { title: { startsWith: AREA_PREFIX } } })
       }
     })
   })

@@ -1,6 +1,6 @@
 -- Subway/station entrance nodes for the `_publicTransport_entrances` PROCESSING-ONLY table
 -- (geometry only — no tags/meta, no minzoom). The leading `_` marks it internal: no map layer,
--- Martin only serves it for inspection. It is used by the planning-worker to score proximity to
+-- Martin only serves it for inspection. It is used by the space-finder-worker to score proximity to
 -- actual pedestrian access points instead of the (often distant) station point.
 --
 -- TODO: if this ever becomes a PRESENTATIONAL table, give it the standard topic shape

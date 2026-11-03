@@ -1,10 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { buttonStylesOnYellow } from '@/components/shared/links/styles'
-import { runPlanningVariantFn } from '@/server/planning/planning.functions'
+import { runSpaceFinderVariantFn } from '@/server/spaceFinder/spaceFinder.functions'
 import {
-  planningAreasQueryOptions,
-  planningVariantQueryOptions,
-} from '@/server/planning/planningQueryOptions'
+  spaceFinderAreasQueryOptions,
+  spaceFinderVariantQueryOptions,
+} from '@/server/spaceFinder/spaceFinderQueryOptions'
 import { useSpaceFinderFactorSavePending } from '../../../hooks/mapState/space-finder-boundary-store'
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import {
@@ -34,10 +34,10 @@ export const RunButton = ({
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
-    mutationFn: () => runPlanningVariantFn({ data: { variantId } }),
+    mutationFn: () => runSpaceFinderVariantFn({ data: { variantId } }),
     onSuccess: () => {
-      queryClient.invalidateQueries(planningVariantQueryOptions(variantId))
-      queryClient.invalidateQueries(planningAreasQueryOptions(regionSlug))
+      queryClient.invalidateQueries(spaceFinderVariantQueryOptions(variantId))
+      queryClient.invalidateQueries(spaceFinderAreasQueryOptions(regionSlug))
     },
   })
 

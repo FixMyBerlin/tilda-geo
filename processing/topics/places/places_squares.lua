@@ -1,9 +1,9 @@
 -- place=square polygons for the `_places_squares` PROCESSING-ONLY table (geometry only — no
 -- tags/meta, no minzoom). The leading `_` marks it internal: no map layer, Martin only serves it
--- for inspection. The planning-worker uses it to score proximity to / coverage by public squares.
+-- for inspection. The space-finder-worker uses it to score proximity to / coverage by public squares.
 --
 -- MVP: closed ways only, no multipolygon relations (squares as relations are rare; mirrors the
--- pedestrian-zone MVP decision elsewhere in the planning module).
+-- pedestrian-zone MVP decision elsewhere in the Flächenfinder).
 local db_table = osm2pgsql.define_table({
   name = '_places_squares',
   ids = { type = 'way', id_column = 'osm_id' },

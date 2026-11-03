@@ -23,12 +23,12 @@ const PersistedCandidatesSchema = z.object({
  * Properties come from the rendered tile feature at click time, so the list and
  * GeoJSON export still work after panning away (no re-query of the vector source).
  * Tiles clip hexagons at tile borders, so the full outline is loaded from the
- * server (`getPlanningHexagonGeomFn`) right after the click.
+ * server (`getSpaceFinderHexagonGeomFn`) right after the click.
  */
 export type SpaceFinderCandidate = z.infer<typeof SpaceFinderCandidateSchema>
 
 /**
- * Store key of one `PlanningRun`: id plus creation time. The id alone is not unique for
+ * Store key of one `SpaceFinderRun`: id plus creation time. The id alone is not unique for
  * sessionStorage — the same origin (127.0.0.1:5173) serves different databases (main checkout,
  * worktrees, a fresh seed or db-pull), and their run ids overlap. Without the timestamp a new run
  * would show the candidates of an unrelated run with the same id.

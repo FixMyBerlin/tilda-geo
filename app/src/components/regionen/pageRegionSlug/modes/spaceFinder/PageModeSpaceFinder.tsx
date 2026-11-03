@@ -8,7 +8,7 @@ import { RunButton } from '@/components/regionen/pageRegionSlug/modes/spaceFinde
 import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { frenchQuote } from '@/components/shared/text/Quotes'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
-import { planningAreasQueryOptions } from '@/server/planning/planningQueryOptions'
+import { spaceFinderAreasQueryOptions } from '@/server/spaceFinder/spaceFinderQueryOptions'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 import {
   getLastFittedBoundaryKey,
@@ -61,7 +61,7 @@ export const PageModeSpaceFinder = () => {
   const { setBoundaryHighlightGeom, setLastFittedBoundaryKey } = useSpaceFinderBoundaryActions()
 
   // Primed by the route loader (areas list and the active variant).
-  const { data: areas } = useSuspenseQuery(planningAreasQueryOptions(regionSlug))
+  const { data: areas } = useSuspenseQuery(spaceFinderAreasQueryOptions(regionSlug))
   const sortedAreas = sortedSpaceFinderAreas(areas)
 
   const { spaceFinderMode, setSpaceFinderModeParam } = useSpaceFinderModeParam()

@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 
 // The 14 domain steps of a run, in order. Must match SCORING_STEPS in the
-// planning-worker (flaechenfinder/scorer.py).
+// space-finder-worker (scoring/scorer.py).
 const SCORING_STEPS = [
   'Vegetationsflächen berechnen',
   'H3-Gitter generieren',

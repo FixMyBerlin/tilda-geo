@@ -112,21 +112,21 @@ describe('assertRegionCanBeDeleted', () => {
         memberships: 2,
         noteFolders: 0,
         qaConfigs: 0,
-        planningAreas: 0,
+        spaceFinderAreas: 0,
         mapDatasetUploads: 0,
       },
     })
     await expect(assertRegionCanBeDeleted('berlin')).rejects.toThrow('2 Mitgliedschaft(en)')
   })
 
-  test('throws when region has planningAreas', async () => {
+  test('throws when region has spaceFinderAreas', async () => {
     regionFindUnique.mockResolvedValueOnce({
       slug: 'berlin',
       _count: {
         memberships: 0,
         noteFolders: 0,
         qaConfigs: 0,
-        planningAreas: 3,
+        spaceFinderAreas: 3,
         mapDatasetUploads: 0,
       },
     })
@@ -140,7 +140,7 @@ describe('assertRegionCanBeDeleted', () => {
         memberships: 0,
         noteFolders: 0,
         qaConfigs: 0,
-        planningAreas: 0,
+        spaceFinderAreas: 0,
         mapDatasetUploads: 1,
       },
     })
@@ -154,7 +154,7 @@ describe('assertRegionCanBeDeleted', () => {
         memberships: 0,
         noteFolders: 0,
         qaConfigs: 0,
-        planningAreas: 0,
+        spaceFinderAreas: 0,
         mapDatasetUploads: 0,
       },
     })

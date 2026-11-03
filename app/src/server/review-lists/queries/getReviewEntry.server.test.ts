@@ -4,12 +4,12 @@ import { UserRoleEnum } from '@/prisma/generated/enums'
 
 const {
   reviewEntryFindFirst,
-  planningVariantFindFirst,
+  spaceFinderVariantFindFirst,
   getAppSession,
   canAccessMemberModeForRegion,
 } = vi.hoisted(() => ({
   reviewEntryFindFirst: vi.fn(),
-  planningVariantFindFirst: vi.fn(),
+  spaceFinderVariantFindFirst: vi.fn(),
   getAppSession: vi.fn(),
   canAccessMemberModeForRegion: vi.fn(),
 }))
@@ -17,7 +17,7 @@ const {
 vi.mock('@/server/db.server', () => ({
   default: {
     reviewEntry: { findFirst: reviewEntryFindFirst },
-    planningVariant: { findFirst: planningVariantFindFirst },
+    spaceFinderVariant: { findFirst: spaceFinderVariantFindFirst },
   },
 }))
 
@@ -46,7 +46,7 @@ const entryRow = {
 
 beforeEach(() => {
   reviewEntryFindFirst.mockReset()
-  planningVariantFindFirst.mockReset()
+  spaceFinderVariantFindFirst.mockReset()
   getAppSession.mockReset()
   canAccessMemberModeForRegion.mockReset()
 
@@ -75,7 +75,7 @@ describe('getReviewEntry', () => {
       ...entryRow,
       spaceFinderVariant: null,
     })
-    expect(planningVariantFindFirst).not.toHaveBeenCalled()
+    expect(spaceFinderVariantFindFirst).not.toHaveBeenCalled()
     expect(reviewEntryFindFirst).toHaveBeenCalledWith({
       where: { id: 7, list: { regions: { some: { slug: 'berlin' } } } },
       select: expect.any(Object),
@@ -92,12 +92,12 @@ describe('getReviewEntry', () => {
     test('resolves the variant only inside the requested region', async () => {
       canAccessMemberModeForRegion.mockResolvedValue({ isAuthorized: true, regionId: 11 })
       reviewEntryFindFirst.mockResolvedValue(spaceFinderRow)
-      planningVariantFindFirst.mockResolvedValue({ id: 5, currentRunId: 9 })
+      spaceFinderVariantFindFirst.mockResolvedValue({ id: 5, currentRunId: 9 })
 
       const result = await getReviewEntry({ regionSlug: 'berlin', entryId: 7 }, headers)
 
       expect(result.spaceFinderVariant).toEqual({ id: 5, currentRunId: 9 })
-      expect(planningVariantFindFirst).toHaveBeenCalledWith({
+      expect(spaceFinderVariantFindFirst).toHaveBeenCalledWith({
         where: { id: 5, area: { region: { slug: 'berlin' } } },
         select: { id: true, currentRunId: true },
       })
@@ -106,7 +106,7 @@ describe('getReviewEntry', () => {
     test('has no link target when the variant belongs to another region or is gone', async () => {
       canAccessMemberModeForRegion.mockResolvedValue({ isAuthorized: true, regionId: 11 })
       reviewEntryFindFirst.mockResolvedValue(spaceFinderRow)
-      planningVariantFindFirst.mockResolvedValue(null)
+      spaceFinderVariantFindFirst.mockResolvedValue(null)
 
       const result = await getReviewEntry({ regionSlug: 'koeln', entryId: 7 }, headers)
 
@@ -120,7 +120,7 @@ describe('getReviewEntry', () => {
       const result = await getReviewEntry({ regionSlug: 'berlin', entryId: 7 }, headers)
 
       expect(result.spaceFinderVariant).toBeNull()
-      expect(planningVariantFindFirst).not.toHaveBeenCalled()
+      expect(spaceFinderVariantFindFirst).not.toHaveBeenCalled()
     })
   })
 })

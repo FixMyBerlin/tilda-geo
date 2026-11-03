@@ -10,7 +10,7 @@ export const CollapsibleBoxChevron = ({ open }: { open: boolean }) => (
 
 /**
  * Collapsible box with a title row. Base for the Flächenfinder sections, so they look and behave
- * the same in the planning panel.
+ * the same in the Flächenfinder panel.
  */
 export const CollapsibleBox = ({
   title,

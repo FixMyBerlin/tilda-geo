@@ -1,6 +1,6 @@
 import { CollapsibleBox } from '@/components/shared/CollapsibleBox/CollapsibleBox'
 import { DEFAULT_FACTOR_TEMPLATE } from '../factors/spaceFinderDefaults'
-import type { PlanningVariantDetail } from '../spaceFinderVariantDetail'
+import type { SpaceFinderVariantDetail } from '../spaceFinderVariantDetail'
 import {
   CarriagewaysToggle,
   CensusToggle,
@@ -14,7 +14,7 @@ import { ScoreModeSwitcher } from './ScoreModeSwitcher'
  * »Anzeige«: map controls. Hidden until the first run is complete: all controls (score mode,
  * area filter, layer toggles) act on run data, and the map layers are only mounted with a run.
  */
-export const DisplaySection = ({ variant }: { variant: PlanningVariantDetail }) => {
+export const DisplaySection = ({ variant }: { variant: SpaceFinderVariantDetail }) => {
   const latestRun = variant.runs[0] ?? null
   const hasCompleteRun = latestRun?.status === 'COMPLETE'
   if (!hasCompleteRun) return null
@@ -37,7 +37,7 @@ export const DisplaySection = ({ variant }: { variant: PlanningVariantDetail }) 
       {(latestRun?.vegCount ?? 0) > 0 && <VegetationToggle />}
       {factorConfig?.exclude_carriageways && <CarriagewaysToggle />}
       {/* From the run snapshot, not the current config: the tiles are clipped to the
-              Planungsgebiet of THIS run (see planning_census), so the toggle should appear exactly
+              Planungsgebiet of THIS run (see space_finder_census), so the toggle should appear exactly
               when resident demand was actually included. */}
       {(lastRunConfig?.weights?.w_bewohnerbedarf ?? 0) > 0 && <CensusToggle />}
       {hasUserDatasets && <UserObstaclesToggle />}

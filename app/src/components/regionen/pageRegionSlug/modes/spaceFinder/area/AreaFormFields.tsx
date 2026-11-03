@@ -10,9 +10,9 @@ import { uniqueFormattedFormErrors } from '@/components/shared/form/formatError'
 import type { FormApi } from '@/components/shared/form/types'
 import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
 import { radioButtonClass } from '@/components/shared/SegmentedChoice/radioButtonClass'
-import { MAX_STUDY_AREA_KM2, studyAreaSizeKm2 } from '@/lib/planningStudyAreaLimit'
-import type { UserDataset } from '@/lib/planningUserGeojson'
-import type { PlanningAreaFormValues } from '@/server/planning/planningFormSchemas'
+import { MAX_STUDY_AREA_KM2, studyAreaSizeKm2 } from '@/lib/spaceFinderStudyAreaLimit'
+import type { UserDataset } from '@/lib/spaceFinderUserGeojson'
+import type { SpaceFinderAreaFormValues } from '@/server/spaceFinder/spaceFinderFormSchemas'
 import {
   useSpaceFinderBoundaryActions,
   useSpaceFinderDrawnGeometry,
@@ -21,8 +21,8 @@ import {
 import { useSpaceFinderDraw } from '../drawing/useSpaceFinderDraw'
 import {
   GROUP_HELP,
-  PLANNING_USE_CASES,
-  SHOW_PLANNING_USE_CASE_UI,
+  SPACE_FINDER_USE_CASES,
+  SHOW_SPACE_FINDER_USE_CASE_UI,
 } from '../factors/spaceFinderDefaults'
 import {
   spaceFinderDiscardLinkClass,
@@ -50,10 +50,12 @@ const tabClass = (active: boolean) =>
  * The form as these fields see it: the datasets' GeoJSON is hidden from TanStack's deep key types,
  * which overflow on GeoJSON's recursive geometry types (TS2589). Only `userDatasets` is affected.
  */
-type AreaFormFieldValues = Omit<PlanningAreaFormValues, 'userDatasets'> & { userDatasets: unknown }
+type AreaFormFieldValues = Omit<SpaceFinderAreaFormValues, 'userDatasets'> & {
+  userDatasets: unknown
+}
 
 type AreaFormFieldsProps = {
-  form: FormApi<PlanningAreaFormValues>
+  form: FormApi<SpaceFinderAreaFormValues>
   geometryStepTitle?: string
   /** The saved study area when an existing Gebiet is edited; "discard" goes back to it. */
   originalStudyArea?: StudyAreaGeometry | null
@@ -210,23 +212,23 @@ export const AreaFormFields = ({
           <TextField form={form} name="title" label="Name" />
 
           {/* TODO Flächenfinder: the „Art & Größe der gesuchten Fläche“ selection is hidden via
-          `SHOW_PLANNING_USE_CASE_UI` (spaceFinderDefaults.ts) because it has no effect on score or
+          `SHOW_SPACE_FINDER_USE_CASE_UI` (spaceFinderDefaults.ts) because it has no effect on score or
           area search yet. The block stays on purpose and reappears by flipping the flag; the
           values still come from the defaults of the calling forms (AreaWizard/AreaEditor) and
           are saved. */}
-          {SHOW_PLANNING_USE_CASE_UI && (
+          {SHOW_SPACE_FINDER_USE_CASE_UI && (
             <div className="space-y-2">
               <div className="text-xs font-semibold text-gray-700">
                 Art & Größe der gesuchten Fläche
               </div>
               <div className="grid grid-cols-2 gap-1.5">
-                {PLANNING_USE_CASES.map(({ key, label }) => (
+                {SPACE_FINDER_USE_CASES.map(({ key, label }) => (
                   <button
                     key={key}
                     type="button"
                     onClick={() => {
                       form.setFieldValue('useCase', key)
-                      const defaultAreaM2 = PLANNING_USE_CASES.find(
+                      const defaultAreaM2 = SPACE_FINDER_USE_CASES.find(
                         (u) => u.key === key,
                       )?.defaultAreaM2
                       if (defaultAreaM2 != null) form.setFieldValue('areaSizeM2', defaultAreaM2)

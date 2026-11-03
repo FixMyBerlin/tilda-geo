@@ -2,8 +2,8 @@
  * TODO Flächenfinder: DUMMY criteria — replace with the criteria worked out with Sine.
  *
  * One list for every Planungsgebiet on purpose: the use-case selection ("Art & Größe der gesuchten
- * Fläche") is hidden (`SHOW_PLANNING_USE_CASE_UI = false`), so every area is stored as `fahrradbox`
- * and a list per use case would never be picked. Split this per `PlanningArea.useCase` once the
+ * Fläche") is hidden (`SHOW_SPACE_FINDER_USE_CASE_UI = false`), so every area is stored as `fahrradbox`
+ * and a list per use case would never be picked. Split this per `SpaceFinderArea.useCase` once the
  * selection is available.
  *
  * `id` is stable on purpose (a later "tick off" feature can refer to it); `label` is shown.

@@ -19,7 +19,7 @@ import { reviewEntriesInteractiveLayerIds } from '../SourcesAndLayers/reviewEntr
 import { internalNotesLayerId } from '../SourcesAndLayers/SourcesLayersInternalNotes'
 import { osmNotesLayerId } from '../SourcesAndLayers/SourcesLayersOsmNotes'
 import { qaLayerId } from '../SourcesAndLayers/SourcesLayersQa'
-import { planningHexagonsLayerId } from '../SourcesAndLayers/SourcesLayersSpaceFinder'
+import { spaceFinderHexagonsLayerId } from '../SourcesAndLayers/SourcesLayersSpaceFinder'
 import { MASK_INTERACTIVE_LAYER_IDS } from './maskLayerUtils'
 
 type Props = { categories: MapDataCategoryConfig[] | undefined }
@@ -97,7 +97,7 @@ export const useInteractiveLayers = () => {
   const { data: regionDatasets } = useRegionDatasetsQuery()
   const currentMode = useCurrentMode()
   const notesSelection = useNotesSelection()
-  const { runId: planningRun } = useSpaceFinderSelection()
+  const { runId: spaceFinderRun } = useSpaceFinderSelection()
 
   // Debug mode: return ALL layers from config
   if (debugLayerStyles && categoriesConfig) {
@@ -130,8 +130,8 @@ export const useInteractiveLayers = () => {
     activeCategoryLayerIds.push(...MASK_INTERACTIVE_LAYER_IDS)
   }
 
-  if (currentMode.isSpaceFinder && planningRun != null) {
-    activeCategoryLayerIds.push(planningHexagonsLayerId)
+  if (currentMode.isSpaceFinder && spaceFinderRun != null) {
+    activeCategoryLayerIds.push(spaceFinderHexagonsLayerId)
   }
 
   // active layer from datasets

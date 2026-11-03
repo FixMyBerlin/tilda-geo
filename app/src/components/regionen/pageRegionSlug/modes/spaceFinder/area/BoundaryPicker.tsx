@@ -9,7 +9,7 @@ import { useDebouncedValue } from '@/components/shared/hooks/useDebouncedValue'
 import {
   adminBoundariesQueryOptions,
   boundaryGeomQueryOptions,
-} from '@/server/planning/planningQueryOptions'
+} from '@/server/spaceFinder/spaceFinderQueryOptions'
 import { spaceFinderTextInputClass } from '../spaceFinderPanelStyles'
 
 // Level 9 varies by region: a Bezirk in Berlin, mostly an Ortsteil in Brandenburg.

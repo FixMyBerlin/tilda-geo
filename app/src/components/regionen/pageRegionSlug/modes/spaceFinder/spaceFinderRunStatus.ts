@@ -3,16 +3,16 @@ import {
   comparableRunSnapshot,
   factorsDiffer,
   outdatedBannerReason,
-} from '@/server/planning/factorFingerprint'
-import { areaInputFromRow } from '@/server/planning/mergeFactorConfig'
+} from '@/server/spaceFinder/factorFingerprint'
+import { areaInputFromRow } from '@/server/spaceFinder/mergeFactorConfig'
 import {
   type SpaceFinderVariantStatus,
   spaceFinderVariantStatus,
 } from './collection/spaceFinderCollectionOptions'
-import type { PlanningVariantDetail } from './spaceFinderVariantDetail'
+import type { SpaceFinderVariantDetail } from './spaceFinderVariantDetail'
 
 /** Status of the open variant, including unsaved factor and area drift the list row does not have. */
-export const spaceFinderOpenRunStatus = (variant: PlanningVariantDetail) => {
+export const spaceFinderOpenRunStatus = (variant: SpaceFinderVariantDetail) => {
   const latestJob = variant.jobs[0] ?? null
   const latestRun = variant.runs[0] ?? null
   const hasCompleteRun = latestRun?.status === 'COMPLETE'

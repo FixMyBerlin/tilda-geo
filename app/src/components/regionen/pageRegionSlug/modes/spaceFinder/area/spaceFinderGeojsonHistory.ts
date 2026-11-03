@@ -1,5 +1,7 @@
-const DB_NAME = 'tilda-planning'
-const DB_VERSION = 2
+const DB_NAME = 'tilda-space-finder'
+const DB_VERSION = 1
+// Same store under the old module name; its upload history is not carried over.
+const LEGACY_DB_NAME = 'tilda-planning'
 const STORE_NAME = 'geojson_uploads'
 const SCOPE_INDEX = 'scope'
 const SCOPE_SEPARATOR = '::'
@@ -23,31 +25,21 @@ function scopeKey(regionSlug: string, kind: GeojsonHistoryKind) {
   return `${regionSlug}${SCOPE_SEPARATOR}${kind}`
 }
 
+let legacyDbDeleted = false
+
 function openDb() {
+  if (!legacyDbDeleted) {
+    legacyDbDeleted = true
+    indexedDB.deleteDatabase(LEGACY_DB_NAME)
+  }
   return new Promise<IDBDatabase>((resolve, reject) => {
     const request = indexedDB.open(DB_NAME, DB_VERSION)
-    request.onupgradeneeded = (event) => {
-      const db = request.result
-      if (!db.objectStoreNames.contains(STORE_NAME)) {
-        const store = db.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true })
-        store.createIndex(SCOPE_INDEX, 'scope')
-        return
-      }
-      if (event.oldVersion < 2) {
-        // Entries from before uploads were scoped per region cannot be attributed to
-        // one anymore, so they would stay invisible – and therefore undeletable – in
-        // every region. Drop them instead of leaving them behind in the quota.
-        const store = request.transaction?.objectStore(STORE_NAME)
-        const cursorRequest = store?.openCursor()
-        if (!cursorRequest) return
-        cursorRequest.onsuccess = () => {
-          const cursor = cursorRequest.result
-          if (!cursor) return
-          const entry = cursor.value as GeojsonHistoryEntry
-          if (!entry.scope.includes(SCOPE_SEPARATOR)) cursor.delete()
-          cursor.continue()
-        }
-      }
+    request.onupgradeneeded = () => {
+      const store = request.result.createObjectStore(STORE_NAME, {
+        keyPath: 'id',
+        autoIncrement: true,
+      })
+      store.createIndex(SCOPE_INDEX, 'scope')
     }
     request.onsuccess = () => resolve(request.result)
     request.onerror = () => reject(request.error)

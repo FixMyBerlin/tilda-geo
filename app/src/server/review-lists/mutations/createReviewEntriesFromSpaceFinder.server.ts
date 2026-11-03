@@ -7,8 +7,8 @@ import {
   requireMemberSession,
 } from '@/server/auth/memberCaller.server'
 import db from '@/server/db.server'
-import { authorizePlanningRegion } from '@/server/planning/authorizePlanningRegion.server'
-import { parseFactorConfigSnapshot } from '@/server/planning/factorConfigSchema'
+import { authorizeSpaceFinderRegion } from '@/server/spaceFinder/authorizeSpaceFinderRegion.server'
+import { parseFactorConfigSnapshot } from '@/server/spaceFinder/factorConfigSchema'
 import { REVIEW_UPLOAD_MAX_FEATURES } from '@/shared/reviewLists/reviewEntryImport'
 import {
   buildSpaceFinderReviewProperties,
@@ -53,9 +53,9 @@ export async function createReviewEntriesFromSpaceFinder(
   const { regionSlug, runId, target, candidates } = Schema.parse(input)
 
   // Member check plus the region's `spaceFinderEnabled` flag.
-  await authorizePlanningRegion(session, regionSlug)
+  await authorizeSpaceFinderRegion(session, regionSlug)
 
-  const run = await db.planningRun.findUnique({
+  const run = await db.spaceFinderRun.findUnique({
     where: { id: runId },
     select: {
       status: true,

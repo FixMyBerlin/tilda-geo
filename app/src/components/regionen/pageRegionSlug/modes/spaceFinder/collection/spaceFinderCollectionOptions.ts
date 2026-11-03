@@ -1,7 +1,7 @@
-import type { getPlanningAreasFn } from '@/server/planning/planning.functions'
+import type { getSpaceFinderAreasFn } from '@/server/spaceFinder/spaceFinder.functions'
 
-export type PlanningAreasRow = Awaited<ReturnType<typeof getPlanningAreasFn>>[number]
-export type PlanningAreaVariantRow = PlanningAreasRow['variants'][number]
+export type SpaceFinderAreasRow = Awaited<ReturnType<typeof getSpaceFinderAreasFn>>[number]
+export type SpaceFinderAreaVariantRow = SpaceFinderAreasRow['variants'][number]
 
 /** The active Planungsgebiet + Variante, resolved from `space.key` (a variant id). */
 export type SpaceFinderSelectedVariant = {
@@ -17,12 +17,12 @@ export type SpaceFinderSelectedVariant = {
  * Planungsgebiete for the header collection, oldest first — the server returns `createdAt: desc`.
  * Their variants already come ascending by creation from the server.
  */
-export const sortedSpaceFinderAreas = (areas: readonly PlanningAreasRow[]) =>
+export const sortedSpaceFinderAreas = (areas: readonly SpaceFinderAreasRow[]) =>
   [...areas].sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())
 
 /** Resolves the variant id from the URL to its Gebiet; `undefined` if it no longer exists. */
 export const spaceFinderSelectedVariant = (
-  areas: readonly PlanningAreasRow[],
+  areas: readonly SpaceFinderAreasRow[],
   variantId: number | null | undefined,
 ) => {
   if (variantId == null) return undefined
@@ -43,7 +43,7 @@ export const spaceFinderSelectedVariant = (
 
 /** List row plus the loaded variant. Titles prefer the variant so the header matches the body. */
 type SpaceFinderActiveSelection = SpaceFinderSelectedVariant & {
-  area: PlanningAreasRow
+  area: SpaceFinderAreasRow
 }
 
 /**
@@ -52,7 +52,7 @@ type SpaceFinderActiveSelection = SpaceFinderSelectedVariant & {
  * leave the header on the list and the form on the detail.
  */
 export const spaceFinderActiveSelection = (
-  areas: readonly PlanningAreasRow[],
+  areas: readonly SpaceFinderAreasRow[],
   variantId: number | null | undefined,
   variant: { id: number; title: string; area: { id: number; title: string } } | undefined,
 ) => {
@@ -71,7 +71,7 @@ export const spaceFinderActiveSelection = (
 }
 
 /** First variant of the oldest Gebiet that has one — the implicit selection. */
-export const firstSpaceFinderVariantId = (areas: readonly PlanningAreasRow[]) =>
+export const firstSpaceFinderVariantId = (areas: readonly SpaceFinderAreasRow[]) =>
   sortedSpaceFinderAreas(areas).find((area) => area.variants.length > 0)?.variants[0]?.id
 
 /**
@@ -80,7 +80,7 @@ export const firstSpaceFinderVariantId = (areas: readonly PlanningAreasRow[]) =>
  * does not redirect, because the create wizard may own the selection (`space.new`).
  */
 export const spaceFinderVariantIdToPrime = (
-  areas: readonly PlanningAreasRow[],
+  areas: readonly SpaceFinderAreasRow[],
   key: number | undefined,
 ) => {
   if (key != null && spaceFinderSelectedVariant(areas, key)) return key
@@ -94,7 +94,7 @@ export type SpaceFinderVariantStatus = 'running' | 'stale' | 'complete' | 'none'
  * `outdated` is the live factor/area drift of the open variant; list rows only have `runs[].stale`.
  */
 export const spaceFinderVariantStatus = (
-  variant: Pick<PlanningAreaVariantRow, 'currentRunId' | 'jobs' | 'runs'>,
+  variant: Pick<SpaceFinderAreaVariantRow, 'currentRunId' | 'jobs' | 'runs'>,
   options?: { outdated?: boolean },
 ) => {
   const jobStatus = variant.jobs[0]?.status

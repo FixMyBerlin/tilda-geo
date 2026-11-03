@@ -3,9 +3,9 @@ import { useEffect } from 'react'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { Spinner } from '@/components/shared/Spinner/Spinner'
 import {
-  planningJobQueryOptions,
-  planningVariantQueryOptions,
-} from '@/server/planning/planningQueryOptions'
+  spaceFinderJobQueryOptions,
+  spaceFinderVariantQueryOptions,
+} from '@/server/spaceFinder/spaceFinderQueryOptions'
 import { deriveScoringStep, SpaceFinderRunSteps } from './SpaceFinderRunSteps'
 
 const LABELS: Record<string, string> = {
@@ -28,7 +28,7 @@ export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId:
   const { clearInspectorFeatures } = useMapActions()
 
   const { data } = useQuery({
-    ...planningJobQueryOptions(jobId),
+    ...spaceFinderJobQueryOptions(jobId),
     refetchInterval: (query) => {
       const status = query.state.data?.status
       return status === 'DONE' || status === 'FAILED' ? false : 2000
@@ -39,8 +39,8 @@ export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId:
     if (data?.status !== 'DONE' || data.resultRunId == null) return
     // No explicit "show this run" write: the shown run is always `variant.currentRunId` (D7), which
     // the worker already set server-side — this invalidation just refetches it.
-    queryClient.invalidateQueries(planningVariantQueryOptions(variantId))
-    queryClient.invalidateQueries({ queryKey: ['planning', 'areas'] })
+    queryClient.invalidateQueries(spaceFinderVariantQueryOptions(variantId))
+    queryClient.invalidateQueries({ queryKey: ['spaceFinder', 'areas'] })
     // An open hexagon inspector shows the previous run's frozen snapshot.
     clearInspectorFeatures()
   }, [data?.status, data?.resultRunId, variantId, queryClient, clearInspectorFeatures])

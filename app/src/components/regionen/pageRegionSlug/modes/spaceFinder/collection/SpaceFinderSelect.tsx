@@ -1,10 +1,10 @@
 import { ModeCollectionNewRow } from '../../ModeCollectionNewRow'
 import { ModeCollectionSelect } from '../../ModeCollectionSelect'
-import type { PlanningAreasRow } from './spaceFinderCollectionOptions'
+import type { SpaceFinderAreasRow } from './spaceFinderCollectionOptions'
 
 type Props = {
   /** Already sorted oldest first (`sortedSpaceFinderAreas`). */
-  areas: PlanningAreasRow[]
+  areas: SpaceFinderAreasRow[]
   selectedAreaId: number | undefined
   onSelectArea: (areaId: number) => void
   /** Desktop only (D10) — opens the »Neues Planungsgebiet« detail view. */

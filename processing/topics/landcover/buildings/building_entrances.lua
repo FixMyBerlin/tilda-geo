@@ -1,5 +1,5 @@
 -- Entrance nodes for the `buildingEntrances` table (standard topic shape: id/tags/meta/geom +
--- minzoom). It is the map layer "Gebäudeeingänge" and also read by the planning-worker
+-- minzoom). It is the map layer "Gebäudeeingänge" and also read by the space-finder-worker
 -- (`PostgisLoader.load_building_entrances`), which can let demand originate at the building
 -- entrance instead of the building outline.
 --

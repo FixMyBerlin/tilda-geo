@@ -1,7 +1,7 @@
 import type { DrawStyles } from '@osm-editor-kit/react-map-gl-draw'
 import type { ExpressionSpecification } from 'maplibre-gl'
 
-/** Blue palette, matching the planning boundary highlight (#2563eb). */
+/** Blue palette, matching the Flächenfinder boundary highlight (#2563eb). */
 const SPACE_FINDER_DRAW_COLORS = {
   area: '#2563eb',
   selected: '#1d4ed8',

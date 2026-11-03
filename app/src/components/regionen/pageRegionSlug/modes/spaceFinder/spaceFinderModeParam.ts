@@ -1,8 +1,8 @@
 import { z } from 'zod'
-import { PLANNING_SCORE_MODES } from '@/shared/regionen/planningScoreMode.const'
+import { SPACE_FINDER_SCORE_MODES } from '@/shared/regionen/spaceFinderScoreMode.const'
 
 /**
- * Single JSON param for the Flächenfinder mode (`space`). `key` is the active `PlanningVariant` id —
+ * Single JSON param for the Flächenfinder mode (`space`). `key` is the active `SpaceFinderVariant` id —
  * the planungsgebiet is always derived from it (D7: `useSpaceFinderSelection`), there is no
  * separate area key. `score` and `opacity` control the hexagon result layer (`opacity` 0 also hides
  * it — replaces the old separate visibility flag). `minArea: true` turns the "Fläche suchen"
@@ -15,7 +15,7 @@ import { PLANNING_SCORE_MODES } from '@/shared/regionen/planningScoreMode.const'
 // as soon as one field fails.
 export const zodSpaceFinderModeParam = z.object({
   key: z.number().optional().catch(undefined),
-  score: z.enum(PLANNING_SCORE_MODES).optional().catch(undefined),
+  score: z.enum(SPACE_FINDER_SCORE_MODES).optional().catch(undefined),
   opacity: z.number().min(0).max(100).optional().catch(undefined),
   minArea: z.literal(true).optional().catch(undefined),
   new: z.literal('area').optional().catch(undefined),

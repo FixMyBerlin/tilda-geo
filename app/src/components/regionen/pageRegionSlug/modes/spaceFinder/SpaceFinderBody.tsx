@@ -1,8 +1,8 @@
 import { feature, featureCollection } from '@turf/helpers'
 import { useEffect } from 'react'
 import { twJoin } from 'tailwind-merge'
-import { comparableRunSnapshot } from '@/server/planning/factorFingerprint'
-import { areaInputFromRow } from '@/server/planning/mergeFactorConfig'
+import { comparableRunSnapshot } from '@/server/spaceFinder/factorFingerprint'
+import { areaInputFromRow } from '@/server/spaceFinder/mergeFactorConfig'
 import { useSpaceFinderBoundaryActions } from '../../hooks/mapState/space-finder-boundary-store'
 import { modePanelMutedClassName } from '../modePanel.const'
 import { SpaceFinderCandidatesSection } from './candidates/SpaceFinderCandidatesSection'
@@ -10,10 +10,10 @@ import { DisplaySection } from './display/DisplaySection'
 import { FactorEditorPanel } from './factors/FactorEditorPanel'
 import { JobStatusBadge } from './run/JobStatusBadge'
 import { spaceFinderOpenRunStatus } from './spaceFinderRunStatus'
-import type { PlanningVariantDetail } from './spaceFinderVariantDetail'
+import type { SpaceFinderVariantDetail } from './spaceFinderVariantDetail'
 
 /** Status line (D5): same run state as the Varianten dropdown and the run button. */
-const StatusSection = ({ variant }: { variant: PlanningVariantDetail }) => {
+const StatusSection = ({ variant }: { variant: SpaceFinderVariantDetail }) => {
   const { status, outdatedReason, latestJob } = spaceFinderOpenRunStatus(variant)
 
   return (
@@ -39,7 +39,7 @@ export const SpaceFinderBody = ({
   variant,
   editable = true,
 }: {
-  variant: PlanningVariantDetail | undefined
+  variant: SpaceFinderVariantDetail | undefined
   /**
    * Desktop only (D10): hides Faktoren editing, the run button (footer, handled by the caller)
    * and candidate selection behind a short notice. Status and Anzeige

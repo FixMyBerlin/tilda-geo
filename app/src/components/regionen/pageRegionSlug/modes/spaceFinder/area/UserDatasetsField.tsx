@@ -23,7 +23,7 @@ import {
   userDatasetCoverage,
   userDatasetCoverageMessage,
   userGeojsonByteSize,
-} from '@/lib/planningUserGeojson'
+} from '@/lib/spaceFinderUserGeojson'
 import { RemoveIconButton } from '../RemoveIconButton'
 import { GeoJsonUploadField } from './GeoJsonUpload'
 

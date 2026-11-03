@@ -1,16 +1,16 @@
 import { EyeSlashIcon } from '@heroicons/react/24/outline'
 import { twJoin } from 'tailwind-merge'
 import { radioButtonClass } from '@/components/shared/SegmentedChoice/radioButtonClass'
-import type { PlanningScoreMode } from '@/shared/regionen/planningScoreMode.const'
+import type { SpaceFinderScoreMode } from '@/shared/regionen/spaceFinderScoreMode.const'
 import { spaceFinderGroupButtonClass } from '../spaceFinderPanelStyles'
 import { useSpaceFinderModeParam } from '../useSpaceFinderModeParam'
 
 // Tab-like switcher for the three display modes (Issue #3415): the demand
 // probability, the buildability probability, or their combination. Colors the
-// hexagon layer by the corresponding tile property (see PLANNING_SCORE_PROPERTY).
+// hexagon layer by the corresponding tile property (see SPACE_FINDER_SCORE_PROPERTY).
 // A fourth icon-only state switches the hexagon layer off entirely; the color
 // mode is preserved so re-selecting a mode restores the previous display.
-const MODES: [PlanningScoreMode, string][] = [
+const MODES: [SpaceFinderScoreMode, string][] = [
   ['bedarf', 'Bedarf'],
   ['bebauung', 'Bebauung'],
   ['kombination', 'Kombination'],

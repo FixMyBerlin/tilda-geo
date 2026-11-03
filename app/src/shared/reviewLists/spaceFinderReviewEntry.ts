@@ -1,8 +1,8 @@
-import { parseEigendatenDetails } from '@/shared/regionen/planningEigendatenDetails'
+import { parseEigendatenDetails } from '@/shared/regionen/spaceFinderEigendatenDetails'
 import {
-  PLANNING_SCORE_GROUPS,
-  PLANNING_SCORE_LABELS,
-} from '@/shared/regionen/planningScoreLabels.const'
+  SPACE_FINDER_SCORE_GROUPS,
+  SPACE_FINDER_SCORE_LABELS,
+} from '@/shared/regionen/spaceFinderScoreLabels.const'
 import { SPACE_FINDER_CHECKLIST } from './spaceFinderChecklist.const'
 
 /** Import identity of a Flächenfinder candidate in a review list; makes re-imports detectable. */
@@ -42,10 +42,10 @@ const signedPoints = (value: number) => {
  * accepted for now).
  */
 const scoreBreakdown = (props: CandidateProperties, names?: EigendatenNames) => {
-  const label = (key: string) => PLANNING_SCORE_LABELS[key] ?? key
+  const label = (key: string) => SPACE_FINDER_SCORE_LABELS[key] ?? key
   const blocks: string[] = []
 
-  for (const group of PLANNING_SCORE_GROUPS) {
+  for (const group of SPACE_FINDER_SCORE_GROUPS) {
     const groupScore = asNumber(props[group.scoreKey])
     const criteria = group.criteria.flatMap((key) => {
       const value = asNumber(props[key])

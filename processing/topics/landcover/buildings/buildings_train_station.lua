@@ -1,6 +1,6 @@
 -- Train station buildings for the `_buildings_train_station` PROCESSING-ONLY table
 -- (geometry only — no tags/meta, no minzoom). The leading `_` marks it internal: no map layer,
--- Martin only serves it for inspection. It is used by the planning-worker to score proximity to
+-- Martin only serves it for inspection. It is used by the space-finder-worker to score proximity to
 -- train stations for the ÖPNV factor (bicycle parking is best planned as close as possible to
 -- the station building).
 --

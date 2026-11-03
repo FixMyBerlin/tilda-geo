@@ -1,7 +1,7 @@
 import wasmUrl from '@ngageoint/geopackage/dist/sql-wasm.wasm?url'
 
 /**
- * Client-side preprocessing for the Planning-module GeoJSON uploads (study area /
+ * Client-side preprocessing for the SpaceFinder-module GeoJSON uploads (study area /
  * user obstacles): converts GeoPackage files to GeoJSON and reprojects legacy
  * `crs`-tagged GeoJSON to WGS84. Both paths dynamically import their (WASM-backed)
  * dependency so a normal, already-valid WGS84 GeoJSON upload never pays for either.
