@@ -3,7 +3,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { bbox } from '@turf/turf'
 import { useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
-import { useSpaceFinderBoundaryActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-boundary-store'
+import { useSpaceFinderDrawActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-draw-store'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import { useDebouncedValue } from '@/components/shared/hooks/useDebouncedValue'
 import {
@@ -38,7 +38,7 @@ export const BoundaryPicker = ({
   const regionSlug = useRegionSlug()
   const { mainMap: map } = useMap()
   const queryClient = useQueryClient()
-  const { setBoundaryHighlightGeom } = useSpaceFinderBoundaryActions()
+  const { setBoundaryHighlightGeom } = useSpaceFinderDrawActions()
   const [query, setQuery] = useState('')
   // The selected area comes from the result list at the moment of selection; since the list
   // depends on the search, keep it here instead of looking it up again later.

@@ -14,10 +14,10 @@ import { MAX_STUDY_AREA_KM2, studyAreaSizeKm2 } from '@/lib/spaceFinderStudyArea
 import type { UserDataset } from '@/lib/spaceFinderUserGeojson'
 import type { SpaceFinderAreaFormValues } from '@/server/space-finder/spaceFinderFormSchemas'
 import {
-  useSpaceFinderBoundaryActions,
-  useSpaceFinderDrawnGeometry,
+  useSpaceFinderDrawActions,
   useSpaceFinderDrawingActive,
-} from '../../../hooks/mapState/space-finder-boundary-store'
+  useSpaceFinderDrawnGeometry,
+} from '../../../hooks/mapState/space-finder-draw-store'
 import { useSpaceFinderDraw } from '../drawing/useSpaceFinderDraw'
 import {
   GROUP_HELP,
@@ -77,7 +77,7 @@ export const AreaFormFields = ({
   const form = areaForm as unknown as FormApi<AreaFormFieldValues>
   const { mainMap: map } = useMap()
   const { setBoundaryHighlightGeom, setDrawingActive, setDrawnGeometry } =
-    useSpaceFinderBoundaryActions()
+    useSpaceFinderDrawActions()
   const drawingActive = useSpaceFinderDrawingActive()
   const drawnGeometry = useSpaceFinderDrawnGeometry()
   const draw = useSpaceFinderDraw()

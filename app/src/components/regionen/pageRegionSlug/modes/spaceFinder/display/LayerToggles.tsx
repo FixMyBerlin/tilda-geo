@@ -3,12 +3,12 @@ import type { ReactNode } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
 import {
-  useSpaceFinderBoundaryActions,
   useSpaceFinderCarriagewaysVisible,
   useSpaceFinderCensusVisible,
+  useSpaceFinderLayersActions,
   useSpaceFinderUserObstaclesVisible,
   useSpaceFinderVegetationVisible,
-} from '../../../hooks/mapState/space-finder-boundary-store'
+} from '../../../hooks/mapState/space-finder-layers-store'
 
 /** Switch look of the display rows; `onColorClass` colours it when on. */
 export const ToggleSwitch = ({
@@ -66,7 +66,7 @@ const LayerToggle = ({
 
 export const VegetationToggle = () => {
   const vegetationOn = useSpaceFinderVegetationVisible()
-  const { setVegetationVisible: setVegetationOn } = useSpaceFinderBoundaryActions()
+  const { setVegetationVisible: setVegetationOn } = useSpaceFinderLayersActions()
   return (
     <LayerToggle
       label="Vegetationsflächen"
@@ -79,7 +79,7 @@ export const VegetationToggle = () => {
 
 export const CarriagewaysToggle = () => {
   const carriagewaysOn = useSpaceFinderCarriagewaysVisible()
-  const { setCarriagewaysVisible: setCarriagewaysOn } = useSpaceFinderBoundaryActions()
+  const { setCarriagewaysVisible: setCarriagewaysOn } = useSpaceFinderLayersActions()
   return (
     <LayerToggle
       label="Fahrbahnen"
@@ -93,7 +93,7 @@ export const CarriagewaysToggle = () => {
 
 export const CensusToggle = () => {
   const censusOn = useSpaceFinderCensusVisible()
-  const { setCensusVisible: setCensusOn } = useSpaceFinderBoundaryActions()
+  const { setCensusVisible: setCensusOn } = useSpaceFinderLayersActions()
   return (
     <LayerToggle
       label="Zensus-Einwohner"
@@ -107,7 +107,7 @@ export const CensusToggle = () => {
 
 export const UserObstaclesToggle = () => {
   const userObstaclesOn = useSpaceFinderUserObstaclesVisible()
-  const { setUserObstaclesVisible: setUserObstaclesOn } = useSpaceFinderBoundaryActions()
+  const { setUserObstaclesVisible: setUserObstaclesOn } = useSpaceFinderLayersActions()
   return (
     <LayerToggle
       label="Eigene Daten"

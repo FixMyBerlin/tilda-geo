@@ -18,11 +18,11 @@ import type {
   ViewStateChangeEvent,
 } from 'react-map-gl/maplibre'
 import { AttributionControl, Map as MapGl, useMap } from 'react-map-gl/maplibre'
-import { useSpaceFinderDrawingActive } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-boundary-store'
 import {
   useSpaceFinderCandidateSelectActive,
   useSpaceFinderCandidatesActions,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-candidates-store'
+import { useSpaceFinderDrawingActive } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-draw-store'
 import {
   useMapActions,
   useMapInspectorFeatures,

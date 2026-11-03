@@ -3,7 +3,7 @@ import { DrawLayers } from '@osm-editor-kit/react-map-gl-draw'
 import {
   useSpaceFinderDrawingActive,
   useSpaceFinderDrawnGeometry,
-} from '../../../hooks/mapState/space-finder-boundary-store'
+} from '../../../hooks/mapState/space-finder-draw-store'
 import { ModeMapHint, ModeMapToolbar, ModeMapToolbarRow } from '../../ModeMapHint'
 import { ModeMapUndoRedo } from '../../ModeMapUndoRedo'
 import { spaceFinderDrawStyles } from './spaceFinderDrawStyles'

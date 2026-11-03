@@ -3,7 +3,7 @@ import { useEffect } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { comparableRunSnapshot } from '@/server/space-finder/factorFingerprint'
 import { areaInputFromRow } from '@/server/space-finder/mergeFactorConfig'
-import { useSpaceFinderBoundaryActions } from '../../hooks/mapState/space-finder-boundary-store'
+import { useSpaceFinderLayersActions } from '../../hooks/mapState/space-finder-layers-store'
 import { modePanelMutedClassName } from '../modePanel.const'
 import { SpaceFinderCandidatesSection } from './candidates/SpaceFinderCandidatesSection'
 import { DisplaySection } from './display/DisplaySection'
@@ -48,7 +48,7 @@ export const SpaceFinderBody = ({
    */
   editable?: boolean
 }) => {
-  const { setVegetationAttribution, setUserObstaclesGeom } = useSpaceFinderBoundaryActions()
+  const { setVegetationAttribution, setUserObstaclesGeom } = useSpaceFinderLayersActions()
 
   useEffect(() => {
     if (!variant) return

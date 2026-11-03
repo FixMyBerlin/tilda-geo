@@ -5,7 +5,7 @@ import {
   spaceFinderAreasQueryOptions,
   spaceFinderVariantQueryOptions,
 } from '@/server/space-finder/spaceFinderQueryOptions'
-import { useSpaceFinderFactorSavePending } from '../../../hooks/mapState/space-finder-boundary-store'
+import { useSpaceFinderFactorSavePending } from '../../../hooks/mapState/space-finder-factor-draft-store'
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import {
   type SpaceFinderVariantStatus,

@@ -10,10 +10,7 @@ import { frenchQuote } from '@/components/shared/text/Quotes'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 import { spaceFinderAreasQueryOptions } from '@/server/space-finder/spaceFinderQueryOptions'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
-import {
-  getLastFittedBoundaryKey,
-  useSpaceFinderBoundaryActions,
-} from '../../hooks/mapState/space-finder-boundary-store'
+import { useSpaceFinderDrawActions } from '../../hooks/mapState/space-finder-draw-store'
 import { useMapActions } from '../../hooks/mapState/useMapState'
 import { useRegionSearchNavigation } from '../../hooks/useQueryState/useRegionSearchNavigation'
 import { useRegion } from '../../regionUtils/useRegion'
@@ -40,6 +37,13 @@ import { spaceFinderOpenRunStatus } from './spaceFinderRunStatus'
 import { useSpaceFinderModeParam } from './useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from './useSpaceFinderSelection'
 
+/**
+ * Bbox key of the study area the map was last flown to. Module scope, so it survives the
+ * panel unmounting: switching between variants of the same study area must not move the
+ * camera, a different boundary triggers a new `fitBounds`.
+ */
+let lastFittedBoundaryKey: string | null = null
+
 /** D10: mobile shows the mode read-only; editing/creating/running/selection needs a desktop. */
 const MobileEditingNotice = () => (
   <p className={twJoin('px-4 py-3', modePanelMutedClassName)}>
@@ -58,7 +62,7 @@ export const PageModeSpaceFinder = () => {
   const regionSlug = useRegion().slug
   const isDesktop = useBreakpoint('sm')
   const { mainMap: map } = useMap()
-  const { setBoundaryHighlightGeom, setLastFittedBoundaryKey } = useSpaceFinderBoundaryActions()
+  const { setBoundaryHighlightGeom } = useSpaceFinderDrawActions()
 
   // Primed by the route loader (areas list and the active variant).
   const { data: areas } = useSuspenseQuery(spaceFinderAreasQueryOptions(regionSlug))
@@ -135,13 +139,13 @@ export const PageModeSpaceFinder = () => {
           properties: {},
         })
         const boundaryKey = [minLng, minLat, maxLng, maxLat].map((v) => v.toFixed(6)).join(',')
-        if (getLastFittedBoundaryKey() !== boundaryKey) {
-          setLastFittedBoundaryKey(boundaryKey)
+        if (lastFittedBoundaryKey !== boundaryKey) {
+          lastFittedBoundaryKey = boundaryKey
           map.fitBounds([minLng, minLat, maxLng, maxLat], { padding: 60, duration: 800 })
         }
       }
     },
-    [areaFormOpen, activeArea, studyArea, map, setBoundaryHighlightGeom, setLastFittedBoundaryKey],
+    [areaFormOpen, activeArea, studyArea, map, setBoundaryHighlightGeom],
   )
 
   // Clear the outline when leaving the mode — the component unmounts with the route.

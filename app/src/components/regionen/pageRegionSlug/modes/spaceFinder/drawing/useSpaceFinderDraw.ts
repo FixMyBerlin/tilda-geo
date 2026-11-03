@@ -7,11 +7,11 @@ import {
 } from '@osm-editor-kit/react-map-gl-draw'
 import { useMemo } from 'react'
 import {
-  useSpaceFinderBoundaryActions,
+  useSpaceFinderDrawActions,
+  useSpaceFinderDrawSession,
   useSpaceFinderDrawingActive,
   useSpaceFinderDrawnGeometry,
-  useSpaceFinderDrawSession,
-} from '../../../hooks/mapState/space-finder-boundary-store'
+} from '../../../hooks/mapState/space-finder-draw-store'
 import { useCurrentMode } from '../../useCurrentMode'
 
 const spaceFinderDrawController = createDrawController()
@@ -28,7 +28,7 @@ export const useSpaceFinderDraw = () => {
   const drawingActive = useSpaceFinderDrawingActive()
   const drawSession = useSpaceFinderDrawSession()
   const drawnGeometry = useSpaceFinderDrawnGeometry()
-  const { setDrawnGeometry } = useSpaceFinderBoundaryActions()
+  const { setDrawnGeometry } = useSpaceFinderDrawActions()
 
   const value = useMemo(() => featuresFromGeometry(drawnGeometry), [drawnGeometry])
 

@@ -67,7 +67,7 @@ type SpaceFinderCandidatesStore = {
 
 /**
  * Candidate selection. Store, not URL, like `vegetationVisible` /
- * `carriagewaysVisible` in `space-finder-boundary-store.ts`: it changes on every
+ * `carriagewaysVisible` in `space-finder-layers-store.ts`: it changes on every
  * click (a URL update would navigate per hexagon) and the geometries do not belong in a URL.
  *
  * `candidatesByRun` is persisted to sessionStorage so a selection survives switching

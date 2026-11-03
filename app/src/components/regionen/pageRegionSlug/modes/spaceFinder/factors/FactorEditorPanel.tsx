@@ -28,7 +28,7 @@ import {
   spaceFinderAreasQueryOptions,
   spaceFinderVariantQueryOptions,
 } from '@/server/space-finder/spaceFinderQueryOptions'
-import { useSpaceFinderBoundaryActions } from '../../../hooks/mapState/space-finder-boundary-store'
+import { useSpaceFinderFactorDraftActions } from '../../../hooks/mapState/space-finder-factor-draft-store'
 import { useRegionSlug } from '../../../regionUtils/useRegionSlug'
 import { USER_DATASET_MODE_OPTIONS, UserDatasetCoverageHint } from '../area/UserDatasetsField'
 import {
@@ -670,7 +670,7 @@ const FactorEditorPanelForm = ({
   const [config, setConfig] = useState<FactorConfig>(factorConfig)
   const [open, setOpen] = useState(defaultOpen)
   const [prevReadOnly, setPrevReadOnly] = useState(readOnly)
-  const { setFactorSavePending } = useSpaceFinderBoundaryActions()
+  const { setFactorSavePending } = useSpaceFinderFactorDraftActions()
   // Fingerprint of the state last sent to the server — comparing it with the current draft drives
   // auto-save, the discard button and the lock on „Neu berechnen".
   const [savedFingerprint, setSavedFingerprint] = useState(() => factorFingerprint(factorConfig))

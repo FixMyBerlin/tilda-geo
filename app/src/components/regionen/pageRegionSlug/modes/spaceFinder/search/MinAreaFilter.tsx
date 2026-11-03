@@ -1,9 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useRef, useState } from 'react'
 import {
-  useSpaceFinderBoundaryActions,
+  useSpaceFinderFactorDraftActions,
   useSpaceFinderMinAreaDraft,
-} from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-boundary-store'
+} from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-factor-draft-store'
 import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
 import { updateSpaceFinderVariantFn } from '@/server/space-finder/space-finder.functions'
 import { spaceFinderVariantQueryOptions } from '@/server/space-finder/spaceFinderQueryOptions'
@@ -33,7 +33,7 @@ const MinAreaFilterForm = ({
   const queryClient = useQueryClient()
   const { spaceFinderMode, setSpaceFinderModeParam } = useSpaceFinderModeParam()
   const draft = useSpaceFinderMinAreaDraft()
-  const { setMinAreaDraft } = useSpaceFinderBoundaryActions()
+  const { setMinAreaDraft } = useSpaceFinderFactorDraftActions()
   const filterOn = spaceFinderMode.minArea === true
   const [minArea, setLocalMinArea] = useState(savedMinArea)
   // Switch on but no number > 0 (field cleared to retype, or the URL turned it on without a saved

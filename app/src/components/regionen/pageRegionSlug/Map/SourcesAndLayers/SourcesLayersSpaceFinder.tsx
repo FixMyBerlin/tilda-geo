@@ -1,21 +1,23 @@
 import { feature, featureCollection } from '@turf/helpers'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import {
-  useSpaceFinderBoundaryHighlightFilled,
-  useSpaceFinderBoundaryHighlightGeom,
-  useSpaceFinderCarriagewaysVisible,
-  useSpaceFinderCensusVisible,
-  useSpaceFinderMinAreaDraft,
-  useSpaceFinderUserObstaclesGeom,
-  useSpaceFinderUserObstaclesVisible,
-  useSpaceFinderVegetationAttribution,
-  useSpaceFinderVegetationVisible,
-} from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-boundary-store'
-import {
   useSpaceFinderCandidateSelectActive,
   useSpaceFinderCandidates,
   useSpaceFinderFocusedCandidateH3Id,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-candidates-store'
+import {
+  useSpaceFinderBoundaryHighlightFilled,
+  useSpaceFinderBoundaryHighlightGeom,
+} from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-draw-store'
+import { useSpaceFinderMinAreaDraft } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-factor-draft-store'
+import {
+  useSpaceFinderCarriagewaysVisible,
+  useSpaceFinderCensusVisible,
+  useSpaceFinderUserObstaclesGeom,
+  useSpaceFinderUserObstaclesVisible,
+  useSpaceFinderVegetationAttribution,
+  useSpaceFinderVegetationVisible,
+} from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-layers-store'
 import { useHoveredListItem } from '@/components/regionen/pageRegionSlug/modes/mode-list-store'
 import { appliedMinAreaM2 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderModeParam'
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
