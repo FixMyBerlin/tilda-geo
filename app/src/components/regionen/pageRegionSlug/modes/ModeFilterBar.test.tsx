@@ -11,7 +11,7 @@ import {
   notesAuthorFilterOptions,
   uniqueOsmNoteAuthorNames,
 } from './notes/notesModeFilters'
-import { QA_STATUS_FILTER_OPTIONS, QA_STATUS_SELECT_ALL } from './qa/qaConfigStyles'
+import { QA_DEFAULT_STATUS_KEYS } from './qa/qaConfigStyles'
 import { REVIEW_STATUS_FILTER_OPTIONS } from './reviewLists/reviewListsModeFilters'
 
 class ResizeObserverStub {
@@ -90,11 +90,8 @@ describe('filter dropdown options', () => {
     ])
   })
 
-  test('QA status has no Aus; first option is the default status', () => {
-    const values = QA_STATUS_FILTER_OPTIONS.map((option) => option.value)
-    expect(values[0]).toBe('pending-needs-review')
-    expect(values).toContain(QA_STATUS_SELECT_ALL)
-    expect(values).toHaveLength(9)
+  test('QA status defaults to the Zu prüfen group', () => {
+    expect(QA_DEFAULT_STATUS_KEYS).toEqual(['pending-needs-review', 'pending-problematic'])
   })
 
   test('Hinweise Autor:in dropdown lists Alle, Meine, then OSM authors', () => {

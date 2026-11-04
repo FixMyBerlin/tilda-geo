@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { adminActiveSectionRootMargin } from '@/components/admin/adminClasses'
-import { scrollToAdminSection } from './adminAsideSection'
+import { replaceAdminSectionHash, scrollToAdminSection } from './adminAsideSection'
 
 /**
  * Scroll-spy for `AdminAsideLayout`: the first section (in document order) crossing the band
  * `adminActiveSectionRootMargin` is active. A jump (click or URL hash on load) pins its target
  * until the user scrolls themselves, so short sections at the page end stay highlighted.
+ * The active section is kept in the URL hash.
  */
 export const useActiveSectionId = (sectionIds: string[]) => {
   const [activeId, setActiveId] = useState(sectionIds[0])
@@ -24,7 +25,11 @@ export const useActiveSectionId = (sectionIds: string[]) => {
             else intersecting.delete(entry.target.id)
           }
           const nextId = pinnedIdRef.current ?? ids.find((id) => intersecting.has(id))
-          if (nextId) setActiveId(nextId)
+          if (!nextId) return
+          setActiveId(nextId)
+          // Mirror the scrolled-to section in the hash so a reload or shared link returns to it.
+          // A page still at its first section without a hash keeps a clean URL.
+          if (window.location.hash || nextId !== ids[0]) replaceAdminSectionHash(nextId)
         },
         { rootMargin: adminActiveSectionRootMargin },
       )

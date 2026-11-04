@@ -82,7 +82,9 @@ async function writeTodoIdTypes() {
 
   const bikelaneTodoNames = await callLuaForNames('extract_bikelane_todos')
   const roadTodoNames = await callLuaForNames('extract_road_todos')
-  const todos = [...bikelaneTodoNames, ...roadTodoNames].map((e) => e.id).sort(sortMapillarySpecial)
+  const todos = [...new Set([...bikelaneTodoNames, ...roadTodoNames].map((e) => e.id))].sort(
+    sortMapillarySpecial,
+  )
 
   const formatStringArray = (values: string[]) => {
     if (values.length === 0) return '\n  // (oxlint: one line per entry)\n'

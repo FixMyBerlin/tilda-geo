@@ -120,7 +120,7 @@ export function getLocalTargetDatabaseUrl() {
   return getBaseDatabaseUrl()
 }
 
-/** No audit extensions. Used for bulk restore and sanitize writes. */
+/** No audit extensions. Used for bulk script writes (db-pull restore and sanitize, one-off fixes). */
 export function createUnauditedPrismaClient() {
   const adapter = new PrismaPg({
     connectionString: getLocalTargetDatabaseUrl(),

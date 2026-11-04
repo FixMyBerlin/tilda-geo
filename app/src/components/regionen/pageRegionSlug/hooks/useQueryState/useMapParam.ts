@@ -1,5 +1,6 @@
 import { getMapParamFromSearch } from '@/shared/regionen/regionSearchSchemas'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
+import { useRegion } from '../../regionUtils/useRegion'
 import { useRegionSearchNavigation } from './useRegionSearchNavigation'
 import { serializeMapParam, type MapParam } from './utils/mapParam'
 
@@ -9,7 +10,8 @@ type SetMapParamOptions = {
 
 export const useMapParam = () => {
   const { search, updateSearch } = useRegionSearchNavigation()
-  const mapParam = getMapParamFromSearch(search)
+  const region = useRegion()
+  const mapParam = getMapParamFromSearch(search, region.map)
 
   const setMapParam = (value: MapParam, options?: SetMapParamOptions) => {
     updateSearch(

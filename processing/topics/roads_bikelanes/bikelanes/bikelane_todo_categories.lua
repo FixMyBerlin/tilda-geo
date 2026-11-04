@@ -3,6 +3,8 @@ local sanitize_traffic_sign = require('topics.helper.sanitize_traffic_sign')
 local SET = require('topics.helper.sets')
 local bikelane_categories = require('topics.roads_bikelanes.bikelanes.bikelane_categories')
 local has_tag_with_prefix = require('topics.helper.has_tag_with_prefix')
+local is_adjoining_of_vs_csv = require('topics.roads_bikelanes.pseudo_tags_sidepath.is_adjoining_of_vs_csv')
+local is_unusual_width = require('topics.roads_bikelanes.helper.is_unusual_width')
 -- local inspect = require('inspect')
 local BikelaneTodo = {}
 BikelaneTodo.__index = BikelaneTodo
@@ -371,17 +373,16 @@ local needs_clarification_track = BikelaneTodo.new({
     if result_tags.category == 'cyclewayOnHighwayProtected' then return false end
     if object_tags._parent == nil then return false end
 
-    -- Some cases are tagged sufficiently with `cycleway:SIDE:segregated` or `cycleway:SIDE:traffic_signs`
-    -- It is hard to check both sides propery. This will error on the side of caution.
-    local segregated = object_tags._parent['cycleway:both:segregated'] or object_tags._parent['cycleway:left:segregated'] or object_tags._parent['cycleway:right:segregated']
-    if segregated == 'yes' or segregated == 'no' then return false end
-    local traffic_sign = object_tags._parent['cycleway:both:traffic_sign'] or object_tags._parent['cycleway:left:traffic_sign'] or object_tags._parent['cycleway:right:traffic_sign']
-    if contains_substring(traffic_sign, '240') or contains_substring(traffic_sign, '241') then return false end
+    -- The side object already holds its own side's tags (`cycleway:SIDE:*` > `cycleway:both:*` > `cycleway:*`),
+    -- so `segregated` and `traffic_sign` here are the values of this side only.
+    if object_tags.segregated == 'yes' or object_tags.segregated == 'no' then return false end
+    local traffic_sign = object_tags.traffic_sign
+    -- A traffic sign settles what the track is, so `segregated` is not needed:
+    if contains_substring(traffic_sign, '237') then return false end -- DE:237 Radweg (bicycles only)
+    if contains_substring(traffic_sign, '240') then return false end -- DE:240 Gemeinsamer Geh- und Radweg (shared)
+    if contains_substring(traffic_sign, '241') then return false end -- DE:241 Getrennter Rad- und Gehweg (segregated)
 
-    return object_tags._parent['cycleway'] == 'track'
-      or object_tags._parent['cycleway:both'] == 'track'
-      or object_tags._parent['cycleway:left'] == 'track'
-      or object_tags._parent['cycleway:right'] == 'track'
+    return object_tags.cycleway == 'track'
   end
 })
 local needs_clarification_track__mapillary = BikelaneTodo.new({
@@ -468,6 +469,16 @@ local missing_width = BikelaneTodo.new({
       and not contains_substring(result_tags.category, 'sharedBusLane')
   end
 })
+local unusual_width = BikelaneTodo.new({
+  id = 'unusual_width',
+  desc = 'Width that we cannot read or that is unusually high. Fix `width`, or confirm it with `check_date=*` or `check_date:width=*`.',
+  todoTableOnly = true,
+  priority = function(object_tags, _)
+    if object_tags.mapillary_coverage then return '1' end
+    return '2'
+  end,
+  conditions = is_unusual_width,
+})
 local missing_width_surface_sett__mapillary = BikelaneTodo.new({
   id = 'missing_width_surface_sett__mapillary',
   desc = 'Ways without `width` but `surface=sett` to count stones',
@@ -546,6 +557,15 @@ local missing_oneway__mapillary = BikelaneTodo.new({
   end
 })
 
+-- === Adjoining road ===
+local adjoining_of_vs_csv = BikelaneTodo.new({
+  id = 'adjoining_of_vs_csv',
+  desc = 'OSM is_sidepath:of and the sidepath CSV name different road classes. Published adjoining_road follows is_sidepath:of.',
+  todoTableOnly = true,
+  priority = function(_, _) return '2' end,
+  conditions = is_adjoining_of_vs_csv,
+})
+
 local bikelane_todo_categories = {
   -- REMINDER: Always use snake_case, never camelCase
   -- Infrastructure
@@ -570,8 +590,10 @@ local bikelane_todo_categories = {
   -- Other
   currentness_too_old,
   missing_width,
+  unusual_width,
   missing_surface,
   missing_oneway,
+  adjoining_of_vs_csv,
 
   -- Mapillary versions…
   missing_traffic_sign_vehicle_destination__mapillary,

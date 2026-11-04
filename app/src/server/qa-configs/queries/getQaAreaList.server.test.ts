@@ -11,6 +11,13 @@ describe('qaStatusSqlPredicate', () => {
     expect(qaStatusSqlPredicate(undefined, 2)).toEqual({ sql: 'TRUE', params: [] })
   })
 
+  test('several keys match when ANY of them matches, params continue across keys', () => {
+    expect(qaStatusSqlPredicate(['pending-problematic', 'ok-construction'], 2)).toEqual({
+      sql: '(l."userStatus" IS NULL AND l."systemStatus"::text = $2) OR (l."userStatus"::text = $3)',
+      params: ['PROBLEMATIC', 'OK_STRUCTURAL_CHANGE'],
+    })
+  })
+
   test.each(QA_STATUS_OPTIONS)('$key matches option table enums', (option) => {
     const result = qaStatusSqlPredicate(option.key, 2)
     const expectedParams: string[] = []
@@ -27,7 +34,7 @@ describe('qaStatusSqlPredicate', () => {
       clauses.push(`l."systemStatus"::text = $${index}`)
       expectedParams.push(option.systemStatus)
     }
-    expect(result).toEqual({ sql: clauses.join(' AND '), params: expectedParams })
+    expect(result).toEqual({ sql: `(${clauses.join(' AND ')})`, params: expectedParams })
   })
 
   // The schema rejects unknown keys, so this only fires if the option table and enum drift apart.

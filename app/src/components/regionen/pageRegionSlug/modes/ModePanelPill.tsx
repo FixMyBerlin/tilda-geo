@@ -23,10 +23,10 @@ export const ModePanelPill = ({ children, className, backgroundColor, style, ...
   </span>
 )
 
-export const ModeCommentsPill = ({ count }: { count: number }) => {
+export const ModeCommentsPill = ({ count, className }: { count: number; className?: string }) => {
   const label = `${count} Kommentar${count === 1 ? '' : 'e'}`
   return (
-    <ModePanelPill aria-label={label} title={label}>
+    <ModePanelPill aria-label={label} title={label} className={className}>
       <ChatBubbleLeftIcon className="size-3.5" aria-hidden="true" />
       {count}
     </ModePanelPill>

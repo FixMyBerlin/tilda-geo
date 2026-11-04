@@ -76,6 +76,7 @@ export function RadioGroup<T extends Record<string, unknown>>({
                     disabled={item.disabled}
                     checked={value === item.value}
                     aria-label={item.label}
+                    aria-invalid={hasError}
                     onBlur={field.handleBlur}
                     onChange={() => field.handleChange((_prev) => item.value as typeof _prev)}
                     className={choiceControlClassName(hasError)}

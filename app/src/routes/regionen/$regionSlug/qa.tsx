@@ -4,7 +4,7 @@ import { modeScopedSearchMiddleware } from '@/components/regionen/pageRegionSlug
 import { PageModeQa } from '@/components/regionen/pageRegionSlug/modes/qa/PageModeQa'
 import {
   compactQaParam,
-  QA_DEFAULT_STATUS_KEY,
+  QA_DEFAULT_STATUS_KEYS,
 } from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
 import {
   qaDataForMapQueryOptions,
@@ -70,7 +70,7 @@ export const Route = createFileRoute('/regionen/$regionSlug/qa')({
           [searchParamsRegistry.qa]: compactQaParam({
             ...getQaParamFromSearch(prev),
             key: defaultConfig.slug,
-            status: QA_DEFAULT_STATUS_KEY,
+            status: QA_DEFAULT_STATUS_KEYS,
           }),
         }),
         replace: true,

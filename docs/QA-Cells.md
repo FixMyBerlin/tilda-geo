@@ -31,7 +31,7 @@ grid a small geometry edit near a grid line would still move length between cell
 ## Cells today: external input, taken as-is
 
 Cells are a **static, externally provided** dataset, imported via
-[`add-db-data-table`](../.cursor/skills/add-db-data-table/SKILL.md) into a `data.*` table
+[`add-db-data-table`](../.agents/skills/add-db-data-table/SKILL.md) into a `data.*` table
 (today: `data.euvm_qa_voronoi_2026`, 34,655 cells for Berlin — 23,571 main + 11,084 priority).
 Processing takes them as-is: it does not split, merge, or repair cells. If cells in parks or
 forests turn out too large for a bikelanes review, the fix is an improved input dataset from the

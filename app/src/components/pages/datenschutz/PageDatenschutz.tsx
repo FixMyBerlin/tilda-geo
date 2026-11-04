@@ -38,7 +38,7 @@ export function PageDatenschutz() {
         <br />
         E-Mail: <LinkMail>hello@fixmycity.de</LinkMail>
         <br />
-        Telefon: <LinkTel tel="+403054908665">+40 30 549 08 665</LinkTel>
+        Telefon: <LinkTel tel="+493054908665">+49 30 549 08 665</LinkTel>
       </p>
       <h3>Datenschutzbeauftragter</h3>
       <p>Unsere Datenschutzbeauftragten erreichen Sie wie folgt:</p>

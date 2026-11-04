@@ -1,3 +1,5 @@
+local is_adjoining_of_vs_csv = require('topics.roads_bikelanes.pseudo_tags_sidepath.is_adjoining_of_vs_csv')
+local is_unusual_width = require('topics.roads_bikelanes.helper.is_unusual_width')
 
 local road_todo_class = {}
 road_todo_class.__index = road_todo_class
@@ -45,8 +47,35 @@ local deprecated_cycleway_shared = road_todo_class.new({
   end,
 })
 
+-- === Width ===
+local unusual_width = road_todo_class.new({
+  id = 'unusual_width',
+  desc = 'Width that we cannot read or that is unusually high. Fix `width`, or confirm it with `check_date=*` or `check_date:width=*`.',
+  todoTableOnly = true,
+  priority = function(object_tags, _)
+    if object_tags.mapillary_coverage then return '1' end
+    return '2'
+  end,
+  -- One todo per way: skip it when the self row in `bikelanes` has it already. A self row can read
+  -- another value (`cycleway:width`, `width:lanes`), so a self row alone is not enough.
+  conditions = function(object_tags, result_tags)
+    return not result_tags._self_bikelane_has_unusual_width and is_unusual_width(object_tags, result_tags)
+  end,
+})
+
+-- === Adjoining road ===
+local adjoining_of_vs_csv = road_todo_class.new({
+  id = 'adjoining_of_vs_csv',
+  desc = 'OSM is_sidepath:of and the sidepath CSV name different road classes. Published adjoining_road follows is_sidepath:of.',
+  todoTableOnly = true,
+  priority = function(_, _) return '2' end,
+  conditions = is_adjoining_of_vs_csv,
+})
+
 local road_todo_categories = {
   deprecated_cycleway_shared,
+  unusual_width,
+  adjoining_of_vs_csv,
 }
 
 return road_todo_categories

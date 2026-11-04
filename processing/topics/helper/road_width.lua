@@ -1,13 +1,10 @@
-local parse_length = require('topics.helper.parse_length')
+local parse_width = require('topics.helper.parse_width')
 
 -- * @desc TODO
 -- * @returns TODO
 local function road_width(tags)
-  local width = tags['width'] or tags['est_width']
-  if width then
-    width = parse_length(width)
-    if width then return width end
-  end
+  local width = parse_width(tags['width']) or parse_width(tags['est_width'])
+  if width then return width end
 
   local street_widths = {
     primary = 10,

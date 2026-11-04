@@ -101,7 +101,7 @@
       "required": true,
       "sensitive": true,
       "githubSource": "secrets.SESSION_SECRET_KEY",
-      "description": "Session signing secret."
+      "description": "Session signing secret. Also encrypts the stored OSM OAuth tokens: rotating it makes them unreadable until each user signs in again."
     },
     {
       "name": "OSM_CLIENT_ID",

@@ -8,7 +8,7 @@ export const needs_clarification_track__mapillary: CampaignType = {
   recommendedAction: 'maproulette',
   visibility: 'secondary',
   description:
-    'Diesee Wege sind als `cycleway=track` eingetragen. Es fehlen ihnen aber Attribute, um eine eindeutige Radinfrastruktur-Kategorie zu vergeben.',
+    'Diese Wege sind als `cycleway=track` eingetragen. Es fehlen ihnen aber Attribute, um eine eindeutige Radinfrastruktur-Kategorie zu vergeben.',
   task: '**Bitte ergänze weitere Tags, um eine präzise Kategorisierung sicherzustellen.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.',
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=1v92rco.4nyc.4pvwn4&v=2',
   maprouletteChallenge: {
@@ -27,11 +27,11 @@ Dieser Weg ist als \`cycleway=track\` eingetragen. Das sind nicht genug Daten, u
 
 _Wenn du so wenig wie möglich ändern möchtest:_
 
-* Ergänze \`cycleway:right:segregated=yes\`, wenn Rad- und Fußverkehr getrennt sind — bzw. \`no\` bei einem gem. Geh-Radweg.
-* Ergänze \`cycleway:right:traffic_sign=*\`, mit dem [passenden Verkehrszeichen](https://trafficsigns.osm-verkehrswende.org/DE) — oder \`none\` wenn unbeschildert.
-* Wenn der Radweg in beide Richtunge befahren werden darf, ergänze \`cycleway:right:oneway=no\`.
+Die Aufgabe gilt für eine Straßenseite. Ergänze die Tags für diese Seite mit \`cycleway:left:*\` oder \`cycleway:right:*\` (links/rechts in Zeichenrichtung der Straße). Ist es auf beiden Seiten gleich, nutze \`cycleway:both:*\`. Ein vorhandenes \`cycleway:both=track\` kann bleiben, die Ergänzungen dürfen je Seite verschieden sein.
 
-(Das gleiche gilt auch für \`cycleway:right:*\` bzw. \`cycleway:both:*\`.)
+* Ergänze das [passende Verkehrszeichen](https://trafficsigns.osm-verkehrswende.org/DE), z. B. \`cycleway:right:traffic_sign=DE:237\` (Radweg), \`DE:240\` (gemeinsamer Geh- und Radweg) oder \`DE:241-30\` (getrennter Rad- und Gehweg).
+* Ist der Weg unbeschildert (\`cycleway:right:traffic_sign=none\`), ergänze zusätzlich \`cycleway:right:segregated=yes\`, wenn Rad- und Fußverkehr baulich getrennt sind, bzw. \`no\` bei einer gemeinsamen Fläche.
+* Gerne auch: Wenn der Radweg in beide Richtungen befahren werden darf, ergänze \`cycleway:right:oneway=no\`.
 
 _Wenn du dir zutraust die Geometrie umzuwandeln:_ In vielen Fällen bietet es sich an, den Weg als separate Geometrie parallel zur Straße einzutragen:
 

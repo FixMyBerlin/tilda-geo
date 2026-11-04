@@ -15,7 +15,7 @@ export const useMeasureAutomaticBackground = () => {
   const { region } = useRegionLoaderData()
   if (!isMeasure) return undefined
 
-  const { lng, lat } = getMapParamFromSearch(search)
+  const { lng, lat } = getMapParamFromSearch(search, region.map)
   return pickAerialBackground({
     sources: sourcesBackgroundsRaster,
     allowedIds: region.backgroundSources,

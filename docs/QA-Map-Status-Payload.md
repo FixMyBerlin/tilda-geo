@@ -127,4 +127,4 @@ Omitting Gut from the map payload does not change that.
 
 ## Optimistic cache splice
 
-`QaDetail` snapshots the current row and feature-state in `onMutate`, then splices with `upsertQaMapDataRow` / `restoreQaMapDataRow` (`useQaMapData.ts`). That cache entry is the **unfiltered** payload; `useQaMapState` applies `qaMapRowMatchesStatus` per rendered feature. Writing a status-filtered subset would shrink the cache under the default `pending-needs-review` filter, and switching to »Alle Status« would leave most areas uncolored until stale.
+`QaDetail` snapshots the current row and feature-state in `onMutate`, then splices with `upsertQaMapDataRow` / `restoreQaMapDataRow` (`useQaMapData.ts`). That cache entry is the **unfiltered** payload; `useQaMapState` applies `qaMapRowMatchesStatus` per rendered feature. Writing a status-filtered subset would shrink the cache under the default »Zu prüfen« filter, and switching to »Alle Status« would leave most areas uncolored until stale.

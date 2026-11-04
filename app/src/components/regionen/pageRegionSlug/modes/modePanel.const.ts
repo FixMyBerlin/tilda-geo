@@ -76,6 +76,13 @@ export const modePanelSmallButtonClassName =
 export const modePanelFilterControlClassName =
   'inline-flex items-center justify-center rounded-md border border-gray-300 bg-white px-2 py-1 text-xs text-gray-700 hover:bg-gray-50 focus:ring-2 focus:ring-brand focus:outline-none'
 
+/** Non-interactive heading band of a filter dropdown; a fill sets it apart from the options. */
+export const modeFilterMenuHeadingClassName =
+  'sticky top-0 z-10 mb-1 flex cursor-default items-center gap-1 border-b border-gray-200 bg-gray-100 px-3 py-1.5 text-[11px] font-semibold text-gray-600 select-none'
+
+export const modeFilterCheckboxClassName =
+  'size-4 rounded border-gray-300 text-brand focus:ring-brand'
+
 export const modePanelListItemBorderClassName = 'border-b border-white/80'
 
 /** Hairline on tinted mode panels; gray-200 disappears on the wash. */
@@ -89,6 +96,8 @@ export const modePanelTintContentRailClassName = 'border-l-4 border-white/80 pl-
 export const modePanelListItemActiveClassName = 'bg-yellow-50'
 
 export const modePanelListItemHoverClassName = 'hover:bg-gray-50'
+
+export const modeFilterCheckboxRowClassName = `flex cursor-pointer items-center gap-2 rounded px-1 py-0.5 text-xs ${modePanelListItemHoverClassName}`
 
 /** Solid hover fill for map-driven row highlight (`hover:` does not apply then). */
 export const modePanelListItemHoveredClassName = 'bg-gray-50'

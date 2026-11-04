@@ -80,6 +80,21 @@ describe('bikelane_categories', function()
       local category = categorize_bikelane(tags).id
       assert.are.equal(category, 'cycleway_isolated')
     end)
+    it('unsigned cycleway with traffic_sign=none', function()
+      local tags = {
+        ['highway'] = 'cycleway',
+        ['traffic_sign'] = 'none',
+      }
+      local category = categorize_bikelane(tags).id
+      assert.are.equal(category, 'cycleway_adjoiningOrIsolated')
+    end)
+    it('unsigned cycleway without traffic_sign stays unclear', function()
+      local tags = {
+        ['highway'] = 'cycleway',
+      }
+      local category = categorize_bikelane(tags).id
+      assert.are.equal(category, 'needsClarification')
+    end)
   end)
 
   describe('`needsClarification`:', function()

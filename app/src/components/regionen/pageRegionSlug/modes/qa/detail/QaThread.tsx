@@ -15,6 +15,7 @@ import { QaAttributeLabel } from './QaAttributeLabel'
 import { qaStatusPillConfig } from './qaConfigs'
 import { QaDecisionData } from './QaDecisionData'
 import { QaEvaluatorDisplay } from './QaEvaluatorDisplay'
+import { QaEvaluatorIcon } from './QaEvaluatorIcon'
 
 type Props = {
   entries: QaThreadEntry[]
@@ -37,6 +38,7 @@ const QaThreadEntryCard = ({ entry }: { entry: QaThreadEntry }) => {
     >
       {/* One line: the name is cut, the OSM handle and the time keep their width. */}
       <header className="flex min-w-0 items-baseline gap-x-1.5">
+        <QaEvaluatorIcon evaluatorType={first.evaluatorType} className="self-center" />
         {isSystem ? (
           <span className="truncate font-medium text-gray-900">System-Bewertung</span>
         ) : (

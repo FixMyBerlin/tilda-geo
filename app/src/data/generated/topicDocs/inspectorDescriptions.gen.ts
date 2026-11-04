@@ -217,10 +217,6 @@ const data = {
   },
   tilda_parkings: {
     keys: {
-      capacity: 'Geschätzte oder explizit erfasste Anzahl von Stellplätzen.',
-      area: 'Fläche des durch parkende Fahrzeuge auf diesem Parkraumabschnitt belegten Raumes in Quadratmetern.',
-      angle:
-        'Drehung der Beschriftung in Grad (im Uhrzeigersinn, 0 = Osten), entlang der Linie (Parklinie bzw. Kante) und so gewendet, dass der Text nie auf dem Kopf steht (−90 bis 90). Nur zur Darstellung.',
       name: 'Name der Straße, übernommen vom längsten OSM-Way der Kante.',
       highway: 'Wert des OSM-Tags `highway` ohne weitere Normalisierung.',
       road: 'Art der Straße, an dem der Parkraum liegt.',
@@ -254,6 +250,10 @@ const data = {
         'JSON-Array analog zu `way_ids`. Pro Way, ob die OSM-Digitization der Kantenrichtung entgegengesetzt ist.',
       start_node: 'OSM-Node-ID am Anfang der Kante. Zusammen mit `end_node` die Objekt-ID.',
       end_node: 'OSM-Node-ID am Ende der Kante. Zusammen mit `start_node` die Objekt-ID.',
+      capacity: 'Geschätzte oder explizit erfasste Anzahl von Stellplätzen.',
+      area: 'Fläche des durch parkende Fahrzeuge auf diesem Parkraumabschnitt belegten Raumes in Quadratmetern.',
+      angle:
+        'Drehung der Beschriftung in Grad (im Uhrzeigersinn, 0 = Osten), entlang der Linie (Parklinie bzw. Kante) und so gewendet, dass der Text nie auf dem Kopf steht (−90 bis 90). Nur zur Darstellung.',
       parking: 'Lage oder Art des Parkraums im Straßenland.',
       capacity_source: 'Herkunft der Stellplatzanzahl inklusive Schätz- oder Umverteilungslogik.',
       orientation: 'Ausrichtung der Fahrzeuge im Straßenland zur Verkehrsrichtung.',

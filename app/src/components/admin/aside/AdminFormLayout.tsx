@@ -43,6 +43,7 @@ export function AdminFormLayout<TValues>({
   return (
     <AdminAsideLayout
       sections={[...toAdminAsideSections(fieldLabels), ...(extras?.sections ?? [])]}
+      mobileError={submitError}
       actions={
         <AdminFormAsideActions
           form={form}

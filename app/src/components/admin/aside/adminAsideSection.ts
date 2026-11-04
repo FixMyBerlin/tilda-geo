@@ -13,14 +13,21 @@ export const adminSectionDataAttribute = 'data-admin-section'
 const preferredScrollBehavior = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
 
-/** Scrolls to a section and mirrors it in the URL hash (without a router navigation). */
+/**
+ * Writes a section id into the URL hash without a history entry or scroll. The router still
+ * notices the change and runs `beforeLoad`/loaders of the admin routes, which read cached queries.
+ */
+export const replaceAdminSectionHash = (id: string) => {
+  if (window.location.hash === `#${id}`) return
+  window.history.replaceState(window.history.state, '', `#${id}`)
+}
+
+/** Scrolls to a section and mirrors it in the URL hash. */
 export const scrollToAdminSection = (id: string, behavior?: ScrollBehavior) => {
   const element = document.getElementById(id)
   if (!element) return false
   element.scrollIntoView({ behavior: behavior ?? preferredScrollBehavior(), block: 'start' })
-  if (window.location.hash !== `#${id}`) {
-    window.history.replaceState(window.history.state, '', `#${id}`)
-  }
+  replaceAdminSectionHash(id)
   return true
 }
 

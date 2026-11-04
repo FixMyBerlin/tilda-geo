@@ -7,6 +7,7 @@ import {
   evaluatorTypeConfig,
   qaStatusPillConfig,
 } from '@/components/regionen/pageRegionSlug/modes/qa/detail/qaConfigs'
+import { QaEvaluatorIcon } from '@/components/regionen/pageRegionSlug/modes/qa/detail/QaEvaluatorIcon'
 import { TimeWithRelativeTooltip } from '@/components/shared/date/TimeWithRelativeTooltip'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { frenchQuote } from '@/components/shared/text/Quotes'
@@ -28,7 +29,7 @@ import { ModePanelEmpty } from '../ModePanelEmpty'
 import { ModeCommentsPill, ModePanelPill } from '../ModePanelPill'
 import type { ModeListExtent } from '../useMapExtentFilter'
 import { useMapViewportBbox } from '../useMapViewportBbox'
-import { QA_STATUS_SELECT_ALL, type QaStatusKey } from './qaConfigStyles'
+import type { QaStatusKey } from './qaConfigStyles'
 import { QaZoomNotice } from './QaZoomNotice'
 
 const evaluatorLabel = (area: QaAreaListItem) => {
@@ -41,7 +42,8 @@ const evaluatorLabel = (area: QaAreaListItem) => {
 type Props = {
   configSlug: string
   regionSlug: string
-  status: QaStatusKey | typeof QA_STATUS_SELECT_ALL
+  /** Selected statuses, `undefined` = Alle Status. */
+  status: QaStatusKey[] | undefined
   users?: string[]
   /** Selected indicator keys (`ind` param), `undefined` = every indicator. */
   indicatorKeys?: string[]
@@ -173,18 +175,24 @@ export const QaModeAreaList = ({
               <div className="relative flex items-start justify-between gap-2">
                 <span className={modePanelListTitleClassName}>Bereich #{area.areaId}</span>
                 <span className="flex shrink-0 items-center gap-2">
-                  <ModeCommentsPill count={area.commentCount} />
                   <TimeWithRelativeTooltip
                     date={area.createdAt}
-                    timeClassName={modePanelListHintClassName}
+                    timeClassName={`tracking-tight ${modePanelListHintClassName}`}
                   />
+                  <span className="flex min-w-12.5 justify-end">
+                    <ModeCommentsPill
+                      count={area.commentCount}
+                      className="tracking-tighter tabular-nums"
+                    />
+                  </span>
                 </span>
                 <ComposerDraftDot draftId={qaEvalDraftId(regionSlug, configSlug, area.areaId)} />
               </div>
-              <div className="mt-1 flex min-w-0 items-center gap-2">
+              <div className="mt-1 flex min-w-0 items-center justify-between gap-2">
                 <ModePanelPill backgroundColor={config.hexColor}>{config.label}</ModePanelPill>
-                <span className={`truncate ${modePanelListMetaClassName}`}>
-                  {evaluatorLabel(area)}
+                <span className={`flex min-w-0 items-center gap-1 ${modePanelListMetaClassName}`}>
+                  <QaEvaluatorIcon evaluatorType={area.evaluatorType} />
+                  <span className="truncate">{evaluatorLabel(area)}</span>
                 </span>
               </div>
             </ModeListItem>

@@ -403,6 +403,13 @@ local cyclewaySeparated = BikelaneCategory.new({
       return true
     end
 
+    -- CASE: Unsigned cycleway ('anderer Radweg')
+    -- `highway=cycleway` with an explicit `traffic_sign=none` is a cycleway without a mandatory-use sign.
+    -- Shared and segregated foot paths are matched by the categories before this one.
+    if tags.highway == 'cycleway' and sanitize_traffic_sign(tags.traffic_sign) == 'none' then
+      return true
+    end
+
     -- CASE: Everything that has a traffic sign DE:237
     -- Sometimes users add a `traffic_sign=DE:237` right on the `highway=secondard` but it should be `cycleway:right:traffic_sign`
     -- We only allow the follow highway tags. This will still produce false positives but less so.

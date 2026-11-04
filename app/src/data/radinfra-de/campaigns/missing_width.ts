@@ -14,6 +14,7 @@ export const missing_width: CampaignType = {
   maprouletteChallenge: {
     enabled: false,
   },
+  // `est_width` does not clear this todo yet: processing reads only `width`. https://github.com/FixMyBerlin/tilda-geo/pull/362 adds it.
   taskTemplate: `
 Diesem Weg fehlt eine Angabe zur Breite.
 

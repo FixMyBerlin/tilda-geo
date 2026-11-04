@@ -239,13 +239,12 @@ describe('bikelane_todos', function()
       assert.are.equal(table_includes(right._todo_list, 'needs_clarification_track'), true)
     end)
 
-    it('skip when sufficient tagging is present', function()
+    it('skip only on the side with sufficient tagging', function()
       local input_object = {
         tags = {
           ['highway'] = 'secondary',
           ['cycleway:both'] = 'track',
           ['cycleway:left:traffic_sign'] = 'DE:241-30',
-          -- ['cycleway:left:segregated'] = 'yes', -- works as well
         },
         id = 1,
         type = 'way'
@@ -258,6 +257,37 @@ describe('bikelane_todos', function()
       assert.are.equal(table_includes(left._todo_list, 'needs_clarification_track'), false)
 
       local right = cycleways[2]
+      assert.are.equal(right._id, 'way/1/cycleway/right')
+      assert.are.equal(table_includes(right._todo_list, 'needs_clarification_track'), true)
+    end)
+
+    it('skip on both sides with cycleway:both:segregated', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'secondary',
+          ['cycleway:both'] = 'track',
+          ['cycleway:both:segregated'] = 'yes',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local cycleways = run_bikelanes(input_object)
+      assert.are.equal(table_includes(cycleways[1]._todo_list, 'needs_clarification_track'), false)
+      assert.are.equal(table_includes(cycleways[2]._todo_list, 'needs_clarification_track'), false)
+    end)
+
+    it('skip when the track has traffic_sign DE:237', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'secondary',
+          ['cycleway:right'] = 'track',
+          ['cycleway:right:traffic_sign'] = 'DE:237',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local cycleways = run_bikelanes(input_object)
+      local right = cycleways[1]
       assert.are.equal(right._id, 'way/1/cycleway/right')
       assert.are.equal(table_includes(right._todo_list, 'needs_clarification_track'), false)
     end)

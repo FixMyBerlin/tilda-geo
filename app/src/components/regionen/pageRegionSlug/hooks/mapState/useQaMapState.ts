@@ -7,7 +7,7 @@ import {
   qaSourceId,
 } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersQa'
 import {
-  qaStatusForMapFilter,
+  resolvedQaStatusKeys,
   resolvedQaIndicatorKeys,
 } from '@/components/regionen/pageRegionSlug/modes/qa/qaConfigStyles'
 import { isProd } from '@/components/shared/utils/isEnv'
@@ -36,7 +36,8 @@ export const useQaMapState = () => {
   const applyDefault =
     currentQaData !== undefined &&
     qaMapPayloadAppliesDefault({ search: qaParamData.search, userIds: qaParamData.users })
-  const statusFilter = qaStatusForMapFilter(qaParamData.status)
+  const statusFilter = resolvedQaStatusKeys(qaParamData.status)
+  const statusFilterId = statusFilter?.join(',')
   // The map and the area list resolve the URL keys the same way: a selection that matches no key
   // of the config means every indicator.
   const resolvedIndicatorKeys = resolvedQaIndicatorKeys(
@@ -126,7 +127,7 @@ export const useQaMapState = () => {
       qaDataByAreaId,
       indicators,
       selectedIndicatorKeysId,
-      statusFilter,
+      statusFilterId,
       shouldUpdateFeatureStates,
       mainMap,
       mapLoaded,

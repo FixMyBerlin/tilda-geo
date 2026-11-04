@@ -5,23 +5,19 @@ import { frenchQuote } from '@/components/shared/text/Quotes'
 import { regionQaConfigsQueryOptions } from '@/server/regions/regionQueryOptions'
 import { ModeCollectionSelect } from '../ModeCollectionSelect'
 import { ModeFilterBar } from '../ModeFilterBar'
-import { ModeFilterSelect, modeFilterIcons } from '../ModeFilterSelect'
 import { ModePanel } from '../ModePanel'
 import { modePanelMutedClassName } from '../modePanel.const'
 import { useModeDetailSelection } from '../useModeDetailSelection'
 import { QaDetail } from './detail/QaDetail'
 import { QaConfigInfo } from './QaConfigInfo'
 import {
-  QA_DEFAULT_STATUS_KEY,
-  QA_STATUS_FILTER_OPTIONS,
-  QA_STATUS_SELECT_ALL,
+  QA_DEFAULT_STATUS_KEYS,
   resolvedQaIndicatorKeys,
-  resolvedQaStatusSelectValue,
-  zodQaStatusKey,
-  type QaStatusKey,
+  resolvedQaStatusKeys,
 } from './qaConfigStyles'
 import { QaIndicatorDropdown } from './QaIndicatorDropdown'
 import { QaModeAreaList } from './QaModeAreaList'
+import { QaStatusDropdown } from './QaStatusDropdown'
 import { QaUserDropdown } from './QaUserDropdown'
 
 export const PageModeQa = () => {
@@ -46,28 +42,7 @@ export const PageModeQa = () => {
       ...qaParamData,
       key: configSlug,
       ind: undefined,
-      status: qaParamData.status ?? QA_DEFAULT_STATUS_KEY,
-    })
-  }
-
-  const statusSelectValue = resolvedQaStatusSelectValue(qaParamData.status)
-
-  const setStatus = (value: string) => {
-    if (!selectedKey) return
-    if (value === QA_STATUS_SELECT_ALL) {
-      setQaParamData({
-        ...qaParamData,
-        key: selectedKey,
-        status: QA_STATUS_SELECT_ALL,
-      })
-      return
-    }
-    const parsed = zodQaStatusKey.safeParse(value)
-    if (!parsed.success) return
-    setQaParamData({
-      ...qaParamData,
-      key: selectedKey,
-      status: parsed.data satisfies QaStatusKey,
+      status: qaParamData.status ?? QA_DEFAULT_STATUS_KEYS,
     })
   }
 
@@ -119,13 +94,7 @@ export const PageModeQa = () => {
             })
           }
         >
-          <ModeFilterSelect
-            label="Status"
-            icon={modeFilterIcons.status}
-            value={statusSelectValue}
-            options={[...QA_STATUS_FILTER_OPTIONS]}
-            onChange={setStatus}
-          />
+          <QaStatusDropdown />
           {selectedKey && activeConfig ? (
             <>
               <QaIndicatorDropdown indicators={indicators} />
@@ -139,7 +108,7 @@ export const PageModeQa = () => {
         <QaModeAreaList
           configSlug={selectedKey}
           regionSlug={region.slug}
-          status={statusSelectValue}
+          status={resolvedQaStatusKeys(qaParamData.status)}
           users={qaParamData.users}
           indicatorKeys={qaParamData.ind && qaParamData.ind.length > 0 ? indicatorKeys : undefined}
           search={qaParamData.search ?? ''}

@@ -81,6 +81,24 @@ describe('useActiveSectionId', () => {
     expect(screen.getByTestId('active').textContent).toBe('b')
   })
 
+  test('writes the scrolled-to section into the hash, but not the first one on load', () => {
+    render(<Harness />)
+
+    intersect('a')
+    expect(window.location.hash).toBe('')
+
+    const replaceState = vi.spyOn(window.history, 'replaceState')
+    intersect('b')
+    intersect('b', 'c')
+    expect(window.location.hash).toBe('#b')
+    // Every write makes the router run a load, so an unchanged section must not write again.
+    expect(replaceState).toHaveBeenCalledTimes(1)
+    replaceState.mockRestore()
+
+    intersect('a')
+    expect(window.location.hash).toBe('#a')
+  })
+
   test('jump scrolls smoothly, writes the hash and pins until the user scrolls', () => {
     render(<Harness />)
 
