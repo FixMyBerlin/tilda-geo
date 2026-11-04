@@ -24,8 +24,10 @@ Dieser Weg hat den veralteten Tag \`cycleway=shared\`. Diese wollen wir aktualis
 
 **Bitte prüfe die Infrastruktur und aktualisiere das Tagging.**
 
-* In vielen Fällen kann das \`cycleway=shared\` einfach gelöscht werden.
-* Wenn keine Radinfrastruktur vorliegt, ergänze \`cycleway:both=no\`
+* Lösche in jedem Fall \`cycleway=shared\`. Erst dann ist die Aufgabe erledigt.
+* Hat der Weg schon \`cycleway:both\`, \`cycleway:left\` oder \`cycleway:right\`? Dann reicht das Löschen.
+* Gibt es Piktogrammketten (Sharrows) auf der Fahrbahn? Dann ersetze es durch \`cycleway:both=shared_lane\`.
+* Wenn keine Radinfrastruktur vorliegt, ersetze es durch \`cycleway:both=no\`.
 
 ## Hilfsmittel
 
