@@ -158,7 +158,21 @@ export default defineConfig({
       sourcemap: true,
     } as Parameters<typeof nitro>[0]),
     tailwindcss(),
-    tanstackStart({}),
+    tanstackStart({
+      router: {
+        // The router plugin splits only the components by default; loader and pendingComponent
+        // code (and everything they import) would otherwise ship in the entry chunk to every page.
+        codeSplittingOptions: {
+          defaultBehavior: [
+            ['loader'],
+            ['component'],
+            ['pendingComponent'],
+            ['errorComponent'],
+            ['notFoundComponent'],
+          ],
+        },
+      },
+    }),
     viteReact({ compiler: true }),
   ],
 })
