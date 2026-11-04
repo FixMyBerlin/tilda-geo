@@ -10,7 +10,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -76,7 +76,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -273,7 +273,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -882,7 +882,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -2375,7 +2375,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -2811,7 +2811,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -2951,7 +2951,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -3435,7 +3435,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -4398,7 +4398,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -9610,7 +9610,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -9704,7 +9704,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -10862,7 +10862,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -10950,7 +10950,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -12250,7 +12250,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -14361,7 +14361,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -14423,7 +14423,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
