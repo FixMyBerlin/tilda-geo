@@ -1,19 +1,19 @@
 import { expect, test } from '@playwright/test'
 import { LAYER_POSITIONS } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/utils/beforeId'
 import { TEST_REGION_URL } from '../fixtures/routes'
-import { getMapLayerIds, waitForAtlasGeoLayers, waitForMapLoad } from '../utils/maps'
+import { getMapLayerIds, waitForTildaLayers, waitForMapLoad } from '../utils/maps'
 
 // Read-only smoke check. Tests that write the MapLayerOrder table live together in
 // tests/pages/admin-layer-order.spec.ts (serial), because Playwright runs spec files in
 // parallel and the table is a global singleton.
 
-test('Smoke – map layer order: the basemap has all positions in order and atlas layers sit between them', async ({
+test('Smoke – map layer order: the basemap has all positions in order and TILDA layers sit between them', async ({
   page,
 }) => {
   await page.goto(TEST_REGION_URL)
   await page.waitForURL(/map=/, { timeout: 30_000 })
   await waitForMapLoad(page, 60_000)
-  await waitForAtlasGeoLayers(page)
+  await waitForTildaLayers(page)
 
   const layerIds = await getMapLayerIds(page)
 
@@ -25,18 +25,18 @@ test('Smoke – map layer order: the basemap has all positions in order and atla
     [...positions].sort((a, b) => a - b),
   )
 
-  const atlasLayerPositions = layerIds
+  const tildaLayerPositions = layerIds
     .map((id, position) => ({ id, position }))
     .filter(({ id }) => id.startsWith('source:'))
-  expect(atlasLayerPositions.length).toBeGreaterThan(0)
+  expect(tildaLayerPositions.length).toBeGreaterThan(0)
 
   const belowRoadnameAnchor = layerIds.indexOf('atlas-app-beforeid-below-roadname')
-  const splicedBelow = atlasLayerPositions.filter(({ position }) => position < belowRoadnameAnchor)
-  expect(splicedBelow.length, 'no atlas layers spliced below the roadname anchor').toBeGreaterThan(
+  const splicedBelow = tildaLayerPositions.filter(({ position }) => position < belowRoadnameAnchor)
+  expect(splicedBelow.length, 'no TILDA layers spliced below the roadname anchor').toBeGreaterThan(
     0,
   )
 
   const topAnchor = layerIds.indexOf('atlas-app-beforeid-top')
-  const lastAtlasLayer = atlasLayerPositions.at(-1)
-  expect(lastAtlasLayer!.position).toBeLessThan(topAnchor)
+  const lastTildaLayer = tildaLayerPositions.at(-1)
+  expect(lastTildaLayer!.position).toBeLessThan(topAnchor)
 })

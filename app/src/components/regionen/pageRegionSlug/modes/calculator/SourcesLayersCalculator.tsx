@@ -4,9 +4,9 @@ import { useMapDebugDebugLayerStyles } from '@/components/regionen/pageRegionSlu
 import { useBackgroundParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBackgroundParam'
 import type { LayerPosition } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/utils/beforeId'
 import {
-  buildAtlasLayerProps,
-  isAtlasStyleLayer,
-} from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/utils/buildAtlasLayerProps'
+  buildTildaLayerProps,
+  isTildaStyleLayer,
+} from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/utils/buildTildaLayerProps'
 import { layerVisibility } from '@/components/regionen/pageRegionSlug/Map/utils/layerVisibility'
 import { getMapDataSourceTilesUrl } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/getMapDataSourceTilesUrl'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
@@ -87,9 +87,9 @@ export const SourcesLayersCalculator = ({ dataset, filter, styleColors }: Props)
             ? (styleColors.colors[part.id] ?? calculatorStyleOtherColor)
             : styleColors && calculatorStyleColorExpression(styleColors)
 
-        return part.layers.filter(isAtlasStyleLayer).map((layer) => {
+        return part.layers.filter(isTildaStyleLayer).map((layer) => {
           const layerId = calculatorLayerId(dataset.id, part.id, layer.id)
-          const layerProps = buildAtlasLayerProps({
+          const layerProps = buildTildaLayerProps({
             layer,
             layerId,
             sourceKey: calculatorSourceKey(dataset.id, part.sourceId),

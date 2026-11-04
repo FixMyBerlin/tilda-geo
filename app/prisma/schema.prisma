@@ -836,7 +836,7 @@ enum DataSchemaImportStatus {
   @@schema("prisma")
 }
 
-/// Order of the Atlas-Geo map layers, one list for all regions; edited on /admin/layer-order.
+/// Order of the TILDA map layers, one list for all regions; edited on /admin/layer-order.
 /// Exactly one row per layer of the code: the app adds and removes rows when it starts (`getMapLayerOrder`).
 model MapLayerOrder {
   id        Int      @id @default(autoincrement())

@@ -7,7 +7,7 @@ import {
   createSourceKeyStaticDatasets,
 } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { isMaskLayer } from '../utils/maskLayerUtils'
-import { buildUploadLayerProps, type UploadLayerWithAtlasType } from './utils/buildUploadLayerProps'
+import { buildUploadLayerProps, type RenderableUploadLayer } from './utils/buildUploadLayerProps'
 import { createPmtilesUrl } from './utils/createPmtilesUrl'
 
 // Renders systemLayer datasets that are always active and hidden from UI.
@@ -68,7 +68,7 @@ export const LayersSystemDatasets = () => {
                   ? layer.beforeId || 'atlas-app-beforeid-fallback'
                   : 'atlas-app-beforeid-fallback'
               const layerProps = buildUploadLayerProps({
-                layer: layer as UploadLayerWithAtlasType,
+                layer: layer as RenderableUploadLayer,
                 layerId,
                 sourceId: datasetSourceId,
                 debugLayerStyles,

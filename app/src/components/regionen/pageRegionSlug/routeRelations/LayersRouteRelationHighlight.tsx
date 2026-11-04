@@ -1,5 +1,5 @@
 import { Layer } from 'react-map-gl/maplibre'
-import type { buildAtlasLayerEntries } from '../Map/SourcesAndLayers/sortLayers/buildAtlasLayerEntries'
+import type { buildTildaLayerEntries } from '../Map/SourcesAndLayers/sortLayers/buildTildaLayerEntries'
 import type { SourcesId } from '../mapData/mapDataSources/sources.const'
 import { routeRelationFilter } from './routeRelations'
 import { useHoveredRouteRelation } from './useRouteRelationHighlight'
@@ -14,7 +14,7 @@ const routeRelationSources: SourcesId[] = [
 const ROUTE_HIGHLIGHT_COLOR = '#c026d3'
 
 type Props = {
-  layerEntries: ReturnType<typeof buildAtlasLayerEntries>
+  layerEntries: ReturnType<typeof buildTildaLayerEntries>
 }
 
 /**

@@ -30,9 +30,9 @@ const createMatchExpression = ({
   ] satisfies ExpressionSpecification
 }
 
-/** Pointer hover on atlas categories and static datasets. Mode layers pass their own accent. */
+/** Pointer hover on TILDA categories and static datasets. Mode layers pass their own accent. */
 const HOVER_COLOR = '#ff9933'
-/** Selected atlas/static features. Unchanged by the active region mode. */
+/** Selected TILDA/static features. Unchanged by the active region mode. */
 const SELECTED_COLOR = '#ff0000'
 
 type Props = LayerProps & {

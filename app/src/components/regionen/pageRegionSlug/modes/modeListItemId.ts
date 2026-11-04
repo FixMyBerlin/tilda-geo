@@ -70,7 +70,7 @@ export const listItemIdFromMapFeature = (feature: MapFeatureId) => {
   return null
 }
 
-/** First mode-owned feature in a MapLibre hit list (atlas/mask layers return null). */
+/** First mode-owned feature in a MapLibre hit list (TILDA/mask layers return null). */
 export const listItemIdFromMapFeatures = (features: MapFeatureId[] | undefined) => {
   for (const feature of features ?? []) {
     const listId = listItemIdFromMapFeature(feature)

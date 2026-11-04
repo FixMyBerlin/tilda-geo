@@ -1,4 +1,4 @@
-import type { AtlasLayerEntry } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/sortLayers/getAllAtlasLayerEntries'
+import type { TildaLayerEntry } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/sortLayers/getAllTildaLayerEntries'
 import type { LayerPosition } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/utils/beforeId'
 import { LayerPositionSchema } from '@/server/map-layer-order/schemas'
 
@@ -84,8 +84,8 @@ type SavedEntry = { layerKey: string; beforeId: string | null }
  * `savedOrder` are the rows of the MapLayerOrder table, the bottom layer first. They hold exactly
  * the layers of the code, see `getMapLayerOrder`.
  */
-export function toLayerStack(savedOrder: SavedEntry[], atlasLayers: AtlasLayerEntry[]) {
-  const defaultSlots = new Map(atlasLayers.map((layer) => [layer.layerKey, layer.defaultBeforeId]))
+export function toLayerStack(savedOrder: SavedEntry[], tildaLayers: TildaLayerEntry[]) {
+  const defaultSlots = new Map(tildaLayers.map((layer) => [layer.layerKey, layer.defaultBeforeId]))
 
   const stack: LayerStack = {}
   const bottoms: LayerStack = {}
@@ -107,8 +107,8 @@ export function toLayerStack(savedOrder: SavedEntry[], atlasLayers: AtlasLayerEn
  * The MapLayerOrder rows, the bottom layer of the map first. `beforeId` is null for a layer at
  * the position from the config.
  */
-export function toSavedOrder(stack: LayerStack, atlasLayers: AtlasLayerEntry[]) {
-  const defaultSlots = new Map(atlasLayers.map((layer) => [layer.layerKey, layer.defaultBeforeId]))
+export function toSavedOrder(stack: LayerStack, tildaLayers: TildaLayerEntry[]) {
+  const defaultSlots = new Map(tildaLayers.map((layer) => [layer.layerKey, layer.defaultBeforeId]))
   return [...STACK_SLOT_IDS].reverse().flatMap((slot) =>
     [...(stack[slot] ?? [])].reverse().map((layerKey) => ({
       layerKey,

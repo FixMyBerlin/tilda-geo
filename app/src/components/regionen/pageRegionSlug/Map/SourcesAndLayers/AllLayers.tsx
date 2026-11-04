@@ -1,5 +1,4 @@
 import { LayersRasterBackgrounds } from './SourcesLayerRasterBackgrounds'
-import { LayersAtlasGeo } from './SourcesLayersAtlasGeo'
 import { LayersInternalNotes } from './SourcesLayersInternalNotes'
 import { SourcesLayersMap3dBuildings } from './SourcesLayersMap3dBuildings'
 import { SourcesLayersMap3dDem } from './SourcesLayersMap3dDem'
@@ -8,6 +7,7 @@ import { LayersQa } from './SourcesLayersQa'
 import { LayersStaticDatasets } from './SourcesLayersStaticDatasets'
 import { SourcesLayersStreetImagery } from './SourcesLayersStreetImagery'
 import { LayersSystemDatasets } from './SourcesLayersSystemDatasets'
+import { LayersTilda } from './SourcesLayersTilda'
 
 // All data layers of the map as one flat list, apart from their Sources (see <AllSources>).
 // Layers that share a `beforeId` stack in the order of this list, the first one at the bottom.
@@ -20,7 +20,7 @@ export const AllLayers = () => {
       <SourcesLayersMap3dDem />
       <SourcesLayersMap3dBuildings />
       <LayersSystemDatasets />
-      <LayersAtlasGeo />
+      <LayersTilda />
       <LayersStaticDatasets />
       <SourcesLayersStreetImagery />
       <LayersOsmNotes />

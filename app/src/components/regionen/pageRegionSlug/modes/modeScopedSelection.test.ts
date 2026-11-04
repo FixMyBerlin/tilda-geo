@@ -12,7 +12,7 @@ import {
 } from './modeScopedSelection'
 
 describe('modeScopedSelection', () => {
-  test('atlas sources stay allowed in every mode', () => {
+  test('TILDA sources stay allowed in every mode', () => {
     expect(isSelectionSourceAllowedInMode('atlas_bikelanes', 'map')).toBe(true)
     expect(isSelectionSourceAllowedInMode('atlas_bikelanes', 'notes')).toBe(true)
     expect(isModeOwnedSource('atlas_bikelanes')).toBe(false)

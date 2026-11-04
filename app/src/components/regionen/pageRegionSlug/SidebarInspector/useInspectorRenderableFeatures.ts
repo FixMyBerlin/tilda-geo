@@ -2,10 +2,7 @@ import type { MapGeoJSONFeature } from 'react-map-gl/maplibre'
 import { useMapInspectorFeatures } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useSelectedFeatures } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useSelectedFeatures'
 import { isModeOwnedSource } from '@/components/regionen/pageRegionSlug/modes/modeScopedSelection'
-import {
-  isSourceKeyAtlasGeo,
-  parseSourceKeyAtlasGeo,
-} from '../utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
+import { isSourceKeyTilda, parseSourceKeyTilda } from '../utils/sourceKeyUtils/sourceKeyUtilsTilda'
 
 const isMapFeature = (feature: MapGeoJSONFeature | undefined): feature is MapGeoJSONFeature =>
   feature !== undefined
@@ -21,8 +18,8 @@ const dataFeatureKey = (feature: MapGeoJSONFeature) => {
   // Without an id we cannot tell duplicates from different features, so we keep them all.
   if (featureId === undefined || featureId === null) return undefined
   const sourceKey = String(feature.source)
-  const dataSource = isSourceKeyAtlasGeo(sourceKey)
-    ? parseSourceKeyAtlasGeo(sourceKey).sourceId
+  const dataSource = isSourceKeyTilda(sourceKey)
+    ? parseSourceKeyTilda(sourceKey).sourceId
     : sourceKey
   return `${dataSource}|${featureId}`
 }

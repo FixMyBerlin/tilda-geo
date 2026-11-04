@@ -2,14 +2,14 @@ import { expect, test } from '@playwright/test'
 import db from '../../src/server/db.server'
 import { cleanupStubbedSessionData, createStubbedAdminSession } from '../fixtures/auth'
 import { TEST_REGION_URL } from '../fixtures/routes'
-import { getMapLayerIds, waitForAtlasGeoLayers, waitForMapLoad } from '../utils/maps'
+import { getMapLayerIds, waitForTildaLayers, waitForMapLoad } from '../utils/maps'
 
 // Every test that writes the MapLayerOrder table lives in this one serial file: Playwright runs
 // spec files in parallel and the table is a global singleton, so two files snapshotting and
 // restoring it concurrently would race and leak state.
 
 const IDENTITY_KEY = 'admin-layer-order'
-// Fixed keys instead of getAllAtlasLayerEntries(): that module pulls in the map config, which reads
+// Fixed keys instead of getAllTildaLayerEntries(): that module pulls in the map config, which reads
 // `import.meta.env` and cannot load in the Playwright (Node) runtime. All three are in the
 // bikelanes default style, which the test region renders; tests fail loudly if they vanish.
 const SAMPLE_KEY = 'source:atlas_bikelanes--subcat:bikelanes--style:default--layer:smooth-colors'
@@ -23,7 +23,7 @@ async function openRegionMap(page: import('@playwright/test').Page) {
   await page.goto(TEST_REGION_URL)
   await page.waitForURL(/map=/, { timeout: 30_000 })
   await waitForMapLoad(page, 60_000)
-  await waitForAtlasGeoLayers(page)
+  await waitForTildaLayers(page)
 }
 
 test.describe('Admin layer order', () => {
@@ -61,7 +61,9 @@ test.describe('Admin layer order', () => {
     await cleanupStubbedSessionData('ADMIN', IDENTITY_KEY)
   })
 
-  test('lists atlas keys and the save control without writing', async ({ page }, testInfo) => {
+  test('lists TILDA layer keys and the save control without writing', async ({
+    page,
+  }, testInfo) => {
     const baseURL = testInfo.project.use.baseURL
     if (typeof baseURL !== 'string') {
       throw new Error('Playwright baseURL must be a string for stubbed login tests')
@@ -152,7 +154,7 @@ test.describe('Admin layer order', () => {
     await page.reload()
     await page.waitForURL(/map=/, { timeout: 30_000 })
     await waitForMapLoad(page, 60_000)
-    await waitForAtlasGeoLayers(page)
+    await waitForTildaLayers(page)
 
     const secondPass = await getMapLayerIds(page)
     expect(secondPass.indexOf(ORDER_KEY_B)).toBeLessThan(secondPass.indexOf(ORDER_KEY_A))

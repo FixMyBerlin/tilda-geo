@@ -48,10 +48,10 @@ export const DebugMap = () => {
 
   const vectorSources = Object.entries(allSources).filter(([_, value]) => value.type === 'vector')
   const rasterSources = Object.entries(allSources).filter(([_, value]) => value.type === 'raster')
-  const atlasLayers = allLayers.filter((layer) => {
+  const tildaLayers = allLayers.filter((layer) => {
     return 'source' in layer && layer.source !== 'openmaptiles' && layer.type !== 'raster'
   })
-  if (!vectorSources || !rasterSources || !atlasLayers.length) return null
+  if (!vectorSources || !rasterSources || !tildaLayers.length) return null
 
   return (
     <div className="space-y-0.5 rounded bg-pink-100 px-2 py-2 text-sm [&_.font-mono]:text-[11px] [&_code]:text-[11px] [&_pre]:text-[11px]">
@@ -92,11 +92,11 @@ export const DebugMap = () => {
         <div className="font-mono">getTilesUrl: {getTilesUrl()}</div>
       </details>
 
-      <DebugMapDownload layers={atlasLayers} />
+      <DebugMapDownload layers={tildaLayers} />
 
       <details>
         <summary className="cursor-pointer hover:font-semibold">
-          Layers {Object.keys(atlasLayers).length}
+          Layers {Object.keys(tildaLayers).length}
         </summary>
 
         <button
@@ -108,7 +108,7 @@ export const DebugMap = () => {
         </button>
         <input onChange={(e) => setLayerFilter(e.target.value)} placeholder="Filter Layer" />
 
-        {atlasLayers
+        {tildaLayers
           .filter((layer) => (layerFilter ? layer.id.includes(layerFilter) : true))
           .map((layer) => {
             const layerName =

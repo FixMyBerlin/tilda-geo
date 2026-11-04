@@ -1,6 +1,6 @@
 import { FormattedMessage, IntlProvider } from 'react-intl'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
-import { parseSourceKeyAtlasGeo } from '../utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
+import { parseSourceKeyTilda } from '../utils/sourceKeyUtils/sourceKeyUtilsTilda'
 import { Disclosure } from './Disclosure/Disclosure'
 import type { InspectorFeature } from './Inspector'
 import { NoticeMaproulette } from './InspectorFeatureSource/NoticeMaproulette'
@@ -15,7 +15,7 @@ import { ToolsWrapper } from './Tools/ToolsWrapper'
 
 export const InspectorFeatureTilda = ({ sourceKey, feature }: InspectorFeature) => {
   const { geometry, properties } = feature
-  const sourceId = sourceKey ? parseSourceKeyAtlasGeo(sourceKey).sourceId : ''
+  const sourceId = sourceKey ? parseSourceKeyTilda(sourceKey).sourceId : ''
   const sourceData = sourceId ? getSourceData(sourceId) : null
   const { osmType, osmId } =
     properties && sourceData

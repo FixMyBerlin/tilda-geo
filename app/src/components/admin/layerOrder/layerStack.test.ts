@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'vitest'
-import type { AtlasLayerEntry } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/sortLayers/getAllAtlasLayerEntries'
+import type { TildaLayerEntry } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/sortLayers/getAllTildaLayerEntries'
 import { LAYER_POSITIONS } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/utils/beforeId'
 import { moveToSlot, STACK_SLOT_IDS, toLayerStack, toSavedOrder } from './layerStack'
 
 const TOP = 'atlas-app-beforeid-top'
 
-const atlasLayer = (layerKey: string, defaultBeforeId: AtlasLayerEntry['defaultBeforeId']) =>
+const tildaLayer = (layerKey: string, defaultBeforeId: TildaLayerEntry['defaultBeforeId']) =>
   ({
     layerKey,
     defaultBeforeId,
@@ -14,25 +14,25 @@ const atlasLayer = (layerKey: string, defaultBeforeId: AtlasLayerEntry['defaultB
     categoryNames: [],
     subcategoryName: '',
     styleName: '',
-  }) satisfies AtlasLayerEntry
+  }) satisfies TildaLayerEntry
 
 // Config order: a category with a line and a fill, then one with a fill, a line and a label that
 // the config puts on top.
-const atlasLayers = [
-  atlasLayer('line-a', 'boundary_country'),
-  atlasLayer('fill-a', 'landuse'),
-  atlasLayer('fill-b', 'landuse'),
-  atlasLayer('line-b', 'boundary_country'),
-  atlasLayer('label', TOP),
+const tildaLayers = [
+  tildaLayer('line-a', 'boundary_country'),
+  tildaLayer('fill-a', 'landuse'),
+  tildaLayer('fill-b', 'landuse'),
+  tildaLayer('line-b', 'boundary_country'),
+  tildaLayer('label', TOP),
 ]
 
 // The table after the first sync: every layer of the code, in config order, no beforeId.
-const codeOrder = (layers: AtlasLayerEntry[]) =>
+const codeOrder = (layers: TildaLayerEntry[]) =>
   layers.map((layer) => ({ layerKey: layer.layerKey, beforeId: null }))
 
 describe('toLayerStack', () => {
   test('without a saved position, every layer is at its default one, the last of the config on top', () => {
-    expect(toLayerStack(codeOrder(atlasLayers), atlasLayers)).toEqual({
+    expect(toLayerStack(codeOrder(tildaLayers), tildaLayers)).toEqual({
       landuse: ['fill-b', 'fill-a'],
       boundary_country: ['line-b', 'line-a'],
       [TOP]: ['label'],
@@ -48,7 +48,7 @@ describe('toLayerStack', () => {
         { layerKey: 'line-a', beforeId: null },
         { layerKey: 'fill-b', beforeId: null },
       ],
-      atlasLayers,
+      tildaLayers,
     )
     expect(stack).toEqual({
       landuse: ['fill-b'],
@@ -58,16 +58,16 @@ describe('toLayerStack', () => {
   })
 
   test('an anchor that left the basemap style is ignored', () => {
-    const saved = codeOrder(atlasLayers).map((entry) =>
+    const saved = codeOrder(tildaLayers).map((entry) =>
       entry.layerKey === 'fill-a' ? { ...entry, beforeId: 'atlas-app-beforeid-renamed' } : entry,
     )
-    expect(toLayerStack(saved, atlasLayers).landuse).toEqual(['fill-b', 'fill-a'])
+    expect(toLayerStack(saved, tildaLayers).landuse).toEqual(['fill-b', 'fill-a'])
   })
 })
 
 describe('toSavedOrder', () => {
   test('lists the map from the bottom to the top and sets no beforeId without a change', () => {
-    expect(toSavedOrder(toLayerStack(codeOrder(atlasLayers), atlasLayers), atlasLayers)).toEqual([
+    expect(toSavedOrder(toLayerStack(codeOrder(tildaLayers), tildaLayers), tildaLayers)).toEqual([
       { layerKey: 'fill-a', beforeId: null },
       { layerKey: 'fill-b', beforeId: null },
       { layerKey: 'line-a', beforeId: null },
@@ -78,21 +78,21 @@ describe('toSavedOrder', () => {
 
   test('a layer moved to a group below a basemap layer is saved with that layer as beforeId', () => {
     const stack = moveToSlot(
-      toLayerStack(codeOrder(atlasLayers), atlasLayers),
+      toLayerStack(codeOrder(tildaLayers), tildaLayers),
       ['label'],
       'building',
     )
-    const saved = toSavedOrder(stack, atlasLayers)
+    const saved = toSavedOrder(stack, tildaLayers)
     expect(saved.find((entry) => entry.layerKey === 'label')).toEqual({
       layerKey: 'label',
       beforeId: 'building',
     })
-    expect(toLayerStack(saved, atlasLayers).building).toEqual(['label'])
+    expect(toLayerStack(saved, tildaLayers).building).toEqual(['label'])
   })
 
   test('saving and loading again gives the same stack', () => {
-    const stack = moveToSlot(toLayerStack(codeOrder(atlasLayers), atlasLayers), ['line-a'], TOP)
-    expect(toLayerStack(toSavedOrder(stack, atlasLayers), atlasLayers)).toEqual({
+    const stack = moveToSlot(toLayerStack(codeOrder(tildaLayers), tildaLayers), ['line-a'], TOP)
+    expect(toLayerStack(toSavedOrder(stack, tildaLayers), tildaLayers)).toEqual({
       landuse: ['fill-b', 'fill-a'],
       boundary_country: ['line-b'],
       [TOP]: ['line-a', 'label'],
@@ -102,15 +102,15 @@ describe('toSavedOrder', () => {
 
 describe('moveToSlot', () => {
   test('puts the layer on top of the layers of the new position', () => {
-    const stack = moveToSlot(toLayerStack(codeOrder(atlasLayers), atlasLayers), ['fill-a'], TOP)
+    const stack = moveToSlot(toLayerStack(codeOrder(tildaLayers), tildaLayers), ['fill-a'], TOP)
     expect(stack[TOP]).toEqual(['fill-a', 'label'])
     expect(stack.landuse).toEqual(['fill-b'])
-    expect(toSavedOrder(stack, atlasLayers).at(-1)).toEqual({ layerKey: 'fill-a', beforeId: TOP })
+    expect(toSavedOrder(stack, tildaLayers).at(-1)).toEqual({ layerKey: 'fill-a', beforeId: TOP })
   })
 
   test('several layers move together and keep their order on the map', () => {
     const stack = moveToSlot(
-      toLayerStack(codeOrder(atlasLayers), atlasLayers),
+      toLayerStack(codeOrder(tildaLayers), tildaLayers),
       ['fill-a', 'line-b', 'fill-b'],
       TOP,
     )
@@ -121,15 +121,15 @@ describe('moveToSlot', () => {
   })
 
   test('moving back to the default position removes the beforeId', () => {
-    const moved = moveToSlot(toLayerStack(codeOrder(atlasLayers), atlasLayers), ['fill-a'], TOP)
-    const saved = toSavedOrder(moveToSlot(moved, ['fill-a'], 'landuse'), atlasLayers)
+    const moved = moveToSlot(toLayerStack(codeOrder(tildaLayers), tildaLayers), ['fill-a'], TOP)
+    const saved = toSavedOrder(moveToSlot(moved, ['fill-a'], 'landuse'), tildaLayers)
     expect(saved.find((entry) => entry.layerKey === 'fill-a')?.beforeId).toBe(null)
   })
 })
 
 describe('a position that is the bottom of another one', () => {
   const GROUP1 = 'atlas-app-beforeid-group1'
-  const layers = [atlasLayer('below-top', GROUP1), ...atlasLayers, atlasLayer('label-2', TOP)]
+  const layers = [tildaLayer('below-top', GROUP1), ...tildaLayers, tildaLayer('label-2', TOP)]
 
   test('its layers are listed at the bottom of that position', () => {
     const stack = toLayerStack(codeOrder(layers), layers)
