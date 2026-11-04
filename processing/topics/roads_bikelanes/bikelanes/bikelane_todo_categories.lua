@@ -373,17 +373,16 @@ local needs_clarification_track = BikelaneTodo.new({
     if result_tags.category == 'cyclewayOnHighwayProtected' then return false end
     if object_tags._parent == nil then return false end
 
-    -- Some cases are tagged sufficiently with `cycleway:SIDE:segregated` or `cycleway:SIDE:traffic_signs`
-    -- It is hard to check both sides propery. This will error on the side of caution.
-    local segregated = object_tags._parent['cycleway:both:segregated'] or object_tags._parent['cycleway:left:segregated'] or object_tags._parent['cycleway:right:segregated']
-    if segregated == 'yes' or segregated == 'no' then return false end
-    local traffic_sign = object_tags._parent['cycleway:both:traffic_sign'] or object_tags._parent['cycleway:left:traffic_sign'] or object_tags._parent['cycleway:right:traffic_sign']
-    if contains_substring(traffic_sign, '240') or contains_substring(traffic_sign, '241') then return false end
+    -- The side object already holds its own side's tags (`cycleway:SIDE:*` > `cycleway:both:*` > `cycleway:*`),
+    -- so `segregated` and `traffic_sign` here are the values of this side only.
+    if object_tags.segregated == 'yes' or object_tags.segregated == 'no' then return false end
+    local traffic_sign = object_tags.traffic_sign
+    -- A traffic sign settles what the track is, so `segregated` is not needed:
+    if contains_substring(traffic_sign, '237') then return false end -- DE:237 Radweg (bicycles only)
+    if contains_substring(traffic_sign, '240') then return false end -- DE:240 Gemeinsamer Geh- und Radweg (shared)
+    if contains_substring(traffic_sign, '241') then return false end -- DE:241 Getrennter Rad- und Gehweg (segregated)
 
-    return object_tags._parent['cycleway'] == 'track'
-      or object_tags._parent['cycleway:both'] == 'track'
-      or object_tags._parent['cycleway:left'] == 'track'
-      or object_tags._parent['cycleway:right'] == 'track'
+    return object_tags.cycleway == 'track'
   end
 })
 local needs_clarification_track__mapillary = BikelaneTodo.new({
