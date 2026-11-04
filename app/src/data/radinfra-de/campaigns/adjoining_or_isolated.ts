@@ -9,7 +9,7 @@ export const adjoining_or_isolated: CampaignType = {
   visibility: 'secondary',
   description:
     'Diese Kampagne enthält Wege, deren Führungsform [in TILDA Radverkehr](https://tilda-geo.de/regionen/radinfra?config=ife2uk.3yo4.f6&v=2) nicht präzise angegeben werden kann. (Aktuell werden nur Wege der Kategorie "Radweg" aufgenommen.)',
-  task: '**Bitte prüfe ob die Radinfrastruktur straßenbegleitend ist und ergänze den fehlenden Zugangs-Tag `is_sidepath=yes` oder `no`.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.\n',
+  task: '**Bitte prüfe ob die Radinfrastruktur straßenbegleitend ist und ergänze den fehlenden Tag `is_sidepath=yes` oder `no`.** Weitere Hinweise findet Du in der Aufgabenbeschreibung.\n',
   mapUrl: 'https://tilda-geo.de/regionen/radinfra?config=ife2uk.3yo4.f6&v=2',
   maprouletteChallenge: {
     enabled: true,
@@ -25,8 +25,8 @@ Für diese Infrastruktur (%%CATEGORY%%) fehlt uns eine Angabe, ob sie straßenbe
 ## Aufgabe
 
 Bitte präzisiere das Tagging.
-* Ist die Infrastruktur ein Radweg oder geteilter/gemeinsamer Geh- und Radweg? Dann ergänze bitte \`is_sidepath=yes\`, wenn der Weg straßenbegleitend ist oder \`is_sidepath=no\` für selbständig/frei geführt Wege.
-* Ist die Infrastruktur ein Gehweg? Dann wähle "Gehweg" als Typ aus oder füge \`footway=sidepath\` hinzu.
+* Ist die Infrastruktur ein Radweg oder geteilter/gemeinsamer Geh- und Radweg? Dann ergänze bitte \`is_sidepath=yes\`, wenn der Weg straßenbegleitend ist oder \`is_sidepath=no\` für selbstständig/frei geführte Wege.
+* Ist die Infrastruktur ein straßenbegleitender Gehweg (\`highway=footway\`)? Dann wähle "Gehweg" als Typ aus oder füge \`footway=sidewalk\` hinzu.
 
 ## Hilfsmittel
 
