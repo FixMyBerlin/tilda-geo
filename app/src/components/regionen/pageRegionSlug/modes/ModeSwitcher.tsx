@@ -35,7 +35,7 @@ type HighlightPill = {
  * config, and per-mode filters survive a switch. Hidden when only the default map is available
  * or when this header is reused outside a region route.
  */
-export const ModeSwitcher = () => {
+export default function ModeSwitcher() {
   const match = useMatch({ from: '/regionen/$regionSlug', shouldThrow: false })
   if (!match) return null
   return <ModeSwitcherNav />
