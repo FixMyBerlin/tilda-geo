@@ -145,8 +145,9 @@ class PostgisLoader:
         Map layer in the standard topic shape (see processing/topics/entrances/
         entrance_nodes.lua), EPSG:3857 like the other `public.*` tables; the value
         lives in `tags->>'entrance'`. The table holds all entrance values; `kinds` filters
-        them. Default is the entrances relevant to residents: `yes`/`main` plus
-        `home`/`staircase`, which are the norm on residential blocks in Germany.
+        them. Default is the entrances that would be relevant to residents: `yes`/`main`
+        plus `home`/`staircase`, which are the norm on residential blocks in Germany. Not
+        used by any score yet (see `TildaLoader.load_building_entrances`).
         `kinds=()` returns all (incl. `service`, `emergency`). Keep the default in sync with
         `mainEntranceValues` in the map style (`subcat_poi_plus_entrances.const.ts`).
 

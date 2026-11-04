@@ -1,7 +1,8 @@
 -- Entrance nodes for the `entrances` table (standard topic shape: id/tags/meta/geom + minzoom).
 -- It is the map layer "Eingänge" and also read by the space-finder-worker (`PostgisLoader`):
--- building entrances let demand originate at the entrance instead of the building outline,
--- subway entrances are the access points for the ÖPNV score.
+-- subway entrances are the access points for the ÖPNV score. Building entrances are not
+-- used by any score yet (resident demand starts at the building outline); the loader is
+-- there for letting demand start at the entrance later.
 --
 -- `tags.category` (sanitized, only the values we use):
 --   - `public_transport`: `railway=subway_entrance` (not `disused=yes`). Those are often also

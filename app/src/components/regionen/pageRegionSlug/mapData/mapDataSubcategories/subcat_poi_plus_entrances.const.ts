@@ -8,8 +8,8 @@ export type SubcatPoiPlusEntrancesId = typeof subcatId
 export type SubcatPoiPlusEntrancesStyleIds = 'default'
 
 const isPublicTransport: ExpressionSpecification = ['==', ['get', 'category'], 'public_transport']
-// Same values the space-finder-worker counts as residents' entrances
-// (`PostgisLoader.load_building_entrances`, default `kinds`).
+// Same values as the default `kinds` of `PostgisLoader.load_building_entrances` in the
+// space-finder-worker (entrances that would be relevant to residents; no score uses them yet).
 const mainEntranceValues = ['yes', 'main', 'home', 'staircase']
 const isMainEntrance: ExpressionSpecification = [
   'in',
