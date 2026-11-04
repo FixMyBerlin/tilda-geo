@@ -1,4 +1,5 @@
-import { getTopicDocByTableName, isNumericTopicDocFormat } from '@/data/topicDocs/runtime'
+import { isNumericTopicDocFormat } from '@/data/topicDocs/inspector'
+import { getTopicDocByTableName } from '@/data/topicDocs/runtime'
 import { qaDatasets, type QaDatasetKey } from '../qaDatasets.const'
 import { qaIndicatorTagKey, type QaIndicator } from './qaIndicatorsSchema'
 
