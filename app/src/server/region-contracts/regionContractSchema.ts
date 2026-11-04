@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { slugSchema } from '@/lib/slugSchema'
-import { RegionContractStatus } from '@/prisma/generated/browser'
+import { RegionContractStatus } from '@/prisma/generated/enums'
 
 const RegionContractStatusSchema = z.enum(RegionContractStatus)
 

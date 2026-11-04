@@ -6,7 +6,7 @@ import { AdminFormSection } from '@/components/admin/aside/AdminFormSection'
 import { Link } from '@/components/shared/links/Link'
 import { Pill } from '@/components/shared/text/Pill'
 import { getStaticDatasetUrl } from '@/components/shared/utils/getStaticDatasetUrl'
-import { MapRenderFormatEnum } from '@/prisma/generated/browser'
+import { MapRenderFormatEnum } from '@/prisma/generated/enums'
 import type { getUploadWithRegions } from '@/server/uploads/queries/getUploadWithRegions.server'
 
 type Upload = Awaited<ReturnType<typeof getUploadWithRegions>>
