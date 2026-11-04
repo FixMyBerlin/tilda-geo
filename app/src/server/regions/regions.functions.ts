@@ -46,9 +46,18 @@ export const getRegionPageDataFn = createServerFn({ method: 'GET' })
       data.regionSlug,
     )
     if (redirectUrl) {
+      // Add the welcome dialog to this redirect too, so a first visit needs one redirect, not two.
+      // It depends on a cookie, so that redirect must not be permanent.
+      const welcomeDialogUrl =
+        resolvedRegion &&
+        resolveWelcomeDialogRedirectUrl({
+          url: redirectUrl,
+          region: resolvedRegion,
+          dismissedCookie: getCookie(WELCOME_DISMISSED_COOKIE_NAME),
+        })
       return {
-        redirectUrl,
-        redirectPermanent: true as const,
+        redirectUrl: welcomeDialogUrl || redirectUrl,
+        redirectPermanent: !welcomeDialogUrl,
         authorized: false as const,
         region: null,
         hasPermissions: false,
