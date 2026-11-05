@@ -1,5 +1,6 @@
 import { MotionConfig } from 'motion/react'
 import { useId } from 'react'
+import { ModeSwitcher } from '@/components/regionen/pageRegionSlug/modes/ModeSwitcher'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { RegionPanelToggle } from '@/components/regionen/pageRegionSlug/welcome/RegionPanelToggle'
 import { RegionWelcomeDesktopPanel } from '@/components/regionen/pageRegionSlug/welcome/RegionWelcomeDesktopPanel'
@@ -23,6 +24,7 @@ export const HeaderRegionen = () => {
       <NavigationWrapper>
         <NavigationDesktop
           logo={<HeaderRegionenLogo />}
+          leading={<ModeSwitcher />}
           primaryNavigation={primaryNavigation}
           trailing={
             <NavigationDesktopMenu menuItems={defaultSecondaryNavigationGrouped} logo={false} />
@@ -39,6 +41,7 @@ export const HeaderRegionen = () => {
       >
         <NavigationDesktop
           logo={<HeaderRegionenLogo />}
+          leading={<ModeSwitcher />}
           primaryNavigation={primaryNavigation}
           trailing={
             <RegionPanelToggle
