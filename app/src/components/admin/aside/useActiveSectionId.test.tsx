@@ -4,6 +4,15 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { adminActiveSectionRootMargin } from '@/components/admin/adminClasses'
 import { useActiveSectionId } from './useActiveSectionId'
 
+// Stands in for the router-backed hook: writes the hash without a history entry.
+const replaceHash = vi.fn((hash: string) => {
+  if (window.location.hash === `#${hash}`) return
+  window.history.replaceState(null, '', `#${hash}`)
+})
+vi.mock('@/components/shared/hooks/useReplaceUrlHash', () => ({
+  useReplaceUrlHash: () => replaceHash,
+}))
+
 let observerCallback: IntersectionObserverCallback | undefined
 let observerOptions: IntersectionObserverInit | undefined
 
@@ -58,6 +67,7 @@ describe('useActiveSectionId', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
     scrollIntoView.mockReset()
+    replaceHash.mockClear()
     observerCallback = undefined
   })
 
@@ -87,13 +97,9 @@ describe('useActiveSectionId', () => {
     intersect('a')
     expect(window.location.hash).toBe('')
 
-    const replaceState = vi.spyOn(window.history, 'replaceState')
     intersect('b')
     intersect('b', 'c')
     expect(window.location.hash).toBe('#b')
-    // Every write makes the router run a load, so an unchanged section must not write again.
-    expect(replaceState).toHaveBeenCalledTimes(1)
-    replaceState.mockRestore()
 
     intersect('a')
     expect(window.location.hash).toBe('#a')

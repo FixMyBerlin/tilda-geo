@@ -47,7 +47,7 @@ export const LayersRasterBackgrounds = () => {
   const { backgroundParam } = useBackgroundParam()
   const backgrounds = useRegionBackgrounds()
 
-  // The background covers the basemap layers below it; the Atlas-Geo layers of positions below it
+  // The background covers the basemap layers below it; the TILDA layers of positions below it
   // move right above it (`beforeIdOnBackground`). Check the list via <Map> => `handleLoad` => `console.log`.
 
   return (

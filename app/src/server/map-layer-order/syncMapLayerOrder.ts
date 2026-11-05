@@ -1,7 +1,7 @@
 type Row = { layerKey: string; position: number }
 
 /**
- * What it takes to give every Atlas-Geo layer of the code exactly one row: rows to add for new
+ * What it takes to give every TILDA layer of the code exactly one row: rows to add for new
  * layers and rows to remove for layers that left the code. Existing rows stay as they are.
  *
  * A new layer goes after all others. The map sorts by position first, so that is the top of the

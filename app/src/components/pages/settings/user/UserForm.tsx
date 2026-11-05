@@ -107,7 +107,7 @@ export const UserForm = ({ user }: Props) => {
               type="email"
               placeholder=""
               autoComplete="email"
-              help="Verwendet zur Kontaktaufnahme durch FixMyCity und für Benachrichtigungen aus dem Atlas."
+              help="Verwendet zur Kontaktaufnahme durch FixMyCity und für Benachrichtigungen aus TILDA."
             />
           </>
         )}

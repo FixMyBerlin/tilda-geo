@@ -9,6 +9,7 @@ import {
   modeForSource,
 } from '@/components/regionen/pageRegionSlug/modes/modeScopedSelection'
 import type { RegionMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
+import { uniqueDataFeatures } from './uniqueDataFeatures'
 
 const featureInArray = (feature: MapGeoJSONFeature, features: MapGeoJSONFeature[]) =>
   features.some((other) => feature.properties?.id === other.properties?.id)
@@ -43,8 +44,8 @@ export const partitionClickedFeatures = ({
   regionDatasets,
   multiselect,
 }: PartitionClickedFeaturesInput) => {
-  const clickedInspectorFeatures = clickedFeatures.filter(
-    (feature) => !isModeOwnedSource(feature.source),
+  const clickedInspectorFeatures = uniqueDataFeatures(
+    clickedFeatures.filter((feature) => !isModeOwnedSource(feature.source)),
   )
   const previousInspectorDomain = previousInspectorFeatures.filter(
     (feature) => !isModeOwnedSource(feature.source),

@@ -1,4 +1,4 @@
-import { getAtlasVectorTilesUrl } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/generalization/getAtlasVectorTilesUrl'
+import { getTildaVectorTilesUrl } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/generalization/getTildaVectorTilesUrl'
 import {
   hasExplicitTilesUrl,
   type MapDataSource,
@@ -7,5 +7,5 @@ import {
 /** Resolve tile URL for any `MapDataSource` (processing or explicit tilesUrl). */
 export const getMapDataSourceTilesUrl = (source: MapDataSource<string>) => {
   if (hasExplicitTilesUrl(source)) return source.tilesUrl
-  return getAtlasVectorTilesUrl(source.tileTables)
+  return getTildaVectorTilesUrl(source.tileTables)
 }

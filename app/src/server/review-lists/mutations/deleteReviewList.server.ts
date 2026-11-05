@@ -8,6 +8,7 @@ import {
 } from '@/server/auth/memberCaller.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
+import { CollectionDeleteRefusedError } from '@/server/utils/collectionDeleteRefusedError'
 
 const Schema = z.object({
   regionSlug: z.string(),
@@ -29,11 +30,15 @@ export async function deleteReviewList(input: z.infer<typeof Schema>, caller: Me
     select: { id: true, _count: { select: { entries: true, regions: true } } },
   })
   if (list._count.entries > 0) {
-    throw new Error('Nur leere Prüflisten können gelöscht werden.')
+    throw new CollectionDeleteRefusedError(
+      'notEmpty',
+      'Nur leere Prüflisten können gelöscht werden.',
+    )
   }
 
   if (list._count.regions > 1) {
-    throw new Error(
+    throw new CollectionDeleteRefusedError(
+      'linkedToOtherRegions',
       'Diese Prüfliste ist mehreren Regionen zugeordnet und kann nur im Admin-Bereich gelöscht werden.',
     )
   }

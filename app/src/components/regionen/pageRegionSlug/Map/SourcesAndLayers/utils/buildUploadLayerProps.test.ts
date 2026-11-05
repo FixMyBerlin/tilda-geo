@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'vitest'
-import { buildUploadLayerProps, type UploadLayerWithAtlasType } from './buildUploadLayerProps'
+import { buildUploadLayerProps, type RenderableUploadLayer } from './buildUploadLayerProps'
 
 const fillLayer = {
   id: 'test-fill',
   type: 'fill',
   paint: { 'fill-color': '#000' },
-} satisfies UploadLayerWithAtlasType
+} satisfies RenderableUploadLayer
 
 const baseParams = {
   layerId: 'layer-1',

@@ -2,11 +2,12 @@ import type { MapGeoJSONFeature } from 'react-map-gl/maplibre'
 import { useMapInspectorFeatures } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useSelectedFeatures } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useSelectedFeatures'
 import { isModeOwnedSource } from '@/components/regionen/pageRegionSlug/modes/modeScopedSelection'
+import { uniqueDataFeatures } from '../Map/utils/uniqueDataFeatures'
 
 const isMapFeature = (feature: MapGeoJSONFeature | undefined): feature is MapGeoJSONFeature =>
   feature !== undefined
 
-/** Inspector features excluding sources owned by the current mode panel (notes / QA / Prüflisten). */
+/** Inspector features excluding sources owned by the current mode panel (notes / QA / Prüflisten), each data feature once. */
 export const inspectorRenderableFeatures = (
   inspectorFeatures: MapGeoJSONFeature[],
   selectedMapFeatures: (MapGeoJSONFeature | undefined)[],
@@ -14,7 +15,7 @@ export const inspectorRenderableFeatures = (
   const rawFeatures = inspectorFeatures.length
     ? inspectorFeatures
     : selectedMapFeatures.filter(isMapFeature)
-  return rawFeatures.filter((feature) => !isModeOwnedSource(feature.source))
+  return uniqueDataFeatures(rawFeatures.filter((feature) => !isModeOwnedSource(feature.source)))
 }
 
 /** True when the mobile inspector sheet (or desktop inspector) has something to show. */

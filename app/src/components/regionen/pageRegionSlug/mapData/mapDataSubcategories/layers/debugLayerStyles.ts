@@ -7,7 +7,7 @@ import type {
   SymbolLayerSpecification,
 } from 'maplibre-gl'
 import { wrapFilterWithAll } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/utils/filterUtils/wrapFilterWithAll'
-import type { AtlasLayerType, FileMapDataSubcategoryStyleLayer } from '../../types'
+import type { RenderableLayerType, FileMapDataSubcategoryStyleLayer } from '../../types'
 
 /** Partial layer (source/source-layer/filter added in debugLayerStyles). */
 type DebugLayerBase<T> = Omit<T, 'source' | 'source-layer' | 'filter'>
@@ -95,8 +95,8 @@ const DEBUG_STYLE_BY_TYPE: Record<
   'color-relief': undefined,
 }
 
-/** Single place to read debug style by type. All AtlasLayerType have a debug style. */
-export function getDebugStyleForLayerType(type: AtlasLayerType) {
+/** Single place to read debug style by type. All RenderableLayerType have a debug style. */
+export function getDebugStyleForLayerType(type: RenderableLayerType) {
   const entry = DEBUG_STYLE_BY_TYPE[type]
   if (!entry) throw new Error(`No debug style for layer type: ${type}`)
   return { layout: entry.layout, paint: entry.paint }

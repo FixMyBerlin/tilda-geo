@@ -7,9 +7,9 @@ import { AdminAsideActions } from '@/components/admin/aside/AdminAsideActions'
 import { AdminAsideLayout } from '@/components/admin/aside/AdminAsideLayout'
 import { useAdminAsideVariant } from '@/components/admin/aside/adminAsideSection'
 import {
-  type AtlasLayerEntry,
-  getAllAtlasLayerEntries,
-} from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/sortLayers/getAllAtlasLayerEntries'
+  type TildaLayerEntry,
+  getAllTildaLayerEntries,
+} from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/sortLayers/getAllTildaLayerEntries'
 import { buttonStyles } from '@/components/shared/links/styles'
 import { SortableList } from '@/components/shared/sortable/SortableList'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
@@ -27,8 +27,8 @@ import {
   toSavedOrder,
 } from './layerStack'
 
-const ATLAS_LAYERS = getAllAtlasLayerEntries()
-const ATLAS_LAYER_BY_KEY = new Map(ATLAS_LAYERS.map((layer) => [layer.layerKey, layer]))
+const TILDA_LAYERS = getAllTildaLayerEntries()
+const TILDA_LAYER_BY_KEY = new Map(TILDA_LAYERS.map((layer) => [layer.layerKey, layer]))
 
 type SlotId = (typeof STACK_SLOT_IDS)[number]
 
@@ -102,7 +102,7 @@ function PositionSelect({
 }
 
 type LayerRowProps = {
-  layer: AtlasLayerEntry
+  layer: TildaLayerEntry
   slot: SlotId
   isSelected: boolean
   dragHandle?: React.ReactNode
@@ -213,7 +213,7 @@ type PositionGroupProps = {
   onMove: LayerRowProps['onMove']
 }
 
-const matchesSearch = (layer: AtlasLayerEntry, searchTerm: string) =>
+const matchesSearch = (layer: TildaLayerEntry, searchTerm: string) =>
   [layer.subcategoryName, layer.styleName, layer.layerKey, ...layer.categoryNames].some((text) =>
     text.toLowerCase().includes(searchTerm),
   )
@@ -234,7 +234,7 @@ function PositionGroup({
   const [rangeStart, setRangeStart] = useState<string>()
   const shownKeys = searchTerm
     ? layerKeys.filter((layerKey) => {
-        const layer = ATLAS_LAYER_BY_KEY.get(layerKey)
+        const layer = TILDA_LAYER_BY_KEY.get(layerKey)
         return layer && matchesSearch(layer, searchTerm)
       })
     : layerKeys
@@ -256,7 +256,7 @@ function PositionGroup({
   }
 
   const renderRow = (layerKey: string, dragHandle?: React.ReactNode) => {
-    const layer = ATLAS_LAYER_BY_KEY.get(layerKey)
+    const layer = TILDA_LAYER_BY_KEY.get(layerKey)
     if (!layer) return null
     return (
       <LayerRow
@@ -314,7 +314,7 @@ type LayerOrderEditorProps = { savedOrder: MapLayerOrderEntry[] }
 
 function LayerOrderEditor({ savedOrder }: LayerOrderEditorProps) {
   const queryClient = useQueryClient()
-  const [stack, setStack] = useState(() => toLayerStack(savedOrder, ATLAS_LAYERS))
+  const [stack, setStack] = useState(() => toLayerStack(savedOrder, TILDA_LAYERS))
   const [isDirty, setIsDirty] = useState(false)
   const [search, setSearch] = useState('')
 
@@ -336,7 +336,7 @@ function LayerOrderEditor({ savedOrder }: LayerOrderEditorProps) {
       // Each layer back to the position from the code.
       return STACK_SLOT_IDS.reduce((next, slot) => {
         const keys = layerKeys.filter((key) => {
-          const layer = ATLAS_LAYER_BY_KEY.get(key)
+          const layer = TILDA_LAYER_BY_KEY.get(key)
           return layer && listedSlot(layer.defaultBeforeId) === slot
         })
         return keys.length > 0 ? moveToSlot(next, keys, slot) : next
@@ -352,7 +352,7 @@ function LayerOrderEditor({ savedOrder }: LayerOrderEditorProps) {
 
   const save = useMutation({
     mutationFn: () =>
-      updateMapLayerOrderFn({ data: { entries: toSavedOrder(stack, ATLAS_LAYERS) } }),
+      updateMapLayerOrderFn({ data: { entries: toSavedOrder(stack, TILDA_LAYERS) } }),
     onSuccess: () => {
       setIsDirty(false)
       // The refetch gives the editor a new `key`, so it starts again from the saved order.

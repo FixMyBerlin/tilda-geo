@@ -1,13 +1,13 @@
 import { describe, expect, test } from 'vitest'
 import { layerVisibility } from '../../utils/layerVisibility'
-import { buildAtlasLayerProps, type AtlasStyleLayer } from './buildAtlasLayerProps'
+import { buildTildaLayerProps, type TildaStyleLayer } from './buildTildaLayerProps'
 
 const lineLayer = {
   id: 'line_base',
   type: 'line',
   source: 'atlas_bikelanes',
   'source-layer': 'bikelanes',
-} satisfies AtlasStyleLayer
+} satisfies TildaStyleLayer
 
 const baseParams = {
   layer: lineLayer,
@@ -17,9 +17,9 @@ const baseParams = {
   debugLayerStyles: false,
 }
 
-describe('buildAtlasLayerProps', () => {
+describe('buildTildaLayerProps', () => {
   test('the beforeId is the position on the default background', () => {
-    const props = buildAtlasLayerProps({
+    const props = buildTildaLayerProps({
       ...baseParams,
       backgroundId: 'default',
       position: 'boundary_country',
@@ -28,7 +28,7 @@ describe('buildAtlasLayerProps', () => {
   })
 
   test('the beforeId is right above the raster background for a position below it', () => {
-    const props = buildAtlasLayerProps({
+    const props = buildTildaLayerProps({
       ...baseParams,
       backgroundId: 'esri',
       position: 'boundary_country',

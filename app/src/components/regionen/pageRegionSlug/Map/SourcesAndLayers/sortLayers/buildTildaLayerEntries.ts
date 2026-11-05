@@ -2,19 +2,19 @@ import type { MapDataCategoryConfig } from '@/components/regionen/pageRegionSlug
 import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
 import {
-  createLayerKeyAtlasGeo,
-  createSourceKeyAtlasGeo,
-} from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
+  createLayerKeyTilda,
+  createSourceKeyTilda,
+} from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsTilda'
 import type { MapLayerOrderEntry } from '@/server/map-layer-order/queries/getMapLayerOrder.server'
 import { LayerPositionSchema } from '@/server/map-layer-order/schemas'
 import { getLayerHighlightId } from '../../utils/layerHighlight'
 import { layerVisibility } from '../../utils/layerVisibility'
 import { type LayerPosition, layerPosition, layerPositionRank } from '../utils/beforeId'
 import {
-  type AtlasStyleLayer,
-  buildAtlasLayerProps,
-  isAtlasStyleLayer,
-} from '../utils/buildAtlasLayerProps'
+  type TildaStyleLayer,
+  buildTildaLayerProps,
+  isTildaStyleLayer,
+} from '../utils/buildTildaLayerProps'
 
 type Props = {
   categoriesConfig: MapDataCategoryConfig[]
@@ -26,8 +26,8 @@ type Props = {
   hidden?: boolean
 }
 
-/** The Atlas-Geo layers of a region in mount order, the bottom layer first. */
-export function buildAtlasLayerEntries({
+/** The TILDA layers of a region in mount order, the bottom layer first. */
+export function buildTildaLayerEntries({
   categoriesConfig,
   layerOrder,
   backgroundParam,
@@ -47,7 +47,7 @@ export function buildAtlasLayerEntries({
   const layers = new Map<
     string,
     {
-      layer: AtlasStyleLayer
+      layer: TildaStyleLayer
       sourceId: SourcesId
       sourceKey: string
       position: LayerPosition
@@ -57,15 +57,11 @@ export function buildAtlasLayerEntries({
   for (const categoryConfig of categoriesConfig) {
     for (const subcategoryConfig of categoryConfig.subcategories) {
       const sourceData = getSourceData(subcategoryConfig.sourceId)
-      const sourceKey = createSourceKeyAtlasGeo(
-        categoryConfig.id,
-        sourceData.id,
-        subcategoryConfig.id,
-      )
+      const sourceKey = createSourceKeyTilda(categoryConfig.id, sourceData.id, subcategoryConfig.id)
       for (const styleConfig of subcategoryConfig.styles) {
         const visible = !hidden && categoryConfig.active && styleConfig.active
-        for (const layer of styleConfig.layers?.filter(isAtlasStyleLayer) ?? []) {
-          const layerId = createLayerKeyAtlasGeo(
+        for (const layer of styleConfig.layers?.filter(isTildaStyleLayer) ?? []) {
+          const layerId = createLayerKeyTilda(
             sourceData.id,
             subcategoryConfig.id,
             styleConfig.id,
@@ -102,7 +98,7 @@ export function buildAtlasLayerEntries({
     // All styles of a subcategory are mounted at once and reuse style layer ids like
     // "structure-icons", so the highlight id comes from the unique layer key.
     highlightLayerId: getLayerHighlightId(layerId),
-    layerProps: buildAtlasLayerProps({
+    layerProps: buildTildaLayerProps({
       ...layerConfig,
       layerId,
       visibility: layerVisibility(visible),

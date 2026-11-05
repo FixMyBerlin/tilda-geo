@@ -24,7 +24,7 @@ function parseKey(key: string, shortToLong: Record<string, string>) {
   )
 }
 
-export function createLayerKeyAtlasGeo(
+export function createLayerKeyTilda(
   sourceId: SourcesId,
   subCat: SubcategoryId,
   styleId: string,
@@ -38,7 +38,7 @@ export function createLayerKeyAtlasGeo(
   })
 }
 
-export function createSourceKeyAtlasGeo(
+export function createSourceKeyTilda(
   categoryId: MapDataCategoryId,
   sourceId: SourcesId,
   subCat: SubcategoryId,
@@ -50,7 +50,7 @@ export function createSourceKeyAtlasGeo(
   })
 }
 
-export function parseSourceKeyAtlasGeo(sourceKey: string) {
+export function parseSourceKeyTilda(sourceKey: string) {
   // source: "cat:bikelanes--source:atlas_bikelanes--subcat:bikelanes"
   // returns: { categoryId: 'bikelanes', sourceId: 'atlas_bikelanes', subcategoryId: 'bikelanes' }
   return parseKey(sourceKey, {
@@ -64,7 +64,7 @@ export function parseSourceKeyAtlasGeo(sourceKey: string) {
   }
 }
 
-export function isSourceKeyAtlasGeo(key: string) {
-  const { categoryId, sourceId, subcategoryId } = parseSourceKeyAtlasGeo(key)
+export function isSourceKeyTilda(key: string) {
+  const { categoryId, sourceId, subcategoryId } = parseSourceKeyTilda(key)
   return !!categoryId && !!sourceId && !!subcategoryId
 }

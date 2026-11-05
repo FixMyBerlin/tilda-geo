@@ -7,3 +7,7 @@ alwaysApply: false
 
 - Never use return types, unless needed for some specific reason
 - Always use `type`, don't use `interface`
+
+# TanStack Router
+
+- A URL hash that follows the scroll position (scroll-spy) or a scroll the page does itself: set it with `useReplaceUrlHash`, never `window.history.replaceState` or a plain `navigate({ hash })` — the router scrolls every new hash into view

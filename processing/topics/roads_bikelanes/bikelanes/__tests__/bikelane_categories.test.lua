@@ -95,6 +95,29 @@ describe('bikelane_categories', function()
       local category = categorize_bikelane(tags).id
       assert.are.equal(category, 'needsClarification')
     end)
+    it('a lane between the car lanes with traffic_sign=none on the road side is no unsigned cycleway', function()
+      -- Like way 529891428 in Berlin: the 'Angstweiche' is also tagged as `cycleway:right:*`
+      local input_object = {
+        tags = {
+          highway = 'secondary',
+          oneway = 'yes',
+          lanes = '3',
+          ['cycleway:lanes'] = 'no|no|lane|no',
+          ['bicycle:lanes'] = 'yes|no|designated|yes',
+          ['vehicle:lanes'] = 'yes|yes|no|yes',
+          ['cycleway:left'] = 'no',
+          ['cycleway:right:lane'] = 'advisory',
+          ['cycleway:right:traffic_sign'] = 'none',
+          ['traffic_sign'] = 'none',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local categorized = extract_categories_by_side(input_object)
+      assert.are_not.equal(categorized.right.category and categorized.right.category.id, 'cycleway_adjoiningOrIsolated')
+      assert.are_not.equal(categorized.right.category and categorized.right.category.id, 'cycleway_adjoining')
+      assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
+    end)
   end)
 
   describe('`needsClarification`:', function()

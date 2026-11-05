@@ -1,14 +1,14 @@
 import { describe, expect, test } from 'vitest'
 import { categories } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/categories.const'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
-import { createLayerKeyAtlasGeo } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
+import { createLayerKeyTilda } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsTilda'
 import { layerPosition } from '../utils/beforeId'
-import { getAllAtlasLayerEntries } from './getAllAtlasLayerEntries'
+import { getAllTildaLayerEntries } from './getAllTildaLayerEntries'
 
-describe('getAllAtlasLayerEntries', () => {
-  const entries = getAllAtlasLayerEntries()
+describe('getAllTildaLayerEntries', () => {
+  const entries = getAllTildaLayerEntries()
 
-  test('lists every layer key once, in createLayerKeyAtlasGeo format', () => {
+  test('lists every layer key once, in createLayerKeyTilda format', () => {
     const keys = entries.map((entry) => entry.layerKey)
     expect(keys.length).toBeGreaterThan(100)
     expect(new Set(keys).size).toBe(keys.length)
@@ -33,7 +33,7 @@ describe('getAllAtlasLayerEntries', () => {
       for (const subcategory of category.subcategories) {
         for (const style of subcategory.styles) {
           for (const layer of style.layers ?? []) {
-            const key = createLayerKeyAtlasGeo(
+            const key = createLayerKeyTilda(
               getSourceData(subcategory.sourceId).id,
               subcategory.id,
               style.id,

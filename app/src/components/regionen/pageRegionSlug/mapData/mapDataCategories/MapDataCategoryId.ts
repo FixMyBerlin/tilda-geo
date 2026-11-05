@@ -13,7 +13,7 @@ export type MapDataCategoryId =
   | 'parking' // LEGACY id kept for decoding old ?config= URLs stored in RegionConfigTemplate
   | 'parkingLars'
   | 'parkingTilda'
-  // bicycleParking Atlas
+  // TILDA Fahrradparken
   | 'bicycleParking'
   // Special only:
   | 'trafficSigns'

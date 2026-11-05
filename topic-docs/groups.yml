@@ -9,7 +9,7 @@ groups:
       - parkings_cutouts
       - off_street_parking_areas
   - id: atlas
-    label: Atlas Daten
+    label: TILDA Daten
     tables:
       - barrierAreas
       - barrierLines

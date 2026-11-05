@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'vitest'
 import { createFreshCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useCategoriesConfig/createFreshCategoriesConfig'
 import { layerPositionRank } from '../utils/beforeId'
-import { buildAtlasLayerEntries } from './buildAtlasLayerEntries'
-import { getAllAtlasLayerEntries } from './getAllAtlasLayerEntries'
+import { buildTildaLayerEntries } from './buildTildaLayerEntries'
+import { getAllTildaLayerEntries } from './getAllTildaLayerEntries'
 
 // The table after the first sync: every layer of the code, in config order, no beforeId.
-const codeOrder = getAllAtlasLayerEntries().map((layer) => ({
+const codeOrder = getAllTildaLayerEntries().map((layer) => ({
   layerKey: layer.layerKey,
   beforeId: null,
 }))
@@ -17,10 +17,10 @@ const defaultArgs = {
   debugLayerStyles: false,
 }
 
-describe('buildAtlasLayerEntries', () => {
+describe('buildTildaLayerEntries', () => {
   test('the saved order sorts the layers of one position, lower layer first', () => {
     const categoriesConfig = bikelanesConfig()
-    const configOrder = buildAtlasLayerEntries({
+    const configOrder = buildTildaLayerEntries({
       categoriesConfig,
       layerOrder: codeOrder,
       ...defaultArgs,
@@ -30,7 +30,7 @@ describe('buildAtlasLayerEntries', () => {
     const last = samePosition.at(-1)!.layerId
     expect(first).not.toBe(last)
 
-    const ids = buildAtlasLayerEntries({
+    const ids = buildTildaLayerEntries({
       categoriesConfig,
       layerOrder: [
         ...codeOrder.filter((entry) => entry.layerKey === last),
@@ -44,7 +44,7 @@ describe('buildAtlasLayerEntries', () => {
 
   test('a layer without an entry in the saved order is an error', () => {
     expect(() =>
-      buildAtlasLayerEntries({
+      buildTildaLayerEntries({
         categoriesConfig: bikelanesConfig(),
         layerOrder: [],
         ...defaultArgs,
@@ -55,7 +55,7 @@ describe('buildAtlasLayerEntries', () => {
   test('layers of a lower position mount first, on every background', () => {
     const categoriesConfig = createFreshCategoriesConfig(['bikelanes', 'surface', 'poi'])
     for (const backgroundParam of ['default', 'esri']) {
-      const entries = buildAtlasLayerEntries({
+      const entries = buildTildaLayerEntries({
         categoriesConfig,
         layerOrder: codeOrder,
         backgroundParam,
@@ -69,7 +69,7 @@ describe('buildAtlasLayerEntries', () => {
 
   test('a saved beforeId is the position of the layer', () => {
     const categoriesConfig = bikelanesConfig()
-    const configOrder = buildAtlasLayerEntries({
+    const configOrder = buildTildaLayerEntries({
       categoriesConfig,
       layerOrder: codeOrder,
       ...defaultArgs,
@@ -79,7 +79,7 @@ describe('buildAtlasLayerEntries', () => {
       entry.layerKey === layerKey ? { ...entry, beforeId: 'atlas-app-beforeid-group2' } : entry,
     )
 
-    const onDefault = buildAtlasLayerEntries({ categoriesConfig, layerOrder, ...defaultArgs })
+    const onDefault = buildTildaLayerEntries({ categoriesConfig, layerOrder, ...defaultArgs })
     const moved = onDefault.find((e) => e.layerId === layerKey)
     expect(moved?.position).toBe('atlas-app-beforeid-group2')
     expect(moved?.layerProps.beforeId).toBe('atlas-app-beforeid-group2')
@@ -87,7 +87,7 @@ describe('buildAtlasLayerEntries', () => {
 
   test('a saved beforeId that is not a layer of the basemap is ignored', () => {
     const categoriesConfig = bikelanesConfig()
-    const configOrder = buildAtlasLayerEntries({
+    const configOrder = buildTildaLayerEntries({
       categoriesConfig,
       layerOrder: codeOrder,
       ...defaultArgs,
@@ -95,7 +95,7 @@ describe('buildAtlasLayerEntries', () => {
     const layerKey = configOrder[0]!.layerId
     const defaultBeforeId = configOrder[0]!.layerProps.beforeId
 
-    const withUnknown = buildAtlasLayerEntries({
+    const withUnknown = buildTildaLayerEntries({
       categoriesConfig,
       layerOrder: codeOrder.map((entry) =>
         entry.layerKey === layerKey ? { ...entry, beforeId: 'atlas-app-beforeid-renamed' } : entry,
@@ -111,17 +111,17 @@ describe('buildAtlasLayerEntries', () => {
     const secondCategory = createFreshCategoriesConfig(['radinfra_bikelanes'])
     const bothCategories = createFreshCategoriesConfig(['bikelanes', 'radinfra_bikelanes'])
 
-    const first = buildAtlasLayerEntries({
+    const first = buildTildaLayerEntries({
       categoriesConfig: firstCategory,
       layerOrder: codeOrder,
       ...defaultArgs,
     })
-    const second = buildAtlasLayerEntries({
+    const second = buildTildaLayerEntries({
       categoriesConfig: secondCategory,
       layerOrder: codeOrder,
       ...defaultArgs,
     })
-    const both = buildAtlasLayerEntries({
+    const both = buildTildaLayerEntries({
       categoriesConfig: bothCategories,
       layerOrder: codeOrder,
       ...defaultArgs,
@@ -147,7 +147,7 @@ describe('buildAtlasLayerEntries', () => {
           style.active = style.id === 'default' && category.id === shownIn
         }
       }
-      const entries = buildAtlasLayerEntries({
+      const entries = buildTildaLayerEntries({
         categoriesConfig,
         layerOrder: codeOrder,
         ...defaultArgs,
@@ -166,7 +166,7 @@ describe('buildAtlasLayerEntries', () => {
 
   test('highlight ids are unique even when styles of one subcategory reuse raw layer ids', () => {
     // `roads` mounts several styles that all contain a layer "structure-icons".
-    const entries = buildAtlasLayerEntries({
+    const entries = buildTildaLayerEntries({
       categoriesConfig: createFreshCategoriesConfig(['roads']),
       layerOrder: codeOrder,
       ...defaultArgs,

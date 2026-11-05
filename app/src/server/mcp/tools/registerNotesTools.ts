@@ -33,6 +33,9 @@ export function registerNotesTools(server: McpServer, caller: AdminApiCaller) {
     create: (input) => createNoteFolder(input, caller),
     update: ({ id, ...config }) => updateNoteFolderForAdmin(id, config, caller),
     remove: ({ id, ...input }) => deleteNoteFolder({ ...input, folderId: id }, caller),
+    whenNotEmpty: () =>
+      'Move its notes to another folder with notes_move (only their author may delete them); ' +
+      'the admin UI also deletes empty folders only.',
   })
 
   server.registerTool(

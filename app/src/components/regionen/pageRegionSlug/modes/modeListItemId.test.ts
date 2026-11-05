@@ -35,7 +35,7 @@ describe('listItemIdFromMapFeature()', () => {
     )
   })
 
-  test('ignores atlas features and missing ids', () => {
+  test('ignores TILDA features and missing ids', () => {
     expect(listItemIdFromMapFeature({ source: 'atlas_bikelanes', id: 1 })).toBeNull()
     expect(listItemIdFromMapFeature({ source: osmNotesSourceId, id: undefined })).toBeNull()
     expect(listItemIdFromMapFeature({ source: qaSourceId, id: undefined })).toBeNull()
