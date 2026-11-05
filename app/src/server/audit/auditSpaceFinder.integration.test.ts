@@ -22,7 +22,10 @@ const studyArea = {
   ],
 }
 
-async function auditRowsFor(model: 'SpaceFinderArea' | 'SpaceFinderVariant', recordId: number) {
+async function auditRowsFor(
+  model: 'SpaceFinderArea' | 'SpaceFinderVariant' | 'SpaceFinderJob',
+  recordId: number,
+) {
   return db.auditLog.findMany({
     where: { model, recordId: String(recordId) },
     orderBy: { createdAt: 'asc' },
@@ -114,5 +117,31 @@ describe.skipIf(!integrationDb)('SpaceFinderArea audit (integration)', () => {
     expect(rows[0]?.userId).toBe(USER_ID)
     expect(rows[0]?.metadata).toMatchObject({ changeSource: 'MEMBER_FORM' })
     expect(rows[0]?.newData).toMatchObject({ title: 'Variante 1', areaId: variant.areaId })
+  })
+
+  test('logs the start of a run, not the status updates', async () => {
+    const context = memberFormAuditContext(new Headers(), USER_ID)
+    const area = await db.spaceFinderArea.create({
+      data: { regionId, createdById: USER_ID, title: 'Gebiet run', studyArea },
+    })
+    const variant = await db.spaceFinderVariant.create({
+      data: { areaId: area.id, createdById: USER_ID, title: 'Variante run', factorConfig: {} },
+    })
+    const job = await runWithAuditContextAsync(context, () =>
+      db.spaceFinderJob.create({
+        data: { variantId: variant.id, status: 'QUEUED' },
+        select: { id: true, status: true, variantId: true },
+      }),
+    )
+    await db.spaceFinderJob.update({
+      where: { id: job.id },
+      data: { status: 'RUNNING', progress: 50 },
+    })
+
+    const rows = await auditRowsFor('SpaceFinderJob', job.id)
+    expect(rows.map((row) => row.action)).toEqual(['CREATE'])
+    expect(rows[0]?.userId).toBe(USER_ID)
+    expect(rows[0]?.metadata).toMatchObject({ changeSource: 'MEMBER_FORM' })
+    expect(rows[0]?.newData).toMatchObject({ variantId: variant.id, status: 'QUEUED' })
   })
 })

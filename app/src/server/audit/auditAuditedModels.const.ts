@@ -26,5 +26,6 @@ export const AUDITED_MODELS = [
   'QaEvaluation',
   'SpaceFinderArea',
   'SpaceFinderVariant',
+  'SpaceFinderJob',
   'AdminApiToken',
 ] as const

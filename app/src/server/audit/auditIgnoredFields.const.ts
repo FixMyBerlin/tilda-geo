@@ -2,7 +2,7 @@
  * Models whose updates are never audited (e.g. session refresh / lastActive bumps).
  * CREATE/DELETE on these models still audit when the model is in AUDITED_MODELS.
  */
-export const AUDIT_SKIP_UPDATE_MODELS = ['Session'] as const
+export const AUDIT_SKIP_UPDATE_MODELS = ['Session', 'SpaceFinderJob'] as const
 
 /**
  * Auto/telemetry fields: never stored in audit payloads (`fieldFilters.exclude`),
