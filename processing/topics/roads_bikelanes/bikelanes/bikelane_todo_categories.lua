@@ -184,8 +184,7 @@ local missing_access_tag_240 = BikelaneTodo.new({
   end,
   conditions = function(object_tags, _)
     return (contains_substring(object_tags.traffic_sign, '240') or contains_substring(object_tags.traffic_sign, '241'))
-        and object_tags.bicycle ~= 'designated'
-        and object_tags.foot ~= 'designated'
+        and (object_tags.bicycle ~= 'designated' or object_tags.foot ~= 'designated')
         and object_tags.cycleway ~= 'track'
         and object_tags.cycleway ~= 'lane'
   end

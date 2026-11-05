@@ -27,6 +27,62 @@ describe('bikelane_todos', function()
       local result = run_bikelanes(input_object)
       assert.are.equal(table_includes(result[1]._todo_list, 'missing_access_tag_240'), false)
     end)
+
+    it('creates todo for traffic_sign=DE:240 with bicycle=designated and no foot', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'path',
+          ['bicycle'] = 'designated',
+          ['traffic_sign'] = 'DE:240',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = run_bikelanes(input_object)
+      assert.are.equal(table_includes(result[1]._todo_list, 'missing_access_tag_240'), true)
+    end)
+
+    it('creates todo for traffic_sign=DE:240 with foot=designated and no bicycle', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'path',
+          ['foot'] = 'designated',
+          ['traffic_sign'] = 'DE:240',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = run_bikelanes(input_object)
+      assert.are.equal(table_includes(result[1]._todo_list, 'missing_access_tag_240'), true)
+    end)
+
+    it('does not create todo for traffic_sign=DE:240 with bicycle=designated and foot=designated', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'path',
+          ['bicycle'] = 'designated',
+          ['foot'] = 'designated',
+          ['traffic_sign'] = 'DE:240',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = run_bikelanes(input_object)
+      assert.are.equal(table_includes(result[1]._todo_list, 'missing_access_tag_240'), false)
+    end)
+
+    it('creates todo for traffic_sign=DE:241 with neither bicycle=designated nor foot=designated', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'path',
+          ['traffic_sign'] = 'DE:241',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = run_bikelanes(input_object)
+      assert.are.equal(table_includes(result[1]._todo_list, 'missing_access_tag_240'), true)
+    end)
   end)
 
   describe('`malformed_traffic_sign`:', function()
