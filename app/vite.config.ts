@@ -158,7 +158,17 @@ export default defineConfig({
       sourcemap: true,
     } as Parameters<typeof nitro>[0]),
     tailwindcss(),
-    tanstackStart({}),
+    tanstackStart({
+      router: {
+        // The router plugin splits only the components by default; loader code (and everything it
+        // imports) would otherwise ship in the entry chunk to every page. `pendingComponent` stays
+        // unsplit: splitting it breaks SSR of the region page ("A previously unvisited boundary must
+        // have exactly one root segment", React 19.2 / Start 1.169).
+        codeSplittingOptions: {
+          defaultBehavior: [['loader'], ['component'], ['errorComponent'], ['notFoundComponent']],
+        },
+      },
+    }),
     viteReact({ compiler: true }),
   ],
 })
