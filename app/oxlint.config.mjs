@@ -54,8 +54,22 @@ export default defineConfig({
     // Prisma's `browser` and `client` entries pull its runtime (decimal.js etc.) into the browser
     // bundle; client code reads enums from `@/prisma/generated/enums`.
     {
-      files: ['src/components/**', 'src/routes/**', 'src/shared/**', 'src/data/**', 'src/lib/**'],
-      excludeFiles: ['**/*.server.ts', '**/*.test.ts', 'src/routes/api/**'],
+      // `src/server` holds schemas the admin forms import; server-only code there is excluded by name.
+      files: [
+        'src/components/**',
+        'src/routes/**',
+        'src/shared/**',
+        'src/data/**',
+        'src/lib/**',
+        'src/server/**',
+      ],
+      excludeFiles: [
+        '**/*.server.ts',
+        '**/*.functions.ts',
+        '**/*.test.ts',
+        'src/routes/api/**',
+        'src/server/mcp/**',
+      ],
       rules: {
         'eslint/no-restricted-imports': [
           'error',

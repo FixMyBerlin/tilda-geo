@@ -28,16 +28,28 @@ const appRoot = join(import.meta.dir, '../..')
 const publicDir = join(appRoot, '.output/public')
 const serverBundle = readFileSync(join(appRoot, '.output/server/index.mjs'), 'utf8')
 
-const manifestStart = serverBundle.indexOf('tsrStartManifest = () => (')
-if (manifestStart === -1) throw new Error('No tsrStartManifest in .output/server/index.mjs')
-const manifestSource = serverBundle.slice(
-  manifestStart + 'tsrStartManifest = () => '.length,
-  serverBundle.indexOf('} });', manifestStart) + '} })'.length,
-)
-// oxlint-disable-next-line typescript/no-implied-eval -- evaluates the object literal of our own build output
-const { routes } = new Function(`return ${manifestSource}`)() as {
-  routes: Record<string, ManifestRoute>
+// TanStack Start inlines the route manifest as `tsrStartManifest = () => ({ routes: { … } })`.
+const readRouteManifest = () => {
+  const manifestStart = serverBundle.indexOf('tsrStartManifest = () => (')
+  const manifestEnd = serverBundle.indexOf('} });', manifestStart)
+  if (manifestStart !== -1 && manifestEnd !== -1) {
+    const manifestSource = serverBundle.slice(
+      manifestStart + 'tsrStartManifest = () => '.length,
+      manifestEnd + '} })'.length,
+    )
+    try {
+      // oxlint-disable-next-line typescript/no-implied-eval -- evaluates the object literal of our own build output
+      const manifest = new Function(`return ${manifestSource}`)() as {
+        routes?: Record<string, ManifestRoute>
+      }
+      if (manifest.routes) return manifest.routes
+    } catch {}
+  }
+  throw new Error(
+    'Could not read the route manifest (`tsrStartManifest`) from .output/server/index.mjs. Run `bun run build` first; if the build output format changed, update readRouteManifest in scripts/bundle-budget/index.ts.',
+  )
 }
+const routes = readRouteManifest()
 
 const parentOf = new Map<string, string>()
 for (const [id, route] of Object.entries(routes)) {

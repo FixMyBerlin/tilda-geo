@@ -113,10 +113,10 @@ export const main = async () => {
     titlesByTableName[doc.tableName] = doc.title
     for (const sourceId of doc.sourceIds) {
       const bySourceKey = (inspectorAttributes[sourceId] ??= {})
+      // Type and purpose each come from the first table that sets them.
       for (const attribute of doc.attributes) {
-        bySourceKey[attribute.key] ??= attribute.purpose
-          ? { type: attribute.type, purpose: attribute.purpose }
-          : { type: attribute.type }
+        const entry = (bySourceKey[attribute.key] ??= { type: attribute.type })
+        if (attribute.purpose) entry.purpose ??= attribute.purpose
       }
     }
   }
