@@ -251,7 +251,7 @@ local unexpected_bicycle_access_on_footway__mapillary = BikelaneTodo.new({
 
 local unexpected_highway_path = BikelaneTodo.new({
   id = 'unexpected_highway_path',
-  desc = 'Expected `highway=cyclway` (unsigned/explicit DE:237)',
+  desc = 'Expected `highway=cycleway` (unsigned/explicit DE:237)',
   todoTableOnly = true,
   priority = function(object_tags, result_tags)
     if object_tags.mapillary_coverage then return '1' end
@@ -272,7 +272,7 @@ local unexpected_highway_path = BikelaneTodo.new({
 })
 local unexpected_highway_path__mapillary = BikelaneTodo.new({
   id = 'unexpected_highway_path__mapillary',
-  desc = 'Expected `highway=cyclway` (unsigned/explicit DE:237)',
+  desc = 'Expected `highway=cycleway` (unsigned/explicit DE:237)',
   todoTableOnly = true,
   priority = function(_, _) return '1' end,
   conditions = function(object_tags, result_tags)
