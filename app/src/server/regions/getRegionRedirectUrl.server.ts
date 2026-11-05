@@ -199,7 +199,7 @@ export async function getRegionRedirectUrl(locationHref: string, regionSlug: str
   try {
     region = await getRegion({ slug })
   } catch {
-    return { redirectUrl: null, region: null }
+    return { redirectUrl: null, region: null, isSlugRename: false }
   }
 
   let migratedUrl = absoluteUrl
@@ -323,5 +323,6 @@ export async function getRegionRedirectUrl(locationHref: string, regionSlug: str
   migratedUrl = u.toString()
 
   const redirectUrl = redirectIfChanged(absoluteUrl, migratedUrl)
-  return { redirectUrl, region }
+  // Only a slug rename is permanent; config and map defaults come from editable region settings.
+  return { redirectUrl, region, isSlugRename: slug !== regionSlug }
 }
