@@ -9,10 +9,11 @@ type Props = {
 }
 
 export function ContactProfilePromptModal({ user }: Props) {
-  // Decided once per user (the parent keys by user id), so the dialog stays mounted to show its
-  // thank-you step after the email was saved.
-  const [needsContactEmail] = useState(() => !hasContactEmail(user.email))
-  if (!needsContactEmail) return null
+  const needsContactEmail = !hasContactEmail(user.email)
+  // Stays mounted once shown, so the dialog can show its thank-you step after the email was saved.
+  const [dialogMounted, setDialogMounted] = useState(needsContactEmail)
+  if (needsContactEmail && !dialogMounted) setDialogMounted(true)
+  if (!dialogMounted) return null
 
   return (
     <Suspense fallback={null}>
