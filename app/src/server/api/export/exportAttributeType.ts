@@ -1,4 +1,5 @@
-import { getTopicDocFormatsForTagKey, isNumericTopicDocFormat } from '@/data/topicDocs/runtime'
+import { isNumericTopicDocFormat } from '@/data/topicDocs/inspector'
+import { getTopicDocFormatsForTagKey } from '@/data/topicDocs/runtime'
 
 export type ExportAttributeType = 'string' | 'number'
 
