@@ -19,6 +19,9 @@ const skipUpdateModels = new Set<string>(AUDIT_SKIP_UPDATE_MODELS)
  * 1. **Automatic AuditLog rows** — this extension (plus the small `recordId` string fix below)
  *    watches create/update/delete on `AUDITED_MODELS` and writes an AuditLog entry for each.
  *    That happens for every write through the shared `db` client; call sites do not opt in.
+ *    The rows are built from what the write returns: an audited `create`/`update` with `select`
+ *    logs only the selected fields (an update with `select: { id: true }` logs nothing), and a
+ *    nested `create` of a related model gets no row. Audited writes return the full record.
  *
  * 2. **Actor / source attribution** — `getContext` below reads request-scoped ALS from
  *    `auditContext.server` (`runWithAuditContextAsync` + helpers like `adminFormAuditContext`).

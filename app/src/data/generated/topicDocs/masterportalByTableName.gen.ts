@@ -1379,6 +1379,66 @@ const data = {
       wikipedia: 'Wikipedia',
     },
   },
+  entrances: {
+    gfiAttributes: {
+      category: {
+        name: 'Kategorie',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          building: 'Gebäudeeingang',
+          public_transport: 'U-Bahn-Eingang',
+        },
+      },
+      entrance: {
+        name: 'Art des Eingangs',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          yes: 'Eingang',
+          main: 'Haupteingang',
+          home: 'Eingang Wohnhaus',
+          staircase: 'Treppenhaus-Eingang',
+          service: 'Nebeneingang (Lieferung, Personal)',
+          secondary: 'Nebeneingang',
+          emergency: 'Notausgang',
+          exit: 'Ausgang',
+          garage: 'Garageneinfahrt',
+          shop: 'Ladeneingang',
+        },
+      },
+      ref: 'Kennung (Hausnummer, Treppenhaus)',
+      name: 'Name',
+      wheelchair: {
+        name: 'Rollstuhlgerecht',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          yes: 'Ja',
+          limited: 'Eingeschränkt',
+          no: 'Nein',
+          designated: 'Speziell für Rollstühle',
+        },
+      },
+      access: {
+        name: 'Zugang',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          public: 'Öffentlich',
+          customers: 'Kund:innen',
+          delivery: 'Lieferverkehr',
+          destination: 'Anlieger',
+          employees: 'Mitarbeitende',
+          permissive: 'Öffentliche Nutzung geduldet',
+          permit: 'Mit Genehmigung',
+          private: 'Privat',
+          residents: 'Bewohner:innen',
+          no: 'Kein Zugang',
+        },
+      },
+    },
+  },
   footroutes: {
     gfiAttributes: {
       route: 'Routentyp (`route=*`)',
@@ -3833,6 +3893,7 @@ const data = {
         condition: 'contains',
         type: 'string',
         format: {
+          bus_stop: 'Bushaltestelle',
           ferry_station: 'Fähranleger',
           light_rail_station: 'S-Bahn-Station',
           railway_station: 'Bahnhof regional / überregional',

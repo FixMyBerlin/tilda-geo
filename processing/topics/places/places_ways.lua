@@ -5,10 +5,17 @@ local places_tables = require('topics.places.places_tables')
 local exit_processing = require('topics.places.helper.exit_processing')
 local result_tags = require('topics.places.helper.result_tags')
 local minzoom = require('topics.places.helper.minzoom')
+local places_squares = require('topics.places.places_squares')
 
 local table = places_tables.table
 
 local function places_ways(object)
+  -- place=square is not a place LABEL (allowed_values in exit_processing) but an area –
+  -- routed to its own processing-only table instead of the point-based `places` table.
+  if object.tags.place == 'square' then
+    places_squares(object)
+    return
+  end
   if exit_processing(object) then return end
   if not object.is_closed then return end
   local cleaned_tags, replaced_tags = result_tags(object.tags)

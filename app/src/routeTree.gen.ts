@@ -93,6 +93,7 @@ import { Route as ApiSignInOsmRouteImport } from './routes/api/sign-in.osm'
 import { Route as ApiUploadsSlugRouteImport } from './routes/api/uploads.$slug'
 import { Route as ApiUploadsCreateRouteImport } from './routes/api/uploads.create'
 import { Route as RegionenRegionSlugIndexRouteImport } from './routes/regionen/$regionSlug/index'
+import { Route as RegionenRegionSlugFlaechenfinderRouteImport } from './routes/regionen/$regionSlug/flaechenfinder'
 import { Route as RegionenRegionSlugHinweiseRouteImport } from './routes/regionen/$regionSlug/hinweise'
 import { Route as RegionenRegionSlugMessenRouteImport } from './routes/regionen/$regionSlug/messen'
 import { Route as RegionenRegionSlugPrueflistenRouteImport } from './routes/regionen/$regionSlug/prueflisten'
@@ -123,6 +124,7 @@ import { Route as ApiAdminQaConfigsIdExportCsvRouteImport } from './routes/api/a
 import { Route as ApiNotesRegionSlugFolderIdNoteIdRouteImport } from './routes/api/notes.$regionSlug.$folderId.$noteId'
 import { Route as ApiNotesRegionSlugFolderIdNoteIdCommentsRouteImport } from './routes/api/notes.$regionSlug.$folderId.$noteId.comments'
 import { Route as ApiPrivateBackgroundsSlugZXYRouteImport } from './routes/api/private-backgrounds.$slug.$z.$x.$y'
+import { Route as ApiRegionsRegionSlugSpaceFinderTilesLayerZXYRouteImport } from './routes/api/regions.$regionSlug.space-finder-tiles.$layer.$z.$x.$y'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -557,6 +559,12 @@ const RegionenRegionSlugIndexRoute = RegionenRegionSlugIndexRouteImport.update({
   path: '/',
   getParentRoute: () => RegionenRegionSlugRouteRoute,
 } as any)
+const RegionenRegionSlugFlaechenfinderRoute =
+  RegionenRegionSlugFlaechenfinderRouteImport.update({
+    id: '/flaechenfinder',
+    path: '/flaechenfinder',
+    getParentRoute: () => RegionenRegionSlugRouteRoute,
+  } as any)
 const RegionenRegionSlugHinweiseRoute =
   RegionenRegionSlugHinweiseRouteImport.update({
     id: '/hinweise',
@@ -731,6 +739,12 @@ const ApiPrivateBackgroundsSlugZXYRoute =
     path: '/api/private-backgrounds/$slug/$z/$x/$y',
     getParentRoute: () => rootRouteImport,
   } as any)
+const ApiRegionsRegionSlugSpaceFinderTilesLayerZXYRoute =
+  ApiRegionsRegionSlugSpaceFinderTilesLayerZXYRouteImport.update({
+    id: '/$regionSlug/space-finder-tiles/$layer/$z/$x/$y',
+    path: '/$regionSlug/space-finder-tiles/$layer/$z/$x/$y',
+    getParentRoute: () => ApiRegionsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -805,6 +819,7 @@ export interface FileRoutesByFullPath {
   '/api/sign-in/osm': typeof ApiSignInOsmRoute
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
+  '/regionen/$regionSlug/flaechenfinder': typeof RegionenRegionSlugFlaechenfinderRoute
   '/regionen/$regionSlug/hinweise': typeof RegionenRegionSlugHinweiseRoute
   '/regionen/$regionSlug/messen': typeof RegionenRegionSlugMessenRoute
   '/regionen/$regionSlug/prueflisten': typeof RegionenRegionSlugPrueflistenRoute
@@ -846,6 +861,7 @@ export interface FileRoutesByFullPath {
   '/api/notes/$regionSlug/$folderId/$noteId': typeof ApiNotesRegionSlugFolderIdNoteIdRouteWithChildren
   '/api/notes/$regionSlug/$folderId/$noteId/comments': typeof ApiNotesRegionSlugFolderIdNoteIdCommentsRoute
   '/api/private-backgrounds/$slug/$z/$x/$y': typeof ApiPrivateBackgroundsSlugZXYRoute
+  '/api/regions/$regionSlug/space-finder-tiles/$layer/$z/$x/$y': typeof ApiRegionsRegionSlugSpaceFinderTilesLayerZXYRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -907,6 +923,7 @@ export interface FileRoutesByTo {
   '/api/sign-in/osm': typeof ApiSignInOsmRoute
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
+  '/regionen/$regionSlug/flaechenfinder': typeof RegionenRegionSlugFlaechenfinderRoute
   '/regionen/$regionSlug/hinweise': typeof RegionenRegionSlugHinweiseRoute
   '/regionen/$regionSlug/messen': typeof RegionenRegionSlugMessenRoute
   '/regionen/$regionSlug/prueflisten': typeof RegionenRegionSlugPrueflistenRoute
@@ -948,6 +965,7 @@ export interface FileRoutesByTo {
   '/api/notes/$regionSlug/$folderId/$noteId': typeof ApiNotesRegionSlugFolderIdNoteIdRouteWithChildren
   '/api/notes/$regionSlug/$folderId/$noteId/comments': typeof ApiNotesRegionSlugFolderIdNoteIdCommentsRoute
   '/api/private-backgrounds/$slug/$z/$x/$y': typeof ApiPrivateBackgroundsSlugZXYRoute
+  '/api/regions/$regionSlug/space-finder-tiles/$layer/$z/$x/$y': typeof ApiRegionsRegionSlugSpaceFinderTilesLayerZXYRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -1024,6 +1042,7 @@ export interface FileRoutesById {
   '/api/sign-in/osm': typeof ApiSignInOsmRoute
   '/api/uploads/$slug': typeof ApiUploadsSlugRoute
   '/api/uploads/create': typeof ApiUploadsCreateRoute
+  '/regionen/$regionSlug/flaechenfinder': typeof RegionenRegionSlugFlaechenfinderRoute
   '/regionen/$regionSlug/hinweise': typeof RegionenRegionSlugHinweiseRoute
   '/regionen/$regionSlug/messen': typeof RegionenRegionSlugMessenRoute
   '/regionen/$regionSlug/prueflisten': typeof RegionenRegionSlugPrueflistenRoute
@@ -1065,6 +1084,7 @@ export interface FileRoutesById {
   '/api/notes/$regionSlug/$folderId/$noteId': typeof ApiNotesRegionSlugFolderIdNoteIdRouteWithChildren
   '/api/notes/$regionSlug/$folderId/$noteId/comments': typeof ApiNotesRegionSlugFolderIdNoteIdCommentsRoute
   '/api/private-backgrounds/$slug/$z/$x/$y': typeof ApiPrivateBackgroundsSlugZXYRoute
+  '/api/regions/$regionSlug/space-finder-tiles/$layer/$z/$x/$y': typeof ApiRegionsRegionSlugSpaceFinderTilesLayerZXYRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -1141,6 +1161,7 @@ export interface FileRouteTypes {
     | '/api/sign-in/osm'
     | '/api/uploads/$slug'
     | '/api/uploads/create'
+    | '/regionen/$regionSlug/flaechenfinder'
     | '/regionen/$regionSlug/hinweise'
     | '/regionen/$regionSlug/messen'
     | '/regionen/$regionSlug/prueflisten'
@@ -1182,6 +1203,7 @@ export interface FileRouteTypes {
     | '/api/notes/$regionSlug/$folderId/$noteId'
     | '/api/notes/$regionSlug/$folderId/$noteId/comments'
     | '/api/private-backgrounds/$slug/$z/$x/$y'
+    | '/api/regions/$regionSlug/space-finder-tiles/$layer/$z/$x/$y'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -1243,6 +1265,7 @@ export interface FileRouteTypes {
     | '/api/sign-in/osm'
     | '/api/uploads/$slug'
     | '/api/uploads/create'
+    | '/regionen/$regionSlug/flaechenfinder'
     | '/regionen/$regionSlug/hinweise'
     | '/regionen/$regionSlug/messen'
     | '/regionen/$regionSlug/prueflisten'
@@ -1284,6 +1307,7 @@ export interface FileRouteTypes {
     | '/api/notes/$regionSlug/$folderId/$noteId'
     | '/api/notes/$regionSlug/$folderId/$noteId/comments'
     | '/api/private-backgrounds/$slug/$z/$x/$y'
+    | '/api/regions/$regionSlug/space-finder-tiles/$layer/$z/$x/$y'
   id:
     | '__root__'
     | '/'
@@ -1359,6 +1383,7 @@ export interface FileRouteTypes {
     | '/api/sign-in/osm'
     | '/api/uploads/$slug'
     | '/api/uploads/create'
+    | '/regionen/$regionSlug/flaechenfinder'
     | '/regionen/$regionSlug/hinweise'
     | '/regionen/$regionSlug/messen'
     | '/regionen/$regionSlug/prueflisten'
@@ -1400,6 +1425,7 @@ export interface FileRouteTypes {
     | '/api/notes/$regionSlug/$folderId/$noteId'
     | '/api/notes/$regionSlug/$folderId/$noteId/comments'
     | '/api/private-backgrounds/$slug/$z/$x/$y'
+    | '/api/regions/$regionSlug/space-finder-tiles/$layer/$z/$x/$y'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -2037,6 +2063,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof RegionenRegionSlugIndexRouteImport
       parentRoute: typeof RegionenRegionSlugRouteRoute
     }
+    '/regionen/$regionSlug/flaechenfinder': {
+      id: '/regionen/$regionSlug/flaechenfinder'
+      path: '/flaechenfinder'
+      fullPath: '/regionen/$regionSlug/flaechenfinder'
+      preLoaderRoute: typeof RegionenRegionSlugFlaechenfinderRouteImport
+      parentRoute: typeof RegionenRegionSlugRouteRoute
+    }
     '/regionen/$regionSlug/hinweise': {
       id: '/regionen/$regionSlug/hinweise'
       path: '/hinweise'
@@ -2246,6 +2279,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/api/private-backgrounds/$slug/$z/$x/$y'
       preLoaderRoute: typeof ApiPrivateBackgroundsSlugZXYRouteImport
       parentRoute: typeof rootRouteImport
+    }
+    '/api/regions/$regionSlug/space-finder-tiles/$layer/$z/$x/$y': {
+      id: '/api/regions/$regionSlug/space-finder-tiles/$layer/$z/$x/$y'
+      path: '/$regionSlug/space-finder-tiles/$layer/$z/$x/$y'
+      fullPath: '/api/regions/$regionSlug/space-finder-tiles/$layer/$z/$x/$y'
+      preLoaderRoute: typeof ApiRegionsRegionSlugSpaceFinderTilesLayerZXYRouteImport
+      parentRoute: typeof ApiRegionsRoute
     }
   }
 }
@@ -2486,6 +2526,7 @@ const PreviewRouteWithChildren =
   PreviewRoute._addFileChildren(PreviewRouteChildren)
 
 interface RegionenRegionSlugRouteRouteChildren {
+  RegionenRegionSlugFlaechenfinderRoute: typeof RegionenRegionSlugFlaechenfinderRoute
   RegionenRegionSlugHinweiseRoute: typeof RegionenRegionSlugHinweiseRoute
   RegionenRegionSlugMessenRoute: typeof RegionenRegionSlugMessenRoute
   RegionenRegionSlugPrueflistenRoute: typeof RegionenRegionSlugPrueflistenRoute
@@ -2496,6 +2537,8 @@ interface RegionenRegionSlugRouteRouteChildren {
 
 const RegionenRegionSlugRouteRouteChildren: RegionenRegionSlugRouteRouteChildren =
   {
+    RegionenRegionSlugFlaechenfinderRoute:
+      RegionenRegionSlugFlaechenfinderRoute,
     RegionenRegionSlugHinweiseRoute: RegionenRegionSlugHinweiseRoute,
     RegionenRegionSlugMessenRoute: RegionenRegionSlugMessenRoute,
     RegionenRegionSlugPrueflistenRoute: RegionenRegionSlugPrueflistenRoute,
@@ -2527,10 +2570,13 @@ const RegionenRouteWithChildren = RegionenRoute._addFileChildren(
 
 interface ApiRegionsRouteChildren {
   ApiRegionsRegionSlugUploadsCsvRoute: typeof ApiRegionsRegionSlugUploadsCsvRoute
+  ApiRegionsRegionSlugSpaceFinderTilesLayerZXYRoute: typeof ApiRegionsRegionSlugSpaceFinderTilesLayerZXYRoute
 }
 
 const ApiRegionsRouteChildren: ApiRegionsRouteChildren = {
   ApiRegionsRegionSlugUploadsCsvRoute: ApiRegionsRegionSlugUploadsCsvRoute,
+  ApiRegionsRegionSlugSpaceFinderTilesLayerZXYRoute:
+    ApiRegionsRegionSlugSpaceFinderTilesLayerZXYRoute,
 }
 
 const ApiRegionsRouteWithChildren = ApiRegionsRoute._addFileChildren(

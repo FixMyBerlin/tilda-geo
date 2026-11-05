@@ -1,21 +1,22 @@
 # Region modes
 
-A region has a shared map and extra pages that reconfigure the UI around it. The default map stays `/regionen/<region>`. Hinweise, Qualitätssicherung, Prüflisten, Summieren, and Messen are their own routes. They show up in the main navigation when the region has the matching data (notes flags, at least one QA config, review lists, a category with a dataset to sum); Messen is in every region. Members can open Prüflisten before the first list exists so they can create one.
+A region has a shared map and extra pages that reconfigure the UI around it. The default map stays `/regionen/<region>`. Hinweise, Qualitätssicherung, Prüflisten, the Flächenfinder, Summieren, and Messen are their own routes. They show up in the main navigation when the region has the matching data (notes flags, at least one QA config, review lists, a category with a dataset to sum) or, for the Flächenfinder, the region flag; Messen is in every region. Members can open Prüflisten before the first list exists so they can create one.
 
 Who may open and change what per mode: [Permissions.md](./Permissions.md).
 
 URL keys and filters: [Modes-URL-State-Contract-And-Optimizations.md](./Modes-URL-State-Contract-And-Optimizations.md). Selection `f`: [Features-Parameter-Deeplinks.md](./Features-Parameter-Deeplinks.md).
 
-| Mode               | URL                              |
-| ------------------ | -------------------------------- |
-| Map (default)      | `/regionen/<region>`             |
-| Hinweise           | `/regionen/<region>/hinweise`    |
-| Qualitätssicherung | `/regionen/<region>/qa`          |
-| Prüflisten         | `/regionen/<region>/prueflisten` |
-| Summieren          | `/regionen/<region>/summieren`   |
-| Messen             | `/regionen/<region>/messen`      |
+| Mode               | URL                                 |
+| ------------------ | ----------------------------------- |
+| Map (default)      | `/regionen/<region>`                |
+| Hinweise           | `/regionen/<region>/hinweise`       |
+| Qualitätssicherung | `/regionen/<region>/qa`             |
+| Prüflisten         | `/regionen/<region>/prueflisten`    |
+| Flächenfinder      | `/regionen/<region>/flaechenfinder` |
+| Summieren          | `/regionen/<region>/summieren`      |
+| Messen             | `/regionen/<region>/messen`         |
 
-Switching modes keeps map position and layer configuration. Each mode stores its filters in one JSON search object (`notes`, `qa`, `review`, `sum`, `measure`) and restores them when you come back.
+Switching modes keeps map position and layer configuration. Each mode stores its filters in one JSON search object (`notes`, `qa`, `review`, `space`, `sum`, `measure`) and restores them when you come back.
 
 ## Shared panel
 
@@ -109,3 +110,14 @@ GeoJSON lists of candidates (points, lines, polygons, including Multi\*). Pick a
 While the geometry of an entry is edited, undo and redo on the map (buttons, Cmd/Ctrl+Z) step through the changes to that entry; every step is saved like an edit. The steps are separate from those of Summieren and end with the edit session. Creating and deleting an entry cannot be undone. While a new entry is drawn, undo takes back the last corner.
 
 UI names: **Prüfliste** / **Prüfeintrag**. Status and comments exist. A richer evaluation workflow is still placeholder-level. Admin: `/admin/review-lists`.
+
+## Flächenfinder
+
+Scores hexagons of a Planungsgebiet to find candidate areas for new bike parking (Abstellanlagen). It is always member-only, and only available when the region has the flag `spaceFinderEnabled` switched on (D8). The flag defaults to `false`; admins switch it on per region in the region form ("Flächenfinder aktiv"). Unlike the other modes it cannot be derived from data, because the worker that produces the results only runs on some instances. The flag also applies to admins and to the server functions, not only to the route.
+
+- **Collection:** Planungsgebiete (areas) with their Varianten. A Variante is a copy of a Gebiet's factor weights and thresholds that can be calculated on its own. Duplicating a Variante seeds the copy from its parent. Creating or duplicating shows a confirmation toast.
+- **Study area drawing:** "Eigenes Gebiet" draws one polygon on the map like Summieren: the first click starts it, corners and edges are changed directly, and undo and redo cover the steps of the current drawing session. When an existing Gebiet is edited, drawing starts from its saved area, so it can be changed instead of redrawn. "Gebiet verwerfen" throws the whole drawing away and starts a new one (undo brings it back during the session); when editing, "Änderungen am Gebiet verwerfen" goes back to the saved area. Map clicks belong to drawing meanwhile.
+- **Result layer:** the hexagons of the active Variante's latest run, coloured by score (`score`), with an opacity (`opacity`; 0 hides the layer) and a "Gesuchte Fläche" filter (`minArea`).
+- **Candidates:** with the selection tool on, clicking a hexagon adds it to a candidate list that can be exported as GeoJSON. Selections are stored per run in `sessionStorage` ([`space-finder-candidates-store.ts`](../app/src/components/regionen/pageRegionSlug/hooks/mapState/space-finder-candidates-store.ts)), so they survive reloads of the tab but not a new session.
+
+The creator of a Gebiet or Variante is kept for attribution only. It is cleared when the user is deleted. A region with Planungsgebieten cannot be deleted.

@@ -18,6 +18,16 @@ describe('sanitize_tags', function()
     end)
   end)
 
+  describe('wheelchair', function()
+    it('keeps limited', function()
+      assert.are.equal(SANITIZE_TAGS.wheelchair('limited'), 'limited')
+    end)
+
+    it('marks unknown values as disallowed', function()
+      assert.are.equal(SANITIZE_TAGS.wheelchair('partial'), 'DISALLOWED_VALUE')
+    end)
+  end)
+
   describe('tunnel', function()
     it('keeps yes', function()
       assert.are.equal(SANITIZE_TAGS.tunnel('yes'), 'yes')
