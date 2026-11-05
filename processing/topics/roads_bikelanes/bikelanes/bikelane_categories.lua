@@ -406,7 +406,10 @@ local cyclewaySeparated = BikelaneCategory.new({
     -- CASE: Unsigned cycleway ('anderer Radweg')
     -- `highway=cycleway` with an explicit `traffic_sign=none` is a cycleway without a mandatory-use sign.
     -- Shared and segregated foot paths are matched by the categories before this one.
-    if tags.highway == 'cycleway' and sanitize_traffic_sign(tags.traffic_sign) == 'none' then
+    -- A lane between the car lanes ('Angstweiche', `cycleway:lanes=no|no|lane|no`) that is also tagged
+    -- on the road side is `cyclewayOnHighwayBetweenLanes`; skip its side object like `needsClarification` does.
+    if tags.highway == 'cycleway' and sanitize_traffic_sign(tags.traffic_sign) == 'none'
+        and not has_cycleway_on_highway_between_lanes_conditions(tags) then
       return true
     end
 
