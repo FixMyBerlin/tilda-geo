@@ -191,6 +191,8 @@ local missing_access_tag_240 = BikelaneTodo.new({
   end
 })
 
+local SEGREGATED_VALUES = SET.set({ 'yes', 'no' })
+
 -- TODO: If both bicycle=designated and foot=designated are present, check if the traffic_sign is 240 or 241.
 local missing_segregated = BikelaneTodo.new({
   id = 'missing_segregated',
@@ -202,7 +204,7 @@ local missing_segregated = BikelaneTodo.new({
   end,
   conditions = function(object_tags, result_tags)
     return result_tags.category == 'needsClarification'
-        and (object_tags.segregated ~= 'yes' or object_tags.segregated ~= 'no')
+        and not SEGREGATED_VALUES[object_tags.segregated]
         and (
           (object_tags.bicycle == 'designated' and object_tags.foot == 'designated')
           or contains_substring( object_tags.traffic_sign, '240')

@@ -468,6 +468,60 @@ describe('bikelane_todos', function()
       assert.are.equal(table_includes(data._todo_list, 'missing_segregated'), true)
       assert.are.equal(table_includes(data._todo_list, 'needs_clarification'), false)
     end)
+
+    it('creates missing_segregated for path with designated bicycle and foot and no segregated tag', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'path',
+          ['bicycle'] = 'designated',
+          ['foot'] = 'designated',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local cycleways = run_bikelanes(input_object)
+      assert.are.equal(table_size(cycleways), 1)
+
+      local data = cycleways[1]
+      assert.are.equal(data.category, 'needsClarification')
+      assert.are.equal(table_includes(data._todo_list, 'missing_segregated'), true)
+    end)
+
+    it('does not create missing_segregated for path with designated bicycle and foot and segregated=yes', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'path',
+          ['bicycle'] = 'designated',
+          ['foot'] = 'designated',
+          ['segregated'] = 'yes',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local cycleways = run_bikelanes(input_object)
+      assert.are.equal(table_size(cycleways), 1)
+
+      local data = cycleways[1]
+      assert.are.equal(table_includes(data._todo_list, 'missing_segregated'), false)
+    end)
+
+    it('does not create missing_segregated for path with designated bicycle and foot and segregated=no', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'path',
+          ['bicycle'] = 'designated',
+          ['foot'] = 'designated',
+          ['segregated'] = 'no',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local cycleways = run_bikelanes(input_object)
+      assert.are.equal(table_size(cycleways), 1)
+
+      local data = cycleways[1]
+      assert.are.equal(table_includes(data._todo_list, 'missing_segregated'), false)
+    end)
   end)
 
   describe('`crossing_too_long`:', function()
