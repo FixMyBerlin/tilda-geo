@@ -160,16 +160,12 @@ export default defineConfig({
     tailwindcss(),
     tanstackStart({
       router: {
-        // The router plugin splits only the components by default; loader and pendingComponent
-        // code (and everything they import) would otherwise ship in the entry chunk to every page.
+        // The router plugin splits only the components by default; loader code (and everything it
+        // imports) would otherwise ship in the entry chunk to every page. `pendingComponent` stays
+        // unsplit: splitting it breaks SSR of the region page ("A previously unvisited boundary must
+        // have exactly one root segment", React 19.2 / Start 1.169).
         codeSplittingOptions: {
-          defaultBehavior: [
-            ['loader'],
-            ['component'],
-            ['pendingComponent'],
-            ['errorComponent'],
-            ['notFoundComponent'],
-          ],
+          defaultBehavior: [['loader'], ['component'], ['errorComponent'], ['notFoundComponent']],
         },
       },
     }),
