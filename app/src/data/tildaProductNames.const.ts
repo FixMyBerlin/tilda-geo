@@ -1,4 +1,4 @@
-import { RegionProduct } from '@/prisma/generated/browser'
+import { RegionProduct } from '@/prisma/generated/enums'
 
 /** Branded product name shown in region header / page title. */
 export const productName = {

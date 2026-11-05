@@ -51,6 +51,38 @@ export default defineConfig({
         'typescript/no-non-null-assertion': 'off',
       },
     },
+    // Prisma's `browser` and `client` entries pull its runtime (decimal.js etc.) into the browser
+    // bundle; client code reads enums from `@/prisma/generated/enums`.
+    {
+      // `src/server` holds schemas the admin forms import; server-only code there is excluded by name.
+      files: [
+        'src/components/**',
+        'src/routes/**',
+        'src/shared/**',
+        'src/data/**',
+        'src/lib/**',
+        'src/server/**',
+      ],
+      excludeFiles: [
+        '**/*.server.ts',
+        '**/*.functions.ts',
+        '**/*.test.ts',
+        'src/routes/api/**',
+        'src/server/mcp/**',
+      ],
+      rules: {
+        'eslint/no-restricted-imports': [
+          'error',
+          {
+            paths: ['@/prisma/generated/browser', '@/prisma/generated/client'].map((name) => ({
+              name,
+              allowTypeImports: true,
+              message: 'Import Prisma enums from @/prisma/generated/enums in client code.',
+            })),
+          },
+        ],
+      },
+    },
     // Browser API guard — only for code that ships to the client (components + route UI).
     // Server code (*.server.ts, *.functions.ts, src/routes/api/**, src/server/**) is excluded:
     // it runs on Bun/Nitro and may use whatever the server runtime supports (Node/Bun APIs).

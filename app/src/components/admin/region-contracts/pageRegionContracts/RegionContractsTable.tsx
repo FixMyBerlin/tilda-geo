@@ -8,7 +8,7 @@ import {
 } from '@/components/admin/AdminTableActions'
 import { Pill } from '@/components/shared/text/Pill'
 import { toastSuccess } from '@/components/shared/toast/toastSuccess'
-import { RegionContractStatus } from '@/prisma/generated/browser'
+import { RegionContractStatus } from '@/prisma/generated/enums'
 import { adminNavCountsQueryOptions } from '@/server/admin/adminNavQueryOptions'
 import { deleteRegionContractFn } from '@/server/region-contracts/region-contracts.functions'
 import type { TRegionContract } from '@/server/region-contracts/regionContractMapper.server'

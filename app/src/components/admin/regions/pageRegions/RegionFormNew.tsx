@@ -1,4 +1,4 @@
-import { RegionStatus } from '@/prisma/generated/browser'
+import { RegionStatus } from '@/prisma/generated/enums'
 import type { TRegionContract } from '@/server/region-contracts/regionContractMapper.server'
 import { regionFormEmptyDefaults, RegionForm } from './RegionForm'
 
