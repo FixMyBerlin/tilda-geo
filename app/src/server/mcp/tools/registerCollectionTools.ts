@@ -1,6 +1,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'
 import { z } from 'zod'
 import { run } from '@/server/mcp/mcpToolResult'
+import { CollectionDeleteRefusedError } from '@/server/utils/collectionDeleteRefusedError'
 import { idInput, regionSlugInput } from './mcpToolInputs'
 
 type CollectionTools = {
@@ -19,6 +20,8 @@ type CollectionTools = {
     regionSlugs: string[]
   }) => Promise<{ success: boolean; message: string }>
   remove: (input: { regionSlug: string; id: number }) => Promise<unknown>
+  /** Next step when the delete is refused for its contents; `id` is `{id}` in the description. */
+  whenNotEmpty: (id: string) => string
 }
 
 /**
@@ -81,9 +84,21 @@ export function registerCollectionTools(server: McpServer, tools: CollectionTool
     {
       description:
         `Delete a ${noun}. Only works when it has no ${contents} and is linked to this region ` +
-        `only — move or delete its ${contents} first, and unlink other regions with ${prefix}_update.`,
+        `only (unlink other regions with ${prefix}_update first). ${tools.whenNotEmpty('{id}')}`,
       inputSchema: { regionSlug: regionSlugInput, id: idInput },
     },
-    (args) => run(() => tools.remove(args)),
+    (args) =>
+      run(async () => {
+        try {
+          return await tools.remove(args)
+        } catch (error) {
+          if (!(error instanceof CollectionDeleteRefusedError)) throw error
+          const nextStep =
+            error.reason === 'notEmpty'
+              ? tools.whenNotEmpty(String(args.id))
+              : `Unlink the other regions with ${prefix}_update, then delete it with this tool.`
+          throw new Error(`${error.message} ${nextStep}`)
+        }
+      }),
   )
 }

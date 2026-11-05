@@ -27,7 +27,11 @@ const propertiesInput = z
   .describe('Display attributes shown with the entry; values are stored as strings.')
 
 /** Review lists ("Prüflisten") and their entries — the same functions the region UI calls. */
-export function registerReviewListsTools(server: McpServer, caller: AdminApiCaller) {
+export function registerReviewListsTools(
+  server: McpServer,
+  caller: AdminApiCaller,
+  origin: string,
+) {
   registerCollectionTools(server, {
     prefix: 'review_lists',
     noun: 'review list',
@@ -36,6 +40,9 @@ export function registerReviewListsTools(server: McpServer, caller: AdminApiCall
     create: (input) => createReviewList(input, caller),
     update: ({ id, ...config }) => updateReviewListForAdmin(id, config, caller),
     remove: ({ id, ...input }) => deleteReviewList({ ...input, listId: id }, caller),
+    whenNotEmpty: (id) =>
+      'An admin deletes a list with its entries and comments in the admin UI: ' +
+      `${origin}/admin/review-lists/${id}/edit (tell the user, there is no tool for it).`,
   })
 
   server.registerTool(

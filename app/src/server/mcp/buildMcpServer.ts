@@ -111,7 +111,7 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
         `map_dataset_uploads_* list, read and remove those uploads; the static datasets script only creates and replaces them, so a retired dataset stays until it is deleted here or in the admin UI. Deleting removes the database row only, the files on S3 stay. ` +
         `processing_runs_list / processing_runs_get read nightly processing timings from public.meta (same data as /admin/processing). ` +
         `note_folders_* / notes_* / note_comments_* manage internal notes (Hinweise) and review_lists_* / review_entries_* / review_entry_comments_* manage review lists (Prüflisten) of one region (regionSlug). ` +
-        `They act as the API token owner with the same rules as the region UI: notes and comments can only be edited or deleted by their author (the tool answers "Not allowed: …" otherwise), and only empty folders and lists can be deleted. note_folders_update / review_lists_update also set which regions a folder or list is linked to. ` +
+        `They act as the API token owner with the same rules as the region UI: notes and comments can only be edited or deleted by their author (the tool answers "Not allowed: …" otherwise), and only empty folders and lists can be deleted (an admin deletes a list with its entries in the admin UI, see review_lists_delete). note_folders_update / review_lists_update also set which regions a folder or list is linked to. ` +
         `qa_configs_* manage the QA configs (Qualitätssicherung) of a region with the validation of the admin form; qa_configs_get returns the form values for qa_configs_update. ` +
         `qa_areas_list / qa_evaluations_* read the cells of one config (regionSlug, configSlug) with their numbers and status, and store user decisions and comments as the API token owner with the same rules as the region UI; evaluations are a history and cannot be deleted.`,
     },
@@ -518,7 +518,7 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
 
   const memberCaller = adminApiMemberCaller(auth, request)
   registerNotesTools(server, memberCaller)
-  registerReviewListsTools(server, memberCaller)
+  registerReviewListsTools(server, memberCaller, origin)
   registerQaTools(server, memberCaller)
 
   return server
