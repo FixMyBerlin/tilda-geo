@@ -15,7 +15,7 @@ export const PageDocsChaptersSection = ({ topicDoc }: Props) => {
       {topicDoc.chapters.map((chapter) => (
         <article key={chapter.id}>
           <DocumentHeading as="h2" id={chapter.id} className={DOCS_PAGE_SECTION_H2_CLASSNAME}>
-            {chapter.title}
+            <Markdown markdown={chapter.title} inline />
           </DocumentHeading>
           <Markdown
             markdown={chapter.markdown}
