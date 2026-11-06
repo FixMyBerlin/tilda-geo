@@ -90,7 +90,8 @@ local function bikelanes(object_tags, object_geom)
           _id = default_id({ type = object_tags._type, id = object_tags._id }),
           _infrastructureExists = true,
           prefix = transformed_tags._prefix,
-          lifecycle = transformed_tags.lifecycle or SANITIZE_ROAD_TAGS.temporary(transformed_tags) or object_tags.lifecycle,
+          -- The side's own lifecycle wins, else it gets the lifecycle of its road
+          lifecycle = transformed_tags.lifecycle or object_tags.lifecycle,
           width = parse_width(transformed_tags.width),
           width_source = transformed_tags['source:width'],
           width_effective = parse_width(transformed_tags['width:effective']),

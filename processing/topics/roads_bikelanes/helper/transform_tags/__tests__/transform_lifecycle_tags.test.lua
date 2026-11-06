@@ -220,6 +220,50 @@ describe('transform_lifecycle_tags', function()
     end)
   end)
 
+  describe('temporary', function()
+    it('moves temporary=yes to lifecycle=temporary', function()
+      local tags = { highway = 'cycleway', temporary = 'yes' }
+      local unmodified_tags = transform_lifecycle_tags(tags)
+
+      assert.are.same(tags, { highway = 'cycleway', lifecycle = 'temporary' })
+      assert.are.same(unmodified_tags, { temporary = 'yes' })
+    end)
+
+    it('moves cycleway:SIDE:temporary=yes and sidewalk:SIDE:temporary=yes to the side lifecycle', function()
+      local tags = {
+        highway = 'residential',
+        ['cycleway:right'] = 'lane',
+        ['cycleway:right:temporary'] = 'yes',
+        ['cycleway:temporary'] = 'yes',
+        ['sidewalk:both:temporary'] = 'yes',
+      }
+      transform_lifecycle_tags(tags)
+
+      assert.are.same(tags, {
+        highway = 'residential',
+        ['cycleway:right'] = 'lane',
+        ['cycleway:right:lifecycle'] = 'temporary',
+        ['cycleway:lifecycle'] = 'temporary',
+        ['sidewalk:both:lifecycle'] = 'temporary',
+      })
+    end)
+
+    it('keeps an existing lifecycle', function()
+      local tags = { highway = 'construction', construction = 'cycleway', temporary = 'yes' }
+      transform_lifecycle_tags(tags)
+
+      assert.are.same(tags.lifecycle, 'construction')
+      assert.is_nil(tags.temporary)
+    end)
+
+    it('ignores temporary=no', function()
+      local tags = { highway = 'cycleway', temporary = 'no' }
+      transform_lifecycle_tags(tags)
+
+      assert.are.same(tags, { highway = 'cycleway', temporary = 'no' })
+    end)
+  end)
+
   describe('interaction with maxspeed inference', function()
     it('treats construction=living_street as living_street for maxspeed fallback after transform', function()
       local tags = {

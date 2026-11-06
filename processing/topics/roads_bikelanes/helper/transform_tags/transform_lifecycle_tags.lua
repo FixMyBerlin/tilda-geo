@@ -61,6 +61,37 @@ local function has_blocked_text(tags)
   return false
 end
 
+local TEMPORARY_SIDE_PREFIXES = {}
+for _, prefix in ipairs({ 'cycleway', 'sidewalk' }) do
+  for _, infix in ipairs({ '', ':left', ':right', ':both' }) do
+    table.insert(TEMPORARY_SIDE_PREFIXES, prefix .. infix)
+  end
+end
+
+-- Move `temporary=yes` into the lifecycle concept:
+-- - `temporary=yes` -> `lifecycle=temporary`
+-- - `cycleway:right:temporary=yes` -> `cycleway:right:lifecycle=temporary` (same for `sidewalk` and all sides)
+-- An existing lifecycle wins. The `temporary` key is removed.
+---@param dest_tags OsmTags
+---@param unmodified_tags OsmTags
+local function transform_temporary(dest_tags, unmodified_tags)
+  if dest_tags.temporary == 'yes' then
+    unmodified_tags.temporary = dest_tags.temporary
+    dest_tags.temporary = nil
+    if not dest_tags.lifecycle then dest_tags.lifecycle = 'temporary' end
+  end
+
+  for _, side_prefix in ipairs(TEMPORARY_SIDE_PREFIXES) do
+    local temporary_key = side_prefix .. ':temporary'
+    if dest_tags[temporary_key] == 'yes' then
+      local lifecycle_key = side_prefix .. ':lifecycle'
+      unmodified_tags[temporary_key] = dest_tags[temporary_key]
+      dest_tags[temporary_key] = nil
+      if not dest_tags[lifecycle_key] then dest_tags[lifecycle_key] = 'temporary' end
+    end
+  end
+end
+
 -- Mutate the input tags to normalize lifecycle-related OSM tagging before filtering.
 ---@param dest_tags OsmTags
 ---@return OsmTags unmodified_tags Original values overwritten by the transform.
@@ -105,6 +136,8 @@ local function transform_lifecycle_tags(dest_tags)
       dest_tags[tag] = nil
     end
   end
+
+  transform_temporary(dest_tags, unmodified_tags)
 
   return unmodified_tags
 end

@@ -2,7 +2,6 @@ local road_classification = require('topics.roads_bikelanes.roads.road_classific
 local lit = require('topics.roads_bikelanes.lit.lit')
 local surface_quality = require('topics.roads_bikelanes.surfaceQuality.surface_quality')
 local merge_table = require('topics.helper.merge_table')
-local SANITIZE_ROAD_TAGS = require('topics.roads_bikelanes.helper.sanitize_road_tags')
 local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
 
 ---@param object_tags OsmTags
@@ -12,7 +11,7 @@ local function result_tags_roads_bikelanes(object_tags)
     name = SANITIZE_TAGS.safe_string(object_tags.name or object_tags.ref or object_tags['is_sidepath:of:name'] or object_tags['street:name']),
     length = object_tags._length,
     area = object_tags._area,
-    lifecycle = object_tags.lifecycle or SANITIZE_ROAD_TAGS.temporary(object_tags),
+    lifecycle = object_tags.lifecycle,
     mapillary_coverage = object_tags.mapillary_coverage,
     mapillary = object_tags.mapillary,
     mapillary_forward = object_tags['mapillary:forward'],
