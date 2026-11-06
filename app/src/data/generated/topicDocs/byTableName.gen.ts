@@ -1468,6 +1468,8 @@ const data = {
           {
             value: 'temporary',
             label: 'Temporärer Weg',
+            description:
+              'Aus `temporary=yes` am Weg oder `cycleway:<Seite>:temporary=yes` / `sidewalk:<Seite>:temporary=yes` für eine Seite. Radwege und Gehwege an einer temporären Straße sind ebenfalls temporär.',
           },
         ],
       },
@@ -3143,6 +3145,8 @@ const data = {
           {
             value: 'temporary',
             label: 'Temporärer Weg',
+            description:
+              'Aus `temporary=yes` am Weg oder `cycleway:<Seite>:temporary=yes` / `sidewalk:<Seite>:temporary=yes` für eine Seite. Radwege und Gehwege an einer temporären Straße sind ebenfalls temporär.',
           },
         ],
       },
@@ -3840,6 +3844,8 @@ const data = {
           {
             value: 'temporary',
             label: 'Temporärer Weg',
+            description:
+              'Aus `temporary=yes` am Weg oder `cycleway:<Seite>:temporary=yes` / `sidewalk:<Seite>:temporary=yes` für eine Seite. Radwege und Gehwege an einer temporären Straße sind ebenfalls temporär.',
           },
         ],
       },
@@ -11218,6 +11224,8 @@ const data = {
           {
             value: 'temporary',
             label: 'Temporärer Weg',
+            description:
+              'Aus `temporary=yes` am Weg oder `cycleway:<Seite>:temporary=yes` / `sidewalk:<Seite>:temporary=yes` für eine Seite. Radwege und Gehwege an einer temporären Straße sind ebenfalls temporär.',
           },
         ],
       },
@@ -12419,6 +12427,8 @@ const data = {
           {
             value: 'temporary',
             label: 'Temporärer Weg',
+            description:
+              'Aus `temporary=yes` am Weg oder `cycleway:<Seite>:temporary=yes` / `sidewalk:<Seite>:temporary=yes` für eine Seite. Radwege und Gehwege an einer temporären Straße sind ebenfalls temporär.',
           },
         ],
       },

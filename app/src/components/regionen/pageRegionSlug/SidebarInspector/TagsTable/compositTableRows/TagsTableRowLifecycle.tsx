@@ -28,7 +28,7 @@ const lifecycleStyle = {
     icon: <SvgFaPersonDigging className="size-5 text-amber-600" />,
     colorClass: 'text-amber-600',
     description:
-      'Dieser Weg ist in OSM als temporärer Weg angegeben. Meistens ist das der Fall, wenn es sich um einen Ersatz-Weg für eine Baustelle handelt.',
+      'Dieser Weg ist in OSM als temporärer Weg angegeben. Meistens ist das ein Ersatz-Weg oder ein gelb markierter Radstreifen für eine Baustelle.',
   },
   fallback: {
     icon: <QuestionMarkCircleIcon className="size-5 text-amber-600" />,
