@@ -20,6 +20,7 @@ local function process_roads_bikelanes_way(object)
   ---@type OsmTags
   local object_tags = object.tags
 
+  -- REMINDER: Keep the transform order in sync with `bikelanes/__tests__/bikelanes_lifecycle.test.lua`
   transform_lifecycle_tags(object_tags)
   if EXIT.exit_processing(object_tags) then return end
 

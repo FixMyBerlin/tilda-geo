@@ -7,7 +7,7 @@ describe('bikelanes lifecycle', function()
   local transform_cycleway_both_postfix = require('topics.roads_bikelanes.helper.transform_tags.transform_cycleway_both_postfix')
   local result_tags = require('topics.roads_bikelanes.helper.result_tags')
 
-  -- Same transform order as `roads_bikelanes_ways.lua`
+  -- REMINDER: Keep the transform order in sync with `roads_bikelanes_ways.lua`
   ---@param tags OsmTags
   ---@return { bikelanes: table<string, OsmTags>, road: SharedResultTags }
   local function run(tags)
