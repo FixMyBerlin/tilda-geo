@@ -122,4 +122,22 @@ describe('partitionClickedFeatures', () => {
 
     expect(nextUrlFeatures).toEqual([streetUrl, noteUrl])
   })
+
+  test('a way from several categories of the same source is stored once', () => {
+    const inCategory = (categoryId: string) =>
+      ({
+        ...streetFeature,
+        source: `cat:${categoryId}--source:atlas_bikelanes--subcat:bikelanes`,
+      }) as MapGeoJSONFeature
+
+    const { nextInspectorFeatures, nextUrlFeatures } = partition(
+      [inCategory('bikelanes'), inCategory('radinfra_bikelanes'), inCategory('bikelanes')],
+      { currentMode: 'map', previousUrlFeatures: [] },
+    )
+
+    expect(nextInspectorFeatures).toHaveLength(1)
+    expect(nextUrlFeatures.map((feature) => [feature.sourceId, feature.id])).toEqual([
+      ['atlas_bikelanes', 10],
+    ])
+  })
 })

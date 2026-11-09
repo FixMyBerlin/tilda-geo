@@ -8,6 +8,7 @@ import {
 } from '@/server/auth/memberCaller.server'
 import { authorizeRegionMemberByRegionSlug } from '@/server/authorization/authorizeRegionMember.server'
 import db from '@/server/db.server'
+import { CollectionDeleteRefusedError } from '@/server/utils/collectionDeleteRefusedError'
 
 const Schema = z.object({
   regionSlug: z.string(),
@@ -29,11 +30,12 @@ export async function deleteNoteFolder(input: z.infer<typeof Schema>, caller: Me
     select: { id: true, _count: { select: { notes: true, regions: true } } },
   })
   if (folder._count.notes > 0) {
-    throw new Error('Nur leere Ordner können gelöscht werden.')
+    throw new CollectionDeleteRefusedError('notEmpty', 'Nur leere Ordner können gelöscht werden.')
   }
 
   if (folder._count.regions > 1) {
-    throw new Error(
+    throw new CollectionDeleteRefusedError(
+      'linkedToOtherRegions',
       'Dieser Ordner ist mehreren Regionen zugeordnet und kann nur im Admin-Bereich gelöscht werden.',
     )
   }

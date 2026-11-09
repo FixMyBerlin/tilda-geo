@@ -54,8 +54,8 @@ export async function getMapLayerIds(page: Page) {
   })
 }
 
-/** Atlas-Geo layers are added once the style has loaded; the map 'load' event can fire first. */
-export async function waitForAtlasGeoLayers(page: Page) {
+/** TILDA layers are added once the style has loaded; the map 'load' event can fire first. */
+export async function waitForTildaLayers(page: Page) {
   await getMapLayerIds(page)
   await page.waitForFunction(
     () =>

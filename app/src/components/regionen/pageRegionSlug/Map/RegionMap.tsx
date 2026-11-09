@@ -2,7 +2,6 @@ import {
   streetImageryInteractiveLayerIds,
   useArmedLocationOpenerId,
 } from '@osm-editor-kit/street-imagery-react'
-import { bbox, bboxPolygon, buffer } from '@turf/turf'
 import { differenceBy, uniqBy } from 'es-toolkit/compat'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import type {
@@ -103,6 +102,22 @@ const extractInteractiveFeatures = (
 
 // Stable reference so toggling draw mode doesn't churn the <Map> interactiveLayerIds prop.
 const NO_INTERACTIVE_LAYERS: string[] = []
+
+const MAX_BOUNDS_PADDING_KM = 60
+const KM_PER_DEGREE_LATITUDE = 111.32
+
+/** Grows a bbox by `km` on every side. Longitude uses the edge closer to the pole, where a degree is shortest. */
+const padBbox = ([west, south, east, north]: [number, number, number, number], km: number) => {
+  const latPadding = km / KM_PER_DEGREE_LATITUDE
+  const polewardLat = Math.min(Math.max(Math.abs(south), Math.abs(north)), 89)
+  const lngPadding = km / (KM_PER_DEGREE_LATITUDE * Math.cos((polewardLat * Math.PI) / 180))
+  return [
+    Math.max(west - lngPadding, -180),
+    Math.max(south - latPadding, -90),
+    Math.min(east + lngPadding, 180),
+    Math.min(north + latPadding, 90),
+  ] satisfies [number, number, number, number]
+}
 
 export const RegionMap = () => {
   const { mapParam, setMapParam } = useMapParam()
@@ -373,15 +388,7 @@ export const RegionMap = () => {
   type MapMaxBoundsProps = { maxBounds: [number, number, number, number] }
   let mapMaxBoundsSettings: MapMaxBoundsProps | Record<string, never> = {}
   if (region?.bbox) {
-    const maxBounds = region.bbox
-    const buffered = buffer(bboxPolygon(maxBounds), 60, {
-      units: 'kilometers',
-    })
-    if (buffered) {
-      // turf bbox() returns 4 numbers for 2D; we have no elevation data
-      const b = bbox(buffered) as [number, number, number, number]
-      mapMaxBoundsSettings = { maxBounds: b }
-    }
+    mapMaxBoundsSettings = { maxBounds: padBbox(region.bbox, MAX_BOUNDS_PADDING_KM) }
   }
 
   return (

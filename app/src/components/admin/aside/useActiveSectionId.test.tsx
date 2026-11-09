@@ -4,6 +4,15 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { adminActiveSectionRootMargin } from '@/components/admin/adminClasses'
 import { useActiveSectionId } from './useActiveSectionId'
 
+// Stands in for the router-backed hook: writes the hash without a history entry.
+const replaceHash = vi.fn((hash: string) => {
+  if (window.location.hash === `#${hash}`) return
+  window.history.replaceState(null, '', `#${hash}`)
+})
+vi.mock('@/components/shared/hooks/useReplaceUrlHash', () => ({
+  useReplaceUrlHash: () => replaceHash,
+}))
+
 let observerCallback: IntersectionObserverCallback | undefined
 let observerOptions: IntersectionObserverInit | undefined
 
@@ -58,6 +67,7 @@ describe('useActiveSectionId', () => {
   afterEach(() => {
     vi.unstubAllGlobals()
     scrollIntoView.mockReset()
+    replaceHash.mockClear()
     observerCallback = undefined
   })
 
@@ -79,6 +89,20 @@ describe('useActiveSectionId', () => {
 
     intersect()
     expect(screen.getByTestId('active').textContent).toBe('b')
+  })
+
+  test('writes the scrolled-to section into the hash, but not the first one on load', () => {
+    render(<Harness />)
+
+    intersect('a')
+    expect(window.location.hash).toBe('')
+
+    intersect('b')
+    intersect('b', 'c')
+    expect(window.location.hash).toBe('#b')
+
+    intersect('a')
+    expect(window.location.hash).toBe('#a')
   })
 
   test('jump scrolls smoothly, writes the hash and pins until the user scrolls', () => {

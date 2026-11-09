@@ -13,14 +13,11 @@ export const adminSectionDataAttribute = 'data-admin-section'
 const preferredScrollBehavior = () =>
   window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth'
 
-/** Scrolls to a section and mirrors it in the URL hash (without a router navigation). */
+/** Scrolls to a section; `useActiveSectionId` mirrors the active section in the URL hash. */
 export const scrollToAdminSection = (id: string, behavior?: ScrollBehavior) => {
   const element = document.getElementById(id)
   if (!element) return false
   element.scrollIntoView({ behavior: behavior ?? preferredScrollBehavior(), block: 'start' })
-  if (window.location.hash !== `#${id}`) {
-    window.history.replaceState(window.history.state, '', `#${id}`)
-  }
   return true
 }
 

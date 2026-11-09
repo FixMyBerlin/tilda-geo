@@ -1,4 +1,4 @@
-import { RegionContractStatus } from '@/prisma/generated/browser'
+import { RegionContractStatus } from '@/prisma/generated/enums'
 import {
   collectUniqueContractsFromRegions,
   getMultiRegionContracts,

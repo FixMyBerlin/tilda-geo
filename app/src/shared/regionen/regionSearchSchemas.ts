@@ -34,18 +34,17 @@ import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 
 export const defaultMapSearchValue = serializeMapParam(mapParamFallback)
 
-const normalizeMapSearchParam = (raw: unknown, defaultValue: string) => {
+const normalizeMapSearchParam = (raw: unknown) => {
   const wire = optionalSearchString().safeParse(raw).data
-  if (!wire) return defaultValue
+  if (!wire) return undefined
   const parsed = parseMapParam(wire)
-  return parsed ? serializeMapParam(parsed) : defaultValue
+  return parsed ? serializeMapParam(parsed) : undefined
 }
 
-const mapSearchParam = (defaultValue: string) =>
-  z.preprocess(
-    (raw) => normalizeMapSearchParam(raw, defaultValue),
-    z.string().default(defaultValue).catch(defaultValue),
-  )
+// No default: a defaulted value would make the router redirect to add it before the region loader
+// runs, and the loader then redirects again to the region start view (two round trips).
+const mapSearchParam = () =>
+  z.preprocess(normalizeMapSearchParam, z.string().optional().catch(undefined))
 
 const backgroundSearchParam = () =>
   optionalSearchString()
@@ -65,7 +64,7 @@ export type RegionDialogParam = z.infer<typeof regionDialogParamSchema>
 
 export const regionSearchSchema = z.object({
   [searchParamsRegistry.v]: optionalSearchString(),
-  [searchParamsRegistry.map]: mapSearchParam(defaultMapSearchValue),
+  [searchParamsRegistry.map]: mapSearchParam(),
   [searchParamsRegistry.config]: optionalSearchString(),
   [searchParamsRegistry.data]: searchStringArray().default([]),
   [searchParamsRegistry.f]: optionalSearchString(),
@@ -97,12 +96,12 @@ export const parseRegionSearch = (search: Record<string, unknown>) =>
   regionSearchSchema.parse(search)
 
 /**
- * The URL viewport, else the start view of the region. A `Link` without `map` carries the sentinel
- * until the loader redirect is through, and with cached loader data the page already renders then.
+ * The URL viewport, else the start view of the region. A `Link` without `map` has none until the
+ * loader redirect is through, and with cached loader data the page already renders then.
  */
 export const getMapParamFromSearch = (search: RegionSearch, regionMap: MapParam): MapParam => {
   const wire = search[searchParamsRegistry.map]
-  if (wire === defaultMapSearchValue) return regionMap
+  if (!wire || wire === defaultMapSearchValue) return regionMap
   return parseMapParam(wire) ?? regionMap
 }
 

@@ -2,7 +2,7 @@ import { FilterRow } from '@/components/shared/FilterRow/FilterRow'
 import type { FilterRowItem } from '@/components/shared/FilterRow/types'
 import { Link } from '@/components/shared/links/Link'
 import { filterChipStyles, filterChipStylesActive } from '@/components/shared/links/styles'
-import { RegionContractStatus } from '@/prisma/generated/browser'
+import { RegionContractStatus } from '@/prisma/generated/enums'
 import {
   collectUniqueContractsFromRegions,
   getMultiRegionContracts,

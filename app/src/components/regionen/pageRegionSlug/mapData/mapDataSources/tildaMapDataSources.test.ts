@@ -11,7 +11,7 @@ const expectedTilePathSuffix = (tileTables: readonly TableId[]) => {
   return `/${tilePath}/{z}/{x}/{y}`
 }
 
-describe('atlas map data sources', () => {
+describe('TILDA map data sources', () => {
   test('processing sources store tileTables without tilesUrl', () => {
     for (const source of sources) {
       if (hasExplicitTilesUrl(source)) continue

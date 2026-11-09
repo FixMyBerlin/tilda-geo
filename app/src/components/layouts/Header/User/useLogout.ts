@@ -15,7 +15,7 @@ export const useLogout = () => {
   const { clearInspectorFeatures } = useMapActions()
 
   return async function handleLogout() {
-    // We need to reset the inspector because it might hold atlas notes which would throw an authorization error if left open
+    // We need to reset the inspector because it might hold internal notes which would throw an authorization error if left open
     clearInspectorFeatures()
     await authClient.signOut()
     await queryClient.invalidateQueries({ queryKey: currentUserQueryKey })

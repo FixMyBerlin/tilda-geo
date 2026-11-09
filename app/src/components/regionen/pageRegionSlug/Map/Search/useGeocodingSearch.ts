@@ -52,7 +52,7 @@ const fetchFeatureById = async (
   id: string,
   signal: AbortSignal,
 ): Promise<GeoFeature | undefined> => {
-  const url = new URL(`https://api.maptiler.com/geocoding/${encodeURIComponent(id)}.json`)
+  const url = new URL(`https://api.maptiler.eu/geocoding/${encodeURIComponent(id)}.json`)
   url.searchParams.set('key', MAPTILER_API_KEY)
   url.searchParams.set('language', 'de')
   const response = await fetch(url, { signal })
@@ -81,7 +81,7 @@ export const useGeocodingSearch = () => {
     queryKey: ['geocoding', debouncedQuery],
     queryFn: async ({ signal }) => {
       const url = new URL(
-        `https://api.maptiler.com/geocoding/${encodeURIComponent(debouncedQuery)}.json`,
+        `https://api.maptiler.eu/geocoding/${encodeURIComponent(debouncedQuery)}.json`,
       )
       url.searchParams.set('key', MAPTILER_API_KEY)
       url.searchParams.set('country', 'de')

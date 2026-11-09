@@ -3,7 +3,7 @@ import { LAYER_POSITIONS } from '@/components/regionen/pageRegionSlug/Map/Source
 import { MAPTILER_API_KEY } from '@/components/regionen/pageRegionSlug/Map/utils/maptilerApiKey.const'
 
 // Edit the style at https://cloud.maptiler.com/maps/editor?map=08357855-50d4-44e1-ac9f-ea099d9de4a5
-const BASE_STYLE_URL = `https://api.maptiler.com/maps/08357855-50d4-44e1-ac9f-ea099d9de4a5/style.json?key=${MAPTILER_API_KEY}`
+const BASE_STYLE_URL = `https://api.maptiler.eu/maps/08357855-50d4-44e1-ac9f-ea099d9de4a5/style.json?key=${MAPTILER_API_KEY}`
 
 export const BASE_STYLE_PATH = path.join(
   import.meta.dir,

@@ -9,11 +9,11 @@ import { useNotesSelection } from '@/components/regionen/pageRegionSlug/modes/no
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
 import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
-import { createLayerKeyAtlasGeo } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
 import {
   createDatasetSourceLayerKey,
   createSourceKeyStaticDatasets,
 } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
+import { createLayerKeyTilda } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsTilda'
 import { useHasPermissions } from '@/components/shared/hooks/useHasPermissions'
 import { reviewEntriesInteractiveLayerIds } from '../SourcesAndLayers/reviewEntriesLayers.const'
 import { internalNotesLayerId } from '../SourcesAndLayers/SourcesLayersInternalNotes'
@@ -42,7 +42,7 @@ const collectInteractiveLayerIdsFromCategory = ({ categories }: Props) => {
           const layerData = styleConfig.layers.find((l) => l.id === layerConfig.id)
           if (layerData?.interactive === false) continue
 
-          const layerKey = createLayerKeyAtlasGeo(
+          const layerKey = createLayerKeyTilda(
             subcatConfig.sourceId,
             subcatConfig.id,
             styleConfig.id,
@@ -72,7 +72,7 @@ const collectAllLayerIdsFromConfig = ({ categories }: Props) => {
         if (styleConfig.id === 'hidden') return
 
         styleConfig.layers.forEach((layerConfig) => {
-          const layerKey = createLayerKeyAtlasGeo(
+          const layerKey = createLayerKeyTilda(
             subcatConfig.sourceId,
             subcatConfig.id,
             styleConfig.id,

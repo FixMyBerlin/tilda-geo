@@ -87,7 +87,7 @@ export async function waitForFreshData() {
     }
 
     tries++
-    // If we exceeded the maximum number of tries, return false and log to Synology
+    // If we exceeded the maximum number of tries, return false
     if (tries >= maxTries) {
       console.log(
         '[ERROR] Download: Timeout exceeded while waiting for fresh data.',

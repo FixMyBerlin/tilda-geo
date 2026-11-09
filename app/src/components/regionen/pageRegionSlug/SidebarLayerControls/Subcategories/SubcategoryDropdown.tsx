@@ -8,7 +8,7 @@ import { useCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/
 import type { MapDataCategoryId } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/MapDataCategoryId'
 import { MotionAutoHeight } from '@/components/shared/motion/MotionAutoHeight'
 import { mapOverlayMenuClassName } from '../../mapOverlayChrome.const'
-import { createSubcatStyleKey } from '../../utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
+import { createSubcatStyleKey } from '../../utils/sourceKeyUtils/sourceKeyUtilsTilda'
 import { Legend } from '../Legend/Legend'
 
 type MapDataSubcategoryConfig = MapDataCategoryConfig['subcategories'][number]

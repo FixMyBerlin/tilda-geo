@@ -10,7 +10,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -76,7 +76,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -273,7 +273,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -882,7 +882,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -1468,6 +1468,8 @@ const data = {
           {
             value: 'temporary',
             label: 'Temporärer Weg',
+            description:
+              'Aus `temporary=yes` am Weg oder `cycleway:<Seite>:temporary=yes` / `sidewalk:<Seite>:temporary=yes` für eine Seite. Radwege und Gehwege an einer temporären Straße sind ebenfalls temporär.',
           },
         ],
       },
@@ -2375,7 +2377,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -2811,7 +2813,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -2951,7 +2953,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -3143,6 +3145,8 @@ const data = {
           {
             value: 'temporary',
             label: 'Temporärer Weg',
+            description:
+              'Aus `temporary=yes` am Weg oder `cycleway:<Seite>:temporary=yes` / `sidewalk:<Seite>:temporary=yes` für eine Seite. Radwege und Gehwege an einer temporären Straße sind ebenfalls temporär.',
           },
         ],
       },
@@ -3435,7 +3439,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -4001,6 +4005,8 @@ const data = {
           {
             value: 'temporary',
             label: 'Temporärer Weg',
+            description:
+              'Aus `temporary=yes` am Weg oder `cycleway:<Seite>:temporary=yes` / `sidewalk:<Seite>:temporary=yes` für eine Seite. Radwege und Gehwege an einer temporären Straße sind ebenfalls temporär.',
           },
         ],
       },
@@ -4559,7 +4565,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -9771,7 +9777,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -9865,7 +9871,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -11023,7 +11029,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -11115,7 +11121,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -11383,6 +11389,8 @@ const data = {
           {
             value: 'temporary',
             label: 'Temporärer Weg',
+            description:
+              'Aus `temporary=yes` am Weg oder `cycleway:<Seite>:temporary=yes` / `sidewalk:<Seite>:temporary=yes` für eine Seite. Radwege und Gehwege an einer temporären Straße sind ebenfalls temporär.',
           },
         ],
       },
@@ -12415,7 +12423,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -12584,6 +12592,8 @@ const data = {
           {
             value: 'temporary',
             label: 'Temporärer Weg',
+            description:
+              'Aus `temporary=yes` am Weg oder `cycleway:<Seite>:temporary=yes` / `sidewalk:<Seite>:temporary=yes` für eine Seite. Radwege und Gehwege an einer temporären Straße sind ebenfalls temporär.',
           },
         ],
       },
@@ -14526,7 +14536,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [
@@ -14588,7 +14598,7 @@ const data = {
     groups: [
       {
         id: 'atlas',
-        label: 'Atlas Daten',
+        label: 'TILDA Daten',
       },
     ],
     attributes: [

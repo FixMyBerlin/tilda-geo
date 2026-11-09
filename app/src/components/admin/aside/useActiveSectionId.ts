@@ -1,16 +1,26 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import { adminActiveSectionRootMargin } from '@/components/admin/adminClasses'
+import { useReplaceUrlHash } from '@/components/shared/hooks/useReplaceUrlHash'
 import { scrollToAdminSection } from './adminAsideSection'
 
 /**
  * Scroll-spy for `AdminAsideLayout`: the first section (in document order) crossing the band
  * `adminActiveSectionRootMargin` is active. A jump (click or URL hash on load) pins its target
  * until the user scrolls themselves, so short sections at the page end stay highlighted.
+ * The active section is kept in the URL hash.
  */
 export const useActiveSectionId = (sectionIds: string[]) => {
   const [activeId, setActiveId] = useState(sectionIds[0])
   const pinnedIdRef = useRef<string | null>(null)
   const idsKey = sectionIds.join(' ')
+  const replaceHash = useReplaceUrlHash()
+
+  const onActiveSectionChange = useEffectEvent((id: string, isFirstSection: boolean) => {
+    setActiveId(id)
+    // Mirror the scrolled-to section in the hash so a reload or shared link returns to it.
+    // A page still at its first section without a hash keeps a clean URL.
+    if (window.location.hash || !isFirstSection) replaceHash(id)
+  })
 
   useEffect(
     function observeSectionsInBand() {
@@ -24,7 +34,7 @@ export const useActiveSectionId = (sectionIds: string[]) => {
             else intersecting.delete(entry.target.id)
           }
           const nextId = pinnedIdRef.current ?? ids.find((id) => intersecting.has(id))
-          if (nextId) setActiveId(nextId)
+          if (nextId) onActiveSectionChange(nextId, nextId === ids[0])
         },
         { rootMargin: adminActiveSectionRootMargin },
       )
@@ -66,6 +76,7 @@ export const useActiveSectionId = (sectionIds: string[]) => {
     if (!scrollToAdminSection(id)) return
     pinnedIdRef.current = id
     setActiveId(id)
+    replaceHash(id)
   }
 
   return { activeId, jumpToSection }

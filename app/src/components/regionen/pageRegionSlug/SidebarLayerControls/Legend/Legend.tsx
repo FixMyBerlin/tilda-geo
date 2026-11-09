@@ -5,7 +5,7 @@ import type {
   FileMapDataSubcategoryStyleLegend,
 } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
-import { createSubcatStyleKey } from '../../utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
+import { createSubcatStyleKey } from '../../utils/sourceKeyUtils/sourceKeyUtilsTilda'
 import { DetailToggle } from '../DetailToggle'
 import { useLegendExpanded, useLegendExpandedActions } from './legend-expanded-store'
 import { LegendIconArea } from './LegendIcons/LegendIconArea'

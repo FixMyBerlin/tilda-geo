@@ -1,15 +1,15 @@
 import type { FilterSpecification } from 'maplibre-gl'
 import type { LayerProps } from 'react-map-gl/maplibre'
 import { getDebugStyleForLayerType } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/debugLayerStyles'
-import type { AtlasLayerType } from '@/components/regionen/pageRegionSlug/mapData/types'
+import type { RenderableLayerType } from '@/components/regionen/pageRegionSlug/mapData/types'
 import type { RegionDataset } from '@/server/uploads/queries/getUploadsForRegion.server'
 import { wrapFilterWithAll } from './filterUtils/wrapFilterWithAll'
 
 type UploadLayer = RegionDataset['layers'][number]
-export type UploadLayerWithAtlasType = Extract<UploadLayer, { type: AtlasLayerType }>
+export type RenderableUploadLayer = Extract<UploadLayer, { type: RenderableLayerType }>
 
 type BuildUploadLayerPropsParams = {
-  layer: UploadLayerWithAtlasType
+  layer: RenderableUploadLayer
   layerId: string
   sourceId: string
   debugLayerStyles: boolean
@@ -17,7 +17,7 @@ type BuildUploadLayerPropsParams = {
   sourceLayer?: 'default'
 }
 
-/** Build LayerProps from upload config layer. Same switch-on-type rhythm as buildAtlasLayerProps; shared by Static and System dataset layers. */
+/** Build LayerProps from upload config layer. Same switch-on-type rhythm as buildTildaLayerProps; shared by Static and System dataset layers. */
 export function buildUploadLayerProps({
   layer,
   layerId,

@@ -92,7 +92,7 @@ export const sourcesBackgroundsRasterTilda: MapDataBackgroundSource<SourcesRaste
     id: 'maptiler-satellite-v1',
     category: 'photo',
     name: 'Luftbild Maptiler v1',
-    tilesUrl: `https://api.maptiler.com/tiles/satellite/{z}/{x}/{y}.jpg?key=${tokenMaptilerTilesets}`,
+    tilesUrl: `https://api.maptiler.eu/tiles/satellite/{z}/{x}/{y}.jpg?key=${tokenMaptilerTilesets}`,
     tileSize: 512,
     maxzoom: 20,
     minzoom: 10, // Visible from 10.5 on. Even though https://cloud.maptiler.com/tiles/satellite/ says "0"
@@ -104,7 +104,7 @@ export const sourcesBackgroundsRasterTilda: MapDataBackgroundSource<SourcesRaste
     id: 'maptiler-satellite',
     category: 'photo',
     name: 'Luftbild Maptiler v2',
-    tilesUrl: `https://api.maptiler.com/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=${tokenMaptilerTilesets}`,
+    tilesUrl: `https://api.maptiler.eu/tiles/satellite-v2/{z}/{x}/{y}.jpg?key=${tokenMaptilerTilesets}`,
     tileSize: 512,
     maxzoom: 22,
     minzoom: 0,

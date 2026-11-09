@@ -1,12 +1,12 @@
 import { ShieldCheckIcon } from '@heroicons/react/24/outline'
 import { useQuery } from '@tanstack/react-query'
-import { useState } from 'react'
+import { lazy, Suspense, useState } from 'react'
 import { twMerge } from 'tailwind-merge'
-import { MobileBottomSheet } from '@/components/regionen/pageRegionSlug/mobile/MobileBottomSheet'
 import { mobileMapIconButtonClassName } from '@/components/regionen/pageRegionSlug/mobile/mobileControlButton.const'
 import { isAdmin } from '@/components/shared/utils/usersUtils'
 import { currentUserQueryOptions } from '@/server/users/currentUserQueryOptions'
-import { AdminPanelContent } from './AdminPanelContent'
+
+const AdminPanelSheet = lazy(() => import('./AdminPanelSheet'))
 
 type Variant = 'header' | 'mapControl'
 
@@ -23,6 +23,8 @@ export const AdminPanelTrigger = ({ variant }: Props) => {
   const { data } = useQuery(currentUserQueryOptions())
   const user = data?.user ?? null
   const [open, setOpen] = useState(false)
+  // Stays true after the first open, so the sheet can animate out when closed.
+  const [sheetMounted, setSheetMounted] = useState(false)
 
   if (!user || !isAdmin(user)) return null
 
@@ -32,7 +34,10 @@ export const AdminPanelTrigger = ({ variant }: Props) => {
     <>
       <button
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => {
+          setSheetMounted(true)
+          setOpen(true)
+        }}
         aria-label="Admin"
         aria-expanded={open}
         className={
@@ -48,15 +53,11 @@ export const AdminPanelTrigger = ({ variant }: Props) => {
         {isMapControl ? <ShieldCheckIcon className="size-6" aria-hidden="true" /> : 'Admin'}
       </button>
 
-      <MobileBottomSheet
-        open={open}
-        onClose={() => setOpen(false)}
-        title="Admin"
-        tone="debug"
-        mapPeek="20%"
-      >
-        <AdminPanelContent />
-      </MobileBottomSheet>
+      {sheetMounted && (
+        <Suspense fallback={null}>
+          <AdminPanelSheet open={open} onClose={() => setOpen(false)} />
+        </Suspense>
+      )}
     </>
   )
 }

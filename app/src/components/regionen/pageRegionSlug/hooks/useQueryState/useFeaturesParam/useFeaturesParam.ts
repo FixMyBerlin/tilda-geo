@@ -1,11 +1,11 @@
 import { bbox } from '@turf/turf'
 import type { MapGeoJSONFeature } from 'react-map-gl/maplibre'
 import { persistableSourceKeys } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/url'
-import {
-  isSourceKeyAtlasGeo,
-  parseSourceKeyAtlasGeo,
-} from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
 import { parseSourceKeyStaticDatasets } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
+import {
+  isSourceKeyTilda,
+  parseSourceKeyTilda,
+} from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsTilda'
 import { searchParamsRegistry } from '@/shared/regionen/searchParamsRegistry'
 import type { UrlFeature } from '../types'
 import { useRegionSearchNavigation } from '../useRegionSearchNavigation'
@@ -14,9 +14,9 @@ import { parseFeaturesParam, serializeFeaturesParam } from './featuresParamCodec
 const getRegistrySourceKey = (feature: MapGeoJSONFeature) => {
   // Only true for additionalSourceKeys (notes): they use simple source ids that match the registry.
   if (persistableSourceKeys.has(feature.source)) return feature.source
-  // Atlas: feature.source is a long key e.g. "cat:bikelanes--source:atlas_bikelanes--subcat:bikelanes" → parse to registry key.
-  const atlasGeoSourceId = parseSourceKeyAtlasGeo(feature.source).sourceId
-  if (atlasGeoSourceId) return atlasGeoSourceId
+  // TILDA: feature.source is a long key e.g. "cat:bikelanes--source:atlas_bikelanes--subcat:bikelanes" → parse to registry key.
+  const tildaSourceId = parseSourceKeyTilda(feature.source).sourceId
+  if (tildaSourceId) return tildaSourceId
   // Static: feature.source is e.g. "tilda_parkings" or "tilda_parkings--subId" → parse to sourceId.
   return parseSourceKeyStaticDatasets(feature.source).sourceId
 }
@@ -29,7 +29,7 @@ export const isPersistableFeature = (
     return true
   }
   const key = getRegistrySourceKey(feature)
-  if (persistableSourceKeys.has(key) && isSourceKeyAtlasGeo(feature.source)) {
+  if (persistableSourceKeys.has(key) && isSourceKeyTilda(feature.source)) {
     return true
   }
   return regionDatasets.some(({ id }) => id === key)

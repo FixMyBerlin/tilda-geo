@@ -52,6 +52,9 @@ export const SubcategoryCheckbox = ({ categoryId, subcategory, disabled }: Props
   const styleConfig = subcategory.styles[0]
   if (!styleConfig) return null
 
+  // Subcategory ids repeat across categories (radinfra has `bikelanes` in several), so the category is part of the id.
+  const inputId = `${categoryId}--${subcategory.id}`
+
   return (
     <fieldset
       className={twJoin(
@@ -68,8 +71,8 @@ export const SubcategoryCheckbox = ({ categoryId, subcategory, disabled }: Props
         transition={{ duration: 0.25, ease: 'easeOut' }}
       >
         <input
-          id={subcategory.id}
-          name={subcategory.id}
+          id={inputId}
+          name={inputId}
           type="checkbox"
           className={twJoin(
             'size-4 rounded border-gray-300',
@@ -91,7 +94,7 @@ export const SubcategoryCheckbox = ({ categoryId, subcategory, disabled }: Props
 
       <div className="min-w-0 flex-1 text-sm leading-4">
         <label
-          htmlFor={subcategory.id}
+          htmlFor={inputId}
           className={twJoin(
             'font-medium',
             disabled ? 'cursor-not-allowed text-gray-400' : 'cursor-pointer text-gray-700',

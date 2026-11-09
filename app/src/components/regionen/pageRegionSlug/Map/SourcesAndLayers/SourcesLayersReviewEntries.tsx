@@ -158,7 +158,7 @@ export const SourcesLayersReviewEntries = () => {
         }}
       />
       {/* Hitareas last (on top): only these ids are in `interactiveLayerIds`. Opacity 0 still
-          participates in queryRenderedFeatures, same as atlas `hitarea-*` layers. */}
+          participates in queryRenderedFeatures, same as TILDA `hitarea-*` layers. */}
       <Layer
         id={`${reviewEntriesHitareaLayerId}-fill`}
         key={`${reviewEntriesHitareaLayerId}-fill`}

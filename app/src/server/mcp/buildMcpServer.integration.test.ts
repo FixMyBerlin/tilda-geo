@@ -408,6 +408,7 @@ describe.skipIf(!integrationDb)('admin MCP tools (integration)', () => {
       id: folderId,
     })
     expect(sharedDelete.text).toContain('mehreren Regionen')
+    expect(sharedDelete.text).toContain('Unlink the other regions with note_folders_update')
 
     const unknownRegion = await callTool(client, 'note_folders_update', {
       id: folderId,
@@ -491,6 +492,7 @@ describe.skipIf(!integrationDb)('admin MCP tools (integration)', () => {
       id: folderId,
     })
     expect(blockedFolderDelete.text).toContain('Nur leere Ordner')
+    expect(blockedFolderDelete.text).toContain('notes_move')
 
     const second = await callTool(client, 'note_folders_create', {
       regionSlug: REGION_SLUG,
@@ -648,6 +650,14 @@ describe.skipIf(!integrationDb)('admin MCP tools (integration)', () => {
       id: listId,
     })
     expect(blockedListDelete.isError).toBe(true)
+    expect(blockedListDelete.text).toContain(`/admin/review-lists/${listId}/edit`)
+
+    const missingListDelete = await callTool(client, 'review_lists_delete', {
+      regionSlug: REGION_SLUG,
+      id: 999_999_999,
+    })
+    expect(missingListDelete.text).toContain('Not found')
+    expect(missingListDelete.text).not.toContain('/admin/review-lists/')
 
     const deletedComment = await callTool(client, 'review_entry_comments_delete', {
       regionSlug: REGION_SLUG,

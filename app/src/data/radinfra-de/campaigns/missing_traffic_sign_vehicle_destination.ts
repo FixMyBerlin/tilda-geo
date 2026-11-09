@@ -25,11 +25,11 @@ Dieser Weg ist als Fahrradstraße mit Freigabe für Kfz getaggt, **jedoch fehlt 
 
 Bitte ergänze oder erweitere das Verkehrszeichen an der Straßenlinie:
 
-* \`traffic_sign=DE:244.1,1020-30\`, wenn es Fahrradstraße mit "Anlieger Frei" ist. Dazu gehört dann für Fahrzeuge \`destination\`.
-* \`traffic_sign=DE:244.1\`, wenn es eine "echte" Fahrradstraße ohne Kfz-Verkehr ist. Dazu gehört dann für Fahrzeuge \`no\`.
+* \`traffic_sign=DE:244.1,1020-30\`, wenn es eine Fahrradstraße mit "Anlieger frei" ist. Dazu gehört dann \`vehicle=destination\`.
+* \`traffic_sign=DE:244.1\`, wenn es eine "echte" Fahrradstraße ohne Kfz-Verkehr ist. Dazu gehört dann \`vehicle=no\` und \`bicycle=designated\`.
 * Andere Zusatzzeichen kannst du beispielsweise [im Verkehrszeichen-Tool](https://trafficsigns.osm-verkehrswende.org/?signs=DE:244.1) oder [im Wiki](https://wiki.openstreetmap.org/wiki/DE:Tag:bicycle_road%3Dyes#Zusatzzeichen) finden.
 
-Wenn wirklich kein Verkehrszeichen existiert, tagge \`traffic_sign=none\`, um diese Information explizit zu erfassen.
+Wenn wirklich kein Zusatzzeichen "Anlieger frei" existiert, ist die Straße nicht für Kfz freigegeben. Ändere dann \`vehicle=destination\` (bzw. \`motor_vehicle=destination\`) zu \`vehicle=no\` und tagge \`traffic_sign=DE:244.1\`. Wenn auch das Zeichen 244.1 fehlt, ist es keine Fahrradstraße: Entferne dann \`bicycle_road=yes\`.
 
 Ergänze gerne auch einen \`mapillary=*\` Tag auf dem das Verkehrszeichen zu sehen ist.
 

@@ -128,7 +128,7 @@ type StaticMapDataSubcategory = FileMapDataSubcategory & {
 // We have some layer without content in our Maptiler basemap style that can be used as an anchor.
 // Listed from the bottom of the map to the top.
 // Modify at https://cloud.maptiler.com/maps/editor?map=08357855-50d4-44e1-ac9f-ea099d9de4a5
-const ATLAS_APP_ANCHOR_IDS = [
+const APP_ANCHOR_IDS = [
   'atlas-app-beforeid-above-landuse',
   'atlas-app-beforeid-below-road',
   'atlas-app-beforeid-below-roadname',
@@ -138,7 +138,7 @@ const ATLAS_APP_ANCHOR_IDS = [
   'atlas-app-beforeid-top',
 ] as const
 
-type AtlasAppAnchorId = (typeof ATLAS_APP_ANCHOR_IDS)[number]
+type AppAnchorId = (typeof APP_ANCHOR_IDS)[number]
 
 export type TBeforeIds =
   | 'housenumber'
@@ -146,7 +146,7 @@ export type TBeforeIds =
   | 'boundary_country'
   | 'landuse'
   | 'building'
-  | AtlasAppAnchorId
+  | AppAnchorId
   | undefined
 
 /** @desc: Thematic "filter" on the raw vector tile data; eg. 'Radinfrastruktur, Oberflächen, Beleuchtung' */
@@ -184,8 +184,8 @@ export type FileMapDataSubcategoryHiddenStyle = {
   legends?: never
 }
 
-/** Layer types used for atlas layers and when filtering layers to render. Convention: same set in buildAtlasLayerProps and ATLAS_LAYER_TYPES. All have a debug style in debugLayerStyles. */
-export type AtlasLayerType = 'fill' | 'line' | 'circle' | 'symbol' | 'heatmap'
+/** Layer types used for TILDA layers and when filtering layers to render. Convention: same set in buildTildaLayerProps and RENDERABLE_LAYER_TYPES. All have a debug style in debugLayerStyles. */
+export type RenderableLayerType = 'fill' | 'line' | 'circle' | 'symbol' | 'heatmap'
 
 /** @desc: The technical glue between sources and styles. The name "layers" is defined by the library we use. */
 export type FileMapDataSubcategoryStyleLayer = (

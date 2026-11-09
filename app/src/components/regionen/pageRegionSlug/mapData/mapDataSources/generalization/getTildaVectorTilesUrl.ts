@@ -6,7 +6,7 @@ import { getTilesUrl } from '@/components/shared/utils/getTilesUrl'
 import { generalizationFunctionIdentifier } from './generalizationIdentifier'
 
 /** Tile URL from processing `TableId`(s) → `atlas_generalized_*` PG functions. */
-export const getAtlasVectorTilesUrl = (tileTables: readonly TableId[]) => {
+export const getTildaVectorTilesUrl = (tileTables: readonly TableId[]) => {
   const tilePath = generalizationFunctionIdentifier(tileTables.join(',') as UnionTiles<TableId>)
   return getTilesUrl(`/${tilePath}/{z}/{x}/{y}`)
 }

@@ -10,7 +10,7 @@ import {
   getCategoryData,
   getSourceData,
 } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
-import { getTopicDocByTableName } from '@/data/topicDocs/runtime'
+import { getTopicDocTitle } from '@/data/topicDocs/inspector'
 
 export type RegionForDatasetDerivation = {
   categories: MapDataCategoryId[]
@@ -39,7 +39,7 @@ const getTableNamesForSourceId = (
     if (!isExportTableName(tableId)) continue
 
     const isReferencedByAnyRegion = tableNamesReferencedByRegionExports.has(tableId)
-    const hasTopicDoc = Boolean(getTopicDocByTableName(tableId))
+    const hasTopicDoc = getTopicDocTitle(tableId) != null
     if (!isReferencedByAnyRegion && !hasTopicDoc) continue
 
     tableNames.add(tableId)
@@ -49,9 +49,7 @@ const getTableNamesForSourceId = (
 }
 
 const getDatasetLabel = (tableName: SourceExportApiIdentifier) => {
-  const topicDoc = getTopicDocByTableName(tableName)
-  if (topicDoc?.title) return topicDoc.title
-  return exportTitleByTableName.get(tableName) ?? tableName
+  return getTopicDocTitle(tableName) || exportTitleByTableName.get(tableName) || tableName
 }
 
 export type RegionDatasetFromCategories = {

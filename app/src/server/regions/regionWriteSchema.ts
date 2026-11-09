@@ -11,7 +11,7 @@ import type {
 } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/tables.const'
 import { EN_DECIMAL_HELP, isValidEnDecimalInput } from '@/components/shared/form/enDecimalInput'
 import { slugSchema } from '@/lib/slugSchema'
-import { RegionProduct, RegionStatus } from '@/prisma/generated/browser'
+import { RegionProduct, RegionStatus } from '@/prisma/generated/enums'
 import { SIMPLIFY_MAX_ZOOM, SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
 import {
   cacheWarmingSourceOptions,

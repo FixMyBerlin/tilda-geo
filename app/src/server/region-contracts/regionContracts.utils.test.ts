@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest'
 import { buildRegionContractFilterItems } from '@/components/admin/regions/pageRegions/buildRegionContractFilterItems'
-import { RegionContractStatus } from '@/prisma/generated/browser'
+import { RegionContractStatus } from '@/prisma/generated/enums'
 import type { TRegionContract } from '@/server/region-contracts/regionContractMapper.server'
 import {
   filterRegionsByContractSearch,

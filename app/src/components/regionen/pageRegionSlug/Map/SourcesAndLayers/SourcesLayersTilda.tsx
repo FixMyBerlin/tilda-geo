@@ -10,12 +10,12 @@ import { useCategoriesConfig } from '@/components/regionen/pageRegionSlug/hooks/
 import { getMapDataSourceTilesUrl } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/getMapDataSourceTilesUrl'
 import { getSourceData } from '@/components/regionen/pageRegionSlug/mapData/utils/getMapDataUtils'
 import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
-import { createSourceKeyAtlasGeo } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsAtlasGeo'
+import { createSourceKeyTilda } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsTilda'
 import { getCachelessTilesUrl } from '@/components/shared/utils/getCachelessTilesUrl'
 import { mapLayerOrderQueryOptions } from '@/server/map-layer-order/mapLayerOrderQueryOptions'
 import { LayersRouteRelationHighlight } from '../../routeRelations/LayersRouteRelationHighlight'
 import { LayerHighlight } from './LayerHighlight'
-import { buildAtlasLayerEntries } from './sortLayers/buildAtlasLayerEntries'
+import { buildTildaLayerEntries } from './sortLayers/buildTildaLayerEntries'
 
 // We add source+layer map-components for all categories and all subcategories of the given config.
 // We then toggle the visibility of the layer base on the URL state (config).
@@ -28,7 +28,7 @@ import { buildAtlasLayerEntries } from './sortLayers/buildAtlasLayerEntries'
 // All layers are therefore rendered as one list, sorted by the order from /admin/layer-order.
 // Source and Layers are two components, see <AllSources> and <AllLayers>.
 
-export const SourcesAtlasGeo = () => {
+export const SourcesTilda = () => {
   const useDebugCachelessTiles = useMapDebugUseDebugCachelessTiles()
   const { categoriesConfig } = useCategoriesConfig()
 
@@ -43,7 +43,7 @@ export const SourcesAtlasGeo = () => {
               const sourceData = getSourceData(subcategoryConfig?.sourceId)
 
               // One source can be used by multiple subcategories, so we need to make the key source-category-specific.
-              const sourceKey = createSourceKeyAtlasGeo(
+              const sourceKey = createSourceKeyTilda(
                 categoryConfig.id,
                 sourceData.id,
                 subcategoryConfig.id,
@@ -73,7 +73,7 @@ export const SourcesAtlasGeo = () => {
   )
 }
 
-export const LayersAtlasGeo = () => {
+export const LayersTilda = () => {
   const debugLayerStyles = useMapDebugDebugLayerStyles()
   const { categoriesConfig } = useCategoriesConfig()
   const { backgroundParam } = useBackgroundParam()
@@ -86,7 +86,7 @@ export const LayersAtlasGeo = () => {
 
   if (!categoriesConfig?.length || !layerOrder) return null
 
-  const layerEntries = buildAtlasLayerEntries({
+  const layerEntries = buildTildaLayerEntries({
     categoriesConfig,
     layerOrder,
     backgroundParam,

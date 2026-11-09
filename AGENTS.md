@@ -6,4 +6,6 @@ Most agent commands run from `app/`. Do not hand-craft `docker compose` for db/t
 
 Permissions: Access rules (roles, region status, member-only modes, API keys) live in [`docs/Permissions.md`](docs/Permissions.md). Update it and the tests it names whenever you change an access check.
 
+Bundle size: Route options that are not split (`validateSearch`, `beforeLoad`, `head`) and everything they import ship to every page. Keep large data behind server functions, mount closed dialogs and rarely shown UI with `React.lazy`, and read Prisma enums from `@/prisma/generated/enums` in client code. After a change that adds imports to shared code, run `bun run build && bun run bundle-budget --report` from `app/` (`--route <id>` for any route); `check-pre-push` fails when a route goes over its budget.
+
 Refactoring: When moving or renaming exports, update all importers and delete the old export—do not add re-export shims (`export { x } from '…'`) or `@deprecated` wrappers. Leave no forwarding layer. Exception: staged migrations (e.g. URL/config version migrations) may keep temporary compatibility code until the migration is complete.

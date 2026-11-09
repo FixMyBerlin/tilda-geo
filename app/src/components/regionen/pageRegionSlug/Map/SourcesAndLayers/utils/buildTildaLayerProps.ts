@@ -2,32 +2,35 @@ import type { FilterSpecification } from 'maplibre-gl'
 import type { LayerProps } from 'react-map-gl/maplibre'
 import { getDebugStyleForLayerType } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/debugLayerStyles'
 import type {
-  AtlasLayerType,
+  RenderableLayerType,
   FileMapDataSubcategoryStyleLayer,
 } from '@/components/regionen/pageRegionSlug/mapData/types'
 import { beforeIdOnBackground, type LayerPosition } from './beforeId'
 
-export type AtlasStyleLayer = Extract<FileMapDataSubcategoryStyleLayer, { type: AtlasLayerType }>
+export type TildaStyleLayer = Extract<
+  FileMapDataSubcategoryStyleLayer,
+  { type: RenderableLayerType }
+>
 
-const ATLAS_LAYER_TYPES = [
+const RENDERABLE_LAYER_TYPES = [
   'fill',
   'line',
   'circle',
   'symbol',
   'heatmap',
-] as const satisfies AtlasLayerType[]
+] as const satisfies RenderableLayerType[]
 
-/** Convention: config is expected to use only these layer types; use when filtering before buildAtlasLayerProps. */
-export function isAtlasStyleLayer(
+/** Convention: config is expected to use only these layer types; use when filtering before buildTildaLayerProps. */
+export function isTildaStyleLayer(
   layer: FileMapDataSubcategoryStyleLayer,
-): layer is AtlasStyleLayer {
-  return ATLAS_LAYER_TYPES.includes(layer.type)
+): layer is TildaStyleLayer {
+  return RENDERABLE_LAYER_TYPES.includes(layer.type)
 }
 
 type Visibility = { visibility: 'visible' | 'none' }
 
-type BuildAtlasLayerPropsParams = {
-  layer: AtlasStyleLayer
+type BuildTildaLayerPropsParams = {
+  layer: TildaStyleLayer
   layerId: string
   sourceKey: string
   visibility: Visibility
@@ -38,7 +41,7 @@ type BuildAtlasLayerPropsParams = {
 }
 
 /** Build LayerProps by switching on layer.type so each branch returns a single coherent layer type (no assertion). */
-export function buildAtlasLayerProps({
+export function buildTildaLayerProps({
   layer,
   layerId,
   sourceKey,
@@ -46,7 +49,7 @@ export function buildAtlasLayerProps({
   debugLayerStyles,
   backgroundId,
   position,
-}: BuildAtlasLayerPropsParams) {
+}: BuildTildaLayerPropsParams) {
   const layerFilter: FilterSpecification | undefined = debugLayerStyles
     ? (['all'] as const)
     : layer.filter

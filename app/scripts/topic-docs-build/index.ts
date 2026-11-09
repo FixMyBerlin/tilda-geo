@@ -14,7 +14,7 @@ import {
 import type { MasterportalTableOutput } from './masterportal'
 import { buildMasterportalMap } from './masterportal'
 import { inputRoot, outputRoot } from './paths'
-import type { CompiledTopicDoc, InspectorDescriptions } from './types'
+import type { CompiledTopicDoc, InspectorAttributes, InspectorDescriptions } from './types'
 
 // These outputs are committed to git, so they must be byte-stable. Sort every emitted record by
 // key — `readdir()` order is runtime/filesystem-dependent (e.g. macOS dev vs CI Linux, and it
@@ -106,6 +106,22 @@ export const main = async () => {
     }
   }
 
+  // Slim lookups for the map page, which must not load the full docs. Iterate in emitted key order
+  // so "first table wins" for a source's attribute matches a lookup over `byTableName.gen.ts`.
+  const titlesByTableName: Record<string, string> = {}
+  const inspectorAttributes: InspectorAttributes = {}
+  for (const doc of Object.values(sortRecordByKey(byTableName))) {
+    titlesByTableName[doc.tableName] = doc.title
+    for (const sourceId of doc.sourceIds) {
+      const bySourceKey = (inspectorAttributes[sourceId] ??= {})
+      // Type and purpose each come from the first table that sets them.
+      for (const attribute of doc.attributes) {
+        const entry = (bySourceKey[attribute.key] ??= { type: attribute.type })
+        if (attribute.purpose) entry.purpose ??= attribute.purpose
+      }
+    }
+  }
+
   await rm(outputRoot, { recursive: true, force: true })
   await mkdir(outputRoot, { recursive: true })
 
@@ -121,6 +137,17 @@ export const main = async () => {
     typeImport:
       "import type { TopicDocMasterportalGfiConfig } from '../../topicDocs/masterportalGfi.types'",
     satisfiesType: 'Partial<Record<string, TopicDocMasterportalGfiConfig>>',
+  })
+  await writeTsModule({
+    filePath: path.resolve(outputRoot, 'titlesByTableName.gen.ts'),
+    data: titlesByTableName,
+    satisfiesType: 'Record<string, string>',
+  })
+  await writeTsModule({
+    filePath: path.resolve(outputRoot, 'inspectorAttributes.gen.ts'),
+    data: sortRecordByKey(inspectorAttributes),
+    typeImport: "import type { TopicDocInspectorAttributes } from '../../topicDocs/inspector'",
+    satisfiesType: 'TopicDocInspectorAttributes',
   })
   await writeTsModule({
     filePath: path.resolve(outputRoot, 'inspectorTranslations.gen.ts'),

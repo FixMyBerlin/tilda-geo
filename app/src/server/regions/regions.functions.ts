@@ -41,14 +41,24 @@ const noPrivateBackgrounds: TPrivateBackground[] = []
 export const getRegionPageDataFn = createServerFn({ method: 'GET' })
   .validator((data: { url: string; regionSlug: string }) => data)
   .handler(async ({ data }) => {
-    const { redirectUrl, region: resolvedRegion } = await getRegionRedirectUrl(
-      data.url,
-      data.regionSlug,
-    )
+    const {
+      redirectUrl,
+      region: resolvedRegion,
+      isSlugRename,
+    } = await getRegionRedirectUrl(data.url, data.regionSlug)
     if (redirectUrl) {
+      // Add the welcome dialog to this redirect too, so a first visit needs one redirect, not two.
+      // Browsers cache a 301 for good, so only a slug rename without the cookie-based dialog is one.
+      const welcomeDialogUrl =
+        resolvedRegion &&
+        resolveWelcomeDialogRedirectUrl({
+          url: redirectUrl,
+          region: resolvedRegion,
+          dismissedCookie: getCookie(WELCOME_DISMISSED_COOKIE_NAME),
+        })
       return {
-        redirectUrl,
-        redirectPermanent: true as const,
+        redirectUrl: welcomeDialogUrl || redirectUrl,
+        redirectPermanent: isSlugRename && !welcomeDialogUrl,
         authorized: false as const,
         region: null,
         hasPermissions: false,

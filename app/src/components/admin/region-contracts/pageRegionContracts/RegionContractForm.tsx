@@ -8,7 +8,7 @@ import { RadioGroup } from '@/components/shared/form/fields/RadioGroup'
 import { choiceOptionListClassName } from '@/components/shared/form/fields/sharedStyles'
 import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form, type SubmitResult } from '@/components/shared/form/Form'
-import { RegionContractStatus } from '@/prisma/generated/browser'
+import { RegionContractStatus } from '@/prisma/generated/enums'
 import { adminNavCountsQueryOptions } from '@/server/admin/adminNavQueryOptions'
 import {
   createRegionContractFn,

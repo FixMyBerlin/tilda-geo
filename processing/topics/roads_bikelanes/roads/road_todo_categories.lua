@@ -34,16 +34,22 @@ function road_todo_class:__call(object_tags, result_tags)
 end
 
 -- === Deprecated cycleway tagging ===
+-- Also on the sides: `cycleway:right=shared` gives no bikelane either (`needs_clarification` skips it as handled here)
+local SHARED_KEYS = { 'cycleway', 'cycleway:both', 'cycleway:left', 'cycleway:right' }
+
 local deprecated_cycleway_shared = road_todo_class.new({
   id = 'deprecated_cycleway_shared',
-  desc = 'The tagging `cycleway=shared` is deprecated and should be replaced or removed.',
+  desc = 'The tagging `cycleway=shared` (also `cycleway:both|left|right=shared`) is deprecated and should be replaced or removed.',
   todoTableOnly = false,
   priority = function(object_tags, result_tags)
     if object_tags.mapillary_coverage then return '1' end
     return '2'
   end,
   conditions = function(object_tags, _)
-    return object_tags.cycleway == 'shared'
+    for _, key in ipairs(SHARED_KEYS) do
+      if object_tags[key] == 'shared' then return true end
+    end
+    return false
   end,
 })
 

@@ -9,7 +9,7 @@ import {
 } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { getLayerHighlightId } from '../utils/layerHighlight'
 import { LayerHighlight } from './LayerHighlight'
-import { buildUploadLayerProps, type UploadLayerWithAtlasType } from './utils/buildUploadLayerProps'
+import { buildUploadLayerProps, type RenderableUploadLayer } from './utils/buildUploadLayerProps'
 import { createPmtilesUrl } from './utils/createPmtilesUrl'
 
 function createSourceProps(mapRenderFormat: string, mapRenderUrl: string) {
@@ -89,7 +89,7 @@ export const LayersStaticDatasets = () => {
                   ? layer.beforeId || 'atlas-app-beforeid-fallback'
                   : 'atlas-app-beforeid-fallback'
               const layerProps = buildUploadLayerProps({
-                layer: layer as UploadLayerWithAtlasType,
+                layer: layer as RenderableUploadLayer,
                 layerId,
                 sourceId: datasetSourceId,
                 debugLayerStyles,
