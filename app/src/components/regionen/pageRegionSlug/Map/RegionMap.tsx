@@ -292,6 +292,14 @@ export const RegionMap = () => {
     drawOnMouseMove?.(event)
     let { features } = event
     features = extractInteractiveFeatures(mapParam, features)
+    // Candidate selection ignores clicks on coarse cells (see `handleClick`), so they get no
+    // pointer and no hover highlight either.
+    if (currentMode.isSpaceFinder && candidateSelectActive) {
+      features = features.filter(
+        (f) =>
+          f.sourceLayer !== spaceFinderHexagonsSourceLayer || !isCoarseHexagon(f.properties?.h3_id),
+      )
+    }
     updateCursor(features)
     const tildaFeatures = features.filter((feature) => !isStreetImageryFeature(feature))
     updateHover(tildaFeatures)
