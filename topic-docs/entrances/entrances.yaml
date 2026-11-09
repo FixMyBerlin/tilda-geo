@@ -1,5 +1,5 @@
 title: Eingänge
-summary: Eingänge an Gebäuden (`entrance=*`) und U-Bahn-Eingänge (`railway=subway_entrance`) aus OpenStreetMap. U-Bahn-Eingänge sowie Haupt- und Wohneingänge sind farblich hervorgehoben.
+summary: Eingänge an Gebäuden (`entrance=*`) aus OpenStreetMap. Haupt- und Wohneingänge sind farblich hervorgehoben. Die Tabelle enthält auch U-Bahn-Eingänge (`railway=subway_entrance`) für den Flächenfinder; die Karte zeigt sie nicht. Parkplatz-/Garageneinfahrten (`amenity=parking_entrance`) gehören nicht dazu, auch mit `entrance=*`.
 sourceIds:
   - atlas_entrances
 attributes:

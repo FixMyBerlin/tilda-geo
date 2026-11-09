@@ -7,7 +7,9 @@ const sourceLayer = 'entrances'
 export type SubcatPoiPlusEntrancesId = typeof subcatId
 export type SubcatPoiPlusEntrancesStyleIds = 'default'
 
-const isPublicTransport: ExpressionSpecification = ['==', ['get', 'category'], 'public_transport']
+// Only building entrances. Subway entrances (`category=public_transport`) stay in the table for
+// the ÖPNV score of the space-finder-worker but are not shown here.
+const isBuilding: ExpressionSpecification = ['==', ['get', 'category'], 'building']
 // Same values as the default `kinds` of `PostgisLoader.load_building_entrances` in the
 // space-finder-worker (entrances that would be relevant to residents; no score uses them yet).
 const mainEntranceValues = ['yes', 'main', 'home', 'staircase']
@@ -16,7 +18,6 @@ const isMainEntrance: ExpressionSpecification = [
   ['get', 'entrance'],
   ['literal', mainEntranceValues],
 ]
-const publicTransportColor = '#1d4ed8'
 const mainColor = '#be185d'
 const otherColor = '#94a3b8'
 
@@ -36,15 +37,9 @@ export const subcat_poi_plus_entrances: FileMapDataSubcategory = {
           source,
           'source-layer': sourceLayer,
           minzoom: 16,
+          filter: isBuilding,
           paint: {
-            'circle-color': [
-              'case',
-              isPublicTransport,
-              publicTransportColor,
-              isMainEntrance,
-              mainColor,
-              otherColor,
-            ],
+            'circle-color': ['case', isMainEntrance, mainColor, otherColor],
             'circle-radius': ['interpolate', ['linear'], ['zoom'], 16, 3, 20, 6],
             'circle-stroke-color': '#ffffff',
             'circle-stroke-width': 1,
@@ -52,12 +47,6 @@ export const subcat_poi_plus_entrances: FileMapDataSubcategory = {
         },
       ],
       legends: [
-        {
-          id: 'public_transport',
-          name: 'U-Bahn-Eingang',
-          desc: ['`railway=subway_entrance`'],
-          style: { type: 'circle', color: publicTransportColor },
-        },
         {
           id: 'main',
           name: 'Gebäudeeingang',

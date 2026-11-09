@@ -7,7 +7,11 @@
 -- `tags.category` (sanitized, only the values we use):
 --   - `public_transport`: `railway=subway_entrance` (not `disused=yes`). Those are often also
 --     tagged `entrance=yes`; the railway tag wins.
+--     The map layer "Eingänge" hides them; they are here for the ÖPNV score.
 --   - `building`: every other `entrance=*` node.
+--
+-- Skipped: `entrance=*` on an `amenity=parking_entrance` (car park / underground garage driveway).
+-- It is no building entrance, and the parking topic has all of them (`off_street_parking_points`).
 --
 -- We do NOT verify that a building entrance actually sits on a building: `entrance=*` is
 -- virtually always mapped as a vertex of a building outline, and proving it (osm2pgsql 2.3 id
@@ -19,6 +23,7 @@ local metadata = require('topics.helper.metadata')
 local default_id = require('topics.helper.default_id')
 local LOG_ERROR = require('topics.entrances.entrances_errors')
 local result_tags = require('topics.entrances.helper.result_tags')
+local entrance_category = require('topics.entrances.helper.entrance_category')
 
 -- Must not exceed SIMPLIFY_MAX_ZOOM (14): sources stop requesting tiles there and overzoom, and
 -- the tile function drops rows with `z < minzoom`. The style layer hides entrances below z16.
@@ -40,18 +45,7 @@ local db_table = osm2pgsql.define_table({
   },
 })
 
----@param tags OsmTags
----@return 'public_transport'|'building'|nil
-local function entrance_category(tags)
-  if tags.railway == 'subway_entrance' then
-    if tags.disused == 'yes' then return nil end
-    return 'public_transport'
-  end
-  if tags.entrance then return 'building' end
-  return nil
-end
-
---- Node handler: subway entrances and every other entrance=* node.
+--- Node handler: subway entrances and every entrance=* node.
 ---@param object OsmObject
 local function entrance_nodes(object)
   local category = entrance_category(object.tags)
