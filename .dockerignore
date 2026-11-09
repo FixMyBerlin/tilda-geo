@@ -11,3 +11,7 @@ processing/node_modules
 # deploy hosts never noticed — they build from a fresh checkout that has no
 # app/node_modules to copy.
 app/node_modules
+# Same for the worker: a dev machine's space-finder-worker/.venv (macOS, from a local
+# `uv sync` for the tests) would replace the image's Linux venv on
+# `COPY space-finder-worker/`, and the worker fails on its first import.
+space-finder-worker/.venv
