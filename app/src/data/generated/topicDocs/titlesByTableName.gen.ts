@@ -8,6 +8,7 @@ const data = {
   bikeSuitability: 'Radeignung',
   boundaries: 'Grenzen',
   busroutes: 'Buslinien',
+  entrances: 'Eingänge',
   footroutes: 'Spazier- und Lehrpfade',
   highwayAreas: 'Daten zu Straßenflächen',
   hikingroutes: 'Wanderwege',
