@@ -1,3 +1,4 @@
+local DESC = require('topics.helper.tilda_description')
 local contains_substring = require('topics.helper.contains_substring')
 local SET = require('topics.helper.sets')
 local category_is_sidepath = require('topics.roads_bikelanes.bikelanes.categories.category_is_sidepath')
@@ -10,7 +11,6 @@ local has_tag_with_prefix = require('topics.helper.has_tag_with_prefix')
 local SANITIZE_ROAD_TAGS = require('topics.roads_bikelanes.helper.sanitize_road_tags')
 local SANITIZE_VALUES = require('topics.helper.sanitize_values')
 local inspect = require('inspect')
-local to_semicolon_list = require('topics.helper.to_semicolon_list')
 local extract_value_from_lanes = require('topics.roads_bikelanes.bikelanes.helper.extract_value_from_lanes')
 
 local is_crossing_pattern -- forward declaration for use in category conditions below
@@ -42,6 +42,7 @@ BikelaneCategory.__index = BikelaneCategory
 --- implicitOneWay: boolean,
 --- implicitOneWayConfidence: 'high'|'medium'|'low'|'not_applicable',
 --- copySurfaceSmoothnessFromParent: boolean, -- Whether this category should copy surface/smoothness values from parent highway
+--- bicycleSurface?: BikelaneBicycleSurface, -- How `surface:bicycle` applies, see `derive_bikelane_surface_tags`; nil ignores it
 --- condition: fun(tags: OsmTags): (boolean|nil),
 --- process: fun(tags: OsmTags): (OsmTags|nil)|nil, -- Optional function to process tags after categorization
 --- }
@@ -55,6 +56,7 @@ function BikelaneCategory.new(args)
   self.implicitOneWay = args.implicitOneWay
   self.implicitOneWayConfidence = args.implicitOneWayConfidence
   self.copySurfaceSmoothnessFromParent = args.copySurfaceSmoothnessFromParent
+  self.bicycleSurface = args.bicycleSurface
   self.condition = args.condition
   self.process = args.process
   return self
@@ -125,6 +127,7 @@ local pedestrianAreaBicycleYes = BikelaneCategory.new({
   implicitOneWay = false, -- 'oneway=assumed_no' because road is shared
   implicitOneWayConfidence = 'high',
   copySurfaceSmoothnessFromParent = false,
+  bicycleSurface = 'strip',
   condition = function(tags)
     if tags.highway == 'pedestrian' and (tags.bicycle == 'yes' or tags.bicycle == 'designated') then
       return true
@@ -141,6 +144,7 @@ local bicycleRoad = BikelaneCategory.new({
   implicitOneWay = false, -- 'oneway=assumed_no' because road is shared
   implicitOneWayConfidence = 'high',
   copySurfaceSmoothnessFromParent = true,
+  bicycleSurface = 'strip',
   condition = function(tags)
     if tags.bicycle_road == 'yes' then
       return true
@@ -170,6 +174,7 @@ local bicycleRoad_vehicleDestination = BikelaneCategory.new({
   implicitOneWay = false, -- 'oneway=assumed_no' because road is shared
   implicitOneWayConfidence = 'high',
   copySurfaceSmoothnessFromParent = true,
+  bicycleSurface = 'strip',
   condition = function(tags)
     -- Subcategory when bicycle road allows vehicle traffic
     if bicycleRoad:is_active(tags) then
@@ -206,6 +211,7 @@ local footAndCyclewayShared = BikelaneCategory.new({
   implicitOneWay = true, -- 'oneway=implicit_yes' because its 'shared lane'-like
   implicitOneWayConfidence = 'low',
   copySurfaceSmoothnessFromParent = false,
+  bicycleSurface = 'whole_way',
   condition = function(tags)
     -- GUARD: Exclude crossings (they should be handled by crossing category or needsClarification)
     if is_crossing_pattern(tags) then return false end
@@ -238,7 +244,7 @@ local footAndCyclewayShared = BikelaneCategory.new({
   end,
   process = function(tags)
     if tags.highway == 'service' then
-      tags.description = to_semicolon_list({ tags.description, 'TILDA-Hinweis: Radinfrastruktur auf einem Zufahrtsweg.' })
+      DESC.add_hint(tags, DESC.token('access_road'))
     end
     -- https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:1026-38 'Land- und forstwirtschaftlicher Verkehr frei'
     -- See also https://github.com/FixMyBerlin/radinfra.de/issues/13#issuecomment-3352120626
@@ -247,7 +253,7 @@ local footAndCyclewayShared = BikelaneCategory.new({
       contains_substring(tags.access, 'agricultural') or contains_substring(tags.motor_vehicle, 'agricultural') or contains_substring(tags.vehicle, 'agricultural') or
       contains_substring(tags.access, 'forestry') or contains_substring(tags.motor_vehicle, 'forestry') or contains_substring(tags.vehicle, 'forestry')
     then
-      tags.description = to_semicolon_list({ tags.description, 'TILDA-Hinweis: Radinfrastruktur geteilt mit land- und/oder forstwirtschaftlichem Verkehr.' })
+      DESC.add_hint(tags, DESC.token('shared_agricultural'))
     end
     return tags
   end
@@ -268,6 +274,7 @@ local footAndCyclewaySegregated = BikelaneCategory.new({
   implicitOneWay = true, -- 'oneway=implicit_yes' because its 'shared lane'-like
   implicitOneWayConfidence = 'low',
   copySurfaceSmoothnessFromParent = false,
+  bicycleSurface = 'whole_way',
   condition = function(tags)
     -- GUARD: Exclude crossings (they should be handled by crossing category or needsClarification)
     if is_crossing_pattern(tags) then return false end
@@ -329,6 +336,7 @@ local footwayBicycleYes = BikelaneCategory.new({
   implicitOneWay = true, -- 'oneway=implicit_yes' because its 'shared lane'-like
   implicitOneWayConfidence = 'low',
   copySurfaceSmoothnessFromParent = false,
+  bicycleSurface = 'whole_way',
   condition = function(tags)
     -- GUARD: Exclude crossings (they should be handled by crossing category or needsClarification)
     if is_crossing_pattern(tags) then return false end
@@ -386,6 +394,7 @@ local cyclewaySeparated = BikelaneCategory.new({
   implicitOneWay = false, -- 'oneway=assumed_no' because its 'track'-like and `oneway=yes` (more commonly tagged in cities) is usually explicit
   implicitOneWayConfidence = 'low',
   copySurfaceSmoothnessFromParent = false,
+  bicycleSurface = 'whole_way',
   condition = function(tags)
     -- CASE: GUARD Centerline 'lane'
     -- Needed for places like https://www.openstreetmap.org/way/964589554 which have the traffic sign but are not separated.
@@ -594,6 +603,7 @@ local sharedMotorVehicleLane = BikelaneCategory.new({
   implicitOneWay = false, -- 'oneway=assumed_no' the whole road is shared (both lanes); Something like left|right would be `implicit_yes`
   implicitOneWayConfidence = 'high',
   copySurfaceSmoothnessFromParent = true,
+  bicycleSurface = 'strip',
   condition = function(tags)
     if tags.highway == 'cycleway' and tags.cycleway == 'shared_lane' then
       return true

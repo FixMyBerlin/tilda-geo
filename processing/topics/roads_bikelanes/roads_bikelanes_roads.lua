@@ -20,6 +20,9 @@ local LOG_ERROR = require('topics.roads_bikelanes.roads_bikelanes_errors')
 local pseudo_route_relations = require('topics.roads_bikelanes.route_relations.pseudo_route_relations')
 local roads_bikelanes_tables = require('topics.roads_bikelanes.roads_bikelanes_tables')
 local adjoining_context = require('topics.roads_bikelanes.pseudo_tags_sidepath.adjoining_context')
+local directional_surface = require('topics.roads_bikelanes.surfaceQuality.directional_surface')
+local surface_quality = require('topics.roads_bikelanes.surfaceQuality.surface_quality')
+local DESC = require('topics.helper.tilda_description')
 
 local roads_table = roads_bikelanes_tables.roads_table
 local roads_path_classes_table = roads_bikelanes_tables.roads_path_classes_table
@@ -37,6 +40,13 @@ local function roads_bikelanes_roads(context)
   local result_tags = merge_table({}, context.shared_result_tags)
   merge_table(result_tags, context.cycleway_presence)
   result_tags._self_bikelane_has_unusual_width = self_bikelane_has_todo(context.cycleways, 'unusual_width')
+
+  local directional = directional_surface(object_tags)
+  if directional.surface_tags then
+    merge_table(result_tags, surface_quality(directional.surface_tags))
+    result_tags.surface_source = 'tag_directional'
+  end
+  result_tags.description = DESC.build(object_tags, directional.hints)
 
   if not highway_classes.sidepath_highway_classes[object_tags.highway] then
     merge_table(result_tags, maxspeed(object_tags))

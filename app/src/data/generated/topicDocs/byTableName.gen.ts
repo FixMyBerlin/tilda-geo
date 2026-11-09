@@ -1949,8 +1949,58 @@ const data = {
       {
         key: 'description',
         type: 'sanitized_strings',
-        label: 'Hinweis aus OSM',
-        values: [],
+        label: 'Hinweise',
+        description:
+          'Hinweise zu diesem Weg: von TILDA ergänzte Hinweise, zum Beispiel zu abweichenden Oberflächen einzelner Straßenhälften oder zu Sperrungen, und die Beschreibung und Notiz aus OpenStreetMap (`description`, `note`). Die TILDA-Hinweise sind als Kürzel gespeichert, ihre Bedeutung steht in der Werteliste; `{value}` steht dort für die jeweilige Oberfläche oder Fahrqualität.',
+        values: [
+          {
+            value: 'TILDA_surface_bicycle',
+            label: 'Am Rand der Straße kann der Radverkehr einen `{value}`-Streifen nutzen.',
+          },
+          {
+            value: 'TILDA_surface_bicycle_right',
+            label:
+              'Am rechten Rand (in Linienrichtung) kann der Radverkehr einen `{value}`-Streifen nutzen.',
+          },
+          {
+            value: 'TILDA_surface_bicycle_left',
+            label:
+              'Am linken Rand (in Linienrichtung) kann der Radverkehr einen `{value}`-Streifen nutzen.',
+          },
+          {
+            value: 'TILDA_surface_right',
+            label: 'Die rechte Hälfte des Weges (in Linienrichtung) hat die Oberfläche `{value}`.',
+          },
+          {
+            value: 'TILDA_surface_left',
+            label: 'Die linke Hälfte des Weges (in Linienrichtung) hat die Oberfläche `{value}`.',
+          },
+          {
+            value: 'TILDA_surface_strip',
+            label:
+              'Die Oberfläche gilt nur für einen Streifen am Rand der Straße. Die übrige Straße hat die Oberfläche `{value}`.',
+          },
+          {
+            value: 'TILDA_smoothness_strip',
+            label: 'Die übrige Straße hat die Fahrqualität `{value}`.',
+          },
+          {
+            value: 'TILDA_access_road',
+            label: 'Radinfrastruktur auf einem Zufahrtsweg.',
+          },
+          {
+            value: 'TILDA_shared_agricultural',
+            label: 'Radinfrastruktur geteilt mit land- und/oder forstwirtschaftlichem Verkehr.',
+          },
+          {
+            value: 'TILDA_closed_construction',
+            label: 'Weg gesperrt aufgrund einer Baustelle.',
+          },
+          {
+            value: 'TILDA_closed_blocked',
+            label: 'Weg gesperrt (Sperrung).',
+          },
+        ],
       },
       {
         key: 'operator_type',
@@ -2168,6 +2218,14 @@ const data = {
           {
             value: 'parent_highway_tag_transformed',
             label: 'Von zugeordneter Straße, normalisiert',
+          },
+          {
+            value: 'tag_directional',
+            label: 'Schlechtere der richtungs- oder seitenbezogenen Angaben aus OSM',
+          },
+          {
+            value: 'parent_highway_tag_directional',
+            label: 'Von zugeordneter Straße, Angabe für diese Seite oder Richtung',
           },
         ],
       },
@@ -3213,8 +3271,58 @@ const data = {
       {
         key: 'description',
         type: 'sanitized_strings',
-        label: 'Hinweis aus OSM',
-        values: [],
+        label: 'Hinweise',
+        description:
+          'Hinweise zu diesem Weg: von TILDA ergänzte Hinweise, zum Beispiel zu abweichenden Oberflächen einzelner Straßenhälften oder zu Sperrungen, und die Beschreibung und Notiz aus OpenStreetMap (`description`, `note`). Die TILDA-Hinweise sind als Kürzel gespeichert, ihre Bedeutung steht in der Werteliste; `{value}` steht dort für die jeweilige Oberfläche oder Fahrqualität.',
+        values: [
+          {
+            value: 'TILDA_surface_bicycle',
+            label: 'Am Rand der Straße kann der Radverkehr einen `{value}`-Streifen nutzen.',
+          },
+          {
+            value: 'TILDA_surface_bicycle_right',
+            label:
+              'Am rechten Rand (in Linienrichtung) kann der Radverkehr einen `{value}`-Streifen nutzen.',
+          },
+          {
+            value: 'TILDA_surface_bicycle_left',
+            label:
+              'Am linken Rand (in Linienrichtung) kann der Radverkehr einen `{value}`-Streifen nutzen.',
+          },
+          {
+            value: 'TILDA_surface_right',
+            label: 'Die rechte Hälfte des Weges (in Linienrichtung) hat die Oberfläche `{value}`.',
+          },
+          {
+            value: 'TILDA_surface_left',
+            label: 'Die linke Hälfte des Weges (in Linienrichtung) hat die Oberfläche `{value}`.',
+          },
+          {
+            value: 'TILDA_surface_strip',
+            label:
+              'Die Oberfläche gilt nur für einen Streifen am Rand der Straße. Die übrige Straße hat die Oberfläche `{value}`.',
+          },
+          {
+            value: 'TILDA_smoothness_strip',
+            label: 'Die übrige Straße hat die Fahrqualität `{value}`.',
+          },
+          {
+            value: 'TILDA_access_road',
+            label: 'Radinfrastruktur auf einem Zufahrtsweg.',
+          },
+          {
+            value: 'TILDA_shared_agricultural',
+            label: 'Radinfrastruktur geteilt mit land- und/oder forstwirtschaftlichem Verkehr.',
+          },
+          {
+            value: 'TILDA_closed_construction',
+            label: 'Weg gesperrt aufgrund einer Baustelle.',
+          },
+          {
+            value: 'TILDA_closed_blocked',
+            label: 'Weg gesperrt (Sperrung).',
+          },
+        ],
       },
       {
         key: 'operator_type',
@@ -3946,8 +4054,58 @@ const data = {
       {
         key: 'description',
         type: 'sanitized_strings',
-        label: 'Hinweis aus OSM',
-        values: [],
+        label: 'Hinweise',
+        description:
+          'Hinweise zu diesem Weg: von TILDA ergänzte Hinweise, zum Beispiel zu abweichenden Oberflächen einzelner Straßenhälften oder zu Sperrungen, und die Beschreibung und Notiz aus OpenStreetMap (`description`, `note`). Die TILDA-Hinweise sind als Kürzel gespeichert, ihre Bedeutung steht in der Werteliste; `{value}` steht dort für die jeweilige Oberfläche oder Fahrqualität.',
+        values: [
+          {
+            value: 'TILDA_surface_bicycle',
+            label: 'Am Rand der Straße kann der Radverkehr einen `{value}`-Streifen nutzen.',
+          },
+          {
+            value: 'TILDA_surface_bicycle_right',
+            label:
+              'Am rechten Rand (in Linienrichtung) kann der Radverkehr einen `{value}`-Streifen nutzen.',
+          },
+          {
+            value: 'TILDA_surface_bicycle_left',
+            label:
+              'Am linken Rand (in Linienrichtung) kann der Radverkehr einen `{value}`-Streifen nutzen.',
+          },
+          {
+            value: 'TILDA_surface_right',
+            label: 'Die rechte Hälfte des Weges (in Linienrichtung) hat die Oberfläche `{value}`.',
+          },
+          {
+            value: 'TILDA_surface_left',
+            label: 'Die linke Hälfte des Weges (in Linienrichtung) hat die Oberfläche `{value}`.',
+          },
+          {
+            value: 'TILDA_surface_strip',
+            label:
+              'Die Oberfläche gilt nur für einen Streifen am Rand der Straße. Die übrige Straße hat die Oberfläche `{value}`.',
+          },
+          {
+            value: 'TILDA_smoothness_strip',
+            label: 'Die übrige Straße hat die Fahrqualität `{value}`.',
+          },
+          {
+            value: 'TILDA_access_road',
+            label: 'Radinfrastruktur auf einem Zufahrtsweg.',
+          },
+          {
+            value: 'TILDA_shared_agricultural',
+            label: 'Radinfrastruktur geteilt mit land- und/oder forstwirtschaftlichem Verkehr.',
+          },
+          {
+            value: 'TILDA_closed_construction',
+            label: 'Weg gesperrt aufgrund einer Baustelle.',
+          },
+          {
+            value: 'TILDA_closed_blocked',
+            label: 'Weg gesperrt (Sperrung).',
+          },
+        ],
       },
       {
         key: 'operator_type',
@@ -4201,6 +4359,14 @@ const data = {
           {
             value: 'parent_highway_tag_transformed',
             label: 'Von zugeordneter Straße, normalisiert',
+          },
+          {
+            value: 'tag_directional',
+            label: 'Schlechtere der richtungs- oder seitenbezogenen Angaben aus OSM',
+          },
+          {
+            value: 'parent_highway_tag_directional',
+            label: 'Von zugeordneter Straße, Angabe für diese Seite oder Richtung',
           },
         ],
       },
@@ -5311,6 +5477,14 @@ const data = {
             value: 'parent_highway_tag_transformed',
             label: 'Von zugeordneter Straße, normalisiert',
           },
+          {
+            value: 'tag_directional',
+            label: 'Schlechtere der richtungs- oder seitenbezogenen Angaben aus OSM',
+          },
+          {
+            value: 'parent_highway_tag_directional',
+            label: 'Von zugeordneter Straße, Angabe für diese Seite oder Richtung',
+          },
         ],
       },
       {
@@ -6420,6 +6594,14 @@ const data = {
           {
             value: 'parent_highway_tag_transformed',
             label: 'Von zugeordneter Straße, normalisiert',
+          },
+          {
+            value: 'tag_directional',
+            label: 'Schlechtere der richtungs- oder seitenbezogenen Angaben aus OSM',
+          },
+          {
+            value: 'parent_highway_tag_directional',
+            label: 'Von zugeordneter Straße, Angabe für diese Seite oder Richtung',
           },
         ],
       },
@@ -9363,6 +9545,14 @@ const data = {
             value: 'parent_highway_tag_transformed',
             label: 'Von zugeordneter Straße, normalisiert',
           },
+          {
+            value: 'tag_directional',
+            label: 'Schlechtere der richtungs- oder seitenbezogenen Angaben aus OSM',
+          },
+          {
+            value: 'parent_highway_tag_directional',
+            label: 'Von zugeordneter Straße, Angabe für diese Seite oder Richtung',
+          },
         ],
       },
       {
@@ -11408,8 +11598,58 @@ const data = {
       {
         key: 'description',
         type: 'sanitized_strings',
-        label: 'Hinweis aus OSM',
-        values: [],
+        label: 'Hinweise',
+        description:
+          'Hinweise zu diesem Weg: von TILDA ergänzte Hinweise, zum Beispiel zu abweichenden Oberflächen einzelner Straßenhälften oder zu Sperrungen, und die Beschreibung und Notiz aus OpenStreetMap (`description`, `note`). Die TILDA-Hinweise sind als Kürzel gespeichert, ihre Bedeutung steht in der Werteliste; `{value}` steht dort für die jeweilige Oberfläche oder Fahrqualität.',
+        values: [
+          {
+            value: 'TILDA_surface_bicycle',
+            label: 'Am Rand der Straße kann der Radverkehr einen `{value}`-Streifen nutzen.',
+          },
+          {
+            value: 'TILDA_surface_bicycle_right',
+            label:
+              'Am rechten Rand (in Linienrichtung) kann der Radverkehr einen `{value}`-Streifen nutzen.',
+          },
+          {
+            value: 'TILDA_surface_bicycle_left',
+            label:
+              'Am linken Rand (in Linienrichtung) kann der Radverkehr einen `{value}`-Streifen nutzen.',
+          },
+          {
+            value: 'TILDA_surface_right',
+            label: 'Die rechte Hälfte des Weges (in Linienrichtung) hat die Oberfläche `{value}`.',
+          },
+          {
+            value: 'TILDA_surface_left',
+            label: 'Die linke Hälfte des Weges (in Linienrichtung) hat die Oberfläche `{value}`.',
+          },
+          {
+            value: 'TILDA_surface_strip',
+            label:
+              'Die Oberfläche gilt nur für einen Streifen am Rand der Straße. Die übrige Straße hat die Oberfläche `{value}`.',
+          },
+          {
+            value: 'TILDA_smoothness_strip',
+            label: 'Die übrige Straße hat die Fahrqualität `{value}`.',
+          },
+          {
+            value: 'TILDA_access_road',
+            label: 'Radinfrastruktur auf einem Zufahrtsweg.',
+          },
+          {
+            value: 'TILDA_shared_agricultural',
+            label: 'Radinfrastruktur geteilt mit land- und/oder forstwirtschaftlichem Verkehr.',
+          },
+          {
+            value: 'TILDA_closed_construction',
+            label: 'Weg gesperrt aufgrund einer Baustelle.',
+          },
+          {
+            value: 'TILDA_closed_blocked',
+            label: 'Weg gesperrt (Sperrung).',
+          },
+        ],
       },
       {
         key: 'operator_type',
@@ -12091,6 +12331,14 @@ const data = {
             value: 'parent_highway_tag_transformed',
             label: 'Von zugeordneter Straße, normalisiert',
           },
+          {
+            value: 'tag_directional',
+            label: 'Schlechtere der richtungs- oder seitenbezogenen Angaben aus OSM',
+          },
+          {
+            value: 'parent_highway_tag_directional',
+            label: 'Von zugeordneter Straße, Angabe für diese Seite oder Richtung',
+          },
         ],
       },
       {
@@ -12537,8 +12785,58 @@ const data = {
       {
         key: 'description',
         type: 'sanitized_strings',
-        label: 'Hinweis aus OSM',
-        values: [],
+        label: 'Hinweise',
+        description:
+          'Hinweise zu diesem Weg: von TILDA ergänzte Hinweise, zum Beispiel zu abweichenden Oberflächen einzelner Straßenhälften oder zu Sperrungen, und die Beschreibung und Notiz aus OpenStreetMap (`description`, `note`). Die TILDA-Hinweise sind als Kürzel gespeichert, ihre Bedeutung steht in der Werteliste; `{value}` steht dort für die jeweilige Oberfläche oder Fahrqualität.',
+        values: [
+          {
+            value: 'TILDA_surface_bicycle',
+            label: 'Am Rand der Straße kann der Radverkehr einen `{value}`-Streifen nutzen.',
+          },
+          {
+            value: 'TILDA_surface_bicycle_right',
+            label:
+              'Am rechten Rand (in Linienrichtung) kann der Radverkehr einen `{value}`-Streifen nutzen.',
+          },
+          {
+            value: 'TILDA_surface_bicycle_left',
+            label:
+              'Am linken Rand (in Linienrichtung) kann der Radverkehr einen `{value}`-Streifen nutzen.',
+          },
+          {
+            value: 'TILDA_surface_right',
+            label: 'Die rechte Hälfte des Weges (in Linienrichtung) hat die Oberfläche `{value}`.',
+          },
+          {
+            value: 'TILDA_surface_left',
+            label: 'Die linke Hälfte des Weges (in Linienrichtung) hat die Oberfläche `{value}`.',
+          },
+          {
+            value: 'TILDA_surface_strip',
+            label:
+              'Die Oberfläche gilt nur für einen Streifen am Rand der Straße. Die übrige Straße hat die Oberfläche `{value}`.',
+          },
+          {
+            value: 'TILDA_smoothness_strip',
+            label: 'Die übrige Straße hat die Fahrqualität `{value}`.',
+          },
+          {
+            value: 'TILDA_access_road',
+            label: 'Radinfrastruktur auf einem Zufahrtsweg.',
+          },
+          {
+            value: 'TILDA_shared_agricultural',
+            label: 'Radinfrastruktur geteilt mit land- und/oder forstwirtschaftlichem Verkehr.',
+          },
+          {
+            value: 'TILDA_closed_construction',
+            label: 'Weg gesperrt aufgrund einer Baustelle.',
+          },
+          {
+            value: 'TILDA_closed_blocked',
+            label: 'Weg gesperrt (Sperrung).',
+          },
+        ],
       },
       {
         key: 'operator_type',
@@ -12768,6 +13066,14 @@ const data = {
           {
             value: 'parent_highway_tag_transformed',
             label: 'Von zugeordneter Straße, normalisiert',
+          },
+          {
+            value: 'tag_directional',
+            label: 'Schlechtere der richtungs- oder seitenbezogenen Angaben aus OSM',
+          },
+          {
+            value: 'parent_highway_tag_directional',
+            label: 'Von zugeordneter Straße, Angabe für diese Seite oder Richtung',
           },
         ],
       },

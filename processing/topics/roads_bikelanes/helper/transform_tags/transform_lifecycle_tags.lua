@@ -1,7 +1,7 @@
+local DESC = require('topics.helper.tilda_description')
 local SET = require('topics.helper.sets')
 local highway_classes = require('topics.helper.highway_classes')
 local contains_substring = require('topics.helper.contains_substring')
-local to_semicolon_list = require('topics.helper.to_semicolon_list')
 local SIDE_LIFECYCLE = require('topics.roads_bikelanes.helper.transform_tags.side_lifecycle')
 
 local ALLOWED_HIGHWAYS = SET.join_sets({
@@ -111,7 +111,7 @@ local function transform_lifecycle_tags(dest_tags)
     unmodified_tags.lifecycle = dest_tags.lifecycle
 
     dest_tags.lifecycle = 'construction_no_access'
-    dest_tags.description = to_semicolon_list({ dest_tags.description, 'TILDA-Hinweis: Weg gesperrt aufgrund einer Baustelle.' })
+    DESC.add_hint(dest_tags, DESC.token('closed_construction'))
     for _, tag in ipairs(construction_restricted_tags) do
       dest_tags[tag] = nil
     end
@@ -125,7 +125,7 @@ local function transform_lifecycle_tags(dest_tags)
     unmodified_tags.lifecycle = dest_tags.lifecycle
 
     dest_tags.lifecycle = 'blocked'
-    dest_tags.description = to_semicolon_list({ dest_tags.description, 'TILDA-Hinweis: Weg gesperrt (Sperrung).' })
+    DESC.add_hint(dest_tags, DESC.token('closed_blocked'))
     for _, tag in ipairs(blocked_restricted_tags) do
       dest_tags[tag] = nil
     end

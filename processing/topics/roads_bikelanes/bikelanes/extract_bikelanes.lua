@@ -19,9 +19,11 @@ local extract_public_tags = require('topics.helper.extract_public_tags')
 local CLEANER = require('topics.helper.sanitize_cleaner')
 local LOG_ERROR = require('topics.roads_bikelanes.roads_bikelanes_errors')
 local to_semicolon_list = require('topics.helper.to_semicolon_list')
+local DESC = require('topics.helper.tilda_description')
 local derive_traffic_mode = require('topics.roads_bikelanes.bikelanes.helper.derive_traffic_mode')
 local derive_bikelane_surface = require('topics.roads_bikelanes.bikelanes.helper.derive_bikelane_surface')
 local derive_bikelane_smoothness = require('topics.roads_bikelanes.bikelanes.helper.derive_bikelane_smoothness')
+local SURFACE_TAGS = require('topics.roads_bikelanes.bikelanes.helper.derive_bikelane_surface_tags')
 local maxspeed = require('topics.roads_bikelanes.maxspeed.maxspeed')
 local adjoining_context = require('topics.roads_bikelanes.pseudo_tags_sidepath.adjoining_context')
 local HIGHWAYS = require('topics.helper.highway_classes')
@@ -127,17 +129,18 @@ local function bikelanes(object_tags, object_geom)
             object_tags['source:traffic_sign:forward:mapillary'],
             object_tags['source:traffic_sign:backward:mapillary'],
           }),
-          description = to_semicolon_list({
-            transformed_tags.description,
-            transformed_tags.note,
-          }),
         })
 
         merge_table(result_tags, derive_traffic_mode(transformed_tags, object_tags, category.id, transformed_tags._side))
         merge_table(result_tags, derive_traffic_signs(transformed_tags))
-        merge_table(result_tags, derive_bikelane_surface(transformed_tags, category))
-        merge_table(result_tags, derive_bikelane_smoothness(transformed_tags, category))
-        result_tags.description = SANITIZE_TAGS.safe_string(result_tags.description)
+        local surface_tags = SURFACE_TAGS.derive(transformed_tags, category)
+        merge_table(result_tags, derive_bikelane_surface(surface_tags, category))
+        merge_table(result_tags, derive_bikelane_smoothness(surface_tags, category))
+        result_tags.surface_source = SURFACE_TAGS.source(surface_tags, result_tags.surface_source)
+        result_tags.description = DESC.build(
+          transformed_tags,
+          SURFACE_TAGS.hints(transformed_tags, category, result_tags.surface_source)
+        )
 
         if transformed_tags._side ~= 'self' then
           result_tags._id = default_id({ type = object_tags._type, id = object_tags._id }) .. '/' .. transformed_tags._prefix .. '/' .. transformed_tags._side
