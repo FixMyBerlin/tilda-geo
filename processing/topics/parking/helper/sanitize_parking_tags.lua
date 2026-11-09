@@ -1,3 +1,4 @@
+local DIRECTION_SIDE = require('topics.helper.direction_side')
 local sanitize_for_logging = require('topics.helper.sanitize_for_logging')
 
 local SANITIZE_PARKING_TAGS = {
@@ -92,11 +93,7 @@ local SANITIZE_PARKING_TAGS = {
     return sanitize_for_logging('OFF_STREET_PARKING_WITHOUT_PARKING_OR_BUILDING_TAG', {})
   end,
   direction_to_side = function(value)
-    local transformations = {
-      forward = 'right',
-      backward = 'left',
-    }
-    return transformations[value]
+    return DIRECTION_SIDE.direction_to_side(value)
   end,
 }
 

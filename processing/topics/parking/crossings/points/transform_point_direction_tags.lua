@@ -1,3 +1,4 @@
+local DIRECTION_SIDE = require('topics.helper.direction_side')
 local sanitize_for_logging = require('topics.helper.sanitize_for_logging')
 local SANITIZE_VALUES = require('topics.helper.sanitize_values')
 
@@ -22,7 +23,7 @@ local function transform_point_direction_tags(source_dest, key)
   local valid_direction_key = sanitized
   if not has_direction_key or (has_direction_key and valid_direction_key) then
     local direction_key = valid_direction_key or 'both'
-    local side = (direction_key == 'forward' and 'right') or (direction_key == 'backward' and 'left') or 'both'
+    local side = DIRECTION_SIDE.direction_to_side(direction_key) or 'both'
     source_dest[key] = side
   end
 
