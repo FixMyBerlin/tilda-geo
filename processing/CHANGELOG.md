@@ -4,6 +4,11 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-11
 
+### `roads`, `roadsPathClasses`, `bikelanes`: `lifecycle`
+
+- Bikelanes and sidewalks of a road with `temporary=yes` are `lifecycle=temporary` now (before only the road), like they already were for `construction`.
+- `construction:cycleway=*` without a side only makes the bikelanes `lifecycle=construction`, no longer the road.
+
 ### `roads`, `roadsPathClasses`, `bikelanes`, `parkings`, `routing`: `width`
 
 - `parse_length` reads the seven most used decimal commas (`0,3`, `0,5`, `0,6`, `1,5`, `2,2`, `2,5`, `2,50`), which were empty before. A negative length is empty now.

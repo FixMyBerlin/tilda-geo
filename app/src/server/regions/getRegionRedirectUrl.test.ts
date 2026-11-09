@@ -532,6 +532,21 @@ describe('getRegionRedirectUrl()', () => {
       expect(typeof resultUrl.searchParams.get('config')).toBe('string')
     })
 
+    test('Marks only a slug rename as permanent and returns the region on a redirect', async () => {
+      const rename = await getRegionRedirectUrl('http://127.0.0.1:5173/regionen/bb-ag', 'bb-ag')
+      expect(rename.redirectUrl).toBeTruthy()
+      expect(rename.isSlugRename).toBe(true)
+      expect(rename.region).not.toBe(null)
+
+      const normalization = await getRegionRedirectUrl(
+        'http://127.0.0.1:5173/regionen/berlin',
+        'berlin',
+      )
+      expect(normalization.redirectUrl).toBeTruthy()
+      expect(normalization.isSlugRename).toBe(false)
+      expect(normalization.region).not.toBe(null)
+    })
+
     test('Do not redirect when rename target slug is missing from DB', async () => {
       const { getRegion } = await import('@/server/regions/queries/getRegion.server')
       vi.mocked(getRegion).mockRejectedValueOnce(new Error('not found'))

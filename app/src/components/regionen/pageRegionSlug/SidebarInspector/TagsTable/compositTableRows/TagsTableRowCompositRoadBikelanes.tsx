@@ -1,5 +1,5 @@
 import { bikelanesPresenceColors } from '@/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/subcat_bikelanes_plus_presence.const'
-import { getDescriptionForInspectorTag } from '@/data/topicDocs/runtime'
+import { getDescriptionForInspectorTag } from '@/data/topicDocs/inspector'
 import {
   tagsTableCompositRowClass,
   tagsTableCompositSubLabelCellClass,

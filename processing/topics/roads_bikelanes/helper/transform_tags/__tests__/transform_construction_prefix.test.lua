@@ -54,6 +54,17 @@ describe('transform_construction_prefix', function()
   end)
 
   describe('cycleway lifecycle tag placement', function()
+    it('adds cycleway:lifecycle for construction:cycleway without a side', function()
+      local tags = { highway = 'residential', ['construction:cycleway'] = 'lane' }
+      transform_construction_prefix(tags)
+
+      assert.are.same(tags, {
+        highway = 'residential',
+        cycleway = 'lane',
+        ['cycleway:lifecycle'] = 'construction'
+      })
+    end)
+
     it('adds cycleway:left:lifecycle for construction:cycleway:left', function()
       local tags = { ['construction:cycleway:left'] = 'lane' }
       local unmodified_tags = transform_construction_prefix(tags)

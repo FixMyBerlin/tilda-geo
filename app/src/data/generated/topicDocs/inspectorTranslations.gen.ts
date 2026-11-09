@@ -283,6 +283,8 @@ const data = {
   'atlas_bikelanes--lifecycle=construction': 'In Bau',
   'atlas_bikelanes--lifecycle=construction_no_access': 'Gesperrt aufgrund einer Baustelle',
   'atlas_bikelanes--lifecycle=temporary': 'Temporärer Weg',
+  'atlas_bikelanes--lifecycle=temporary--description':
+    'Aus `temporary=yes` am Weg oder `cycleway:<Seite>:temporary=yes` / `sidewalk:<Seite>:temporary=yes` für eine Seite. Radwege und Gehwege an einer temporären Straße sind ebenfalls temporär.',
   'atlas_bikelanes--lit--key': 'Beleuchtung',
   'atlas_bikelanes--lit=no': 'Nicht beleuchtet',
   'atlas_bikelanes--lit=special': 'Spezielle Angaben',
@@ -745,6 +747,8 @@ const data = {
   'atlas_bikeSuitability--lifecycle=construction': 'In Bau',
   'atlas_bikeSuitability--lifecycle=construction_no_access': 'Gesperrt aufgrund einer Baustelle',
   'atlas_bikeSuitability--lifecycle=temporary': 'Temporärer Weg',
+  'atlas_bikeSuitability--lifecycle=temporary--description':
+    'Aus `temporary=yes` am Weg oder `cycleway:<Seite>:temporary=yes` / `sidewalk:<Seite>:temporary=yes` für eine Seite. Radwege und Gehwege an einer temporären Straße sind ebenfalls temporär.',
   'atlas_bikeSuitability--mapillary_backward--key': 'Mapillary gegen Linienrichtung',
   'atlas_bikeSuitability--mapillary_coverage--key': 'Mapillary-Abdeckung',
   'atlas_bikeSuitability--mapillary_coverage=pano': 'Panorama-Aufnahmen',
@@ -1377,6 +1381,8 @@ const data = {
   'atlas_roads--lifecycle=construction': 'In Bau',
   'atlas_roads--lifecycle=construction_no_access': 'Gesperrt aufgrund einer Baustelle',
   'atlas_roads--lifecycle=temporary': 'Temporärer Weg',
+  'atlas_roads--lifecycle=temporary--description':
+    'Aus `temporary=yes` am Weg oder `cycleway:<Seite>:temporary=yes` / `sidewalk:<Seite>:temporary=yes` für eine Seite. Radwege und Gehwege an einer temporären Straße sind ebenfalls temporär.',
   'atlas_roads--lit--key': 'Beleuchtung',
   'atlas_roads--lit=no': 'Nicht beleuchtet',
   'atlas_roads--lit=special': 'Spezielle Angaben',
@@ -1732,6 +1738,8 @@ const data = {
   'atlas_roadsPathClasses--lifecycle=construction': 'In Bau',
   'atlas_roadsPathClasses--lifecycle=construction_no_access': 'Gesperrt aufgrund einer Baustelle',
   'atlas_roadsPathClasses--lifecycle=temporary': 'Temporärer Weg',
+  'atlas_roadsPathClasses--lifecycle=temporary--description':
+    'Aus `temporary=yes` am Weg oder `cycleway:<Seite>:temporary=yes` / `sidewalk:<Seite>:temporary=yes` für eine Seite. Radwege und Gehwege an einer temporären Straße sind ebenfalls temporär.',
   'atlas_roadsPathClasses--lit--key': 'Beleuchtung',
   'atlas_roadsPathClasses--lit=no': 'Nicht beleuchtet',
   'atlas_roadsPathClasses--lit=special': 'Spezielle Angaben',
@@ -1896,6 +1904,8 @@ const data = {
   'tilda_highwayAreas--lifecycle=construction': 'In Bau',
   'tilda_highwayAreas--lifecycle=construction_no_access': 'Gesperrt aufgrund einer Baustelle',
   'tilda_highwayAreas--lifecycle=temporary': 'Temporärer Weg',
+  'tilda_highwayAreas--lifecycle=temporary--description':
+    'Aus `temporary=yes` am Weg oder `cycleway:<Seite>:temporary=yes` / `sidewalk:<Seite>:temporary=yes` für eine Seite. Radwege und Gehwege an einer temporären Straße sind ebenfalls temporär.',
   'tilda_highwayAreas--lit--key': 'Beleuchtung',
   'tilda_highwayAreas--lit=no': 'Nicht beleuchtet',
   'tilda_highwayAreas--lit=special': 'Spezielle Angaben',

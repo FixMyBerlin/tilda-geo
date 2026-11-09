@@ -114,7 +114,6 @@ end
 ---@field marking fun(tags: OsmTags, side: SideKey): string|nil
 ---@field traffic_mode fun(tags: OsmTags, side: SideKey): string|nil
 ---@field buffer fun(tags: OsmTags, side: SideKey): number|nil
----@field temporary fun(tags: OsmTags): string|nil
 ---@type SanitizeRoadTags
 local SANITIZE_ROAD_TAGS = {
   log_source_overrides = log_source_overrides,
@@ -222,12 +221,6 @@ local SANITIZE_ROAD_TAGS = {
     end
 
     return parse_length(value)
-  end,
-
-  temporary = function(tags)
-    if tags.temporary == 'yes' then
-      return 'temporary'
-    end
   end,
 }
 

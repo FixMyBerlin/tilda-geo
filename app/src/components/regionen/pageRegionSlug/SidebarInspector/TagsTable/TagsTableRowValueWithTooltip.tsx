@@ -1,4 +1,4 @@
-import { getDescriptionForInspectorTag } from '@/data/topicDocs/runtime'
+import { getDescriptionForInspectorTag } from '@/data/topicDocs/inspector'
 import type { TagsTableRowProps } from './TagsTableRow'
 import { ConditionalFormattedValue } from './translations/ConditionalFormattedValue'
 import { renderTranslationHtml } from './translations/renderTranslationHtml'

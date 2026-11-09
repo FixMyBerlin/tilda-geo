@@ -135,6 +135,7 @@ attributes:
         label: Gesperrt aufgrund einer Baustelle
       - value: temporary
         label: Temporärer Weg
+        description: Aus `temporary=yes` am Weg oder `cycleway:<Seite>:temporary=yes` / `sidewalk:<Seite>:temporary=yes` für eine Seite. Radwege und Gehwege an einer temporären Straße sind ebenfalls temporär.
   - key: width
     format: meter
     label: Breite

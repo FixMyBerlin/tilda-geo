@@ -1,7 +1,7 @@
 import { twJoin } from 'tailwind-merge'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 import { formatNumber } from '@/components/shared/utils/formatNumber'
-import { getInspectorValueTranslationKey } from '@/data/topicDocs/runtime'
+import { getInspectorValueTranslationKey } from '@/data/topicDocs/inspector'
 import type { QaDecisionDataIndicator } from '@/server/qa-configs/queries/getQaDecisionDataForArea.server'
 import type { QaDecisionData as QaDecisionDataType } from '@/server/qa-configs/schemas/qaDecisionDataSchema'
 import { translations } from '../../../SidebarInspector/TagsTable/translations/translations.const'

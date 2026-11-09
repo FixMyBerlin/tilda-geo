@@ -199,7 +199,7 @@ export async function getRegionRedirectUrl(locationHref: string, regionSlug: str
   try {
     region = await getRegion({ slug })
   } catch {
-    return { redirectUrl: null, region: null }
+    return { redirectUrl: null, region: null, isSlugRename: false }
   }
 
   let migratedUrl = absoluteUrl
@@ -274,8 +274,8 @@ export async function getRegionRedirectUrl(locationHref: string, regionSlug: str
     }
   })
 
-  // Make sure param 'map' is valid. The global mapParamFallback is a typed-search sentinel
-  // (validateSearch / defaultRegionSearch), not a real viewport — replace it with region.map.
+  // Make sure param 'map' is valid. mapParamFallback is a placeholder, not a real viewport —
+  // replace it with region.map.
   const map = u.searchParams.get('map')
   const isMissingOrInvalid = !map || !parseMapParam(map)
   const isGlobalFallback = map === serializeMapParam(mapParamFallback)
@@ -323,5 +323,6 @@ export async function getRegionRedirectUrl(locationHref: string, regionSlug: str
   migratedUrl = u.toString()
 
   const redirectUrl = redirectIfChanged(absoluteUrl, migratedUrl)
-  return { redirectUrl, region: redirectUrl ? null : region }
+  // Only a slug rename is permanent; config and map defaults come from editable region settings.
+  return { redirectUrl, region, isSlugRename: slug !== regionSlug }
 }

@@ -80,22 +80,20 @@ describe('getMapParamFromSearch', () => {
 })
 
 describe('regionSearchSchema', () => {
-  test('applies map default when missing', () => {
-    const parsed = regionSearchSchema.parse({})
-    expect(parsed.map).toBe(defaultMapSearchValue)
+  test('leaves map empty when missing or invalid', () => {
+    expect(regionSearchSchema.parse({}).map).toBeUndefined()
+    expect(regionSearchSchema.parse({ map: 'nonsense' }).map).toBeUndefined()
   })
 
   test('keeps URL migration version v', () => {
     expect(regionSearchSchema.parse({ v: '3' }).v).toBe('3')
   })
 
-  test('validateSearch then stringify always includes map=0/0/0', () => {
-    expect(defaultMapSearchValue).toBe('0/0/0')
-    // Link-like stringify without validateSearch can omit map.
-    expect(routerSearch.stringify({ bg3d: false })).toBe('')
-    // navigate() runs validateSearch before stringify, so off-map hrefs get the sentinel.
-    expect(routerSearch.stringify(regionSearchSchema.parse({}))).toContain('map=0/0/0')
-    expect(routerSearch.stringify(regionSearchSchema.parse({ bg3d: false }))).toContain('map=0/0/0')
+  test('validateSearch then stringify adds nothing to a region URL without params', () => {
+    // The router compares this with the request URL on the server and redirects when they differ;
+    // the region loader does the one redirect to the start view instead.
+    expect(routerSearch.stringify(regionSearchSchema.parse({}))).toBe('')
+    expect(routerSearch.stringify(regionSearchSchema.parse({ bg3d: false }))).toBe('')
   })
 
   test('parses qa JSON object', () => {

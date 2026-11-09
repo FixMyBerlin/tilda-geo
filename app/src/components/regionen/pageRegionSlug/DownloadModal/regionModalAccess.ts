@@ -4,7 +4,7 @@ import {
   deriveRegionDatasetsFromCategories,
   type RegionForDatasetDerivation,
 } from '@/components/regionen/pageRegionSlug/regionDatasets/deriveRegionDatasetsFromCategories'
-import { getTopicDocByTableName } from '@/data/topicDocs/runtime'
+import { getTopicDocTitle } from '@/data/topicDocs/inspector'
 
 export type RegionModalDataset = {
   tableName: SourceExportApiIdentifier
@@ -31,7 +31,7 @@ const enrichDataset = (
     desc: exportConfig?.desc ?? '',
     attributionHtml: exportConfig?.attributionHtml ?? '',
     licence: exportConfig?.licence,
-    hasStructuredDocs: getTopicDocByTableName(dataset.tableName) != null,
+    hasStructuredDocs: getTopicDocTitle(dataset.tableName) != null,
     isDownloadable: dataset.isDownloadable,
   }
 }

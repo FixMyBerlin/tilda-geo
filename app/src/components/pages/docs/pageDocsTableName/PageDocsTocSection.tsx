@@ -1,5 +1,9 @@
-import { TABLE_OF_CONTENTS_NAV_CLASSNAME } from '@/components/pages/TableOfContents/TableOfContents'
+import {
+  TABLE_OF_CONTENTS_LINK_CLASSNAME,
+  TABLE_OF_CONTENTS_NAV_CLASSNAME,
+} from '@/components/pages/TableOfContents/TableOfContents'
 import { Link } from '@/components/shared/links/Link'
+import { Markdown } from '@/components/shared/text/Markdown'
 import type { TopicDocCompiled } from '@/data/topicDocs/runtime'
 import { DOCS_PAGE_SECTION_IDS } from './docsSectionIds.const'
 
@@ -9,8 +13,6 @@ type Props = {
   regionSlug: string | null
   showDownloads: boolean
 }
-
-const tocLinkClassName = 'block w-full min-w-0 py-1.5 leading-5 hyphens-auto wrap-anywhere'
 
 export const PageDocsTocSection = ({ topicDoc, tableName, regionSlug, showDownloads }: Props) => {
   if (!topicDoc) return null
@@ -27,7 +29,7 @@ export const PageDocsTocSection = ({ topicDoc, tableName, regionSlug, showDownlo
               params={{ tableName }}
               search={search}
               hash={DOCS_PAGE_SECTION_IDS.downloads}
-              className={tocLinkClassName}
+              className={TABLE_OF_CONTENTS_LINK_CLASSNAME}
             >
               Downloads
             </Link>
@@ -39,7 +41,7 @@ export const PageDocsTocSection = ({ topicDoc, tableName, regionSlug, showDownlo
             params={{ tableName }}
             search={search}
             hash={DOCS_PAGE_SECTION_IDS.attributtabelle}
-            className={tocLinkClassName}
+            className={TABLE_OF_CONTENTS_LINK_CLASSNAME}
           >
             Attributtabelle
           </Link>
@@ -50,7 +52,7 @@ export const PageDocsTocSection = ({ topicDoc, tableName, regionSlug, showDownlo
             params={{ tableName }}
             search={search}
             hash={DOCS_PAGE_SECTION_IDS.masterportal}
-            className={tocLinkClassName}
+            className={TABLE_OF_CONTENTS_LINK_CLASSNAME}
           >
             Masterportal
           </Link>
@@ -62,9 +64,9 @@ export const PageDocsTocSection = ({ topicDoc, tableName, regionSlug, showDownlo
               params={{ tableName }}
               search={search}
               hash={chapter.id}
-              className={tocLinkClassName}
+              className={TABLE_OF_CONTENTS_LINK_CLASSNAME}
             >
-              {chapter.title}
+              <Markdown markdown={chapter.title} inline />
             </Link>
           </li>
         ))}

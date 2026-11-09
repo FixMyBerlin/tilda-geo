@@ -44,3 +44,8 @@ export type InspectorDescriptions = Record<
     values: Record<string, Record<string, string>>
   }
 >
+
+export type InspectorAttributes = Record<
+  string,
+  Record<string, { type: TopicDocAttributeFormat; purpose?: TopicDocAttributePurpose }>
+>

@@ -8,7 +8,7 @@ import {
   getInspectorValueTranslationKey,
   formatInspectorTagValue,
   isNumericTopicDocFormat,
-} from '@/data/topicDocs/runtime'
+} from '@/data/topicDocs/inspector'
 import { getTopicDocNumericFormatSuffix, isTopicDocDateFormat } from '@/data/topicDocs/schema'
 import { NodataFallback } from '../compositTableRows/NodataFallback'
 import { InspectorFormattedMessage } from './InspectorFormattedMessage'

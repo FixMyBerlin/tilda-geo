@@ -1,7 +1,13 @@
-import { bbox, coordEach, difference, featureCollection, point, polygon } from '@turf/turf'
+import {
+  bbox,
+  booleanIntersects,
+  coordEach,
+  difference,
+  featureCollection,
+  point,
+  polygon,
+} from '@turf/turf'
 import type { Feature, FeatureCollection } from 'geojson'
-import GeoJSONReader from 'jsts/org/locationtech/jts/io/GeoJSONReader'
-import OverlayOp from 'jsts/org/locationtech/jts/operation/overlay/OverlayOp'
 import type { Map as MapLibreMap } from 'maplibre-gl'
 import type { UrlFeature } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/types'
 
@@ -73,34 +79,6 @@ export function createBoundingPolygon(
   return poly
 }
 
-function compareFeatures(feature1: Feature, feature2: Feature) {
-  // @ts-expect-error, see https://github.com/bjornharrtell/jsts/issues/532
-  const geojsonReader = new GeoJSONReader()
-  const f1 = geojsonReader.read(feature1.geometry)
-  const f2 = geojsonReader.read(feature2.geometry)
-  const intersected = !OverlayOp.intersection(f1, f2).isEmpty()
-  if (intersected) {
-    const d12 = !OverlayOp.difference(f1, f2).isEmpty()
-    const d21 = !OverlayOp.difference(f2, f1).isEmpty()
-    if (!d12 && !d21) {
-      // feature1 and feature2 are equal
-      return '=' as const
-    } else if (d12 && !d21) {
-      // feature2 is completely contained in feature1
-      return '>' as const
-    } else if (!d12 && d21) {
-      // feature1 is completely contained in feature2
-      return '<' as const
-    } else {
-      // feature1 and feature2 intersect
-      return '~' as const
-    }
-  } else {
-    // feature1 and feature2 do not intersect
-    return '!=' as const
-  }
-}
-
 function geojsonFromCoordinates(coordinates: [number, number] | [number, number, number, number]) {
   return coordinates.length === 2 ? point(coordinates) : createBox(boundsToPoints(coordinates))
 }
@@ -112,10 +90,22 @@ function createFeatureCollection(urlFeatures: UrlFeature[]) {
   ) as FeatureCollection
 }
 
+// A feature is in bounds when it touches the visible map area without covering all of it; a bbox
+// that covers the whole area still needs a zoom-out to show its extent.
+function isUrlFeatureInBounds({ coordinates }: UrlFeature, boundingPolygon: Feature) {
+  if (!booleanIntersects(boundingPolygon, geojsonFromCoordinates(coordinates))) return false
+  if (coordinates.length === 2) return true
+
+  const [west, south, east, north] = coordinates
+  let coversBoundingPolygon = true
+  coordEach(boundingPolygon, ([lng = 0, lat = 0]) => {
+    if (lng < west || lng > east || lat < south || lat > north) coversBoundingPolygon = false
+  })
+  return !coversBoundingPolygon
+}
+
 export function allUrlFeaturesInBounds(urlFeatures: UrlFeature[], boundingPolygon: Feature) {
-  return urlFeatures
-    .map(({ coordinates }) => compareFeatures(boundingPolygon, geojsonFromCoordinates(coordinates)))
-    .every((r: string) => ['~', '>'].includes(r))
+  return urlFeatures.every((urlFeature) => isUrlFeatureInBounds(urlFeature, boundingPolygon))
 }
 
 export function fitBounds(
