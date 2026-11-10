@@ -4,6 +4,22 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-11
 
+### `roads`, `roadsPathClasses`, `bikeSuitability`, `highwayAreas`, `bikelanes`: `description`
+
+- `description` is written by TILDA: hint codes first (`TILDA_<hint>` or `TILDA_<hint>=<value>`), then the OSM texts unchanged as ``OSM-`description`: <text>`` and ``OSM-`note`: <text>``, joined with `;`. Before, it was `description` or `note` plus German `TILDA-Hinweis: …` sentences, split at `;` and sorted. A `note` that repeats the `description` is left out. The codes and their texts are documented as values of `roads.description` in the topic docs; downloads show the codes.
+- The older hints are codes now: `TILDA_access_road`, `TILDA_shared_agricultural`, `TILDA_closed_construction`, `TILDA_closed_blocked`.
+
+### `roads`, `roadsPathClasses`, `bikeSuitability`: `surface`
+
+- Without a valid `surface`, the worst of `surface:bicycle*`, `surface:forward|backward` and `surface:left|right` (by derived smoothness) is the surface, with the new `surface_source=tag_directional`. Before, these ways had no surface.
+- Every other of these values is a hint: `TILDA_surface_bicycle`, `TILDA_surface_bicycle_right|left`, `TILDA_surface_right|left`, each `=<surface>`. Hints name sides only: `forward` is the right half, `backward` the left half; a side value wins over a direction value.
+
+### `bikelanes`: `surface`, `smoothness`
+
+- Fahrradstraßen, pedestrian areas and `sharedMotorVehicleLane` read `surface:bicycle` and `smoothness:bicycle` first; the hints `TILDA_surface_strip` and `TILDA_smoothness_strip` name the surface and smoothness of the rest of the road. Cycleways and foot/cycle paths use `surface:bicycle` as their surface without a hint.
+- These bikelanes also read `surface:forward|backward` and `surface:left|right` of their own way, like `roads`: without a valid `surface`, the worst value is the surface (`surface_source=tag_directional`, the tagged `smoothness` still applies); every other value is a hint `TILDA_surface_right|left` or `TILDA_surface_bicycle_right|left` (`forward` is the right half, `backward` the left half). Example: a shared foot/cycle path with `surface=paving_stones` and `surface:left=asphalt` gets `TILDA_surface_left=asphalt`.
+- Lanes and bus lanes without their own `cycleway:<side>:surface` take, from the road, `surface:bicycle`, then the bicycle, side or direction value of their half (`surface:<side>`, `surface:forward` for the right lane), then `surface`; new `surface_source=parent_highway_tag_directional`.
+
 ### `roads`, `roadsPathClasses`, `bikelanes`: `lifecycle`
 
 - Bikelanes and sidewalks of a road with `temporary=yes` are `lifecycle=temporary` now (before only the road), like they already were for `construction`.
