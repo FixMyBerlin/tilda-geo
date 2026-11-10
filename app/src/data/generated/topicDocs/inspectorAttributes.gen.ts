@@ -402,6 +402,26 @@ const data = {
       type: 'string',
     },
   },
+  atlas_entrances: {
+    category: {
+      type: 'string',
+    },
+    entrance: {
+      type: 'string',
+    },
+    ref: {
+      type: 'sanitized_strings',
+    },
+    name: {
+      type: 'sanitized_strings',
+    },
+    wheelchair: {
+      type: 'string',
+    },
+    access: {
+      type: 'string',
+    },
+  },
   atlas_landuse: {
     landuse: {
       type: 'string',

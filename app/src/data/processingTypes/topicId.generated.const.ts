@@ -12,6 +12,7 @@ export const topicIds = [
   'publicTransport',
   'poiClassification',
   'barriers',
+  'entrances',
   'landcover',
   'parking',
   // (oxlint: one line per entry)
@@ -30,6 +31,7 @@ export const topicScheduleById = {
   publicTransport: 'nightly',
   poiClassification: 'nightly',
   barriers: 'nightly',
+  entrances: 'nightly',
   landcover: 'weekend',
   parking: 'nightly',
 } as const satisfies Record<TopicId, TopicSchedule>

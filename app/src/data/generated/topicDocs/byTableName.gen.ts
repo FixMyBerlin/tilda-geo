@@ -3701,6 +3701,167 @@ const data = {
     ],
     chapters: [],
   },
+  entrances: {
+    topic: 'entrances',
+    tableName: 'entrances',
+    sourceIds: ['atlas_entrances'],
+    title: 'Eingänge',
+    summary:
+      'Eingänge an Gebäuden (`entrance=*`) aus OpenStreetMap. Haupt- und Wohneingänge sind farblich hervorgehoben. Die Tabelle enthält auch U-Bahn-Eingänge (`railway=subway_entrance`) für den Flächenfinder; die Karte zeigt sie nicht. Parkplatz-/Garageneinfahrten (`amenity=parking_entrance`) gehören nicht dazu, auch mit `entrance=*`.',
+    groups: [
+      {
+        id: 'atlas',
+        label: 'TILDA Daten',
+      },
+    ],
+    attributes: [
+      {
+        key: 'category',
+        type: 'string',
+        label: 'Kategorie',
+        values: [
+          {
+            value: 'building',
+            label: 'Gebäudeeingang',
+          },
+          {
+            value: 'public_transport',
+            label: 'U-Bahn-Eingang',
+          },
+        ],
+      },
+      {
+        key: 'entrance',
+        type: 'string',
+        label: 'Art des Eingangs',
+        values: [
+          {
+            value: 'yes',
+            label: 'Eingang',
+          },
+          {
+            value: 'main',
+            label: 'Haupteingang',
+          },
+          {
+            value: 'home',
+            label: 'Eingang Wohnhaus',
+          },
+          {
+            value: 'staircase',
+            label: 'Treppenhaus-Eingang',
+          },
+          {
+            value: 'service',
+            label: 'Nebeneingang (Lieferung, Personal)',
+          },
+          {
+            value: 'secondary',
+            label: 'Nebeneingang',
+          },
+          {
+            value: 'emergency',
+            label: 'Notausgang',
+          },
+          {
+            value: 'exit',
+            label: 'Ausgang',
+          },
+          {
+            value: 'garage',
+            label: 'Garageneinfahrt',
+          },
+          {
+            value: 'shop',
+            label: 'Ladeneingang',
+          },
+        ],
+      },
+      {
+        key: 'ref',
+        type: 'sanitized_strings',
+        label: 'Kennung (Hausnummer, Treppenhaus)',
+        values: [],
+      },
+      {
+        key: 'name',
+        type: 'sanitized_strings',
+        label: 'Name',
+        values: [],
+      },
+      {
+        key: 'wheelchair',
+        type: 'string',
+        label: 'Rollstuhlgerecht',
+        values: [
+          {
+            value: 'yes',
+            label: 'Ja',
+          },
+          {
+            value: 'limited',
+            label: 'Eingeschränkt',
+          },
+          {
+            value: 'no',
+            label: 'Nein',
+          },
+          {
+            value: 'designated',
+            label: 'Speziell für Rollstühle',
+          },
+        ],
+      },
+      {
+        key: 'access',
+        type: 'string',
+        label: 'Zugang',
+        values: [
+          {
+            value: 'public',
+            label: 'Öffentlich',
+          },
+          {
+            value: 'customers',
+            label: 'Kund:innen',
+          },
+          {
+            value: 'delivery',
+            label: 'Lieferverkehr',
+          },
+          {
+            value: 'destination',
+            label: 'Anlieger',
+          },
+          {
+            value: 'employees',
+            label: 'Mitarbeitende',
+          },
+          {
+            value: 'permissive',
+            label: 'Öffentliche Nutzung geduldet',
+          },
+          {
+            value: 'permit',
+            label: 'Mit Genehmigung',
+          },
+          {
+            value: 'private',
+            label: 'Privat',
+          },
+          {
+            value: 'residents',
+            label: 'Bewohner:innen',
+          },
+          {
+            value: 'no',
+            label: 'Kein Zugang',
+          },
+        ],
+      },
+    ],
+    chapters: [],
+  },
   footroutes: {
     topic: 'routes',
     tableName: 'footroutes',
@@ -4562,7 +4723,7 @@ const data = {
     chapters: [],
   },
   landuse: {
-    topic: 'landuse',
+    topic: 'landcover',
     tableName: 'landuse',
     sourceIds: ['atlas_landuse'],
     title: 'Daten zur Landnutzung',
@@ -11067,6 +11228,10 @@ const data = {
         type: 'string',
         label: 'Art',
         values: [
+          {
+            value: 'bus_stop',
+            label: 'Bushaltestelle',
+          },
           {
             value: 'ferry_station',
             label: 'Fähranleger',

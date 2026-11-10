@@ -4,6 +4,13 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-11
 
+### `entrances` (new nightly topic), `_buildings`
+
+- New table `entrances` (map layer „Eingänge"): building entrances (`entrance=*`) and subway entrances (`railway=subway_entrance`, not `disused=yes`) in one table, with `category` = `building` or `public_transport`. Nightly. It replaces `buildingEntrances` (weekend, `landcover`) and `_publicTransport_entrances` (nightly, `publicTransport`).
+- Parking entrances (`amenity=parking_entrance`, e.g. underground garage driveways) are left out, also with `entrance=*`. They are no building entrances and are on the parking map (`off_street_parking_points`).
+- The map layer „Eingänge" shows building entrances only. Subway entrances are in the table for the Flächenfinder ÖPNV score.
+- `_buildings` has a new column `category` (`train_station` for `building=train_station`, otherwise empty). Train station buildings below 100 m² are no longer dropped. This replaces `_buildings_train_station`.
+
 ### `roads`, `roadsPathClasses`, `bikelanes`: `lifecycle`
 
 - Bikelanes and sidewalks of a road with `temporary=yes` are `lifecycle=temporary` now (before only the road), like they already were for `construction`.
@@ -21,6 +28,10 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 - `prefix`, `parent_road`, `adjoining_road`, `adjoining_maxspeed` no longer read an OSM tag of the same name. No change in the data: no way in Germany has these tags (2026-10).
 
 ## 2026-10
+
+### Flächenfinder: bike sharing from `bicycleParking_points`
+
+- The Flächenfinder reads bike sharing stations from `bicycleParking_points` with `kind=bicycle_rental` (before from `poiClassification`). Its existing bicycle parking leaves out `kind=bicycle_rental` and `kind=mobility_hub`.
 
 ### Summieren: `tilda_measure_sum`
 

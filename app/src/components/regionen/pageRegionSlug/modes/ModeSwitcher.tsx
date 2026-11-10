@@ -3,6 +3,7 @@ import { motion } from 'motion/react'
 import { useLayoutEffect, useRef, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { UI_SPRING } from '@/components/shared/motion/spring.const'
+import { useMapActions } from '../hooks/mapState/useMapState'
 import { modeIdentity } from './modeIdentity'
 import { modeSwitcherSearch } from './modeSwitcherSearch'
 import {
@@ -38,6 +39,7 @@ export const ModeSwitcher = () => {
   const { regionSlug } = routeApi.useParams()
   const { availableModes } = routeApi.useLoaderData()
   const optimisticMode = useOptimisticMode()
+  const { clearInspectorFeatures } = useMapActions()
   const [hoveredMode, setHoveredMode] = useState<RegionMode | null>(null)
   const navRef = useRef<HTMLElement>(null)
   const tabRefs = useRef<Partial<Record<RegionMode, HTMLElement | null>>>({})
@@ -92,6 +94,7 @@ export const ModeSwitcher = () => {
       availableModes.notes,
       availableModes.qa,
       availableModes.reviewLists,
+      availableModes.spaceFinder,
       availableModes.calculator,
       availableModes.measure,
     ],
@@ -135,6 +138,9 @@ export const ModeSwitcher = () => {
             aria-current={active ? 'page' : undefined}
             title={showsLabel(mode) ? undefined : identity.label}
             onMouseEnter={() => setHoveredMode(mode)}
+            onClick={() => {
+              if (mode !== optimisticMode) clearInspectorFeatures()
+            }}
           >
             <Icon className="h-4 w-4 shrink-0" aria-hidden />
             {showsLabel(mode) ? identity.label : <span className="sr-only">{identity.label}</span>}

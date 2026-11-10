@@ -10,6 +10,7 @@ type TopicChartHue =
   | 'orange'
   | 'amber'
   | 'lime'
+  | 'emerald'
   | 'teal'
   | 'cyan'
 
@@ -23,6 +24,7 @@ const topicChartHueById: Record<TopicId, TopicChartHue> = {
   publicTransport: 'orange',
   poiClassification: 'amber',
   barriers: 'lime',
+  entrances: 'emerald',
   landcover: 'teal',
   parking: 'cyan',
 }
@@ -37,6 +39,7 @@ const luaBg: Record<TopicChartHue, string> = {
   orange: 'bg-orange-400',
   amber: 'bg-amber-400',
   lime: 'bg-lime-400',
+  emerald: 'bg-emerald-400',
   teal: 'bg-teal-400',
   cyan: 'bg-cyan-400',
 }
@@ -51,6 +54,7 @@ const sqlBg: Record<TopicChartHue, string> = {
   orange: 'bg-orange-600',
   amber: 'bg-amber-600',
   lime: 'bg-lime-600',
+  emerald: 'bg-emerald-600',
   teal: 'bg-teal-600',
   cyan: 'bg-cyan-600',
 }
@@ -65,6 +69,7 @@ const luaDotFill: Record<TopicChartHue, string> = {
   orange: 'fill-orange-400',
   amber: 'fill-amber-400',
   lime: 'fill-lime-400',
+  emerald: 'fill-emerald-400',
   teal: 'fill-teal-400',
   cyan: 'fill-cyan-400',
 }
@@ -85,6 +90,7 @@ const sqlDotFill: Record<TopicChartHue, string> = {
   orange: 'fill-orange-600',
   amber: 'fill-amber-600',
   lime: 'fill-lime-600',
+  emerald: 'fill-emerald-600',
   teal: 'fill-teal-600',
   cyan: 'fill-cyan-600',
 }

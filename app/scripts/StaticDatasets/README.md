@@ -11,7 +11,7 @@ These scripts manage geodata files, which are made public or semi-public in tild
   - `ATLAS_API_KEY` — required for `--env=dev` (calls the **local** app API only).
   - `ATLAS_API_KEY_STAGING` — required for `--env=staging` (no fallback to `ATLAS_API_KEY`).
   - `ATLAS_API_KEY_PRODUCTION` — required for `--env=production` (no fallback).
-- **Target hosts:** `--env=dev` calls the local app (`http://127.0.0.1:5173`); `--env=staging` / `--env=production` call that environment of `--instance` (default `tilda`) from the registry in [`appInstances.const.ts`](../../src/components/shared/utils/appInstances.const.ts). The same origins end up in `mapRenderUrl`.
+- **Target hosts:** `--env=dev` calls this checkout's local app (`http://127.0.0.1:5173`, offset by `DEV_PORT_SLOT` from `.env.local`); `--env=staging` / `--env=production` call that environment of `--instance` (default `tilda`) from the registry in [`appInstances.const.ts`](../../src/components/shared/utils/appInstances.const.ts). The same origins end up in `mapRenderUrl`.
   - **Other instance (e.g. Flächenfinder):** `--instance=flaechenfinder --env=staging` with that instance's Atlas key in `ATLAS_API_KEY_STAGING`. Uploads share the S3 prefix `staging` with staging.tilda-geo.de, so same-named datasets overwrite each other's files.
 - S3 credentials (`S3_KEY`, `S3_SECRET`, `S3_REGION`, `S3_BUCKET`) must be set in the **root** `.env` for uploads. The S3 prefix (`localdev` / `staging` / `production`) is chosen from `--env`, not from env vars.
 - [Install Bun](https://bun.sh/docs/installation)

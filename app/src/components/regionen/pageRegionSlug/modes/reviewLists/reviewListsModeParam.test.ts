@@ -17,6 +17,14 @@ describe('reviewListsModeParam', () => {
     })
   })
 
+  test('source accepts SPACE_FINDER and drops unknown values', () => {
+    expect(zodReviewListsModeParam.parse({ key: 7, source: 'SPACE_FINDER' })).toEqual({
+      key: 7,
+      source: 'SPACE_FINDER',
+    })
+    expect(zodReviewListsModeParam.parse({ key: 7, source: 'OTHER' })).toEqual({ key: 7 })
+  })
+
   test('compactReviewListsModeParam omits defaults', () => {
     expect(compactReviewListsModeParam({ extent: 'view' })).toBeUndefined()
     expect(compactReviewListsModeParam({ key: 3, extent: 'all', status: 'OK' })).toEqual({

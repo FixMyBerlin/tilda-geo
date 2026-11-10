@@ -2,7 +2,7 @@
  * Models whose updates are never audited (e.g. session refresh / lastActive bumps).
  * CREATE/DELETE on these models still audit when the model is in AUDITED_MODELS.
  */
-export const AUDIT_SKIP_UPDATE_MODELS = ['Session'] as const
+export const AUDIT_SKIP_UPDATE_MODELS = ['Session', 'SpaceFinderJob'] as const
 
 /**
  * Auto/telemetry fields: never stored in audit payloads (`fieldFilters.exclude`),
@@ -14,4 +14,11 @@ export const AUDIT_IGNORED_FIELDS = {
   AdminApiToken: ['lastUsedAt'],
   // The URL holds a secret token; audit rows outlive the record and a rotated token.
   PrivateBackgroundSource: ['tilesUrl'],
+  // Uploads are left out because of their size: "Eigene Daten" are whole FeatureCollections in one
+  // column, and every update would copy the old and the new version (other uploads live on S3).
+  // A change still shows as `inputUpdatedAt`. The census figures are computed from the geometry.
+  // `studyArea` is logged like other drawn geometries (e.g. `ReviewEntry.geometry`).
+  SpaceFinderArea: ['userDatasets', 'censusSaettigungEw', 'censusEwPerHa', 'censusComputedAt'],
+  // Set by the space-finder-worker when a run finishes.
+  SpaceFinderVariant: ['currentRunId'],
 } as const

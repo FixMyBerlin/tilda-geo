@@ -21,6 +21,7 @@ groups:
       - bikeroutes
       - boundaries
       - landuse
+      - entrances
       - places
       - poiClassification
       - publicTransport

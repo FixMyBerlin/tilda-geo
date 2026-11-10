@@ -87,4 +87,20 @@ export const layers_ziele_plus_publictransport: StyleLayer[] = [
       ],
     },
   },
+  // `category=bus_stop` only comes from the Flächenfinder processing (`highway=bus_stop`).
+  {
+    id: 'bus-stops',
+    type: 'symbol',
+    filter: ['==', ['get', 'category'], 'bus_stop'],
+    layout: {
+      'icon-allow-overlap': true,
+      'icon-image': 'bus-stop',
+      'icon-padding': 1,
+      // The SVG is 32 px; 0.43 gives the ~14 px of the U-Bahn icon (17 px at 0.8).
+      'icon-size': 0.43,
+    },
+    paint: {
+      'icon-opacity': 1,
+    },
+  },
 ]

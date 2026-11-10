@@ -8,7 +8,8 @@ local landuse = require('topics.landcover.landuse.landuse')
 local settlement_source = require('topics.landcover.settlement_areas.settlement_source')
 local buildings = require('topics.landcover.buildings.buildings')
 
--- No process_node for landcover: this topic has no point output contract.
+-- No process_node for landcover: this topic has no point output contract, so no noop helper file is used.
+-- (Entrances are the nightly `entrances` topic.)
 
 -- The entrypoint owns geometry eligibility (which objects are areas): closed ways and
 -- multipolygon relations. Each handler does only its own tag filter + insert.

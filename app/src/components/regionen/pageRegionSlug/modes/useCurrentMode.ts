@@ -12,6 +12,7 @@ const regionModeRouteIds = {
   notes: '/regionen/$regionSlug/hinweise',
   qa: '/regionen/$regionSlug/qa',
   reviewLists: '/regionen/$regionSlug/prueflisten',
+  spaceFinder: '/regionen/$regionSlug/flaechenfinder',
   calculator: '/regionen/$regionSlug/summieren',
   measure: '/regionen/$regionSlug/messen',
 } as const
@@ -22,6 +23,7 @@ export const modeRoutePaths = {
   notes: '/regionen/$regionSlug/hinweise',
   qa: '/regionen/$regionSlug/qa',
   reviewLists: '/regionen/$regionSlug/prueflisten',
+  spaceFinder: '/regionen/$regionSlug/flaechenfinder',
   calculator: '/regionen/$regionSlug/summieren',
   measure: '/regionen/$regionSlug/messen',
 } as const
@@ -31,6 +33,7 @@ export const regionModeOrder = [
   'notes',
   'qa',
   'reviewLists',
+  'spaceFinder',
   'calculator',
   'measure',
 ] as const
@@ -44,6 +47,7 @@ const regionModeFlags = (mode: RegionMode) =>
     isNotes: mode === 'notes',
     isQa: mode === 'qa',
     isReviewLists: mode === 'reviewLists',
+    isSpaceFinder: mode === 'spaceFinder',
     isCalculator: mode === 'calculator',
     isMeasure: mode === 'measure',
   }) satisfies {
@@ -52,6 +56,7 @@ const regionModeFlags = (mode: RegionMode) =>
     isNotes: boolean
     isQa: boolean
     isReviewLists: boolean
+    isSpaceFinder: boolean
     isCalculator: boolean
     isMeasure: boolean
   }
@@ -67,6 +72,7 @@ export const useCurrentMode = () => {
   if (deepestRouteId === regionModeRouteIds.notes) return regionModeFlags('notes')
   if (deepestRouteId === regionModeRouteIds.qa) return regionModeFlags('qa')
   if (deepestRouteId === regionModeRouteIds.reviewLists) return regionModeFlags('reviewLists')
+  if (deepestRouteId === regionModeRouteIds.spaceFinder) return regionModeFlags('spaceFinder')
   if (deepestRouteId === regionModeRouteIds.calculator) return regionModeFlags('calculator')
   if (deepestRouteId === regionModeRouteIds.measure) return regionModeFlags('measure')
   return regionModeFlags('map')

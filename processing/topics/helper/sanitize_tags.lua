@@ -31,6 +31,7 @@ end
 ---@field boolean_yes fun(value: string|nil): string|nil
 ---@field tunnel fun(value: string|nil): string|nil
 ---@field access fun(value: string|nil): string|nil
+---@field wheelchair fun(value: string|nil): string|nil
 ---@field traffic_sign fun(value: string|nil): string|nil
 ---@field surface fun(tags: OsmTags): string|nil
 ---@field allowed_surface fun(value: string|nil, tags: OsmTags): string|nil
@@ -77,6 +78,9 @@ local SANITIZE_TAGS = {
       return 'private'
     end
     return sanitize_for_logging(value, { 'no', 'private', 'permissive', 'permit', 'employees', 'customers', 'delivery', 'destination', 'residents', 'public' })
+  end,
+  wheelchair = function (value)
+    return sanitize_for_logging(value, { 'yes', 'limited', 'no', 'designated' })
   end,
   traffic_sign = function (value)
     return sanitize_traffic_sign(value)

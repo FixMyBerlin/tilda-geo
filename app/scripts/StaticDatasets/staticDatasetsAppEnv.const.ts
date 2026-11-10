@@ -1,6 +1,7 @@
 import type { AppInstance } from '@/components/shared/utils/appInstances.const'
 import { getAppBaseUrl } from '@/components/shared/utils/getAppBaseUrl'
 import type { EnvironmentValues } from '@/server/envSchema'
+import { applyDevPortSlotToProcessEnv } from '../predev/devPortSlot'
 import type { StaticDatasetsApiConfig } from './api'
 import { red } from './utils/log'
 
@@ -47,6 +48,8 @@ function resolveAtlasApiKeyForStaticDatasets(appEnv: EnvironmentValues) {
 }
 
 export function buildStaticDatasetsApiConfig(appEnv: EnvironmentValues, instance: AppInstance) {
+  // `--env=dev` targets this checkout's Vite port (DEV_PORT_SLOT in .env.local).
+  if (appEnv === 'development') applyDevPortSlotToProcessEnv()
   return {
     apiRootUrl: getAppBaseUrl('/api', appEnv, instance),
     atlasApiKey: resolveAtlasApiKeyForStaticDatasets(appEnv),

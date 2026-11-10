@@ -7,6 +7,7 @@ import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/use
 import { reviewEntriesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/reviewEntriesLayers.const'
 import { mergeModeUrlFeature } from '@/components/regionen/pageRegionSlug/Map/utils/partitionClickedFeatures'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
+import type { ReviewEntrySource } from '@/prisma/generated/enums'
 import { reviewCommentDraftId } from '../composerDrafts/composerDraftIds'
 import { ComposerDraftDot } from '../composerDrafts/DraftIndicatorDot'
 import { flyMapToIfOffscreen } from '../flyMapToIfOffscreen'
@@ -25,6 +26,7 @@ import { ModePanelEmpty } from '../ModePanelEmpty'
 import { ModeCommentsPill, ModePanelPill } from '../ModePanelPill'
 import { useMapExtentFilter } from '../useMapExtentFilter'
 import { formatReviewEntryDataSummary } from './reviewEntryDataSummary'
+import { REVIEW_ENTRY_SOURCE_LABEL } from './reviewEntrySourceLabel'
 import { STATUS_LABEL, type ReviewStatus } from './reviewListsModeFilters'
 import { useReviewListsModeParam } from './useReviewListsModeParam'
 
@@ -67,7 +69,7 @@ type ReviewListEntryFeature = {
   properties: {
     id: number
     status: ReviewStatus
-    source: string
+    source: ReviewEntrySource
     geometryType: string
     authorName?: string | null
     authorOsmName?: string | null
@@ -239,7 +241,7 @@ export const ReviewListsModeList = ({
                   </span>
                 </div>
                 <div className={twJoin('mt-0.5', modePanelListMetaClassName)}>
-                  {props.source === 'MANUAL' ? 'manuell' : 'Upload'}
+                  {REVIEW_ENTRY_SOURCE_LABEL[props.source]}
                 </div>
               </ModeListItem>
             )
@@ -266,7 +268,7 @@ export const ReviewListsModeList = ({
               </span>,
               <ReviewStatusBadge key="status" status={props.status} />,
               <span key="source" className={modePanelListMetaClassName}>
-                {props.source === 'MANUAL' ? 'manuell' : 'Upload'}
+                {REVIEW_ENTRY_SOURCE_LABEL[props.source]}
               </span>,
               <span key="author" className={twJoin('line-clamp-1', modePanelListMetaClassName)}>
                 {props.authorName ?? '—'}

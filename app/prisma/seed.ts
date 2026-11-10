@@ -8,6 +8,7 @@ import seedQaConfigs from './seeds/qaConfigs'
 import seedQaEvaluations from './seeds/qaEvaluations'
 import seedRegionContracts from './seeds/regionContracts'
 import seedRegions from './seeds/regions'
+import seedSpaceFinder from './seeds/spaceFinder'
 import seedUsers from './seeds/users'
 
 const seed = async () => {
@@ -19,6 +20,7 @@ const seed = async () => {
   await seedUsers()
   await seedLocalAccess()
   await seedMemberships()
+  await seedSpaceFinder()
   await seedUploads()
   await seedInternalNotes()
   await seedQaConfigs()
