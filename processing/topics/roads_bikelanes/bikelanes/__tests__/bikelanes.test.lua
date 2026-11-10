@@ -801,4 +801,101 @@ describe('bikelanes', function()
       end)
     end)
   end)
+
+  describe('Sidewalks mapped on the road (`sidewalk:<side>=*`):', function()
+    ---@param sidewalk_tags table `sidewalk:right:*` tags without the prefix
+    ---@return table|nil the bikelane of the right sidewalk
+    local function right_sidewalk(sidewalk_tags)
+      local tags = { highway = 'residential', ['sidewalk:right'] = 'lane' }
+      for key, value in pairs(sidewalk_tags) do
+        tags['sidewalk:right:' .. key] = value
+      end
+      for _, result in ipairs(run_bikelanes({ tags = tags, id = 1, type = 'way' })) do
+        if result._id == 'way/1/sidewalk/right' then return result end
+      end
+      return nil
+    end
+
+    -- https://www.openstreetmap.org/way/828479376
+    it('is no bikelane with a physical separation but without bicycle access (Hegemeisterweg)', function()
+      local input_object = {
+        tags = {
+          highway = 'residential',
+          bicycle = 'designated',
+          bicycle_road = 'yes',
+          vehicle = 'destination',
+          traffic_sign = 'DE:244.1,1020-30',
+          ['sidewalk:left'] = 'no',
+          ['sidewalk:right'] = 'lane',
+          ['sidewalk:right:separation:left'] = 'bump',
+          ['sidewalk:right:surface'] = 'asphalt',
+        },
+        id = 1,
+        type = 'way',
+      }
+      local result = run_bikelanes(input_object)
+      assert.are.equal(#result, 1)
+      assert.are.equal(result[1].category, 'bicycleRoad_vehicleDestination')
+    end)
+
+    it('is no bikelane with parking on the left but without bicycle access', function()
+      assert.are.equal(right_sidewalk({ ['traffic_mode:left'] = 'parking' }), nil)
+    end)
+
+    it('is no bikelane with a pedestrian-only sign', function()
+      assert.are.equal(right_sidewalk({ traffic_sign = 'DE:239', ['separation:left'] = 'bump' }), nil)
+    end)
+
+    it('is no bikelane when the sidewalk is mapped separately', function()
+      local result = run_bikelanes({
+        tags = { highway = 'residential', ['sidewalk:right'] = 'separate', ['sidewalk:right:bicycle'] = 'yes' },
+        id = 1,
+        type = 'way',
+      })
+      assert.are.equal(#result, 0)
+    end)
+
+    it('is footwayBicycleYes with bicycle=yes, also with a physical separation', function()
+      assert.are.equal(right_sidewalk({ bicycle = 'yes' }).category, 'footwayBicycleYes_adjoining')
+      assert.are.equal(right_sidewalk({ bicycle = 'yes', ['separation:left'] = 'bump' }).category, 'footwayBicycleYes_adjoining')
+    end)
+
+    it('is footwayBicycleYes with the sign DE:1022-10 only', function()
+      assert.are.equal(right_sidewalk({ traffic_sign = 'DE:239,1022-10' }).category, 'footwayBicycleYes_adjoining')
+    end)
+
+    it('is footAndCyclewayShared with the sign DE:240 only', function()
+      assert.are.equal(right_sidewalk({ traffic_sign = 'DE:240', ['separation:left'] = 'bump' }).category, 'footAndCyclewayShared_adjoining')
+    end)
+
+    it('is footAndCyclewayShared with bicycle=designated + foot=designated + segregated=no, not PBL', function()
+      local result = right_sidewalk({
+        bicycle = 'designated',
+        foot = 'designated',
+        segregated = 'no',
+        ['separation:left'] = 'bump',
+      })
+      assert.are.equal(result.category, 'footAndCyclewayShared_adjoining')
+    end)
+
+    it('is footAndCyclewaySegregated with bicycle=designated + foot=designated + segregated=yes', function()
+      local result = right_sidewalk({ bicycle = 'designated', foot = 'designated', segregated = 'yes' })
+      assert.are.equal(result.category, 'footAndCyclewaySegregated_adjoining')
+    end)
+
+    it('is needsClarification with bicycle=designated only, also with a physical separation', function()
+      assert.are.equal(right_sidewalk({ bicycle = 'designated', ['separation:left'] = 'bump' }).category, 'needsClarification')
+    end)
+
+    it('compared to a cycleway lane with a physical separation, which is PBL', function()
+      local result = run_bikelanes({
+        tags = { highway = 'residential', ['cycleway:right'] = 'lane', ['cycleway:right:separation:left'] = 'bump' },
+        id = 1,
+        type = 'way',
+      })
+      assert.are.equal(result[1]._id, 'way/1/cycleway/right')
+      assert.are.equal(result[1].category, 'cyclewayOnHighwayProtected')
+    end)
+  end)
+
 end)

@@ -4,6 +4,13 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-11
 
+### `bikelanes`, `roads`, `bikelanesPresence`: sidewalks and `cyclewayOnHighwayProtected`
+
+- A protected bikelane (PBL) comes only from `cycleway:<side>=lane|track` on the road, a separately mapped `highway=cycleway`, or a separately mapped `highway=path` with `bicycle=designated`. Before, other ways with a physical separation (`separation:left=bump|bollard|…`) or parking on the left were PBLs, too: sidewalks mapped on the road (`sidewalk:<side>=*`), footways and e.g. `highway=service` sidepaths.
+- A sidewalk mapped on the road (`sidewalk:<side>=*`) is only a bikelane with `sidewalk:<side>:bicycle=yes|designated` or a traffic sign; the category follows from these tags as for separately mapped sidewalks (e.g. `bicycle=yes` or `DE:1022-10` is `footwayBicycleYes_*`, `DE:240` is `footAndCyclewayShared_*`). Example: `sidewalk:right=lane` + `sidewalk:right:separation:left=bump` without bicycle tags was a PBL, now it is no bikelane.
+- `sidewalk:<side>=separate|no` with bicycle tags no longer adds a bikelane on the road. The separately mapped sidewalk is a bikelane only with its own bicycle tags; in Berlin 26 separate sidewalks have none, so their bicycle access is no longer shown until they are tagged.
+- `bikelane_left|right` in `roads` and `bikelanesPresence` follow: a road whose only bikelane was such a sidewalk is `not_expected` (e.g. Fahrradstraßen) or `missing` (roads with `sidewalk:<side>=separate` and no `cycleway:<side>` tags).
+
 ### Access: `roads`, `roadsPathClasses`, `bikelanes`, `routing`
 
 #### Which ways are public

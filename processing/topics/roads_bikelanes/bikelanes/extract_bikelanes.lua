@@ -32,7 +32,16 @@ local footway_transformation = CenterLineTransformation.new({
   highway = 'footway',
   prefix = 'sidewalk',
   filter = function(tags)
-    return not (tags.footway == 'no' or tags.footway == 'separate')
+    -- `sidewalk:<side>=no|separate` unnests to `sidewalk`
+    if tags.sidewalk == 'no' or tags.sidewalk == 'separate' then return false end
+    -- Only sidewalks with bicycle access or any traffic sign are categorized.
+    -- The categories check which access or sign they need (e.g. DE:240, DE:1022-10; DE:239 alone matches none).
+    local has_bicycle_access = tags.bicycle == 'yes' or tags.bicycle == 'designated'
+    local has_traffic_sign = tags.traffic_sign ~= nil
+      or tags['traffic_sign:forward'] ~= nil
+      or tags['traffic_sign:backward'] ~= nil
+    if has_bicycle_access or has_traffic_sign then return true end
+    return false
   end,
   direction_reference = 'parent',
 })

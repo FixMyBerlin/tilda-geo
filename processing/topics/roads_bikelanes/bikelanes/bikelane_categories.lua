@@ -689,6 +689,12 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
 
     -- Only target sidepath like ways
     if not category_is_sidepath(tags) then return false end
+    -- PBLs are mapped as `cycleway:<side>=lane|track` (becomes `highway=cycleway`) or as a separate `highway=cycleway`
+    -- (or `highway=path` + `bicycle=designated`), never on a sidewalk (`sidewalk:<side>=*` becomes `highway=footway`)
+    -- or other highways
+    local is_cycleway = tags.highway == 'cycleway'
+    local is_designated_path = tags.highway == 'path' and tags.bicycle == 'designated'
+    if not is_cycleway and not is_designated_path then return false end
     -- 'Schutzstreifen' cannot be PBLs
     if tags['lane'] == 'advisory' then return false end
     -- Share busways should not be PBLs

@@ -277,6 +277,36 @@ describe('bikelane_categories', function()
       -- With segregated=yes, it should match footAndCyclewaySegregated instead
       assert.are.equal(category.id, 'footAndCyclewaySegregated_adjoining')
     end)
+
+    it('is PBL for a separate highway=path with bicycle=designated', function()
+      local tags = {
+        ['highway'] = 'path',
+        ['bicycle'] = 'designated',
+        ['is_sidepath'] = 'yes',
+        ['separation:left'] = 'bollard',
+      }
+      assert.are.equal(categorize_bikelane(tags).id, 'cyclewayOnHighwayProtected')
+    end)
+
+    it('is not PBL for a separate footway with bicycle=designated', function()
+      local tags = {
+        ['highway'] = 'footway',
+        ['footway'] = 'sidewalk',
+        ['bicycle'] = 'designated',
+        ['separation:left'] = 'bump',
+      }
+      assert.are.equal(categorize_bikelane(tags).id, 'needsClarification')
+    end)
+
+    it('is no bikelane for a separate highway=service with bicycle=yes', function()
+      local tags = {
+        ['highway'] = 'service',
+        ['bicycle'] = 'yes',
+        ['is_sidepath'] = 'yes',
+        ['separation:left'] = 'bollard',
+      }
+      assert.are.equal(categorize_bikelane(tags), nil)
+    end)
   end)
 
   describe('`footwayBicycleYes` with mtb:scale conditions:', function()
