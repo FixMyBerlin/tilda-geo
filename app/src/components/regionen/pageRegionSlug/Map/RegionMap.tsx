@@ -178,7 +178,7 @@ export const RegionMap = () => {
     // Flächenfinder selection tool (`SpaceFinderCandidatesSection`): while active, a click on a
     // result hexagon collects candidates instead of opening the inspector. A click on empty map
     // leaves the selection untouched. Coarse cells (the active grid below FINE_HEXAGON_ZOOM)
-    // are only averages over many areas and don't work as candidates — the panel asks the user
+    // only summarize the best of many areas and don't work as candidates — the panel asks the user
     // to zoom in.
     if (currentMode.isSpaceFinder && candidateSelectActive) {
       const hexagon = features?.find(

@@ -257,8 +257,9 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
   const props = feature.properties
   if (!props) return null
 
-  // Coarse cells (aggregate grid, see spaceFinderHexagonResolution.ts) only carry averages: no exclusion reasons
-  // and no per-dataset breakdown (see `aggregate_hexagons` in the worker).
+  // Coarse cells (aggregate grid, see spaceFinderHexagonResolution.ts) only carry the mean of
+  // their best fine cells: no exclusion reasons and no per-dataset breakdown (see
+  // `aggregate_hexagons` in the worker).
   const coarseCell = isCoarseHexagon(props.h3_id)
   const eigendatenDetails = parseEigendatenDetails(props.eigendaten_details)
   const eigendatenExcludedBy = eigendatenDetails.filter((detail) => detail.x != null)
@@ -312,14 +313,17 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
 
         {coarseCell && (
           <p className="rounded bg-gray-50 px-3 py-2 text-xs text-gray-600">
-            Grobe Ansicht: Die Werte sind über mehrere Flächen gemittelt. Ausschlussgründe und die
-            Wirkung einzelner Datensätze erscheinen beim Hineinzoomen.
+            Übersicht: Jeder Wert zeigt die besten rund 300 m² dieser Zelle und kann von anderen
+            Flächen stammen als die übrigen Werte. Zum Prüfen reinzoomen – dann erscheinen auch
+            Ausschlussgründe und die Wirkung einzelner Datensätze.
           </p>
         )}
 
         {areaFilterOn && props.cluster_area_m2 != null && (
           <div className="flex items-center justify-between text-xs">
-            <span className="text-gray-500">Zusammenhängende Fläche</span>
+            <span className="text-gray-500">
+              {coarseCell ? 'Größte zusammenhängende Fläche' : 'Zusammenhängende Fläche'}
+            </span>
             <span className="font-semibold text-gray-800">
               {Math.round(props.cluster_area_m2).toLocaleString('de-DE')} m²
             </span>

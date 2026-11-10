@@ -3,8 +3,8 @@ export const spaceFinderTileLayers = ['hexagons', 'vegetation', 'carriageways', 
 export type SpaceFinderTileLayer = (typeof spaceFinderTileLayers)[number]
 
 /**
- * H3 resolutions of the hexagon layer: 11 = coarse cells (scores averaged over their 49 fine
- * cells), 13 = fine cells (one candidate area each). Must match AGG_H3_RES/BASE_H3_RES in
+ * H3 resolutions of the hexagon layer: 11 = coarse cells (mean of the best 7 of their 49 fine
+ * cells per score column), 13 = fine cells (one candidate area each). Must match AGG_H3_RES/BASE_H3_RES in
  * space-finder-worker/scoring/scorer.py.
  */
 export const spaceFinderHexagonResolutions = ['11', '13'] as const

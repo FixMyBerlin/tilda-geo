@@ -44,9 +44,15 @@ Core code: [`scoring/scorer.py`](scoring/scorer.py)
 ## Zoom aggregation (display)
 
 For low zoom levels (z < 16) the fine res-13 hexagons are additionally
-aggregated to H3 res. 11 (`AGG_H3_RES`) via `aggregate_hexagons()` – a plain
-mean of the score columns per `h3.cell_to_parent`; `eignungsklasse` is derived
-again from that. No re-scoring, no spatial joins. The zoom branch
+aggregated to H3 res. 11 (`AGG_H3_RES`) via `aggregate_hexagons()` – the mean
+of the best 7 values (`AGG_TOP_CELLS`, ≈ 300 m²) of each score column per
+`h3.cell_to_parent`; `eignungsklasse` is derived again from that. A coarse cell
+thus shows its best ~300 m²: a mean of all 49 cells would let excluded cells
+hide good areas, the maximum would let one good fine cell color the whole coarse
+cell. Each column picks its own best cells. `cluster_area_m2` is the largest contiguous area
+among the fine cells, so the minimum area filter also applies to coarse cells.
+No re-scoring, no spatial joins. Runs computed before this change keep the mean
+until they are recalculated. The zoom branch
 (`z >= 16 → res 13, otherwise res 11`) must match the tile function
 `space_finder.space_finder_hexagons` in [`sql/martin_functions.sql`](sql/martin_functions.sql).
 The map loads both grids around the switch at z16: below it the fine cells

@@ -32,8 +32,12 @@ from .tilda import TildaLoader
 BASE_H3_RES = 13
 AGG_H3_RES = 11
 
-# Score columns averaged during aggregation (eignungsklasse is re-derived from
-# them, not averaged).
+# A coarse cell shows the mean of its best AGG_TOP_CELLS fine cells per score column:
+# 7 × ~44 m² ≈ the best 300 m² of a coarse cell (~2,150 m², 49 fine cells).
+AGG_TOP_CELLS = 7
+
+# Score columns aggregated (mean of the best AGG_TOP_CELLS) to the coarse grid
+# (eignungsklasse is re-derived from the aggregated total score).
 _SCORE_COLS = [
     "mce_gesamtscore", "score_bedarf", "score_bebauung",
     "score_radweg", "score_zielorte",
@@ -51,13 +55,19 @@ _KLASSE_LABELS = ["ausgeschlossen", "schlecht", "mittel", "gut", "sehr gut"]
 def aggregate_hexagons(hex_proj: gpd.GeoDataFrame, target_res: int = AGG_H3_RES) -> gpd.GeoDataFrame:
     """Aggregates the fine BASE grid to a coarser H3 resolution.
 
-    For low zoom levels: averages the score columns per parent cell
-    (`h3.cell_to_parent`) and re-derives `eignungsklasse` from the averaged
-    total score. Pure post-processing of already computed values – no spatial
-    joins, no I/O.
+    For low zoom levels: takes the mean of the best `AGG_TOP_CELLS` values of each
+    score column per parent cell (`h3.cell_to_parent`) and re-derives
+    `eignungsklasse` from that total score. The coarse cell answers "how good is
+    the best ~300 m² in here?": a plain mean would let excluded cells (score 0,
+    e.g. buildings) drown out good areas, the maximum would let one good fine
+    cell color the whole coarse cell. Each column picks its own best cells.
+    `cluster_area_m2` is the largest contiguous area any fine cell belongs to, so
+    the minimum area filter also works below zoom 16. Pure post-processing of
+    already computed values – no spatial joins, no I/O.
 
     Returns: GeoDataFrame in EPSG:25832 with `h3_id` (= parent cell index),
-    `resolution`, the averaged score columns and `eignungsklasse`.
+    `resolution`, the aggregated score columns, `cluster_area_m2` and
+    `eignungsklasse`.
     """
     if hex_proj is None or len(hex_proj) == 0:
         return gpd.GeoDataFrame(geometry=[], crs="EPSG:25832")
@@ -66,8 +76,15 @@ def aggregate_hexagons(hex_proj: gpd.GeoDataFrame, target_res: int = AGG_H3_RES)
     df["parent_id"] = df["h3_id"].map(lambda h: h3.cell_to_parent(h, target_res))
 
     present = [c for c in _SCORE_COLS if c in df.columns]
-    agg = df.groupby("parent_id")[present].mean().round(1).reset_index()
-    agg = agg.rename(columns={"parent_id": "h3_id"})
+    agg = pd.DataFrame({
+        col: df.sort_values(col, ascending=False, na_position="last")
+        .groupby("parent_id")[col].head(AGG_TOP_CELLS)
+        .groupby(df["parent_id"]).mean()
+        for col in present
+    })
+    if "cluster_area_m2" in df.columns:
+        agg["cluster_area_m2"] = df.groupby("parent_id")["cluster_area_m2"].max()
+    agg = agg.round(1).rename_axis("h3_id").reset_index()
     agg["resolution"] = target_res
     # The building flag is deliberately a fine-grid detail only (z >= 16). On the coarse
     # aggregate cells "no construction possible" would be misleading, hence always False –

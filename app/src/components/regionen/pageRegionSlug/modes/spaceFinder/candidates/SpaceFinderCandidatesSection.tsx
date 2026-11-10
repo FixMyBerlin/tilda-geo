@@ -219,13 +219,13 @@ export const SpaceFinderCandidatesSection = ({
         {selectActive ? 'Auswahl beenden' : 'Kandidaten auswählen'}
       </button>
 
-      {/* Like `QaZoomNotice`: below FINE_HEXAGON_ZOOM clicks go to the averaged coarse
+      {/* Like `QaZoomNotice`: below FINE_HEXAGON_ZOOM clicks go to the coarse overview
           cells, which RegionMap does not accept as candidates. */}
       {selectActive && (mapParam?.zoom ?? 0) < FINE_HEXAGON_ZOOM && (
         <div className="flex items-start justify-between gap-3 rounded border border-yellow-200 bg-yellow-50 px-2 py-1.5">
           <p className="text-xs text-yellow-900">
-            Kandidaten lassen sich erst weiter hineingezoomt auswählen — vorher zeigt die Karte
-            Mittelwerte über mehrere Flächen.
+            Kandidaten lassen sich erst weiter hineingezoomt auswählen — vorher zeigt die Karte je
+            Zelle nur einen Überblick über die besten Flächen.
           </p>
           <button
             type="button"
