@@ -8,6 +8,10 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 - A cycleway with the footway as its own line on its **left** (`highway=cycleway` + `traffic_mode:left=foot`, no separation on the left) is `footAndCyclewaySegregated_*` now, like `traffic_mode:right=foot` before. Ways are drawn in the riding direction, so a one-way cycleway cannot be reversed to put the footway on its right. In Berlin 16 ways change from `cycleway_*` to `footAndCyclewaySegregated_*`.
 
+### `todos_lines` (bikelanes): `__mapillary` todos and priorities on lanes
+
+- Lanes and tracks tagged on the road (`cycleway:left|right|both`) use the road's `mapillary_coverage`. Before, they never got a `__mapillary` todo (e.g. `advisory_or_exclusive__mapillary`, `needs_clarification__mapillary`) and never priority 1 from coverage. The MapRoulette challenges of the `__mapillary` campaigns gain tasks for these lanes.
+
 ### `roads`, `roadsPathClasses`, `bikeSuitability`, `highwayAreas`, `bikelanes`: `description`
 
 - `description` is written by TILDA: hint codes first (`TILDA_<hint>` or `TILDA_<hint>=<value>`), then the OSM texts unchanged as ``OSM-`description`: <text>`` and ``OSM-`note`: <text>``, joined with `;`. Before, it was `description` or `note` plus German `TILDA-Hinweis: …` sentences, split at `;` and sorted. A `note` that repeats the `description` is left out. The codes and their texts are documented as values of `roads.description` in the topic docs; downloads show the codes.

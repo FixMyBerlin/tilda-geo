@@ -651,4 +651,36 @@ describe('bikelane_todos', function()
       assert.are.equal(table_includes(data._todo_list, 'crossing_too_long'), false)
     end)
   end)
+  describe('`__mapillary` todos on lanes tagged on the road:', function()
+    ---@param mapillary_coverage string|nil
+    local function run_advisory_lanes(mapillary_coverage)
+      return run_bikelanes({
+        tags = {
+          ['highway'] = 'tertiary',
+          ['cycleway:both'] = 'lane',
+          ['mapillary_coverage'] = mapillary_coverage,
+        },
+        id = 1,
+        type = 'way'
+      })
+    end
+
+    it('lanes get the campaign and priority 1 when the road has Mapillary coverage', function()
+      local lanes = run_advisory_lanes('regular')
+      assert.are.equal(table_size(lanes), 2)
+      for _, lane in ipairs(lanes) do
+        assert.are.equal(lane._todo_list['advisory_or_exclusive'], 'prio1')
+        assert.are.equal(lane._todo_list['advisory_or_exclusive__mapillary'], 'prio1')
+      end
+    end)
+
+    it('lanes get no campaign when the road has no Mapillary coverage', function()
+      local lanes = run_advisory_lanes(nil)
+      assert.are.equal(table_size(lanes), 2)
+      for _, lane in ipairs(lanes) do
+        assert.are.equal(lane._todo_list['advisory_or_exclusive'], 'prio2')
+        assert.are.equal(table_includes(lane._todo_list, 'advisory_or_exclusive__mapillary'), false)
+      end
+    end)
+  end)
 end)
