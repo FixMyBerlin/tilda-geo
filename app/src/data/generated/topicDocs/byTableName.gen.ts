@@ -3970,6 +3970,8 @@ const data = {
           {
             value: 'yes',
             label: 'Einbahnstraße',
+            description:
+              'Auch Kreisverkehre ohne eigene Angabe und Einbahnstraßen gegen die Zeichenrichtung des Weges (`oneway=-1`).',
           },
           {
             value: 'yes_dual_carriageway',
@@ -11460,6 +11462,8 @@ const data = {
           {
             value: 'yes',
             label: 'Einbahnstraße',
+            description:
+              'Auch Kreisverkehre ohne eigene Angabe und Einbahnstraßen gegen die Zeichenrichtung des Weges (`oneway=-1`).',
           },
           {
             value: 'yes_dual_carriageway',
@@ -12693,6 +12697,8 @@ const data = {
           {
             value: 'yes',
             label: 'Einbahnstraße',
+            description:
+              'Auch Kreisverkehre ohne eigene Angabe und Einbahnstraßen gegen die Zeichenrichtung des Weges (`oneway=-1`).',
           },
           {
             value: 'yes_dual_carriageway',

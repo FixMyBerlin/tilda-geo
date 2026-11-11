@@ -158,8 +158,12 @@ function get_transformed_objects(tags, transformations)
       unnest_prefixed_tags(tags, 'cycleway', '', center, metaPrefix)
     end
 
-    if center.oneway == 'yes' and tags['oneway:bicycle'] ~= 'no' then
-      center.traffic_sign = center.traffic_sign or center['traffic_sign:forward']
+    if tags['oneway:bicycle'] ~= 'no' then
+      if center.oneway == 'yes' then
+        center.traffic_sign = center.traffic_sign or center['traffic_sign:forward']
+      elseif center.oneway == '-1' then
+        center.traffic_sign = center.traffic_sign or center['traffic_sign:backward']
+      end
     end
 
     return { center }

@@ -49,14 +49,17 @@ local SANITIZE_TAGS = {
     local name = tags.name or tags.ref or tags['is_sidepath:of:name'] or tags['street:name']
     return sanitize_string(name)
   end,
+  -- Published without the direction: `-1` (against the drawing direction) becomes `yes`.
   oneway_road = function (tags)
-    if tags.oneway == 'yes' and tags.dual_carriageway == 'yes' then
+    local oneway = tags.oneway == '-1' and 'yes' or tags.oneway
+    if oneway == 'yes' and tags.dual_carriageway == 'yes' then
       return 'yes_dual_carriageway'
     end
-    return sanitize_for_logging(tags.oneway, { 'yes' }, { 'no' })
+    return sanitize_for_logging(oneway, { 'yes' }, { 'no' })
   end,
+  -- Published without the direction: `-1` (against the drawing direction) becomes `yes`.
   oneway_bicycle = function (value)
-    return sanitize_for_logging(value, { 'yes', 'no' })
+    return sanitize_for_logging(value == '-1' and 'yes' or value, { 'yes', 'no' })
   end,
   boolean_yes = function (value)
     return sanitize_for_logging(value, { 'yes' }, { 'no' })

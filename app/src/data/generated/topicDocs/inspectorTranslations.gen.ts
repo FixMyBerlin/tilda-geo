@@ -1477,6 +1477,8 @@ const data = {
   'atlas_roads--oneway=no': 'Beide Richtungen',
   'atlas_roads--oneway=yes': 'Einbahnstraße',
   'atlas_roads--oneway=yes_dual_carriageway': 'Einbahnstraße da separate Geometrie pro Seite',
+  'atlas_roads--oneway=yes--description':
+    'Auch Kreisverkehre ohne eigene Angabe und Einbahnstraßen gegen die Zeichenrichtung des Weges (`oneway=-1`).',
   'atlas_roads--operator_type--key': 'Betreibertyp',
   'atlas_roads--operator_type=private': 'Privat',
   'atlas_roads--operator_type=public': 'Öffentlich',
@@ -1849,6 +1851,8 @@ const data = {
   'atlas_roadsPathClasses--oneway=yes': 'Einbahnstraße',
   'atlas_roadsPathClasses--oneway=yes_dual_carriageway':
     'Einbahnstraße da separate Geometrie pro Seite',
+  'atlas_roadsPathClasses--oneway=yes--description':
+    'Auch Kreisverkehre ohne eigene Angabe und Einbahnstraßen gegen die Zeichenrichtung des Weges (`oneway=-1`).',
   'atlas_roadsPathClasses--operator_type--key': 'Betreibertyp',
   'atlas_roadsPathClasses--operator_type=private': 'Privat',
   'atlas_roadsPathClasses--operator_type=public': 'Öffentlich',
@@ -2039,6 +2043,8 @@ const data = {
   'tilda_highwayAreas--oneway=yes': 'Einbahnstraße',
   'tilda_highwayAreas--oneway=yes_dual_carriageway':
     'Einbahnstraße da separate Geometrie pro Seite',
+  'tilda_highwayAreas--oneway=yes--description':
+    'Auch Kreisverkehre ohne eigene Angabe und Einbahnstraßen gegen die Zeichenrichtung des Weges (`oneway=-1`).',
   'tilda_highwayAreas--operator_type--key': 'Betreibertyp',
   'tilda_highwayAreas--operator_type=private': 'Privat',
   'tilda_highwayAreas--operator_type=public': 'Öffentlich',

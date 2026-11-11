@@ -98,6 +98,7 @@ local isSeparate = BikelaneCategory.new({
 })
 
 -- for oneways we assume that the tag `cycleway=*` significates that there's one bike line on the right
+-- in the direction of travel, which is the left side of the way on `oneway=-1`
 -- TODO: this assumes right hand traffic (would be nice to specify this as an option)
 local implicitOneWay = BikelaneCategory.new({
   id = 'not_expected',
@@ -108,9 +109,11 @@ local implicitOneWay = BikelaneCategory.new({
   copySurfaceSmoothnessFromParent = false,
   condition = function(tags)
     local result = tags._prefix == 'cycleway' and tags._infix == '' -- object is created from implicit case
-    result = result and tags._parent.oneway == 'yes' and
-        tags._parent['oneway:bicycle'] ~= 'no'                      -- is oneway w/o bike exception
-    result = result and tags._side == 'left'                        -- is the left side object
+    result = result and tags._parent['oneway:bicycle'] ~= 'no'      -- is oneway w/o bike exception
+    result = result and (
+      (tags._parent.oneway == 'yes' and tags._side == 'left') or    -- the side against the traffic
+      (tags._parent.oneway == '-1' and tags._side == 'right')
+    )
     if result then
       return true
     end

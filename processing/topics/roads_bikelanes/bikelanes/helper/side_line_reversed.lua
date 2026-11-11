@@ -1,11 +1,10 @@
 local is_oneway_road = require('topics.roads_bikelanes.bikelanes.helper.is_oneway_road')
-local ONEWAY_VALUES = require('topics.roads_bikelanes.bikelanes.helper.oneway_values')
 
 -- Whether the published line of a lane or track tagged on the road (`cycleway:left|right|both`)
 -- runs against the drawing direction of the road. One-way lines point in the riding direction.
 -- `cycleway:<side>:oneway` is relative to the drawing direction of the road:
 -- https://wiki.openstreetmap.org/wiki/Key:cycleway:right:oneway
--- - `yes`/`1`: with the way; `-1`: against it.
+-- - `yes`: with the way; `-1`: against it (values after `normalize_oneway_tags`).
 -- - Missing tag (wiki default, no need to tag it): on a oneway road both sides follow the road
 --   (against the way on `oneway=-1`); on other roads the right side runs with the way, the left side against it.
 -- - `no` or any other value (both directions): the same side rule as on other roads.
@@ -22,7 +21,7 @@ local function side_line_reversed(tags)
   if direction == '-1' then
     return true
   end
-  if ONEWAY_VALUES[direction] then
+  if direction == 'yes' then
     return false
   end
 

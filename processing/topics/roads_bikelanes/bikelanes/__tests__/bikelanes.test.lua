@@ -658,6 +658,31 @@ describe('bikelanes', function()
     end)
   end)
 
+  describe('`oneway=-1` roads:', function()
+    local function sides(result)
+      local list = {}
+      for _, row in ipairs(result) do
+        if row.category ~= 'not_expected' then table.insert(list, row._side) end
+      end
+      table.sort(list)
+      return list
+    end
+
+    it('puts `cycleway=lane` on the right in the direction of travel', function()
+      assert.are.same(sides(run_bikelanes({ tags = { highway = 'residential', oneway = 'yes', cycleway = 'lane' }, id = 1, type = 'way' })), { 'right' })
+      assert.are.same(sides(run_bikelanes({ tags = { highway = 'residential', oneway = '-1', cycleway = 'lane' }, id = 1, type = 'way' })), { 'left' })
+    end)
+
+    it('reads the traffic sign in the direction of travel of a separate cycleway', function()
+      local result = run_bikelanes({
+        tags = { highway = 'cycleway', oneway = '-1', ['traffic_sign:forward'] = 'DE:240', ['traffic_sign:backward'] = 'DE:237' },
+        id = 1,
+        type = 'way',
+      })
+      assert.are.equal('DE:237', result[1].traffic_sign)
+    end)
+  end)
+
   describe('Line direction and `offset` of lanes on the road:', function()
     local function by_side(result)
       local rows = {}

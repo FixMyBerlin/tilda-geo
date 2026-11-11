@@ -158,6 +158,7 @@ attributes:
         label: Beide Richtungen
       - value: yes
         label: Einbahnstraße
+        description: Auch Kreisverkehre ohne eigene Angabe und Einbahnstraßen gegen die Zeichenrichtung des Weges (`oneway=-1`).
       - value: yes_dual_carriageway
         label: Einbahnstraße da separate Geometrie pro Seite
   - key: oneway_bicycle

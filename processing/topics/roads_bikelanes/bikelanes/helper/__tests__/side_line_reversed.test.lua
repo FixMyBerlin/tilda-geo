@@ -1,5 +1,6 @@
 describe('side_line_reversed', function()
   local side_line_reversed = require('topics.roads_bikelanes.bikelanes.helper.side_line_reversed')
+  local normalize_oneway_tags = require('topics.helper.normalize_oneway_tags')
 
   ---@param side string
   ---@param lane table
@@ -54,8 +55,10 @@ describe('side_line_reversed', function()
       assert.is_false(side_line_reversed(lane('right', { oneway = 'yes' }, road)))
     end)
 
-    it('treats a roundabout as a oneway road', function()
-      assert.is_false(side_line_reversed(lane('left', {}, { junction = 'roundabout' })))
+    it('treats a roundabout as a oneway road (after normalize_oneway_tags)', function()
+      local road = { junction = 'roundabout' }
+      normalize_oneway_tags(road)
+      assert.is_false(side_line_reversed(lane('left', {}, road)))
     end)
 
     it('keeps the side rule for two-way lanes', function()

@@ -13,6 +13,7 @@ local parking_node_road_mapping = require('topics.parking.roads.parking_node_roa
 local parking_roads = require('topics.parking.roads.parking_roads')
 local log = require('topics.helper.log')
 local parking_scaffold_tables = require('topics.parking.parkings.parking_scaffold_tables')
+local normalize_oneway_tags = require('topics.helper.normalize_oneway_tags')
 
 -- NOTE ON PROJECTIONS:
 -- All `_paring_*` tables use EPSG:5243
@@ -29,6 +30,8 @@ function osm2pgsql.process_node(object)
 end
 
 function osm2pgsql.process_way(object)
+  normalize_oneway_tags(object.tags)
+
   parking_separate_parking_areas(object)
   obstacle_areas(object)
   off_street_parking_areas(object)

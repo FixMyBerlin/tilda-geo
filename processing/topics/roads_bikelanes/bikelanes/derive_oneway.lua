@@ -1,4 +1,8 @@
-local ONEWAY_VALUES = require('topics.roads_bikelanes.bikelanes.helper.oneway_values')
+-- Expects tags after `normalize_oneway_tags`: one-way is `yes` or `-1` (against the drawing direction).
+---@param value string|nil
+local function is_oneway(value)
+  return value == 'yes' or value == '-1'
+end
 
 -- Without a tag, the category decides (`implicitOneWay` in `bikelane_categories.lua`), also for
 -- lanes and tracks tagged on the road (`cycleway:<side>=*`):
@@ -15,17 +19,17 @@ local ONEWAY_VALUES = require('topics.roads_bikelanes.bikelanes.helper.oneway_va
 ---@param category table
 ---@return 'yes'|'no'|'car_not_bike'|'assumed_no'|'implicit_yes'
 local function derive_oneway(tags, category)
-  if ONEWAY_VALUES[tags['oneway:bicycle']] then
+  if is_oneway(tags['oneway:bicycle']) then
     return 'yes'
   elseif tags['oneway:bicycle'] == 'no' then
-    if ONEWAY_VALUES[tags.oneway] then
+    if is_oneway(tags.oneway) then
       return 'car_not_bike'
     else
       return 'no'
     end
   end
 
-  if ONEWAY_VALUES[tags.oneway] then
+  if is_oneway(tags.oneway) then
     return 'yes'
   elseif tags.oneway == 'no' then
     return 'no'

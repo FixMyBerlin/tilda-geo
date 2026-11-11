@@ -30,9 +30,8 @@ describe('derive_oneway', function()
     }, no_implicit), 'yes')
   end)
 
-  it('reads oneway=-1 and oneway=1 as an explicit oneway', function()
+  it('reads oneway=-1 as an explicit oneway (`1` is `yes` after normalize_oneway_tags)', function()
     assert.are.equal(derive_oneway({ highway = 'cycleway', oneway = '-1' }, no_implicit), 'yes')
-    assert.are.equal(derive_oneway({ highway = 'cycleway', oneway = '1' }, no_implicit), 'yes')
     assert.are.equal(derive_oneway({ highway = 'path', ['oneway:bicycle'] = '-1' }, no_implicit), 'yes')
   end)
 

@@ -47,4 +47,17 @@ describe('transform_cycleway_opposite_schema', function()
     transform_cycleway_opposite_schema(input)
     assert.are.same(input, expectedResult)
   end)
+
+  it('puts the contraflow lane on the right side when oneway is -1', function()
+    local input = { ['cycleway'] = 'opposite_lane', ['oneway'] = '-1' }
+    local expectedResult = {
+      ['cycleway:left'] = 'no',
+      ['cycleway:right'] = 'lane',
+      ['cycleway:right:oneway'] = 'yes',
+      ['oneway:bicycle'] = 'no',
+      ['oneway'] = '-1',
+    }
+    transform_cycleway_opposite_schema(input)
+    assert.are.same(input, expectedResult)
+  end)
 end)

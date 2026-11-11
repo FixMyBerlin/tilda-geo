@@ -32,6 +32,14 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 - Lines of lanes and tracks tagged on the road point in the riding direction in `bikelanes` and `routing`, following `cycleway:<side>:oneway`. Without it, on a oneway road (also a roundabout) both sides run in the road direction; before, the left line always ran against the way. A contraflow lane needs `cycleway:<side>:oneway=-1`; `cycleway=opposite_lane|opposite_track` gets it. Two-way lanes keep left against and right with the way.
 - `bikelanes.offset` and `routing.offset` are signed relative to the line now (`+` left / `-` right of its direction), so most values are negative. Before, the sign was relative to the way.
 
+### `roads`, `bikelanes`, `parkings`, `routing`: `oneway=-1`, roundabouts
+
+- One-way tags (also `construction:*`) are cleaned once at the start of `roads_bikelanes` and `parking`: `1` and `true` become `yes`, a roundabout (also `junction=circular`) without `oneway` gets `oneway=yes`. Later steps only read `yes`, `-1` and `no`.
+- `roads.oneway`, `roads.oneway_bicycle` and `parkings.road_oneway` publish `oneway=-1` as `yes` (without the direction). Before, `-1` was `disallowed`. Roundabouts are `oneway=yes` now.
+- On `oneway=-1` roads the side rules follow the direction of travel: `cycleway=lane|track` without a side is the left side of the way (the right side is `not_expected`), `cycleway=opposite_lane|opposite_track` is the right side with `cycleway:right:oneway=yes`, and a cycleway with `oneway=-1` takes `traffic_sign:backward`. Before, these roads were handled like two-way roads.
+- Roundabouts count as one-way everywhere: `routing` carriageway edges of roundabouts are `oneway=yes` (before `no`), and so are `bikelanes` rows of the way itself.
+- The parking road width uses the oneway fallback for `oneway=-1` and roundabouts, so parking capacities there can change.
+
 ### `roads`, `roadsPathClasses`, `bikelanes`, `parkings`, `routing`: `width`
 
 - `parse_length` reads the seven most used decimal commas (`0,3`, `0,5`, `0,6`, `1,5`, `2,2`, `2,5`, `2,50`), which were empty before. A negative length is empty now.
