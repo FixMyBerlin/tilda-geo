@@ -1,5 +1,6 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useEffectEvent, useRef } from 'react'
+import { useSpaceFinderLayersActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-layers-store'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { Spinner } from '@/components/shared/Spinner/Spinner'
 import {
@@ -25,7 +26,8 @@ const COLORS: Record<string, string> = {
 
 /**
  * Polls a job until DONE/FAILED. On DONE, shows the run on the map + refreshes variant, and
- * switches on the map layers with the input data of the weighted factors.
+ * switches on the map layers with the input data of the weighted factors, the normal ones and
+ * the mode's own (Vegetation, Fahrbahnen, Zensus).
  */
 export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId: number }) => {
   const queryClient = useQueryClient()
@@ -43,8 +45,15 @@ export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId:
   // job is long done must not switch layers on again that the user has hidden since.
   const activeJobId = useRef<number | null>(null)
   const activateFactorLayers = useActivateSpaceFinderFactorLayers()
+  const { setVegetationVisible, setCarriagewaysVisible, setCensusVisible } =
+    useSpaceFinderLayersActions()
   const showFactorLayers = useEffectEvent(() => {
-    if (data?.weights) activateFactorLayers(data.weights)
+    if (!data) return
+    activateFactorLayers(data.weights)
+    // Only ever on, never off: a layer the user switched on stays.
+    if ((data.weights.w_vegetation ?? 0) > 0) setVegetationVisible(true)
+    if (data.excludeCarriageways) setCarriagewaysVisible(true)
+    if ((data.weights.w_bewohnerbedarf ?? 0) > 0) setCensusVisible(true)
   })
 
   useEffect(() => {

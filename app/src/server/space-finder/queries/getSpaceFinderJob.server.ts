@@ -51,5 +51,6 @@ export async function getSpaceFinderJob(data: z.infer<typeof JobIdInput>, header
     progressLabel: job.progressLabel,
     weights: (fc.weights ?? {}) as Record<string, number>,
     hasUserDatasets: (fc.user_datasets?.length ?? 0) > 0,
+    excludeCarriageways: fc.exclude_carriageways === true,
   }
 }
