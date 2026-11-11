@@ -31,6 +31,7 @@ export type SourcesRasterIdsTILDA =
   | 'brandenburg-aktualitaet'
   | 'nrw-ortho'
   | 'bayern-dop20'
+  | 'bayern-alkis-parzellarkarte'
 
 // https://console.mapbox.com/account/access-tokens/
 // https://console.mapbox.com/account/access-tokens/cmpe4fbj800im2pr3p8jz5qvj
@@ -64,7 +65,7 @@ export const sourcesBackgroundsRasterTilda: MapDataBackgroundSource<SourcesRaste
     maxzoom: 21,
     minzoom: 10,
     attributionHtml:
-      '<a target="_blank" href="https://fbinter.stadt-berlin.de/fb/berlin/service_intern.jsp?id=k_StraDa@senstadt&type=WMS">Geoportal Berlin / Straßenbefahrung 2014</a>',
+      '<a target="_blank" href="https://gdi.berlin.de">Geoportal Berlin / ALKIS Berlin</a>',
   },
   {
     id: 'mapnik',
@@ -427,5 +428,17 @@ export const sourcesBackgroundsRasterTilda: MapDataBackgroundSource<SourcesRaste
     tileSize: 512,
     attributionHtml:
       '<a target="_blank" href="https://geoservices.bayern.de">Bayerische Vermessungsverwaltung / DOP20</a>, CC BY 4.0',
+  },
+  {
+    // https://geoservices.bayern.de/od/wms/alkis/v1/parzellarkarte?SERVICE=WMS&REQUEST=GetCapabilities
+    id: 'bayern-alkis-parzellarkarte',
+    name: 'Bayern: ALKIS-Parzellarkarte',
+    tilesUrl:
+      'https://geoservices.bayern.de/od/wms/alkis/v1/parzellarkarte?LAYERS=by_alkis_parzellarkarte_farbe&STYLES=&FORMAT=image/png&TRANSPARENT=TRUE&VERSION=1.3.0&SERVICE=WMS&REQUEST=GetMap&CRS=EPSG:3857&WIDTH=512&HEIGHT=512&BBOX={bbox-epsg-3857}',
+    maxzoom: 21,
+    minzoom: 15, // The WMS renders only up to scale 1:5000; tiles below zoom 15 come back empty.
+    tileSize: 512,
+    attributionHtml:
+      '<a target="_blank" href="https://geodaten.bayern.de/opengeodata/OpenDataDetail.html?pn=parzellarkarte">Bayerische Vermessungsverwaltung / ALKIS-Parzellarkarte</a>, CC BY 4.0 (Grenzen nur bedingt für Maßentnahme geeignet)',
   },
 ]
