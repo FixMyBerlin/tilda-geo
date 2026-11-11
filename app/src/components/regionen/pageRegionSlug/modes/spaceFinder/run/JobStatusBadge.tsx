@@ -1,11 +1,12 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useEffect } from 'react'
+import { useEffect, useEffectEvent, useRef } from 'react'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { Spinner } from '@/components/shared/Spinner/Spinner'
 import {
   spaceFinderJobQueryOptions,
   spaceFinderVariantQueryOptions,
 } from '@/server/space-finder/spaceFinderQueryOptions'
+import { useActivateSpaceFinderFactorLayers } from '../display/useActivateSpaceFinderFactorLayers'
 import { deriveScoringStep, SpaceFinderRunSteps } from './SpaceFinderRunSteps'
 
 const LABELS: Record<string, string> = {
@@ -22,7 +23,10 @@ const COLORS: Record<string, string> = {
   FAILED: 'bg-red-100 text-red-800',
 }
 
-/** Polls a job until DONE/FAILED. On DONE, shows the run on the map + refreshes variant. */
+/**
+ * Polls a job until DONE/FAILED. On DONE, shows the run on the map + refreshes variant, and
+ * switches on the map layers with the input data of the weighted factors.
+ */
 export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId: number }) => {
   const queryClient = useQueryClient()
   const { clearInspectorFeatures } = useMapActions()
@@ -35,15 +39,28 @@ export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId:
     },
   })
 
+  // Only a job that was seen running here counts as "just finished": opening a variant whose
+  // job is long done must not switch layers on again that the user has hidden since.
+  const activeJobId = useRef<number | null>(null)
+  const activateFactorLayers = useActivateSpaceFinderFactorLayers()
+  const showFactorLayers = useEffectEvent(() => {
+    if (data?.weights) activateFactorLayers(data.weights)
+  })
+
   useEffect(() => {
+    if (data?.status === 'QUEUED' || data?.status === 'RUNNING') activeJobId.current = jobId
     if (data?.status !== 'DONE' || data.resultRunId == null) return
+    if (activeJobId.current === jobId) {
+      activeJobId.current = null
+      showFactorLayers()
+    }
     // No explicit "show this run" write: the shown run is always `variant.currentRunId` (D7), which
     // the worker already set server-side — this invalidation just refetches it.
     queryClient.invalidateQueries(spaceFinderVariantQueryOptions(variantId))
     queryClient.invalidateQueries({ queryKey: ['spaceFinder', 'areas'] })
     // An open hexagon inspector shows the previous run's frozen snapshot.
     clearInspectorFeatures()
-  }, [data?.status, data?.resultRunId, variantId, queryClient, clearInspectorFeatures])
+  }, [data?.status, data?.resultRunId, jobId, variantId, queryClient, clearInspectorFeatures])
 
   // The "Neu berechnen" button in RunButton already shows the finished state.
   if (!data || data.status === 'DONE') return null
