@@ -67,7 +67,7 @@ export const ModeListItem = ({
         onFocus={hoverHandlers.onFocus}
         onBlur={hoverHandlers.onBlur}
         className={twMerge(
-          'block w-full cursor-pointer px-4 py-3 text-left text-sm select-none',
+          'block w-full cursor-pointer px-4 py-2.5 text-left text-sm select-none',
           active
             ? ''
             : hoveredFromMap
