@@ -306,20 +306,22 @@ local footAndCyclewaySegregated = BikelaneCategory.new({
 
     -- Edge case: https://www.openstreetmap.org/way/1319011143#map=18/52.512226/13.288552
     -- No traffic_sign but mapper decided to map foot- and bike lane as separate geometry
-    -- We check for traffic_mode:right=foot
-    -- But in some cases, it is OK to map traffic_mode:right=foot but there is a separation.
-    -- Those cases are not `footAndCyclewaySegregated`. So if a separation is given, this has to be 'no'.
+    -- We check for traffic_mode:<side>=foot on either side: ways are drawn in the riding direction,
+    -- so a one-way cycleway cannot be reversed to put the footway on its right.
+    -- Eg. traffic_mode:left=foot https://www.openstreetmap.org/way/1196160658
+    -- But in some cases, it is OK to map traffic_mode:<side>=foot but there is a separation.
+    -- Those cases are not `footAndCyclewaySegregated`. So if a separation is given on that side, it has to be 'no'.
     -- Eg. https://www.openstreetmap.org/way/244549219
-    local separation_right = SANITIZE_ROAD_TAGS.separation(tags, 'right')
-    local separation_condition = true
-    if separation_right ~= nil and separation_right ~= SANITIZE_VALUES.disallowed then
-      separation_condition = separation_right == 'no'
+    local function foot_next_to_it(side)
+      local separation = SANITIZE_ROAD_TAGS.separation(tags, side)
+      local separation_condition = true
+      if separation ~= nil and separation ~= SANITIZE_VALUES.disallowed then
+        separation_condition = separation == 'no'
+      end
+      return SANITIZE_ROAD_TAGS.traffic_mode(tags, side) == 'foot' and separation_condition
     end
 
-    local traffic_mode_right = SANITIZE_ROAD_TAGS.traffic_mode(tags, 'right')
-    local traffic_mode_condition = traffic_mode_right == 'foot'
-
-    if tags.highway == 'cycleway' and traffic_mode_condition and separation_condition then
+    if tags.highway == 'cycleway' and (foot_next_to_it('right') or foot_next_to_it('left')) then
       return true
     end
   end

@@ -30,6 +30,30 @@ describe('bikelane_categories', function()
     end)
   end)
 
+  describe('`footAndCyclewaySegregated` mapped as two lines (traffic_mode:<side>=foot):', function()
+    local function category(extra)
+      local tags = { ['highway'] = 'cycleway', ['is_sidepath'] = 'yes', ['traffic_sign'] = 'none' }
+      for key, value in pairs(extra) do tags[key] = value end
+      return categorize_bikelane(tags).id
+    end
+
+    it('footway right of the cycleway', function()
+      assert.are.equal('footAndCyclewaySegregated_adjoining', category({ ['traffic_mode:right'] = 'foot' }))
+    end)
+
+    it('footway left of the cycleway', function()
+      assert.are.equal('footAndCyclewaySegregated_adjoining', category({ ['traffic_mode:left'] = 'foot' }))
+    end)
+
+    it('a separation on the footway side makes it a cycleway', function()
+      assert.are.equal('cycleway_adjoining', category({ ['traffic_mode:left'] = 'foot', ['separation:left'] = 'kerb' }))
+    end)
+
+    it('a separation on the other side does not matter', function()
+      assert.are.equal('footAndCyclewaySegregated_adjoining', category({ ['traffic_mode:left'] = 'foot', ['separation:right'] = 'kerb' }))
+    end)
+  end)
+
   describe('`footAndCyclewayShared` with highway=service:', function()
     it('should get the category for service road with bicycle=designated, foot=designated, segregated=no', function()
       local tags = {
