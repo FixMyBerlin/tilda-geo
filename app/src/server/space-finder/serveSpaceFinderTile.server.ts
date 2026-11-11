@@ -10,6 +10,7 @@ import { getAppSession } from '@/server/auth/session.server'
 import db from '@/server/db.server'
 import { geoDataClient } from '@/server/prisma-client.server'
 import {
+  spaceFinderHexagonResolutions,
   spaceFinderTileLayers,
   type SpaceFinderTileLayer,
 } from '@/server/space-finder/spaceFinderTilesPath'
@@ -29,6 +30,7 @@ const TileParamsSchema = z
     x: digits(10),
     y: digits(10),
     runId: digits(10).pipe(z.number().min(1).max(2147483647)),
+    res: z.enum(spaceFinderHexagonResolutions).optional(),
   })
   .refine((tile) => tile.x < 2 ** tile.z && tile.y < 2 ** tile.z)
 
@@ -107,10 +109,14 @@ export async function serveSpaceFinderTile(request: Request, params: unknown) {
   const session = await getAppSession(request.headers)
   if (!session?.userId) return unauthorizedJson()
 
-  const runIdParam = new URL(request.url).searchParams.get('run_id')
-  const parsed = TileParamsSchema.safeParse({ ...(params as object), runId: runIdParam })
+  const searchParams = new URL(request.url).searchParams
+  const parsed = TileParamsSchema.safeParse({
+    ...(params as object),
+    runId: searchParams.get('run_id'),
+    res: searchParams.get('res') ?? undefined,
+  })
   if (!parsed.success) return badRequestJson()
-  const { regionSlug, layer, runId, ...tile } = parsed.data
+  const { regionSlug, layer, runId, res, ...tile } = parsed.data
 
   if (!(await canReadRun(session, regionSlug, runId))) {
     // Non-members get the same answer for every reason (not a member, flag off, run of another
@@ -119,7 +125,7 @@ export async function serveSpaceFinderTile(request: Request, params: unknown) {
   }
 
   const rows = await geoDataClient.$queryRaw<{ mvt: Uint8Array | null }[]>(
-    Prisma.sql`SELECT ${Prisma.raw(tileFunctions[layer])}(${tile.z}::int, ${tile.x}::int, ${tile.y}::int, json_build_object('run_id', ${String(runId)}::text)) AS mvt`,
+    Prisma.sql`SELECT ${Prisma.raw(tileFunctions[layer])}(${tile.z}::int, ${tile.x}::int, ${tile.y}::int, json_build_object('run_id', ${String(runId)}::text, 'res', ${res ?? null}::text)) AS mvt`,
   )
   const mvt = rows[0]?.mvt
   const headers = {

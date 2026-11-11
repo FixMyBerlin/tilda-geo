@@ -57,6 +57,7 @@ describe('serveSpaceFinderTile', () => {
     ['x outside the zoom', { ...params, z: '3', x: '8' }, '?run_id=42'],
     ['y outside the zoom', { ...params, z: '3', y: '8' }, '?run_id=42'],
     ['exponent notation', { ...params, x: '1e3' }, '?run_id=42'],
+    ['unknown res', params, '?run_id=42&res=12'],
   ])('%s gets 400 without any query', async (_name, p, query) => {
     getAppSession.mockResolvedValue(member)
 
@@ -126,6 +127,18 @@ describe('serveSpaceFinderTile', () => {
     expect(queryRaw.mock.calls[0]?.[0].strings.join('?')).toContain(
       'space_finder.space_finder_hexagons(',
     )
+  })
+
+  test('res is passed to the tile function, a missing res as null', async () => {
+    getAppSession.mockResolvedValue(member)
+    findFirst.mockResolvedValue({ id: 42 })
+    queryRaw.mockResolvedValue([{ mvt: new Uint8Array([1]) }])
+
+    await serveSpaceFinderTile(requestFor('?run_id=42&res=13'), params)
+    await serveSpaceFinderTile(requestFor(), params)
+
+    expect(queryRaw.mock.calls[0]?.[0].values).toEqual([15, 17603, 10747, '42', '13'])
+    expect(queryRaw.mock.calls[1]?.[0].values).toEqual([15, 17603, 10747, '42', null])
   })
 
   test('layer picks its own function', async () => {

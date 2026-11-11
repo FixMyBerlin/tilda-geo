@@ -31,7 +31,7 @@ import {
   modePanelTintHairlineTopClassName,
 } from '../../modePanel.const'
 import { RemoveIconButton } from '../RemoveIconButton'
-import { FINE_HEXAGON_MIN_ZOOM } from '../spaceFinderHexagonResolution'
+import { FINE_HEXAGON_ZOOM } from '../spaceFinderHexagonResolution'
 import { spaceFinderDiscardLinkClass, spaceFinderDiscardRowClass } from '../spaceFinderPanelStyles'
 import { useSpaceFinderSelection } from '../useSpaceFinderSelection'
 import { candidateExportFileName, downloadCandidatesGeojson } from './spaceFinderCandidateExport'
@@ -180,7 +180,7 @@ export const SpaceFinderCandidatesSection = ({
     })
     map.easeTo({
       center: [(minLng + maxLng) / 2, (minLat + maxLat) / 2],
-      zoom: Math.max(map.getZoom(), FINE_HEXAGON_MIN_ZOOM),
+      zoom: Math.max(map.getZoom(), FINE_HEXAGON_ZOOM),
       duration: 500,
     })
   }
@@ -190,9 +190,9 @@ export const SpaceFinderCandidatesSection = ({
     setSelectActive(next)
     if (!next) return
     closeInspector()
-    // Below zoom 16 only coarse cells are shown, which cannot be selected — zoom in right away.
-    if (map && map.getZoom() < FINE_HEXAGON_MIN_ZOOM) {
-      map.zoomTo(FINE_HEXAGON_MIN_ZOOM, { duration: 600 })
+    // Coarse cells cannot be selected — zoom in right away, to where only fine cells are shown.
+    if (map && map.getZoom() < FINE_HEXAGON_ZOOM) {
+      map.zoomTo(FINE_HEXAGON_ZOOM, { duration: 600 })
     }
   }
 
@@ -219,19 +219,19 @@ export const SpaceFinderCandidatesSection = ({
         {selectActive ? 'Auswahl beenden' : 'Kandidaten auswählen'}
       </button>
 
-      {/* Like `QaZoomNotice`: below zoom 16 the map only shows averaged coarse cells, which
-          RegionMap does not accept as candidates. */}
-      {selectActive && (mapParam?.zoom ?? 0) < FINE_HEXAGON_MIN_ZOOM && (
+      {/* Like `QaZoomNotice`: below FINE_HEXAGON_ZOOM clicks go to the averaged coarse
+          cells, which RegionMap does not accept as candidates. */}
+      {selectActive && (mapParam?.zoom ?? 0) < FINE_HEXAGON_ZOOM && (
         <div className="flex items-start justify-between gap-3 rounded border border-yellow-200 bg-yellow-50 px-2 py-1.5">
           <p className="text-xs text-yellow-900">
-            Kandidaten lassen sich ab Zoomstufe {FINE_HEXAGON_MIN_ZOOM} auswählen — vorher zeigt die
-            Karte Mittelwerte über mehrere Flächen.
+            Kandidaten lassen sich erst weiter hineingezoomt auswählen — vorher zeigt die Karte
+            Mittelwerte über mehrere Flächen.
           </p>
           <button
             type="button"
             className={twJoin(modePanelSmallButtonClassName, 'shrink-0 border-yellow-300 bg-white')}
             disabled={!map}
-            onClick={() => map?.zoomTo(FINE_HEXAGON_MIN_ZOOM, { duration: 600 })}
+            onClick={() => map?.zoomTo(FINE_HEXAGON_ZOOM, { duration: 600 })}
           >
             Hineinzoomen
           </button>

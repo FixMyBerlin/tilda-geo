@@ -16,13 +16,34 @@ RETURNS bytea LANGUAGE plpgsql STABLE PARALLEL SAFE AS $$
 DECLARE
     run_id_val bigint := (query_params->>'run_id')::bigint;
     bounds     geometry := ST_TileEnvelope(z, x, y);
-    -- From z16 the fine BASE grid (res 13), below that the coarse aggregate
-    -- (res 11, ~49× fewer features). Must match AGG_H3_RES/BASE_H3_RES in
-    -- space-finder-worker/scoring/scorer.py.
-    res_val    smallint := CASE WHEN z >= 16 THEN 13 ELSE 11 END;
+    -- `res` from the map pins the grid (it loads both around the switch at z16, see
+    -- spaceFinderHexagonResolution.ts). Without it the zoom picks: from z16 the fine BASE
+    -- grid (res 13), below that the coarse aggregate (res 11, ~49× fewer features). Must
+    -- match AGG_H3_RES/BASE_H3_RES in space-finder-worker/scoring/scorer.py.
+    res_val    smallint := COALESCE(
+        NULLIF(query_params->>'res', '')::smallint,
+        CASE WHEN z >= 16 THEN 13 ELSE 11 END
+    );
     hex_mvt    bytea;
     label_mvt  bytea;
 BEGIN
+    -- Below z16 (FINE_HEXAGON_ZOOM in spaceFinderHexagonResolution.ts) the map only draws
+    -- the outlines of the fine cells, so they come as bare geometry. From z16 on the map
+    -- loads its own z16 tiles with all attributes.
+    IF res_val = 13 AND z < 16 THEN
+        SELECT ST_AsMVT(t, 'space_finder_hexagons', 4096, 'geom')
+        INTO hex_mvt
+        FROM (
+            SELECT ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom
+            FROM space_finder.scenario_hexagons
+            WHERE run_id = run_id_val
+              AND resolution = res_val
+              AND geom && bounds
+        ) t
+        WHERE t.geom IS NOT NULL;
+        RETURN hex_mvt;
+    END IF;
+
     SELECT ST_AsMVT(t, 'space_finder_hexagons', 4096, 'geom')
     INTO hex_mvt
     FROM (

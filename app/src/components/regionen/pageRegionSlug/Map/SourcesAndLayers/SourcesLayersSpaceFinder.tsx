@@ -1,4 +1,5 @@
 import { feature, featureCollection } from '@turf/helpers'
+import { Fragment } from 'react'
 import { Layer, Source } from 'react-map-gl/maplibre'
 import {
   useSpaceFinderCandidateSelectActive,
@@ -19,6 +20,10 @@ import {
   useSpaceFinderVegetationVisible,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-layers-store'
 import { useHoveredListItem } from '@/components/regionen/pageRegionSlug/modes/mode-list-store'
+import {
+  FINE_HEXAGON_PREVIEW_ZOOM,
+  FINE_HEXAGON_ZOOM,
+} from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderHexagonResolution'
 import { appliedMinAreaM2 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderModeParam'
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
@@ -32,8 +37,20 @@ import {
 import { getLayerHighlightId } from '../utils/layerHighlight'
 import { LayerHighlight } from './LayerHighlight'
 
-export const spaceFinderHexagonsSourceId = 'space-finder-hexagons-source'
-export const spaceFinderHexagonsLayerId = 'space-finder-hexagons'
+type HexagonGrid = 'coarse' | 'fine'
+
+// One source per grid, each pinned to its H3 resolution with `res` (see
+// spaceFinderHexagonResolution.ts). Around the switch both are drawn: one grid colored, the other
+// only as fading outlines.
+export const spaceFinderHexagonsSourceIds: Record<HexagonGrid, string> = {
+  coarse: 'space-finder-hexagons-coarse-source',
+  fine: 'space-finder-hexagons-fine-source',
+}
+export const spaceFinderHexagonsLayerIds: Record<HexagonGrid, string> = {
+  coarse: 'space-finder-hexagons-coarse',
+  fine: 'space-finder-hexagons-fine',
+}
+const hexagonGridResolution = { coarse: '11', fine: '13' } as const
 /**
  * Two invisible anchor layers, mounted on the first render (with or without a `runId`) and
  * never removed or recreated afterwards. `SpaceFinderOverlayAnchors` sits at the same position
@@ -148,27 +165,42 @@ const clusterOpacity = (filterOn: boolean, minArea: number, maxOpacity: number) 
       ]
     : maxOpacity
 
+// Grid lines around the switch to the fine grid (FINE_HEXAGON_ZOOM) are their own line layers, so
+// they can fade independently of the colors: zooming in, the fine lines fade in before the switch
+// (on top of the coarse colors), the coarse lines fade out after it (on top of the fine colors,
+// shorter, so they don't linger) — and back when zooming out.
+const fineHexagonOutlineLayerId = 'space-finder-hexagons-fine-outline'
+const coarseHexagonOutlineLayerId = 'space-finder-hexagons-coarse-outline'
+const HEXAGON_OUTLINE_COLOR = 'rgba(0,0,0,0.15)'
+const COARSE_GRID_MAX_ZOOM = FINE_HEXAGON_ZOOM + 0.5
+
+// Tiles load at whole zooms, so the sources split at a whole zoom.
+const HEXAGON_TILES_SPLIT_ZOOM = Math.floor(FINE_HEXAGON_PREVIEW_ZOOM)
+
 const hexagonFillLayerProps = (
+  grid: HexagonGrid,
   property: string,
   mode: SpaceFinderScoreMode,
   filterOn: boolean,
   minArea: number,
   opacityPct: number,
 ) => ({
-  id: spaceFinderHexagonsLayerId,
-  source: spaceFinderHexagonsSourceId,
+  id: spaceFinderHexagonsLayerIds[grid],
+  source: spaceFinderHexagonsSourceIds[grid],
   'source-layer': spaceFinderHexagonsSourceLayer,
   type: 'fill' as const,
+  ...(grid === 'coarse' ? { maxzoom: FINE_HEXAGON_ZOOM } : { minzoom: FINE_HEXAGON_ZOOM }),
   paint: {
     'fill-color': scoreColor(property, mode) as any,
     'fill-opacity': clusterOpacity(filterOn, minArea, (opacityPct / 100) * MAX_FILL_OPACITY) as any,
-    'fill-outline-color': 'rgba(0,0,0,0.15)',
+    // The coarse grid lines come from coarseHexagonOutlineLayerId.
+    'fill-outline-color': grid === 'coarse' ? 'rgba(0,0,0,0)' : HEXAGON_OUTLINE_COLOR,
   },
 })
 
 const hexagonLabelLayerProps = (property: string) => ({
   id: spaceFinderHexagonsLabelLayerId,
-  source: spaceFinderHexagonsSourceId,
+  source: spaceFinderHexagonsSourceIds.fine,
   'source-layer': spaceFinderHexagonsLabelSourceLayer,
   type: 'symbol' as const,
   minzoom: HEXAGON_LABEL_MIN_ZOOM,
@@ -432,17 +464,9 @@ export const SourcesLayersSpaceFinder = () => {
     )
 
   // MapLibre needs absolute tile URLs (same as private backgrounds in useRegionBackgrounds).
-  const hexagonsUrl = getAppBaseUrl(spaceFinderTilesPath(regionSlug, 'hexagons', runId))
   const vegetationUrl = getAppBaseUrl(spaceFinderTilesPath(regionSlug, 'vegetation', runId))
   const carriagewaysUrl = getAppBaseUrl(spaceFinderTilesPath(regionSlug, 'carriageways', runId))
   const censusUrl = getAppBaseUrl(spaceFinderTilesPath(regionSlug, 'census', runId))
-  const fillLayerProps = hexagonFillLayerProps(
-    SPACE_FINDER_SCORE_PROPERTY[scoreMode],
-    scoreMode,
-    areaFilterOn,
-    minArea,
-    hexagonsOpacityPct,
-  )
 
   return (
     <>
@@ -451,16 +475,91 @@ export const SourcesLayersSpaceFinder = () => {
 
       {hexagonsOpacityPct > 0 && (
         <>
-          <Source
-            id={spaceFinderHexagonsSourceId}
-            type="vector"
-            tiles={[hexagonsUrl]}
-            promoteId="h3_id"
-          />
-          <Layer {...fillLayerProps} beforeId={spaceFinderOverlayCeilingLayerId} />
-          <LayerHighlight
-            {...fillLayerProps}
-            id={getLayerHighlightId(spaceFinderHexagonsLayerId)}
+          {/* Coarse first: each layer attaches right below the ceiling, so fine ends up on top. */}
+          {(['coarse', 'fine'] as const).map((grid) => {
+            const fillLayerProps = hexagonFillLayerProps(
+              grid,
+              SPACE_FINDER_SCORE_PROPERTY[scoreMode],
+              scoreMode,
+              areaFilterOn,
+              minArea,
+              hexagonsOpacityPct,
+            )
+            return (
+              <Fragment key={grid}>
+                <Source
+                  id={spaceFinderHexagonsSourceIds[grid]}
+                  type="vector"
+                  tiles={[
+                    getAppBaseUrl(
+                      spaceFinderTilesPath(
+                        regionSlug,
+                        'hexagons',
+                        runId,
+                        hexagonGridResolution[grid],
+                      ),
+                    ),
+                  ]}
+                  promoteId="h3_id"
+                  // Tiles only for the zooms the grid is drawn at: coarse z15 tiles are
+                  // overzoomed up to FINE_HEXAGON_ZOOM, fine tiles start with the outline preview.
+                  {...(grid === 'coarse'
+                    ? { maxzoom: HEXAGON_TILES_SPLIT_ZOOM }
+                    : { minzoom: HEXAGON_TILES_SPLIT_ZOOM })}
+                />
+                <Layer {...fillLayerProps} beforeId={spaceFinderOverlayCeilingLayerId} />
+                {grid === 'fine' && (
+                  <Layer
+                    id={fineHexagonOutlineLayerId}
+                    source={spaceFinderHexagonsSourceIds.fine}
+                    source-layer={spaceFinderHexagonsSourceLayer}
+                    type="line"
+                    minzoom={FINE_HEXAGON_PREVIEW_ZOOM}
+                    maxzoom={FINE_HEXAGON_ZOOM}
+                    paint={{
+                      'line-color': HEXAGON_OUTLINE_COLOR,
+                      'line-width': 1,
+                      'line-opacity': [
+                        'interpolate',
+                        ['linear'],
+                        ['zoom'],
+                        FINE_HEXAGON_PREVIEW_ZOOM,
+                        0,
+                        FINE_HEXAGON_ZOOM,
+                        1,
+                      ],
+                    }}
+                    beforeId={spaceFinderOverlayCeilingLayerId}
+                  />
+                )}
+                <LayerHighlight
+                  {...fillLayerProps}
+                  id={getLayerHighlightId(spaceFinderHexagonsLayerIds[grid])}
+                  beforeId={spaceFinderOverlayCeilingLayerId}
+                />
+              </Fragment>
+            )
+          })}
+          {/* After both fills, so the coarse lines also show on top of the fine colors. */}
+          <Layer
+            id={coarseHexagonOutlineLayerId}
+            source={spaceFinderHexagonsSourceIds.coarse}
+            source-layer={spaceFinderHexagonsSourceLayer}
+            type="line"
+            maxzoom={COARSE_GRID_MAX_ZOOM}
+            paint={{
+              'line-color': HEXAGON_OUTLINE_COLOR,
+              'line-width': 1,
+              'line-opacity': [
+                'interpolate',
+                ['linear'],
+                ['zoom'],
+                FINE_HEXAGON_ZOOM,
+                1,
+                COARSE_GRID_MAX_ZOOM,
+                0,
+              ],
+            }}
             beforeId={spaceFinderOverlayCeilingLayerId}
           />
           <Layer

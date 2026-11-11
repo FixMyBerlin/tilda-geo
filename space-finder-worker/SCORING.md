@@ -49,3 +49,5 @@ mean of the score columns per `h3.cell_to_parent`; `eignungsklasse` is derived
 again from that. No re-scoring, no spatial joins. The zoom branch
 (`z >= 16 → res 13, otherwise res 11`) must match the tile function
 `space_finder.space_finder_hexagons` in [`sql/martin_functions.sql`](sql/martin_functions.sql).
+The map loads both grids around the switch at z16: below it the fine cells
+only draw outlines, so the tile function sends them as bare geometry.

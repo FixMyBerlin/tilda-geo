@@ -19,7 +19,7 @@ import { reviewEntriesInteractiveLayerIds } from '../SourcesAndLayers/reviewEntr
 import { internalNotesLayerId } from '../SourcesAndLayers/SourcesLayersInternalNotes'
 import { osmNotesLayerId } from '../SourcesAndLayers/SourcesLayersOsmNotes'
 import { qaLayerId } from '../SourcesAndLayers/SourcesLayersQa'
-import { spaceFinderHexagonsLayerId } from '../SourcesAndLayers/SourcesLayersSpaceFinder'
+import { spaceFinderHexagonsLayerIds } from '../SourcesAndLayers/SourcesLayersSpaceFinder'
 import { MASK_INTERACTIVE_LAYER_IDS } from './maskLayerUtils'
 
 type Props = { categories: MapDataCategoryConfig[] | undefined }
@@ -131,7 +131,7 @@ export const useInteractiveLayers = () => {
   }
 
   if (currentMode.isSpaceFinder && spaceFinderRun != null) {
-    activeCategoryLayerIds.push(spaceFinderHexagonsLayerId)
+    activeCategoryLayerIds.push(...Object.values(spaceFinderHexagonsLayerIds))
   }
 
   // active layer from datasets

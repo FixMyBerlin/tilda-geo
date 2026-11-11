@@ -58,7 +58,10 @@ import { useReviewDraw } from '../modes/reviewLists/drawing/useReviewDraw'
 import { useReviewDrawActive } from '../modes/reviewLists/useReviewDrawActive'
 import { SpaceFinderMapDrawing } from '../modes/spaceFinder/drawing/SpaceFinderMapDrawing'
 import { useSpaceFinderDraw } from '../modes/spaceFinder/drawing/useSpaceFinderDraw'
-import { isCoarseHexagon } from '../modes/spaceFinder/spaceFinderHexagonResolution'
+import {
+  isActiveHexagonGrid,
+  isCoarseHexagon,
+} from '../modes/spaceFinder/spaceFinderHexagonResolution'
 import { useSpaceFinderSelection } from '../modes/spaceFinder/useSpaceFinderSelection'
 import { useCurrentMode } from '../modes/useCurrentMode'
 import { useRegion } from '../regionUtils/useRegion'
@@ -93,7 +96,12 @@ const extractInteractiveFeatures = (
   features: MapGeoJSONFeature[] | undefined,
 ) => {
   if (!features) return []
-  return features.filter(({ sourceLayer }) => {
+  return features.filter(({ sourceLayer, properties }) => {
+    // Flächenfinder: only the grid that is colored at this zoom counts (FINE_HEXAGON_ZOOM in
+    // spaceFinderHexagonResolution.ts).
+    if (sourceLayer === spaceFinderHexagonsSourceLayer) {
+      return isActiveHexagonGrid(properties?.h3_id, mapParam.zoom)
+    }
     const layer = String(sourceLayer) as keyof InteracitvityConfiguartion
     const config = interactivityConfiguration[layer]
     return config === undefined || mapParam.zoom >= config.minzoom
@@ -169,10 +177,15 @@ export const RegionMap = () => {
 
     // Flächenfinder selection tool (`SpaceFinderCandidatesSection`): while active, a click on a
     // result hexagon collects candidates instead of opening the inspector. A click on empty map
-    // leaves the selection untouched. Coarse cells (below zoom 16) are only averages over many
-    // areas and don't work as candidates — the panel asks the user to zoom in.
+    // leaves the selection untouched. Coarse cells (the active grid below FINE_HEXAGON_ZOOM)
+    // are only averages over many areas and don't work as candidates — the panel asks the user
+    // to zoom in.
     if (currentMode.isSpaceFinder && candidateSelectActive) {
-      const hexagon = features?.find((f) => f.sourceLayer === spaceFinderHexagonsSourceLayer)
+      const hexagon = features?.find(
+        (f) =>
+          f.sourceLayer === spaceFinderHexagonsSourceLayer &&
+          isActiveHexagonGrid(f.properties?.h3_id, mapParam.zoom),
+      )
       const h3Id = hexagon?.properties?.h3_id
       if (
         hexagon &&

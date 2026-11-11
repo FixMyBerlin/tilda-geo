@@ -162,10 +162,27 @@ async function registerHexagonsFunction() {
       label_mvt bytea;
       rid bigint := NULLIF(query_params->>'run_id', '')::bigint;
       bounds geometry := ST_TileEnvelope(z, x, y);
-      res_val smallint := CASE WHEN z >= 16 THEN 13 ELSE 11 END;
+      -- res from the map pins the grid (it loads both around the switch at z16, see
+      -- spaceFinderHexagonResolution.ts); without it the zoom picks: from z16 the fine grid
+      -- (13), below that the coarse aggregate (11).
+      res_val smallint := COALESCE(
+        NULLIF(query_params->>'res', '')::smallint,
+        CASE WHEN z >= 16 THEN 13 ELSE 11 END
+      );
     BEGIN
       IF rid IS NULL THEN
         RETURN NULL;
+      END IF;
+      -- Below z16 (FINE_HEXAGON_ZOOM) the map only draws the outlines of the fine cells, so
+      -- they come as bare geometry. From z16 on the map loads its own z16 tiles with all
+      -- attributes.
+      IF res_val = 13 AND z < 16 THEN
+        SELECT INTO hex_mvt ST_AsMVT(tile, 'space_finder_hexagons', 4096, 'geom') FROM (
+          SELECT ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom
+          FROM space_finder.scenario_hexagons
+          WHERE run_id = rid AND resolution = res_val AND (geom && bounds)
+        ) AS tile;
+        RETURN NULLIF(hex_mvt, ''::bytea);
       END IF;
       SELECT INTO hex_mvt ST_AsMVT(tile, 'space_finder_hexagons', 4096, 'geom') FROM (
         SELECT

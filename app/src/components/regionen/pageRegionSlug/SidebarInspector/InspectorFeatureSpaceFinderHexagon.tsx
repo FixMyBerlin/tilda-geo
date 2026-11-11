@@ -257,7 +257,7 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
   const props = feature.properties
   if (!props) return null
 
-  // Coarse cells (aggregate grid below zoom 16) only carry averages: no exclusion reasons
+  // Coarse cells (aggregate grid, see spaceFinderHexagonResolution.ts) only carry averages: no exclusion reasons
   // and no per-dataset breakdown (see `aggregate_hexagons` in the worker).
   const coarseCell = isCoarseHexagon(props.h3_id)
   const eigendatenDetails = parseEigendatenDetails(props.eigendaten_details)
