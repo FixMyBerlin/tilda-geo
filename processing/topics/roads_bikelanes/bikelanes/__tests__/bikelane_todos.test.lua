@@ -682,5 +682,25 @@ describe('bikelane_todos', function()
         assert.are.equal(table_includes(lane._todo_list, 'advisory_or_exclusive__mapillary'), false)
       end
     end)
+
+    it('sidewalks tagged on the road also use the coverage of the road', function()
+      local result = run_bikelanes({
+        tags = {
+          ['highway'] = 'residential',
+          ['sidewalk:right'] = 'yes',
+          ['sidewalk:right:bicycle'] = 'designated',
+          ['mapillary_coverage'] = 'pano',
+        },
+        id = 1,
+        type = 'way'
+      })
+      local sidewalk = nil
+      for _, row in ipairs(result) do
+        if row._side == 'right' then sidewalk = row end
+      end
+      assert.is_not_nil(sidewalk)
+      assert.are.equal(sidewalk._todo_list['unexpected_bicycle_access_on_footway'], 'prio1')
+      assert.are.equal(sidewalk._todo_list['unexpected_bicycle_access_on_footway__mapillary'], 'prio1')
+    end)
   end)
 end)

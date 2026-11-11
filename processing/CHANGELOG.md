@@ -10,7 +10,7 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ### `todos_lines` (bikelanes): `__mapillary` todos and priorities on lanes
 
-- Lanes and tracks tagged on the road (`cycleway:left|right|both`) use the road's `mapillary_coverage`. Before, they never got a `__mapillary` todo (e.g. `advisory_or_exclusive__mapillary`, `needs_clarification__mapillary`) and never priority 1 from coverage. The MapRoulette challenges of the `__mapillary` campaigns gain tasks for these lanes.
+- Lanes, tracks and sidewalks tagged on the road (`cycleway:left|right|both`, `sidewalk:left|right|both`) use the road's `mapillary_coverage`. Before, they never got a `__mapillary` todo (e.g. `advisory_or_exclusive__mapillary`, `needs_clarification__mapillary`, `unexpected_bicycle_access_on_footway__mapillary`) and never priority 1 from coverage, also in the regular campaigns. The MapRoulette challenges of the `__mapillary` campaigns gain tasks for them.
 
 ### `roads`, `roadsPathClasses`, `bikeSuitability`, `highwayAreas`, `bikelanes`: `description`
 
