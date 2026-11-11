@@ -49,7 +49,7 @@ const data = {
       description:
         'Hinweise zu diesem Weg: von TILDA ergänzte Hinweise, zum Beispiel zu abweichenden Oberflächen einzelner Straßenhälften oder zu Sperrungen, und die Beschreibung und Notiz aus OpenStreetMap (`description`, `note`). Die TILDA-Hinweise sind als Kürzel gespeichert, ihre Bedeutung steht in der Werteliste; `{value}` steht dort für die jeweilige Oberfläche oder Fahrqualität.',
       offset:
-        'Reiner Darstellungswert für den Kartenstil – empfohlener seitlicher Versatz in Metern. Die Geometrie bleibt auf der Straßen-Mittellinie; der Versatz wird ausschließlich visuell als `line-offset` angewendet und verändert die Daten nicht. Vorzeichen: positiv = links, negativ = rechts der Mittellinie. Der Betrag wird im Processing aus der halben Straßenbreite berechnet.',
+        'Reiner Darstellungswert für den Kartenstil – empfohlener seitlicher Versatz in Metern. Die Geometrie bleibt auf der Straßen-Mittellinie; der Versatz wird ausschließlich visuell als `line-offset` angewendet und verändert die Daten nicht. Vorzeichen bezogen auf die Richtung der Linie: positiv = links, negativ = rechts der Linie. Weil die Linien in Fahrtrichtung zeigen, ist der Wert bei Rechtsverkehr in der Regel negativ. Der Betrag wird im Processing aus der halben Straßenbreite berechnet.',
     },
     values: {
       lifecycle: {
@@ -57,10 +57,11 @@ const data = {
           'Aus `temporary=yes` am Weg oder `cycleway:<Seite>:temporary=yes` / `sidewalk:<Seite>:temporary=yes` für eine Seite. Radwege und Gehwege an einer temporären Straße sind ebenfalls temporär.',
       },
       oneway: {
+        yes: 'Laut OSM-Daten nur in eine Richtung befahrbar.',
         assumed_no:
-          'Keine explizite OSM-Angabe zur Verkehrsrichtung vorhanden. Aus Führungsform und Umfeld wird hier beide Richtungen als wahrscheinlich angenommen.',
+          'Keine OSM-Angabe zur Verkehrsrichtung. Bei Radwegen und gemeinsamen Geh- und Radwegen nehmen wir beide Richtungen an. Außerorts sind straßenbegleitende Radwege oft in beide Richtungen freigegeben, ohne dass das in OSM steht; innerorts ist die Richtung meist angegeben.',
         implicit_yes:
-          'Keine explizite OSM-Angabe (`oneway` / `oneway:bicycle`). Aus der Führungsform abgeleitet (z. B. Schutzstreifen), nicht aus einem oneway-Tag gelesen.',
+          'Keine OSM-Angabe zur Verkehrsrichtung. Aus der Führungsform abgeleitet, denn Schutz- und Radfahrstreifen sind fast immer nur in eine Richtung befahrbar.',
       },
       tunnel: {
         yes: 'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',

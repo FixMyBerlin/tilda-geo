@@ -50,12 +50,12 @@ local function roads_bikelanes_bikelanes(context)
       local meta = object_meta
 
       local tags = merge_table(extract_public_tags(cycleway), result_tags)
-      orient_line_direction_tags(tags, cycleway._side)
+      orient_line_direction_tags(tags, cycleway._line_reversed)
 
-      -- Geometry stays on the road centerline. Left-side lines run against the OSM way
-      -- (right-hand-traffic flow); right and self lines run with it.
+      -- Geometry stays on the road centerline. Lines of lanes on the road point in the riding
+      -- direction (see `side_line_reversed`); self lines run with the way.
       local geom = object_geom
-      if cycleway._side == 'left' then
+      if cycleway._line_reversed then
         geom = reverse_linestring(object_geom)
       end
 

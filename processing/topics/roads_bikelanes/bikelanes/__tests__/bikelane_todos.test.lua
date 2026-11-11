@@ -392,6 +392,40 @@ describe('bikelane_todos', function()
       assert.are.equal(table_includes(data._todo_list, 'missing_oneway'), true)
     end)
 
+    it('skips lanes and tracks tagged on the road (one-way per side by default)', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'secondary',
+          ['sidewalk:right'] = 'yes',
+          ['sidewalk:right:bicycle'] = 'yes',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local right = nil
+      for _, cycleway in ipairs(run_bikelanes(input_object)) do
+        if cycleway._side == 'right' then right = cycleway end
+      end
+      assert.are.equal(right.category, 'footwayBicycleYes_adjoining')
+      assert.are.equal(right.oneway, 'implicit_yes')
+      assert.are.equal(table_includes(right._todo_list, 'missing_oneway'), false)
+    end)
+
+    it('skips own geometries with oneway=-1', function()
+      local input_object = {
+        tags = {
+          ['highway'] = 'cycleway',
+          ['is_sidepath'] = 'yes',
+          ['oneway'] = '-1',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local data = run_bikelanes(input_object)[1]
+      assert.are.equal(data.oneway, 'yes')
+      assert.are.equal(table_includes(data._todo_list, 'missing_oneway'), false)
+    end)
+
     it('skips specific category cyclewayLink', function()
       local input_object = {
         tags = {

@@ -8,6 +8,7 @@ local derive_smoothness = require('topics.helper.derive_smoothness')
 local bikelane_todo_categories = require('topics.roads_bikelanes.bikelanes.bikelane_todo_categories')
 local collect_todos = require('topics.helper.collect_todos')
 local derive_oneway = require('topics.roads_bikelanes.bikelanes.derive_oneway')
+local side_line_reversed = require('topics.roads_bikelanes.bikelanes.helper.side_line_reversed')
 local default_id = require('topics.helper.default_id')
 local derive_traffic_signs = require('topics.helper.derive_traffic_signs')
 local to_markdown_list = require('topics.helper.to_markdown_list')
@@ -27,11 +28,6 @@ local SURFACE_TAGS = require('topics.roads_bikelanes.bikelanes.helper.derive_bik
 local maxspeed = require('topics.roads_bikelanes.maxspeed.maxspeed')
 local adjoining_context = require('topics.roads_bikelanes.pseudo_tags_sidepath.adjoining_context')
 local HIGHWAYS = require('topics.helper.highway_classes')
-
-local side_sign_map = {
-  ['left'] = 1,
-  ['right'] = -1,
-}
 
 local footway_transformation = CenterLineTransformation.new({
   highway = 'footway',
@@ -148,11 +144,16 @@ local function bikelanes(object_tags, object_geom)
           -- object_tags is the parent centerline; maxspeed() reads exactly the tags the old
           -- synthetic-table rebuild copied (maxspeed*/zone:maxspeed/source:maxspeed + highway).
           result_tags.parent_maxspeed = maxspeed(object_tags).maxspeed
-          -- Recommended sideways offset in meters (signed: + left / - right of the
-          -- centerline). The geometry itself stays on the road centerline; this value
-          -- is exported as the `offset` attribute and consumed purely visually by the
-          -- map style (`line-offset`). See topic-doc chapter `versetzte-geometrien`.
-          result_tags.offset = side_sign_map[transformed_tags._side] * road_width(object_tags) / 2
+          -- The line points in the riding direction, see `side_line_reversed`.
+          local line_reversed = side_line_reversed(transformed_tags)
+          result_tags._line_reversed = line_reversed
+          -- Recommended sideways offset in meters, signed relative to the published line
+          -- (+ left / - right of its direction). The geometry itself stays on the road
+          -- centerline; this value is exported as the `offset` attribute and consumed purely
+          -- visually by the map style (`line-offset`). See topic-doc chapter `versetzte-geometrien`.
+          -- In right-hand traffic the lane usually lies to the right of its line (negative).
+          local lane_left_of_line = (transformed_tags._side == 'left') ~= line_reversed
+          result_tags.offset = (lane_left_of_line and 1 or -1) * road_width(object_tags) / 2
         elseif HIGHWAYS.path_classes[transformed_tags.highway]
           or HIGHWAYS.sidepath_highway_classes[transformed_tags.highway] then
           merge_table(

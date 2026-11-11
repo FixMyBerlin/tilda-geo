@@ -26,11 +26,14 @@ local function transform_cycleway_opposite_schema(destTags)
     unmodified_tags.cycleway = destTags.cycleway
     unmodified_tags['cycleway:right'] = destTags['cycleway:right']
     unmodified_tags['cycleway:left'] = destTags['cycleway:left']
+    unmodified_tags['cycleway:left:oneway'] = destTags['cycleway:left:oneway']
     unmodified_tags['oneway:bicycle'] = destTags['oneway:bicycle']
 
     destTags['cycleway'] = nil
     destTags['cycleway:right'] = 'no'
     destTags['cycleway:left'] = 'lane'
+    -- Explicit, because on a oneway road both sides follow the road unless tagged otherwise.
+    destTags['cycleway:left:oneway'] = destTags['cycleway:left:oneway'] or '-1'
     destTags['oneway:bicycle'] = 'no'
     return unmodified_tags
   end
@@ -40,11 +43,14 @@ local function transform_cycleway_opposite_schema(destTags)
     unmodified_tags.cycleway = destTags.cycleway
     unmodified_tags['cycleway:right'] = destTags['cycleway:right']
     unmodified_tags['cycleway:left'] = destTags['cycleway:left']
+    unmodified_tags['cycleway:left:oneway'] = destTags['cycleway:left:oneway']
     unmodified_tags['oneway:bicycle'] = destTags['oneway:bicycle']
 
     destTags['cycleway'] = nil
     destTags['cycleway:right'] = 'no'
     destTags['cycleway:left'] = 'track'
+    -- Explicit, because on a oneway road both sides follow the road unless tagged otherwise.
+    destTags['cycleway:left:oneway'] = destTags['cycleway:left:oneway'] or '-1'
     destTags['oneway:bicycle'] = 'no'
     return unmodified_tags
   end

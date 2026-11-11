@@ -25,6 +25,13 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 - Bikelanes and sidewalks of a road with `temporary=yes` are `lifecycle=temporary` now (before only the road), like they already were for `construction`.
 - `construction:cycleway=*` without a side only makes the bikelanes `lifecycle=construction`, no longer the road.
 
+### `bikelanes`, `routing`, `todos_lines`: `oneway`, `offset`
+
+- `oneway=-1` (one-way against the drawing direction of the way) and `oneway=1` are explicit values now, also as `oneway:bicycle=-1` and `cycleway:<side>:oneway=-1`. They give `oneway=yes`. Before, `-1` counted as "not tagged" (`assumed_no` / `implicit_yes`). `routing` reverses the edge of own lines, now also for `oneway:bicycle=-1`.
+- `missing_oneway` only lists own geometries. Lanes and tracks tagged on the road are left out, because the campaign led to `cycleway:both:oneway=yes`, which is wrong for the left side of a two-way road. Without a tag, lanes stay `implicit_yes` and tracks `assumed_no`.
+- Lines of lanes and tracks tagged on the road point in the riding direction in `bikelanes` and `routing`, following `cycleway:<side>:oneway`. Without it, on a oneway road (also a roundabout) both sides run in the road direction; before, the left line always ran against the way. A contraflow lane needs `cycleway:<side>:oneway=-1`; `cycleway=opposite_lane|opposite_track` gets it. Two-way lanes keep left against and right with the way.
+- `bikelanes.offset` and `routing.offset` are signed relative to the line now (`+` left / `-` right of its direction), so most values are negative. Before, the sign was relative to the way.
+
 ### `roads`, `roadsPathClasses`, `bikelanes`, `parkings`, `routing`: `width`
 
 - `parse_length` reads the seven most used decimal commas (`0,3`, `0,5`, `0,6`, `1,5`, `2,2`, `2,5`, `2,50`), which were empty before. A negative length is empty now.

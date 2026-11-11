@@ -537,6 +537,9 @@ local missing_oneway = BikelaneTodo.new({
     -- Skip if the 'track' campaign is present
     if needs_clarification_track(object_tags, result_tags) then return false end
     if needs_clarification(object_tags, result_tags) then return false end
+    -- Lanes and tracks tagged on the road are left out: asking for the direction there led to
+    -- `cycleway:both:oneway=yes`, which is wrong for the left side of a two-way road.
+    if object_tags._parent ~= nil then return false end
     -- We rely on `_implicitOneWayConfidence` from `processing/topics/roads_bikelanes/bikelanes/BikelaneCategories.lua`
     -- But some infra it not relevant enough for now:
     if result_tags.category == 'crossing' then return false end

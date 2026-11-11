@@ -335,13 +335,14 @@ const data = {
   'atlas_bikelanes--oneway--key': 'Verkehrsrichtung',
   'atlas_bikelanes--oneway=assumed_no': 'Wahrscheinlich beide Richtungen',
   'atlas_bikelanes--oneway=assumed_no--description':
-    'Keine explizite OSM-Angabe zur Verkehrsrichtung vorhanden. Aus Führungsform und Umfeld wird hier beide Richtungen als wahrscheinlich angenommen.',
+    'Keine OSM-Angabe zur Verkehrsrichtung. Bei Radwegen und gemeinsamen Geh- und Radwegen nehmen wir beide Richtungen an. Außerorts sind straßenbegleitende Radwege oft in beide Richtungen freigegeben, ohne dass das in OSM steht; innerorts ist die Richtung meist angegeben.',
   'atlas_bikelanes--oneway=car_not_bike': 'Beide Richtungen für Fahrrad; Einbahnstraße für Kfz',
   'atlas_bikelanes--oneway=implicit_yes': 'Eine Richtung (abgeleitet)',
   'atlas_bikelanes--oneway=implicit_yes--description':
-    'Keine explizite OSM-Angabe (`oneway` / `oneway:bicycle`). Aus der Führungsform abgeleitet (z. B. Schutzstreifen), nicht aus einem oneway-Tag gelesen.',
+    'Keine OSM-Angabe zur Verkehrsrichtung. Aus der Führungsform abgeleitet, denn Schutz- und Radfahrstreifen sind fast immer nur in eine Richtung befahrbar.',
   'atlas_bikelanes--oneway=no': 'Beide Richtungen',
   'atlas_bikelanes--oneway=yes': 'Eine Richtung',
+  'atlas_bikelanes--oneway=yes--description': 'Laut OSM-Daten nur in eine Richtung befahrbar.',
   'atlas_bikelanes--operator_type--key': 'Betreibertyp',
   'atlas_bikelanes--operator_type=private': 'Privat',
   'atlas_bikelanes--operator_type=public': 'Öffentlich',

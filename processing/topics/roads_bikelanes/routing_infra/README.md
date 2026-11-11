@@ -7,7 +7,7 @@ Score-free road+bike edges for routing. Processing writes to `routing` (`roads_b
 - One OSM way → **0..N rows**, but **one row per source object** (carriageway, each left/right lane, the path). No row is split by travel direction.
 - Direction: **`oneway=yes|no`** (may a cyclist ride against the line?) plus geometry direction. With `yes` the line points in the legal direction (OSM `oneway=-1` → reversed).
 - **`oneway_motor=yes`**: cars are one-way, bikes ride both ways (carriageway, Fahrradstraße). The line points along the car direction, so riding against it is contraflow. Routers can use this for a separate reverse cost.
-- Left/right lanes stay on the centerline. Left side (`offset` > 0) runs against the OSM way, same as `bikelanes`. Right side runs with the OSM way.
+- Left/right lanes stay on the centerline and use the same line direction as `bikelanes`: lines point in the riding direction (`cycleway:<side>:oneway`; without it right with the OSM way and left against it, on a oneway road both in the road direction). Two-way lanes keep left against and right with the OSM way. `offset` is signed relative to that line (`+` left / `-` right).
 - Segments are distinguished by **`segment_id`**, **`side`**, and **`prefix`**.
 - Join keys (in `tags`, like every rendering table; `parent_id` and `source_id` have expression indexes): **`parent_id`**, **`source_table`**, **`source_id`**. `source_table` is the edge type. Carriageway edges join `roads` on `way/{id}`; bikelane edges join `bikelanes` on the same id as `bikelanes.id`; path edges always join `roadsPathClasses` (category is the non-infra self cycleway id when present, else `mixedTrafficFoot`).
 
