@@ -118,7 +118,15 @@ function Signs({
 function TrafficSignImg({ osmValuePart }: { osmValuePart: string }) {
   const src = use(loadTrafficSignSvg(trafficSignCountryPrefix, osmValuePart))
   if (!src) return null
-  return <Img src={src} width={48} height={48} alt="" className="h-12 max-w-12" />
+  return (
+    <Img
+      src={src}
+      width={48}
+      height={48}
+      alt=""
+      className="h-auto max-h-12 w-12 object-contain object-left"
+    />
+  )
 }
 
 function Sign({ item }: { item: TrafficSignDisplayItem }) {
@@ -126,7 +134,7 @@ function Sign({ item }: { item: TrafficSignDisplayItem }) {
 
   return (
     <div className="flex flex-col items-start justify-center px-3 first:pl-0 last:pr-0">
-      <p className={showImage ? `mb-1 ${tagsTableLeadingClass}` : tagsTableLeadingClass}>
+      <p className={showImage ? `mb-0.5 ${tagsTableLeadingClass}` : tagsTableLeadingClass}>
         {item.label}
       </p>
       {item.svgName && (
