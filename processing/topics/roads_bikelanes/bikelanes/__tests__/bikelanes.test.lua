@@ -727,6 +727,29 @@ describe('bikelanes', function()
   end)
 
   describe('`oneway` without a tag on lanes and tracks tagged on the road:', function()
+    it('assumes one direction for a shared lane on each side of the road', function()
+      local function oneway_by_side(tags)
+        local rows = {}
+        for _, row in ipairs(run_bikelanes({ tags = tags, id = 1, type = 'way' })) do
+          rows[row._side] = row.category .. ':' .. tostring(row.oneway)
+        end
+        return rows
+      end
+      assert.are.same(
+        { right = 'sharedMotorVehicleLane:implicit_yes' },
+        oneway_by_side({ highway = 'residential', ['cycleway:right'] = 'shared_lane' })
+      )
+      -- Without a side the whole road is shared: one row per side, each in one direction.
+      assert.are.same(
+        { left = 'sharedMotorVehicleLane:implicit_yes', right = 'sharedMotorVehicleLane:implicit_yes' },
+        oneway_by_side({ highway = 'residential', cycleway = 'shared_lane' })
+      )
+      assert.are.same(
+        { right = 'sharedMotorVehicleLane:no' },
+        oneway_by_side({ highway = 'residential', ['cycleway:right'] = 'shared_lane', ['cycleway:right:oneway'] = 'no' })
+      )
+    end)
+
     it('assumes one direction for a lane and both directions for a track', function()
       local result = run_bikelanes({
         tags = { highway = 'secondary', ['cycleway:left'] = 'track', ['cycleway:right'] = 'lane', ['cycleway:right:lane'] = 'exclusive' },

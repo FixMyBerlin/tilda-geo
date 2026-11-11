@@ -48,6 +48,10 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 - Roundabouts count as one-way everywhere: `routing` carriageway edges of roundabouts are `oneway=yes` (before `no`), and so are `bikelanes` rows of the way itself.
 - The parking road width uses the oneway fallback for `oneway=-1` and roundabouts, so parking capacities there can change.
 
+### `bikelanes`, `routing`: `oneway` of `sharedMotorVehicleLane`
+
+- `cycleway=shared_lane` (also `cycleway:<side>=shared_lane`) without `cycleway:<side>:oneway` is `implicit_yes` now, before `assumed_no`. Each row is one side of the road, so it is the motor vehicle lane of that side and runs in one direction. The `routing` lane edges of these rows are `oneway=yes`; the carriageway edge is unchanged.
+
 ### `roads`, `roadsPathClasses`, `bikelanes`, `parkings`, `routing`: `width`
 
 - `parse_length` reads the seven most used decimal commas (`0,3`, `0,5`, `0,6`, `1,5`, `2,2`, `2,5`, `2,50`), which were empty before. A negative length is empty now.

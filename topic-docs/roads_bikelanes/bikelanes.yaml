@@ -126,7 +126,7 @@ attributes:
         description: Keine OSM-Angabe zur Verkehrsrichtung. Bei Radwegen und gemeinsamen Geh- und Radwegen nehmen wir beide Richtungen an. Außerorts sind straßenbegleitende Radwege oft in beide Richtungen freigegeben, ohne dass das in OSM steht; innerorts ist die Richtung meist angegeben.
       - value: implicit_yes
         label: Eine Richtung (abgeleitet)
-        description: Keine OSM-Angabe zur Verkehrsrichtung. Aus der Führungsform abgeleitet, denn Schutz- und Radfahrstreifen sind fast immer nur in eine Richtung befahrbar.
+        description: Keine OSM-Angabe zur Verkehrsrichtung. Aus der Führungsform abgeleitet, denn Schutz- und Radfahrstreifen sowie gemeinsam mit dem Kfz-Verkehr genutzte Fahrstreifen sind fast immer nur in eine Richtung befahrbar.
   - key: bridge
     ref: roads.bridge
   - key: tunnel

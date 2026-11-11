@@ -605,7 +605,12 @@ local sharedMotorVehicleLane = BikelaneCategory.new({
   id = 'sharedMotorVehicleLane',
   desc = 'Marked shared motor-vehicle lane (DE: anteilig genutzter Fahrstreifen / Sharrows) via cycleway=shared_lane.',
   infrastructureExists = true,
-  implicitOneWay = false, -- 'oneway=assumed_no' the whole road is shared (both lanes); Something like left|right would be `implicit_yes`
+  -- 'oneway=implicit_yes': TILDA makes one row per side of the road, also for `cycleway=shared_lane`
+  -- without a side, which means the same as `cycleway:both` (on a oneway road only the right side).
+  -- Each row is the motor vehicle lane of its side and runs in one direction, so a two-way road gets
+  -- two rows, one per direction. `cycleway:<side>:oneway` is rarely tagged for this infrastructure
+  -- (Germany, 2026-10: 3 % of the sides, almost only the defaults).
+  implicitOneWay = true,
   implicitOneWayConfidence = 'high',
   copySurfaceSmoothnessFromParent = true,
   bicycleSurface = 'strip',

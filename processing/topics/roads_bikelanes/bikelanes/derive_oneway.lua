@@ -7,7 +7,8 @@ end
 -- Without a tag, the category decides (`implicitOneWay` in `bikelane_categories.lua`), also for
 -- lanes and tracks tagged on the road (`cycleway:<side>=*`):
 -- - Lanes (`implicit_yes`): one direction, in and outside settlements. Two-way lanes are very rare,
---   and then mostly protected bike lanes.
+--   and then mostly protected bike lanes. Shared motor vehicle lanes (`shared_lane`) are the car lane
+--   of their side and also run in one direction.
 -- - Tracks and shared foot and cycle paths (`assumed_no`): both directions. Outside settlements
 --   roadside tracks are often two-way and the `oneway=no` is often missing; inside settlements
 --   (e.g. Berlin) the direction is usually tagged. We can't tell settlements apart yet (the settlement

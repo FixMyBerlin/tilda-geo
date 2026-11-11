@@ -61,7 +61,7 @@ const data = {
         assumed_no:
           'Keine OSM-Angabe zur Verkehrsrichtung. Bei Radwegen und gemeinsamen Geh- und Radwegen nehmen wir beide Richtungen an. Außerorts sind straßenbegleitende Radwege oft in beide Richtungen freigegeben, ohne dass das in OSM steht; innerorts ist die Richtung meist angegeben.',
         implicit_yes:
-          'Keine OSM-Angabe zur Verkehrsrichtung. Aus der Führungsform abgeleitet, denn Schutz- und Radfahrstreifen sind fast immer nur in eine Richtung befahrbar.',
+          'Keine OSM-Angabe zur Verkehrsrichtung. Aus der Führungsform abgeleitet, denn Schutz- und Radfahrstreifen sowie gemeinsam mit dem Kfz-Verkehr genutzte Fahrstreifen sind fast immer nur in eine Richtung befahrbar.',
       },
       tunnel: {
         yes: 'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',

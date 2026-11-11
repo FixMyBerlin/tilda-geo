@@ -339,7 +339,7 @@ const data = {
   'atlas_bikelanes--oneway=car_not_bike': 'Beide Richtungen für Fahrrad; Einbahnstraße für Kfz',
   'atlas_bikelanes--oneway=implicit_yes': 'Eine Richtung (abgeleitet)',
   'atlas_bikelanes--oneway=implicit_yes--description':
-    'Keine OSM-Angabe zur Verkehrsrichtung. Aus der Führungsform abgeleitet, denn Schutz- und Radfahrstreifen sind fast immer nur in eine Richtung befahrbar.',
+    'Keine OSM-Angabe zur Verkehrsrichtung. Aus der Führungsform abgeleitet, denn Schutz- und Radfahrstreifen sowie gemeinsam mit dem Kfz-Verkehr genutzte Fahrstreifen sind fast immer nur in eine Richtung befahrbar.',
   'atlas_bikelanes--oneway=no': 'Beide Richtungen',
   'atlas_bikelanes--oneway=yes': 'Eine Richtung',
   'atlas_bikelanes--oneway=yes--description': 'Laut OSM-Daten nur in eine Richtung befahrbar.',

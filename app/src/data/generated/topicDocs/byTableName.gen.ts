@@ -1529,7 +1529,7 @@ const data = {
             value: 'implicit_yes',
             label: 'Eine Richtung (abgeleitet)',
             description:
-              'Keine OSM-Angabe zur Verkehrsrichtung. Aus der Führungsform abgeleitet, denn Schutz- und Radfahrstreifen sind fast immer nur in eine Richtung befahrbar.',
+              'Keine OSM-Angabe zur Verkehrsrichtung. Aus der Führungsform abgeleitet, denn Schutz- und Radfahrstreifen sowie gemeinsam mit dem Kfz-Verkehr genutzte Fahrstreifen sind fast immer nur in eine Richtung befahrbar.',
           },
         ],
       },
