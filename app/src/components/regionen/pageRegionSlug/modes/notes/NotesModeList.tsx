@@ -115,10 +115,11 @@ export const NotesModeList = ({
                       status={entry.status}
                       className="size-5 shrink-0 text-teal-700"
                     />
-                    <span className="flex min-w-0 items-baseline gap-1.5">
+                    {/* Inline text flow: the author follows the last word of a wrapped title. */}
+                    <span className="min-w-0">
                       <span className={modePanelListTitleClassName}>{entry.title}</span>
                       {entry.subtitle ? (
-                        <span className={`min-w-0 truncate ${modePanelListMetaClassName}`}>
+                        <span className={`ml-1.5 ${modePanelListMetaClassName}`}>
                           {entry.subtitle}
                         </span>
                       ) : null}
@@ -127,13 +128,6 @@ export const NotesModeList = ({
                   </div>
                   <ModeCommentsPill count={entry.commentCount} />
                 </div>
-                {entry.commentPreview && (
-                  <div
-                    className={`mt-0.5 line-clamp-2 pl-6.5 italic ${modePanelListBodyClassName}`}
-                  >
-                    {entry.commentPreview}
-                  </div>
-                )}
               </ModeListItem>
             )
           })}
