@@ -1,8 +1,8 @@
 import { type QueryKey, useMutation, useQueryClient } from '@tanstack/react-query'
 
-type ModeCollectionManagerOptions<TCreated> = {
+type ModeCollectionManagerOptions<TCreated, TRename extends { id: number; name: string }> = {
   createFn: (name: string) => Promise<TCreated>
-  renameFn: (input: { id: number; name: string }) => Promise<unknown>
+  renameFn: (input: TRename) => Promise<unknown>
   deleteFn: (id: number) => Promise<unknown>
   invalidateKeys: QueryKey[]
   onAfterCreate?: (created: TCreated) => void
@@ -13,14 +13,17 @@ type ModeCollectionManagerOptions<TCreated> = {
  * Create/rename/delete plus cache invalidation for the Prüflisten and Hinweise-Ordner
  * collection selectors. `ReviewListSelect`/`NoteFolderSelect` own the name modal and extra actions.
  */
-export const useModeCollectionManager = <TCreated>({
+export const useModeCollectionManager = <
+  TCreated,
+  TRename extends { id: number; name: string } = { id: number; name: string },
+>({
   createFn,
   renameFn,
   deleteFn,
   invalidateKeys,
   onAfterCreate,
   onAfterDelete,
-}: ModeCollectionManagerOptions<TCreated>) => {
+}: ModeCollectionManagerOptions<TCreated, TRename>) => {
   const queryClient = useQueryClient()
 
   const invalidate = () =>

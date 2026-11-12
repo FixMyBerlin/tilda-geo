@@ -7,6 +7,11 @@ import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/use
 import { reviewEntriesSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/reviewEntriesLayers.const'
 import { mergeModeUrlFeature } from '@/components/regionen/pageRegionSlug/Map/utils/partitionClickedFeatures'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
+import {
+  type ReviewListStatusStyles,
+  type ReviewStatus,
+  readableTextColor,
+} from '@/shared/reviewLists/reviewListStatusStyles'
 import { reviewCommentDraftId } from '../composerDrafts/composerDraftIds'
 import { ComposerDraftDot } from '../composerDrafts/DraftIndicatorDot'
 import { flyMapToIfOffscreen } from '../flyMapToIfOffscreen'
@@ -25,8 +30,8 @@ import { ModePanelEmpty } from '../ModePanelEmpty'
 import { ModeCommentsPill, ModePanelPill } from '../ModePanelPill'
 import { useMapExtentFilter } from '../useMapExtentFilter'
 import { formatReviewEntryDataSummary } from './reviewEntryDataSummary'
-import { STATUS_LABEL, type ReviewStatus } from './reviewListsModeFilters'
 import { useReviewListsModeParam } from './useReviewListsModeParam'
+import { useReviewListStatusStyles } from './useReviewListStatusStyles'
 
 const firstPosition = (geometry: Geometry) => {
   if (!('coordinates' in geometry)) return null
@@ -47,20 +52,11 @@ const REVIEW_TABLE_COLUMNS = [
   { id: 'data', label: 'Daten', className: 'w-[44%]' },
 ] as const
 
-const ReviewStatusBadge = ({ status }: { status: ReviewStatus }) => {
-  switch (status) {
-    case 'PROBLEM':
-      return (
-        <ModePanelPill className="bg-red-100 text-red-800">{STATUS_LABEL.PROBLEM}</ModePanelPill>
-      )
-    case 'OK':
-      return (
-        <ModePanelPill className="bg-green-100 text-green-800">{STATUS_LABEL.OK}</ModePanelPill>
-      )
-    case 'OPEN':
-      return <ModePanelPill>{STATUS_LABEL.OPEN}</ModePanelPill>
-  }
-}
+const ReviewStatusBadge = ({ style }: { style: ReviewListStatusStyles[ReviewStatus] }) => (
+  <ModePanelPill backgroundColor={style.color} style={{ color: readableTextColor(style.color) }}>
+    {style.label}
+  </ModePanelPill>
+)
 
 type ReviewListEntryFeature = {
   geometry: Geometry
@@ -98,6 +94,7 @@ export const ReviewListsModeList = ({
   const { mainMap } = useMap()
   const { featuresParam, setFeaturesParam } = useFeaturesParam()
   const { reviewListsMode, setReviewListsModeParam } = useReviewListsModeParam()
+  const statusStyles = useReviewListStatusStyles()
   const search = reviewListsMode.search ?? ''
   const extent = reviewListsMode.extent ?? 'view'
   const passesExtent = useMapExtentFilter(extent)
@@ -234,7 +231,7 @@ export const ReviewListsModeList = ({
                     <ComposerDraftDot draftId={reviewCommentDraftId(id)} />
                   </span>
                   <span className="flex shrink-0 items-center gap-1.5">
-                    <ReviewStatusBadge status={props.status} />
+                    <ReviewStatusBadge style={statusStyles[props.status]} />
                     <ModeCommentsPill count={props.commentCount} />
                   </span>
                 </div>
@@ -264,7 +261,7 @@ export const ReviewListsModeList = ({
                 #{id}
                 <ComposerDraftDot draftId={reviewCommentDraftId(id)} />
               </span>,
-              <ReviewStatusBadge key="status" status={props.status} />,
+              <ReviewStatusBadge key="status" style={statusStyles[props.status]} />,
               <span key="source" className={modePanelListMetaClassName}>
                 {props.source === 'MANUAL' ? 'manuell' : 'Upload'}
               </span>,

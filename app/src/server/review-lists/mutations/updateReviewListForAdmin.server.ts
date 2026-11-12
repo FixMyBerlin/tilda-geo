@@ -25,6 +25,7 @@ export async function updateReviewListForAdmin(
         where: { id },
         data: {
           name: data.name,
+          statusStyles: data.statusStyles,
           updatedById: admin.userId,
           regions: { set: data.regionSlugs.map((slug) => ({ slug })) },
         },

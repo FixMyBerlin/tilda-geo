@@ -591,6 +591,8 @@ model ReviewList {
   updatedAt DateTime @updatedAt
   //
   name      String
+  // Button label and map color per status ({ OPEN|OK|PROBLEM: { label, color } }); null = defaults.
+  statusStyles Json?
   //
   createdById String?
   createdBy   User?   @relation("ReviewListCreatedBy", fields: [createdById], references: [id], onDelete: SetNull)

@@ -14,8 +14,8 @@ import { reviewCommentDraftId } from '../../composerDrafts/composerDraftIds'
 import { ModeCommentComposer } from '../../ModeCommentComposer'
 import { modePanelMutedClassName, modePanelTintHairlineTopClassName } from '../../modePanel.const'
 import { REVIEW_ENTRY_MOVE_COLOR, REVIEW_ENTRY_MOVE_COLOR_LABEL } from '../reviewEntryMapColors'
-import { STATUS_LABEL } from '../reviewListsModeFilters'
 import { useReviewListsModeValue } from '../useReviewListsModeParam'
+import { useReviewListStatusStyles } from '../useReviewListStatusStyles'
 import { ReviewEntryComment } from './ReviewEntryComment'
 import { ReviewEntryProperties } from './ReviewEntryProperties'
 
@@ -25,6 +25,7 @@ export const ReviewEntryDetail = ({ entryId }: Props) => {
   const regionSlug = useRegionSlug()
   const { move: isMoveArmed } = useReviewListsModeValue()
   const queryClient = useQueryClient()
+  const statusStyles = useReviewListStatusStyles()
 
   const queryKey = ['review-lists', 'getReviewEntry', { regionSlug, entryId }] as const
   const { data: entry, isError } = useQuery({
@@ -111,7 +112,7 @@ export const ReviewEntryDetail = ({ entryId }: Props) => {
               )}
               aria-pressed={entry.status === status}
             >
-              {STATUS_LABEL[status]}
+              {statusStyles[status].label}
             </button>
           ))}
         </div>

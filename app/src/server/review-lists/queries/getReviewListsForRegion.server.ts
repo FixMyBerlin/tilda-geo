@@ -2,6 +2,10 @@ import { z } from 'zod'
 import { type MemberCaller, getMemberSession } from '@/server/auth/memberCaller.server'
 import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'
+import {
+  type ReviewListStatusStyles,
+  parseReviewListStatusStyles,
+} from '@/shared/reviewLists/reviewListStatusStyles'
 
 const Schema = z.object({ regionSlug: z.string() })
 
@@ -13,6 +17,7 @@ type ReviewListRegion = {
 export type ReviewListForRegion = {
   id: number
   name: string
+  statusStyles: ReviewListStatusStyles
   entryCount: number
   /** All regions this list is linked to. >1 means shared (UI hint). */
   regions: ReviewListRegion[]
@@ -31,6 +36,7 @@ export async function getReviewListsForRegion(input: z.infer<typeof Schema>, cal
     select: {
       id: true,
       name: true,
+      statusStyles: true,
       _count: { select: { entries: true } },
       regions: { select: { slug: true, name: true }, orderBy: { name: 'asc' } },
     },
@@ -46,6 +52,7 @@ export async function getReviewListsForRegion(input: z.infer<typeof Schema>, cal
       return {
         id: list.id,
         name: list.name,
+        statusStyles: parseReviewListStatusStyles(list.statusStyles),
         entryCount: list._count.entries,
         regions,
       }

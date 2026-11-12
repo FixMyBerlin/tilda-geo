@@ -19,10 +19,11 @@ import { ReviewEntryDetail } from './detail/ReviewEntryDetail'
 import { ReviewEntryDetailActions } from './detail/ReviewEntryDetailActions'
 import { ReviewEntryNew } from './new/ReviewEntryNew'
 import { ReviewListManageMenu, ReviewListSelect } from './ReviewListSelect'
-import { REVIEW_STATUS_FILTER_OPTIONS } from './reviewListsModeFilters'
+import { reviewStatusFilterOptions } from './reviewListsModeFilters'
 import { ReviewListsModeList } from './ReviewListsModeList'
 import { useReviewListCommands } from './useReviewListCommands'
 import { useReviewListsModeParam } from './useReviewListsModeParam'
+import { useReviewListStatusStyles } from './useReviewListStatusStyles'
 
 export const PageModeReviewLists = () => {
   const region = useRegion()
@@ -37,6 +38,7 @@ export const PageModeReviewLists = () => {
   const lists = listsData.lists
   const selectedListId = reviewListsMode.key ?? lists[0]?.id
   const selectedList = lists.find((list) => list.id === selectedListId)
+  const statusStyles = useReviewListStatusStyles()
 
   const { data: entriesData, isLoading } = useQuery({
     ...reviewEntriesQueryOptions(region.slug, selectedListId),
@@ -164,7 +166,7 @@ export const PageModeReviewLists = () => {
             label="Status"
             icon={modeFilterIcons.status}
             value={reviewListsMode.status ?? 'all'}
-            options={REVIEW_STATUS_FILTER_OPTIONS}
+            options={reviewStatusFilterOptions(statusStyles)}
             onChange={(value) =>
               updateFilter({
                 status: value === 'all' ? undefined : value,

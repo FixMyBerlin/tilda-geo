@@ -2,11 +2,16 @@ import { useRouter } from '@tanstack/react-router'
 import { AdminFormLayout, type AdminFormPageExtras } from '@/components/admin/aside/AdminFormLayout'
 import { AdminFormSection } from '@/components/admin/aside/AdminFormSection'
 import { RegionSlugsByContractField } from '@/components/admin/regions/RegionSlugsByContractField'
+import { ColorField } from '@/components/shared/form/fields/ColorField'
 import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form, type SubmitResult } from '@/components/shared/form/Form'
 import type { TRegion } from '@/server/regions/regionConfigMapper.server'
 import { updateReviewListForAdminFn } from '@/server/review-lists/review-lists.functions'
 import { type ReviewListFormInput, UpdateReviewListFormSchema } from '@/server/review-lists/schemas'
+import {
+  DEFAULT_REVIEW_LIST_STATUS_STYLES,
+  REVIEW_STATUSES,
+} from '@/shared/reviewLists/reviewListStatusStyles'
 
 /** Section ids (jump list + URL hash) and titles of the field groups, in page order. */
 const sectionLabels = {
@@ -55,6 +60,16 @@ export function ReviewListForm({ listId, initialValues, regions, pageExtras }: P
               label="Name"
               help="Anzeigename der Prüfliste (z.B. 'Problematische Kreuzungen 2026')"
             />
+            {REVIEW_STATUSES.map((status) => (
+              <div key={status} className="grid grid-cols-[1fr_9rem] gap-3">
+                <TextField
+                  form={form}
+                  name={`statusStyles.${status}.label`}
+                  label={`Status-Button „${DEFAULT_REVIEW_LIST_STATUS_STYLES[status].label}“`}
+                />
+                <ColorField form={form} name={`statusStyles.${status}.color`} label="Kartenfarbe" />
+              </div>
+            ))}
           </AdminFormSection>
 
           <AdminFormSection
