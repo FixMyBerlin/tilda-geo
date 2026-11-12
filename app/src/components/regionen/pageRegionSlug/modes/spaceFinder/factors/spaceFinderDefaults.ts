@@ -96,29 +96,29 @@ export const MIN_AREA_FILTER_LABEL = 'Fläche suchen'
 
 export const FACTOR_HELP: Record<string, string> = {
   w_cyclepath:
-    'Vorhandene Radwege aus OpenStreetMap heben den Bedarf. Bis 20 m Entfernung gibt es die volle Punktzahl, danach fällt sie bis zur eingestellten Maximaldistanz auf null. Das Gewicht bestimmt, wie stark diese Nähe im Grundscore zählt.',
+    'Nähe zu Radwegen hebt den Bedarf: volle Punkte bis 20 m, danach abnehmend bis zur Maximaldistanz. Nach der Berechnung eingeblendet: „Radinfrastruktur“.',
   w_transit:
-    'Haltestellen von U-Bahn, Straßenbahn, Bus und Bahn sowie Bikesharing-Stationen in der Nähe heben den Bedarf. Je näher, desto höher; Bahnhöfe wirken weiter als Haltestellen, Bushaltestellen und Bikesharing am kleinräumigsten. Das Gewicht bestimmt den Anteil am Grundscore. Unter „ÖPNV-Arten“ steht das Verhältnis von ÖPNV und Bikesharing zueinander: zusammen immer 100 %, wirksam nur in diesem Faktor. Die Kartenebenen „ÖPNV-Haltepunkte und Fähranleger“ und „Fahrrad- & Mikromobilitätsparken“ (Bikesharing) werden nach der Berechnung automatisch eingeblendet.',
+    'Nähe zu ÖPNV-Haltestellen und Bikesharing-Stationen hebt den Bedarf. „ÖPNV-Arten“ legt das Verhältnis der beiden fest. Nach der Berechnung eingeblendet: „ÖPNV-Haltepunkte und Fähranleger“ und „Fahrrad- & Mikromobilitätsparken“ bzw. „Fahrradparken / Anzahl Stellplätze“.',
   w_target:
-    'Gebäude mit Alltagszielen (Grundversorgung, Bildung, Einkauf, Freizeit) heben den Bedarf direkt daneben; der Zuschlag nimmt bis 20 m Abstand linear ab. Das Gewicht bestimmt die maximalen Punkte, „Zielort-Arten“ das Verhältnis der vier Arten (zusammen 100 %). Die Kartenebene „Quellen & Ziele“ wird nach der Berechnung automatisch eingeblendet.',
+    'Gebäude mit Alltagszielen geben direkt daneben einen Zuschlag, bis 20 m abnehmend. „Zielort-Arten“ legt das Verhältnis der vier Arten fest. Nach der Berechnung eingeblendet: „Quellen & Ziele“.',
   w_fussgaengerzone:
-    'An Ecken, wo eine normale Straße auf eine Fußgängerzone trifft, ist der Bedarf besonders hoch. Der volle Zuschlag liegt rund 5–8 m von der Ecke; bis zum Radius fällt er auf null. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen.',
+    'Zuschlag an Ecken, wo eine Straße auf eine Fußgängerzone trifft: voll rund 5–8 m von der Ecke, bis zum Radius abnehmend.',
   w_bestand:
-    'Bestehende Fahrradabstellanlagen senken den Bedarf: wo schon geparkt werden kann, braucht es weniger neue Anlagen. Jede Anlage hat einen Einzugskreis (aus der Kapazität, sonst dem Standard-Durchmesser); darin voller Abzug, außerhalb keiner. Das Gewicht bestimmt, wie viele Punkte maximal abgezogen werden.',
+    'Bestehende Fahrradabstellanlagen ziehen Punkte ab: voller Abzug im Einzugskreis (aus der Kapazität, sonst Standard-Durchmesser). Nach der Berechnung eingeblendet: „Fahrrad- & Mikromobilitätsparken“ bzw. „Fahrradparken / Anzahl Stellplätze“.',
   w_slope:
-    'Die Geländeneigung kommt aus dem Höhenmodell. Flach (bis etwa 2°) ist ideal; ab etwa 10° wird die Fläche ganz ausgeschlossen. Das Gewicht bestimmt den Anteil am Grundscore; ist das Gewicht 0, ist Hangneigung wie jeder andere ausgeschaltete Faktor komplett wirkungslos – auch der Ausschluss steiler Lagen entfällt dann.',
+    'Flaches Gelände (bis etwa 2°) ist ideal, ab etwa 10° ist die Fläche ausgeschlossen. Bei Gewicht 0 entfällt auch der Ausschluss.',
   w_vegetation:
-    'Aus Infrarot-Luftbildern wird der Grünanteil je Fläche geschätzt. „Grün schützen“ zieht Punkte ab, „Grün bevorzugen“ gibt Bonus — umso mehr, je höher die Bedeckung; kleine Grünreste bleiben ohne Effekt. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen oder abgezogen werden.',
+    'Grünanteil aus Infrarot-Luftbildern: „Grün schützen“ zieht ab, „Grün bevorzugen“ gibt Zuschlag, je mehr Grün, desto stärker. Nach der Berechnung eingeblendet: „Vegetationsflächen“.',
   w_intersection:
-    'Abstellanlagen an Straßenecken sind gut auffindbar und kurz anzufahren. Hexagone rund 5–8 m von der Bordsteinecke erhalten den vollen Bonus, bis zum eingestellten Radius fällt er auf null. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen.',
+    'Zuschlag an Straßenecken: voll rund 5–8 m von der Bordsteinecke, bis zum Radius abnehmend.',
   w_parken:
-    'Bestehende Kfz-Parkflächen am Straßenrand und auf Parkplätzen eignen sich zur Umwidmung. Liegt die Fläche direkt auf dem Parken, gibt es den vollen Zuschlag; bis zum Radius fällt er auf null. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen.',
+    'Kfz-Parkflächen eignen sich zur Umwidmung: voller Zuschlag direkt auf dem Parken, bis zum Radius abnehmend. Nach der Berechnung eingeblendet: „Öffentliches Straßenparken“ und „Öffentliches Parken abseits des Straßenraums“.',
   w_platz:
-    '„Belebung bevorzugen" gibt Bonus auf Plätzen (place=square aus OpenStreetMap), „Platz freihalten" zieht dort Punkte ab. Liegt die Fläche direkt auf dem Platz, gibt es den vollen Effekt; außerhalb keinen. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen oder abgezogen werden.',
+    'Auf Plätzen gibt „Belebung bevorzugen“ einen Zuschlag, „Platz freihalten“ einen Abzug — nur direkt auf dem Platz.',
   w_eigendaten:
-    'Laden Sie eigene Punkte, Linien oder Flächen hoch — auch mehrere Dateien, jede mit eigenem Namen. Bonus und Abzug verschieben den Gesamtscore innerhalb der Fläche, mehrere Datensätze addieren sich; Ausschluss innen oder außen setzt ihn dort auf null. Punkte werden mit 1,5 m, Linien mit 2,5 m verbreitert. Dateien und Modus legen Sie am Planungsgebiet fest (gilt für alle Varianten); die Stärke für Bonus und Abzug stellt jede Variante hier je Datensatz ein.',
+    'Eigene Punkte, Linien oder Flächen: Bonus und Abzug verschieben den Score innerhalb, Ausschluss setzt ihn innen oder außen auf null. Dateien und Modus gelten am Planungsgebiet, die Stärke stellt jede Variante je Datensatz ein.',
   w_bewohnerbedarf:
-    'Einwohnerzahlen aus dem Zensus 2022, auf einzelne Gebäude heruntergerechnet, heben den Bedarf dort, wo viele Menschen wohnen — unabhängig vom Alter. Jedes bewohnte Gebäude wirkt 20 m weit: direkt an der Gebäudekante mit seiner vollen Einwohnerzahl, auf halber Strecke nur noch zur Hälfte, ab 20 m gar nicht mehr. Ein Haus mit 100 Einwohnern zählt direkt daneben also 100, aus 10 m Entfernung 50. Mehrere Gebäude in Reichweite addieren sich. Der eingestellte Wert ist die Summe, ab der es den vollen Zuschlag gibt. Er wird je Planungsgebiet automatisch aus dem Zensus vorbelegt — so, dass ungefähr das dichteste Zehntel der bewohnten Fläche den vollen Zuschlag bekommt — und lässt sich überschreiben. Zur Einordnung: dichte Berliner Innenstadt landet bei etwa 20–25, ein Einfamilienhausgebiet bei etwa 5. Auf den Gebäuden selbst entsteht kein Bedarf, er beginnt erst unmittelbar daneben. Das Gewicht bestimmt, wie viele Punkte maximal dazukommen.',
+    'Einwohner aus dem Zensus 2022 heben den Bedarf neben bewohnten Gebäuden, bis 20 m abnehmend; mehrere Gebäude addieren sich. Der Wert ist die Summe für den vollen Zuschlag, vorbelegt aus dem Zensus des Planungsgebiets. Nach der Berechnung eingeblendet: „Zensus-Einwohner“.',
   min_score_threshold: `Nur Flächen ab diesem Gesamtscore zählen zur zusammenhängenden Kandidatenfläche. Der Filter „${MIN_AREA_FILTER_LABEL}“ im Panel nutzt diese Cluster. Der Score selbst ändert sich dadurch nicht.`,
 }
 

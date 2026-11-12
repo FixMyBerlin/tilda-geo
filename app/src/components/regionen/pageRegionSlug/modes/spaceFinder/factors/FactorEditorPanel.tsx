@@ -618,7 +618,7 @@ const FactorFields = ({
             </span>
             <InfoTooltip>
               {parkingDataAvailable
-                ? 'Straßenflächen werden anhand ihrer erfassten oder geschätzten Breite als Fläche berechnet und aus den Hexagonen ausgeschlossen — dort ist keine Bebauung möglich, unabhängig von den übrigen Faktoren.'
+                ? 'Straßenflächen (aus erfasster oder geschätzter Breite) werden ausgeschlossen. Nach der Berechnung eingeblendet: „Fahrbahnen“.'
                 : PARKING_DATA_HINT}
             </InfoTooltip>
           </label>
