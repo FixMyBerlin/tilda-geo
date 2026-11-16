@@ -3,7 +3,7 @@ import { mapStyleResponse } from './mapStyleResponse'
 import { SPRITE_VERSION } from './spriteVersion.const'
 
 const get = (headers?: HeadersInit) =>
-  mapStyleResponse(new Request('http://localhost/api/map-style', { headers }))
+  mapStyleResponse(new Request('http://localhost/api/map-style/atlas', { headers }), 'atlas')
 
 describe('mapStyleResponse', () => {
   test('points the sprite to the current sprite version', async () => {

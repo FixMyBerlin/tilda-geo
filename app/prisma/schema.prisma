@@ -209,6 +209,9 @@ model Region {
   welcomeImageAltText  String?
 
   categoryAssignments   RegionCategoryAssignment[]
+  /// The vector style under the TILDA data: an id from BACKGROUND_STYLES (backgroundStyles.const.ts).
+  /// `backgroundAssignments` are the raster backgrounds a user can switch on top of it.
+  backgroundStyle       String                       @default("dataviz")
   backgroundAssignments RegionBackgroundAssignment[]
   exportAssignments     RegionExportAssignment[]
   navigationLinks       RegionNavigationLink[]

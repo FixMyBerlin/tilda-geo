@@ -17,6 +17,7 @@ const privateRegion = {
   showSearch: true,
   mask: { osmRelationIds: [1], bufferKm: 2 },
   map: { lat: 52.5, lng: 13.4, zoom: 12 },
+  backgroundStyle: 'atlas',
   logoWhiteBackgroundRequired: false,
   logoPath: '/api/region-uploads/9/logo.svg',
   navigationLinks: [{ name: 'Docs', href: 'https://example.com' }],

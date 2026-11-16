@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest'
-import baseStyle from '@/server/api/map-style/style.json'
+import atlasStyle from '@/server/api/map-style/styles/atlas.json'
+import datavizStyle from '@/server/api/map-style/styles/dataviz.json'
 import sprite from '../../../../../../public/map-style/sprite.json'
 import sprite2x from '../../../../../../public/map-style/sprite@2x.json'
 import { noteIconLayout } from '../../modes/notes/noteIconLayout'
@@ -75,8 +76,8 @@ describe('map sprite', () => {
     expect(used.filter(({ imageId }) => !spriteIds.has(imageId))).toEqual([])
   })
 
-  test('has every icon the base style uses', () => {
-    const used = usedImageIds(baseStyle.layers as Layer[])
+  test('has every icon the base styles use', () => {
+    const used = usedImageIds([...atlasStyle.layers, ...datavizStyle.layers] as Layer[])
     expect(used.length).toBeGreaterThan(0)
     expect(used.filter(({ imageId }) => !spriteIds.has(imageId))).toEqual([])
   })

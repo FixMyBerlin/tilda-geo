@@ -28,6 +28,7 @@ const mockRegion = (slug: string, contract: TRegionContract | null = null): TReg
     notesOsm: false,
     notesInternal: false,
     map: { lat: 0, lng: 0, zoom: 10 },
+    backgroundStyle: 'atlas',
     mask: null,
     logoPath: null,
     logoWhiteBackgroundRequired: false,

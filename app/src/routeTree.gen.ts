@@ -36,7 +36,6 @@ import { Route as AdminReviewListsRouteImport } from './routes/admin/review-list
 import { Route as AdminUsersRouteImport } from './routes/admin/users'
 import { Route as ApiBoundaryRouteImport } from './routes/api/boundary'
 import { Route as ApiCampaignsRouteImport } from './routes/api/campaigns'
-import { Route as ApiMapStyleRouteImport } from './routes/api/map-style'
 import { Route as ApiOsmcha2RssRewriteRouteImport } from './routes/api/osmcha2-rss-rewrite'
 import { Route as ApiProcessingDatesRouteImport } from './routes/api/processing-dates'
 import { Route as ApiProcessingDatesMapillaryRouteImport } from './routes/api/processing-dates-mapillary'
@@ -80,6 +79,7 @@ import { Route as ApiAdminRegionUploadsRouteImport } from './routes/api/admin/re
 import { Route as ApiAdminRegionsRouteImport } from './routes/api/admin/regions'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth.$'
 import { Route as ApiAuthOsmTokenRouteImport } from './routes/api/auth.osm-token'
+import { Route as ApiMapStyleStyleIdRouteImport } from './routes/api/map-style.$styleId'
 import { Route as ApiNotesRegionSlugRouteImport } from './routes/api/notes.$regionSlug'
 import { Route as ApiOsmNotesRssRouteImport } from './routes/api/osm-notes.rss'
 import { Route as ApiPrivateGenerateMaprouletteTasksRouteImport } from './routes/api/private/generate-maproulette-tasks'
@@ -257,11 +257,6 @@ const ApiBoundaryRoute = ApiBoundaryRouteImport.update({
 const ApiCampaignsRoute = ApiCampaignsRouteImport.update({
   id: '/api/campaigns',
   path: '/api/campaigns',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ApiMapStyleRoute = ApiMapStyleRouteImport.update({
-  id: '/api/map-style',
-  path: '/api/map-style',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiOsmcha2RssRewriteRoute = ApiOsmcha2RssRewriteRouteImport.update({
@@ -486,6 +481,11 @@ const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
 const ApiAuthOsmTokenRoute = ApiAuthOsmTokenRouteImport.update({
   id: '/api/auth/osm-token',
   path: '/api/auth/osm-token',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiMapStyleStyleIdRoute = ApiMapStyleStyleIdRouteImport.update({
+  id: '/api/map-style/$styleId',
+  path: '/api/map-style/$styleId',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiNotesRegionSlugRoute = ApiNotesRegionSlugRouteImport.update({
@@ -759,7 +759,6 @@ export interface FileRoutesByFullPath {
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/api/boundary': typeof ApiBoundaryRoute
   '/api/campaigns': typeof ApiCampaignsRoute
-  '/api/map-style': typeof ApiMapStyleRoute
   '/api/osmcha2-rss-rewrite': typeof ApiOsmcha2RssRewriteRoute
   '/api/processing-dates': typeof ApiProcessingDatesRoute
   '/api/processing-dates-mapillary': typeof ApiProcessingDatesMapillaryRoute
@@ -793,6 +792,7 @@ export interface FileRoutesByFullPath {
   '/api/admin/regions': typeof ApiAdminRegionsRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/osm-token': typeof ApiAuthOsmTokenRoute
+  '/api/map-style/$styleId': typeof ApiMapStyleStyleIdRoute
   '/api/notes/$regionSlug': typeof ApiNotesRegionSlugRouteWithChildren
   '/api/osm-notes/rss': typeof ApiOsmNotesRssRoute
   '/api/private/generate-maproulette-tasks': typeof ApiPrivateGenerateMaprouletteTasksRoute
@@ -861,7 +861,6 @@ export interface FileRoutesByTo {
   '/admin/layer-order': typeof AdminLayerOrderRoute
   '/api/boundary': typeof ApiBoundaryRoute
   '/api/campaigns': typeof ApiCampaignsRoute
-  '/api/map-style': typeof ApiMapStyleRoute
   '/api/osmcha2-rss-rewrite': typeof ApiOsmcha2RssRewriteRoute
   '/api/processing-dates': typeof ApiProcessingDatesRoute
   '/api/processing-dates-mapillary': typeof ApiProcessingDatesMapillaryRoute
@@ -895,6 +894,7 @@ export interface FileRoutesByTo {
   '/api/admin/regions': typeof ApiAdminRegionsRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/osm-token': typeof ApiAuthOsmTokenRoute
+  '/api/map-style/$styleId': typeof ApiMapStyleStyleIdRoute
   '/api/notes/$regionSlug': typeof ApiNotesRegionSlugRouteWithChildren
   '/api/osm-notes/rss': typeof ApiOsmNotesRssRoute
   '/api/private/generate-maproulette-tasks': typeof ApiPrivateGenerateMaprouletteTasksRoute
@@ -978,7 +978,6 @@ export interface FileRoutesById {
   '/admin/users': typeof AdminUsersRouteWithChildren
   '/api/boundary': typeof ApiBoundaryRoute
   '/api/campaigns': typeof ApiCampaignsRoute
-  '/api/map-style': typeof ApiMapStyleRoute
   '/api/osmcha2-rss-rewrite': typeof ApiOsmcha2RssRewriteRoute
   '/api/processing-dates': typeof ApiProcessingDatesRoute
   '/api/processing-dates-mapillary': typeof ApiProcessingDatesMapillaryRoute
@@ -1012,6 +1011,7 @@ export interface FileRoutesById {
   '/api/admin/regions': typeof ApiAdminRegionsRouteWithChildren
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/auth/osm-token': typeof ApiAuthOsmTokenRoute
+  '/api/map-style/$styleId': typeof ApiMapStyleStyleIdRoute
   '/api/notes/$regionSlug': typeof ApiNotesRegionSlugRouteWithChildren
   '/api/osm-notes/rss': typeof ApiOsmNotesRssRoute
   '/api/private/generate-maproulette-tasks': typeof ApiPrivateGenerateMaprouletteTasksRoute
@@ -1095,7 +1095,6 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/api/boundary'
     | '/api/campaigns'
-    | '/api/map-style'
     | '/api/osmcha2-rss-rewrite'
     | '/api/processing-dates'
     | '/api/processing-dates-mapillary'
@@ -1129,6 +1128,7 @@ export interface FileRouteTypes {
     | '/api/admin/regions'
     | '/api/auth/$'
     | '/api/auth/osm-token'
+    | '/api/map-style/$styleId'
     | '/api/notes/$regionSlug'
     | '/api/osm-notes/rss'
     | '/api/private/generate-maproulette-tasks'
@@ -1197,7 +1197,6 @@ export interface FileRouteTypes {
     | '/admin/layer-order'
     | '/api/boundary'
     | '/api/campaigns'
-    | '/api/map-style'
     | '/api/osmcha2-rss-rewrite'
     | '/api/processing-dates'
     | '/api/processing-dates-mapillary'
@@ -1231,6 +1230,7 @@ export interface FileRouteTypes {
     | '/api/admin/regions'
     | '/api/auth/$'
     | '/api/auth/osm-token'
+    | '/api/map-style/$styleId'
     | '/api/notes/$regionSlug'
     | '/api/osm-notes/rss'
     | '/api/private/generate-maproulette-tasks'
@@ -1313,7 +1313,6 @@ export interface FileRouteTypes {
     | '/admin/users'
     | '/api/boundary'
     | '/api/campaigns'
-    | '/api/map-style'
     | '/api/osmcha2-rss-rewrite'
     | '/api/processing-dates'
     | '/api/processing-dates-mapillary'
@@ -1347,6 +1346,7 @@ export interface FileRouteTypes {
     | '/api/admin/regions'
     | '/api/auth/$'
     | '/api/auth/osm-token'
+    | '/api/map-style/$styleId'
     | '/api/notes/$regionSlug'
     | '/api/osm-notes/rss'
     | '/api/private/generate-maproulette-tasks'
@@ -1411,7 +1411,6 @@ export interface RootRouteChildren {
   RegionenRoute: typeof RegionenRouteWithChildren
   ApiBoundaryRoute: typeof ApiBoundaryRoute
   ApiCampaignsRoute: typeof ApiCampaignsRoute
-  ApiMapStyleRoute: typeof ApiMapStyleRoute
   ApiOsmcha2RssRewriteRoute: typeof ApiOsmcha2RssRewriteRoute
   ApiProcessingDatesRoute: typeof ApiProcessingDatesRoute
   ApiProcessingDatesMapillaryRoute: typeof ApiProcessingDatesMapillaryRoute
@@ -1424,6 +1423,7 @@ export interface RootRouteChildren {
   ApiAdminRegionsRoute: typeof ApiAdminRegionsRouteWithChildren
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiAuthOsmTokenRoute: typeof ApiAuthOsmTokenRoute
+  ApiMapStyleStyleIdRoute: typeof ApiMapStyleStyleIdRoute
   ApiNotesRegionSlugRoute: typeof ApiNotesRegionSlugRouteWithChildren
   ApiOsmNotesRssRoute: typeof ApiOsmNotesRssRoute
   ApiPrivateGenerateMaprouletteTasksRoute: typeof ApiPrivateGenerateMaprouletteTasksRoute
@@ -1636,13 +1636,6 @@ declare module '@tanstack/react-router' {
       path: '/api/campaigns'
       fullPath: '/api/campaigns'
       preLoaderRoute: typeof ApiCampaignsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/api/map-style': {
-      id: '/api/map-style'
-      path: '/api/map-style'
-      fullPath: '/api/map-style'
-      preLoaderRoute: typeof ApiMapStyleRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/osmcha2-rss-rewrite': {
@@ -1944,6 +1937,13 @@ declare module '@tanstack/react-router' {
       path: '/api/auth/osm-token'
       fullPath: '/api/auth/osm-token'
       preLoaderRoute: typeof ApiAuthOsmTokenRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/map-style/$styleId': {
+      id: '/api/map-style/$styleId'
+      path: '/api/map-style/$styleId'
+      fullPath: '/api/map-style/$styleId'
+      preLoaderRoute: typeof ApiMapStyleStyleIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/notes/$regionSlug': {
@@ -2639,7 +2639,6 @@ const rootRouteChildren: RootRouteChildren = {
   RegionenRoute: RegionenRouteWithChildren,
   ApiBoundaryRoute: ApiBoundaryRoute,
   ApiCampaignsRoute: ApiCampaignsRoute,
-  ApiMapStyleRoute: ApiMapStyleRoute,
   ApiOsmcha2RssRewriteRoute: ApiOsmcha2RssRewriteRoute,
   ApiProcessingDatesRoute: ApiProcessingDatesRoute,
   ApiProcessingDatesMapillaryRoute: ApiProcessingDatesMapillaryRoute,
@@ -2652,6 +2651,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAdminRegionsRoute: ApiAdminRegionsRouteWithChildren,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiAuthOsmTokenRoute: ApiAuthOsmTokenRoute,
+  ApiMapStyleStyleIdRoute: ApiMapStyleStyleIdRoute,
   ApiNotesRegionSlugRoute: ApiNotesRegionSlugRouteWithChildren,
   ApiOsmNotesRssRoute: ApiOsmNotesRssRoute,
   ApiPrivateGenerateMaprouletteTasksRoute:

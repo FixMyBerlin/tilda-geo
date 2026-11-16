@@ -9,6 +9,8 @@ import {
   useMapDebugUseDebugCachelessTiles,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapDebugState'
 import { useMapLoaded } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
+import { BACKGROUND_STYLES } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/backgroundStyles.const'
+import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { getTilesUrl } from '@/components/shared/utils/getTilesUrl'
 import { isDev } from '@/components/shared/utils/isEnv'
 import { useInteractiveLayers } from '../Map/utils/useInteractiveLayers'
@@ -21,6 +23,7 @@ export const DebugMap = () => {
   const { setDebugLayerStyles, setUseDebugCachelessTiles } = useMapDebugActions()
   const { mainMap } = useMap()
   const mapLoaded = useMapLoaded()
+  const basemapSource = BACKGROUND_STYLES[useRegion().backgroundStyle].source
   const [_triggerRerender, setTriggerRerender] = useState(0)
   const [layerFilter, setLayerFilter] = useState('')
 
@@ -49,7 +52,7 @@ export const DebugMap = () => {
   const vectorSources = Object.entries(allSources).filter(([_, value]) => value.type === 'vector')
   const rasterSources = Object.entries(allSources).filter(([_, value]) => value.type === 'raster')
   const tildaLayers = allLayers.filter((layer) => {
-    return 'source' in layer && layer.source !== 'openmaptiles' && layer.type !== 'raster'
+    return 'source' in layer && layer.source !== basemapSource && layer.type !== 'raster'
   })
   if (!vectorSources || !rasterSources || !tildaLayers.length) return null
 
@@ -165,7 +168,7 @@ export const DebugMap = () => {
               const source = 'source' in layer ? (layer?.source ?? '-') : '-'
               return (
                 <tr key={`all${layer.id}`} className="border-t border-t-white/10 leading-tight">
-                  <td className={source === 'openmaptiles' ? 'font-semibold' : ''}>
+                  <td className={source === basemapSource ? 'font-semibold' : ''}>
                     <div className="w-28 truncate">{source}</div>
                   </td>
                   <td>{layer.type}</td>

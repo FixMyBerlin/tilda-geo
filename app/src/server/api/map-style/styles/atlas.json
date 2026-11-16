@@ -1,6 +1,5 @@
 {
   "version": 8,
-  "id": "08357855-50d4-44e1-ac9f-ea099d9de4a5",
   "name": "atlas-basemap",
   "sources": {
     "openmaptiles": {
@@ -3336,9 +3335,10 @@
     }
   ],
   "glyphs": "https://api.maptiler.eu/fonts/{fontstack}/{range}.pbf?key=ECOoUBmpqklzSCASXxcu",
-  "sprite": "https://api.maptiler.eu/maps/08357855-50d4-44e1-ac9f-ea099d9de4a5/sprite",
+  "sprite": "https://api.maptiler.eu/sprites/019d2471-bb09-76a3-8579-6466017e89b3/sprite",
   "bearing": 0,
   "pitch": 0,
   "center": [13.766570682486531, 52.42790930166814],
-  "zoom": 11.70689512859718
+  "zoom": 11.70689512859718,
+  "id": "08357855-50d4-44e1-ac9f-ea099d9de4a5"
 }
