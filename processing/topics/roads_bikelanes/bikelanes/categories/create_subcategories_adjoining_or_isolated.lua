@@ -11,6 +11,8 @@ local function create_subcategories_adjoining_or_isolated(category)
     infrastructureExists = category.infrastructureExists,
     implicitOneWay = category.implicitOneWay,
     implicitOneWayConfidence = category.implicitOneWayConfidence,
+    copySurfaceSmoothnessFromParent = category.copySurfaceSmoothnessFromParent,
+    bicycleSurface = category.bicycleSurface,
     condition = function(tags)
       return category:is_active(tags) and category_is_sidepath(tags) and tags.is_sidepath ~= 'no'
     end,
@@ -23,6 +25,8 @@ local function create_subcategories_adjoining_or_isolated(category)
     infrastructureExists = category.infrastructureExists,
     implicitOneWay = category.implicitOneWay,
     implicitOneWayConfidence = category.implicitOneWayConfidence,
+    copySurfaceSmoothnessFromParent = category.copySurfaceSmoothnessFromParent,
+    bicycleSurface = category.bicycleSurface,
     condition = function(tags)
       return category:is_active(tags) and (tags.is_sidepath == 'no' or tags.highway == 'service' or tags.highway == 'track')
     end,
@@ -35,6 +39,8 @@ local function create_subcategories_adjoining_or_isolated(category)
     infrastructureExists = category.infrastructureExists,
     implicitOneWay = category.implicitOneWay,
     implicitOneWayConfidence = category.implicitOneWayConfidence,
+    copySurfaceSmoothnessFromParent = category.copySurfaceSmoothnessFromParent,
+    bicycleSurface = category.bicycleSurface,
     condition = function(tags)
       return category:is_active(tags) and not category_is_sidepath(tags) and tags.is_sidepath ~= 'no' and tags.highway ~= 'service' and tags.highway ~= 'track'
     end,

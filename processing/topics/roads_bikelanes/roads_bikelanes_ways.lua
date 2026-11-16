@@ -2,6 +2,7 @@ local transform_construction_prefix = require('topics.roads_bikelanes.helper.tra
 local transform_cycleway_both_postfix = require('topics.roads_bikelanes.helper.transform_tags.transform_cycleway_both_postfix')
 local transform_cycleway_opposite_schema = require('topics.roads_bikelanes.helper.transform_tags.transform_cycleway_opposite_schema')
 local transform_lifecycle_tags = require('topics.roads_bikelanes.helper.transform_tags.transform_lifecycle_tags')
+local normalize_oneway_tags = require('topics.helper.normalize_oneway_tags')
 local round = require('topics.helper.round')
 local metadata = require('topics.helper.metadata')
 local prepare_pseudo_tags_roads_bikelanes = require('topics.roads_bikelanes.pseudo_tags.prepare_pseudo_tags_roads_bikelanes')
@@ -20,6 +21,7 @@ local function process_roads_bikelanes_way(object)
   ---@type OsmTags
   local object_tags = object.tags
 
+  -- REMINDER: Keep the transform order in sync with `bikelanes/__tests__/bikelanes_lifecycle.test.lua`
   transform_lifecycle_tags(object_tags)
   if EXIT.exit_processing(object_tags) then return end
 
@@ -31,6 +33,7 @@ local function process_roads_bikelanes_way(object)
 
   prepare_pseudo_tags_roads_bikelanes(object_tags, object_tags._id, object_geom)
 
+  normalize_oneway_tags(object_tags)
   transform_cycleway_opposite_schema(object_tags)
   transform_construction_prefix(object_tags)
   transform_cycleway_both_postfix(object_tags)

@@ -7,6 +7,7 @@ local sanitize_traffic_sign = require('topics.helper.sanitize_traffic_sign')
 local sanitize_for_logging = require('topics.helper.sanitize_for_logging')
 local parse_length = require('topics.helper.parse_length')
 local sanitize_string = require('topics.helper.sanitize_string')
+local SANITIZE_VALUES = require('topics.helper.sanitize_values')
 
 --- Value fed into `operator_type` before transformation / allowlist (for `separate_tags` logging).
 ---@param tags OsmTags|nil
@@ -32,6 +33,7 @@ end
 ---@field access fun(value: string|nil): string|nil
 ---@field traffic_sign fun(value: string|nil): string|nil
 ---@field surface fun(tags: OsmTags): string|nil
+---@field allowed_surface fun(value: string|nil, tags: OsmTags): string|nil
 ---@field operator_type_log_source fun(tags: OsmTags|nil): string|nil
 ---@field operator_type fun(tags: OsmTags): string|nil
 ---@field indoor fun(value: string|nil): string|nil
@@ -47,14 +49,17 @@ local SANITIZE_TAGS = {
     local name = tags.name or tags.ref or tags['is_sidepath:of:name'] or tags['street:name']
     return sanitize_string(name)
   end,
+  -- Published without the direction: `-1` (against the drawing direction) becomes `yes`.
   oneway_road = function (tags)
-    if tags.oneway == 'yes' and tags.dual_carriageway == 'yes' then
+    local oneway = tags.oneway == '-1' and 'yes' or tags.oneway
+    if oneway == 'yes' and tags.dual_carriageway == 'yes' then
       return 'yes_dual_carriageway'
     end
-    return sanitize_for_logging(tags.oneway, { 'yes' }, { 'no' })
+    return sanitize_for_logging(oneway, { 'yes' }, { 'no' })
   end,
+  -- Published without the direction: `-1` (against the drawing direction) becomes `yes`.
   oneway_bicycle = function (value)
-    return sanitize_for_logging(value, { 'yes', 'no' })
+    return sanitize_for_logging(value == '-1' and 'yes' or value, { 'yes', 'no' })
   end,
   boolean_yes = function (value)
     return sanitize_for_logging(value, { 'yes' }, { 'no' })
@@ -178,5 +183,14 @@ local SANITIZE_TAGS = {
     end
   end,
 }
+
+--- Sanitized surface for a value from another key (`surface:bicycle`, `surface:right`, …), with the way's `sett:length`.
+--- `nil` for values outside the allowlist, so callers can fall back to the next value.
+SANITIZE_TAGS.allowed_surface = function (value, tags)
+  if value == nil then return nil end
+  local surface = SANITIZE_TAGS.surface({ surface = value, ['sett:length'] = tags['sett:length'] })
+  if surface == SANITIZE_VALUES.disallowed then return nil end
+  return surface
+end
 
 return SANITIZE_TAGS

@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { z } from 'zod'
 import { ReviewEntryStatus } from '@/prisma/generated/enums'
+import { ReviewListStatusStylesSchema } from '@/shared/reviewLists/reviewListStatusStyles'
 import { reviewEntryGeometrySchema } from './geojson'
 import { createReviewEntriesFromGeojson } from './mutations/createReviewEntriesFromGeojson.server'
 import { createReviewEntry } from './mutations/createReviewEntry.server'
@@ -49,8 +50,11 @@ export const createReviewListFn = createServerFn({ method: 'POST' })
   .validator(CreateListInput)
   .handler(async ({ data }) => createReviewList(data, getRequestHeaders()))
 
-// Members may only rename. Region links are admin-only (`updateReviewListForAdminFn`).
-const UpdateListInput = ListInRegion.extend({ name: z.string().trim().min(1) })
+// Members edit name and status styles. Region links are admin-only (`updateReviewListForAdminFn`).
+const UpdateListInput = ListInRegion.extend({
+  name: z.string().trim().min(1),
+  statusStyles: ReviewListStatusStylesSchema.optional(),
+})
 export const updateReviewListFn = createServerFn({ method: 'POST' })
   .validator(UpdateListInput)
   .handler(async ({ data }) => updateReviewList(data, getRequestHeaders()))

@@ -1,6 +1,7 @@
 /** @vitest-environment jsdom */
 import { fireEvent, render, screen } from '@testing-library/react'
 import { beforeEach, describe, expect, test, vi } from 'vitest'
+import { DEFAULT_REVIEW_LIST_STATUS_STYLES } from '@/shared/reviewLists/reviewListStatusStyles'
 import { ModeFilterBar } from './ModeFilterBar'
 import { ModeFilterSelect, modeFilterIcons } from './ModeFilterSelect'
 import { NotesModeFilterBar } from './notes/NotesModeFilterBar'
@@ -12,7 +13,7 @@ import {
   uniqueOsmNoteAuthorNames,
 } from './notes/notesModeFilters'
 import { QA_DEFAULT_STATUS_KEYS } from './qa/qaConfigStyles'
-import { REVIEW_STATUS_FILTER_OPTIONS } from './reviewLists/reviewListsModeFilters'
+import { reviewStatusFilterOptions } from './reviewLists/reviewListsModeFilters'
 
 class ResizeObserverStub {
   observe() {}
@@ -129,7 +130,7 @@ describe('filter dropdown options', () => {
           label="Status"
           icon={modeFilterIcons.status}
           value="all"
-          options={REVIEW_STATUS_FILTER_OPTIONS}
+          options={reviewStatusFilterOptions(DEFAULT_REVIEW_LIST_STATUS_STYLES)}
           onChange={onStatus}
         />
       </ModeFilterBar>,

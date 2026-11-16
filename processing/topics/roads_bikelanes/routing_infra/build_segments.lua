@@ -35,6 +35,13 @@ local lane_within_carriageway_categories = SET.set({
   'needsClarification',
 })
 
+-- `oneway=-1` / `oneway:bicycle=-1`: one-way against the drawing direction, so the edge is reversed.
+---@param object_tags OsmTags
+---@return boolean
+local function against_way(object_tags)
+  return object_tags.oneway == '-1' or object_tags['oneway:bicycle'] == '-1'
+end
+
 -- One carriageway edge per OSM way (`id` = `source_id` = `roads.id`), like path and bikelane edges.
 -- `oneway=yes`: geometry points in the legal direction. `oneway=no` with `oneway_motor=yes`: cars
 -- are one-way, bikes both ways; geometry points along the car direction, so riding against the
@@ -47,14 +54,10 @@ local lane_within_carriageway_categories = SET.set({
 local function emit_carriageway_edge(segments, object_tags, object_geom, object_default_id, road_value)
   local derived_oneway = derive_oneway(object_tags, { implicitOneWay = false })
   local geom = object_geom
-  if object_tags.oneway == '-1' then
+  if against_way(object_tags) then
     geom = reverse_linestring(object_geom)
   end
   local edge_oneway = routing_oneway[derived_oneway]
-  if object_tags.oneway == '-1' and derived_oneway ~= 'car_not_bike' then
-    -- derive_oneway has no `-1` case (falls to assumed_no).
-    edge_oneway = 'yes'
-  end
 
   local tags = merge_table({ road = road_value, parent_id = object_default_id, _side = 'self' }, object_tags)
   tags.oneway = edge_oneway
@@ -84,14 +87,11 @@ local function emit_path_edge(segments, object_tags, object_geom, object_default
   local bikelane_category_id = self_cycleway and self_cycleway.category or nil
   local derived_oneway = (self_cycleway and self_cycleway.oneway)
     or derive_oneway(object_tags, { implicitOneWay = false })
-  local edge_oneway = 'yes'
+  -- Bikes may ride both ways on `no`, `assumed_no` and `car_not_bike` (only motor traffic is oneway).
+  local edge_oneway = routing_oneway[derived_oneway]
   local edge_geom = object_geom
-  if object_tags.oneway == '-1' and derived_oneway ~= 'car_not_bike' then
-    -- Directed against the OSM way; derive_oneway has no `-1` case (falls to assumed_no).
+  if against_way(object_tags) and derived_oneway ~= 'car_not_bike' then
     edge_geom = reverse_linestring(object_geom)
-  elseif derived_oneway == 'no' or derived_oneway == 'assumed_no' or derived_oneway == 'car_not_bike' then
-    -- Bikes may ride both ways (car_not_bike: only motor traffic is oneway).
-    edge_oneway = 'no'
   end
 
   local tags = merge_table({
@@ -134,16 +134,12 @@ local function build_segments(context)
       local geom = nil
       local edge_oneway = routing_oneway[cycleway.oneway]
       local oneway_motor = nil
-      if side == 'self' and object_tags.oneway == '-1' then
+      if side == 'self' and against_way(object_tags) then
         -- Same as carriageway/path edges: point along the (motor) direction of `oneway=-1`.
-        -- derive_oneway has no `-1` case, so a bike-too oneway becomes `yes` here.
         geom = reverse_linestring(object_geom)
-        if cycleway.oneway ~= 'car_not_bike' then
-          edge_oneway = 'yes'
-        end
       end
-      if side == 'left' then
-        -- Same as `bikelanes`: left-side lines run against the OSM way (right-hand-traffic flow).
+      if cycleway._line_reversed then
+        -- Same line direction as `bikelanes` (see `side_line_reversed`).
         geom = reverse_linestring(object_geom)
       end
       if side == 'self' and cycleway.oneway == 'car_not_bike' then

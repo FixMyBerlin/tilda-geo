@@ -1,5 +1,6 @@
 describe('categorize_bikelane sanitizer-dependent behavior', function()
   require('topics.helper.osm2pgsql')
+  local DESC = require('topics.helper.tilda_description')
   local bikelane_categories = require('topics.roads_bikelanes.bikelanes.bikelane_categories')
   local SANITIZE_VALUES = require('topics.helper.sanitize_values')
   local categorize_bikelane = bikelane_categories.categorize_bikelane
@@ -51,6 +52,6 @@ describe('categorize_bikelane sanitizer-dependent behavior', function()
 
     local category = categorize_bikelane(tags)
     assert.is_not_nil(category)
-    assert.is_truthy(string.find(category.process and tags.description or '', 'Zufahrtsweg', 1, true))
+    assert.are.same(DESC.hints(tags), { 'TILDA_access_road' })
   end)
 end)

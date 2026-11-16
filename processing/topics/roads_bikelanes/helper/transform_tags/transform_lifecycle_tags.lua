@@ -1,7 +1,8 @@
+local DESC = require('topics.helper.tilda_description')
 local SET = require('topics.helper.sets')
 local highway_classes = require('topics.helper.highway_classes')
 local contains_substring = require('topics.helper.contains_substring')
-local to_semicolon_list = require('topics.helper.to_semicolon_list')
+local SIDE_LIFECYCLE = require('topics.roads_bikelanes.helper.transform_tags.side_lifecycle')
 
 local ALLOWED_HIGHWAYS = SET.join_sets({
   highway_classes.trunk_motorway_classes,
@@ -61,13 +62,6 @@ local function has_blocked_text(tags)
   return false
 end
 
-local TEMPORARY_SIDE_PREFIXES = {}
-for _, prefix in ipairs({ 'cycleway', 'sidewalk' }) do
-  for _, infix in ipairs({ '', ':left', ':right', ':both' }) do
-    table.insert(TEMPORARY_SIDE_PREFIXES, prefix .. infix)
-  end
-end
-
 -- Move `temporary=yes` into the lifecycle concept:
 -- - `temporary=yes` -> `lifecycle=temporary`
 -- - `cycleway:right:temporary=yes` -> `cycleway:right:lifecycle=temporary` (same for `sidewalk` and all sides)
@@ -81,10 +75,10 @@ local function transform_temporary(dest_tags, unmodified_tags)
     if not dest_tags.lifecycle then dest_tags.lifecycle = 'temporary' end
   end
 
-  for _, side_prefix in ipairs(TEMPORARY_SIDE_PREFIXES) do
-    local temporary_key = side_prefix .. ':temporary'
+  for _, side_key in ipairs(SIDE_LIFECYCLE.side_keys) do
+    local temporary_key = side_key .. ':temporary'
     if dest_tags[temporary_key] == 'yes' then
-      local lifecycle_key = side_prefix .. ':lifecycle'
+      local lifecycle_key = side_key .. ':lifecycle'
       unmodified_tags[temporary_key] = dest_tags[temporary_key]
       dest_tags[temporary_key] = nil
       if not dest_tags[lifecycle_key] then dest_tags[lifecycle_key] = 'temporary' end
@@ -117,7 +111,7 @@ local function transform_lifecycle_tags(dest_tags)
     unmodified_tags.lifecycle = dest_tags.lifecycle
 
     dest_tags.lifecycle = 'construction_no_access'
-    dest_tags.description = to_semicolon_list({ dest_tags.description, 'TILDA-Hinweis: Weg gesperrt aufgrund einer Baustelle.' })
+    DESC.add_hint(dest_tags, DESC.token('closed_construction'))
     for _, tag in ipairs(construction_restricted_tags) do
       dest_tags[tag] = nil
     end
@@ -131,7 +125,7 @@ local function transform_lifecycle_tags(dest_tags)
     unmodified_tags.lifecycle = dest_tags.lifecycle
 
     dest_tags.lifecycle = 'blocked'
-    dest_tags.description = to_semicolon_list({ dest_tags.description, 'TILDA-Hinweis: Weg gesperrt (Sperrung).' })
+    DESC.add_hint(dest_tags, DESC.token('closed_blocked'))
     for _, tag in ipairs(blocked_restricted_tags) do
       dest_tags[tag] = nil
     end

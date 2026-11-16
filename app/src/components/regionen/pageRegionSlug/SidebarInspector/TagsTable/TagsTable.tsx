@@ -1,6 +1,5 @@
 import { twJoin } from 'tailwind-merge'
 import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
-import { MarkdownAttributeValue } from '@/components/shared/text/MarkdownAttributeValue'
 import { parseMarkdownKey } from '@/components/shared/text/markdownKey'
 import type { InspectorFeatureProperty } from '../Inspector'
 import { TagsTableRowColor, tableKeysColor } from './compositTableRows/TagsTableRowColor'
@@ -40,6 +39,10 @@ import {
   TagsTableRowCompositTrassencoutSurveyResponse,
   tableKeyTrassencoutSurveyResponse,
 } from './compositTableRows/TagsTableRowCompositTrassencoutSurveyResponse'
+import {
+  TagsTableRowDescription,
+  tableKeyDescription,
+} from './compositTableRows/TagsTableRowDescription'
 import { TagsTableRowlifecycle } from './compositTableRows/TagsTableRowLifecycle'
 import { TagsTableRowValueSourceConfidence } from './compositTableRows/TagsTableRowValueSourceConfidence'
 import { TagsTableRowWebsite, tableKeyWebsite } from './compositTableRows/TagsTableRowWebsite'
@@ -51,6 +54,7 @@ import {
   tagsTableLeadingClass,
 } from './tagsTableLayout'
 import { TagsTableRow } from './TagsTableRow'
+import { TagsTableRowMarkdown } from './TagsTableRowMarkdown'
 import { cleanKey, KEY_IF_PRESENCE } from './utils/cleanKey'
 
 type Props = {
@@ -172,6 +176,16 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
                   />
                 )
               }
+              case tableKeyDescription: {
+                return (
+                  <TagsTableRowDescription
+                    key={cleanedKey}
+                    sourceId={sourceId}
+                    tagKey={cleanedKey}
+                    properties={properties}
+                  />
+                )
+              }
               case tableKeyWebsite: {
                 return (
                   <TagsTableRowWebsite
@@ -244,15 +258,15 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
                   return null
                 }
 
-                const markdownValue = properties[cleanedKey]
-                if (parseMarkdownKey(cleanedKey).isMarkdown && typeof markdownValue === 'string') {
+                const value = properties[cleanedKey]
+                if (parseMarkdownKey(cleanedKey).isMarkdown && value) {
                   return (
-                    <TagsTableRow key={cleanedKey} sourceId={sourceId} tagKey={cleanedKey}>
-                      <MarkdownAttributeValue
-                        markdown={markdownValue}
-                        className={twJoin('text-sm text-inherit', tagsTableLeadingClass)}
-                      />
-                    </TagsTableRow>
+                    <TagsTableRowMarkdown
+                      key={cleanedKey}
+                      sourceId={sourceId}
+                      tagKey={cleanedKey}
+                      markdown={value}
+                    />
                   )
                 }
 

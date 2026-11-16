@@ -25,7 +25,7 @@ const menuHeadingClassName = 'px-3 pt-2 pb-1 text-xs font-semibold tracking-wide
 
 /**
  * Review-list options for the mode header disclosure. A trailing “Neue Prüfliste…” row opens
- * the shared name modal (same as Umbenennen).
+ * the shared list modal (same as Bearbeiten).
  */
 export const ReviewListSelect = ({
   lists,
@@ -63,13 +63,17 @@ export const ReviewListSelect = ({
       {uploadError ? <p className="text-xs text-red-200">{uploadError}</p> : null}
       <ReviewListNameModal
         kind={nameModal}
-        defaultName={nameModal === 'rename' ? (selectedList?.name ?? '') : ''}
+        defaultValues={
+          nameModal === 'rename' && selectedList
+            ? { name: selectedList.name, statusStyles: selectedList.statusStyles }
+            : undefined
+        }
         isPending={create.isPending || rename.isPending}
         onClose={closeNameModal}
-        onSubmit={async (name) => {
+        onSubmit={async ({ name, statusStyles }) => {
           if (nameModal === 'rename') {
             if (!selectedList) return
-            await rename.mutateAsync({ id: selectedList.id, name })
+            await rename.mutateAsync({ id: selectedList.id, name, statusStyles })
             return
           }
           await create.mutateAsync(name)
@@ -139,7 +143,7 @@ export const ReviewListManageMenu = ({
                 onClick={(event) => openNameModal('rename', event.currentTarget)}
                 className={menuItemClassName}
               >
-                Umbenennen
+                Bearbeiten…
               </button>
             </MenuItem>
             <MenuItem

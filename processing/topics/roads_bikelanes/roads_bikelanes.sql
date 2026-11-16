@@ -4,9 +4,10 @@
 --
 -- NOTE: Derived bikelane geometries stay on the road centerline. The sideways
 -- offset is applied visually in the map style via `line-offset`, from the
--- `offset` attribute (meters, `+` left / `-` right). Left-side lines run
--- against the OSM way; right-side lines run with it. Both are oriented in Lua
--- (`roads_bikelanes_bikelanes.lua`, `routing_infra/build_segments.lua`).
+-- `offset` attribute (meters, `+` left / `-` right of the line's own direction).
+-- Lines point in the riding direction; two-way lines run against the OSM way on
+-- the left and with it on the right. Direction is decided in Lua
+-- (`bikelanes/helper/side_line_reversed.lua`).
 -- See topic-doc chapter `versetzte-geometrien` and processing/CHANGELOG.md.
 \i '/processing/topics/roads_bikelanes/3_cleanup_todos_lines.sql'
 \i '/processing/topics/roads_bikelanes/4_hide_network_noise.sql'

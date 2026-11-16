@@ -1,6 +1,6 @@
--- Left-side bikelane lines run against the OSM way. OSM `*:forward` / `*:backward`
--- follow the way, so on those rows the pair is swapped to follow the line.
--- Right and centerline rows already run with the way and are left unchanged.
+-- Some bikelane lines run against the OSM way (see `side_line_reversed`). OSM `*:forward` /
+-- `*:backward` follow the way, so on those rows the pair is swapped to follow the line.
+-- Rows that run with the way are left unchanged.
 --
 -- Pairs:
 -- - `mapillary_forward` / `mapillary_backward` (shared `result_tags`, or the lane's own)
@@ -13,10 +13,10 @@ local direction_pairs = {
 }
 
 ---@param tags table
----@param side string|nil
+---@param line_reversed boolean|nil
 ---@return table
-local function orient_line_direction_tags(tags, side)
-  if side ~= 'left' then
+local function orient_line_direction_tags(tags, line_reversed)
+  if not line_reversed then
     return tags
   end
 

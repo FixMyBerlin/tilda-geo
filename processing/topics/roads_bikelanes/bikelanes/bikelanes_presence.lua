@@ -53,12 +53,14 @@ local function bikelanes_presence(object_tags, cycleways)
     end
   end
 
-  if object_tags.oneway == 'yes' and object_tags['oneway:bicycle'] ~= 'no' then
-    presence.left = presence.left or 'not_expected'
-  end
-
-  if object_tags.junction == 'roundabout' then
-    presence.left = presence.left or 'not_expected'
+  -- On a oneway road the side against the traffic, left in the direction of travel, needs no infrastructure.
+  -- Roundabouts are `oneway=yes` after `normalize_oneway_tags`.
+  if object_tags['oneway:bicycle'] ~= 'no' then
+    if object_tags.oneway == 'yes' then
+      presence.left = presence.left or 'not_expected'
+    elseif object_tags.oneway == '-1' then
+      presence.right = presence.right or 'not_expected'
+    end
   end
 
   for _, side in pairs(sides) do presence[side] = presence[side] or 'missing' end

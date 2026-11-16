@@ -16,11 +16,12 @@ import type { StyleLayer } from './types'
  * plus the always-present `id` column (`way/…/left`, `way/…/right`, or `way/…` for
  * center-running `self`). Above it, full tags including `offset` are present.
  *
- * - **Below minzoom:** nudge each side by half the layer's stroke width so the two sides
- *   sit flush against the centerline (no overlap, no road-width gap). Side comes from `id`.
- *   A meter-based gap would be sub-pixel at these zooms anyway.
- * - **At/above minzoom:** convert the absolute `offset` attribute (meters; the sign is
- *   `+` left / `-` right of the OSM way, computed in processing as half the road width)
+ * - **Below minzoom:** nudge each derived line (known from `id`) to its right by half the
+ *   layer's stroke width so the two sides sit flush against the centerline (no overlap, no
+ *   road-width gap). A meter-based gap would be sub-pixel at these zooms anyway. The few
+ *   lines whose lane lies to their left (positive `offset`) get the same nudge here.
+ * - **At/above minzoom:** convert the `offset` attribute (meters; the sign is `+` left /
+ *   `-` right of the line's own direction, computed in processing as half the road width)
  *   to screen pixels so the two sides sit at the road edge.
  *
  * Meter → pixel conversion: MapLibre `line-offset` is in screen pixels, while `offset` is
@@ -54,11 +55,10 @@ const metersPerPixelAtZoom0 =
   (EARTH_CIRCUMFERENCE_M / TILE_SIZE_PX) * Math.cos((REFERENCE_LATITUDE_DEG * Math.PI) / 180)
 
 /**
- * Pixels-per-meter at a given zoom. Positive: MapLibre `line-offset` is positive to the
- * RIGHT of the feature direction. Left-side geometries are reversed in processing, so
- * both sides are drawn to the right of their own line (right-hand-traffic flow). The
- * `offset` attribute stays signed relative to the OSM way (`+` left / `-` right); only
- * its magnitude is used here.
+ * Pixels-per-meter at a given zoom. MapLibre `line-offset` is positive to the RIGHT of the
+ * feature direction, the `offset` attribute is positive to the LEFT of it, hence the sign
+ * flip in {@link lineOffsetMeters}. One-way lines point in the riding direction, so in
+ * right-hand traffic `offset` is usually negative: the lane is drawn to the right of its line.
  */
 export const pixelsPerMeterAtZoom = (zoom: number) => 2 ** zoom / metersPerPixelAtZoom0
 
@@ -66,9 +66,10 @@ const MIN_ZOOM_STOP = 0
 const MAX_ZOOM_STOP = 24
 const INTERACTIVE_MINZOOM = interactivityConfiguration.bikelanes.minzoom
 
-/** `|offset|` in meters; missing (e.g. center-running `cycleway=self`) → `0`. */
-const offsetMetersAbs = [
-  'abs',
+/** `offset` as MapLibre `line-offset` meters; missing (e.g. center-running `cycleway=self`) → `0`. */
+const lineOffsetMeters = [
+  '*',
+  -1,
   ['coalesce', ['get', 'offset'], 0],
 ] satisfies ExpressionSpecification
 
@@ -85,7 +86,7 @@ const compactLineOffset = (halfWidthPx: number) =>
   ['case', isDerivedSide, halfWidthPx, 0] satisfies ExpressionSpecification
 
 const meterLineOffsetAtZoom = (zoom: number) =>
-  ['*', offsetMetersAbs, pixelsPerMeterAtZoom(zoom)] satisfies ExpressionSpecification
+  ['*', lineOffsetMeters, pixelsPerMeterAtZoom(zoom)] satisfies ExpressionSpecification
 
 /** Clamped stroke width at zooms below the layer's first interpolate/step stop. */
 export const lowZoomLineWidthPx = (lineWidth: unknown) => {
@@ -105,7 +106,7 @@ export const lowZoomLineWidthPx = (lineWidth: unknown) => {
  * `interpolate`/`step` ("zoom-and-property" expression), so feature-dependent values live
  * in the stop outputs. Equal compact stops at 0 and `minzoom-1` keep the nudge constant
  * through the non-interactive range; from `minzoom` to 24, base-2 interpolation of the
- * meter stops is identical to `|offset| × pixelsPerMeter(zoom)`.
+ * meter stops is identical to `-offset × pixelsPerMeter(zoom)`.
  */
 export const bikelaneVisualLineOffset = (lineWidth: unknown) => {
   const compact = compactLineOffset(lowZoomLineWidthPx(lineWidth) / 2)
@@ -144,7 +145,7 @@ export const zoomValue = (value: unknown, zoom: number) => {
 /** Symbol expressions get one stop per zoom level up to here; above it they keep the last value. */
 export const SYMBOL_MAX_STEP_ZOOM = 19
 
-/** Largest `|offset|` in meters the linear feature interpolation below covers exactly. */
+/** Largest `|offset|` in meters the linear feature interpolation below covers exactly (both signs). */
 const MAX_OFFSET_M = 100
 
 /**
@@ -168,7 +169,9 @@ export const bikelaneVisualTextOffset = (
     return [
       'interpolate',
       ['linear'],
-      offsetMetersAbs,
+      lineOffsetMeters,
+      -MAX_OFFSET_M,
+      ['literal', [x, y - MAX_OFFSET_M * emPerMeter]],
       0,
       ['literal', [x, y]],
       MAX_OFFSET_M,

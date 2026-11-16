@@ -1,0 +1,11 @@
+describe('direction_side', function()
+  local DIRECTION_SIDE = require('topics.helper.direction_side')
+
+  it('maps directions to sides and back', function()
+    assert.are.equal(DIRECTION_SIDE.direction_to_side('forward'), 'right')
+    assert.are.equal(DIRECTION_SIDE.direction_to_side('backward'), 'left')
+    assert.are.equal(DIRECTION_SIDE.side_to_direction('right'), 'forward')
+    assert.are.equal(DIRECTION_SIDE.side_to_direction('left'), 'backward')
+    assert.is_nil(DIRECTION_SIDE.direction_to_side('both'))
+  end)
+end)

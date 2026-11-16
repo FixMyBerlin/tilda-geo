@@ -14,27 +14,29 @@ import {
   reviewHighlightLinePaint,
 } from '@/components/regionen/pageRegionSlug/modes/reviewLists/reviewHighlightPaint'
 import { useReviewListsModeValue } from '@/components/regionen/pageRegionSlug/modes/reviewLists/useReviewListsModeParam'
+import { useReviewListStatusStyles } from '@/components/regionen/pageRegionSlug/modes/reviewLists/useReviewListStatusStyles'
 import { useCurrentMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
 import {
   reviewEntriesQueryOptions,
   reviewListsQueryOptions,
 } from '@/server/regions/regionQueryOptions'
+import type { ReviewListStatusStyles } from '@/shared/reviewLists/reviewListStatusStyles'
 import {
   reviewEntriesHitareaLayerId,
   reviewEntriesLayerId,
   reviewEntriesSourceId,
 } from './reviewEntriesLayers.const'
 
-// Status → color (matches the panel pills).
-const STATUS_COLOR: ExpressionSpecification = [
+// Status → color of the list (matches the panel pills).
+const statusColor = (styles: ReviewListStatusStyles): ExpressionSpecification => [
   'match',
   ['get', 'status'],
   'OK',
-  '#16a34a', // green-600
+  styles.OK.color,
   'PROBLEM',
-  '#dc2626', // red-600
-  '#6b7280', // gray-500 (OPEN / default)
+  styles.PROBLEM.color,
+  styles.OPEN.color,
 ]
 
 /**
@@ -55,6 +57,7 @@ export const SourcesLayersReviewEntries = () => {
     enabled: currentMode.isReviewLists,
   })
   const activeListId = key ?? lists?.lists[0]?.id
+  const statusStyles = useReviewListStatusStyles()
 
   const { data } = useQuery({
     ...reviewEntriesQueryOptions(regionSlug, activeListId),
@@ -71,6 +74,8 @@ export const SourcesLayersReviewEntries = () => {
   const haloIds = reviewHighlightIds(selectedIds, hoveredListItem?.id, hoveredMapItemId).filter(
     (id) => id !== editingId,
   )
+
+  const statusColorExpression = statusColor(statusStyles)
 
   const notEditing = (filter: ExpressionSpecification) =>
     editingId === undefined
@@ -130,7 +135,7 @@ export const SourcesLayersReviewEntries = () => {
         source={reviewEntriesSourceId}
         type="fill"
         filter={notEditing(['in', ['geometry-type'], ['literal', ['Polygon', 'MultiPolygon']]])}
-        paint={{ 'fill-color': STATUS_COLOR, 'fill-opacity': 0.25 }}
+        paint={{ 'fill-color': statusColorExpression, 'fill-opacity': 0.25 }}
       />
       <Layer
         id={`${reviewEntriesLayerId}-line`}
@@ -142,7 +147,7 @@ export const SourcesLayersReviewEntries = () => {
           ['geometry-type'],
           ['literal', ['LineString', 'MultiLineString', 'Polygon', 'MultiPolygon']],
         ])}
-        paint={{ 'line-color': STATUS_COLOR, 'line-width': 2 }}
+        paint={{ 'line-color': statusColorExpression, 'line-width': 2 }}
       />
       <Layer
         id={reviewEntriesLayerId}
@@ -152,7 +157,7 @@ export const SourcesLayersReviewEntries = () => {
         filter={notEditing(['in', ['geometry-type'], ['literal', ['Point', 'MultiPoint']]])}
         paint={{
           'circle-radius': 6,
-          'circle-color': STATUS_COLOR,
+          'circle-color': statusColorExpression,
           'circle-stroke-color': '#ffffff',
           'circle-stroke-width': 1.5,
         }}

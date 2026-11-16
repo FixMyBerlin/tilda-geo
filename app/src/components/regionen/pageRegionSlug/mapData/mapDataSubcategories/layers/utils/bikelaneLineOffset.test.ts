@@ -73,6 +73,15 @@ describe('bikelaneVisualLineOffset', () => {
     expect(expression[9]).toBe(24)
     expect(JSON.stringify(expression[10])).toContain('offset')
   })
+
+  test('shifts a negative `offset` (lane right of its line) to the right, a positive one to the left', () => {
+    const expression = bikelaneVisualLineOffset(1.5)
+    const meterStop = expression[8] as unknown[]
+    // MapLibre `line-offset` is positive to the right; `offset` is positive to the left.
+    expect(meterStop[0]).toBe('*')
+    expect(meterStop[1]).toEqual(['*', -1, ['coalesce', ['get', 'offset'], 0]])
+    expect(meterStop[2]).toBeGreaterThan(0)
+  })
 })
 
 describe('withBikelaneVisualLineOffset', () => {
@@ -139,6 +148,14 @@ describe('bikelaneVisualTextOffset', () => {
       expect(x).toBe(0)
       expect(y * zoomValue(textSize, zoom)).toBeCloseTo(linePx, 1)
     }
+  })
+
+  test('follows the sign: a lane left of its line (positive `offset`) moves the symbol left', () => {
+    const lineOffset = bikelaneVisualLineOffset(1.5)
+    const linePx = evaluate(lineOffset, 16, 5) as unknown as number
+    const [, y] = evaluate(bikelaneVisualTextOffset(12, 14), 16, 5)
+    expect(linePx).toBeLessThan(0)
+    expect(y * 12).toBeCloseTo(linePx, 1)
   })
 
   test('adds the layer offset and keeps it without `offset`', () => {

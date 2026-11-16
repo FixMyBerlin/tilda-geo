@@ -3,6 +3,7 @@ import { twJoin } from 'tailwind-merge'
 import { useDataParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useDataParam'
 import { useIsAdmin } from '@/components/shared/hooks/useIsAdmin'
 import { Link } from '@/components/shared/links/Link'
+import { Markdown } from '@/components/shared/text/Markdown'
 import { getStaticDatasetUrl } from '@/components/shared/utils/getStaticDatasetUrl'
 import type { RegionDataset } from '@/server/uploads/queries/getUploadsForRegion.server'
 import { createSourceKeyStaticDatasets } from '../../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
@@ -62,9 +63,10 @@ export const SelectDataset = ({ dataset }: { dataset: RegionDataset }) => {
       {selected && (
         <div className="flex flex-col gap-3 border-2 border-t-0 border-yellow-400 bg-yellow-100 px-1.5 pt-1.5 pb-1.5 text-xs leading-4 prose-a:underline-offset-1">
           {description && (
-            <p className={description.includes('(!)') ? 'text-red-500' : undefined}>
-              {description}
-            </p>
+            <Markdown
+              markdown={description}
+              className={twJoin('text-xs leading-4', description.includes('(!)') && 'text-red-500')}
+            />
           )}
           {(dataUpdatedNote || dataSourceMarkdown) && (
             <div className="flex flex-col gap-1">

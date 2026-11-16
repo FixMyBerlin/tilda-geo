@@ -1,4 +1,5 @@
 local has_prefix = require('topics.helper.has_prefix')
+local SIDE_LIFECYCLE = require('topics.roads_bikelanes.helper.transform_tags.side_lifecycle')
 
 -- Mutate the input to transform `construction:bicycle_road=yes` to be `bicycle_road=yes`.
 -- - Function returns the old tags `<oldKey>=<oldValue>` for debugging … but we don't use that ATM
@@ -32,11 +33,8 @@ local function transform_construction_prefix(destTags)
 
     -- Add the lifecycle-tag to track this modification
     -- Place it at the right 'layer' based on the base tag structure
-    if base_tag == 'cycleway' or has_prefix(base_tag, 'cycleway:') then
-      -- For cycleway, cycleway:left, cycleway:right, cycleway:both -> cycleway[:SIDE]:lifecycle
-      destTags[base_tag .. ':lifecycle'] = 'construction'
-    elseif base_tag == 'sidewalk' or has_prefix(base_tag, 'sidewalk:') then
-      -- For sidewalk, sidewalk:left, sidewalk:right, sidewalk:both -> sidewalk[:SIDE]:lifecycle
+    if SIDE_LIFECYCLE.is_side_key(base_tag) then
+      -- For cycleway[:SIDE], sidewalk[:SIDE] -> cycleway[:SIDE]:lifecycle, sidewalk[:SIDE]:lifecycle
       destTags[base_tag .. ':lifecycle'] = 'construction'
     else
       -- For highway, bicycle_road, etc. -> lifecycle

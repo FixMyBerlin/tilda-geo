@@ -1,7 +1,7 @@
 describe('orient_line_direction_tags', function()
   local orient_line_direction_tags = require('topics.roads_bikelanes.bikelanes.helper.orient_line_direction_tags')
 
-  it('swaps mapillary and traffic_sign direction pairs on the left side', function()
+  it('swaps mapillary and traffic_sign direction pairs on a reversed line', function()
     local tags = {
       mapillary_forward = 'photo-with-way',
       mapillary_backward = 'photo-against-way',
@@ -12,7 +12,7 @@ describe('orient_line_direction_tags', function()
       mapillary_coverage = '2024',
     }
 
-    orient_line_direction_tags(tags, 'left')
+    orient_line_direction_tags(tags, true)
 
     assert.are.equal('photo-against-way', tags.mapillary_forward)
     assert.are.equal('photo-with-way', tags.mapillary_backward)
@@ -23,16 +23,16 @@ describe('orient_line_direction_tags', function()
     assert.are.equal('2024', tags.mapillary_coverage)
   end)
 
-  it('moves a one-sided mapillary value to the other key on the left side', function()
+  it('moves a one-sided mapillary value to the other key on a reversed line', function()
     local tags = { mapillary_backward = 'photo-against-way' }
 
-    orient_line_direction_tags(tags, 'left')
+    orient_line_direction_tags(tags, true)
 
     assert.is_nil(tags.mapillary_backward)
     assert.are.equal('photo-against-way', tags.mapillary_forward)
   end)
 
-  it('leaves right-side and centerline tags in OSM way direction', function()
+  it('leaves lines that run with the way unchanged', function()
     local right = {
       mapillary_forward = 'photo-with-way',
       mapillary_backward = 'photo-against-way',
@@ -43,8 +43,8 @@ describe('orient_line_direction_tags', function()
       ['traffic_sign:backward'] = 'DE:241',
     }
 
-    orient_line_direction_tags(right, 'right')
-    orient_line_direction_tags(center, 'self')
+    orient_line_direction_tags(right, false)
+    orient_line_direction_tags(center, nil)
 
     assert.are.equal('photo-with-way', right.mapillary_forward)
     assert.are.equal('photo-against-way', right.mapillary_backward)

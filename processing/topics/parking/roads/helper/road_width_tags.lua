@@ -59,7 +59,7 @@ local function road_width_tags(tags)
   local width_oneway = highway_width_fallbacks_oneway[tags.highway]
   local width_no_oneway = highway_width_fallbacks_no_oneway[tags.highway]
 
-  local is_oneway = tags.oneway == 'yes' or tags.oneway == 'implicit_yes'
+  local is_oneway = tags.oneway == 'yes' or tags.oneway == '-1' or tags.oneway == 'implicit_yes'
   if is_oneway then
     return {
       value = width_oneway or 10,

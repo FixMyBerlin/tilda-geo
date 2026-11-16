@@ -46,6 +46,7 @@ export function PageReviewListEdit() {
         listId={list.id}
         initialValues={reviewListConfigToFormValues({
           name: list.name,
+          statusStyles: list.statusStyles,
           regionSlugs: list.regionSlugs,
         })}
         regions={regions}

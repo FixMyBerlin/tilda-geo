@@ -19,6 +19,7 @@ import {
   reviewListGeojsonClientMetadataSchema,
   reviewListGeojsonResponseMetadataSchema,
 } from '@/server/review-lists/reviewListUpload.schemas'
+import type { ReviewListStatusStyles } from '@/shared/reviewLists/reviewListStatusStyles'
 import { useModeCollectionManager } from '../useModeCollectionManager'
 
 type ReviewListCommandsInput = {
@@ -53,7 +54,15 @@ export const useReviewListCommands = ({
 
   const { invalidate, create, rename, remove } = useModeCollectionManager({
     createFn: (name) => createReviewListFn({ data: { regionSlug, name } }),
-    renameFn: ({ id, name }) => updateReviewListFn({ data: { regionSlug, listId: id, name } }),
+    renameFn: ({
+      id,
+      name,
+      statusStyles,
+    }: {
+      id: number
+      name: string
+      statusStyles: ReviewListStatusStyles
+    }) => updateReviewListFn({ data: { regionSlug, listId: id, name, statusStyles } }),
     deleteFn: (id) => deleteReviewListFn({ data: { regionSlug, listId: id } }),
     invalidateKeys: [
       reviewListsQueryOptions(regionSlug).queryKey,

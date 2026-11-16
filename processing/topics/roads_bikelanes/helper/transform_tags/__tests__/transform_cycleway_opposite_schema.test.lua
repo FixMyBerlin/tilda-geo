@@ -21,6 +21,7 @@ describe('transform_cycleway_opposite_schema', function()
     local expectedResult = {
       ['cycleway:right'] = 'no',
       ['cycleway:left'] = 'lane',
+      ['cycleway:left:oneway'] = '-1',
       ['oneway:bicycle'] = 'no',
       ['oneway'] = 'yes',
     }
@@ -28,13 +29,33 @@ describe('transform_cycleway_opposite_schema', function()
     assert.are.same(input, expectedResult)
   end)
 
+  it('keeps a tagged direction of the contraflow lane', function()
+    local input = { ['cycleway'] = 'opposite_lane', ['oneway'] = 'yes', ['cycleway:left:oneway'] = 'no' }
+    transform_cycleway_opposite_schema(input)
+    assert.are.equal('no', input['cycleway:left:oneway'])
+  end)
+
   it('handle opposite_track when oneway is yes', function()
     local input = { ['cycleway'] = 'opposite_track', ['oneway'] = 'yes' }
     local expectedResult = {
       ['cycleway:right'] = 'no',
       ['cycleway:left'] = 'track',
+      ['cycleway:left:oneway'] = '-1',
       ['oneway:bicycle'] = 'no',
       ['oneway'] = 'yes',
+    }
+    transform_cycleway_opposite_schema(input)
+    assert.are.same(input, expectedResult)
+  end)
+
+  it('puts the contraflow lane on the right side when oneway is -1', function()
+    local input = { ['cycleway'] = 'opposite_lane', ['oneway'] = '-1' }
+    local expectedResult = {
+      ['cycleway:left'] = 'no',
+      ['cycleway:right'] = 'lane',
+      ['cycleway:right:oneway'] = 'yes',
+      ['oneway:bicycle'] = 'no',
+      ['oneway'] = '-1',
     }
     transform_cycleway_opposite_schema(input)
     assert.are.same(input, expectedResult)

@@ -658,4 +658,108 @@ describe('bikelanes', function()
     end)
   end)
 
+  describe('`oneway=-1` roads:', function()
+    local function sides(result)
+      local list = {}
+      for _, row in ipairs(result) do
+        if row.category ~= 'not_expected' then table.insert(list, row._side) end
+      end
+      table.sort(list)
+      return list
+    end
+
+    it('puts `cycleway=lane` on the right in the direction of travel', function()
+      assert.are.same(sides(run_bikelanes({ tags = { highway = 'residential', oneway = 'yes', cycleway = 'lane' }, id = 1, type = 'way' })), { 'right' })
+      assert.are.same(sides(run_bikelanes({ tags = { highway = 'residential', oneway = '-1', cycleway = 'lane' }, id = 1, type = 'way' })), { 'left' })
+    end)
+
+    it('reads the traffic sign in the direction of travel of a separate cycleway', function()
+      local result = run_bikelanes({
+        tags = { highway = 'cycleway', oneway = '-1', ['traffic_sign:forward'] = 'DE:240', ['traffic_sign:backward'] = 'DE:237' },
+        id = 1,
+        type = 'way',
+      })
+      assert.are.equal('DE:237', result[1].traffic_sign)
+    end)
+  end)
+
+  describe('Line direction and `offset` of lanes on the road:', function()
+    local function by_side(result)
+      local rows = {}
+      for _, row in ipairs(result) do rows[row._side] = row end
+      return rows
+    end
+
+    it('runs the left lane against the way on a two-way road, both lanes right of their line', function()
+      local rows = by_side(run_bikelanes({
+        tags = { highway = 'residential', ['cycleway:both'] = 'lane', ['cycleway:both:lane'] = 'advisory', width = '10' },
+        id = 1,
+        type = 'way',
+      }))
+      assert.is_true(rows.left._line_reversed)
+      assert.is_false(rows.right._line_reversed)
+      assert.are.equal(-5, rows.left.offset)
+      assert.are.equal(-5, rows.right.offset)
+    end)
+
+    it('runs the left lane of a oneway road with the way, left of its line', function()
+      local rows = by_side(run_bikelanes({
+        tags = { highway = 'residential', oneway = 'yes', ['cycleway:left'] = 'lane', ['cycleway:left:lane'] = 'advisory', width = '10' },
+        id = 1,
+        type = 'way',
+      }))
+      assert.is_false(rows.left._line_reversed)
+      assert.are.equal(5, rows.left.offset)
+    end)
+
+    it('runs a cycleway=opposite_lane against the way', function()
+      local transform_cycleway_opposite_schema = require('topics.roads_bikelanes.helper.transform_tags.transform_cycleway_opposite_schema')
+      local tags = { highway = 'residential', oneway = 'yes', cycleway = 'opposite_lane', width = '10' }
+      transform_cycleway_opposite_schema(tags)
+      local rows = by_side(run_bikelanes({
+        tags = tags,
+        id = 1,
+        type = 'way',
+      }))
+      assert.is_true(rows.left._line_reversed)
+      assert.are.equal(-5, rows.left.offset)
+    end)
+  end)
+
+  describe('`oneway` without a tag on lanes and tracks tagged on the road:', function()
+    it('assumes one direction for a shared lane on each side of the road', function()
+      local function oneway_by_side(tags)
+        local rows = {}
+        for _, row in ipairs(run_bikelanes({ tags = tags, id = 1, type = 'way' })) do
+          rows[row._side] = row.category .. ':' .. tostring(row.oneway)
+        end
+        return rows
+      end
+      assert.are.same(
+        { right = 'sharedMotorVehicleLane:implicit_yes' },
+        oneway_by_side({ highway = 'residential', ['cycleway:right'] = 'shared_lane' })
+      )
+      -- Without a side the whole road is shared: one row per side, each in one direction.
+      assert.are.same(
+        { left = 'sharedMotorVehicleLane:implicit_yes', right = 'sharedMotorVehicleLane:implicit_yes' },
+        oneway_by_side({ highway = 'residential', cycleway = 'shared_lane' })
+      )
+      assert.are.same(
+        { right = 'sharedMotorVehicleLane:no' },
+        oneway_by_side({ highway = 'residential', ['cycleway:right'] = 'shared_lane', ['cycleway:right:oneway'] = 'no' })
+      )
+    end)
+
+    it('assumes one direction for a lane and both directions for a track', function()
+      local result = run_bikelanes({
+        tags = { highway = 'secondary', ['cycleway:left'] = 'track', ['cycleway:right'] = 'lane', ['cycleway:right:lane'] = 'exclusive' },
+        id = 1,
+        type = 'way',
+      })
+      local by_side = {}
+      for _, row in ipairs(result) do by_side[row._side] = row end
+      assert.are.equal('assumed_no', by_side.left.oneway)
+      assert.are.equal('implicit_yes', by_side.right.oneway)
+    end)
+  end)
 end)
