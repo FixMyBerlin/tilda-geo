@@ -466,6 +466,19 @@ describe('RegionFormSchema', () => {
     expect(parsed.maskOsmRelationIds).toEqual([2787952, 62504])
     expect(parsed.maskBufferKm).toBe(1.5)
   })
+
+  test('accepts a mask buffer of 0 and rejects a negative one', () => {
+    const formValues = regionConfigToFormValues({
+      ...validBase,
+      maskOsmRelationIds: [2787952],
+      maskBufferKm: 0,
+    })
+    expect(RegionFormSchema.parse(formValues).maskBufferKm).toBe(0)
+    expect(RegionWriteSchema.safeParse({ ...validBase, maskBufferKm: 0 }).success).toBe(true)
+
+    expect(RegionFormSchema.safeParse({ ...formValues, maskBufferKm: '-1' }).success).toBe(false)
+    expect(RegionWriteSchema.safeParse({ ...validBase, maskBufferKm: -1 }).success).toBe(false)
+  })
 })
 
 describe('RegionFormSchema welcome image', () => {

@@ -178,7 +178,7 @@ export const RegionWriteSchema = z
     navigationLinks: z.array(RegionNavigationLinkSchema),
     contractId: z.number().int().positive().nullable(),
     maskOsmRelationIds: z.array(z.number().int().positive()),
-    maskBufferKm: z.number().positive(),
+    maskBufferKm: z.number().nonnegative(),
     welcome: RegionWelcomeWriteSchema.nullable(),
   })
   .strict()
@@ -353,11 +353,11 @@ const refineMaskForm = (
       path: ['maskBufferKm'],
       message: EN_DECIMAL_HELP,
     })
-  } else if (!(Number(form.maskBufferKm) > 0)) {
+  } else if (!(Number(form.maskBufferKm) >= 0)) {
     ctx.addIssue({
       code: 'custom',
       path: ['maskBufferKm'],
-      message: 'Buffer muss größer als 0 sein.',
+      message: 'Buffer darf nicht negativ sein.',
     })
   }
 }
