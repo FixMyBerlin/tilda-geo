@@ -1,7 +1,6 @@
 import type { ExpressionSpecification } from 'maplibre-gl'
 import type { LayerProps } from 'react-map-gl/maplibre'
 import { Layer } from 'react-map-gl/maplibre'
-import { useMapLoaded } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 
 const createMatchExpression = ({
   valueNone,
@@ -47,7 +46,6 @@ export const LayerHighlight = ({
   includeSelected = true,
   ...props
 }: Props) => {
-  const mapLoaded = useMapLoaded()
   const opacity = createMatchExpression({
     valueNone: 0,
     valueHover: 0.5,
@@ -60,8 +58,6 @@ export const LayerHighlight = ({
     valueSelected: includeSelected ? SELECTED_COLOR : hoverColor,
     valueHoverSelected: includeSelected ? SELECTED_COLOR : hoverColor,
   })
-  if (!mapLoaded) return null
-
   // Type guard: check if this is a standard layer (not custom layer)
   if (!('type' in props) || props.type === 'custom') {
     return null
@@ -115,7 +111,8 @@ export const LayerHighlight = ({
     // It is really hard to create a generic highlighting for symbol layers.
     // There are two cases:
     // a. When we use a symbol as the only style.Eg.a bike parking icon. Those will get the the cirle highlight below.
-    // b. When we add a symbol on a line or area. In those cases we cannot position the circle properly. Instead we do not highlight anything, ATM.
+    // b. When we add a symbol on a line or area. In those cases we cannot position the circle properly. Instead we do not highlight anything.
+    //    The line itself is highlighted, and `buildDirectionArrowLayers` puts its direction arrows on top.
     // Test-URL: http://127.0.0.1:5173/regionen/bb-sg?map=13.7/52.3679/13.4683&config=gdl8v6.ibc0ia.d1s1&data=&f=12|way/80883641|13.458831|52.364856|13.463069|52.366717&notes=true&v=2
     if (layerProps?.layout && 'symbol-placement' in layerProps.layout) {
       return null

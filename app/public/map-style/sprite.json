@@ -90,101 +90,94 @@
     "y": 80,
     "pixelRatio": 1
   },
-  "chevron-double-right": {
+  "ferry": {
     "width": 20,
     "height": 20,
     "x": 212,
     "y": 80,
     "pixelRatio": 1
   },
-  "ferry": {
+  "lifecycle-blocked": {
     "width": 20,
     "height": 20,
     "x": 233,
     "y": 80,
     "pixelRatio": 1
   },
-  "lifecycle-blocked": {
+  "lifecycle-construction": {
     "width": 20,
     "height": 20,
     "x": 0,
     "y": 102,
     "pixelRatio": 1
   },
-  "lifecycle-construction": {
+  "mobility-hub": {
     "width": 20,
     "height": 20,
     "x": 21,
     "y": 102,
     "pixelRatio": 1
   },
-  "mobility-hub": {
+  "museum": {
     "width": 20,
     "height": 20,
     "x": 42,
     "y": 102,
     "pixelRatio": 1
   },
-  "museum": {
+  "parking": {
     "width": 20,
     "height": 20,
     "x": 63,
     "y": 102,
     "pixelRatio": 1
   },
-  "parking": {
+  "parking-garage": {
     "width": 20,
     "height": 20,
     "x": 84,
     "y": 102,
     "pixelRatio": 1
   },
-  "parking-garage": {
+  "s-bahn": {
     "width": 20,
     "height": 20,
     "x": 105,
     "y": 102,
     "pixelRatio": 1
   },
-  "s-bahn": {
+  "scooter-parking": {
     "width": 20,
     "height": 20,
     "x": 126,
     "y": 102,
     "pixelRatio": 1
   },
-  "scooter-parking": {
+  "tram": {
     "width": 20,
     "height": 20,
     "x": 147,
     "y": 102,
     "pixelRatio": 1
   },
-  "tram": {
+  "tunnel": {
     "width": 20,
     "height": 20,
     "x": 168,
     "y": 102,
     "pixelRatio": 1
   },
-  "tunnel": {
-    "width": 20,
-    "height": 20,
-    "x": 189,
-    "y": 102,
-    "pixelRatio": 1
-  },
   "cross": {
     "width": 19,
     "height": 19,
-    "x": 210,
+    "x": 189,
     "y": 102,
     "pixelRatio": 1
   },
   "pattern-stripes": {
     "width": 19,
     "height": 19,
-    "x": 230,
+    "x": 209,
     "y": 102,
     "pixelRatio": 1
   },
@@ -251,11 +244,25 @@
     "y": 123,
     "pixelRatio": 1
   },
+  "pattern-direction-arrow-selected": {
+    "width": 90,
+    "height": 12,
+    "x": 0,
+    "y": 142,
+    "pixelRatio": 1
+  },
   "dot": {
     "width": 11,
     "height": 11,
-    "x": 238,
-    "y": 123,
+    "x": 91,
+    "y": 142,
+    "pixelRatio": 1
+  },
+  "pattern-direction-arrow-faint": {
+    "width": 120,
+    "height": 10,
+    "x": 103,
+    "y": 142,
     "pixelRatio": 1
   }
 }
