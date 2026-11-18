@@ -1,6 +1,8 @@
 import { ModeListCount, type ModeListCountNouns } from '../ModeListCount'
+import { osmNotesHitBboxLimit } from './osmNotesQueryOptions'
 import { useNotesModeListData } from './useNotesModeListData'
 import { useNotesModeParam } from './useNotesModeParam'
+import { useOsmNotesQuery } from './useOsmNotesQuery'
 import { useVisibleNotesEntries } from './useVisibleNotesEntries'
 
 const nouns = {
@@ -21,6 +23,7 @@ export const NotesModeListCount = () => {
     isOsmError,
     capabilities,
   } = useNotesModeListData()
+  const { data: osmNotes } = useOsmNotesQuery()
   const visibleEntries = useVisibleNotesEntries(
     entries,
     showingOsm,
@@ -33,5 +36,12 @@ export const NotesModeListCount = () => {
     return <ModeListCount count={{ status: 'loading' }} nouns={nouns} />
   }
 
-  return <ModeListCount count={{ status: 'counted', shown: visibleEntries.length }} nouns={nouns} />
+  const shown = visibleEntries.length
+  const osmHitLimit = showingOsm && osmNotesHitBboxLimit(osmNotes?.features.length ?? 0)
+  return (
+    <ModeListCount
+      count={osmHitLimit ? { status: 'atLeast', shown } : { status: 'counted', shown }}
+      nouns={nouns}
+    />
+  )
 }

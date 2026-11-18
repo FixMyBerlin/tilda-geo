@@ -26,4 +26,8 @@ describe('ModeListCount', () => {
   test('names the total when the list is capped', () => {
     expect(countText({ status: 'capped', shown: 200, total: 1234 })).toBe('200 von 1.234 Bereichen')
   })
+
+  test('marks a count as a minimum when the source stops at a limit', () => {
+    expect(countText({ status: 'atLeast', shown: 100 })).toBe('100+ Bereiche')
+  })
 })

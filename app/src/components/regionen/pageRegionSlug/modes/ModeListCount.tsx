@@ -2,6 +2,7 @@ export type ModeListCountState =
   | { status: 'loading' }
   | { status: 'counted'; shown: number }
   | { status: 'capped'; shown: number; total: number }
+  | { status: 'atLeast'; shown: number }
 
 export type ModeListCountNouns = {
   singular: string
@@ -27,6 +28,7 @@ export const ModeListCount = ({ count, nouns }: Props) => {
         `${formatNumber(count.shown)} ${count.shown === 1 ? nouns.singular : nouns.plural}`}
       {count.status === 'capped' &&
         `${formatNumber(count.shown)} von ${formatNumber(count.total)} ${nouns.pluralDative}`}
+      {count.status === 'atLeast' && `${formatNumber(count.shown)}+ ${nouns.plural}`}
     </span>
   )
 }
