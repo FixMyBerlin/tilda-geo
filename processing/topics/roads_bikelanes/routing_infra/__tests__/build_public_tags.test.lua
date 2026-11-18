@@ -73,6 +73,38 @@ describe('build_public_tags', function()
       assert.are.equal(row.smoothness, result_tags(object_tags).smoothness)
       assert.is_not_nil(row.smoothness)
     end)
+
+    it('publishes the sanitized tunnel value', function()
+      local row = row_of(public_rows({ highway = 'primary', tunnel = 'yes' }), 'roads')
+      assert.are.equal(row.tunnel, 'yes')
+    end)
+
+    it('publishes no tunnel when the road is not a tunnel', function()
+      local row = row_of(public_rows({ highway = 'primary', tunnel = 'no' }), 'roads')
+      assert.is_nil(row.tunnel)
+    end)
+
+    it('publishes dual_carriageway for one carriageway of a road with separated directions', function()
+      local row = row_of(public_rows({ highway = 'primary', oneway = 'yes', dual_carriageway = 'yes' }), 'roads')
+      assert.are.equal(row.dual_carriageway, 'yes')
+    end)
+
+    it('publishes no dual_carriageway for a plain oneway road', function()
+      local row = row_of(public_rows({ highway = 'primary', oneway = 'yes' }), 'roads')
+      assert.is_nil(row.dual_carriageway)
+    end)
+
+    it('publishes roundabout for junction=roundabout and junction=circular', function()
+      local roundabout = row_of(public_rows({ highway = 'primary', junction = 'roundabout' }), 'roads')
+      local circular = row_of(public_rows({ highway = 'primary', junction = 'circular' }), 'roads')
+      assert.are.equal(roundabout.roundabout, 'yes')
+      assert.are.equal(circular.roundabout, 'yes')
+    end)
+
+    it('publishes no roundabout for other junctions', function()
+      local row = row_of(public_rows({ highway = 'primary', junction = 'intersection' }), 'roads')
+      assert.is_nil(row.roundabout)
+    end)
   end)
 
   describe('path edges', function()
