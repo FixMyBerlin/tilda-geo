@@ -3,8 +3,9 @@
 When we freeze parking data for delivery, we always:
 
 1. **Export** the freeze package with [`scripts/tilda-parkraum-euvm-export/freeze_with_qa.py`](../../scripts/tilda-parkraum-euvm-export/freeze_with_qa.py) (customer GPKGs + `qa/PACKAGE.md`). The delivered `parking_public.gpkg` is also the input for the reference in step 3: its parking lines and lots carry the delivery-date `capacity` and tag values (e.g. `condition_category_primary`) that the indicators need.
-2. **(Only if the cell set itself changes)** Build/refresh the **cell table** on production: edit `base_table` / `target_table` in [`qa_create_new_voronoi_baseline.sql`](qa_create_new_voronoi_baseline.sql) and run the whole script. That clips and validates `data.<target_table>` (id, geom, name, priority — no reference values, see the note at the top of that file) against Berlin. Skip this step when reusing an existing, already-clipped cell table (e.g. `data.euvm_qa_voronoi_2026` for both parking and bikelanes). Use the latest dated cell table as `base_table`: its borders are already straightened (`euvm_qa_voronoi` is the delivered original).
+2. **(Only if the cell set itself changes)** Build/refresh the **cell table** on production: edit `base_table` / `target_table` in [`qa_create_new_voronoi_baseline.sql`](qa_create_new_voronoi_baseline.sql) and run the whole script. That clips and validates `data.<target_table>` (id, geom, name, priority — no reference values, see the note at the top of that file) against Berlin. Skip this step when reusing an existing, already-clipped cell table (e.g. `data.euvm_qa_voronoi_2026`). Use the latest dated cell table as `base_table`: its borders are already straightened (`euvm_qa_voronoi` is the delivered original).
    - **Straighten the cell borders** when the base table still had the dense delivered borders (a vertex every few metres), with [`scripts/2026-tilda-qa-voronoi-simplify`](../../scripts/2026-tilda-qa-voronoi-simplify/): `uv run simplify.py --table <target_table>` reports, `--write` updates `data.<target_table>` and its `.sql`. Junctions stay, neighbours keep identical borders and the ids stay.
+   - **Split it into one table per QA config**: the configs read no `priority` column. Innenstadt = `priority IS TRUE`, Außenstadt = the rest, with the same ids, geometry and names (today `data.euvm_innenstadt_qa_cells_2026` and `data.euvm_aussenstadt_qa_cells_2026`; the recipe is in their `spec.yaml`). Keep the whole table: the border straightening and the reference script need all cells.
    - A changed cell table needs a new reference (step 3): the reference is measured on the cell geometry, so both have to come from the same borders.
 3. **Build the reference table**: the amount per cell, indicator and tag value at delivery date. It must be measured with the same code the nightly run uses ([Measure.md](Measure.md)), so both ways below call the QA functions:
    - **From the delivered files** (local database with the cell table): `FMC/scripts/2026-tilda-qa-reference`, `--dataset parking`. It loads the public parking lines and lots of `parking_public.gpkg` and writes `data.qa_parkings_euvm_reference_2026` plus its SQL dump. Go on with step 5.
@@ -52,13 +53,16 @@ For a bikelanes `QaConfig` the reference table is built the same way:
   and steps 4–8 above. The customer's merged roads+bikelanes network is **not** a valid input — QA
   reads TILDA's own `bikelanes` table; see
   [QA-Documentation.md](QA-Documentation.md#scope-tilda-data-not-the-customers-merged-network).
-- **From an old export (infraVelo, 2026-01-29)**: that state only exists as a TILDA export, not in
-  a database. `data.qa_bikelanes_infravelo_reference_2026` is written by
-  `FMC/scripts/2026-tilda-qa-reference`, `--dataset bikelanes` (README there). It does not move the
-  lines to the street side: until August 2026 the exported geometry was already offset.
+- **From the export of a delivery (infraVelo)**: each delivery of infraVelo gets its own QA view,
+  measured against the TILDA export the delivery was computed from. Cells and reference are built
+  in the repo infravelo-radnetz, folder `tilda-qa/` (README there): `build_qa_cells.py` (one cell
+  per network edge, optionally one district) and `build_qa_reference.py`, which measures the export
+  with the QA functions in a local database. Exports since August 2026 lie on the road centerline
+  and are moved to their street side like the nightly; older ones (e.g. 2026-01-29) are already
+  offset.
 
-There is no separate "cell clip" step for bikelanes today — it reuses the parking cell table
-(`data.euvm_qa_voronoi_2026`, `areaFilter: all`).
+The QA views of infraVelo use their own cell tables along the network (e.g.
+`data.infravelo_rvn_qa_cells_2026`), not the parking cells.
 
 ## Artifacts
 

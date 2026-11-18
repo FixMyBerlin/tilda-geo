@@ -64,11 +64,3 @@ export type QaDatasetKey = keyof typeof qaDatasets
 export const qaDatasetKeySchema = z.enum(
   Object.keys(qaDatasets) as [QaDatasetKey, ...QaDatasetKey[]],
 )
-
-/** Labels of `QaConfig.areaFilter` (admin form and the config info of the QA mode). */
-export const qaAreaFilterLabels = {
-  all: 'Alle Flächen',
-  priority: 'Nur priorisierte Flächen',
-  non_priority: 'Nur nicht-priorisierte Flächen',
-  with_reference: 'Nur Flächen mit Referenzwerten',
-} as const

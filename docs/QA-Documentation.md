@@ -212,8 +212,8 @@ until the next freeze and is left out until then — comparing it against 0 woul
 PROBLEMATIC; the nightly logs it as missing. A missing table (CI, fresh DB) leaves out all
 indicators.
 
-The **cell table** (`areaTable`, also `data.*`) has `id`, `geom` and optionally `priority` for
-`areaFilter`; see [QA-Cells.md](QA-Cells.md).
+The **cell table** (`areaTable`, also `data.*`) has `id`, `geom` and optionally `name`. A config
+checks all of its cells; see [QA-Cells.md](QA-Cells.md).
 
 ## 7. Nightly update job
 

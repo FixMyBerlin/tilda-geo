@@ -1,7 +1,7 @@
 -- WHAT IT DOES:
 -- QA for dataset `parking_euvm`: the public parking spaces per cell, for every indicator of every
 -- active prisma."QaConfig" with dataset = 'parking_euvm'
--- (today: main cells `areaFilter = non_priority`, priority cells `areaFilter = priority`).
+-- (today: Innenstadt and Außenstadt, each with its own cell table).
 -- A parking line or lot that crosses a cell border counts in each cell with the share that lies
 -- inside (processing/measure/measure_functions.sql).
 -- 1. Build _qa_features within the extent of the configs' area tables: the parking lines along
@@ -10,7 +10,7 @@
 -- 2. tilda_qa_run_dataset (processing/qa/qa_functions.sql): measure, compare to the reference,
 --    write the output tables
 -- INPUT: public.parkings, public.off_street_parking_areas, prisma."QaConfig",
---        per config: areaTable (e.g. data.euvm_qa_voronoi_2026), referenceTable (e.g. data.qa_parkings_euvm_reference_2026)
+--        per config: areaTable (e.g. data.euvm_qa_2026_cells_innenstadt), referenceTable (e.g. data.euvm_qa_2026_reference)
 -- OUTPUT: per config (mapTable = public.<name>): public.<name>, public.<name>_indicators,
 --         public.<name>_last_editors
 --

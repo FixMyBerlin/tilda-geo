@@ -13,7 +13,7 @@
 -- 2. tilda_qa_run_dataset (processing/qa/qa_functions.sql): measure, compare to the reference,
 --    write the output tables
 -- INPUT: public.bikelanes (lines in riding direction), prisma."QaConfig",
---        per config: areaTable (e.g. data.euvm_qa_voronoi_2026), referenceTable (e.g. data.qa_bikelanes_berlin_reference_2026)
+--        per config: areaTable (e.g. data.infravelo_qa_2026_cells_rvn), referenceTable (e.g. data.infravelo_qa_2026_reference_rvn)
 -- OUTPUT: per config (mapTable = public.<name>): public.<name>, public.<name>_indicators,
 --         public.<name>_last_editors
 --

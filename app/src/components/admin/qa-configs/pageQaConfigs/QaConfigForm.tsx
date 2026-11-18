@@ -10,11 +10,7 @@ import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form, type SubmitResult } from '@/components/shared/form/Form'
 import { adminNavCountsQueryOptions } from '@/server/admin/adminNavQueryOptions'
 import { createQaConfigFn, updateQaConfigFn } from '@/server/qa-configs/qa-configs.functions'
-import {
-  qaAreaFilterLabels,
-  qaDatasets,
-  type QaDatasetKey,
-} from '@/server/qa-configs/qaDatasets.const'
+import { qaDatasets, type QaDatasetKey } from '@/server/qa-configs/qaDatasets.const'
 import {
   CreateQaConfigFormSchema,
   type QaIndicatorDraft,
@@ -31,7 +27,6 @@ export type QaConfigFormValues = {
   // '' is the unselected placeholder option; the schema rejects it as "required".
   dataset: QaDatasetKey | ''
   areaTable: string
-  areaFilter: 'all' | 'priority' | 'non_priority' | 'with_reference'
   referenceTable: string
   indicators: QaIndicatorDraft[]
   regionId: string
@@ -47,7 +42,6 @@ export const qaConfigFormEmptyDefaults = {
   mapAttribution: '',
   dataset: '',
   areaTable: '',
-  areaFilter: 'all',
   referenceTable: '',
   indicators: [],
   regionId: '',
@@ -69,11 +63,6 @@ const datasetOptions: [string, string][] = [
   ['', '— Datensatz wählen —'],
   ...Object.entries(qaDatasets).map(([key, dataset]): [string, string] => [key, dataset.label]),
 ]
-
-const areaFilterItems = Object.entries(qaAreaFilterLabels).map(([value, label]) => ({
-  value,
-  label,
-}))
 
 type Props = {
   regions: Array<{ id: number; slug: string }>
@@ -184,20 +173,13 @@ export function QaConfigForm(props: Props) {
               form={form}
               name="areaTable"
               label="Flächen-Tabelle"
-              help='Schema-qualifizierte Tabelle mit den QA-Flächen, z. B. "data.euvm_qa_voronoi_2026".'
-            />
-            <RadioGroup
-              form={form}
-              name="areaFilter"
-              label="Flächen-Filter"
-              items={areaFilterItems}
-              help='"Priorisiert" nutzt die Spalte "priority" der Flächen-Tabelle. "Mit Referenzwerten" prüft nur Flächen, die in der Referenz-Tabelle einen Wert haben – Neues in bisher leeren Flächen fällt dann nicht auf.'
+              help='Schema-qualifizierte Tabelle mit den QA-Flächen, z. B. "data.euvm_qa_2026_cells_innenstadt". Geprüft werden alle Flächen der Tabelle; jede Flächen-Menge hat ihre eigene Tabelle.'
             />
             <TextField
               form={form}
               name="referenceTable"
               label="Referenz-Tabelle"
-              help='Schema-qualifizierte Tabelle mit den Referenzwerten, z. B. "data.qa_parkings_euvm_reference_2026". Kann nach dem Anlegen noch fehlen (Freeze folgt später).'
+              help='Schema-qualifizierte Tabelle mit den Referenzwerten, z. B. "data.euvm_qa_2026_reference". Kann nach dem Anlegen noch fehlen (Freeze folgt später).'
             />
           </AdminFormSection>
 

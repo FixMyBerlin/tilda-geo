@@ -85,7 +85,6 @@ export const CreateQaConfigFormSchema = z.object({
     .transform((v) => v || null), // Convert empty/undefined to null for Prisma
   dataset: qaDatasetKeySchema,
   areaTable: qaSchemaQualifiedTableSchema,
-  areaFilter: z.enum(['all', 'priority', 'non_priority', 'with_reference']),
   referenceTable: qaSchemaQualifiedTableSchema,
   indicators: z.array(qaIndicatorDraftSchema).pipe(qaIndicatorsSchema),
   regionId: z.coerce.number().int().positive('Region ID must be a valid positive integer'),
@@ -103,7 +102,6 @@ export const qaConfigToFormValues = (qaConfig: z.output<typeof CreateQaConfigFor
     mapAttribution: qaConfig.mapAttribution ?? '',
     dataset: qaConfig.dataset,
     areaTable: qaConfig.areaTable,
-    areaFilter: qaConfig.areaFilter,
     referenceTable: qaConfig.referenceTable,
     indicators: qaIndicatorsToDrafts(qaConfig.indicators),
     regionId: qaConfig.regionId.toString(),

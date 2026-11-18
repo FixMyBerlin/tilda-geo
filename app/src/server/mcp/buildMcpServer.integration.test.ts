@@ -718,7 +718,6 @@ describe.skipIf(!integrationDb)('admin MCP tools (integration)', () => {
       mapTable: QA_MAP_TABLE,
       dataset: 'bikelanes',
       areaTable: QA_AREA_TABLE,
-      areaFilter: 'with_reference',
       referenceTable: 'data.vitest_mcp_qa_reference',
       indicators: [indicator],
       regionId: region.id,
@@ -732,11 +731,6 @@ describe.skipIf(!integrationDb)('admin MCP tools (integration)', () => {
     })
     expect(unknownTag.isError).toBe(true)
     expect(unknownTag.text).toContain('Merkmal "not_a_bikelanes_tag"')
-    const unknownAreaFilter = await callTool(client, 'qa_configs_create', {
-      ...config,
-      areaFilter: 'some',
-    })
-    expect(unknownAreaFilter.isError).toBe(true)
 
     const created = await callTool(client, 'qa_configs_create', config)
     expect(created.isError).toBe(false)
@@ -762,7 +756,7 @@ describe.skipIf(!integrationDb)('admin MCP tools (integration)', () => {
     expect(updated.isError).toBe(false)
     const list = await callTool(client, 'qa_configs_list', { regionSlug: REGION_SLUG })
     expect(JSON.parse(list.text)).toEqual([
-      expect.objectContaining({ id, label: 'MCP QA renamed', areaFilter: 'with_reference' }),
+      expect.objectContaining({ id, label: 'MCP QA renamed', areaTable: QA_AREA_TABLE }),
     ])
 
     const cell = { regionSlug: REGION_SLUG, configSlug: config.slug, areaId: 'cell-1' }

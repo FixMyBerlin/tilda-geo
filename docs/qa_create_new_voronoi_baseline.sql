@@ -9,6 +9,9 @@
 -- docs/Parking-Client-Freeze-QA.md. The cell table produced here only needs `id` + `geom`
 -- (+ optional `name` / `priority`).
 --
+-- The `priority` column marks the Innenstadt cells. QA configs do not read it: split the result into
+-- one table per config afterwards (docs/Parking-Client-Freeze-QA.md, step 2).
+--
 -- Run this only when the CELL SET itself needs to change (a new priority split, a new provider
 -- export, or clipping a not-yet-clipped table to Berlin for the first time). Reusing an existing,
 -- already-clipped cell table (e.g. data.euvm_qa_voronoi_2026) needs none of this — go straight to

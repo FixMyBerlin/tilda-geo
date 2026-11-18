@@ -14,9 +14,8 @@ const seedQaConfigs = async () => {
       mapTable: 'public.qa_parkings_euvm',
       mapAttribution: 'QA Data: tilda-geo.de',
       dataset: 'parking_euvm',
-      areaTable: 'data.euvm_qa_voronoi_2026',
-      areaFilter: 'all',
-      referenceTable: 'data.qa_parkings_euvm_reference_2026',
+      areaTable: 'data.euvm_qa_2026_cells_aussenstadt',
+      referenceTable: 'data.euvm_qa_2026_reference',
       indicators: qaDatasets.parking_euvm.defaultIndicators,
       regionId: parkraumRegion.id,
       referenceFrozenAt: new Date('2025-06-30'),
@@ -37,13 +36,12 @@ const seedQaConfigs = async () => {
       mapTable: 'public.qa_bikelanes_berlin',
       mapAttribution: 'QA Data: tilda-geo.de',
       dataset: 'bikelanes',
-      areaTable: 'data.euvm_qa_voronoi_2026',
-      areaFilter: 'all',
-      referenceTable: 'data.qa_bikelanes_berlin_reference_2026',
+      areaTable: 'data.infravelo_qa_2026_cells_rvn',
+      referenceTable: 'data.infravelo_qa_2026_reference_rvn',
       indicators: qaDatasets.bikelanes.defaultIndicators,
       regionId: radinfraRegion.id,
-      // Same freeze day as the 2026 eUVM cells (data.euvm_qa_voronoi_2026)
-      referenceFrozenAt: new Date('2026-03-02'),
+      // Day of the TILDA export behind data.infravelo_qa_2026_reference_rvn
+      referenceFrozenAt: new Date('2026-01-29'),
     },
   })
 }

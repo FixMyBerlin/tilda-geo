@@ -81,17 +81,15 @@ BEGIN
 END $$;
 
 -- Fixture: cells + features ----------------------------------------------------------------------
--- Cells (4326, like data.euvm_qa_voronoi_2026): A, B non-priority, C priority, D degenerate (dropped)
+-- Cells (4326, like data.euvm_qa_2026_cells_aussenstadt): A, B, D degenerate (dropped)
 CREATE TABLE data.qa_test_fixture_areas (
   id TEXT PRIMARY KEY,
-  priority BOOLEAN,
   geom geometry(MultiPolygon, 4326)
 );
-INSERT INTO data.qa_test_fixture_areas (id, priority, geom) VALUES
-  ('A', FALSE, ST_Multi(ST_MakeEnvelope(13.400, 52.500, 13.401, 52.501, 4326))),
-  ('B', NULL, ST_Multi(ST_MakeEnvelope(13.402, 52.500, 13.403, 52.501, 4326))),
-  ('C', TRUE, ST_Multi(ST_MakeEnvelope(13.404, 52.500, 13.405, 52.501, 4326))),
-  ('D', FALSE, ST_Multi(ST_GeomFromText('POLYGON((13.406 52.5, 13.407 52.5, 13.408 52.5, 13.406 52.5))', 4326)));
+INSERT INTO data.qa_test_fixture_areas (id, geom) VALUES
+  ('A', ST_Multi(ST_MakeEnvelope(13.400, 52.500, 13.401, 52.501, 4326))),
+  ('B', ST_Multi(ST_MakeEnvelope(13.402, 52.500, 13.403, 52.501, 4326))),
+  ('D', ST_Multi(ST_GeomFromText('POLYGON((13.406 52.5, 13.407 52.5, 13.408 52.5, 13.406 52.5))', 4326)));
 
 CREATE TEMP TABLE _qa_features (geom geometry(Geometry, 5243), amount NUMERIC, tags JSONB, osm_user TEXT, updated_at BIGINT);
 INSERT INTO _qa_features (geom, amount, tags, osm_user, updated_at)
@@ -102,8 +100,7 @@ FROM (VALUES
   (13.4007, 52.5007, 5, '{"surface":"paving_stones"}', 'alice', 200),
   (13.4006, 52.5006, 3, '{"surface":""}', 'alice', 200),         -- empty value -> untagged
   (13.4025, 52.5005, 2, '{"surface":"asphalt"}', NULL, NULL),     -- editor unknown
-  (13.4045, 52.5005, 7, '{"surface":"asphalt"}', 'bob', 400),    -- in C (priority, filtered out)
-  (13.4100, 52.5100, 99, '{"surface":"asphalt"}', 'bob', 500)    -- outside every cell
+    (13.4100, 52.5100, 99, '{"surface":"asphalt"}', 'bob', 500)    -- outside every cell
 ) AS v(lon, lat, amount, tags, osm_user, updated_at);
 
 -- Lines that leave their cell through the middle of its north edge (nothing lies north of the cells).
@@ -130,8 +127,8 @@ CREATE INDEX ON _qa_features USING GIST (geom);
 -- prepare + measure, area filters
 DO $$
 BEGIN
-  CALL tilda_qa_prepare_config('data.qa_test_fixture_areas', 'non_priority', '[{"key":"total"},{"key":"surface"}]');
-  PERFORM pg_temp.assert_eq((SELECT string_agg(id, ',' ORDER BY id) FROM _qa_areas), 'A,B', 'areas: non_priority, degenerate dropped');
+  CALL tilda_qa_prepare_config('data.qa_test_fixture_areas', '[{"key":"total"},{"key":"surface"}]');
+  PERFORM pg_temp.assert_eq((SELECT string_agg(id, ',' ORDER BY id) FROM _qa_areas), 'A,B', 'areas: degenerate dropped');
   PERFORM pg_temp.assert_eq((SELECT string_agg(format('%s:%s', key, tag_key), ',') FROM _qa_ind), 'total:,surface:surface', 'indicators: total has no tag');
 
   CALL tilda_qa_measure();
@@ -140,11 +137,7 @@ BEGIN
     'A/surface/__none__=3 A/surface/asphalt=17.5 A/surface/paving_stones=5 A/total/__total__=25.5 B/surface/asphalt=2.04 B/total/__total__=2.04',
     'measure current: points whole, lines by their share inside the cell');
 
-  CALL tilda_qa_prepare_config('data.qa_test_fixture_areas', 'priority', '[{"key":"total"}]');
-  PERFORM pg_temp.assert_eq((SELECT string_agg(id, ',' ORDER BY id) FROM _qa_areas), 'C', 'areas: priority');
-  CALL tilda_qa_prepare_config('data.qa_test_fixture_areas', 'all', '[{"key":"total"}]');
-  PERFORM pg_temp.assert_eq((SELECT string_agg(id, ',' ORDER BY id) FROM _qa_areas), 'A,B,C', 'areas: all');
-  CALL tilda_qa_prepare_config('data.qa_test_missing_areas', 'all', '[{"key":"total"}]');
+  CALL tilda_qa_prepare_config('data.qa_test_missing_areas', '[{"key":"total"}]');
   PERFORM pg_temp.assert_eq((SELECT count(*) FROM _qa_areas), 0::BIGINT, 'areas: missing table -> empty');
 END $$;
 
@@ -166,7 +159,7 @@ CREATE TABLE public.qa_test_fixture (id TEXT PRIMARY KEY, geom geometry(MultiPol
 
 DO $$
 BEGIN
-  CALL tilda_qa_prepare_config('data.qa_test_fixture_areas', 'non_priority', '[{"key":"total"},{"key":"surface"}]');
+  CALL tilda_qa_prepare_config('data.qa_test_fixture_areas', '[{"key":"total"},{"key":"surface"}]');
   CALL tilda_qa_measure();
   CALL tilda_qa_load_reference('data.qa_test_fixture_reference');
   PERFORM pg_temp.assert_eq((SELECT count(*) FROM _qa_reference), 6::BIGINT, 'reference filtered to config indicators, summed per class');
@@ -260,12 +253,6 @@ BEGIN
     (SELECT breakdown FROM tilda_qa_compute_indicators() WHERE indicator_key = 'surface' AND area_id = 'empty'),
     '{}'::JSONB, 'split by tag without classes -> {}');
   PERFORM pg_temp.assert_eq((SELECT count(*) FROM tilda_qa_compute_indicators()), 16::BIGINT, 'one row per area x indicator');
-
-  -- areaFilter with_reference: cells without a reference amount drop out (ref0 has only current)
-  CALL tilda_qa_keep_areas_with_reference();
-  PERFORM pg_temp.assert_eq(
-    (SELECT string_agg(id, ',' ORDER BY id) FROM _qa_areas), 'cur0,less,mixed,more,tiny', 'areas: with_reference');
-  PERFORM pg_temp.assert_eq((SELECT count(*) FROM tilda_qa_compute_indicators()), 10::BIGINT, 'with_reference: rows only for kept cells');
 END $$;
 
 DO $$ BEGIN RAISE NOTICE 'qa_functions.test.sql: all tests passed'; END $$;
