@@ -38,6 +38,7 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 - Bikelanes and sidewalks of a road with `temporary=yes` are `lifecycle=temporary` now (before only the road), like they already were for `construction`.
 - `construction:cycleway=*` without a side only makes the bikelanes `lifecycle=construction`, no longer the road.
+- `lifecycle=construction_no_access` and `lifecycle=blocked` also read `fixme`, next to `access:reason`, `description` and `note`. Mappers often keep the reason only there, e.g. `access=no` + `fixme=access=no und bicycle=no wegen Baustelle`. A restricted access tag is still required. In Berlin 8 ways change. Side keys like `cycleway:right:fixme` are not read.
 
 ### `bikelanes`, `routing`, `todos_lines`: `oneway`, `offset`
 

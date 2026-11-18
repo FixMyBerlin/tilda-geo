@@ -28,7 +28,8 @@ local function has_construction_no_access_text(tags)
     'construction',
     'baustelle',
   }
-  local combined_text = (tags['access:reason'] or '') .. ' ' .. (tags.description or '') .. ' ' .. (tags.note or '')
+  -- Mappers often keep the reason only in `fixme`, e.g. `fixme=Nach Beendigung der Baustelle access prüfen`
+  local combined_text = (tags['access:reason'] or '') .. ' ' .. (tags.description or '') .. ' ' .. (tags.note or '') .. ' ' .. (tags.fixme or '')
   local combined_text_lower = string.lower(combined_text)
   for _, term in ipairs(construction_no_access_terms) do
     if contains_substring(combined_text_lower, term) then
@@ -51,7 +52,7 @@ local function has_blocked_text(tags)
     'closed',
     'blocked off',
   }
-  local combined_text = (tags.description or '') .. ' ' .. (tags.note or '')
+  local combined_text = (tags.description or '') .. ' ' .. (tags.note or '') .. ' ' .. (tags.fixme or '')
   local combined_text_lower = string.lower(combined_text)
   for _, term in ipairs(blocked_terms) do
     if contains_substring(combined_text_lower, term) then

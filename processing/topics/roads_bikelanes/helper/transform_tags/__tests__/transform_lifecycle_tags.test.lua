@@ -224,6 +224,85 @@ describe('transform_lifecycle_tags', function()
     end)
   end)
 
+  describe('fixme as text source', function()
+    it('transforms access=no with Baustelle in fixme to construction_no_access', function()
+      local tags = {
+        highway = 'footway',
+        access = 'no',
+        bicycle = 'no',
+        fixme = 'access=no und bicycle=no wegen Baustelle',
+      }
+      local unmodified_tags = transform_lifecycle_tags(tags)
+
+      assert.are.same(tags.lifecycle, 'construction_no_access')
+      assert.is_nil(tags.access)
+      assert.are.same(tags.bicycle, 'no')
+      assert.are.same(DESC.hints(tags), { 'TILDA_closed_construction' })
+      assert.are.same(unmodified_tags, { access = 'no', lifecycle = nil })
+    end)
+
+    it('transforms cycleway bicycle=no with gesperrt in fixme to blocked', function()
+      local tags = {
+        highway = 'cycleway',
+        bicycle = 'no',
+        fixme = '2027 prüfen ob immer noch gesperrt',
+      }
+      local unmodified_tags = transform_lifecycle_tags(tags)
+
+      assert.are.same(tags.lifecycle, 'blocked')
+      assert.is_nil(tags.bicycle)
+      assert.are.same(DESC.hints(tags), { 'TILDA_closed_blocked' })
+      assert.are.same(unmodified_tags, { bicycle = 'no', lifecycle = nil })
+    end)
+
+    it('prioritizes construction_no_access when fixme has both terms', function()
+      local tags = {
+        highway = 'footway',
+        access = 'no',
+        fixme = 'Übergang durch Baustelle blockiert',
+      }
+      transform_lifecycle_tags(tags)
+
+      assert.are.same(tags.lifecycle, 'construction_no_access')
+      assert.are.same(DESC.hints(tags), { 'TILDA_closed_construction' })
+    end)
+
+    it('turns highway=construction with access=no and Baustelle in fixme into construction_no_access', function()
+      local tags = {
+        highway = 'construction',
+        construction = 'footway',
+        access = 'no',
+        bicycle = 'yes',
+        fixme = 'Nach Beendigung der Baustelle neu prüfen (Berechtigung Fahrräder)',
+      }
+      local unmodified_tags = transform_lifecycle_tags(tags)
+
+      assert.are.same(tags.highway, 'footway')
+      assert.are.same(tags.lifecycle, 'construction_no_access')
+      assert.are.same(unmodified_tags, {
+        highway = 'construction',
+        lifecycle = 'construction',
+        access = 'no',
+      })
+    end)
+
+    it('does not transform a fixme hint without restricted access', function()
+      local tags = {
+        highway = 'footway',
+        bicycle = 'yes',
+        fixme = 'Nach Beendigung der Baustelle neu prüfen (Berechtigung Fahrräder)',
+      }
+      local unmodified_tags = transform_lifecycle_tags(tags)
+
+      assert.are.same(tags, {
+        highway = 'footway',
+        bicycle = 'yes',
+        fixme = 'Nach Beendigung der Baustelle neu prüfen (Berechtigung Fahrräder)',
+      })
+      assert.are.same(unmodified_tags, {})
+    end)
+  end)
+
   describe('temporary', function()
     it('moves temporary=yes to lifecycle=temporary', function()
       local tags = { highway = 'cycleway', temporary = 'yes' }
