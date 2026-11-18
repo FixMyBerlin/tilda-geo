@@ -37,6 +37,8 @@ local function build_public_tags(segment, motor_context, context)
     dual_carriageway = shared_result_tags.oneway == 'yes_dual_carriageway' and 'yes' or nil,
     -- The OSM way is part of a roundabout (`junction=roundabout|circular`).
     roundabout = ROUNDABOUT_JUNCTIONS[context.object_tags.junction] and 'yes' or nil,
+    -- Lanes on the road: the wiki rule (`side_line_reversed`) would give the opposite direction.
+    _oneway_flip = segment.source_table == 'bikelanes' and segment.tags._oneway_flip or nil,
     maxspeed = motor_context.maxspeed,
     adjoining_road = motor_context.adjoining_road,
     adjoining_maxspeed = motor_context.adjoining_maxspeed,

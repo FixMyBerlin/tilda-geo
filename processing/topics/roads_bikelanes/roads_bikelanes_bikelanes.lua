@@ -44,6 +44,8 @@ local function roads_bikelanes_bikelanes(context)
         covered = shared_result_tags.covered,
         parent_road = cycleway.parent_road,
         _is_sidepath = object_tags._is_sidepath,
+        -- The wiki rule (`side_line_reversed`) would give the lane the opposite direction.
+        _oneway_flip = cycleway._oneway_flip,
         _in_settlement_area = object_tags._in_settlement_area,
         route_relations = pseudo_route_relations(object_tags, cycleway._id),
       }
@@ -53,7 +55,7 @@ local function roads_bikelanes_bikelanes(context)
       orient_line_direction_tags(tags, cycleway._line_reversed)
 
       -- Geometry stays on the road centerline. Lines of lanes on the road point in the riding
-      -- direction (see `side_line_reversed`); self lines run with the way.
+      -- direction (`_line_reversed`, left against the way); self lines run with the way.
       local geom = object_geom
       if cycleway._line_reversed then
         geom = reverse_linestring(object_geom)

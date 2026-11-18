@@ -15,7 +15,7 @@ end
 --   areas are not active), so the default follows the case outside settlements. This differs from
 --   the wiki default for `cycleway:<side>:oneway` (one direction per side,
 --   https://wiki.openstreetmap.org/wiki/Key:cycleway:right:oneway#Implicit_values).
---   The line direction still follows the wiki default, see `side_line_reversed`.
+--   The line direction follows the side (left against the way), see `_line_reversed` in `extract_bikelanes`.
 ---@param tags OsmTags
 ---@param category table
 ---@return 'yes'|'no'|'car_not_bike'|'assumed_no'|'implicit_yes'

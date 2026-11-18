@@ -144,9 +144,15 @@ local function bikelanes(object_tags, object_geom)
           -- object_tags is the parent centerline; maxspeed() reads exactly the tags the old
           -- synthetic-table rebuild copied (maxspeed*/zone:maxspeed/source:maxspeed + highway).
           result_tags.parent_maxspeed = maxspeed(object_tags).maxspeed
-          -- The line points in the riding direction, see `side_line_reversed`.
-          local line_reversed = side_line_reversed(transformed_tags)
+          -- Line direction by the side only: left lines run against the way, right lines with it
+          -- (right-hand traffic, the rule before `side_line_reversed`). `cycleway:<side>:oneway` does not
+          -- change it: in Berlin `cycleway:left:oneway=yes` mostly means "one-way" rather than "with the way".
+          local line_reversed = transformed_tags._side == 'left'
           result_tags._line_reversed = line_reversed
+          -- `_oneway_flip`: the wiki rule (`side_line_reversed`) would give this lane the opposite direction.
+          if side_line_reversed(transformed_tags) ~= line_reversed then
+            result_tags._oneway_flip = true
+          end
           -- Recommended sideways offset in meters, signed relative to the published line
           -- (+ left / - right of its direction). The geometry itself stays on the road
           -- centerline; this value is exported as the `offset` attribute and consumed purely

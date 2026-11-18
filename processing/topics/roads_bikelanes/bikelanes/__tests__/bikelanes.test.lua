@@ -700,16 +700,41 @@ describe('bikelanes', function()
       assert.is_false(rows.right._line_reversed)
       assert.are.equal(-5, rows.left.offset)
       assert.are.equal(-5, rows.right.offset)
+      assert.is_nil(rows.left._oneway_flip)
+      assert.is_nil(rows.right._oneway_flip)
     end)
 
-    it('runs the left lane of a oneway road with the way, left of its line', function()
+    it('runs the left lane of a oneway road against the way and flags the wiki direction', function()
       local rows = by_side(run_bikelanes({
         tags = { highway = 'residential', oneway = 'yes', ['cycleway:left'] = 'lane', ['cycleway:left:lane'] = 'advisory', width = '10' },
         id = 1,
         type = 'way',
       }))
-      assert.is_false(rows.left._line_reversed)
-      assert.are.equal(5, rows.left.offset)
+      assert.is_true(rows.left._line_reversed)
+      assert.are.equal(-5, rows.left.offset)
+      assert.is_true(rows.left._oneway_flip)
+    end)
+
+    it('runs a left track with `cycleway:left:oneway=yes` on a two-way road against the way and flags it', function()
+      local rows = by_side(run_bikelanes({
+        tags = { highway = 'secondary', ['cycleway:left'] = 'track', ['cycleway:left:oneway'] = 'yes', ['cycleway:right'] = 'track', width = '10' },
+        id = 1,
+        type = 'way',
+      }))
+      assert.is_true(rows.left._line_reversed)
+      assert.is_true(rows.left._oneway_flip)
+      assert.is_false(rows.right._line_reversed)
+      assert.is_nil(rows.right._oneway_flip)
+    end)
+
+    it('flags a right lane with `cycleway:right:oneway=-1`, keeping it with the way', function()
+      local rows = by_side(run_bikelanes({
+        tags = { highway = 'residential', ['cycleway:right'] = 'lane', ['cycleway:right:lane'] = 'advisory', ['cycleway:right:oneway'] = '-1', width = '10' },
+        id = 1,
+        type = 'way',
+      }))
+      assert.is_false(rows.right._line_reversed)
+      assert.is_true(rows.right._oneway_flip)
     end)
 
     it('runs a cycleway=opposite_lane against the way', function()

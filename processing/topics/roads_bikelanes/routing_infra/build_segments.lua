@@ -139,7 +139,7 @@ local function build_segments(context)
         geom = reverse_linestring(object_geom)
       end
       if cycleway._line_reversed then
-        -- Same line direction as `bikelanes` (see `side_line_reversed`).
+        -- Same line direction as `bikelanes` (`_line_reversed`: left lines against the way).
         geom = reverse_linestring(object_geom)
       end
       if side == 'self' and cycleway.oneway == 'car_not_bike' then

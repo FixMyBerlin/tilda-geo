@@ -1,7 +1,8 @@
 local is_oneway_road = require('topics.roads_bikelanes.bikelanes.helper.is_oneway_road')
 
--- Whether the published line of a lane or track tagged on the road (`cycleway:left|right|both`)
--- runs against the drawing direction of the road. One-way lines point in the riding direction.
+-- Whether, by the wiki, the line of a lane or track tagged on the road (`cycleway:left|right|both`)
+-- runs against the drawing direction of the road. Only for `_oneway_flip`: the published lines keep the
+-- side rule (left against the way), see `extract_bikelanes`.
 -- `cycleway:<side>:oneway` is relative to the drawing direction of the road:
 -- https://wiki.openstreetmap.org/wiki/Key:cycleway:right:oneway
 -- - `yes`: with the way; `-1`: against it (values after `normalize_oneway_tags`).

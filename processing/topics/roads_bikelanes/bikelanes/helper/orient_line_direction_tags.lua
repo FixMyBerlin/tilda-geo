@@ -1,4 +1,4 @@
--- Some bikelane lines run against the OSM way (see `side_line_reversed`). OSM `*:forward` /
+-- Some bikelane lines run against the OSM way (left lanes, see `_line_reversed` in `extract_bikelanes`). OSM `*:forward` /
 -- `*:backward` follow the way, so on those rows the pair is swapped to follow the line.
 -- Rows that run with the way are left unchanged.
 --
