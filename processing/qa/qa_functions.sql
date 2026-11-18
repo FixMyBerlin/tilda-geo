@@ -443,7 +443,7 @@ BEGIN
 END;
 $$;
 
--- Freeze generator (MANUAL ONLY, run at delivery; see docs/Parking-Client-Freeze-QA.md):
+-- Freeze generator (MANUAL ONLY, run at delivery; see docs/QA-Freeze.md):
 -- writes the reference table for one config (area_id, indicator_key, value_key, amount).
 -- Precondition: temp table `_qa_features` (see header; osm_user/updated_at may be NULL) exists in this
 -- session — build it exactly like the dataset script does (topics/parking/9_qa_parkings.sql, topics/roads_bikelanes/5_qa_bikelanes.sql), or

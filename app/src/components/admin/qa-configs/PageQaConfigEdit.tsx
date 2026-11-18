@@ -71,7 +71,7 @@ export function PageQaConfigEdit() {
                     Die Referenz-Tabelle <code>{qaConfig.referenceTable}</code> existiert nicht in
                     dieser Datenbank. Ohne sie schreibt das Processing keine Indikator-Werte und
                     alle Flächen erscheinen als »Gut«. Import über /admin/data-schema
-                    (docs/Parking-Client-Freeze-QA.md).
+                    (docs/QA-Freeze.md).
                   </p>
                 </Callout>
               )}

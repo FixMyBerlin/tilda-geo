@@ -71,7 +71,7 @@ First run on an area always writes a system evaluation. After that it writes a n
 - Tooling-error OK and both NOT_OK values stay until the effective system status becomes `GOOD`. Then the user fields are cleared (`userStatus`, `body`, `userId` null).
 - Users never set system status. `NEEDS_REVIEW` is system-only.
 
-Nightly rules, including the trusted-editor check: [QA-Documentation.md](./QA-Documentation.md). Code: [`qaEvaluationRules.ts`](../app/src/server/qa-configs/evaluation/qaEvaluationRules.ts) (`getQaUpdateDecision`). Map coloring and cache: [QA-Map-Status-Payload.md](./QA-Map-Status-Payload.md). Parking freeze baseline: [Parking-Client-Freeze-QA.md](./Parking-Client-Freeze-QA.md).
+Nightly rules, including the trusted-editor check: [QA-Documentation.md](./QA-Documentation.md). Code: [`qaEvaluationRules.ts`](../app/src/server/qa-configs/evaluation/qaEvaluationRules.ts) (`getQaUpdateDecision`). Map coloring and cache: [QA-Map-Status-Payload.md](./QA-Map-Status-Payload.md). Parking freeze baseline: [QA-Freeze.md](./QA-Freeze.md).
 
 New configs are created in admin. The source table needs a string `id`, comparison counts, and polygon geometry. Set `mapTable` to that table.
 
