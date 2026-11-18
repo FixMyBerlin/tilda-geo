@@ -8,9 +8,9 @@ const nouns = {
 } satisfies ModeListCountNouns
 
 export const ReviewListsModeListCount = () => {
-  const { selectedListId, isLoading, entries } = useReviewListEntries()
+  const { selectedListId, isLoading, isError, entries } = useReviewListEntries()
 
-  if (selectedListId === undefined) return null
+  if (selectedListId === undefined || isError) return null
   if (isLoading) return <ModeListCount count={{ status: 'loading' }} nouns={nouns} />
 
   return <ModeListCount count={{ status: 'counted', shown: entries.length }} nouns={nouns} />

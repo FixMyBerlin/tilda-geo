@@ -7,7 +7,7 @@ const nouns = { singular: 'Bereich', plural: 'Bereiche', pluralDative: 'Bereiche
 
 const countText = (count: ModeListCountState) => {
   const { unmount } = render(<ModeListCount count={count} nouns={nouns} />)
-  const text = screen.getByRole('status').textContent
+  const text = screen.getByTestId('mode-list-count').textContent
   unmount()
   return text
 }

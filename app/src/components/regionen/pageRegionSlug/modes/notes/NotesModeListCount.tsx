@@ -17,6 +17,7 @@ export const NotesModeListCount = () => {
     entries,
     isInternalLoading,
     isInternalError,
+    isOsmLoading,
     isOsmError,
     capabilities,
   } = useNotesModeListData()
@@ -27,9 +28,8 @@ export const NotesModeListCount = () => {
   )
 
   if (kind === 'none') return null
-  if (kind === 'osm' && isOsmError) return null
-  if (kind === 'internal' && isInternalError) return null
-  if (kind === 'internal' && isInternalLoading) {
+  if (showingOsm ? isOsmError : isInternalError) return null
+  if (showingOsm ? isOsmLoading : isInternalLoading) {
     return <ModeListCount count={{ status: 'loading' }} nouns={nouns} />
   }
 

@@ -216,9 +216,9 @@ describe('ModeFilterBar', () => {
         }
       />,
     )
-    expect(screen.getByRole('status').textContent).toBe('23 Einträge')
+    expect(screen.getByTestId('mode-list-count').textContent).toBe('23 Einträge')
 
     rerender(<ModeFilterBar search="" onSearchChange={vi.fn()} />)
-    expect(screen.queryByRole('status')).toBeNull()
+    expect(screen.queryByTestId('mode-list-count')).toBeNull()
   })
 })

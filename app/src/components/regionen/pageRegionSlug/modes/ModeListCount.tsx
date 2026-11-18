@@ -19,7 +19,7 @@ const formatNumber = (value: number) => value.toLocaleString('de-DE')
 export const ModeListCount = ({ count, nouns }: Props) => {
   return (
     <span
-      role="status"
+      data-testid="mode-list-count"
       className="ml-auto shrink-0 pl-1 text-xs whitespace-nowrap text-gray-500 tabular-nums"
     >
       {count.status === 'loading' && '…'}

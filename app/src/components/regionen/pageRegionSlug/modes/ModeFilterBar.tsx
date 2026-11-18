@@ -26,7 +26,7 @@ type Props = {
 
 /**
  * Compact mode filter line: a search icon that expands to the same magnifier + input + X bar as
- * map place search (`mapOverlaySearchFieldClassName`), icon-prefixed value dropdowns, and an
+ * map place search (`mapOverlaySearchFieldClassName`), icon-prefixed value dropdowns, an
  * optional Ausschnitt dropdown (Nur Karte / Überall), and an optional list count pushed to the
  * right end of the row (bottom right once the controls wrap).
  */

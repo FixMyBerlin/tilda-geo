@@ -40,7 +40,7 @@ export const useReviewListEntries = () => {
   const region = useRegion()
   const { selectedListId } = useSelectedReviewList()
   const { reviewListsMode } = useReviewListsModeParam()
-  const { data, isLoading } = useQuery({
+  const { data, isLoading, isError } = useQuery({
     ...reviewEntriesQueryOptions(region.slug, selectedListId),
     enabled: selectedListId !== undefined,
   })
@@ -66,5 +66,5 @@ export const useReviewListEntries = () => {
     )
   const entries = matchingFilters.filter((entry) => passesExtent(entry.coordinates))
 
-  return { selectedListId, isLoading, features, matchingFilters, entries }
+  return { selectedListId, isLoading, isError, features, matchingFilters, entries }
 }
