@@ -72,8 +72,27 @@ local function build(tags, extra_tokens)
   return table.concat(parts, ';')
 end
 
+--- Hint tokens of a side (`TILDA_surface_right=…`) follow the drawing direction of the way. On a line
+--- that runs against the way (`roads_bikelanes/helper/line_direction.lua`) right and left are swapped to follow the line.
+---@param tokens string[]
+---@return string[]
+local function swap_side_tokens(tokens)
+  local swapped = {}
+  for _, hint in ipairs(tokens) do
+    local name, rest = hint:match('^([^=]*)(.*)$')
+    if name:match('_right$') then
+      name = name:gsub('_right$', '_left')
+    elseif name:match('_left$') then
+      name = name:gsub('_left$', '_right')
+    end
+    table.insert(swapped, name .. rest)
+  end
+  return swapped
+end
+
 return {
   token = token,
+  swap_side_tokens = swap_side_tokens,
   add_hint = add_hint,
   hints = hints,
   build = build,

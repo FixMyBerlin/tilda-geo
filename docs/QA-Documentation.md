@@ -197,7 +197,7 @@ Built by `tilda_qa_finalize` and driven per dataset by `tilda_qa_run_dataset`
 ([Measure.md](Measure.md)): the public parking lines and lots with their `capacity`, the bikelanes
 with their `length`. Bikelane geometry stays on the road centerline in the database, but the cells
 are per street side, so for QA the lines are moved by their `offset` (`+` left / `-` right of the
-line, like the map style; see `bikelanes/helper/side_line_reversed.lua` for the line direction).
+line, like the map style; see `processing/topics/roads_bikelanes/helper/line_direction.lua` for the line direction).
 
 The map shows the cell geometry the measure uses. The borders of the cells are straightened once,
 in the cell table itself ([freeze checklist](Parking-Client-Freeze-QA.md), step 2).

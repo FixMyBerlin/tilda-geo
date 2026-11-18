@@ -254,4 +254,67 @@ describe('roads_bikelanes_roads', function()
       end
     end
   end)
+
+  describe('`oneway=-1`', function()
+    ---@param object_tags table
+    ---@param cycleway_presence table|nil
+    local function run_reversed(object_tags, cycleway_presence)
+      rows.roads, rows.roadsPathClasses, rows.bikeSuitability, rows.todos_lines = {}, {}, {}, {}
+      object_tags._type = 'way'
+      object_tags._id = 42
+      object_tags._length = 100
+      local reversed_geom = { reversed = true }
+      local object_geom = {}
+      function object_geom:reverse()
+        return reversed_geom
+      end
+      roads_bikelanes_roads({
+        object_meta = {},
+        object_tags = object_tags,
+        object_geom = object_geom,
+        shared_result_tags = result_tags(object_tags),
+        cycleways = bikelanes(object_tags, object_geom),
+        cycleway_presence = cycleway_presence,
+      })
+      return reversed_geom, object_geom
+    end
+
+    it('reverses the road line and publishes `oneway=yes`', function()
+      local reversed_geom = run_reversed({ highway = 'residential', oneway = '-1' })
+      assert.are.equal(rows.roads[1].geom, reversed_geom)
+      assert.are.equal(rows.roads[1].tags.oneway, 'yes')
+    end)
+
+    it('swaps the bikelane sides and the maxspeed direction of the road', function()
+      run_reversed(
+        { highway = 'residential', oneway = '-1', ['maxspeed:forward'] = '30', ['maxspeed:backward'] = '50' },
+        { bikelane_left = 'cyclewayOnHighway_advisory', bikelane_right = 'missing', bikelane_self = 'not_expected' }
+      )
+      local tags = rows.roads[1].tags
+      assert.are.equal(tags.bikelane_left, 'missing')
+      assert.are.equal(tags.bikelane_right, 'cyclewayOnHighway_advisory')
+      assert.are.equal(tags['osm_maxspeed:forward'], '50')
+      assert.are.equal(tags['osm_maxspeed:backward'], '30')
+    end)
+
+    it('reverses the bike suitability line', function()
+      local reversed_geom = run_reversed({ highway = 'living_street', oneway = '-1' })
+      assert.are.equal(rows.bikeSuitability[1].geom, reversed_geom)
+    end)
+
+    it('reverses a path on `oneway:bicycle=-1`', function()
+      local reversed_geom = run_reversed({ highway = 'path', bicycle = 'designated', ['oneway:bicycle'] = '-1' })
+      assert.are.equal(rows.roadsPathClasses[1].geom, reversed_geom)
+    end)
+
+    it('swaps right and left in the surface hints of the road', function()
+      run_reversed({ highway = 'residential', oneway = '-1', surface = 'sett', ['surface:right'] = 'asphalt' })
+      assert.are.equal(rows.roads[1].tags.description, 'TILDA_surface_left=asphalt')
+    end)
+
+    it('keeps the todo line in the drawing direction', function()
+      local _, object_geom = run_reversed({ highway = 'residential', oneway = '-1', width = '0', ['cycleway:right'] = 'lane', ['cycleway:right:width'] = '1.5' })
+      assert.are.equal(rows.todos_lines[1].geom, object_geom)
+    end)
+  end)
 end)

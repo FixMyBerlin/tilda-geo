@@ -5,6 +5,7 @@ local default_id = require('topics.helper.default_id')
 local road_classification_road_value = require('topics.roads_bikelanes.roads.road_classification_road_value')
 local derive_oneway = require('topics.roads_bikelanes.bikelanes.derive_oneway')
 local reverse_linestring = require('topics.roads_bikelanes.routing_infra.reverse_linestring')
+local LINE_DIRECTION = require('topics.roads_bikelanes.helper.line_direction')
 local SET = require('topics.helper.sets')
 local HIGHWAYS = require('topics.helper.highway_classes')
 local excluded_from_roads_tables = require('topics.roads_bikelanes.helper.excluded_from_roads_tables')
@@ -35,12 +36,6 @@ local lane_within_carriageway_categories = SET.set({
   'needsClarification',
 })
 
--- `oneway=-1` / `oneway:bicycle=-1`: one-way against the drawing direction, so the edge is reversed.
----@param object_tags OsmTags
----@return boolean
-local function against_way(object_tags)
-  return object_tags.oneway == '-1' or object_tags['oneway:bicycle'] == '-1'
-end
 
 -- One carriageway edge per OSM way (`id` = `source_id` = `roads.id`), like path and bikelane edges.
 -- `oneway=yes`: geometry points in the legal direction. `oneway=no` with `oneway_motor=yes`: cars
@@ -54,7 +49,7 @@ end
 local function emit_carriageway_edge(segments, object_tags, object_geom, object_default_id, road_value)
   local derived_oneway = derive_oneway(object_tags, { implicitOneWay = false })
   local geom = object_geom
-  if against_way(object_tags) then
+  if LINE_DIRECTION.way_reversed(object_tags) then
     geom = reverse_linestring(object_geom)
   end
   local edge_oneway = routing_oneway[derived_oneway]
@@ -90,7 +85,8 @@ local function emit_path_edge(segments, object_tags, object_geom, object_default
   -- Bikes may ride both ways on `no`, `assumed_no` and `car_not_bike` (only motor traffic is oneway).
   local edge_oneway = routing_oneway[derived_oneway]
   local edge_geom = object_geom
-  if against_way(object_tags) and derived_oneway ~= 'car_not_bike' then
+  -- Same line direction as `bikelanes` and `roadsPathClasses`, also when only motor traffic is one-way.
+  if LINE_DIRECTION.way_reversed(object_tags) then
     edge_geom = reverse_linestring(object_geom)
   end
 
@@ -134,12 +130,8 @@ local function build_segments(context)
       local geom = nil
       local edge_oneway = routing_oneway[cycleway.oneway]
       local oneway_motor = nil
-      if side == 'self' and against_way(object_tags) then
-        -- Same as carriageway/path edges: point along the (motor) direction of `oneway=-1`.
-        geom = reverse_linestring(object_geom)
-      end
       if cycleway._line_reversed then
-        -- Same line direction as `bikelanes` (see `side_line_reversed`).
+        -- Same line direction as `bikelanes` (see `LINE_DIRECTION.bikelane_reversed`), also on `oneway=-1`.
         geom = reverse_linestring(object_geom)
       end
       if side == 'self' and cycleway.oneway == 'car_not_bike' then

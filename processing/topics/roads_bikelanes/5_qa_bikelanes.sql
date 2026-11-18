@@ -6,7 +6,7 @@
 --    - Bikelanes stay on the road centerline in the DB, but the QA cells are per street side:
 --      tilda_qa_side_lines moves each line by its `offset` (+ left / - right of its own direction),
 --      for QA only, like the map style. Lines point in the riding direction
---      (bikelanes/helper/side_line_reversed.lua), so most lanes move to the right of their line.
+--      (helper/line_direction.lua), so most lanes move to the right of their line.
 --    - amount = tags.length (meters), split over the side-line parts by part length
 --    - tags as the QA compares them (tilda_qa_bikelane_tags: derived oneway values count as tagged)
 --    - osm_user / updated_at from meta (last OSM editor, for trusted editors)

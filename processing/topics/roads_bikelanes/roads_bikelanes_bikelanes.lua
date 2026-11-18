@@ -4,7 +4,7 @@ local extract_public_tags = require('topics.helper.extract_public_tags')
 local default_id = require('topics.helper.default_id')
 local roads_bikelanes_tables = require('topics.roads_bikelanes.roads_bikelanes_tables')
 local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
-local orient_line_direction_tags = require('topics.roads_bikelanes.bikelanes.helper.orient_line_direction_tags')
+local LINE_DIRECTION = require('topics.roads_bikelanes.helper.line_direction')
 local reverse_linestring = require('topics.roads_bikelanes.routing_infra.reverse_linestring')
 local pseudo_route_relations = require('topics.roads_bikelanes.route_relations.pseudo_route_relations')
 
@@ -49,14 +49,17 @@ local function roads_bikelanes_bikelanes(context)
       }
       local meta = object_meta
 
+      -- Geometry stays on the road centerline. Lines point in the riding direction
+      -- (see `LINE_DIRECTION.bikelane_reversed`).
       local tags = merge_table(extract_public_tags(cycleway), result_tags)
-      orient_line_direction_tags(tags, cycleway._line_reversed)
-
-      -- Geometry stays on the road centerline. Lines of lanes on the road point in the riding
-      -- direction (see `side_line_reversed`); self lines run with the way.
       local geom = object_geom
       if cycleway._line_reversed then
         geom = reverse_linestring(object_geom)
+        if cycleway._side == 'self' then
+          tags = LINE_DIRECTION.swap_way_tags(tags)
+        else
+          tags = LINE_DIRECTION.swap_lane_tags(tags)
+        end
       end
 
       bikelanes_table:insert({
@@ -95,11 +98,12 @@ local function roads_bikelanes_bikelanes(context)
 
   if not has_expected_presence then return end
 
+  local presence_geom, presence_tags = LINE_DIRECTION.way_line(object_tags, object_geom, cycleway_presence)
   bikelanes_presence_table:insert({
     id = default_id({ type = object_tags._type, id = object_tags._id }),
-    tags = cycleway_presence,
+    tags = presence_tags,
     meta = object_meta,
-    geom = object_geom,
+    geom = presence_geom,
     minzoom = 0
   })
 end
