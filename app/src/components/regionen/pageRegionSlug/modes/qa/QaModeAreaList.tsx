@@ -1,4 +1,3 @@
-import { useQuery } from '@tanstack/react-query'
 import { useMap } from 'react-map-gl/maplibre'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { qaSourceId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersQa'
@@ -11,7 +10,6 @@ import { QaEvaluatorIcon } from '@/components/regionen/pageRegionSlug/modes/qa/d
 import { TimeWithRelativeTooltip } from '@/components/shared/date/TimeWithRelativeTooltip'
 import { SmallSpinner } from '@/components/shared/Spinner/SmallSpinner'
 import { frenchQuote } from '@/components/shared/text/Quotes'
-import { getQaAreaListFn } from '@/server/qa-configs/qa-configs.functions'
 import type { QaAreaListItem } from '@/server/qa-configs/queries/getQaAreaList.server'
 import { qaEvalDraftId } from '../composerDrafts/composerDraftIds'
 import { ComposerDraftDot } from '../composerDrafts/DraftIndicatorDot'
@@ -27,10 +25,8 @@ import {
 } from '../modePanel.const'
 import { ModePanelEmpty } from '../ModePanelEmpty'
 import { ModeCommentsPill, ModePanelPill } from '../ModePanelPill'
-import type { ModeListExtent } from '../useMapExtentFilter'
-import { useMapViewportBbox } from '../useMapViewportBbox'
-import type { QaStatusKey } from './qaConfigStyles'
 import { QaZoomNotice } from './QaZoomNotice'
+import { useQaAreaList } from './useQaAreaList'
 
 const evaluatorLabel = (area: QaAreaListItem) => {
   if (area.evaluatorType === 'SYSTEM') return 'System-Bewertung'
@@ -39,57 +35,22 @@ const evaluatorLabel = (area: QaAreaListItem) => {
   return parts.join(' ') || evaluatorTypeConfig.USER.label
 }
 
-type Props = {
-  configSlug: string
-  regionSlug: string
-  /** Selected statuses, `undefined` = Alle Status. */
-  status: QaStatusKey[] | undefined
-  users?: string[]
-  /** Selected indicator keys (`ind` param), `undefined` = every indicator. */
-  indicatorKeys?: string[]
-  search: string
-  extent: ModeListExtent
-}
-
 /**
  * QA mode area rows. Filters (status, users, indicators, search, map extent) run on the server.
  * Clicking an area selects it in `f` (mode panel detail) and flies the map to its bbox.
  */
-export const QaModeAreaList = ({
-  configSlug,
-  regionSlug,
-  status,
-  users,
-  indicatorKeys,
-  search,
-  extent,
-}: Props) => {
+export const QaModeAreaList = () => {
   const { mainMap } = useMap()
   const { featuresParam, setFeaturesParam } = useFeaturesParam()
-  const viewportBbox = useMapViewportBbox()
-  const bbox = extent === 'view' ? viewportBbox : undefined
-  const queryEnabled = Boolean(configSlug) && (extent === 'all' || bbox !== undefined)
-
-  const { data, isLoading, isError } = useQuery({
-    queryKey: [
-      'qa-configs',
-      'getQaAreaList',
-      { configSlug, regionSlug, status, users, indicatorKeys, search, extent, bbox },
-    ],
-    queryFn: () =>
-      getQaAreaListFn({
-        data: {
-          configSlug,
-          regionSlug,
-          status,
-          userIds: users,
-          indicatorKeys,
-          search: search || undefined,
-          bbox,
-        },
-      }),
+  const {
+    data,
+    isLoading,
+    isError,
     enabled: queryEnabled,
-  })
+    regionSlug,
+    configSlug,
+    extent,
+  } = useQaAreaList()
 
   if (!queryEnabled || isLoading) {
     return (

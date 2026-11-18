@@ -1,8 +1,6 @@
-import { useSuspenseQuery } from '@tanstack/react-query'
 import { useQaParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useQaParam'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { frenchQuote } from '@/components/shared/text/Quotes'
-import { regionQaConfigsQueryOptions } from '@/server/regions/regionQueryOptions'
 import { ModeCollectionSelect } from '../ModeCollectionSelect'
 import { ModeFilterBar } from '../ModeFilterBar'
 import { ModePanel } from '../ModePanel'
@@ -10,31 +8,20 @@ import { modePanelMutedClassName } from '../modePanel.const'
 import { useModeDetailSelection } from '../useModeDetailSelection'
 import { QaDetail } from './detail/QaDetail'
 import { QaConfigInfo } from './QaConfigInfo'
-import {
-  QA_DEFAULT_STATUS_KEYS,
-  resolvedQaIndicatorKeys,
-  resolvedQaStatusKeys,
-} from './qaConfigStyles'
+import { QA_DEFAULT_STATUS_KEYS } from './qaConfigStyles'
 import { QaIndicatorDropdown } from './QaIndicatorDropdown'
 import { QaModeAreaList } from './QaModeAreaList'
+import { QaModeListCount } from './QaModeListCount'
 import { QaStatusDropdown } from './QaStatusDropdown'
 import { QaUserDropdown } from './QaUserDropdown'
+import { useActiveQaConfig } from './useActiveQaConfig'
 
 export const PageModeQa = () => {
   const region = useRegion()
   const { qaParamData, setQaParamData } = useQaParam()
   const { selected, clearModeDetail } = useModeDetailSelection()
 
-  const { data: configs } = useSuspenseQuery(regionQaConfigsQueryOptions(region.slug))
-  const defaultConfig = configs[0]
-  const selectedKey = qaParamData.key || defaultConfig?.slug || ''
-  const activeConfig = configs.find((config) => config.slug === selectedKey)
-  const extent = qaParamData.extent ?? 'view'
-  const indicators = activeConfig?.indicators ?? []
-  const indicatorKeys = resolvedQaIndicatorKeys(
-    qaParamData.ind,
-    indicators.map((indicator) => indicator.key),
-  )
+  const { configs, selectedKey, activeConfig } = useActiveQaConfig()
 
   const setConfig = (configSlug: string) => {
     // Indicator keys belong to one config; keeping them would filter the new config's map to nothing.
@@ -85,7 +72,8 @@ export const PageModeQa = () => {
             })
           }
           searchPlaceholder="Bereiche durchsuchen…"
-          extent={extent}
+          countLabel={<QaModeListCount />}
+          extent={qaParamData.extent ?? 'view'}
           onExtentChange={(next) =>
             setQaParamData({
               ...qaParamData,
@@ -97,7 +85,7 @@ export const PageModeQa = () => {
           <QaStatusDropdown />
           {selectedKey && activeConfig ? (
             <>
-              <QaIndicatorDropdown indicators={indicators} />
+              <QaIndicatorDropdown indicators={activeConfig.indicators} />
               <QaUserDropdown configId={activeConfig.id} regionSlug={region.slug} />
             </>
           ) : null}
@@ -105,15 +93,7 @@ export const PageModeQa = () => {
       }
     >
       {selectedKey ? (
-        <QaModeAreaList
-          configSlug={selectedKey}
-          regionSlug={region.slug}
-          status={resolvedQaStatusKeys(qaParamData.status)}
-          users={qaParamData.users}
-          indicatorKeys={qaParamData.ind && qaParamData.ind.length > 0 ? indicatorKeys : undefined}
-          search={qaParamData.search ?? ''}
-          extent={extent}
-        />
+        <QaModeAreaList />
       ) : (
         <p className={`px-4 py-3 ${modePanelMutedClassName}`}>
           Keine Qualitätssicherungs-Konfiguration.

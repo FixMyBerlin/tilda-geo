@@ -1,14 +1,9 @@
 import { PlusIcon } from '@heroicons/react/24/outline'
-import { useQuery, useSuspenseQuery } from '@tanstack/react-query'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useFeaturesParam/useFeaturesParam'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { frenchQuote } from '@/components/shared/text/Quotes'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
-import {
-  reviewEntriesQueryOptions,
-  reviewListsQueryOptions,
-} from '@/server/regions/regionQueryOptions'
 import { ModeFilterBar } from '../ModeFilterBar'
 import { ModeFilterSelect, modeFilterIcons } from '../ModeFilterSelect'
 import { ModePanel } from '../ModePanel'
@@ -21,9 +16,11 @@ import { ReviewEntryNew } from './new/ReviewEntryNew'
 import { ReviewListManageMenu, ReviewListSelect } from './ReviewListSelect'
 import { reviewStatusFilterOptions } from './reviewListsModeFilters'
 import { ReviewListsModeList } from './ReviewListsModeList'
+import { ReviewListsModeListCount } from './ReviewListsModeListCount'
 import { useReviewListCommands } from './useReviewListCommands'
 import { useReviewListsModeParam } from './useReviewListsModeParam'
 import { useReviewListStatusStyles } from './useReviewListStatusStyles'
+import { useSelectedReviewList } from './useSelectedReviewList'
 
 export const PageModeReviewLists = () => {
   const region = useRegion()
@@ -32,26 +29,14 @@ export const PageModeReviewLists = () => {
   const { selected, clearModeDetail } = useModeDetailSelection()
   const { reviewListsMode, setReviewListsModeParam } = useReviewListsModeParam()
 
-  // Primed by the route loader (ensureQueryData), so this suspends only on hard refresh races
-  // and cooperates with the route pendingComponent.
-  const { data: listsData } = useSuspenseQuery(reviewListsQueryOptions(region.slug))
-  const lists = listsData.lists
-  const selectedListId = reviewListsMode.key ?? lists[0]?.id
-  const selectedList = lists.find((list) => list.id === selectedListId)
+  const { lists, selectedListId, selectedList } = useSelectedReviewList()
   const statusStyles = useReviewListStatusStyles()
-
-  const { data: entriesData, isLoading } = useQuery({
-    ...reviewEntriesQueryOptions(region.slug, selectedListId),
-    enabled: selectedListId !== undefined,
-  })
 
   const search = reviewListsMode.search ?? ''
   const extent = reviewListsMode.extent ?? 'view'
 
   const updateFilter = (patch: Partial<typeof reviewListsMode>) =>
     setReviewListsModeParam({ ...reviewListsMode, ...patch })
-
-  const features = entriesData?.featureCollection.features ?? []
 
   const onSelectList = (list: number) =>
     setReviewListsModeParam({
@@ -159,6 +144,7 @@ export const PageModeReviewLists = () => {
           search={search}
           onSearchChange={(value) => updateFilter({ search: value || undefined })}
           searchPlaceholder="Einträge durchsuchen…"
+          countLabel={<ReviewListsModeListCount />}
           extent={extent}
           onExtentChange={(next) => setReviewListsModeParam({ ...reviewListsMode, extent: next })}
         >
@@ -177,9 +163,6 @@ export const PageModeReviewLists = () => {
       }
     >
       <ReviewListsModeList
-        features={features}
-        isLoading={isLoading}
-        selectedListId={selectedListId}
         onOpenNewEntry={openNewEntry}
         onOpenUpload={reviewListCommands.openUploadModal}
       />

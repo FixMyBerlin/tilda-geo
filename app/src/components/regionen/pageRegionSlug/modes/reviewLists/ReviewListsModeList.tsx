@@ -28,20 +28,10 @@ import {
 } from '../modePanel.const'
 import { ModePanelEmpty } from '../ModePanelEmpty'
 import { ModeCommentsPill, ModePanelPill } from '../ModePanelPill'
-import { useMapExtentFilter } from '../useMapExtentFilter'
 import { formatReviewEntryDataSummary } from './reviewEntryDataSummary'
+import { useReviewListEntries } from './useReviewListEntries'
 import { useReviewListsModeParam } from './useReviewListsModeParam'
 import { useReviewListStatusStyles } from './useReviewListStatusStyles'
-
-const firstPosition = (geometry: Geometry) => {
-  if (!('coordinates' in geometry)) return null
-  let coords: unknown = geometry.coordinates
-  while (Array.isArray(coords) && Array.isArray(coords[0])) coords = coords[0]
-  if (!Array.isArray(coords)) return null
-  const [lng, lat] = coords
-  if (typeof lng !== 'number' || typeof lat !== 'number') return null
-  return [lng, lat] satisfies [number, number]
-}
 
 const REVIEW_TABLE_COLUMNS = [
   { id: 'id', label: '#', className: 'w-[8%]' },
@@ -58,71 +48,22 @@ const ReviewStatusBadge = ({ style }: { style: ReviewListStatusStyles[ReviewStat
   </ModePanelPill>
 )
 
-type ReviewListEntryFeature = {
-  geometry: Geometry
-  properties: {
-    id: number
-    status: ReviewStatus
-    source: string
-    geometryType: string
-    authorName?: string | null
-    authorOsmName?: string | null
-    commentCount: number
-    data?: Record<string, string>
-  }
-}
-
 type Props = {
-  features: ReviewListEntryFeature[]
-  isLoading: boolean
-  selectedListId: number | undefined
   onOpenNewEntry: () => void
   onOpenUpload: (origin: HTMLElement) => void
 }
 
 /**
- * Review-list entry rows. Status/search/extent filters run here. Clicking a row selects it in `f`
+ * Review-list entry rows. Entries and filters come from `useReviewListEntries`. Clicking a row selects it in `f`
  * and pans if it is off-screen (zoom unchanged).
  */
-export const ReviewListsModeList = ({
-  features,
-  isLoading,
-  selectedListId,
-  onOpenNewEntry,
-  onOpenUpload,
-}: Props) => {
+export const ReviewListsModeList = ({ onOpenNewEntry, onOpenUpload }: Props) => {
   const { mainMap } = useMap()
   const { featuresParam, setFeaturesParam } = useFeaturesParam()
   const { reviewListsMode, setReviewListsModeParam } = useReviewListsModeParam()
   const statusStyles = useReviewListStatusStyles()
-  const search = reviewListsMode.search ?? ''
   const extent = reviewListsMode.extent ?? 'view'
-  const passesExtent = useMapExtentFilter(extent)
-
-  const mappedEntries = features.map((feature) => ({
-    feature,
-    coordinates: firstPosition(feature.geometry),
-  }))
-  const matchingFilters = mappedEntries.filter(
-    (
-      entry,
-    ): entry is {
-      feature: (typeof features)[number]
-      coordinates: [number, number]
-    } => {
-      if (!entry.coordinates) return false // skip empty/degenerate geometry
-      const props = entry.feature.properties
-      if (reviewListsMode.status && props.status !== reviewListsMode.status) return false
-      if (reviewListsMode.source && props.source !== reviewListsMode.source) return false
-      if (search) {
-        const haystack =
-          `${props.id} ${props.authorName ?? ''} ${props.authorOsmName ?? ''} ${JSON.stringify(props.data ?? {})}`.toLowerCase()
-        if (!haystack.includes(search.toLowerCase())) return false
-      }
-      return true
-    },
-  )
-  const entries = matchingFilters.filter((entry) => passesExtent(entry.coordinates))
+  const { selectedListId, isLoading, features, matchingFilters, entries } = useReviewListEntries()
 
   // Match on source + id (the `f` param carries both); review entries all share the same source,
   // but this keeps the selection unambiguous if ids ever overlap across sources.
