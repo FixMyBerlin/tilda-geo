@@ -53,6 +53,12 @@ local function result_tags_parkings(object)
   -- 3. `result_tags` in `processing/topics/parking/off_street_parking/helper/result_tags_off_street_parking.lua`
   -- 4. `jsonb_build_object` in `processing/topics/parking/4_merge_parkings.sql`
   local result_tags = {
+    -- `side` is left or right of the OSM way as it is drawn, also on `oneway=-1` roads (where the way
+    -- is drawn against the direction of travel, so `side` is reversed compared to the traffic).
+    -- This differs from `roads` and `bikelanes`: there, lines of `oneway=-1` ways are reversed to
+    -- point in the direction of travel, and `left`/`right` follow that reversed line
+    -- (`roads_bikelanes/helper/line_direction.lua`). So on a `oneway=-1` road, `side=left` here is
+    -- `bikelane_right` in `roads`.
     side = object.tags.side, -- see transform_parkings()
     source = 'parent_highway',
 
