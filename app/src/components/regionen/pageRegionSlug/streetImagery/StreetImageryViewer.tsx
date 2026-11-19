@@ -58,6 +58,8 @@ export const StreetImageryViewer = () => {
     <FloatingPhotoViewer
       title={providerById[photo.providerId].label}
       storageKey="tilda-street-imagery-viewer"
+      // TILDA's focus colour instead of the package's fuchsia.
+      resizeHandleColor="var(--color-yellow-500)"
       // Top left, right of the layer controls (their width plus the map's inset).
       defaultPosition={{ corner: 'top-left', left: isDesktop ? 240 : 8, top: isDesktop ? 12 : 64 }}
       // TILDA shows single photos; the package's suggested views and history are not used.
