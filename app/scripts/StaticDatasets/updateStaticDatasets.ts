@@ -253,29 +253,6 @@ if (!keepTemporaryFiles) {
   fs.rmSync(tempFolder, { recursive: true, force: true })
 }
 
-// For production runs, add a tag so we can see which data was published
-//   https://github.com/FixMyBerlin/tilda-static-data/tags
-// How to use: Compare with the previous tag at
-//   https://github.com/FixMyBerlin/tilda-static-data/compare/main...publish_2024-05-23_prd
-if (appEnv === 'production') {
-  const folder = S3_UPLOAD_FOLDER_BY_APP_ENV[appEnv]
-  const currentDateTime = new Date().toISOString()
-  const tagName = `publish_${currentDateTime}_${folder}`
-  const tagMessage = `publish data to ${folder}`
-
-  try {
-    Bun.spawnSync(['git', 'tag', '-a', tagName, '-m', tagMessage], {
-      cwd: '../../tilda-static-data',
-    })
-    Bun.spawnSync(['git', 'push', 'origin', tagName], {
-      cwd: '../../tilda-static-data',
-    })
-    console.log(`Tag '${tagName}' has been created and pushed to GitHub.`)
-  } catch (error) {
-    console.error('Failed to create or push git tag:', error)
-  }
-}
-
 if (failedFolders.length > 0) {
   red(`Pipeline finished with ${failedFolders.length} failed folder(s):`)
   for (const { folder, error } of failedFolders) {
