@@ -1,4 +1,4 @@
-import { useMapExtentFilter, type ModeListExtent } from '../useMapExtentFilter'
+import { pointBbox, useMapExtentFilter, type ModeListExtent } from '../useMapExtentFilter'
 import type { NotesModeListEntry } from './notesModeListEntry'
 
 /**
@@ -11,5 +11,5 @@ export const useVisibleNotesEntries = (
   extent: ModeListExtent | undefined,
 ) => {
   const passesExtent = useMapExtentFilter(showingOsm ? 'all' : (extent ?? 'view'))
-  return entries.filter((entry) => passesExtent(entry.coordinates))
+  return entries.filter((entry) => passesExtent(pointBbox(entry.coordinates)))
 }
