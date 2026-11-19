@@ -7,7 +7,7 @@ import type {
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 import { createSubcatStyleKey } from '../../utils/sourceKeyUtils/sourceKeyUtilsTilda'
 import { DetailToggle } from '../DetailToggle'
-import { useLegendExpanded, useLegendExpandedActions } from './legend-expanded-store'
+import { useExpanded, useExpandedActions } from '../expanded-store'
 import { LegendIconArea } from './LegendIcons/LegendIconArea'
 import { LegendIconCircle } from './LegendIcons/LegendIconCircle'
 import { LegendIconHeatmap } from './LegendIcons/LegendIconHeatmap'
@@ -17,7 +17,7 @@ import type { LegendIconTypes } from './LegendIcons/types'
 import { LegendNameDesc } from './LegendNameDesc'
 
 /** Longer legends start collapsed as an icon grid; expand to the full list. */
-const LEGEND_COMPACT_THRESHOLD = 3
+export const LEGEND_COMPACT_THRESHOLD = 3
 
 type Props = {
   subcategoryId: SubcategoryId
@@ -122,19 +122,22 @@ const LegendCompactGrid = ({ legends }: { legends: FileMapDataSubcategoryStyleLe
 export const LegendItems = ({
   legendKey,
   legends,
+  showToggle = true,
 }: {
   legendKey: string
   legends: FileMapDataSubcategoryStyleLegend[]
+  /** Off when the caller renders its own toggle for the same `legendKey`. */
+  showToggle?: boolean
 }) => {
-  const expanded = useLegendExpanded(legendKey)
-  const { expand, collapse } = useLegendExpandedActions()
+  const expanded = useExpanded(legendKey)
+  const { expand, collapse } = useExpandedActions()
 
   const canToggle = legends.length > LEGEND_COMPACT_THRESHOLD
   const useCompact = canToggle && !expanded
 
   return (
     <div className="@container space-y-1.5">
-      {canToggle && (
+      {canToggle && showToggle && (
         <DetailToggle
           expanded={expanded}
           onToggle={() => (expanded ? collapse(legendKey) : expand(legendKey))}
