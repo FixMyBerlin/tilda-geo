@@ -83,6 +83,10 @@ Higher accuracy for individual regions: mount real DGM1 GeoTIFFs via the
 `dem_source: "srtm"` remains as a fallback with constant slope (2°) in case
 neither Mapterhorn nor DGM1 is available.
 
+Where elevation is missing for a hexagon (tile not loadable, DGM1
+nodata), the slope is NaN – not 0°. The slope then neither counts as flat nor triggers
+the steep-slope exclusion; it simply drops out of that hexagon's base score.
+
 ## Further docs
 
 - [`SCORING.md`](SCORING.md) – MCE scoring per hexagon, hard exclusions and

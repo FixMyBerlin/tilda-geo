@@ -731,7 +731,11 @@ def run_flaechenfinder(
     _step(13)
     w = use_case.weights
 
+    # Missing elevation (NaN slope, see dem.py) stays NaN: without this check the
+    # comparisons below all fail and the else-branch returns 0.0 – the "too steep"
+    # exclusion. A NaN criterion drops out of `_group_score` for that hexagon.
     def slope_score(deg):
+        if pd.isna(deg):  return np.nan
         if deg <= 2:    return 100.0
         elif deg <= 5:  return 100.0 - (deg - 2) / 3 * 40
         elif deg <= 10: return 60.0 - (deg - 5) / 5 * 60
@@ -746,10 +750,7 @@ def run_flaechenfinder(
     else:
         hex_proj["score_radweg"] = np.nan
     # Only with weight > 0 – like score_radweg above. Without weight hangneigung_grad
-    # is already NaN (step 10); score_hangneigung is additionally set to NaN here
-    # explicitly, because slope_score(NaN) would otherwise wrongly return 0.0 via the
-    # else-branch comparisons – and exactly this "0.0" is the exclusion condition
-    # further below (`== 0`).
+    # is NaN for every hexagon (step 10) and so is score_hangneigung (→ DB NULL).
     if (w.get("w_slope", 0) or 0) > 0:
         hex_proj["score_hangneigung"] = hex_proj["hangneigung_grad"].apply(slope_score)
     else:
@@ -759,21 +760,28 @@ def run_flaechenfinder(
     # Vegetation is NOT a criterion but a separate penalty (or bonus) further
     # below – like all modifiers it shifts the final score by points instead of
     # taking a share of it. Skipped factors (public transport with weight 0) have a
-    # NaN score column; `_term` skips them as scalar 0.0 so the sum is not
+    # NaN score column; `_group_score` skips them entirely so the sum is not
     # poisoned by `NaN * 0 = NaN`.
-    def _term(col, wkey):
-        wv = w.get(wkey, 0) or 0
-        return hex_proj[col] * wv if wv else 0.0
 
     # Weighted average instead of weighted sum: dividing by the sum of the active
     # weights keeps the result in 0–100 however the weights are set. Only their
     # ratio matters – so the UI does not have to force the weights to a fixed sum.
+    # Per hexagon only the terms with a value count: a weighted criterion that is NaN
+    # for one hexagon (no data there) drops out of both the sum and the weight sum,
+    # instead of turning the whole group NaN (→ base score 0 via fillna). A hexagon
+    # without any value stays NaN.
     def _group_score(terms):
-        wsum = sum((w.get(k, 0) or 0) for _, k in terms)
-        if wsum <= 0:
-            return pd.Series(np.nan, index=hex_proj.index)
-        raw = sum(_term(col, k) for col, k in terms)
-        return raw / wsum
+        raw = pd.Series(0.0, index=hex_proj.index)
+        wsum = pd.Series(0.0, index=hex_proj.index)
+        for col, k in terms:
+            wv = w.get(k, 0) or 0
+            if wv <= 0:
+                continue
+            values = hex_proj[col].astype(float)
+            has_value = values.notna()
+            raw += values.fillna(0.0) * wv
+            wsum += has_value * wv
+        return (raw / wsum).where(wsum > 0)
 
     BEDARF_TERMS = [
         ("score_radweg", "w_cyclepath"),

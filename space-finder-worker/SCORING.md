@@ -11,7 +11,8 @@ Core code: [`scoring/scorer.py`](scoring/scorer.py)
 2. **Sub-scores per hexagon** (0–100, from distance to layers or attributes):
    - `score_radweg` – proximity to `public.bikelanes`
    - `score_zielorte` – proximity to the `targets` configured in the scenario
-   - `score_hangneigung` – DEM slope (`slope_score`)
+   - `score_hangneigung` – DEM slope (`slope_score`); NULL where no elevation data is
+     available (tile not loadable, DGM1 nodata)
    - `score_oepnv` – proximity to public transport stops and bike sharing. Two groups: "ÖPNV" (max.
      over 5 types: subway entrance, tram, bus, station, station building) and "Bikesharing"
      (own type, same radius as bus stops). Their ratio is adjustable via
@@ -20,8 +21,10 @@ Core code: [`scoring/scorer.py`](scoring/scorer.py)
      `oepnv_category_factors`/`scorer.py`)
    - `score_bewohnerbedarf` – bonus near inhabited buildings: census residents are assigned to
      the nearest OSM building within 5 m and count with a 20 m ramp from its edge
-3. **Base score** – weighted sum of the sub-scores (`weights` in the
-   `factorConfig`, see [`scoring/config.py`](scoring/config.py)).
+3. **Base score** – weighted average of the sub-scores (`weights` in the
+   `factorConfig`, see [`scoring/config.py`](scoring/config.py)). Per hexagon only
+   sub-scores with a value count: a weighted criterion without data there (e.g. slope
+   without elevation data) drops out of the sum and of the weight sum.
 4. **Vegetation effect** – not an additive sub-score but a continuous
    penalty/bonus on the base score (details: [`VEGETATION.md`](VEGETATION.md)).
    `mce_gesamtscore = clamp(base ± effect, 0, 100)`.

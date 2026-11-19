@@ -26,7 +26,7 @@ class DEMAdapter:
                 pass
 
     def get_slopes(self, points: List[Tuple[float, float]]) -> List[float]:
-        """Return slopes in degrees for [(lng, lat), ...]."""
+        """Return slopes in degrees for [(lng, lat), ...]; NaN where elevation is missing."""
         if self.source == "dgm1" and self.dgm1_path:
             return self._slopes_from_dgm1(points)
         elif self.source == "mapterhorn":
@@ -55,14 +55,14 @@ class DEMAdapter:
                 try:
                     patch = ds.read(1, window=window).astype(float)
                     if patch.shape != (3, 3) or np.any(patch == ds.nodata):
-                        slopes.append(0.0)
+                        slopes.append(float("nan"))
                         continue
                     dz_dx = (patch[1, 2] - patch[1, 0]) / (2 * res_x)
                     dz_dy = (patch[0, 1] - patch[2, 1]) / (2 * res_y)
                     slope_rad = np.arctan(np.sqrt(dz_dx**2 + dz_dy**2))
                     slopes.append(float(np.degrees(slope_rad)))
                 except Exception:
-                    slopes.append(0.0)
+                    slopes.append(float("nan"))
 
             return slopes
 
@@ -141,7 +141,7 @@ class DEMAdapter:
             tile_x, tile_y, px, py = self._mapterhorn_tile_pixel(lng, lat, zoom, tile_size)
             elevation = self._load_mapterhorn_tile(tile_x, tile_y)
             if elevation is None:
-                slopes.append(0.0)
+                slopes.append(float("nan"))
                 continue
 
             x0 = min(tile_size - 1, max(0, round(px)))
@@ -150,7 +150,7 @@ class DEMAdapter:
             y_minus, y_plus = max(0, y0 - 1), min(tile_size - 1, y0 + 1)
             if x_minus == x_plus or y_minus == y_plus:
                 # Point lies on a tile corner without neighbors on both sides
-                slopes.append(0.0)
+                slopes.append(float("nan"))
                 continue
 
             res_m = equator_res * math.cos(math.radians(lat)) / (2 ** zoom) * (256 / tile_size)
