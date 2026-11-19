@@ -10,29 +10,41 @@ import {
   mapDatasetUploadConfigsSchema,
   mapDatasetUploadConfigsToPrismaJson,
 } from '@/server/uploads/mapDatasetUploadConfigs.schema'
+import {
+  mapDatasetUploadStyleGroupsSchema,
+  mapDatasetUploadStyleGroupsToPrismaJson,
+  styleGroupProblems,
+} from '@/server/uploads/mapDatasetUploadStyleGroups'
 
-const Schema = z.object({
-  apiKey: z.string().nullish(),
-  uploadSlug: z.string(),
-  regionSlugs: z.array(z.string()),
-  isPublic: z.boolean(),
-  hideDownloadLink: z.boolean(),
-  configs: mapDatasetUploadConfigsSchema,
-  mapRenderFormat: z.enum(MapRenderFormatEnum),
-  mapRenderUrl: z.string(),
-  pmtilesUrl: z.string().nullish(),
-  geojsonUrl: z.string().nullish(),
-  githubUrl: z.string(),
-  externalSourceUrl: z.string().nullish(),
-  cacheTtlSeconds: z.number().nullish(),
-  systemLayer: z.boolean(),
-  // File-level metadata columns on MapDatasetUpload
-  attributionHtml: z.string().nullish(),
-  dataSourceMarkdown: z.string().nullish(),
-  dataUpdatedNote: z.string().nullish(),
-  licence: z.string().nullish(),
-  licenceOsmCompatible: z.string().nullish(),
-})
+const Schema = z
+  .object({
+    apiKey: z.string().nullish(),
+    uploadSlug: z.string(),
+    regionSlugs: z.array(z.string()),
+    isPublic: z.boolean(),
+    hideDownloadLink: z.boolean(),
+    configs: mapDatasetUploadConfigsSchema,
+    mapRenderFormat: z.enum(MapRenderFormatEnum),
+    mapRenderUrl: z.string(),
+    pmtilesUrl: z.string().nullish(),
+    geojsonUrl: z.string().nullish(),
+    githubUrl: z.string(),
+    externalSourceUrl: z.string().nullish(),
+    cacheTtlSeconds: z.number().nullish(),
+    systemLayer: z.boolean(),
+    // File-level metadata columns on MapDatasetUpload
+    attributionHtml: z.string().nullish(),
+    dataSourceMarkdown: z.string().nullish(),
+    dataUpdatedNote: z.string().nullish(),
+    licence: z.string().nullish(),
+    licenceOsmCompatible: z.string().nullish(),
+    styleGroups: mapDatasetUploadStyleGroupsSchema.nullish(),
+  })
+  .superRefine(({ styleGroups, configs }, ctx) => {
+    for (const message of styleGroupProblems(styleGroups, configs)) {
+      ctx.addIssue({ code: 'custom', path: ['styleGroups'], message })
+    }
+  })
 
 export const Route = createFileRoute('/api/uploads/create')({
   ssr: false,
@@ -65,6 +77,7 @@ export const Route = createFileRoute('/api/uploads/create')({
           dataUpdatedNote,
           licence,
           licenceOsmCompatible,
+          styleGroups,
         } = data
 
         await runWithAuditContextAsync(systemApiAuditContext(request.headers), async () => {
@@ -95,6 +108,7 @@ export const Route = createFileRoute('/api/uploads/create')({
               dataUpdatedNote: dataUpdatedNote ?? null,
               licence: licence ?? null,
               licenceOsmCompatible: licenceOsmCompatible ?? null,
+              styleGroups: mapDatasetUploadStyleGroupsToPrismaJson(styleGroups),
               // Sync normalized layerConfigs rows from configs[] for the admin UI.
               layerConfigs: { create: layerConfigsCreateFromConfigs(configs) },
             },

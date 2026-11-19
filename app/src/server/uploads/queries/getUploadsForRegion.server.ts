@@ -12,6 +12,7 @@ import {
   loadMapDatasetCategoryMap,
 } from '@/server/map-dataset-categories/queries/loadMapDatasetCategoryMap.server'
 import { parseMapDatasetUploadConfigs } from '@/server/uploads/mapDatasetUploadConfigs.schema'
+import { parseMapDatasetUploadStyleGroups } from '@/server/uploads/mapDatasetUploadStyleGroups'
 
 type UploadFields = {
   public: boolean
@@ -39,12 +40,25 @@ type RegionDatasetFileLevelFields = {
   licenceOsmCompatible?: MetaDataFileLevelMetadata['licenceOsmCompatible'] | null
 }
 
-export type RegionDatasetUser = MetaDataUser['configs'][number] &
+/** The style group a config belongs to; one sidebar entry per group, radio button per config. */
+type RegionDatasetStyleGroup = {
+  /** Unique across uploads: `<upload slug>:<group id>` */
+  key: string
+  name: string
+  /** Position of this config within its group (order in `meta.ts`); 0 = default style */
+  position: number
+}
+
+type StyleGroupFields = { styleGroup: RegionDatasetStyleGroup | null }
+
+export type RegionDatasetUser = Omit<MetaDataUser['configs'][number], 'styleGroup'> &
+  StyleGroupFields &
   RegionDatasetFileLevelFields &
   UploadFields &
   CategoryPresentationFields
 
-export type RegionDatasetSystemLayer = MetaDataSystemLayer['configs'][number] &
+export type RegionDatasetSystemLayer = Omit<MetaDataSystemLayer['configs'][number], 'styleGroup'> &
+  StyleGroupFields &
   RegionDatasetFileLevelFields &
   UploadFields &
   CategoryPresentationFields
@@ -145,16 +159,33 @@ function fileLevelFieldsFromRow(upload: UploadShapeForFields) {
   } satisfies RegionDatasetFileLevelFields
 }
 
+/** Style group of each config (same order as `configs`); parses `styleGroups` once per upload. */
+function styleGroupsForConfigs(upload: UploadShapeForFields, configs: MetaDataUser['configs']) {
+  const groups = parseMapDatasetUploadStyleGroups(upload.styleGroups)
+  return configs.map((config) => {
+    const group = groups.find(({ id }) => id === config.styleGroup)
+    if (!group) return null
+    const members = configs.filter(({ styleGroup }) => styleGroup === group.id)
+    return {
+      key: `${upload.slug}:${group.id}`,
+      name: group.name,
+      position: members.indexOf(config),
+    } satisfies RegionDatasetStyleGroup
+  })
+}
+
 function transformUserUploadsToRegionDatasets(
   uploads: UploadRowWithUserConfigs[],
   categoryMap: CategoryMap,
 ) {
   return uploads.flatMap((upload) => {
     const configs = parseMapDatasetUploadConfigs(upload.configs) as MetaDataUser['configs']
+    const styleGroups = styleGroupsForConfigs(upload, configs)
     return configs.map(
-      (config) =>
+      (config, index) =>
         ({
           ...config,
+          styleGroup: styleGroups[index] ?? null,
           ...categoryPresentationForConfigCategory(config.categoryKey, categoryMap),
           ...uploadFieldsFromRow(upload),
           ...fileLevelFieldsFromRow(upload),
@@ -170,6 +201,7 @@ function transformSystemUploadsToRegionDatasets(uploads: UploadRowWithSystemConf
       (config) =>
         ({
           ...config,
+          styleGroup: null,
           ...emptyPresentation,
           ...uploadFieldsFromRow(upload),
           ...fileLevelFieldsFromRow(upload),

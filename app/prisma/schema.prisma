@@ -442,6 +442,9 @@ model MapDatasetUpload {
   dataUpdatedNote      String? // free-text e.g. "2024-11-13" — kept separate from the row's updatedAt
   licence              String? // licence enum values as in StaticDatasets/types.ts
   licenceOsmCompatible String? // 'licence' | 'waiver' | 'no'
+  /// Style groups from `meta.ts` (`[{ id, name }]`): configs with the same `styleGroup` show as one
+  /// sidebar entry with a radio button per config. null = every config is its own entry.
+  styleGroups          Json?
   //
   regions           Region[]                  @relation("RegionToMapDatasetUpload")
   layerConfigs      MapDatasetLayerConfig[]

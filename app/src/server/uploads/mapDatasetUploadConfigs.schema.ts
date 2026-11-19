@@ -66,6 +66,8 @@ const mapDatasetUploadConfigEntrySchema = z.looseObject({
   categoryKey: z.string().nullish(),
   description: z.string().optional(),
   subId: z.string().optional(),
+  /** `MapDatasetUpload.styleGroups[].id`; see `styleGroupProblems`. */
+  styleGroup: z.string().optional(),
   layers: z.array(staticDatasetLayerSchema).optional(),
   inspector: inspectorSchema.optional(),
   legends: z.array(legendSchema).nullish(),
@@ -81,6 +83,7 @@ export type MapDatasetUploadConfigEntry = {
   categoryKey?: string | null
   description?: string
   subId?: string
+  styleGroup?: string
   layers?: StaticDatasetLayer[]
   inspector?:
     | { enabled: false }

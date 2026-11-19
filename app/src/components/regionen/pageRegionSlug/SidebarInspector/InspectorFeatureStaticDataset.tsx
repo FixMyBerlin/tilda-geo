@@ -2,6 +2,7 @@ import { IntlProvider } from 'react-intl'
 import { useRegionDatasetsQuery } from '@/components/regionen/pageRegionSlug/hooks/useRegionDataQueries'
 import { quote } from '@/components/shared/text/Quotes'
 import { parseSourceKeyStaticDatasets } from '../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
+import { staticDatasetDisplayName } from '../utils/staticDatasetDisplayName'
 import { Disclosure } from './Disclosure/Disclosure'
 import type { InspectorFeature } from './Inspector'
 import { TagsTable } from './TagsTable/TagsTable'
@@ -15,8 +16,10 @@ export const InspectorFeatureStaticDataset = ({ sourceKey, feature }: InspectorF
   if (!sourceKey || !feature.properties) return null
 
   // The documentedKeys info is placed on the source object
-  const sourceId = parseSourceKeyStaticDatasets(sourceKey).sourceId as string
-  const sourceData = regionDatasets.find((dataset) => dataset.id === sourceId)
+  const { sourceId, subId } = parseSourceKeyStaticDatasets(sourceKey)
+  const sourceData = regionDatasets.find(
+    (dataset) => dataset.id === sourceId && dataset.subId === subId,
+  )
 
   if (!sourceData) return null
   if (!sourceData.inspector.enabled) return null
@@ -26,7 +29,7 @@ export const InspectorFeatureStaticDataset = ({ sourceKey, feature }: InspectorF
   return (
     <IntlProvider messages={datasetTranslations} locale="de" defaultLocale="de">
       <Disclosure
-        title={<>Statische Daten {quote(sourceData.name)}</>}
+        title={<>Statische Daten {quote(staticDatasetDisplayName(sourceData))}</>}
         objectId={feature.properties.osm_id}
         showLockIcon={!sourceData.public}
       >
