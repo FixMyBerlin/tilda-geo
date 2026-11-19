@@ -60,6 +60,7 @@ type SpaceFinderCandidatesStore = {
     toggleCandidate: (runKey: string, candidate: SpaceFinderCandidate) => boolean
     /** Swaps in the full hexagon outline once it is loaded (the tile geometry may be clipped). */
     setCandidateGeometry: (runKey: string, h3Id: string, geometry: GeoJSON.Geometry) => void
+    addCandidates: (runKey: string, candidates: SpaceFinderCandidate[]) => void
     removeCandidate: (runKey: string, h3Id: string) => void
     clearCandidates: (runKey: string) => void
   }
@@ -105,6 +106,17 @@ const useSpaceFinderCandidatesStore = create<SpaceFinderCandidatesStore>()(
               ),
             },
           })),
+        addCandidates: (runKey, added) =>
+          set((state) => {
+            const candidates = state.candidatesByRun[runKey] ?? []
+            const selected = new Set(candidates.map((c) => c.h3Id))
+            return {
+              candidatesByRun: {
+                ...state.candidatesByRun,
+                [runKey]: [...candidates, ...added.filter((c) => !selected.has(c.h3Id))],
+              },
+            }
+          }),
         removeCandidate: (runKey, h3Id) =>
           set((state) => ({
             candidatesByRun: {

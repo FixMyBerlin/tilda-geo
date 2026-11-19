@@ -1,6 +1,7 @@
 import {
   ArrowDownTrayIcon,
   ClipboardDocumentCheckIcon,
+  QueueListIcon,
   SquaresPlusIcon,
 } from '@heroicons/react/24/outline'
 import { bbox, centroid } from '@turf/turf'
@@ -30,7 +31,9 @@ import {
   modePanelSmallButtonClassName,
   modePanelTintHairlineTopClassName,
 } from '../../modePanel.const'
+import { TOP_FILTER_LABEL } from '../factors/spaceFinderDefaults'
 import { RemoveIconButton } from '../RemoveIconButton'
+import { useSpaceFinderTopHexagons } from '../search/useSpaceFinderTopHexagons'
 import { FINE_HEXAGON_ZOOM } from '../spaceFinderHexagonResolution'
 import { spaceFinderDiscardLinkClass, spaceFinderDiscardRowClass } from '../spaceFinderPanelStyles'
 import { useSpaceFinderSelection } from '../useSpaceFinderSelection'
@@ -151,8 +154,11 @@ export const SpaceFinderCandidatesSection = ({
   const [reviewListModalOpen, setReviewListModalOpen] = useState(false)
   const candidates = useSpaceFinderCandidates(runKey)
   const selectActive = useSpaceFinderCandidateSelectActive()
-  const { setSelectActive, setFocusedH3Id, removeCandidate, clearCandidates } =
+  const { setSelectActive, setFocusedH3Id, addCandidates, removeCandidate, clearCandidates } =
     useSpaceFinderCandidatesActions()
+  const { topHexagons } = useSpaceFinderTopHexagons()
+  const missingTopHexagons =
+    topHexagons?.filter((top) => !candidates.some((c) => c.h3Id === top.h3Id)) ?? []
   const focusedH3Id = useSpaceFinderFocusedCandidateH3Id()
   const { clearInspectorFeatures } = useMapActions()
   const { setFeaturesParam } = useFeaturesParam()
@@ -260,6 +266,32 @@ export const SpaceFinderCandidatesSection = ({
       )}
 
       <div className="flex flex-col gap-2">
+        {topHexagons && topHexagons.length > 0 && (
+          <button
+            type="button"
+            disabled={missingTopHexagons.length === 0}
+            onClick={() => {
+              if (runKey == null) return
+              addCandidates(
+                runKey,
+                missingTopHexagons.map((top) => ({
+                  h3Id: top.h3Id,
+                  geometry: top.geometry,
+                  properties: top.properties,
+                })),
+              )
+              setSelectActive(true)
+              closeInspector()
+            }}
+            className={twMerge(
+              buttonStylesSecondary,
+              'gap-2 disabled:cursor-not-allowed disabled:opacity-60',
+            )}
+          >
+            <QueueListIcon className="size-4" />
+            {TOP_FILTER_LABEL} übernehmen ({topHexagons.length})
+          </button>
+        )}
         <button
           type="button"
           disabled={candidates.length === 0}

@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest'
 import {
   appliedMinAreaM2,
+  appliedTopCount,
   compactSpaceFinderModeParam,
   isSpaceFinderAreaFormOpen,
   zodSpaceFinderModeParam,
@@ -73,6 +74,33 @@ describe('spaceFinderModeParam', () => {
     expect(appliedMinAreaM2(true, 40, 25)).toBe(25)
     expect(appliedMinAreaM2(true, 40, 0)).toBe(0)
     expect(appliedMinAreaM2(true, null, null)).toBe(0)
+  })
+
+  test('top must be a whole number from 1 to 100, topBy area or hexagon', () => {
+    expect(zodSpaceFinderModeParam.parse({ top: 10, topBy: 'hexagon' })).toEqual({
+      top: 10,
+      topBy: 'hexagon',
+    })
+    expect(zodSpaceFinderModeParam.parse({ top: 0 })).toEqual({})
+    expect(zodSpaceFinderModeParam.parse({ top: 101 })).toEqual({})
+    expect(zodSpaceFinderModeParam.parse({ top: 2.5 })).toEqual({})
+    expect(zodSpaceFinderModeParam.parse({ top: 5, topBy: 'invalid' })).toEqual({ top: 5 })
+  })
+
+  test('compactSpaceFinderModeParam omits the default topBy area', () => {
+    expect(compactSpaceFinderModeParam({ top: 10, topBy: 'area' })).toEqual({ top: 10 })
+    expect(compactSpaceFinderModeParam({ top: 10, topBy: 'hexagon' })).toEqual({
+      top: 10,
+      topBy: 'hexagon',
+    })
+  })
+
+  test('appliedTopCount follows the draft and keeps the URL count while the field is empty', () => {
+    expect(appliedTopCount(undefined, 5)).toBeNull()
+    expect(appliedTopCount(10, null)).toBe(10)
+    expect(appliedTopCount(10, 0)).toBe(10)
+    expect(appliedTopCount(10, 25)).toBe(25)
+    expect(appliedTopCount(10, 500)).toBe(100)
   })
 
   test('isSpaceFinderAreaFormOpen only for creating or editing a Planungsgebiet', () => {

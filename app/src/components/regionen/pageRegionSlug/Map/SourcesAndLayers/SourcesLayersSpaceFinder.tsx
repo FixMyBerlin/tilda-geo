@@ -20,6 +20,7 @@ import {
   useSpaceFinderVegetationVisible,
 } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-layers-store'
 import { useHoveredListItem } from '@/components/regionen/pageRegionSlug/modes/mode-list-store'
+import { useSpaceFinderTopHexagons } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/search/useSpaceFinderTopHexagons'
 import {
   FINE_HEXAGON_PREVIEW_ZOOM,
   FINE_HEXAGON_ZOOM,
@@ -155,8 +156,23 @@ const DIMMED_RATIO = 0.1 / 0.7
 // target size (or that belong to no cluster, i.e. NULL) are strongly dimmed instead
 // of hidden – so the score coloring stays visible as context. Checkbox off → no
 // filter, all hexagons colored with the configured opacity.
-const clusterOpacity = (filterOn: boolean, minArea: number, maxOpacity: number) =>
-  filterOn && minArea > 0
+// »Beste Standorte« (`topIds`, see `useSpaceFinderTopHexagons`) dims the same way, everything
+// except the ranked hexagons; its ranking already respects the target size, so it wins.
+const clusterOpacity = (
+  filterOn: boolean,
+  minArea: number,
+  maxOpacity: number,
+  topIds: string[] | null,
+) => {
+  if (topIds) {
+    return [
+      'case',
+      ['in', ['get', 'h3_id'], ['literal', topIds]],
+      maxOpacity,
+      maxOpacity * DIMMED_RATIO,
+    ]
+  }
+  return filterOn && minArea > 0
     ? [
         'case',
         ['>=', ['coalesce', ['get', 'cluster_area_m2'], 0], minArea],
@@ -164,6 +180,7 @@ const clusterOpacity = (filterOn: boolean, minArea: number, maxOpacity: number) 
         maxOpacity * DIMMED_RATIO,
       ]
     : maxOpacity
+}
 
 // Grid lines around the switch to the fine grid (FINE_HEXAGON_ZOOM) are their own line layers, so
 // they can fade independently of the colors: zooming in, the fine lines fade in before the switch
@@ -184,6 +201,7 @@ const hexagonFillLayerProps = (
   filterOn: boolean,
   minArea: number,
   opacityPct: number,
+  topIds: string[] | null,
 ) => ({
   id: spaceFinderHexagonsLayerIds[grid],
   source: spaceFinderHexagonsSourceIds[grid],
@@ -192,7 +210,12 @@ const hexagonFillLayerProps = (
   ...(grid === 'coarse' ? { maxzoom: FINE_HEXAGON_ZOOM } : { minzoom: FINE_HEXAGON_ZOOM }),
   paint: {
     'fill-color': scoreColor(property, mode) as any,
-    'fill-opacity': clusterOpacity(filterOn, minArea, (opacityPct / 100) * MAX_FILL_OPACITY) as any,
+    'fill-opacity': clusterOpacity(
+      filterOn,
+      minArea,
+      (opacityPct / 100) * MAX_FILL_OPACITY,
+      topIds,
+    ) as any,
     // The coarse grid lines come from coarseHexagonOutlineLayerId.
     'fill-outline-color': grid === 'coarse' ? 'rgba(0,0,0,0)' : HEXAGON_OUTLINE_COLOR,
   },
@@ -449,6 +472,11 @@ export const SourcesLayersSpaceFinder = () => {
     minAreaDraft,
   )
   const areaFilterOn = minArea > 0
+  const { topHexagons } = useSpaceFinderTopHexagons()
+  const topIdsByGrid = topHexagons && {
+    fine: topHexagons.map((hexagon) => hexagon.h3Id),
+    coarse: topHexagons.flatMap((hexagon) => (hexagon.coarseH3Id ? [hexagon.coarseH3Id] : [])),
+  }
   const vegetationOn = useSpaceFinderVegetationVisible()
   const vegetationAttribution = useSpaceFinderVegetationAttribution()
   const carriagewaysOn = useSpaceFinderCarriagewaysVisible()
@@ -484,6 +512,7 @@ export const SourcesLayersSpaceFinder = () => {
               areaFilterOn,
               minArea,
               hexagonsOpacityPct,
+              topIdsByGrid?.[grid] ?? null,
             )
             return (
               <Fragment key={grid}>

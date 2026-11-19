@@ -5,6 +5,7 @@ import {
   getSpaceFinderAreaFn,
   getSpaceFinderAreasFn,
   getSpaceFinderJobFn,
+  getSpaceFinderTopHexagonsFn,
   getSpaceFinderVariantFn,
 } from './space-finder.functions'
 
@@ -30,6 +31,23 @@ export const spaceFinderJobQueryOptions = (jobId: number) =>
   queryOptions({
     queryKey: ['spaceFinder', 'job', jobId] as const,
     queryFn: () => getSpaceFinderJobFn({ data: { jobId } }),
+  })
+
+/**
+ * A finished run never changes, so its ranking stays valid until the inputs change. The result
+ * carries its request: with `keepPreviousData` the shown hexagons can belong to the previous one.
+ */
+export const spaceFinderTopHexagonsQueryOptions = (
+  data: Parameters<typeof getSpaceFinderTopHexagonsFn>[0]['data'],
+) =>
+  queryOptions({
+    queryKey: ['spaceFinder', 'topHexagons', data] as const,
+    queryFn: async () => ({
+      request: data,
+      hexagons: await getSpaceFinderTopHexagonsFn({ data }),
+    }),
+    placeholderData: keepPreviousData,
+    staleTime: Number.POSITIVE_INFINITY,
   })
 
 export const adminBoundariesQueryOptions = (regionSlug: string, query: string) =>

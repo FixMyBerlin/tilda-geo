@@ -24,6 +24,10 @@ import {
   HexagonGeomInput,
 } from './queries/getSpaceFinderHexagonGeom.server'
 import { getSpaceFinderJob } from './queries/getSpaceFinderJob.server'
+import {
+  getSpaceFinderTopHexagons,
+  TopHexagonsInput,
+} from './queries/getSpaceFinderTopHexagons.server'
 import { getSpaceFinderVariant } from './queries/getSpaceFinderVariant.server'
 import { AreaIdInput, JobIdInput, RegionSlugInput, VariantIdInput } from './schemas'
 
@@ -56,6 +60,10 @@ export const getBoundaryGeomFn = createServerFn({ method: 'GET' })
 export const getSpaceFinderHexagonGeomFn = createServerFn({ method: 'GET' })
   .validator((data: z.infer<typeof HexagonGeomInput>) => HexagonGeomInput.parse(data))
   .handler(async ({ data }) => getSpaceFinderHexagonGeom(data, getRequestHeaders()))
+
+export const getSpaceFinderTopHexagonsFn = createServerFn({ method: 'GET' })
+  .validator((data: z.infer<typeof TopHexagonsInput>) => TopHexagonsInput.parse(data))
+  .handler(async ({ data }) => getSpaceFinderTopHexagons(data, getRequestHeaders()))
 
 // Mutations: Area
 

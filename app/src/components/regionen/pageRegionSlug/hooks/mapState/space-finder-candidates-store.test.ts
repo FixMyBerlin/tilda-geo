@@ -48,6 +48,13 @@ describe('space-finder-candidates-store', () => {
     expect(ids(RUN_1)).toEqual(['b'])
   })
 
+  test('addCandidates appends in order and skips hexagons already selected', () => {
+    const { toggleCandidate, addCandidates } = getSpaceFinderCandidatesSnapshot().actions
+    toggleCandidate(RUN_1, candidate('b'))
+    addCandidates(RUN_1, [candidate('a'), candidate('b'), candidate('c')])
+    expect(ids(RUN_1)).toEqual(['b', 'a', 'c'])
+  })
+
   test('setCandidateGeometry replaces only the geometry of that candidate', () => {
     const { toggleCandidate, setCandidateGeometry } = getSpaceFinderCandidatesSnapshot().actions
     toggleCandidate(RUN_1, candidate('a'))

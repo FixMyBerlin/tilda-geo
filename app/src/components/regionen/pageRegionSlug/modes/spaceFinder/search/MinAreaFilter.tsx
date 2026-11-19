@@ -118,7 +118,7 @@ const MinAreaFilterForm = ({
       {checked && (
         <>
           <label className="flex items-center justify-between gap-2 text-xs text-gray-600">
-            Mindestgröße in m²
+            in m²
             <input
               type="number"
               min={0}
