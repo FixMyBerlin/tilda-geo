@@ -4,6 +4,12 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-11
 
+### `roads`, `roadsPathClasses`, `bikeSuitability`, `bikelanes`, `bikelanes_presence`, `routing`: line direction on `oneway=-1`
+
+- Lines of a way tagged `oneway=-1` or `oneway:bicycle=-1` point in the direction of travel now, so the published `oneway=yes` holds for the line. Before, `-1` was published as `yes` while the line kept the drawing direction of the way, so it pointed against the traffic. This applies to the way's own rows: `roads`, `roadsPathClasses`, `bikeSuitability`, `bikelanes_presence` and the `bikelanes` row of the way itself. With `oneway=-1` and `oneway:bicycle=no` (e.g. a Fahrradstraße with two-way cycling) the line follows the motor vehicle direction. Lanes tagged on the road keep their rule; `todos_lines` keep the drawing direction.
+- On these reversed rows the pairs that follow the way are swapped: `*:forward`/`*:backward` (`mapillary_*`, `traffic_sign:*`, `osm_maxspeed:*`) and left/right (`bikelane_*`, `traffic_mode_*`, `separation_*`, `buffer_*`, `marking_*`, and the side hints in `description` like `TILDA_surface_right`). In Berlin this affects about 275 lines.
+- `routing` path edges are reversed on `oneway=-1` also when only motor traffic is one-way, like the other edges.
+
 ### `bikelanes`: `category`
 
 - A cycleway with the footway as its own line on its **left** (`highway=cycleway` + `traffic_mode:left=foot`, no separation on the left) is `footAndCyclewaySegregated_*` now, like `traffic_mode:right=foot` before. Ways are drawn in the riding direction, so a one-way cycleway cannot be reversed to put the footway on its right. In Berlin 16 ways change from `cycleway_*` to `footAndCyclewaySegregated_*`.
@@ -32,6 +38,7 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 - Bikelanes and sidewalks of a road with `temporary=yes` are `lifecycle=temporary` now (before only the road), like they already were for `construction`.
 - `construction:cycleway=*` without a side only makes the bikelanes `lifecycle=construction`, no longer the road.
+- `lifecycle=construction_no_access` and `lifecycle=blocked` also read `fixme`, next to `access:reason`, `description` and `note`. Mappers often keep the reason only there, e.g. `access=no` + `fixme=access=no und bicycle=no wegen Baustelle`. A restricted access tag is still required. In Berlin 8 ways change. Side keys like `cycleway:right:fixme` are not read.
 
 ### `bikelanes`, `routing`, `todos_lines`: `oneway`, `offset`
 

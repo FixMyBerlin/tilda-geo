@@ -209,6 +209,9 @@ model Region {
   welcomeImageAltText  String?
 
   categoryAssignments   RegionCategoryAssignment[]
+  /// The vector style under the TILDA data: an id from BACKGROUND_STYLES (backgroundStyles.const.ts).
+  /// `backgroundAssignments` are the raster backgrounds a user can switch on top of it.
+  backgroundStyle       String                       @default("dataviz")
   backgroundAssignments RegionBackgroundAssignment[]
   exportAssignments     RegionExportAssignment[]
   navigationLinks       RegionNavigationLink[]
@@ -439,6 +442,9 @@ model MapDatasetUpload {
   dataUpdatedNote      String? // free-text e.g. "2024-11-13" — kept separate from the row's updatedAt
   licence              String? // licence enum values as in StaticDatasets/types.ts
   licenceOsmCompatible String? // 'licence' | 'waiver' | 'no'
+  /// Style groups from `meta.ts` (`[{ id, name }]`): configs with the same `styleGroup` show as one
+  /// sidebar entry with a radio button per config. null = every config is its own entry.
+  styleGroups          Json?
   //
   regions           Region[]                  @relation("RegionToMapDatasetUpload")
   layerConfigs      MapDatasetLayerConfig[]
@@ -706,13 +712,10 @@ model QaConfig {
   // Dataset key from qaDatasets.const.ts; fixes the amount, the source tables and the tag-key catalog
   dataset String // e.g., "parking_euvm"
 
-  // Cell/area table for this config (schema-qualified, e.g. "data.euvm_qa_voronoi_2026")
+  // Cell/area table for this config (schema-qualified, e.g. "data.euvm_qa_2026_cells_innenstadt"); every cell is checked
   areaTable String
 
-  // Which cells of the area table are checked
-  areaFilter QaAreaFilter @default(all)
-
-  // Long-format reference table (schema-qualified, e.g. "data.qa_parkings_euvm_reference_2026")
+  // Long-format reference table (schema-qualified, e.g. "data.euvm_qa_2026_reference")
   referenceTable String
 
   // Indicators ([{ key: "total" or a tag key, label, thresholds }]); validated by qaIndicatorsSchema
@@ -769,15 +772,6 @@ model QaEvaluation {
 
   @@index([configId, areaId, indicatorKey, createdAt(sort: Desc), id(sort: Desc)])
   @@map("QaEvaluation")
-  @@schema("prisma")
-}
-
-enum QaAreaFilter {
-  all
-  priority
-  non_priority
-  with_reference // only cells that have an amount in the reference table
-
   @@schema("prisma")
 }
 

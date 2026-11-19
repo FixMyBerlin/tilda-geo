@@ -49,7 +49,7 @@ local SANITIZE_TAGS = {
     local name = tags.name or tags.ref or tags['is_sidepath:of:name'] or tags['street:name']
     return sanitize_string(name)
   end,
-  -- Published without the direction: `-1` (against the drawing direction) becomes `yes`.
+  -- `-1` becomes `yes`: the published line is reversed (see `roads_bikelanes/helper/line_direction.lua`).
   oneway_road = function (tags)
     local oneway = tags.oneway == '-1' and 'yes' or tags.oneway
     if oneway == 'yes' and tags.dual_carriageway == 'yes' then
@@ -57,7 +57,7 @@ local SANITIZE_TAGS = {
     end
     return sanitize_for_logging(oneway, { 'yes' }, { 'no' })
   end,
-  -- Published without the direction: `-1` (against the drawing direction) becomes `yes`.
+  -- `-1` becomes `yes`: the published line is reversed (see `roads_bikelanes/helper/line_direction.lua`).
   oneway_bicycle = function (value)
     return sanitize_for_logging(value == '-1' and 'yes' or value, { 'yes', 'no' })
   end,

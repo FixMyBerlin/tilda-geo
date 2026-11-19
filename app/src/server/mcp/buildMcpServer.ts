@@ -74,7 +74,8 @@ import { joinCommaList } from '@/shared/orderedList/commaList'
 import { offsetSearchFields } from '@/shared/pagination/offsetSearchSchema'
 
 const regionConfigDescription =
-  'the full RegionWriteInput (slug, name, fullName, product, status, mapLat/Lng/Zoom, categories, ' +
+  'the full RegionWriteInput (slug, name, fullName, product, status, mapLat/Lng/Zoom, backgroundStyle ' +
+  '(vector style under the data: "atlas" or "dataviz"), categories, ' +
   'backgroundSources, exports, navigationLinks, notes, maskOsmRelationIds, maskBufferKm, welcome ' +
   '{ enabled, title, subtitle, bodyMarkdown, image { uploadId, altText } | null, sections ' +
   '[{ title, bodyMarkdown?, sortOrder }] (max 8) }, …). When maskOsmRelationIds or maskBufferKm ' +

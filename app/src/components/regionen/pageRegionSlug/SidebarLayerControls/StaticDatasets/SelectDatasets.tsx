@@ -4,9 +4,14 @@ import { useDataParam } from '@/components/regionen/pageRegionSlug/hooks/useQuer
 import { DisclosureChevron } from '@/components/shared/DisclosureChevron/DisclosureChevron'
 import { MotionCollapse } from '@/components/shared/motion/MotionCollapse'
 import type { RegionDataset } from '@/server/uploads/queries/getUploadsForRegion.server'
-import { createSourceKeyStaticDatasets } from '../../utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { categoryHeaderTitleBoxClassName } from '../categoryHeader.const'
 import { SelectDataset } from './SelectDataset'
+import { SelectDatasetStyleGroup } from './SelectDatasetStyleGroup'
+import {
+  createStaticDatasetListItems,
+  listItemDefaultKey,
+  listItemKeys,
+} from './staticDatasetListItems'
 
 export const SelectDatasets = ({
   category,
@@ -21,16 +26,17 @@ export const SelectDatasets = ({
   const categoryTitle = first?.categoryTitle ?? category
   const categorySubtitle = first?.categorySubtitle ?? undefined
 
-  const allDatasetKeysForThisCategory = datasets.map((d) =>
-    createSourceKeyStaticDatasets(d.id, d.subId),
-  )
+  const items = createStaticDatasetListItems(datasets)
+  const allDatasetKeysForThisCategory = items.flatMap(listItemKeys)
+  const isItemActive = (item: (typeof items)[number]) =>
+    listItemKeys(item).some((key) => dataParam.includes(key))
 
-  const allCategoryDatasetsInParam =
-    allDatasetKeysForThisCategory.length > 0 &&
-    allDatasetKeysForThisCategory.every((k) => dataParam.includes(k))
+  const allCategoryDatasetsInParam = items.length > 0 && items.every(isItemActive)
 
+  // A style group turns on with its default style, unless one of its styles is on already.
   const activateAll = () => {
-    setDataParam([...new Set([...dataParam, ...allDatasetKeysForThisCategory])])
+    const missingKeys = items.filter((item) => !isItemActive(item)).map(listItemDefaultKey)
+    setDataParam([...dataParam, ...missingKeys])
   }
 
   const deactivateAll = () => {
@@ -38,7 +44,7 @@ export const SelectDatasets = ({
   }
 
   const active = dataParam.some((param) => allDatasetKeysForThisCategory.includes(param))
-  const showBulkToggle = datasets.length > 1
+  const showBulkToggle = items.length > 1
 
   return (
     <Disclosure
@@ -122,10 +128,13 @@ export const SelectDatasets = ({
                   '[&_a:hover]:underline',
                 )}
               >
-                {datasets.map((dataset) => {
-                  const key = createSourceKeyStaticDatasets(dataset.id, dataset.subId)
-                  return <SelectDataset key={key} dataset={dataset} />
-                })}
+                {items.map((item) =>
+                  item.type === 'styleGroup' ? (
+                    <SelectDatasetStyleGroup key={item.key} item={item} />
+                  ) : (
+                    <SelectDataset key={item.key} dataset={item.dataset} />
+                  ),
+                )}
               </ul>
             </DisclosurePanel>
           </MotionCollapse>

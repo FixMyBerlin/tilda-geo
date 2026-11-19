@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { categories } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/categories.const'
 import type { MapDataCategoryId } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/MapDataCategoryId'
+import { BACKGROUND_STYLE_IDS } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/backgroundStyles.const'
 import { exportConfigs } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/exports/exports.const'
 import type { ExportId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/exports/exports.const'
 import { sourcesBackgroundsRaster } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
@@ -35,6 +36,7 @@ const exportIdSet = new Set(exportConfigs.map((e) => e.id))
 const backgroundIdSet = new Set(sourcesBackgroundsRaster.map((s) => s.id))
 
 const RegionProductSchema = z.enum(RegionProduct)
+const BackgroundStyleSchema = z.enum(BACKGROUND_STYLE_IDS)
 const RegionStatusSchema = z.enum(RegionStatus)
 
 const catalogIdSchema = (label: string, allowed: Set<string>) =>
@@ -165,6 +167,7 @@ export const RegionWriteSchema = z
     mapLat: z.number(),
     mapLng: z.number(),
     mapZoom: z.number(),
+    backgroundStyle: BackgroundStyleSchema,
     logoWhiteBackgroundRequired: z.boolean(),
     headerLogoId: z.number().int().positive().nullable(),
     bbox: regionGeoJsonBBoxSchema.nullable(),
@@ -175,7 +178,7 @@ export const RegionWriteSchema = z
     navigationLinks: z.array(RegionNavigationLinkSchema),
     contractId: z.number().int().positive().nullable(),
     maskOsmRelationIds: z.array(z.number().int().positive()),
-    maskBufferKm: z.number().positive(),
+    maskBufferKm: z.number().nonnegative(),
     welcome: RegionWelcomeWriteSchema.nullable(),
   })
   .strict()
@@ -350,11 +353,11 @@ const refineMaskForm = (
       path: ['maskBufferKm'],
       message: EN_DECIMAL_HELP,
     })
-  } else if (!(Number(form.maskBufferKm) > 0)) {
+  } else if (!(Number(form.maskBufferKm) >= 0)) {
     ctx.addIssue({
       code: 'custom',
       path: ['maskBufferKm'],
-      message: 'Buffer muss größer als 0 sein.',
+      message: 'Buffer darf nicht negativ sein.',
     })
   }
 }
@@ -373,6 +376,7 @@ export const RegionFormRawSchema = z
     mapLat: enDecimalFormField,
     mapLng: enDecimalFormField,
     mapZoom: enDecimalFormField,
+    backgroundStyle: BackgroundStyleSchema,
     headerLogoId: z.string(),
     logoWhiteBackgroundRequired: trueOrFalse,
     downloadsEnabled: trueOrFalse,
@@ -516,6 +520,7 @@ export const RegionFormSchema = RegionFormRawSchema.transform((form): RegionWrit
     mapLat: Number(form.mapLat),
     mapLng: Number(form.mapLng),
     mapZoom: Number(form.mapZoom),
+    backgroundStyle: form.backgroundStyle,
     headerLogoId,
     logoWhiteBackgroundRequired: form.logoWhiteBackgroundRequired,
     bbox,
@@ -572,6 +577,7 @@ export function regionConfigToFormValues(config: RegionWriteInput) {
     mapLat: String(config.mapLat),
     mapLng: String(config.mapLng),
     mapZoom: String(config.mapZoom),
+    backgroundStyle: config.backgroundStyle,
     headerLogoId: config.headerLogoId != null ? String(config.headerLogoId) : '',
     logoWhiteBackgroundRequired: toTrueFalseString(config.logoWhiteBackgroundRequired),
     downloadsEnabled: toTrueFalseString(downloadsEnabled),

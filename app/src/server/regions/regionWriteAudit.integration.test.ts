@@ -44,6 +44,7 @@ const regionConfig = {
   mapLat: 52.5,
   mapLng: 13.4,
   mapZoom: 10,
+  backgroundStyle: 'atlas',
   logoWhiteBackgroundRequired: false,
   headerLogoId: null,
   bbox: null,

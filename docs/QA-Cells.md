@@ -32,22 +32,34 @@ grid a small geometry edit near a grid line would still move length between cell
 
 Cells are a **static, externally provided** dataset, imported via
 [`add-db-data-table`](../.agents/skills/add-db-data-table/SKILL.md) into a `data.*` table
-(today: `data.euvm_qa_voronoi_2026`, 34,655 cells for Berlin — 23,571 main + 11,084 priority).
+(today the eUVM street cells of Berlin: `data.euvm_qa_2026_cells_innenstadt` with 11,084 cells and
+`data.euvm_qa_2026_cells_aussenstadt` with 23,571, built from the cells eUVM delivered in July 2025,
+`data.euvm_qa_2025_cells`).
 Processing takes them as-is: it does not split, merge, or repair cells. If cells in parks or
 forests turn out too large for a bikelanes review, the fix is an improved input dataset from the
 provider, not SQL on our side.
 
-The cell table only needs `id` (stable text) and `geom` (valid MultiPolygon); optional `name` and
-`priority` (used by `QaConfig.areaFilter`: `all` / `priority` / `non_priority`). The fourth filter,
-`with_reference`, needs no column: it keeps the cells that have an amount in the config's reference
-table. Use it when the reference covers only part of the cell table (infraVelo bikelanes: 15,525 of
-34,655 cells). The price: something new in a cell that was empty at the freeze is not reported. Reference
+The cell table only needs `id` (stable text) and `geom` (valid MultiPolygon); `name` is optional.
+**One table per cell set**: a config checks every cell of its `areaTable`, there is no column that
+picks a subset. Two configs on different parts of a city (Innenstadt and Außenstadt, or two
+networks) get two tables. Within one table the cells must not overlap; two tables may. Reference
 **values** do not live in the cell table — they live in a separate long-format `data.*` reference
 table per config, computed at freeze time (see
 [QA-Documentation.md §6](QA-Documentation.md#6-reference-table) and the
-[freeze checklist](Parking-Client-Freeze-QA.md)). A cell table can therefore be reused across
-datasets: parking and bikelanes both use `data.euvm_qa_voronoi_2026` today, each with its own
-`referenceTable`.
+[QA-Freeze.md](QA-Freeze.md)). A cell table can therefore be reused across
+datasets. A reference table is keyed by cell id, so one reference can serve several cell
+tables with the same ids (`data.euvm_qa_2026_reference` serves Innenstadt and Außenstadt).
+The cell tables are built in the project folders, not here: eUVM parking in
+[FMC/scripts `tilda-parkraum-euvm/tilda-qa/`](https://github.com/FixMyBerlin/scripts/tree/main/tilda-parkraum-euvm/tilda-qa) (clip to Berlin, straighten the borders, one
+table each for Innenstadt and Außenstadt), infraVelo in
+[infravelo-radnetz `tilda-qa/`](https://github.com/FixMyBerlin/infravelo-radnetz/tree/main/tilda-qa). Table names follow
+`<owner>_qa_<date>_<cells|reference>[_<part>]`. See [QA-Freeze.md](QA-Freeze.md).
+
+Cells along a network: the bikelanes QA of infraVelo on the Radvorrangnetz uses
+`data.infravelo_qa_2026_cells_rvn`, one cell per network edge, the strip up to 25 m on each side,
+split between neighbouring edges by the nearest edge. Only ways along the network count, not
+parallel ways off it. A further network (REN+) or one district delivery gets its own table, e.g.
+`data.infravelo_qa_2026_12_01_cells_ren_bezirk07`.
 
 ## Self-generated cells (later)
 

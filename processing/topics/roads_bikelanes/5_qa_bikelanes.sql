@@ -6,14 +6,14 @@
 --    - Bikelanes stay on the road centerline in the DB, but the QA cells are per street side:
 --      tilda_qa_side_lines moves each line by its `offset` (+ left / - right of its own direction),
 --      for QA only, like the map style. Lines point in the riding direction
---      (bikelanes/helper/side_line_reversed.lua), so most lanes move to the right of their line.
+--      (helper/line_direction.lua), so most lanes move to the right of their line.
 --    - amount = tags.length (meters), split over the side-line parts by part length
 --    - tags as the QA compares them (tilda_qa_bikelane_tags: derived oneway values count as tagged)
 --    - osm_user / updated_at from meta (last OSM editor, for trusted editors)
 -- 2. tilda_qa_run_dataset (processing/qa/qa_functions.sql): measure, compare to the reference,
 --    write the output tables
 -- INPUT: public.bikelanes (lines in riding direction), prisma."QaConfig",
---        per config: areaTable (e.g. data.euvm_qa_voronoi_2026), referenceTable (e.g. data.qa_bikelanes_berlin_reference_2026)
+--        per config: areaTable (e.g. data.infravelo_qa_2026_cells_rvn), referenceTable (e.g. data.infravelo_qa_2026_reference_rvn)
 -- OUTPUT: per config (mapTable = public.<name>): public.<name>, public.<name>_indicators,
 --         public.<name>_last_editors
 --

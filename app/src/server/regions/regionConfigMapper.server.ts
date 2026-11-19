@@ -1,4 +1,8 @@
 import type { MapDataCategoryId } from '@/components/regionen/pageRegionSlug/mapData/mapDataCategories/MapDataCategoryId'
+import {
+  type BackgroundStyleId,
+  isBackgroundStyleId,
+} from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/backgroundStyles.const'
 import type { ExportId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/exports/exports.const'
 import type { SourcesRasterIds } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sourcesBackgroundsRaster.const'
 import type {
@@ -155,6 +159,7 @@ export type TRegion = {
   showSearch?: boolean
   mask: { osmRelationIds: number[]; bufferKm: number } | null
   map: { lat: number; lng: number; zoom: number }
+  backgroundStyle: BackgroundStyleId
   logoWhiteBackgroundRequired: boolean
   logoPath: string | null
   navigationLinks?: RegionNavigationLink[]
@@ -201,6 +206,10 @@ function regionRowToWelcomeWriteInput(region: RegionWithRelations) {
   }
 }
 
+// A style removed from the code falls back to the one every region had before styles existed.
+const toBackgroundStyleId = (value: string): BackgroundStyleId =>
+  isBackgroundStyleId(value) ? value : 'atlas'
+
 export function regionRowToWriteInput(region: RegionWithRelations) {
   // Drop DB-only / relation payloads; `regionInclude` already orders assignment/link rows.
   const {
@@ -230,6 +239,7 @@ export function regionRowToWriteInput(region: RegionWithRelations) {
 
   return {
     ...scalars,
+    backgroundStyle: toBackgroundStyleId(scalars.backgroundStyle),
     bbox: parseRegionGeoJsonBBox(bbox),
     cacheWarming: cacheWarmingToWriteInput(cacheWarming),
     // Copy so write-input and client `mask.osmRelationIds` do not share one array reference
@@ -312,6 +322,7 @@ export function regionRowToClient(region: RegionWithRelations) {
   const base = {
     ...scalars,
     showSearch: scalars.showSearch || undefined,
+    backgroundStyle: toBackgroundStyleId(scalars.backgroundStyle),
     mask:
       maskOsmRelationIds.length > 0
         ? { osmRelationIds: [...maskOsmRelationIds], bufferKm: maskBufferKm }

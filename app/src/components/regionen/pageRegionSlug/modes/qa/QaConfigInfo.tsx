@@ -5,7 +5,7 @@ import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
 import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
 import { Tooltip } from '@/components/shared/Tooltip/Tooltip'
 import { formatNumber, formatPercentage } from '@/components/shared/utils/formatNumber'
-import { qaAreaFilterLabels, qaDatasets } from '@/server/qa-configs/qaDatasets.const'
+import { qaDatasets } from '@/server/qa-configs/qaDatasets.const'
 import type { getQaConfigsForRegion } from '@/server/qa-configs/queries/getQaConfigsForRegion.server'
 import { modePanelHeaderIconButtonClassName } from '../modePanel.const'
 import { QA_SYSTEM_STATUS_COLORS } from './detail/qaConfigs'
@@ -33,7 +33,6 @@ export const QaConfigInfo = ({ config }: Props) => {
   const rows = [
     ['Datensatz', dataset.label],
     ['Status', config.isActive ? 'Aktiv' : 'Inaktiv'],
-    ['Flächen', qaAreaFilterLabels[config.areaFilter]],
     ['Referenz vom', formatDate(config.referenceFrozenAt)],
     [
       'Vertrauensliste',

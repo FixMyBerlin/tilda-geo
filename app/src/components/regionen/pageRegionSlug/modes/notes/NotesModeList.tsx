@@ -18,12 +18,13 @@ import {
 } from '../modePanel.const'
 import { ModePanelEmpty } from '../ModePanelEmpty'
 import { ModeCommentsPill } from '../ModePanelPill'
-import { useMapExtentFilter, type ModeListExtent } from '../useMapExtentFilter'
+import type { ModeListExtent } from '../useMapExtentFilter'
 import { notesListItemId } from './notesListHoverId'
 import type { NotesModeListEntry } from './notesModeListEntry'
 import type { NotesSelection } from './notesSelection'
 import { NotesOpenClosedIcon } from './notesStatusBadge'
 import { OsmNotesLimitNotice } from './OsmNotesLimitNotice'
+import { useVisibleNotesEntries } from './useVisibleNotesEntries'
 
 const NOTES_TABLE_COLUMNS = [
   { id: 'title', label: 'Titel', className: 'w-[28%]' },
@@ -60,8 +61,7 @@ export const NotesModeList = ({
 }: Props) => {
   const { mainMap } = useMap()
   const { featuresParam, setFeaturesParam } = useFeaturesParam()
-  const passesExtent = useMapExtentFilter(showingOsm ? 'all' : (extent ?? 'view'))
-  const visibleEntries = entries.filter((entry) => passesExtent(entry.coordinates))
+  const visibleEntries = useVisibleNotesEntries(entries, showingOsm, extent)
 
   const activeIds = new Set(
     (featuresParam ?? []).map((feature) => `${feature.sourceId}-${feature.id}`),

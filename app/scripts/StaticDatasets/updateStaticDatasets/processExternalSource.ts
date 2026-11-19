@@ -21,6 +21,7 @@ export async function processExternalSource(
     isPublic: metaData.public,
     hideDownloadLink: metaData.hideDownloadLink ?? false,
     configs: metaData.configs,
+    styleGroups: metaData.styleGroups ?? null,
     mapRenderFormat,
     mapRenderUrl: getStaticDatasetUrlForEnvironment(uploadSlug, mapRenderFormat, appEnv),
     pmtilesUrl:

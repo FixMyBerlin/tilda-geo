@@ -64,7 +64,7 @@ Die zugehörigen Legenden-Artefakte:
 
 ## 3. Datenquelle: `parking_public.gpkg`
 
-Die Geodaten stammen aus dem Geschwister-Repo `scripts/tilda-parkraum-euvm-export` (neben `tilda-geo`). Das Skript `process.py` erzeugt **eine** Datei `output/parking_public.gpkg` mit **drei Layern**:
+Die Geodaten stammen aus dem Geschwister-Repo `scripts/tilda-parkraum-euvm` (neben `tilda-geo`). Das Skript `process.py` erzeugt **eine** Datei `output/parking_public.gpkg` mit **drei Layern**:
 
 | GPKG-Layer                  | Geometrie       | Inhalt                                                                    |
 | --------------------------- | --------------- | ------------------------------------------------------------------------- |

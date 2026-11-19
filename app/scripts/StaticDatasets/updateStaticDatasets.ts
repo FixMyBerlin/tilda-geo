@@ -7,6 +7,7 @@ import { parse } from 'parse-gitignore'
 import slugify from 'slugify'
 import { type AppInstance, appInstanceNames } from '@/components/shared/utils/appInstances.const'
 import { S3_UPLOAD_FOLDER_BY_APP_ENV } from '@/server/s3UploadEnvFolder.const'
+import { styleGroupProblems } from '@/server/uploads/mapDatasetUploadStyleGroups'
 import { getValidatedEnv, staticDatasetsS3CredentialsSchema } from '../shared/env'
 import { getRegions } from './api'
 import {
@@ -176,6 +177,14 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
           )
         }
       }
+    }
+
+    const styleGroupErrors = styleGroupProblems(
+      'styleGroups' in metaData ? metaData.styleGroups : undefined,
+      metaData.configs,
+    )
+    if (styleGroupErrors.length) {
+      throw new Error(`Invalid styleGroups in meta.ts:\n    ${styleGroupErrors.join('\n    ')}`)
     }
 
     // Route to appropriate processor based on data source type

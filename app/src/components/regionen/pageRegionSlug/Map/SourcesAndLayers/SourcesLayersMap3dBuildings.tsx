@@ -1,6 +1,8 @@
 import { useEffect, useState } from 'react'
 import { Layer } from 'react-map-gl/maplibre'
 import { useBg3dParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useBg3dParam'
+import { BACKGROUND_STYLES } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/backgroundStyles.const'
+import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 
 /**
  * Extruded buildings for `is3dActive`.
@@ -17,6 +19,7 @@ const MAP3D_BUILDINGS_LAYER_ID = 'tilda-3d-buildings'
 
 export const SourcesLayersMap3dBuildings = () => {
   const { is3dActive } = useBg3dParam()
+  const { source, buildingHeight } = BACKGROUND_STYLES[useRegion().backgroundStyle]
   const [renderLayer, setRenderLayer] = useState(is3dActive)
   const [buildingsOpaque, setBuildingsOpaque] = useState(false)
 
@@ -47,14 +50,14 @@ export const SourcesLayersMap3dBuildings = () => {
     <Layer
       id={MAP3D_BUILDINGS_LAYER_ID}
       type="fill-extrusion"
-      source="openmaptiles"
+      source={source}
       source-layer="building"
       minzoom={15}
       beforeId="atlas-app-beforeid-below-roadname"
       paint={{
         'fill-extrusion-color': '#d4d4d8',
-        'fill-extrusion-height': ['coalesce', ['get', 'render_height'], 0],
-        'fill-extrusion-base': ['coalesce', ['get', 'render_min_height'], 0],
+        'fill-extrusion-height': ['coalesce', ['get', buildingHeight.height], 0],
+        'fill-extrusion-base': ['coalesce', ['get', buildingHeight.minHeight], 0],
         'fill-extrusion-opacity': buildingsOpaque ? 0.75 : 0,
         'fill-extrusion-opacity-transition': {
           duration: 450,

@@ -18,10 +18,10 @@ The icons that layers use as `icon-image`, `fill-pattern` and `line-pattern`.
 - The `width` and `height` of the `<svg>` are the size of the icon on the map in pixels.
   Patterns repeat, so draw them to continue over the edges.
 - Ids are kebab-case. Repeating patterns (`fill-pattern`, `line-pattern`) start with `pattern-`.
-- `circle-11` keeps its name because the Maptiler base style uses it.
+- `circle-11` keeps its name because the Atlas base style uses it.
 - Static datasets in [tilda-static-data](https://github.com/FixMyBerlin/tilda-static-data) use the ids as well,
   and the app does not know about those uses. When you rename an icon, rename it there too and re-upload those datasets.
-- A test checks that every icon the category layers, the notes and debug layers and the base style use exists in the sprite.
+- A test checks that every icon the category layers, the notes and debug layers and the base styles use exists in the sprite.
 
 ### Sources
 

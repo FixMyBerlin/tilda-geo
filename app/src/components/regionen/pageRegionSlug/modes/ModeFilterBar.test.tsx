@@ -4,6 +4,7 @@ import { beforeEach, describe, expect, test, vi } from 'vitest'
 import { DEFAULT_REVIEW_LIST_STATUS_STYLES } from '@/shared/reviewLists/reviewListStatusStyles'
 import { ModeFilterBar } from './ModeFilterBar'
 import { ModeFilterSelect, modeFilterIcons } from './ModeFilterSelect'
+import { ModeListCount } from './ModeListCount'
 import { NotesModeFilterBar } from './notes/NotesModeFilterBar'
 import {
   NOTES_COMMENTED_FILTER_OPTIONS,
@@ -200,5 +201,24 @@ describe('ModeFilterBar', () => {
     rerender(<NotesModeFilterBar {...shared} showReactionFilter={false} showExtentFilter={false} />)
     expect(screen.queryByRole('button', { name: /Ausschnitt/ })).toBeNull()
     expect(screen.queryByRole('button', { name: /Reaktion/ })).toBeNull()
+  })
+
+  test('shows the list count at the end of the filter row', () => {
+    const { rerender } = render(
+      <ModeFilterBar
+        search=""
+        onSearchChange={vi.fn()}
+        countLabel={
+          <ModeListCount
+            count={{ status: 'counted', shown: 23 }}
+            nouns={{ singular: 'Eintrag', plural: 'Einträge', pluralDative: 'Einträgen' }}
+          />
+        }
+      />,
+    )
+    expect(screen.getByTestId('mode-list-count').textContent).toBe('23 Einträge')
+
+    rerender(<ModeFilterBar search="" onSearchChange={vi.fn()} />)
+    expect(screen.queryByTestId('mode-list-count')).toBeNull()
   })
 })

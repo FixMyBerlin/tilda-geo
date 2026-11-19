@@ -23,7 +23,7 @@ export type ParkingPublicGpkgProfileOptions = {
 }
 
 /**
- * Styles aligned with `scripts/tilda-parkraum-euvm-export` → `output/parking_public.gpkg`.
+ * Styles aligned with `scripts/tilda-parkraum-euvm` → `output/parking_public.gpkg`.
  *
  * Masterportal: import the bundled JSON once into global `style.json`, then reference
  * each `styleId` from one WFS/GeoJSON layer per GPKG layer in `config.json`.

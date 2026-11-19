@@ -1,29 +1,39 @@
 import { styleText } from 'node:util'
 import {
-  BASE_STYLE_PATH,
+  BACKGROUND_STYLE_IDS,
+  maptilerEditorUrl,
+} from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/backgroundStyles.const'
+import {
+  anchorLayerProblems,
+  baseStylePath,
   fetchBaseStyle,
   isSameStyle,
-  missingAnchorLayers,
   readLocalBaseStyle,
 } from './baseStyle'
 
-const remoteStyle = await fetchBaseStyle()
+let failed = false
+for (const id of BACKGROUND_STYLE_IDS) {
+  const remoteStyle = await fetchBaseStyle(id)
 
-const missing = missingAnchorLayers(remoteStyle)
-if (missing.length) {
-  console.error(
-    styleText('red', 'The Maptiler style lacks layers that our layers are placed below:'),
-    missing.join(', '),
-  )
-  console.error('Nothing was written. Add them in Maptiler or change `LAYER_POSITIONS`.')
-  process.exit(1)
+  const problem = anchorLayerProblems(remoteStyle)
+  if (problem) {
+    console.error(styleText('red', `${id}: the layers our layers are placed below are ${problem}`))
+    console.error(
+      `Not written. Fix the style in ${maptilerEditorUrl(id)} or its \`anchorsBefore\` in backgroundStyles.const.ts.`,
+    )
+    failed = true
+    continue
+  }
+
+  const localStyle = await readLocalBaseStyle(id).catch(() => null)
+  if (localStyle && isSameStyle(remoteStyle, localStyle)) {
+    console.log(`${id}: up to date.`)
+    continue
+  }
+
+  await Bun.write(baseStylePath(id), `${JSON.stringify(remoteStyle, null, 2)}\n`)
+  console.log(styleText('green', 'Updated'), baseStylePath(id))
 }
 
-if (isSameStyle(remoteStyle, await readLocalBaseStyle())) {
-  console.log('The base style is up to date.')
-  process.exit(0)
-}
-
-await Bun.write(BASE_STYLE_PATH, `${JSON.stringify(remoteStyle, null, 2)}\n`)
-console.log(styleText('green', 'Updated'), BASE_STYLE_PATH)
+if (failed) process.exit(1)
 console.log('Check the diff, then commit.')

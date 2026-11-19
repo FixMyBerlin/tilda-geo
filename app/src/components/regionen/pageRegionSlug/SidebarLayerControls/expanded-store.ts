@@ -2,10 +2,10 @@ import { create } from 'zustand'
 import { createJSONStorage, persist } from 'zustand/middleware'
 
 /**
- * Which long legends (>3 items) the user has expanded in this browser tab.
- * Session-only (sessionStorage), not URL — defaults to collapsed.
+ * Which sidebar disclosures (long legends, static dataset info rows) the user has expanded in
+ * this browser tab. Session-only (sessionStorage), not URL — defaults to collapsed.
  */
-type LegendExpandedStore = {
+type ExpandedStore = {
   expandedKeys: Record<string, true>
   actions: {
     expand: (key: string) => void
@@ -13,7 +13,7 @@ type LegendExpandedStore = {
   }
 }
 
-const useLegendExpandedStore = create<LegendExpandedStore>()(
+const useExpandedStore = create<ExpandedStore>()(
   persist(
     (set) => ({
       expandedKeys: {},
@@ -33,7 +33,7 @@ const useLegendExpandedStore = create<LegendExpandedStore>()(
       },
     }),
     {
-      name: 'fmc-legend-expanded',
+      name: 'fmc-sidebar-expanded',
       storage: createJSONStorage(() => {
         if (typeof window === 'undefined') {
           return {
@@ -49,7 +49,7 @@ const useLegendExpandedStore = create<LegendExpandedStore>()(
   ),
 )
 
-export const useLegendExpanded = (key: string) =>
-  useLegendExpandedStore((state) => Boolean(state.expandedKeys[key]))
+export const useExpanded = (key: string) =>
+  useExpandedStore((state) => Boolean(state.expandedKeys[key]))
 
-export const useLegendExpandedActions = () => useLegendExpandedStore((state) => state.actions)
+export const useExpandedActions = () => useExpandedStore((state) => state.actions)

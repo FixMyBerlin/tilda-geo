@@ -51,7 +51,7 @@ export const useNotesModeListData = () => {
       !isComposing &&
       selectedFolderId !== undefined,
   })
-  const { isError: isOsmError } = useOsmNotesQuery()
+  const { isLoading: isOsmLoading, isError: isOsmError } = useOsmNotesQuery()
   const osmCollection = useFilteredOsmNotes(serverFilter)
   const { data: regionMembers } = useQuery({
     ...regionMemberOsmNamesQueryOptions(region.slug),
@@ -79,6 +79,7 @@ export const useNotesModeListData = () => {
     authorOptions,
     isInternalLoading,
     isInternalError,
+    isOsmLoading,
     isOsmError,
     hasNewNoteDraft,
     showInternalAuthCallout: lacksInternalAccess,

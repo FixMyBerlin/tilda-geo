@@ -25,11 +25,11 @@ describe('pickFolderSourceFile', () => {
   it('accepts a .sql source file', () => {
     expect(
       pickFolderSourceFile({
-        table: 'euvm_qa_voronoi_2026',
-        specFile: 'euvm_qa_voronoi_2026.sql',
-        files: ['euvm_qa_voronoi_2026.sql', 'spec.yaml'],
+        table: 'euvm_qa_2026_cells_aussenstadt',
+        specFile: 'euvm_qa_2026_cells_aussenstadt.sql',
+        files: ['euvm_qa_2026_cells_aussenstadt.sql', 'spec.yaml'],
       }),
-    ).toBe('euvm_qa_voronoi_2026.sql')
+    ).toBe('euvm_qa_2026_cells_aussenstadt.sql')
   })
 
   it('ignores spec.yaml and other non-source files', () => {

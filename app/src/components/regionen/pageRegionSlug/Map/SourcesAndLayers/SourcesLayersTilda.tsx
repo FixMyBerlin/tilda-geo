@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { Fragment } from 'react'
-import { Layer, Source } from 'react-map-gl/maplibre'
+import { Source } from 'react-map-gl/maplibre'
 import {
   useMapDebugDebugLayerStyles,
   useMapDebugUseDebugCachelessTiles,
@@ -14,7 +14,7 @@ import { createSourceKeyTilda } from '@/components/regionen/pageRegionSlug/utils
 import { getCachelessTilesUrl } from '@/components/shared/utils/getCachelessTilesUrl'
 import { mapLayerOrderQueryOptions } from '@/server/map-layer-order/mapLayerOrderQueryOptions'
 import { LayersRouteRelationHighlight } from '../../routeRelations/LayersRouteRelationHighlight'
-import { LayerHighlight } from './LayerHighlight'
+import { LayersWithHighlights } from './LayersWithHighlights'
 import { buildTildaLayerEntries } from './sortLayers/buildTildaLayerEntries'
 
 // We add source+layer map-components for all categories and all subcategories of the given config.
@@ -96,13 +96,7 @@ export const LayersTilda = () => {
 
   return (
     <>
-      {layerEntries.map(({ layerId, layerProps }) => (
-        <Layer key={layerId} {...layerProps} />
-      ))}
-      {/* All highlights mount after all layers: a highlight is never covered by another layer with the same beforeId. */}
-      {layerEntries.map(({ highlightLayerId, layerProps }) => (
-        <LayerHighlight key={highlightLayerId} {...layerProps} id={highlightLayerId} />
-      ))}
+      <LayersWithHighlights entries={layerEntries} />
       <LayersRouteRelationHighlight layerEntries={layerEntries} />
     </>
   )

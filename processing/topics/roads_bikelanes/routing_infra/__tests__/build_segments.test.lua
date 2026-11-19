@@ -336,7 +336,7 @@ describe('build_segments join keys', function()
       object_tags = { highway = 'cycleway', oneway = '-1', _id = 24, _type = 'way' },
       object_geom = way_geom,
       cycleways = {
-        { _id = 'way/24', _side = 'self', _infrastructureExists = true, category = 'cycleway_isolated', oneway = 'yes' },
+        { _id = 'way/24', _side = 'self', _infrastructureExists = true, category = 'cycleway_isolated', oneway = 'yes', _line_reversed = true },
       },
       shared_result_tags = { road = 'cycleway' },
     })

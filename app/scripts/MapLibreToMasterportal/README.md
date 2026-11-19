@@ -42,4 +42,4 @@ Layer files:
 
 `app/src/components/regionen/pageRegionSlug/mapData/mapDataSubcategories/layers/`
 
-GPKG data model: `scripts/tilda-parkraum-euvm-export` → `parking_public.gpkg`
+GPKG data model: `scripts/tilda-parkraum-euvm` → `parking_public.gpkg`

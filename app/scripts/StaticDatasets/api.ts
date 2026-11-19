@@ -1,4 +1,5 @@
 import type { Prisma } from '@/prisma/generated/client'
+import type { StaticDatasetStyleGroup } from './types'
 import { red } from './utils/log'
 
 export type StaticDatasetsApiConfig = {
@@ -34,6 +35,7 @@ type UploadData = {
   hideDownloadLink: boolean
 
   configs: Record<string, unknown>[]
+  styleGroups: StaticDatasetStyleGroup[] | null
   systemLayer: boolean
 } & Pick<
   Prisma.MapDatasetUploadCreateInput,

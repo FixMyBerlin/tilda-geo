@@ -3,7 +3,13 @@ import { AdminTableExternalLink } from '@/components/admin/AdminTableActions'
 import { AdminFormSection } from '@/components/admin/aside/AdminFormSection'
 import { createSourceKeyStaticDatasets } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 
-type LayerConfig = { id: number; name: string; subId: string | null; categoryKey: string | null }
+type LayerConfig = {
+  id: number
+  name: string
+  subId: string | null
+  categoryKey: string | null
+  styleGroupName: string | null
+}
 type Region = { id: number; slug: string }
 
 type Props = {
@@ -23,7 +29,7 @@ export const MapDatasetUploadLayersSection = ({
   regions,
 }: Props) => (
   <AdminFormSection id={id} title={title}>
-    <AdminTable header={['Ansicht', 'Kategorie', 'In Region öffnen']}>
+    <AdminTable header={['Ansicht', 'Stilgruppe', 'Kategorie', 'In Region öffnen']}>
       {layerConfigs.map((layerConfig) => {
         const sourceKey = createSourceKeyStaticDatasets(uploadSlug, layerConfig.subId ?? undefined)
         return (
@@ -31,6 +37,7 @@ export const MapDatasetUploadLayersSection = ({
             <th scope="row" className={adminTableClasses.thRow}>
               {layerConfig.name}
             </th>
+            <td className={adminTableClasses.td}>{layerConfig.styleGroupName ?? '—'}</td>
             <td className={adminTableClasses.td}>
               {layerConfig.categoryKey ? (
                 <code className="text-xs text-gray-700">{layerConfig.categoryKey}</code>

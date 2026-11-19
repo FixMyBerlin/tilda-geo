@@ -41,6 +41,7 @@ import { OsmNotesNewForm } from './new/OsmNotesNewForm'
 import { NoteFolderManageMenu, NoteFolderSelect } from './NoteFolderSelect'
 import { NotesModeFilterBar } from './NotesModeFilterBar'
 import { NotesModeList } from './NotesModeList'
+import { NotesModeListCount } from './NotesModeListCount'
 import {
   compactNotesModeParam,
   notesOsmCollectionKey,
@@ -273,6 +274,7 @@ export const PageModeNotes = () => {
             showReactionFilter={capabilities.showReactionFilter}
             showExtentFilter={capabilities.showExtentFilter}
             authorOptions={authorOptions}
+            countLabel={<NotesModeListCount />}
           />
         )
       }

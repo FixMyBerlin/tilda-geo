@@ -46,7 +46,7 @@ Masterportal nutzt **eine** globale \`style.json\` (Array aller Style-Definition
 
 | Datei | Ziel |
 |-------|------|
-| \`parking_public.gpkg.styles.json\` | **Empfohlen für EUVM-GPKG** (\`scripts/tilda-parkraum-euvm-export\`) — 3 Layer, \`styleId\` = GPKG-Layername |
+| \`parking_public.gpkg.styles.json\` | **Empfohlen für EUVM-GPKG** (\`scripts/tilda-parkraum-euvm\`) — 3 Layer, \`styleId\` = GPKG-Layername |
 | \`parkbeschraenkungen.json\` | Volle Tile-Karte (7 Styles) — nur für tilda-geo-Vektorkacheln / Preview |
 | \`parkbeschraenkungen-legend.json\` | Legende Tile-Profil |
 | \`parking_public.gpkg.legend.json\` | Legende GPKG-Profil |

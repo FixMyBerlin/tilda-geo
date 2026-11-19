@@ -51,6 +51,12 @@ export type StaticDatasetLayer = MapDataDatasetsSourceBase['layers'][number]
 type MapDataDatasetsSource = MapDataDatasetsSourceBase & {
   /** @desc MapDatasetCategory.key for the region sidebar; labels and order live in DB. */
   categoryKey: string | null
+  /**
+   * @desc `id` of an entry in `styleGroups` at the meta.ts root. Configs of one group show as one
+   * sidebar entry with a radio button per config (label: `name`; first config = default).
+   * Omit to show the config as its own entry.
+   */
+  styleGroup?: string
   description?: string
   osmIdConfig?: MapDataOsmIdConfig
   inspector:
@@ -75,6 +81,15 @@ type MapDataDatasetsSourceSystemLayer = MapDataDatasetsSourceBase & {
   categoryKey: undefined
   description?: undefined
   legends?: undefined
+  styleGroup?: undefined
+}
+
+/** @desc One sidebar entry that bundles several configs (styles) of the same dataset file */
+export type StaticDatasetStyleGroup = {
+  /** @desc Speaking slug, e.g. `datensatz-b`; referenced by `configs[].styleGroup` */
+  id: string
+  /** @desc Title of the sidebar entry */
+  name: string
 }
 
 export type MapDataSourceExternalRenderFormat = 'pmtiles' | 'geojson'
@@ -124,6 +139,8 @@ export type MetaDataUser = MetaDataFileLevelMetadata &
         mapRenderFormat?: 'pmtiles' | 'geojson' | 'auto'
         /** @desc Configuration for user-selectable datasets */
         configs: MapDataDatasetsSource[]
+        /** @desc Groups that `configs[].styleGroup` refers to; one sidebar entry per group */
+        styleGroups?: StaticDatasetStyleGroup[]
       }
     | {
         regions: string[]
@@ -142,6 +159,8 @@ export type MetaDataUser = MetaDataFileLevelMetadata &
         mapRenderFormat: MapDataSourceExternalRenderFormat
         /** @desc Configuration for user-selectable datasets. External sources cannot be system layers. */
         configs: MapDataDatasetsSource[]
+        /** @desc Groups that `configs[].styleGroup` refers to; one sidebar entry per group */
+        styleGroups?: StaticDatasetStyleGroup[]
       }
   )
 

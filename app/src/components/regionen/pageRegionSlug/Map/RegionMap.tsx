@@ -38,7 +38,7 @@ import {
   exposeMainMapForDebugging,
   firePlaywrightMapLoadedEvent,
 } from '@/components/shared/utils/playwright'
-import { MAP_STYLE_URL } from '@/server/api/map-style/mapStyleUrl.const'
+import { mapStyleUrl } from '@/server/api/map-style/mapStyleUrl.const'
 import { SIMPLIFY_MIN_ZOOM } from '@/server/instrumentation/generalization.const'
 import { CalculatorMap } from '../modes/calculator/CalculatorMap'
 import { useCalculatorDraw } from '../modes/calculator/drawing/useCalculatorDraw'
@@ -346,7 +346,7 @@ export const RegionMap = () => {
       {...mapMaxBoundsSettings}
       // hash // we cannot use the hash prop because it interfiers with our URL based states; we recreate the same behavior manually
       style={{ width: '100%', height: '100%' }}
-      mapStyle={MAP_STYLE_URL}
+      mapStyle={mapStyleUrl(region.backgroundStyle)}
       interactiveLayerIds={interactiveLayerIds}
       // onMouseMove={}
       // onLoad={handleInspect}

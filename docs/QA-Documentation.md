@@ -13,7 +13,7 @@
 - [7. Nightly update job](#7-nightly-update-job)
 - [Cells](QA-Cells.md)
 - [Map status payload, caching and options](QA-Map-Status-Payload.md)
-- [Parking client freeze + QA](Parking-Client-Freeze-QA.md)
+- [Freeze a QA view](QA-Freeze.md)
 
 ## Overview
 
@@ -37,7 +37,7 @@ this repository — nothing in TILDA merges them. Consequences:
   mixed-traffic street with no separate bikelane) is invisible to QA unless a second `QaConfig` on
   `roads` is added (same generic SQL, other indicators). This has not been decided yet.
 - The reference for the bikelanes config is TILDA `bikelanes` at delivery date
-  (`data.qa_bikelanes_berlin_reference_<year>`, [freeze checklist](Parking-Client-Freeze-QA.md)).
+  (`data.infravelo_qa_<date>_reference_<part>`, [QA-Freeze.md](QA-Freeze.md)).
   The merged customer file is not a valid reference.
 - Indicator keys are TILDA tag names (`category`, `oneway`, …), not the customer schema.
 
@@ -197,23 +197,23 @@ Built by `tilda_qa_finalize` and driven per dataset by `tilda_qa_run_dataset`
 ([Measure.md](Measure.md)): the public parking lines and lots with their `capacity`, the bikelanes
 with their `length`. Bikelane geometry stays on the road centerline in the database, but the cells
 are per street side, so for QA the lines are moved by their `offset` (`+` left / `-` right of the
-line, like the map style; see `bikelanes/helper/side_line_reversed.lua` for the line direction).
+line, like the map style; see `processing/topics/roads_bikelanes/helper/line_direction.lua` for the line direction).
 
 The map shows the cell geometry the measure uses. The borders of the cells are straightened once,
-in the cell table itself ([freeze checklist](Parking-Client-Freeze-QA.md), step 2).
+in the cell table itself, when it is built ([QA-Freeze.md](QA-Freeze.md)).
 
 ## 6. Reference table
 
 Each config points at a `referenceTable` (`data.*`): `area_id, indicator_key, value_key, amount`,
 one row per cell, indicator and class (`value_key = '__total__'` for the `total`). It is written
 once, at freeze time, by `tilda_qa_write_reference(dataset, config_id, target_table)` — see the
-[freeze checklist](Parking-Client-Freeze-QA.md). An indicator added later has no reference rows
+[QA-Freeze.md](QA-Freeze.md). An indicator added later has no reference rows
 until the next freeze and is left out until then — comparing it against 0 would rate every cell
 PROBLEMATIC; the nightly logs it as missing. A missing table (CI, fresh DB) leaves out all
 indicators.
 
-The **cell table** (`areaTable`, also `data.*`) has `id`, `geom` and optionally `priority` for
-`areaFilter`; see [QA-Cells.md](QA-Cells.md).
+The **cell table** (`areaTable`, also `data.*`) has `id`, `geom` and optionally `name`. A config
+checks all of its cells; see [QA-Cells.md](QA-Cells.md).
 
 ## 7. Nightly update job
 

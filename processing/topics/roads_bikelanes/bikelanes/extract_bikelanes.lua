@@ -8,7 +8,7 @@ local derive_smoothness = require('topics.helper.derive_smoothness')
 local bikelane_todo_categories = require('topics.roads_bikelanes.bikelanes.bikelane_todo_categories')
 local collect_todos = require('topics.helper.collect_todos')
 local derive_oneway = require('topics.roads_bikelanes.bikelanes.derive_oneway')
-local side_line_reversed = require('topics.roads_bikelanes.bikelanes.helper.side_line_reversed')
+local LINE_DIRECTION = require('topics.roads_bikelanes.helper.line_direction')
 local default_id = require('topics.helper.default_id')
 local derive_traffic_signs = require('topics.helper.derive_traffic_signs')
 local to_markdown_list = require('topics.helper.to_markdown_list')
@@ -133,20 +133,20 @@ local function bikelanes(object_tags, object_geom)
         merge_table(result_tags, derive_bikelane_surface(surface_tags, category))
         merge_table(result_tags, derive_bikelane_smoothness(surface_tags, category))
         result_tags.surface_source = SURFACE_TAGS.source(surface_tags, result_tags.surface_source)
-        result_tags.description = DESC.build(
-          transformed_tags,
-          SURFACE_TAGS.hints(transformed_tags, category, result_tags.surface_source)
-        )
-
+        -- The line points in the riding direction.
+        local line_reversed = LINE_DIRECTION.bikelane_reversed(transformed_tags)
+        result_tags._line_reversed = line_reversed
+        local surface_hints = SURFACE_TAGS.hints(transformed_tags, category, result_tags.surface_source)
+        if line_reversed and transformed_tags._side == 'self' then
+          surface_hints = DESC.swap_side_tokens(surface_hints)
+        end
+        result_tags.description = DESC.build(transformed_tags, surface_hints)
         if transformed_tags._side ~= 'self' then
           result_tags._id = default_id({ type = object_tags._type, id = object_tags._id }) .. '/' .. transformed_tags._prefix .. '/' .. transformed_tags._side
           result_tags.parent_road = transformed_tags.parent_road
           -- object_tags is the parent centerline; maxspeed() reads exactly the tags the old
           -- synthetic-table rebuild copied (maxspeed*/zone:maxspeed/source:maxspeed + highway).
           result_tags.parent_maxspeed = maxspeed(object_tags).maxspeed
-          -- The line points in the riding direction, see `side_line_reversed`.
-          local line_reversed = side_line_reversed(transformed_tags)
-          result_tags._line_reversed = line_reversed
           -- Recommended sideways offset in meters, signed relative to the published line
           -- (+ left / - right of its direction). The geometry itself stays on the road
           -- centerline; this value is exported as the `offset` attribute and consumed purely

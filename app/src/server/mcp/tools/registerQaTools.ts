@@ -31,8 +31,8 @@ const configFieldsDescription =
   'The fields are the values of the admin form (/admin/qa-configs), validated the same way: ' +
   'regionId (see qa_configs_list or regions_get), slug, label, isActive "true"|"false", ' +
   'dataset parking_euvm|bikelanes, mapTable "public.<name>" (written by processing), areaTable ' +
-  'and referenceTable "data.<name>" (areaTable must exist), areaFilter ' +
-  'all|priority|non_priority|with_reference, referenceFrozenAt "YYYY-MM-DD", trustedOsmUsernames ' +
+  'and referenceTable "data.<name>" (areaTable must exist; every cell of it is checked), ' +
+  'referenceFrozenAt "YYYY-MM-DD", trustedOsmUsernames ' +
   '(one OSM name per line), mapAttribution (optional) and indicators [{ key, label, ' +
   'goodThreshold, needsReviewThreshold, absoluteDifferenceThreshold }] with the thresholds as ' +
   'text, the first two in percent ("10" = 10 %). key is "total" or an attribute of the dataset. ' +

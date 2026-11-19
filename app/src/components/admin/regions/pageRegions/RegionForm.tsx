@@ -9,6 +9,12 @@ import { RegionMaskOsmRelationIdsField } from '@/components/admin/regions/pageRe
 import { RegionNavigationLinksEditor } from '@/components/admin/regions/pageRegions/RegionNavigationLinksEditor'
 import { RegionWelcomeEditor } from '@/components/admin/regions/pageRegions/RegionWelcomeEditor'
 import {
+  BACKGROUND_STYLE_IDS,
+  BACKGROUND_STYLES,
+  type BackgroundStyleId,
+  DEFAULT_BACKGROUND_STYLE_ID,
+} from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/backgroundStyles.const'
+import {
   regionPromotedFormRadioItems,
   regionStatusFormRadioItems,
 } from '@/components/regionen/regionMeta/regionFormRadioItems'
@@ -21,6 +27,7 @@ import { choiceOptionListClassName } from '@/components/shared/form/fields/share
 import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form, type SubmitResult } from '@/components/shared/form/Form'
 import { Link } from '@/components/shared/links/Link'
+import { Markdown } from '@/components/shared/text/Markdown'
 import { regionProductFormItems } from '@/data/tildaProductNames.const'
 import { RegionContractStatus, RegionProduct, RegionStatus } from '@/prisma/generated/enums'
 import { adminNavCountsQueryOptions } from '@/server/admin/adminNavQueryOptions'
@@ -67,6 +74,7 @@ export const regionFormEmptyDefaults = {
   mapLat: '52.5',
   mapLng: '13.4',
   mapZoom: '10',
+  backgroundStyle: DEFAULT_BACKGROUND_STYLE_ID as BackgroundStyleId,
   headerLogoId: '',
   logoWhiteBackgroundRequired: 'false' as const,
   downloadsEnabled: 'false' as const,
@@ -350,6 +358,18 @@ export function RegionForm(props: Props) {
 
           <AdminFormSection id="categories" title={sectionLabels.categories}>
             <RegionCategoriesField form={form} />
+            <Select
+              form={form}
+              name="backgroundStyle"
+              label="Hintergrund-Stil"
+              help={
+                <Markdown
+                  inline
+                  markdown="Der Vektor-Stil unter den TILDA-Daten. Die Hintergrund-Quellen darunter sind Raster-Karten, die man darüber einblendet. Die Stile sind in `backgroundStyles.const.ts` registriert."
+                />
+              }
+              options={BACKGROUND_STYLE_IDS.map((id) => [id, BACKGROUND_STYLES[id].label])}
+            />
             <CheckboxGroup
               form={form}
               name="backgroundSources"

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react'
 import { ModeFilterBar } from '../ModeFilterBar'
 import { ModeFilterSelect, modeFilterIcons } from '../ModeFilterSelect'
 import {
@@ -17,6 +18,7 @@ type Props = {
   /** TILDA notes can filter by map view; OSM notes are already the bbox. */
   showExtentFilter: boolean
   authorOptions: { value: string; label: string }[]
+  countLabel?: ReactNode
 }
 
 export const NotesModeFilterBar = ({
@@ -25,6 +27,7 @@ export const NotesModeFilterBar = ({
   showReactionFilter,
   showExtentFilter,
   authorOptions,
+  countLabel,
 }: Props) => {
   const search = notesMode.search ?? ''
   const updateFilter = (patch: Partial<NotesModeParam>) =>
@@ -35,6 +38,7 @@ export const NotesModeFilterBar = ({
       search={search}
       onSearchChange={(query) => updateFilter({ search: query || undefined })}
       searchPlaceholder="Hinweise durchsuchen…"
+      countLabel={countLabel}
       extent={showExtentFilter ? (notesMode.extent ?? 'view') : undefined}
       onExtentChange={showExtentFilter ? (next) => updateFilter({ extent: next }) : undefined}
     >

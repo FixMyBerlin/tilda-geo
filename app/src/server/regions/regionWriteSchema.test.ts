@@ -29,6 +29,7 @@ const validBase: RegionWriteInput = {
   mapLat: 52.5,
   mapLng: 13.4,
   mapZoom: 12,
+  backgroundStyle: 'atlas',
   logoWhiteBackgroundRequired: false,
   headerLogoId: null,
   bbox: null,
@@ -198,6 +199,7 @@ const regionFormBase = {
   mapLat: '52.5',
   mapLng: '13.4',
   mapZoom: '10',
+  backgroundStyle: 'atlas' as const,
   headerLogoId: '',
   logoWhiteBackgroundRequired: 'false' as const,
   downloadsEnabled: 'false' as const,
@@ -463,6 +465,19 @@ describe('RegionFormSchema', () => {
     const parsed = RegionFormSchema.parse(formValues)
     expect(parsed.maskOsmRelationIds).toEqual([2787952, 62504])
     expect(parsed.maskBufferKm).toBe(1.5)
+  })
+
+  test('accepts a mask buffer of 0 and rejects a negative one', () => {
+    const formValues = regionConfigToFormValues({
+      ...validBase,
+      maskOsmRelationIds: [2787952],
+      maskBufferKm: 0,
+    })
+    expect(RegionFormSchema.parse(formValues).maskBufferKm).toBe(0)
+    expect(RegionWriteSchema.safeParse({ ...validBase, maskBufferKm: 0 }).success).toBe(true)
+
+    expect(RegionFormSchema.safeParse({ ...formValues, maskBufferKm: '-1' }).success).toBe(false)
+    expect(RegionWriteSchema.safeParse({ ...validBase, maskBufferKm: -1 }).success).toBe(false)
   })
 })
 

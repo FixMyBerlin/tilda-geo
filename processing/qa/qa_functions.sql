@@ -149,7 +149,8 @@ $$;
 -- Internal: `_qa_ind` from the indicator JSON and `_qa_areas` from the area table.
 -- The indicator JSON is validated by the app (zod, qaIndicatorsSchema) before it is stored, so it
 -- is trusted here. A missing area table yields no cells (NOTICE), so outputs become empty.
-CREATE OR REPLACE PROCEDURE tilda_qa_prepare_config(p_area_table TEXT, p_area_filter TEXT, p_indicators JSONB)
+DROP PROCEDURE IF EXISTS tilda_qa_prepare_config(TEXT, TEXT, JSONB);
+CREATE OR REPLACE PROCEDURE tilda_qa_prepare_config(p_area_table TEXT, p_indicators JSONB)
 LANGUAGE plpgsql
 AS $$
 DECLARE
@@ -180,17 +181,10 @@ BEGIN
       FROM (
         SELECT id::TEXT AS id, ST_Multi(ST_CollectionExtract(ST_MakeValid(geom), 3)) AS geom
         FROM %I.%I
-        WHERE %s
       ) src
       WHERE NOT ST_IsEmpty(src.geom)
     $sql$,
-    parts[1], parts[2],
-    CASE p_area_filter
-      WHEN 'priority' THEN 'priority IS TRUE'
-      WHEN 'non_priority' THEN 'priority IS NOT TRUE'
-      -- 'all' and 'with_reference' (narrowed later by tilda_qa_keep_areas_with_reference)
-      ELSE 'TRUE'
-    END
+    parts[1], parts[2]
   );
 
   CREATE INDEX ON _qa_areas USING GIST (geom_5243);
@@ -257,18 +251,7 @@ BEGIN
 END;
 $$;
 
--- Internal: for `areaFilter = with_reference`, keep only the cells of `_qa_areas` that have an amount
--- in `_qa_reference`. The outputs are built from `_qa_areas`, so the other cells drop out everywhere.
--- Use it when the reference covers only part of the cell table. It hides everything that is new in
--- a cell that was empty at the freeze.
-CREATE OR REPLACE PROCEDURE tilda_qa_keep_areas_with_reference()
-LANGUAGE plpgsql
-AS $$
-BEGIN
-  DELETE FROM _qa_areas a
-  WHERE NOT EXISTS (SELECT 1 FROM _qa_reference r WHERE r.area_id = a.id AND r.amount > 0);
-END;
-$$;
+DROP PROCEDURE IF EXISTS tilda_qa_keep_areas_with_reference();
 
 -- Internal: the metrics per (area, indicator) from `_qa_areas`, `_qa_ind`, `_qa_current` and
 -- `_qa_reference` (one row per class each). One row per area × indicator, also when both sides are
@@ -439,18 +422,15 @@ BEGIN
   ANALYZE _qa_features;
 
   FOR cfg IN
-    SELECT id, "mapTable" AS map_table, "areaTable" AS area_table, "areaFilter"::TEXT AS area_filter,
+    SELECT id, "mapTable" AS map_table, "areaTable" AS area_table,
       "referenceTable" AS reference_table, indicators::JSONB AS indicators
     FROM prisma."QaConfig"
     WHERE dataset = p_dataset AND "isActive"
     ORDER BY id
   LOOP
     BEGIN
-      CALL tilda_qa_prepare_config(cfg.area_table, cfg.area_filter, cfg.indicators);
+      CALL tilda_qa_prepare_config(cfg.area_table, cfg.indicators);
       CALL tilda_qa_load_reference(cfg.reference_table);
-      IF cfg.area_filter = 'with_reference' THEN
-        CALL tilda_qa_keep_areas_with_reference();
-      END IF;
       CALL tilda_qa_measure();
       CALL tilda_qa_finalize(cfg.map_table);
       RAISE NOTICE 'QA % config % (%): % cells, done at %',
@@ -463,14 +443,14 @@ BEGIN
 END;
 $$;
 
--- Freeze generator (MANUAL ONLY, run at delivery; see docs/Parking-Client-Freeze-QA.md):
+-- Freeze generator (MANUAL ONLY, run at delivery; see docs/QA-Freeze.md):
 -- writes the reference table for one config (area_id, indicator_key, value_key, amount).
 -- Precondition: temp table `_qa_features` (see header; osm_user/updated_at may be NULL) exists in this
 -- session — build it exactly like the dataset script does (topics/parking/9_qa_parkings.sql, topics/roads_bikelanes/5_qa_bikelanes.sql), or
 -- from a freeze backup of the features. Does not require the config to be active.
 -- Fails if the target exists or the config has no cells.
 --
---   CALL tilda_qa_write_reference('bikelanes', 5, 'data.qa_bikelanes_berlin_reference_2026');
+--   CALL tilda_qa_write_reference('bikelanes', 5, 'data.infravelo_qa_2026_reference_rvn');
 CREATE OR REPLACE PROCEDURE tilda_qa_write_reference(p_dataset TEXT, p_config_id INT, p_target_table TEXT)
 LANGUAGE plpgsql
 AS $$
@@ -478,7 +458,7 @@ DECLARE
   cfg RECORD;
   parts TEXT[] := tilda_qa_split_table(p_target_table);
 BEGIN
-  SELECT "areaTable" AS area_table, "areaFilter"::TEXT AS area_filter, indicators::JSONB AS indicators
+  SELECT "areaTable" AS area_table, indicators::JSONB AS indicators
   INTO cfg
   FROM prisma."QaConfig"
   WHERE id = p_config_id AND dataset = p_dataset;
@@ -489,9 +469,9 @@ BEGIN
     RAISE EXCEPTION 'Target % already exists - pick a new name or DROP it first', p_target_table;
   END IF;
 
-  CALL tilda_qa_prepare_config(cfg.area_table, cfg.area_filter, cfg.indicators);
+  CALL tilda_qa_prepare_config(cfg.area_table, cfg.indicators);
   IF NOT EXISTS (SELECT 1 FROM _qa_areas) THEN
-    RAISE EXCEPTION 'Config % has no cells in % (%)', p_config_id, cfg.area_table, cfg.area_filter;
+    RAISE EXCEPTION 'Config % has no cells in %', p_config_id, cfg.area_table;
   END IF;
   ANALYZE _qa_features;
   CALL tilda_qa_measure();

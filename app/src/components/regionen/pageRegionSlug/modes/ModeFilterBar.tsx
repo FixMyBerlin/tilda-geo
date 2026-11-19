@@ -20,13 +20,15 @@ type Props = {
   searchPlaceholder?: string
   extent?: ModeListExtent
   onExtentChange?: (extent: ModeListExtent) => void
+  countLabel?: ReactNode
   children?: ReactNode
 }
 
 /**
  * Compact mode filter line: a search icon that expands to the same magnifier + input + X bar as
- * map place search (`mapOverlaySearchFieldClassName`), icon-prefixed value dropdowns, and an
- * optional Ausschnitt dropdown (Nur Karte / Überall).
+ * map place search (`mapOverlaySearchFieldClassName`), icon-prefixed value dropdowns, an
+ * optional Ausschnitt dropdown (Nur Karte / Überall), and an optional list count pushed to the
+ * right end of the row (bottom right once the controls wrap).
  */
 export const ModeFilterBar = ({
   search,
@@ -34,6 +36,7 @@ export const ModeFilterBar = ({
   searchPlaceholder = 'Suchen…',
   extent,
   onExtentChange,
+  countLabel,
   children,
 }: Props) => {
   const [expanded, setExpanded] = useState(false)
@@ -99,6 +102,7 @@ export const ModeFilterBar = ({
               onChange={onExtentChange}
             />
           ) : null}
+          {countLabel}
         </div>
       ) : null}
     </div>
