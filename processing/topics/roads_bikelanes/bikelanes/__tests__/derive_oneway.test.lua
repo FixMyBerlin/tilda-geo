@@ -40,7 +40,7 @@ describe('derive_oneway', function()
   end)
 
   it('lets the category decide for lanes and tracks tagged on the road without a tag', function()
-    -- Lanes are one-way (`implicitOneWay`), tracks are assumed two-way (the case outside settlements).
+    -- The category decides; for tracks next to a road that is one-way (`_adjoining`), see create_subcategories_adjoining_or_isolated.
     assert.are.equal(derive_oneway({ highway = 'cycleway', _side = 'left' }, { implicitOneWay = true }), 'implicit_yes')
     assert.are.equal(derive_oneway({ highway = 'cycleway', _side = 'right' }, no_implicit), 'assumed_no')
     assert.are.equal(derive_oneway({ highway = 'cycleway', _side = 'right', oneway = 'no' }, no_implicit), 'no')

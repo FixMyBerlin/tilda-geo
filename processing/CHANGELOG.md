@@ -4,6 +4,10 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-11
 
+### `bikelanes`: `oneway` without a tag follows the position
+
+- Without `oneway` / `oneway:bicycle`, paths next to a road (`*_adjoining`) are `implicit_yes` and paths away from roads (`*_isolated`) `assumed_no`, as in StVO § 2 Abs. 4; `*_adjoiningOrIsolated` keep the category default. A track tagged on the road (`cycleway:<side>=track`) follows the other side of the road instead: `implicit_yes` when that side has cycling infrastructure (lane, track, `separate`, a sidewalk open to bicycles), `assumed_no` when it has none. Before, the category alone decided: `cycleway_adjoining` was `assumed_no`; `footAndCyclewayShared_isolated`, `footAndCyclewaySegregated_isolated` and `footwayBicycleYes_isolated` were `implicit_yes`. In Germany about 6,230 km change to `implicit_yes` and 1,070 km to `assumed_no`. Trade-off and numbers: https://github.com/FixMyBerlin/tilda-geo/pull/424.
+
 ### `roads`, `roadsPathClasses`, `bikeSuitability`, `bikelanes`, `bikelanes_presence`, `routing`: line direction on `oneway=-1`
 
 - Lines of a way tagged `oneway=-1` or `oneway:bicycle=-1` point in the direction of travel now, so the published `oneway=yes` holds for the line. Before, `-1` was published as `yes` while the line kept the drawing direction of the way, so it pointed against the traffic. This applies to the way's own rows: `roads`, `roadsPathClasses`, `bikeSuitability`, `bikelanes_presence` and the `bikelanes` row of the way itself. With `oneway=-1` and `oneway:bicycle=no` (e.g. a Fahrradstraße with two-way cycling) the line follows the motor vehicle direction. Lanes tagged on the road keep their rule; `todos_lines` keep the drawing direction.

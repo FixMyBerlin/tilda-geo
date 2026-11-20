@@ -59,9 +59,9 @@ const data = {
       oneway: {
         yes: 'Laut OSM-Daten nur in eine Richtung befahrbar.',
         assumed_no:
-          'Keine OSM-Angabe zur Verkehrsrichtung. Bei Radwegen und gemeinsamen Geh- und Radwegen nehmen wir beide Richtungen an. Außerorts sind straßenbegleitende Radwege oft in beide Richtungen freigegeben, ohne dass das in OSM steht; innerorts ist die Richtung meist angegeben.',
+          'Keine OSM-Angabe zur Verkehrsrichtung. Bei Radwegen, Geh- und Radwegen und Gehwegen mit „Radfahrer frei“ abseits der Straße nehmen wir beide Richtungen an, ebenso bei reinen Radwegen, deren Lage zur Straße unbekannt ist, und bei einem an der Straße getaggten Radweg (`cycleway:<side>=track`), wenn auf der anderen Straßenseite weder ein Radweg noch ein für Fahrräder freigegebener Gehweg getaggt ist.',
         implicit_yes:
-          'Keine OSM-Angabe zur Verkehrsrichtung. Aus der Führungsform abgeleitet, denn Schutz- und Radfahrstreifen sowie gemeinsam mit dem Kfz-Verkehr genutzte Fahrstreifen sind fast immer nur in eine Richtung befahrbar.',
+          'Keine OSM-Angabe zur Verkehrsrichtung. Aus der Führungsform abgeleitet, denn Schutz- und Radfahrstreifen sowie gemeinsam mit dem Kfz-Verkehr genutzte Fahrstreifen sind fast immer nur in eine Richtung befahrbar. Straßenbegleitende Radwege, Geh- und Radwege und Gehwege mit „Radfahrer frei“ dürfen nach StVO § 2 Abs. 4 nur rechts in Fahrtrichtung befahren werden, links nur mit Schild. Außerorts sind gemeinsame Geh- und Radwege oft per Schild in beide Richtungen freigegeben.',
       },
       tunnel: {
         yes: 'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',

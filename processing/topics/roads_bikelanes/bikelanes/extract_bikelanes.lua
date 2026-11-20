@@ -71,9 +71,21 @@ local function bikelanes(object_tags, object_geom)
   ---@type TransformedObject[]
   local transformed_objects = get_transformed_objects(object_tags, transformations)
 
-  for _, transformed_tags in ipairs(transformed_objects) do
+  -- Categorize all sides first: the oneway fallback of a track on the road reads the other side.
+  local categories = {}
+  local side_has_cycling = { left = false, right = false }
+  for index, transformed_tags in ipairs(transformed_objects) do
     transformed_tags._length = object_tags._length
     local category = categorize_bikelane(transformed_tags)
+    categories[index] = category
+    if category ~= nil and side_has_cycling[transformed_tags._side] ~= nil
+      and (category.infrastructureExists or category.id == 'separate_geometry') then
+      side_has_cycling[transformed_tags._side] = true
+    end
+  end
+
+  for index, transformed_tags in ipairs(transformed_objects) do
+    local category = categories[index]
     if category ~= nil then
       local result_tags = {
         _side = transformed_tags._side,
@@ -93,7 +105,9 @@ local function bikelanes(object_tags, object_geom)
           width = parse_width(transformed_tags.width),
           width_source = transformed_tags['source:width'],
           width_effective = parse_width(transformed_tags['width:effective']),
-          oneway = derive_oneway(transformed_tags, category),
+          oneway = derive_oneway(transformed_tags, category, {
+            other_side_has_cycling = side_has_cycling[transformed_tags._side == 'left' and 'right' or 'left'],
+          }),
           bridge = SANITIZE_TAGS.boolean_yes(object_tags.bridge),
           tunnel = SANITIZE_TAGS.tunnel(object_tags.tunnel),
           surface_color = SANITIZE_ROAD_TAGS.surface_color(transformed_tags),
