@@ -33,4 +33,22 @@ describe('create_subcategories_adjoining_or_isolated', function()
     assert.is_false(testCategoryIsolated:is_active(tags))
     assert.is_true(testCategoryAdjoiningOrIsolated:is_active(tags))
   end)
+
+  it('sets the oneway default by position: one way next to a road, both ways away from roads', function()
+    local twoWayCategory = bikelane_category.new({
+      id = 'twoWay',
+      desc = '',
+      infrastructureExists = true,
+      implicitOneWay = false,
+      implicitOneWayConfidence = 'low',
+      copySurfaceSmoothnessFromParent = false,
+      condition = function() return true end,
+    })
+    local adjoining, isolated, adjoiningOrIsolated = create_subcategories_adjoining_or_isolated(twoWayCategory)
+    assert.is_true(adjoining.implicitOneWay)
+    assert.is_false(isolated.implicitOneWay)
+    assert.is_false(adjoiningOrIsolated.implicitOneWay)
+    assert.is_false(testCategoryIsolated.implicitOneWay)
+    assert.is_true(testCategoryAdjoiningOrIsolated.implicitOneWay)
+  end)
 end)

@@ -43,6 +43,7 @@ BikelaneCategory.__index = BikelaneCategory
 --- implicitOneWayConfidence: 'high'|'medium'|'low'|'not_applicable',
 --- copySurfaceSmoothnessFromParent: boolean, -- Whether this category should copy surface/smoothness values from parent highway
 --- bicycleSurface?: BikelaneBicycleSurface, -- How `surface:bicycle` applies, see `derive_bikelane_surface_tags`; nil ignores it
+--- position?: 'adjoining'|'isolated'|'adjoiningOrIsolated', -- Set by `create_subcategories_adjoining_or_isolated`
 --- condition: fun(tags: OsmTags): (boolean|nil),
 --- process: fun(tags: OsmTags): (OsmTags|nil)|nil, -- Optional function to process tags after categorization
 --- }
@@ -57,6 +58,7 @@ function BikelaneCategory.new(args)
   self.implicitOneWayConfidence = args.implicitOneWayConfidence
   self.copySurfaceSmoothnessFromParent = args.copySurfaceSmoothnessFromParent
   self.bicycleSurface = args.bicycleSurface
+  self.position = args.position
   self.condition = args.condition
   self.process = args.process
   return self

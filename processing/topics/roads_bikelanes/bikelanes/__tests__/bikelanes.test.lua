@@ -750,7 +750,7 @@ describe('bikelanes', function()
       )
     end)
 
-    it('assumes one direction for a lane and both directions for a track', function()
+    it('assumes one direction for a lane and for a track with a lane on the other side', function()
       local result = run_bikelanes({
         tags = { highway = 'secondary', ['cycleway:left'] = 'track', ['cycleway:right'] = 'lane', ['cycleway:right:lane'] = 'exclusive' },
         id = 1,
@@ -758,8 +758,47 @@ describe('bikelanes', function()
       })
       local by_side = {}
       for _, row in ipairs(result) do by_side[row._side] = row end
-      assert.are.equal('assumed_no', by_side.left.oneway)
+      assert.are.equal('implicit_yes', by_side.left.oneway)
       assert.are.equal('implicit_yes', by_side.right.oneway)
+    end)
+
+    describe('a track tagged on the road follows the other side:', function()
+      local function oneway_by_side(tags)
+        local by_side = {}
+        for _, row in ipairs(run_bikelanes({ tags = tags, id = 1, type = 'way' })) do
+          if row._side ~= 'self' then by_side[row._side] = row.oneway end
+        end
+        return by_side
+      end
+
+      it('is one-way with a track on both sides', function()
+        assert.are.same({ left = 'implicit_yes', right = 'implicit_yes' }, oneway_by_side({ highway = 'secondary', cycleway = 'track' }))
+        assert.are.same({ left = 'implicit_yes', right = 'implicit_yes' }, oneway_by_side({ highway = 'secondary', ['cycleway:both'] = 'track' }))
+      end)
+
+      it('is one-way with a separately mapped path on the other side', function()
+        assert.are.equal('implicit_yes', oneway_by_side({ highway = 'secondary', ['cycleway:left'] = 'separate', ['cycleway:right'] = 'track' }).right)
+      end)
+
+      it('is one-way with a sidewalk open to bicycles on the other side', function()
+        assert.are.equal('implicit_yes', oneway_by_side({ highway = 'secondary', ['cycleway:right'] = 'track', sidewalk = 'both', ['sidewalk:left:bicycle'] = 'yes' }).right)
+        assert.are.equal('assumed_no', oneway_by_side({ highway = 'secondary', ['cycleway:right'] = 'track', sidewalk = 'both', ['sidewalk:left:bicycle'] = 'no' }).right)
+      end)
+
+      it('is two-way without cycle infrastructure on the other side', function()
+        assert.are.equal('assumed_no', oneway_by_side({ highway = 'secondary', ['cycleway:right'] = 'track' }).right)
+        assert.are.equal('assumed_no', oneway_by_side({ highway = 'secondary', ['cycleway:left'] = 'no', ['cycleway:right'] = 'track' }).right)
+        assert.are.equal('assumed_no', oneway_by_side({ highway = 'secondary', ['cycleway:right'] = 'track', ['cycleway:right:segregated'] = 'no' }).right)
+      end)
+
+      it('reads the other side from its category: no cycle infrastructure expected there on a one-way road', function()
+        assert.are.equal('assumed_no', oneway_by_side({ highway = 'secondary', oneway = 'yes', cycleway = 'track' }).right)
+      end)
+
+      it('keeps an explicit direction', function()
+        assert.are.equal('yes', oneway_by_side({ highway = 'secondary', ['cycleway:right'] = 'track', ['cycleway:right:oneway'] = 'yes' }).right)
+        assert.are.equal('no', oneway_by_side({ highway = 'secondary', cycleway = 'track', ['cycleway:left:oneway'] = 'no' }).left)
+      end)
     end)
   end)
 end)
