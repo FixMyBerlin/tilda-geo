@@ -63,13 +63,19 @@ local routable_bicycle_access = SET.set({
   'yes', 'designated', 'permissive', 'use_sidepath', 'optional_sidepath', 'discouraged', 'dismount',
 })
 
---- Cycling is explicitly allowed: the resolved `bicycle` value (`bicycle` -> `vehicle` -> `access`) is
---- one of `routable_bicycle_access`.
+-- Routable values that open the way itself for bicycles (riding or pushing). `use_sidepath` and
+-- `optional_sidepath` are not among them: like `cycleway=separate` they point to a path next to the
+-- way and say nothing about the way. On `access=no` they are mostly closed roads at construction sites.
+local on_way_bicycle_access = SET.set({ 'yes', 'designated', 'permissive', 'discouraged', 'dismount' })
+
+--- Cycling is explicitly allowed on the way itself: the resolved `bicycle` value
+--- (`bicycle` -> `vehicle` -> `access`) is one of `on_way_bicycle_access`. Lifts `access=no`,
+--- `destination` and `customers`.
 ---@param tags OsmTags
 ---@return boolean
 local function bicycle_explicitly_allowed(tags)
-  local value = normalize((resolve(tags, 'bicycle')))
-  return value ~= nil and routable_bicycle_access[value] == true
+  local value = resolve(tags, 'bicycle')
+  return value ~= nil and on_way_bicycle_access[value] == true
 end
 
 --- The resolved `bicycle` value is `designated`: a signposted cycle route.

@@ -15,8 +15,10 @@
 -- - `access` (or `foot` on a footway) in `no|private|delivery|permit` drops the way,
 --   `destination|customers` drops only the `roads` row.
 -- - `bicycle=designated` (resolved via `bicycle`, `vehicle`) lifts every one of these values.
--- - Any other value that allows cycling (`yes`, `permissive`, `dismount`, `use_sidepath`, …) lifts
---   `no`, `destination` and `customers`, not `private|delivery|permit`.
+-- - `yes`, `permissive`, `discouraged` and `dismount` lift `no`, `destination` and `customers`, not
+--   `private|delivery|permit`.
+-- - `use_sidepath` and `optional_sidepath` lift nothing: like `cycleway=separate` they point to a
+--   path next to the way (PR #425).
 -- - `bicycle=no` on a cycleway always drops the way; nothing lifts it.
 -- - Temporary closures (`access=no` with Baustelle/Sperrung text) are lifecycle, not access:
 --   `transform_lifecycle_tags` runs first, see `exit_processing.test.lua`.
@@ -55,7 +57,8 @@ local rows = {
   { 'access=no + vehicle=yes', { highway = 'unclassified', access = 'no', vehicle = 'yes' }, ALL },
   { 'access=no + bicycle=permissive', { highway = 'track', access = 'no', bicycle = 'permissive' }, ALL },
   { 'access=no + bicycle=dismount', { highway = 'footway', access = 'no', bicycle = 'dismount' }, ALL },
-  { 'access=no + bicycle=use_sidepath', { highway = 'tertiary', access = 'no', bicycle = 'use_sidepath', motor_vehicle = 'yes' }, ALL },
+  { 'access=no + bicycle=use_sidepath (closed road at a construction site, #425)', { highway = 'tertiary', access = 'no', bicycle = 'use_sidepath', foot = 'use_sidepath' }, NONE },
+  { 'access=no + bicycle=optional_sidepath (#425)', { highway = 'secondary', access = 'no', bicycle = 'optional_sidepath' }, NONE },
 
   -- foot on footways
   { 'footway foot=no', { highway = 'footway', foot = 'no' }, NONE },
@@ -90,6 +93,7 @@ local rows = {
   { 'access=destination + bicycle=designated + DE:240', { highway = 'path', access = 'destination', bicycle = 'designated', foot = 'designated', traffic_sign = 'DE:240' }, ALL },
   { 'access=customers + bicycle=permissive', { highway = 'service', access = 'customers', bicycle = 'permissive' }, ALL },
   { 'access=destination + bicycle=no', { highway = 'residential', access = 'destination', bicycle = 'no' }, BIKELANES_ONLY },
+  { 'access=destination + bicycle=use_sidepath (#425)', { highway = 'residential', access = 'destination', bicycle = 'use_sidepath' }, BIKELANES_ONLY },
 }
 
 describe('access rules (decision table)', function()
