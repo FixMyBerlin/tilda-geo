@@ -14646,6 +14646,17 @@ const data = {
         values: [],
       },
       {
+        key: 'informal',
+        type: 'string',
+        label: 'Trampelpfad',
+        values: [
+          {
+            value: 'yes',
+            label: 'Weg als informeller Weg erfasst',
+          },
+        ],
+      },
+      {
         key: 'access_bicycle',
         type: 'string',
         label: 'Zugang Radverkehr',

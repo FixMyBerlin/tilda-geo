@@ -86,6 +86,7 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 - `access_bicycle` has the new values `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry` (it had `no` before). Lanes on the centerline (`side=left|right`) do not inherit the carriageway access.
 - An edge with a bicycle access value that is not published (e.g. `psv`, `emergency`, `delivery;destination`) is not in `routing`.
 - Carriageway and path edges publish the sanitized values of `roads` / `roadsPathClasses` instead of raw OSM tags. `width` is a number in meters or empty (was the OSM text, e.g. `5,7`, which aborted the export). `surface` uses the same values as `roads` (e.g. `dirt` is now `ground`). `smoothness` is also derived from `surface` and other tags, like in `roads`.
+- New tag `informal` (`yes` when present), like on `bikelanes`, `roads` and `roadsPathClasses`. Ways with `informal=yes` are in `routing` only when they have own bike infrastructure, so these edges are now marked.
 - `prefix`, `parent_road`, `adjoining_road`, `adjoining_maxspeed` no longer read an OSM tag of the same name. No change in the data: no way in Germany has these tags (2026-10).
 
 ## 2026-10

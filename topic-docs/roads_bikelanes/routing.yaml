@@ -102,6 +102,8 @@ attributes:
     ref: roads.smoothness
   - key: width
     ref: roads.width
+  - key: informal
+    ref: roads.informal
   - key: access_bicycle
     label: Zugang Radverkehr
     chapterRefs:

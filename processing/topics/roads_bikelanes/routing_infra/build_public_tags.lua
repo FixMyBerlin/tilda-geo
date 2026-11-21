@@ -29,6 +29,10 @@ local function build_public_tags(segment, motor_context, context)
     surface = sanitized_tags.surface,
     smoothness = sanitized_tags.smoothness,
     width = sanitized_tags.width,
+    -- A property of the OSM way, also on the lanes of a carriageway (like `bikelanes.informal`).
+    -- `shared_result_tags` still holds the marker of a disallowed value (`roads` removes it on insert),
+    -- so publish only `yes`.
+    informal = shared_result_tags.informal == 'yes' and 'yes' or nil,
     maxspeed = motor_context.maxspeed,
     adjoining_road = motor_context.adjoining_road,
     adjoining_maxspeed = motor_context.adjoining_maxspeed,

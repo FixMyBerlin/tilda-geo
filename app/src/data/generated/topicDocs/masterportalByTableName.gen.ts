@@ -5255,6 +5255,14 @@ const data = {
         type: 'number',
         suffix: 'm',
       },
+      informal: {
+        name: 'Trampelpfad',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          yes: 'Weg als informeller Weg erfasst',
+        },
+      },
       access_bicycle: {
         name: 'Zugang Radverkehr',
         condition: 'contains',

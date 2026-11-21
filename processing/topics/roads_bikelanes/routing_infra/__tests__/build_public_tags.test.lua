@@ -81,6 +81,18 @@ describe('build_public_tags', function()
     end)
   end)
 
+  describe('informal', function()
+    it('publishes informal=yes on a path edge', function()
+      local row = row_of(public_rows({ highway = 'path', informal = 'yes' }), 'roadsPathClasses')
+      assert.are.equal(row.informal, 'yes')
+    end)
+
+    it('publishes no informal when the way has none', function()
+      local row = row_of(public_rows({ highway = 'path' }), 'roadsPathClasses')
+      assert.is_nil(row.informal)
+    end)
+  end)
+
   describe('bikelane edges', function()
     local object_tags = { highway = 'residential', width = '12 m', surface = 'asphalt' }
     local lane = {
@@ -115,7 +127,7 @@ describe('build_public_tags', function()
     local raw_keys = {
       'access_bicycle', 'adjoining_maxspeed', 'adjoining_road', 'category', 'length', 'maxspeed', 'offset',
       'oneway', 'oneway_motor', 'parent_id', 'prefix', 'road', 'side', 'smoothness', 'source_id', 'source_table',
-      'surface', 'width',
+      'surface', 'width', 'informal',
     }
 
     local function way_with_raw_tags(highway)
