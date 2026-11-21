@@ -11,7 +11,7 @@ local prepare_shared_bikelane_state_roads_bikelanes = require('topics.roads_bike
 local roads_bikelanes_bikelanes = require('topics.roads_bikelanes.roads_bikelanes_bikelanes')
 local roads_bikelanes_routing_infra = require('topics.roads_bikelanes.roads_bikelanes_routing_infra')
 local roads_bikelanes_roads = require('topics.roads_bikelanes.roads_bikelanes_roads')
-local EXIT = require('topics.roads_bikelanes.helper.exit_processing')
+local exit_processing = require('topics.roads_bikelanes.helper.exit_processing')
 local ACCESS = require('topics.roads_bikelanes.helper.access_restriction')
 local result_tags = require('topics.roads_bikelanes.helper.result_tags')
 
@@ -24,7 +24,7 @@ local function process_roads_bikelanes_way(object)
 
   -- REMINDER: Keep the transform order in sync with `bikelanes/__tests__/bikelanes_lifecycle.test.lua`
   transform_lifecycle_tags(object_tags)
-  if EXIT.exit_processing(object_tags) then return end -- stage 1: tags only
+  if exit_processing(object_tags) then return end -- stage 1: tags only
 
   -- `construction:access=private`, `construction:cycleway:right=lane` & co. have to be seen by stage 2.
   -- Tag rewrite only, no geometry or pseudo tags needed. The two `cycleway` transforms below stay

@@ -5,7 +5,7 @@ local extract_public_tags = require('topics.helper.extract_public_tags')
 local transform_lifecycle_tags = require('topics.roads_bikelanes.helper.transform_tags.transform_lifecycle_tags')
 local result_tags = require('topics.roads_bikelanes.helper.result_tags')
 local road_generalization = require('topics.roads_bikelanes.roads.road_generalization')
-local EXIT = require('topics.roads_bikelanes.helper.exit_processing')
+local exit_processing = require('topics.roads_bikelanes.helper.exit_processing')
 local ACCESS = require('topics.roads_bikelanes.helper.access_restriction')
 local SANITIZE_ROAD_TAGS = require('topics.roads_bikelanes.helper.sanitize_road_tags')
 local CLEANER = require('topics.helper.sanitize_cleaner')
@@ -23,7 +23,7 @@ local function process_highway_area(object)
   ---@type OsmTags
   local object_tags = object.tags
   transform_lifecycle_tags(object_tags)
-  if EXIT.exit_processing(object_tags, true) then
+  if exit_processing(object_tags, true) then
     return
   end
   -- Areas have no routing edges and no bike infrastructure; only `way` restrictions apply.

@@ -14,6 +14,4 @@ local function exit_processing(object_tags, include_areas)
   return false
 end
 
-return {
-  exit_processing = exit_processing,
-}
+return exit_processing

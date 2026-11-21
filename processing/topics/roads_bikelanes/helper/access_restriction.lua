@@ -1,4 +1,7 @@
 local SET = require('topics.helper.sets')
+local contains_substring = require('topics.helper.contains_substring')
+local has_prefix = require('topics.helper.has_prefix')
+local has_tag_with_prefix = require('topics.helper.has_tag_with_prefix')
 local sanitize_access_tags = require('topics.roads_bikelanes.helper.sanitize_access_tags')
 
 -- The one place that decides which ways are not public, and why. Tags only, no geometry: this
@@ -83,8 +86,9 @@ end
 -- - 'emergency_access' which we consider a special kind of driveway
 -- - 'drive-through' which we do not consider part of the road network; and which results in false positives for our oneway-plus layer
 --
--- Exception: service highways with explicit bicycle access (`bicycle=designated`,
--- `bicycle:left|right|both` not `no`).
+-- Exception: a signposted cycle route (`bicycle=designated`) is part of the bicycle network even
+-- without a bikelane category. Any other bike infrastructure lifts the restriction in stage 3
+-- (`after_categorisation`).
 --
 -- REMINDER: Keep this in sync with `processing/topics/roads_bikelanes/roads/road_classification_road_value.lua`
 local allowed_service = SET.set({ 'alley' })
@@ -94,23 +98,39 @@ local allowed_service = SET.set({ 'alley' })
 local function is_restricted_service(tags)
   local service = tags.service
   if not service or allowed_service[service] then return false end
-  if tags.bicycle == 'designated' then return false end
-  local left, right, both = tags['bicycle:left'], tags['bicycle:right'], tags['bicycle:both']
-  if left and left ~= 'no' then return false end
-  if right and right ~= 'no' then return false end
-  if both and both ~= 'no' then return false end
-  return true
+  return not sanitize_access_tags.bicycle_designated(tags)
 end
 
--- `traffic_sign` values of bikelane categories that can match on any `highway` class.
-local bike_traffic_signs = { '237', '239', '240', '241', '242', '244', '1022' }
+-- Traffic signs of bikelane categories that can match on any `highway` class. Matched as a
+-- substring, like the categories do, so `244` also finds `DE:244.1`.
+local bike_traffic_signs = {
+  '237', -- Zeichen 237 (Radweg) https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:237
+  '239', -- Zeichen 239 (Gehweg) https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:239
+  '240', -- Zeichen 240 (Gemeinsamer Geh- und Radweg) https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:240
+  '241', -- Zeichen 241 (Getrennter Rad- und Gehweg) https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:241
+  '242', -- Zeichen 242.1 (Beginn Fußgängerzone) https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:242.1
+  '244', -- Zeichen 244.1 (Beginn Fahrradstraße) https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:244.1
+  '1022', -- Zeichen 1022-10 (Radfahrer frei) https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:1022-10
+}
 
 ---@param traffic_sign string|nil
 ---@return boolean
 local function has_bike_traffic_sign(traffic_sign)
-  if not traffic_sign then return false end
   for _, sign in ipairs(bike_traffic_signs) do
-    if string.find(traffic_sign, sign, 1, true) then return true end
+    if contains_substring(traffic_sign, sign) then return true end
+  end
+  return false
+end
+
+--- `sidewalk*` is unnested into a footway side object (`bikelanes/transformations.lua`) that only gets
+--- a category through its own bicycle or traffic sign value (`sidewalk:both:bicycle`, …).
+---@param tags OsmTags
+---@return boolean
+local function has_sidewalk_bike_tag(tags)
+  for key in pairs(tags) do
+    if has_prefix(key, 'sidewalk') and (contains_substring(key, ':bicycle') or contains_substring(key, ':traffic_sign')) then
+      return true
+    end
   end
   return false
 end
@@ -137,20 +157,11 @@ local function may_have_bike_infra(tags)
   if has_bike_traffic_sign(tags.traffic_sign) or has_bike_traffic_sign(tags['traffic_sign:forward']) then
     return true
   end
-  for key in pairs(tags) do
-    local prefix = string.sub(key, 1, 8)
-    if prefix == 'cycleway' then return true end
-    -- `sidewalk*` is unnested into a footway side object (`bikelanes/transformations.lua`) that only
-    -- gets a category through its own bicycle or traffic_sign value (`sidewalk:both:bicycle`, …)
-    if prefix == 'sidewalk' and (string.find(key, ':bicycle', 1, true) or string.find(key, ':traffic_sign', 1, true)) then
-      return true
-    end
-    if prefix == 'bicycle:' then
-      local rest = string.sub(key, 9)
-      if rest == 'left' or rest == 'right' or rest == 'both' or rest == 'lanes' then return true end
-    end
-  end
-  return false
+  -- `bicycle:lanes=…|designated|…`: a bike lane between the motor vehicle lanes.
+  if tags['bicycle:lanes'] then return true end
+  -- Centerline keys of all sides (`cycleway`, `cycleway:right`, `cycleway:left:traffic_sign`, …).
+  if has_tag_with_prefix(tags, 'cycleway') then return true end
+  return has_sidewalk_bike_tag(tags)
 end
 
 --- Restriction that bike infrastructure of the way itself can lift.

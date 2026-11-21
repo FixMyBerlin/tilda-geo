@@ -66,7 +66,6 @@ Paste each printed line to run the container. **Limited topics:** `--topics traf
 | --------------------- | --------------------------------------------- | --------------------------------------- |
 | `xhain-kreuzberg`     | `13.380,52.488,13.418,52.503`                 | Small                                   |
 | `berlin-full`         | `13.0883,52.3382,13.7611,52.6755`             | Large                                   |
-| `berlin-brandenburg`  | `11.2,51.3,14.8,53.6`                         | Very large (speed benchmarks)           |
 | `bussonderstreifen`   | `13.38486,52.43778,13.38956,52.43959`         | Interactive default for processing bbox |
 | `seed-herrfurthplatz` | `13.4209256,52.4763157,13.4272212,52.4779464` | `bun run seed` geo-bootstrap            |
 | `bibi`                | `9.0671,48.9229,9.1753,48.9838`               | Bietigheim-Bissingen (OSM 1613510)      |

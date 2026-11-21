@@ -1,8 +1,8 @@
 -- Decision table for access tags in roads_bikelanes: which public tables a way ends up in.
 --
--- This is the spec, not a test of one helper. A refactor of the access helpers (e.g.
--- `priv/routing-restricted` with `access_restriction.lua`) changes only `outcome()` below and
--- must keep every row green. Changing a row is a product decision: link the issue in the row.
+-- This is the spec, not a test of one helper. A refactor of the access helpers changes only
+-- `outcome()` below and must keep every row green. Changing a row is a product decision: give the
+-- reason in the commit message.
 --
 -- Columns:
 -- - `bikelanes`: the way is processed at all (`exit_processing`): bikelanes, todos, presence,
@@ -10,26 +10,25 @@
 -- - `roads`: the way also gets a `roads` / `roadsPathClasses` row and its carriageway or path
 --   routing edge
 --
--- Rules (https://github.com/FixMyBerlin/tilda-geo/issues/409,
--- https://github.com/FixMyBerlin/radinfra.de/issues/15):
+-- Rules:
 -- - `access` (or `foot` on a footway) in `no|private|delivery|permit` drops the way,
 --   `destination|customers` drops only the `roads` row.
 -- - `bicycle=designated` (resolved via `bicycle`, `vehicle`) lifts every one of these values.
 -- - `yes`, `permissive`, `discouraged` and `dismount` lift `no`, `destination` and `customers`, not
 --   `private|delivery|permit`.
 -- - `use_sidepath` and `optional_sidepath` lift nothing: like `cycleway=separate` they point to a
---   path next to the way (PR #425).
+--   path next to the way.
 -- - `bicycle=no` on a cycleway always drops the way; nothing lifts it.
 -- - Temporary closures (`access=no` with Baustelle/Sperrung text) are lifecycle, not access:
 --   `transform_lifecycle_tags` runs first, see `exit_processing.test.lua`.
 
-local EXIT = require('topics.roads_bikelanes.helper.exit_processing')
+local exit_processing = require('topics.roads_bikelanes.helper.exit_processing')
 local ACCESS = require('topics.roads_bikelanes.helper.access_restriction')
 
 ---@param tags OsmTags
 ---@return { bikelanes: boolean, roads: boolean }
 local function outcome(tags)
-  if EXIT.exit_processing(tags) then return { bikelanes = false, roads = false } end
+  if exit_processing(tags) then return { bikelanes = false, roads = false } end
   local restriction = ACCESS.access_restriction(tags)
   local bikelanes = not (restriction and restriction.level == 'way')
   return { bikelanes = bikelanes, roads = bikelanes and not (restriction and restriction.level == 'roads') }
@@ -51,14 +50,14 @@ local rows = {
   { 'access=no + vehicle=no', { highway = 'residential', access = 'no', vehicle = 'no' }, NONE },
   { 'access=no + bicycle=unknown', { highway = 'residential', access = 'no', bicycle = 'unknown' }, NONE },
   { 'access=no + bicycle=private', { highway = 'residential', access = 'no', bicycle = 'private' }, NONE },
-  { 'Fahrradstraße access=no + bicycle=designated (#409, way 1212226034)', { highway = 'residential', bicycle_road = 'yes', access = 'no', bicycle = 'designated', foot = 'yes', motor_vehicle = 'yes' }, ALL },
+  { 'Fahrradstraße access=no + bicycle=designated', { highway = 'residential', bicycle_road = 'yes', access = 'no', bicycle = 'designated', foot = 'yes', motor_vehicle = 'yes' }, ALL },
   { 'path access=no + bicycle=designated + foot=designated (radinfra#15)', { highway = 'path', access = 'no', bicycle = 'designated', foot = 'designated' }, ALL },
   { 'track access=no + bicycle=yes', { highway = 'track', access = 'no', bicycle = 'yes', foot = 'yes' }, ALL },
   { 'access=no + vehicle=yes', { highway = 'unclassified', access = 'no', vehicle = 'yes' }, ALL },
   { 'access=no + bicycle=permissive', { highway = 'track', access = 'no', bicycle = 'permissive' }, ALL },
   { 'access=no + bicycle=dismount', { highway = 'footway', access = 'no', bicycle = 'dismount' }, ALL },
-  { 'access=no + bicycle=use_sidepath (closed road at a construction site, #425)', { highway = 'tertiary', access = 'no', bicycle = 'use_sidepath', foot = 'use_sidepath' }, NONE },
-  { 'access=no + bicycle=optional_sidepath (#425)', { highway = 'secondary', access = 'no', bicycle = 'optional_sidepath' }, NONE },
+  { 'access=no + bicycle=use_sidepath (closed road at a construction site)', { highway = 'tertiary', access = 'no', bicycle = 'use_sidepath', foot = 'use_sidepath' }, NONE },
+  { 'access=no + bicycle=optional_sidepath', { highway = 'secondary', access = 'no', bicycle = 'optional_sidepath' }, NONE },
 
   -- foot on footways
   { 'footway foot=no', { highway = 'footway', foot = 'no' }, NONE },
@@ -93,7 +92,7 @@ local rows = {
   { 'access=destination + bicycle=designated + DE:240', { highway = 'path', access = 'destination', bicycle = 'designated', foot = 'designated', traffic_sign = 'DE:240' }, ALL },
   { 'access=customers + bicycle=permissive', { highway = 'service', access = 'customers', bicycle = 'permissive' }, ALL },
   { 'access=destination + bicycle=no', { highway = 'residential', access = 'destination', bicycle = 'no' }, BIKELANES_ONLY },
-  { 'access=destination + bicycle=use_sidepath (#425)', { highway = 'residential', access = 'destination', bicycle = 'use_sidepath' }, BIKELANES_ONLY },
+  { 'access=destination + bicycle=use_sidepath', { highway = 'residential', access = 'destination', bicycle = 'use_sidepath' }, BIKELANES_ONLY },
 }
 
 describe('access rules (decision table)', function()

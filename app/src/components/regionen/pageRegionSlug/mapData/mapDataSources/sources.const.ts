@@ -135,6 +135,7 @@ export const sources: MapDataSource<SourcesId>[] = [
         // Same as 'roadsPathClasses'
         'name',
         'road',
+        'informal__if_present',
         'oneway',
         'oneway_bicycle__if_present',
         'composit_surface_smoothness',
@@ -145,7 +146,6 @@ export const sources: MapDataSource<SourcesId>[] = [
         'width',
         'length',
         'description__if_present',
-        'informal__if_present',
         'composit_route_relations',
         // Last: links to photos, not a property of the object.
         'composit_mapillary',
@@ -168,6 +168,7 @@ export const sources: MapDataSource<SourcesId>[] = [
       documentedKeys: [
         'name',
         'road',
+        'informal__if_present',
         'oneway__if_present',
         'oneway_bicycle__if_present',
         'lit__if_present',
@@ -198,6 +199,7 @@ export const sources: MapDataSource<SourcesId>[] = [
         // Same as 'roads'
         'name',
         'road',
+        'informal__if_present',
         'oneway',
         'oneway_bicycle__if_present',
         'composit_surface_smoothness',
@@ -208,7 +210,6 @@ export const sources: MapDataSource<SourcesId>[] = [
         'width',
         'length',
         'description__if_present',
-        'informal__if_present',
         'composit_route_relations',
         // Last: links to photos, not a property of the object.
         'composit_mapillary',
@@ -248,6 +249,7 @@ export const sources: MapDataSource<SourcesId>[] = [
         'name',
         'road',
         'bikeSuitability',
+        'informal__if_present',
         'composit_surface_smoothness',
         'traffic_sign',
       ],

@@ -56,7 +56,7 @@ local function road_classification_road_value(tags)
       alley = 'service_alley',
       driveway = 'service_driveway',
       emergency_access = 'service_emergency_access',
-      parking_isle = 'service_parking_aisle',
+      parking_aisle = 'service_parking_aisle',
     }
     road_value = service_mapping[tags.service]
 

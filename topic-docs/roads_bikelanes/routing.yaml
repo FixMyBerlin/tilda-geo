@@ -123,10 +123,11 @@ attributes:
       - value: permissive
         label: Geduldet
       - value: use_sidepath
-        label: Seitenweg benutzen
-        description: Fahrbahn rechtlich nicht vorgesehen; parallele Infrastruktur nutzen. Kante bleibt im Graphen.
+        label: Benutzungspflichtiger Radweg daneben
+        description: OSM-Wert auf der Fahrbahn. Neben der Fahrbahn liegt ein benutzungspflichtiger Radweg ([Zeichen 237 (Radweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:237), [Zeichen 240 (Gemeinsamer Geh- und Radweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:240) oder [Zeichen 241 (Getrennter Rad- und Gehweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:241)), auf der Fahrbahn ist Radfahren deshalb nicht erlaubt. Kante bleibt im Graphen.
       - value: optional_sidepath
-        label: Seitenweg optional
+        label: Radweg daneben, nicht benutzungspflichtig
+        description: OSM-Wert auf der Fahrbahn. Neben der Fahrbahn liegt ein Radweg ohne Benutzungspflicht, Radfahren auf der Fahrbahn ist erlaubt. Ein Gehweg mit [Zeichen 1022-10 (Radfahrer frei)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:1022-10) gehört nicht dazu, der wird auf dem Gehweg getaggt.
       - value: discouraged
         label: Unerwünscht
       - value: dismount
