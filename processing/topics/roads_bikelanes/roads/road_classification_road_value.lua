@@ -52,7 +52,6 @@ local function road_classification_road_value(tags)
   -- https://taginfo.openstreetmap.org/keys/service#values
   if tags.highway == 'service' then
     local service_mapping = {
-      -- REMINDER: Keep this in sync with `processing/topics/roads_bikelanes/helper/access_restriction.lua` (`allowed_service`)
       alley = 'service_alley',
       driveway = 'service_driveway',
       emergency_access = 'service_emergency_access',
@@ -69,7 +68,8 @@ local function road_classification_road_value(tags)
       road_value = 'service_road'
     end
 
-    -- Fallback. Only service ways with own bike infrastructure get here, see access_restriction.lua
+    -- Other `service` values are public only with bike infrastructure or `bicycle=designated`
+    -- (`helper/access_restriction.lua`).
     road_value = road_value or 'service_uncategorized'
   end
 

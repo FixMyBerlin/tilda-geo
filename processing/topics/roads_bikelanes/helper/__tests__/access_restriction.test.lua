@@ -274,7 +274,7 @@ describe('access_restriction', function()
       { 'traffic_sign', 'DE:237' }, { 'traffic_sign', 'DE:239,1022-10' }, { 'traffic_sign', 'DE:1022-10' },
       { 'traffic_sign', 'DE:240' }, { 'traffic_sign', 'DE:241-30' }, { 'traffic_sign', 'DE:242.1' },
       { 'traffic_sign', 'DE:244.1' }, { 'traffic_sign', 'DE:1020-30' }, { 'traffic_sign', '237' }, { 'traffic_sign', 'none' },
-      { 'traffic_sign:forward', 'DE:240' }, { 'oneway', 'yes' },
+      { 'traffic_sign:forward', 'DE:240' }, { 'traffic_sign:backward', 'DE:240' }, { 'oneway', 'yes' },
       { 'bicycle_road', 'yes' }, { 'vehicle', 'destination' }, { 'motor_vehicle', 'yes' },
       { 'cycleway', 'track' }, { 'cycleway', 'lane' }, { 'cycleway', 'link' }, { 'cycleway', 'crossing' },
       { 'cycleway', 'shared_lane' }, { 'cycleway', 'share_busway' }, { 'cycleway', 'opposite_track' },

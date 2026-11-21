@@ -24,7 +24,7 @@ local function build_public_tags(segment, motor_context, context)
     source_id = segment.source_id,
     road = segment.road or shared_result_tags.road,
     parent_road = sanitized_tags.parent_road,
-    access_bicycle = inclusion_rules.access_bicycle(segment, segment.side, context.object_tags),
+    access_bicycle = inclusion_rules.access_bicycle(segment, context.object_tags),
     offset = sanitized_tags.offset,
     surface = sanitized_tags.surface,
     smoothness = sanitized_tags.smoothness,

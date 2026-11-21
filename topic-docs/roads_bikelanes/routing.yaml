@@ -111,8 +111,8 @@ attributes:
     description: >-
       Aufgelöster Fahrrad-Zugang (OSM-Kette `bicycle` → `vehicle` → `access`,
       Allowlist). Kein Roh-OSM-Wert. Leer: kein Zugangs-Tag, Radfahren ist erlaubt.
-      Kanten mit `no`, `destination`, `private`, `customers`, `delivery` oder
-      `permit` sind im Graphen enthalten, Radfahren ist dort aber nicht erlaubt:
+      Kanten mit `no`, `destination`, `private`, `customers`, `delivery`,
+      `permit` oder `agricultural_or_forestry` sind im Graphen enthalten, Radfahren ist dort aber nicht erlaubt:
       Router filtern sie selbst. Auf Radinfrastruktur an der Fahrbahn-Mittellinie
       (`side=left`/`right`) leer.
     values:
@@ -124,7 +124,7 @@ attributes:
         label: Geduldet
       - value: use_sidepath
         label: Benutzungspflichtiger Radweg daneben
-        description: OSM-Wert auf der Fahrbahn. Neben der Fahrbahn liegt ein benutzungspflichtiger Radweg ([Zeichen 237 (Radweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:237), [Zeichen 240 (Gemeinsamer Geh- und Radweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:240) oder [Zeichen 241 (Getrennter Rad- und Gehweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:241)), auf der Fahrbahn ist Radfahren deshalb nicht erlaubt. Kante bleibt im Graphen.
+        description: OSM-Wert auf der Fahrbahn. Neben der Fahrbahn liegt ein benutzungspflichtiger Radweg ([Zeichen 237 (Radweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:237), [Zeichen 240 (Gemeinsamer Geh- und Radweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:240) oder [Zeichen 241 (Getrennter Rad- und Gehweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:241)). Die Kante zählt als routbar, ein Router sollte aber den Radweg daneben bevorzugen.
       - value: optional_sidepath
         label: Radweg daneben, nicht benutzungspflichtig
         description: OSM-Wert auf der Fahrbahn. Neben der Fahrbahn liegt ein Radweg ohne Benutzungspflicht, Radfahren auf der Fahrbahn ist erlaubt. Ein Gehweg mit [Zeichen 1022-10 (Radfahrer frei)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:1022-10) gehört nicht dazu, der wird auf dem Gehweg getaggt.

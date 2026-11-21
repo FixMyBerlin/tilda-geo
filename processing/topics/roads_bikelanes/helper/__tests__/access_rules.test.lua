@@ -5,20 +5,22 @@
 -- reason in the commit message.
 --
 -- Columns:
--- - `bikelanes`: the way is processed at all (`exit_processing`): bikelanes, todos, presence,
---   bikelane routing edges
+-- - `bikelanes`: the way passes `exit_processing` and is not restricted at level `way`: bikelanes,
+--   todos, presence, bikelane routing edges
 -- - `roads`: the way also gets a `roads` / `roadsPathClasses` row and its carriageway or path
 --   routing edge
 --
 -- Rules:
 -- - `access` (or `foot` on a footway) in `no|private|delivery|permit` drops the way,
 --   `destination|customers` drops only the `roads` row.
--- - `bicycle=designated` (resolved via `bicycle`, `vehicle`) lifts every one of these values.
+-- - `bicycle=designated` (resolved via `bicycle`, `vehicle`, `access`) lifts every one of these values.
 -- - `yes`, `permissive`, `discouraged` and `dismount` lift `no`, `destination` and `customers`, not
 --   `private|delivery|permit`.
 -- - `use_sidepath` and `optional_sidepath` lift nothing: like `cycleway=separate` they point to a
 --   path next to the way.
 -- - `bicycle=no` on a cycleway always drops the way; nothing lifts it.
+-- - `service` (except `alley`), `indoor=yes` and `informal=yes` are lifted by bike infrastructure of the
+--   way itself after the categorisation; see `access_restriction.test.lua`.
 -- - Temporary closures (`access=no` with Baustelle/Sperrung text) are lifecycle, not access:
 --   `transform_lifecycle_tags` runs first, see `exit_processing.test.lua`.
 

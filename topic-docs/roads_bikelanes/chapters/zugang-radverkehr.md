@@ -16,7 +16,9 @@ Der Wert kommt aus der OSM-Kette `bicycle`, sonst `vehicle`, sonst `access`. Es 
 | `yes`, `designated`, `permissive`, `use_sidepath`, `optional_sidepath`, `discouraged`, `dismount` | erlaubt       | ja                                          |
 | `no`, `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry`     | nicht erlaubt | nur zur Information, der Router filtert sie |
 
-Die Liste der erlaubten Werte steht genau einmal im Code (`routable_bicycle_access` in `helper/sanitize_access_tags.lua`).
+`use_sidepath` und `optional_sidepath` zählen als erlaubt: Sie stehen auf der Fahrbahn und verweisen auf einen Radweg daneben. Ein Router sollte diesen Radweg bevorzugen, bei `use_sidepath` ist er benutzungspflichtig.
+
+Die Liste der erlaubten Werte steht in `routable_bicycle_access` in `helper/sanitize_access_tags.lua`.
 
 ## Beispiele
 
@@ -32,7 +34,7 @@ Radinfrastruktur, die an der Fahrbahn-Mittellinie gemappt ist (`side=left` oder 
 
 - Wege mit `access`, `foot` (auf Fußwegen) oder `bicycle` (auf Radwegen) `private`, `delivery` oder `permit`, außer bei `bicycle=designated` (ausgeschilderter Radweg).
 - Wege mit `service=*` außer `alley`, wenn sie keine eigene Radinfrastruktur haben.
-- Wege mit dauerhaftem `access=no` (auf Fußwegen auch `foot=no`), außer Radfahren ist auf dem Weg selbst ausdrücklich erlaubt: `bicycle` oder `vehicle` ist `yes`, `designated`, `permissive`, `discouraged` oder `dismount`. `use_sidepath` und `optional_sidepath` zählen nicht. Sie verweisen wie `cycleway=separate` auf einen Weg daneben. Mit `access=no` sind das meist gesperrte Straßen an Baustellen.
+- Wege mit dauerhaftem `access=no` (auf Fußwegen auch `foot=no`), außer Radfahren ist auf dem Weg selbst ausdrücklich erlaubt: der aufgelöste Wert (`bicycle`, sonst `vehicle`, sonst `access`) ist `yes`, `designated`, `permissive`, `discouraged` oder `dismount`. `use_sidepath` und `optional_sidepath` zählen nicht. Sie verweisen wie `cycleway=separate` auf einen Weg daneben. Mit `access=no` sind das meist gesperrte Straßen an Baustellen.
 - `bicycle=no` auf einem Radweg schließt ihn aus. Ist der Radweg wegen einer Baustelle oder Sperrung zu (Text in `description`, `note`, `fixme` oder `access:reason`), wird er stattdessen als `lifecycle` geführt. Andere Fälle sind sehr selten und fast immer Tagging-Fehler.
 - Fahrbahn- und Wege-Kanten von Wegen, die keine Zeile in `roads` / `roadsPathClasses` haben: `access=destination` oder `customers` ohne Erlaubnis für Radfahrende, `indoor=yes` und `informal=yes` ohne eigene Radinfrastruktur. Radinfrastruktur dieser Wege bleibt erhalten.
 - Autobahnen und Schnellstraßen (`motorway`, `trunk`).

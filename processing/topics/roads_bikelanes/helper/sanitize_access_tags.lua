@@ -1,7 +1,7 @@
 local SET = require('topics.helper.sets')
 
--- Tag-only access resolution for roads_bikelanes / routing (chain resolve + agricultural_or_forestry
--- normalisation).
+-- Access values of roads_bikelanes and routing, from tags only: resolve the OSM fallback chain,
+-- collapse agricultural/forestry, keep only the published values.
 
 -- OSM access fallback chains per mode, e.g. motor_vehicle falls back to vehicle then access.
 local access_chain = {
@@ -54,19 +54,17 @@ local function normalize(value)
   return value
 end
 
--- Bicycle access values under which cycling is allowed. This is the filter a router applies on the
--- published `access_bicycle`: an edge whose `access_bicycle` is empty (no access tag) or in this set
--- is routable, every value of `not_routable_bicycle_access` is on the graph but cycling is not
--- allowed. An edge with any other value is not on the graph (`routing_infra/inclusion_rules.lua`). `access_restriction.lua` uses the set for the explicit
--- permission that lifts `access=destination` / `customers`.
-local routable_bicycle_access = SET.set({
-  'yes', 'designated', 'permissive', 'use_sidepath', 'optional_sidepath', 'discouraged', 'dismount',
-})
-
--- Routable values that open the way itself for bicycles (riding or pushing). `use_sidepath` and
--- `optional_sidepath` are not among them: like `cycleway=separate` they point to a path next to the
--- way and say nothing about the way. On `access=no` they are mostly closed roads at construction sites.
+-- Bicycle access values that allow cycling on the way itself (riding or pushing). They lift
+-- `access=no`, `destination` and `customers` (`access_restriction.lua`).
 local on_way_bicycle_access = SET.set({ 'yes', 'designated', 'permissive', 'discouraged', 'dismount' })
+
+-- Bicycle access values under which cycling is allowed: an edge whose `access_bicycle` is empty or in
+-- this set is routable. `use_sidepath` and `optional_sidepath` are on the carriageway and point, like
+-- `cycleway=separate`, to a path next to it; they do not lift any access restriction.
+local routable_bicycle_access = SET.join_sets({
+  on_way_bicycle_access,
+  SET.set({ 'use_sidepath', 'optional_sidepath' }),
+})
 
 --- Cycling is explicitly allowed on the way itself: the resolved `bicycle` value
 --- (`bicycle` -> `vehicle` -> `access`) is one of `on_way_bicycle_access`. Lifts `access=no`,
@@ -82,10 +80,11 @@ end
 ---@param tags OsmTags
 ---@return boolean
 local function bicycle_designated(tags)
-  return normalize((resolve(tags, 'bicycle'))) == 'designated'
+  return resolve(tags, 'bicycle') == 'designated'
 end
 
--- Published `access_bicycle` values under which cycling is not allowed.
+-- Published `access_bicycle` values under which cycling is not allowed. The edges stay on the graph,
+-- routers filter them.
 local not_routable_bicycle_access = SET.set({
   'no', 'destination', 'private', 'customers', 'delivery', 'permit', 'agricultural_or_forestry',
 })
@@ -136,5 +135,4 @@ return {
   routable_bicycle_access = routable_bicycle_access,
   bicycle_explicitly_allowed = bicycle_explicitly_allowed,
   bicycle_designated = bicycle_designated,
-  not_routable_bicycle_access = not_routable_bicycle_access,
 }

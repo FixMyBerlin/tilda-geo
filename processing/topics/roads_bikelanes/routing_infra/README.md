@@ -44,9 +44,9 @@ Which ways are not public, and why, is decided once per way by `helper/access_re
 | `way`   | `access` (and `foot` on footway, `bicycle` on cycleway) `private`/`delivery`/`permit` unless `bicycle=designated`; `service=*` except `alley` (and except `bicycle=designated`) | none                                                   | none          | none                    |
 | `roads` | `access` (and `foot` on footway, `bicycle` on cycleway) `destination`/`customers`, unless the resolved `bicycle` is explicitly allowed; `indoor=yes`; `informal=yes`            | no `roads` / `roadsPathClasses` row                    | kept          | none                    |
 
-Precedence `way` > `roads`; `reason` (e.g. `access=destination`) is the strongest one. `access=private` & co. are lifted only by `bicycle=designated` (resolved via `vehicle`), `access=destination|customers` by any routable bicycle value. `service`, `indoor` and `informal` can: if the way has a hint of bike infrastructure (`may_have_bike_infra`: tag check, generous on purpose) and the bikelane categorisation then finds bike infrastructure of its own (`has_own_bike_infra`), the way is public again, including its `roads` row and carriageway / path edge. A way with `level = 'way'` that has no hint, or that the categorisation finds no bike infrastructure on, is written to no table.
+Precedence `way` > `roads`; `reason` (e.g. `access=destination`) is the strongest one. `access=private` & co. are lifted only by `bicycle=designated` (resolved via `vehicle`), `access=destination|customers` by a bicycle value that allows cycling on the way itself (`yes`, `designated`, `permissive`, `discouraged`, `dismount`; not `use_sidepath` / `optional_sidepath`). Bike infrastructure of the way lifts `service`, `indoor` and `informal`: if the way has a hint of bike infrastructure (`may_have_bike_infra`: tag check, generous on purpose) and the bikelane categorisation then finds bike infrastructure of its own (`has_own_bike_infra`), the way is public again, including its `roads` row and carriageway / path edge. A way with `level = 'way'` that has no hint, or that the categorisation finds no bike infrastructure on, is written to no table.
 
-`inclusion_rules.prohibited_highway` (motorway/trunk, own or parent `highway`) is the per-segment guard.
+Per segment, `inclusion_rules` drops motorway and trunk (`prohibited_highway`, own or parent `highway`) and edges with a bicycle access value that is not published (`unpublished_bicycle_access`, e.g. `psv`).
 
 | Condition                                                                         | Result   |
 | --------------------------------------------------------------------------------- | -------- |
@@ -58,12 +58,12 @@ Unlike CQI scoring, **non-indexable categories** (`needsClarification`, `data_no
 
 #### Cycling not allowed: `access_bicycle`
 
-An edge where the resolved `bicycle` access (`bicycle` → `vehicle` → `access`) does not allow cycling (`bicycle=no`, `vehicle=destination`, `vehicle=private`, …) is a normal `routing` edge. It is published as `access_bicycle` (`no`, `destination`, `private`, `customers`, `delivery`, `permit`); the way keeps all its rows in the other tables. Routers decide on `access_bicycle`: an empty value (no access tag) or one of `sanitize_access_tags.routable_bicycle_access` (`yes`, `designated`, `permissive`, `use_sidepath`, `optional_sidepath`, `discouraged`, `dismount`) allows cycling, any other value does not. That set is the only list of routable values. Lanes derived from the centerline (`source_table=bikelanes`, `side=left|right`) do not inherit the carriageway's access.
+An edge where the resolved `bicycle` access (`bicycle` → `vehicle` → `access`) does not allow cycling (`bicycle=no`, `vehicle=destination`, `vehicle=private`, …) is a normal `routing` edge. It is published as `access_bicycle` (`no`, `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry`); the way keeps all its rows in the other tables. Routers decide on `access_bicycle`: an empty value (no access tag) or one of `sanitize_access_tags.routable_bicycle_access` (`yes`, `designated`, `permissive`, `use_sidepath`, `optional_sidepath`, `discouraged`, `dismount`) allows cycling, any other value does not. `use_sidepath` and `optional_sidepath` count as routable, but routers should prefer the path next to the carriageway. Lanes derived from the centerline (`source_table=bikelanes`, `side=left|right`) do not inherit the carriageway's access.
 
 ### Pipeline
 
 ```
-access_restriction (per way) → build_segments → inclusion_rules (prohibited_highway) → resolve_motor_road_context → build_public_tags → routing
+access_restriction (per way) → build_segments → inclusion_rules (prohibited_highway, unpublished_bicycle_access) → resolve_motor_road_context → build_public_tags → routing
 ```
 
 `segment.tags` of carriageway and path edges is the raw OSM way, for the two steps in the middle. `build_public_tags` never publishes from it: those edges take `shared_result_tags` (same values as `roads` / `roadsPathClasses`), bikelane edges take their row from `extract_bikelanes`.

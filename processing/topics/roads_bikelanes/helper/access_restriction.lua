@@ -5,14 +5,8 @@ local has_tag_with_prefix = require('topics.helper.has_tag_with_prefix')
 local sanitize_access_tags = require('topics.roads_bikelanes.helper.sanitize_access_tags')
 
 -- The one place that decides which ways are not public, and why. Tags only, no geometry: this
--- runs for every `highway` way, so keep it cheap and allocation-free for public ways.
---
--- Callers:
--- - `roads_bikelanes_ways.lua` / `roads_bikelanes_highway_areas.lua` (right after `exit_processing`)
--- - `roads_bikelanes_roads.lua` and `routing_infra/build_segments.lua` read `context.restriction`
--- Do not copy these value lists anywhere else. `access=no` (and `foot=no` on footways,
--- `bicycle=no` on cycleways) is decided in `exit_processing`: temporary closures are turned into
--- `lifecycle` by `transform_lifecycle_tags` before, what stays is permanent.
+-- runs for every `highway` way, so keep it cheap and allocation-free for public ways. Do not copy
+-- these value lists anywhere else. Only `access=no` is decided earlier, in `exit_processing`.
 --
 -- Levels, strongest first:
 -- - `way`:     no public row at all (bikelanes, roads, roadsPathClasses, routing, sidepath source
@@ -79,18 +73,15 @@ local function access_tag_restriction(tags)
   return nil
 end
 
--- `highway=service + service=<value>`: skip all values except `alley`. The key can have random
--- values, we mainly want to skip
--- - 'driveway' which we consider implicitly private
--- - 'parking_aisle' which we do not consider part of the road network (they need a regular service highway if other roads connect)
--- - 'emergency_access' which we consider a special kind of driveway
--- - 'drive-through' which we do not consider part of the road network; and which results in false positives for our oneway-plus layer
+-- `highway=service + service=<value>`: every value except `alley` is not public. Mainly:
+-- - `driveway`: implicitly private
+-- - `parking_aisle`: not part of the road network (a connecting road needs a plain `highway=service`)
+-- - `emergency_access`: a special kind of driveway
+-- - `drive-through`: not part of the road network, and false positives in the oneway layer
 --
 -- Exception: a signposted cycle route (`bicycle=designated`) is part of the bicycle network even
 -- without a bikelane category. Any other bike infrastructure lifts the restriction in stage 3
 -- (`after_categorisation`).
---
--- REMINDER: Keep this in sync with `processing/topics/roads_bikelanes/roads/road_classification_road_value.lua`
 local allowed_service = SET.set({ 'alley' })
 
 ---@param tags OsmTags
@@ -154,7 +145,10 @@ local function may_have_bike_infra(tags)
   if bicycle == 'yes' and (highway == 'footway' or highway == 'path' or highway == 'pedestrian') then return true end
   if bicycle == 'yes' and tags.segregated ~= nil then return true end -- footAndCyclewayShared / Segregated on any class
   if tags.bicycle_road == 'yes' then return true end
-  if has_bike_traffic_sign(tags.traffic_sign) or has_bike_traffic_sign(tags['traffic_sign:forward']) then
+  if has_bike_traffic_sign(tags.traffic_sign)
+    or has_bike_traffic_sign(tags['traffic_sign:forward'])
+    or has_bike_traffic_sign(tags['traffic_sign:backward'])
+  then
     return true
   end
   -- `bicycle:lanes=…|designated|…`: a bike lane between the motor vehicle lanes.
