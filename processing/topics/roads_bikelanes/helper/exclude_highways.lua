@@ -1,18 +1,20 @@
 local SET = require('topics.helper.sets')
 local highway_classes = require('topics.helper.highway_classes')
+local sanitize_access_tags = require('topics.roads_bikelanes.helper.sanitize_access_tags')
 
 local exclude_highways = {
   -- Permanent closures only: temporary ones are turned into `lifecycle` by `transform_lifecycle_tags`
-  -- before this runs. All other access values are decided by `helper/access_restriction.lua`.
+  -- before this runs. `access=no` (`foot=no` on a footway) is an override, not a closure, when cycling
+  -- is explicitly allowed, e.g. a forest track with `access=no + bicycle=yes` or a Fahrradstraße with
+  -- `access=no + bicycle=designated`. `bicycle=no` on a cycleway always closes it. All other access
+  -- values are decided by `helper/access_restriction.lua`; the decision table is
+  -- `__tests__/access_rules.test.lua`.
   by_access_no = function(tags)
-    if tags.access == 'no' then
-      return true
-    end
-    if tags.highway == 'footway' and tags.foot == 'no' then
-      return true
-    end
     if tags.highway == 'cycleway' and tags.bicycle == 'no' then
       return true
+    end
+    if tags.access == 'no' or (tags.highway == 'footway' and tags.foot == 'no') then
+      return not sanitize_access_tags.bicycle_explicitly_allowed(tags)
     end
 
     return false

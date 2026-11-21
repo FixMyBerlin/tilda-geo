@@ -27,7 +27,9 @@ local sanitize_access_tags = require('topics.roads_bikelanes.helper.sanitize_acc
 ---@field reason string the tag that caused it, e.g. `access=destination`
 ---@field may_have_bike_infra boolean tag hint, only set for reasons that own bike infrastructure can lift (`service`, `indoor`, `informal`)
 
--- `access` / `foot` / `bicycle` values that take the way out of all public tables.
+-- `access` / `foot` / `bicycle` values that take the way out of all public tables, unless the way is a
+-- signposted cycle route (`bicycle=designated`). `bicycle=yes` does not lift them: `access=private +
+-- bicycle=yes` is mostly a private service way.
 local way_access = SET.set({ 'private', 'delivery', 'permit' })
 
 -- Values that only take it out of `roads` / `roadsPathClasses`, unless bicycle is explicitly allowed.
@@ -51,20 +53,13 @@ local function find_access_value(tags, values)
   return nil, nil
 end
 
----@param tags OsmTags
----@return boolean
-local function bicycle_explicitly_allowed(tags)
-  local value = sanitize_access_tags.normalize((sanitize_access_tags.resolve(tags, 'bicycle')))
-  return value ~= nil and sanitize_access_tags.routable_bicycle_access[value] == true
-end
-
 --- Restriction from the access tags only (`access`, and `foot` / `bicycle` on the highway classes
 --- named there). These are never lifted by bike infrastructure.
 ---@param tags OsmTags
 ---@return AccessRestriction|nil
 local function access_tag_restriction(tags)
   local key, value = find_access_value(tags, way_access)
-  if key then
+  if key and not sanitize_access_tags.bicycle_designated(tags) then
     return { level = 'way', reason = key .. '=' .. value, may_have_bike_infra = false }
   end
 
@@ -72,7 +67,7 @@ local function access_tag_restriction(tags)
   if key then
     -- `bicycle=yes` & co. on an `access=destination` way: cycling is explicitly allowed, so the
     -- way is public (and has a `roads` row for the routing edge to join).
-    if bicycle_explicitly_allowed(tags) then
+    if sanitize_access_tags.bicycle_explicitly_allowed(tags) then
       return nil
     end
     return { level = 'roads', reason = key .. '=' .. value, may_have_bike_infra = false }

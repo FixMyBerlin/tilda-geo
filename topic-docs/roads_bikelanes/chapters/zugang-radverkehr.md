@@ -30,9 +30,9 @@ Radinfrastruktur, die an der Fahrbahn-Mittellinie gemappt ist (`side=left` oder 
 
 ## Nicht in `routing`
 
-- Wege mit `access`, `foot` (auf Fußwegen) oder `bicycle` (auf Radwegen) `private`, `delivery` oder `permit`.
+- Wege mit `access`, `foot` (auf Fußwegen) oder `bicycle` (auf Radwegen) `private`, `delivery` oder `permit`, außer bei `bicycle=designated` (ausgeschilderter Radweg).
 - Wege mit `service=*` außer `alley`, wenn sie keine eigene Radinfrastruktur haben.
-- Wege mit dauerhaftem `access=no`.
+- Wege mit dauerhaftem `access=no` (auf Fußwegen auch `foot=no`), außer Radfahren ist ausdrücklich erlaubt (`bicycle` oder `vehicle` mit einem Wert aus der ersten Zeile der Tabelle). `bicycle=no` auf einem Radweg schließt ihn immer aus.
 - Fahrbahn- und Wege-Kanten von Wegen, die keine Zeile in `roads` / `roadsPathClasses` haben: `access=destination` oder `customers` ohne Erlaubnis für Radfahrende, `indoor=yes` und `informal=yes` ohne eigene Radinfrastruktur. Radinfrastruktur dieser Wege bleibt erhalten.
 - Autobahnen und Schnellstraßen (`motorway`, `trunk`).
 

@@ -63,6 +63,22 @@ local routable_bicycle_access = SET.set({
   'yes', 'designated', 'permissive', 'use_sidepath', 'optional_sidepath', 'discouraged', 'dismount',
 })
 
+--- Cycling is explicitly allowed: the resolved `bicycle` value (`bicycle` -> `vehicle` -> `access`) is
+--- one of `routable_bicycle_access`.
+---@param tags OsmTags
+---@return boolean
+local function bicycle_explicitly_allowed(tags)
+  local value = normalize((resolve(tags, 'bicycle')))
+  return value ~= nil and routable_bicycle_access[value] == true
+end
+
+--- The resolved `bicycle` value is `designated`: a signposted cycle route.
+---@param tags OsmTags
+---@return boolean
+local function bicycle_designated(tags)
+  return normalize((resolve(tags, 'bicycle'))) == 'designated'
+end
+
 -- Published `access_bicycle` values under which cycling is not allowed.
 local not_routable_bicycle_access = SET.set({
   'no', 'destination', 'private', 'customers', 'delivery', 'permit', 'agricultural_or_forestry',
@@ -112,5 +128,7 @@ return {
   sanitize = sanitize,
   sanitized_access = sanitized_access,
   routable_bicycle_access = routable_bicycle_access,
+  bicycle_explicitly_allowed = bicycle_explicitly_allowed,
+  bicycle_designated = bicycle_designated,
   not_routable_bicycle_access = not_routable_bicycle_access,
 }

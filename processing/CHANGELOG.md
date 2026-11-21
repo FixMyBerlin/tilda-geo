@@ -11,6 +11,8 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 - `highway=service` ways with a `service=*` other than `alley` are public when they have bike infrastructure of their own, e.g. `traffic_sign=DE:240` (`footAndCyclewayShared_*`).
 - `indoor=yes` and `informal=yes` ways with bike infrastructure of their own are public in `roads` / `roadsPathClasses` too (they were already in `bikelanes`).
 - A way that is not public for `roads` / `roadsPathClasses` (`indoor`, `informal`, `access=destination|customers`) no longer has a carriageway edge in `routing` either, even with an explicit `bicycle` tag.
+- `access=no` (also `foot=no` on a footway) no longer drops a way when cycling is explicitly allowed (`bicycle`, else `vehicle`, is `yes`, `designated`, `permissive`, …), e.g. a forest track with `access=no` + `bicycle=yes` or a Fahrradstraße with `access=no` + `bicycle=designated`. `bicycle=no` on a cycleway still drops it. Refs tilda-geo#409, radinfra.de#15.
+- `access=private|delivery|permit` (also `foot` on a footway, `bicycle` on a cycleway) no longer drops a way with `bicycle=designated` (resolved via `vehicle`), e.g. a signposted cycle path (Z240) through a private area. `bicycle=yes` does not lift them.
 - A way whose resolved `bicycle` access does not allow cycling (`bicycle=no`, `vehicle=destination`, `vehicle=private`, …) is public in all four tables, see `routing` below.
 
 ### `bikelanes`: `oneway` without a tag follows the position
