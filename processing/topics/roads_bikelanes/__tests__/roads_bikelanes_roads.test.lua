@@ -21,20 +21,22 @@ local roads_bikelanes_roads = require('topics.roads_bikelanes.roads_bikelanes_ro
 
 describe('roads_bikelanes_roads', function()
   ---@param object_tags table
+  ---@param restriction table|nil
   ---@return table[] cycleways
-  local function run(object_tags)
+  local function run(object_tags, restriction)
     rows.roads, rows.roadsPathClasses, rows.bikeSuitability, rows.todos_lines = {}, {}, {}, {}
     object_tags._type = 'way'
     object_tags._id = 42
     object_tags._length = 100
     local object_geom = {}
-    local cycleways = bikelanes(object_tags, object_geom)
+    local cycleways = bikelanes(object_tags)
     roads_bikelanes_roads({
       object_meta = {},
       object_tags = object_tags,
       object_geom = object_geom,
       shared_result_tags = result_tags(object_tags),
       cycleways = cycleways,
+      restriction = restriction,
     })
     return cycleways
   end
@@ -253,6 +255,21 @@ describe('roads_bikelanes_roads', function()
         assert.is_nil(row.tags._todo_list, name)
       end
     end
+  end)
+
+  describe('restricted ways', function()
+    it('level `roads` writes no roads, roadsPathClasses, bikeSuitability or todo row', function()
+      run({ highway = 'residential', width = '0', ['cycleway:right'] = 'lane' }, { level = 'roads', reason = 'access=destination' })
+      run({ highway = 'footway', width = '0' }, { level = 'roads', reason = 'indoor=yes' })
+      for _, name in ipairs({ 'roads', 'roadsPathClasses', 'bikeSuitability', 'todos_lines' }) do
+        assert.are.equal(0, #rows[name], name)
+      end
+    end)
+
+    it('public ways write the roads row', function()
+      run({ highway = 'residential' })
+      assert.are.equal(1, #rows.roads)
+    end)
   end)
 
   describe('`oneway=-1`', function()

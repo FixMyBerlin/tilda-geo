@@ -104,17 +104,18 @@ attributes:
     ref: roads.width
   - key: access_bicycle
     label: Zugang Radverkehr
+    chapterRefs:
+      - chapterId: zugang-radverkehr
     description: >-
       Aufgelöster Fahrrad-Zugang (OSM-Kette `bicycle` → `vehicle` → `access`,
-      Allowlist). Kein Roh-OSM-Wert. Router können `use_sidepath` und `dismount`
-      am Graphen entscheiden; die Kanten bleiben enthalten. Auf Radinfrastruktur,
-      die an der Fahrbahn-Mittellinie gemappt ist (`side=left`/`right`), leer: der
-      Zugang der Fahrbahn (z. B. `use_sidepath`) gilt nicht für den Radweg selbst.
+      Allowlist). Kein Roh-OSM-Wert. Leer: kein Zugangs-Tag, Radfahren ist erlaubt.
+      Kanten mit `no`, `destination`, `private`, `customers`, `delivery` oder
+      `permit` sind im Graphen enthalten, Radfahren ist dort aber nicht erlaubt:
+      Router filtern sie selbst. Auf Radinfrastruktur an der Fahrbahn-Mittellinie
+      (`side=left`/`right`) leer.
     values:
       - value: yes
         label: Ja
-      - value: no
-        label: Nein
       - value: designated
         label: Gebaut / vorgesehen
       - value: permissive
@@ -128,3 +129,26 @@ attributes:
         label: Unerwünscht
       - value: dismount
         label: Absteigen
+      - value: destination
+        label: Anlieger frei
+        description: Radfahren nicht erlaubt (Router filtern die Kante), außer für Anlieger.
+      - value: private
+        label: Privat
+        description: Radfahren nicht erlaubt (Router filtern die Kante).
+      - value: customers
+        label: Kunden
+        description: Radfahren nicht erlaubt (Router filtern die Kante), außer für Kunden.
+      - value: delivery
+        label: Lieferverkehr
+        description: Radfahren nicht erlaubt (Router filtern die Kante), außer für den Lieferverkehr.
+      - value: permit
+        label: Mit Genehmigung
+        description: Radfahren nicht erlaubt (Router filtern die Kante), außer mit Genehmigung.
+      - value: agricultural_or_forestry
+        label: Land- und Forstwirtschaft
+        description: >-
+          Radfahren nicht erlaubt (Router filtern die Kante), nur land- oder forstwirtschaftlicher
+          Verkehr (OSM `agricultural`, `forestry` und Kombinationen).
+      - value: no
+        label: Nein
+        description: Radfahren nicht erlaubt (Router filtern die Kante).

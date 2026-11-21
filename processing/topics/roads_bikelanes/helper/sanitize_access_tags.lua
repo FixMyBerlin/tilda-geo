@@ -16,14 +16,15 @@ local access_chain = {
 }
 
 --- Raw OSM access value for `mode`, resolved via the fallback chain (the explicit tag wins, else the
---- chain). No sanitisation.
+--- chain). No sanitisation. The second return value is the key the value was read from.
 ---@param tags OsmTags
 ---@param mode string
----@return string|nil
+---@return string|nil value
+---@return string|nil key
 local function resolve(tags, mode)
   local value = tags[mode]
   if value then
-    return value
+    return value, mode
   end
   local chain = access_chain[mode]
   if not chain then
@@ -31,7 +32,7 @@ local function resolve(tags, mode)
   end
   for _, key in ipairs(chain) do
     if tags[key] then
-      return tags[key]
+      return tags[key], key
     end
   end
   return nil
@@ -53,18 +54,31 @@ local function normalize(value)
   return value
 end
 
+-- Bicycle access values under which cycling is allowed. This is the filter a router applies on the
+-- published `access_bicycle`: an edge whose `access_bicycle` is empty (no access tag) or in this set
+-- is routable, every value of `not_routable_bicycle_access` is on the graph but cycling is not
+-- allowed. An edge with any other value is not on the graph (`routing_infra/inclusion_rules.lua`). `access_restriction.lua` uses the set for the explicit
+-- permission that lifts `access=destination` / `customers`.
+local routable_bicycle_access = SET.set({
+  'yes', 'designated', 'permissive', 'use_sidepath', 'optional_sidepath', 'discouraged', 'dismount',
+})
+
+-- Published `access_bicycle` values under which cycling is not allowed.
+local not_routable_bicycle_access = SET.set({
+  'no', 'destination', 'private', 'customers', 'delivery', 'permit', 'agricultural_or_forestry',
+})
+
 -- Allowlisted values we keep per mode (after normalisation). Anything else -> nil.
--- `bicycle` is the published `access_bicycle` set (includes `no`). The routing
--- keep-on-graph list is separate: `routing_infra/inclusion_rules.lua` `allowed_bicycle_access`
--- (same values minus `no`).
+-- `bicycle` is the published `access_bicycle` set: the routable values plus the ones that do not
+-- allow cycling.
 local allowed_values = {
   motor_vehicle = SET.set({
     'yes', 'no', 'permissive', 'private', 'customers', 'delivery', 'permit', 'destination',
     'agricultural_or_forestry',
   }),
-  bicycle = SET.set({
-    'yes', 'no', 'designated', 'permissive', 'use_sidepath', 'optional_sidepath', 'discouraged',
-    'dismount',
+  bicycle = SET.join_sets({
+    routable_bicycle_access,
+    not_routable_bicycle_access,
   }),
 }
 
@@ -89,7 +103,7 @@ end
 ---@param mode string
 ---@return string|nil
 local function sanitized_access(tags, mode)
-  return sanitize(normalize(resolve(tags, mode)), mode)
+  return sanitize(normalize((resolve(tags, mode))), mode)
 end
 
 return {
@@ -97,4 +111,6 @@ return {
   normalize = normalize,
   sanitize = sanitize,
   sanitized_access = sanitized_access,
+  routable_bicycle_access = routable_bicycle_access,
+  not_routable_bicycle_access = not_routable_bicycle_access,
 }

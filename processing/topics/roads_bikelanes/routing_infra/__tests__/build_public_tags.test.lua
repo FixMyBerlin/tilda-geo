@@ -29,7 +29,7 @@ describe('build_public_tags', function()
 
     local rows = {}
     for _, segment in ipairs(build_segments(context)) do
-      if not inclusion_rules.exclude_segment(segment.tags) then
+      if not inclusion_rules.prohibited_highway(segment.tags) then
         local motor_context = resolve_motor_road_context(segment, context)
         table.insert(rows, build_public_tags(segment, motor_context, context))
       end

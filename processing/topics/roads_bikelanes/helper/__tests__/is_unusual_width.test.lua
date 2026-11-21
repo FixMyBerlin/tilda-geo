@@ -83,7 +83,7 @@ describe('is_unusual_width', function()
 
     it('is written for a separate cycleway', function()
       local tags = { highway = 'cycleway', width = '0', _id = 1, _type = 'way', _length = 100 }
-      local result = bikelanes(tags, { tags = tags, id = 1, type = 'way' })
+      local result = bikelanes(tags)
       assert.are.equal(result[1]._todo_list.unusual_width, 'prio2')
       assert.is_nil(result[1].width)
     end)
@@ -98,7 +98,7 @@ describe('is_unusual_width', function()
         _type = 'way',
         _length = 100,
       }
-      local result = bikelanes(tags, { tags = tags, id = 2, type = 'way' })
+      local result = bikelanes(tags)
       local found = false
       for _, row in ipairs(result) do
         if row._side == 'right' then

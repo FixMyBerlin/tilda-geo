@@ -18,7 +18,6 @@ local SANITIZE_ROAD_TAGS = require('topics.roads_bikelanes.helper.sanitize_road_
 local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
 local extract_public_tags = require('topics.helper.extract_public_tags')
 local CLEANER = require('topics.helper.sanitize_cleaner')
-local LOG_ERROR = require('topics.roads_bikelanes.roads_bikelanes_errors')
 local to_semicolon_list = require('topics.helper.to_semicolon_list')
 local DESC = require('topics.helper.tilda_description')
 local derive_traffic_mode = require('topics.roads_bikelanes.bikelanes.helper.derive_traffic_mode')
@@ -50,21 +49,20 @@ local categorize_bikelane = bikelane_categories.categorize_bikelane
 ---@param result_tags OsmTags
 ---@param object_tags OsmTags
 ---@param log_overrides OsmTags
----@param object_geom OsmGeometry
-local function merge_bikelane_public_tags(result_tags, object_tags, log_overrides, object_geom)
+local function merge_bikelane_public_tags(result_tags, object_tags, log_overrides)
   local public_result_tags = extract_public_tags(result_tags)
   local cleaned_public, replaced_tags =
     CLEANER.separate_tags(public_result_tags, object_tags, log_overrides)
   for k in pairs(public_result_tags) do
     result_tags[k] = cleaned_public[k]
   end
-  LOG_ERROR.SANITIZED_VALUE(object_tags._type, object_tags._id, object_geom, replaced_tags, 'bikelanes')
+  -- Tags that were replaced by their sanitised value, for the bikelanes writer to log.
+  result_tags._replaced_tags = replaced_tags
 end
 
 ---@param object_tags OsmTags
----@param object_geom OsmGeometry
 ---@return OsmTags[]
-local function bikelanes(object_tags, object_geom)
+local function bikelanes(object_tags)
   ---@type OsmTags[]
   local result_bikelanes = {}
 
@@ -179,8 +177,7 @@ local function bikelanes(object_tags, object_geom)
         merge_bikelane_public_tags(
           result_tags,
           object_tags,
-          SANITIZE_ROAD_TAGS.log_source_overrides(transformed_tags),
-          object_geom
+          SANITIZE_ROAD_TAGS.log_source_overrides(transformed_tags)
         )
 
         local todos = collect_todos(bikelane_todo_categories, transformed_tags, result_tags)

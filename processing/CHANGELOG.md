@@ -4,6 +4,15 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-11
 
+### `roads`, `roadsPathClasses`, `bikelanes`, `routing`: restricted access
+
+- Which ways are not public is decided in one place now (`helper/access_restriction.lua`), for all four tables.
+- `access=destination|customers` (also `foot` on a footway, `bicycle` on a cycleway) no longer takes a way out of `roads` / `roadsPathClasses` when cycling is allowed explicitly (`bicycle`, else `vehicle`, is `yes`, `permissive`, `designated`, …), e.g. `access=destination` with `bicycle=yes`. Before, `routing` had the carriageway or path edge of such a way without a row in `roads` / `roadsPathClasses` to join.
+- `highway=service` ways with a `service=*` other than `alley` are public when they have bike infrastructure of their own, e.g. `traffic_sign=DE:240` (`footAndCyclewayShared_*`).
+- `indoor=yes` and `informal=yes` ways with bike infrastructure of their own are public in `roads` / `roadsPathClasses` too (they were already in `bikelanes`).
+- A way that is not public for `roads` / `roadsPathClasses` (`indoor`, `informal`, `access=destination|customers`) no longer has a carriageway edge in `routing` either, even with an explicit `bicycle` tag.
+- A way whose resolved `bicycle` access does not allow cycling (`bicycle=no`, `vehicle=destination`, `vehicle=private`, …) is public in all four tables, see `routing` below.
+
 ### `bikelanes`: `oneway` without a tag follows the position
 
 - Without `oneway` / `oneway:bicycle`, paths next to a road (`*_adjoining`) are `implicit_yes` and paths away from roads (`*_isolated`) `assumed_no`, as in StVO § 2 Abs. 4; `*_adjoiningOrIsolated` keep the category default. A track tagged on the road (`cycleway:<side>=track`) follows the other side of the road instead: `implicit_yes` when that side has cycling infrastructure (lane, track, `separate`, a sidewalk open to bicycles), `assumed_no` when it has none. Before, the category alone decided: `cycleway_adjoining` was `assumed_no`; `footAndCyclewayShared_isolated`, `footAndCyclewaySegregated_isolated` and `footwayBicycleYes_isolated` were `implicit_yes`. In Germany about 6,230 km change to `implicit_yes` and 1,070 km to `assumed_no`. Trade-off and numbers: https://github.com/FixMyBerlin/tilda-geo/pull/424.
@@ -71,6 +80,9 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ### `routing`
 
+- New edges: carriageway and path edges where cycling is not allowed (resolved `bicycle` access `no`, `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry`, e.g. `bicycle=no`, `vehicle=destination`, `vehicle=private`) are in `routing`. They have `access_bicycle` set to that value. Routers filter on `access_bicycle`: empty (no access tag) or `yes`, `designated`, `permissive`, `use_sidepath`, `optional_sidepath`, `discouraged`, `dismount` allows cycling, every other value does not. Motorway and trunk stay out.
+- `access_bicycle` has the new values `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry` (it had `no` before). Lanes on the centerline (`side=left|right`) do not inherit the carriageway access.
+- An edge with a bicycle access value that is not published (e.g. `psv`, `emergency`, `delivery;destination`) is not in `routing`.
 - Carriageway and path edges publish the sanitized values of `roads` / `roadsPathClasses` instead of raw OSM tags. `width` is a number in meters or empty (was the OSM text, e.g. `5,7`, which aborted the export). `surface` uses the same values as `roads` (e.g. `dirt` is now `ground`). `smoothness` is also derived from `surface` and other tags, like in `roads`.
 - `prefix`, `parent_road`, `adjoining_road`, `adjoining_maxspeed` no longer read an OSM tag of the same name. No change in the data: no way in Germany has these tags (2026-10).
 

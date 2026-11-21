@@ -14,11 +14,12 @@ describe('exit_processing', function()
       }))
     end)
 
-    it('exits for disallowed service', function()
-      assert.is_true(EXIT.exit_processing({
-        highway = 'service',
-        service = 'driveway',
-      }))
+    it('leaves restricted access and service ways to access_restriction', function()
+      assert.is_false(EXIT.exit_processing({ highway = 'service', service = 'driveway' }))
+      assert.is_false(EXIT.exit_processing({ highway = 'residential', access = 'private' }))
+      assert.is_false(EXIT.exit_processing({ highway = 'footway', foot = 'delivery' }))
+      assert.is_false(EXIT.exit_processing({ highway = 'footway', indoor = 'yes' }))
+      assert.is_false(EXIT.exit_processing({ highway = 'path', informal = 'yes' }))
     end)
 
     it('exits for disallowed highway class', function()
@@ -32,6 +33,12 @@ describe('exit_processing', function()
         highway = 'residential',
         access = 'no',
       }))
+    end)
+
+    it('exits for foot=no on footways and bicycle=no on cycleways', function()
+      assert.is_true(EXIT.exit_processing({ highway = 'footway', foot = 'no' }))
+      assert.is_true(EXIT.exit_processing({ highway = 'cycleway', bicycle = 'no' }))
+      assert.is_false(EXIT.exit_processing({ highway = 'residential', bicycle = 'no' }))
     end)
   end)
 

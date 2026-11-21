@@ -12,7 +12,7 @@ local to_todo_tags = require('topics.helper.to_todo_tags')
 local categorize_bike_suitability = require('topics.roads_bikelanes.roads.bike_suitability')
 local road_classification_road_value = require('topics.roads_bikelanes.roads.road_classification_road_value')
 local transform_highway_path_with_foot_or_bicycle_no = require('topics.roads_bikelanes.helper.transform_tags.transform_highway_path_with_foot_or_bicycle_no')
-local excluded_from_roads_tables = require('topics.roads_bikelanes.helper.excluded_from_roads_tables')
+local category_is_sidepath = require('topics.roads_bikelanes.bikelanes.categories.category_is_sidepath')
 local self_bikelane_has_todo = require('topics.roads_bikelanes.helper.self_bikelane_has_todo')
 local SANITIZE_ROAD_TAGS = require('topics.roads_bikelanes.helper.sanitize_road_tags')
 local CLEANER = require('topics.helper.sanitize_cleaner')
@@ -75,8 +75,12 @@ local function roads_bikelanes_roads(context)
   end
   LOG_ERROR.SANITIZED_VALUE(object_tags._type, object_tags._id, object_geom, replaced_tags, 'roads_bikelanes_roads')
 
-  -- Same skip as routing mixedTrafficFoot (join symmetry with roadsPathClasses).
-  if excluded_from_roads_tables(object_tags) then return end
+  -- Skip what `routing` has no path edge for (join symmetry with roadsPathClasses, see
+  -- `build_segments.lua` and `routing_infra/README.md` § Join symmetry): ways of restriction level
+  -- `roads`, OSM sidewalks and derived sidepaths.
+  local restriction = context.restriction
+  if restriction and restriction.level == 'roads' then return end
+  if category_is_sidepath(object_tags) then return end
 
   -- Lines of the way point in the direction of travel (`LINE_DIRECTION.way_line`); the todo line
   -- below keeps the drawing direction, like the todos of bikelanes.

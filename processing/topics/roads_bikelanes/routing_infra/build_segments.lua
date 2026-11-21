@@ -1,5 +1,8 @@
 -- Enumerates routing edges per `source_table` (`roads`, `bikelanes`, `roadsPathClasses`).
 -- One edge per source object; direction via `oneway` / `oneway_motor` + geometry (README.md).
+-- A way of restriction level `roads` (`context.restriction`, see `helper/access_restriction.lua`)
+-- keeps its bikelane edges as they are. It has no carriageway or path edge: there is no `roads` /
+-- `roadsPathClasses` row to join.
 local merge_table = require('topics.helper.merge_table')
 local default_id = require('topics.helper.default_id')
 local road_classification_road_value = require('topics.roads_bikelanes.roads.road_classification_road_value')
@@ -8,7 +11,7 @@ local reverse_linestring = require('topics.roads_bikelanes.routing_infra.reverse
 local LINE_DIRECTION = require('topics.roads_bikelanes.helper.line_direction')
 local SET = require('topics.helper.sets')
 local HIGHWAYS = require('topics.helper.highway_classes')
-local excluded_from_roads_tables = require('topics.roads_bikelanes.helper.excluded_from_roads_tables')
+local category_is_sidepath = require('topics.roads_bikelanes.bikelanes.categories.category_is_sidepath')
 
 local road_highway_classes = SET.join_sets({
   HIGHWAYS.trunk_motorway_classes,
@@ -119,6 +122,8 @@ local function build_segments(context)
   local virtual_uses_centerline_id = false
   local self_cycleway = nil
   local object_default_id = default_id({ type = object_tags._type, id = object_tags._id })
+  -- Carriageway and path edges join `roads` / `roadsPathClasses`; level `roads` has no such row.
+  local has_roads_row = not (context.restriction and context.restriction.level == 'roads')
 
   for _, cycleway in ipairs(context.cycleways) do
     if cycleway._side == 'self' then
@@ -168,12 +173,19 @@ local function build_segments(context)
     end
   end
 
+  if not has_roads_row then
+    return segments
+  end
+
   if road_highway_classes[object_tags.highway] and not virtual_uses_centerline_id then
     local road_value = context.shared_result_tags.road or road_classification_road_value(object_tags)
     emit_carriageway_edge(segments, object_tags, object_geom, object_default_id, road_value)
   elseif HIGHWAYS.path_classes[object_tags.highway] and not has_virtual_infra and not virtual_uses_centerline_id then
-    -- Path edges always join roadsPathClasses; skip when that table would omit the way.
-    if not excluded_from_roads_tables(object_tags) then
+    -- Path edges always join roadsPathClasses (`source_id` = path `id`); skip when that table would
+    -- omit the way: OSM sidewalks and derived sidepaths (`roads_bikelanes_roads.lua`, same check).
+    -- Not for bikelane edges: `category_is_sidepath` is true when `parent_road` is set, which would
+    -- drop the centerline-derived `footwayBicycleYes*` / `sidewalk:*` virtuals that join `bikelanes`.
+    if not category_is_sidepath(object_tags) then
       emit_path_edge(
         segments,
         object_tags,

@@ -7,6 +7,7 @@ local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
 local LINE_DIRECTION = require('topics.roads_bikelanes.helper.line_direction')
 local reverse_linestring = require('topics.roads_bikelanes.routing_infra.reverse_linestring')
 local pseudo_route_relations = require('topics.roads_bikelanes.route_relations.pseudo_route_relations')
+local LOG_ERROR = require('topics.roads_bikelanes.roads_bikelanes_errors')
 
 local bikelanes_table = roads_bikelanes_tables.bikelanes_table
 local bikelanes_presence_table = roads_bikelanes_tables.bikelanes_presence_table
@@ -52,6 +53,7 @@ local function roads_bikelanes_bikelanes(context)
       -- Geometry stays on the road centerline. Lines point in the riding direction
       -- (see `LINE_DIRECTION.bikelane_reversed`).
       local tags = merge_table(extract_public_tags(cycleway), result_tags)
+      LOG_ERROR.SANITIZED_VALUE(object_tags._type, object_tags._id, object_geom, cycleway._replaced_tags, 'bikelanes')
       local geom = object_geom
       if cycleway._line_reversed then
         geom = reverse_linestring(object_geom)

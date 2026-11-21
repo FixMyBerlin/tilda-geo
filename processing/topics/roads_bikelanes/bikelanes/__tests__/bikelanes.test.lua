@@ -8,7 +8,7 @@ describe('bikelanes', function()
   local function run_bikelanes(input_object)
     input_object.tags._id = input_object.id
     input_object.tags._type = input_object.type
-    return bikelanes(input_object.tags, input_object)
+    return bikelanes(input_object.tags)
   end
 
   describe('Handle `traffic_sign`:', function()
