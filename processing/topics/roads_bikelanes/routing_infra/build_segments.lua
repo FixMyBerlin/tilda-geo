@@ -122,8 +122,6 @@ local function build_segments(context)
   local virtual_uses_centerline_id = false
   local self_cycleway = nil
   local object_default_id = default_id({ type = object_tags._type, id = object_tags._id })
-  -- Carriageway and path edges join the `roads` / `roadsPathClasses` row.
-  local has_roads_row = context.access.in_roads
 
   for _, cycleway in ipairs(context.cycleways) do
     if cycleway._side == 'self' then
@@ -173,7 +171,9 @@ local function build_segments(context)
     end
   end
 
-  if not has_roads_row then
+  -- Carriageway and path edges join the `roads` / `roadsPathClasses` row; without it only the
+  -- bikelane edges above.
+  if not context.access.in_roads then
     return segments
   end
 

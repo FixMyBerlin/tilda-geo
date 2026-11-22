@@ -12,8 +12,6 @@ Jede Kante hat die Geometrie des OSM-Wegs. Ein Weg wird nicht nach Fahrtrichtung
 
 Radinfrastruktur, die an der Fahrbahn gemappt ist (zum Beispiel `cycleway:right=lane`), ist eine eigene Kante auf derselben Geometrie wie die Fahrbahn. Die Linie wird nicht verschoben. `side` sagt, auf welcher Seite die Radinfrastruktur liegt, `offset` den seitlichen Abstand zur Mittellinie (positiv links, negativ rechts). Die Linie zeigt in die Fahrtrichtung der Radinfrastruktur: rechts in Richtung des OSM-Wegs, links dagegen, wenn `cycleway:<side>:oneway` nichts anderes sagt. Auf einer Einbahnstraße zeigen beide Seiten in die Richtung der Fahrbahn.
 
-### Wege in zwei Tabellen
-
 Ein Weg, der in zwei Tabellen steht, ist nur einmal im Graphen. Ein Radweg in `roadsPathClasses` und `bikelanes` oder eine Fahrradstraße in `roads` und `bikelanes` ist eine Kante aus `bikelanes`.
 
 ### Was nicht im Graphen ist
@@ -38,7 +36,3 @@ Der Graph enthält auch Kanten, auf denen Radfahren nicht erlaubt ist, zum Beisp
 | `no`, `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry` | nicht erlaubt |
 
 `use_sidepath` steht auf einer Fahrbahn mit benutzungspflichtigem Radweg daneben. Radfahren auf der Fahrbahn ist dann erlaubt, ein Router sollte aber den Radweg bevorzugen.
-
-## Radinfrastruktur an der Fahrbahn
-
-Radinfrastruktur, die an der Fahrbahn gemappt ist (`side=left` oder `side=right`), hat ein leeres `access_bicycle`. Der Zugang der Fahrbahn gilt nicht für sie: Eine Fahrbahn mit `use_sidepath` oder `no` hat trotzdem einen befahrbaren Radfahrstreifen.
