@@ -4,9 +4,18 @@ title: Zugang Radverkehr im Routing (`access_bicycle`)
 
 ## Was `routing` enthält
 
-`routing` ist ein Graph für Fahrrad-Router. Er baut auf denselben Wegen auf wie `bikelanes`, `roads` und `roadsPathClasses`: Jede Kante gehört zu genau einer Zeile dort (`source_table` und `source_id`), die Werte, die `routing` mitführt, sind dieselben wie dort. Die Geometrie ist für das Routing aufbereitet. Radinfrastruktur, die an der Fahrbahn gemappt ist, ist eine eigene Kante neben der Fahrbahn.
+`routing` ist ein Graph für Fahrrad-Router. Er enthält alle Zeilen aus `bikelanes`, `roads` und `roadsPathClasses`, bis auf die Ausnahmen unten. Jede Kante gehört zu genau einer Zeile dort (`source_table` und `source_id`) und trägt dieselben Werte. Die Geometrie ist für das Routing aufbereitet: Radinfrastruktur, die an der Fahrbahn gemappt ist, ist eine eigene Kante neben der Fahrbahn.
 
-Wege, die TILDA nicht zeigt, fehlen auch im Graphen, zum Beispiel private Wege, Zufahrten ohne Radinfrastruktur oder Mountainbike-Trails. Autobahnen, Schnellstraßen (`motorway`, `trunk`) und die Fahrbahn von Kraftfahrstraßen (`motorroad=yes`) sind nicht enthalten, weil Radfahren dort verboten ist. Ein Radweg, der an einer Kraftfahrstraße gemappt ist, ist als eigene Kante enthalten.
+Ein Weg, der in zwei Tabellen steht, ist nur einmal im Graphen. Ein Radweg in `roadsPathClasses` und `bikelanes` oder eine Fahrradstraße in `roads` und `bikelanes` ist eine Kante aus `bikelanes`.
+
+Diese Zeilen sind nicht im Graphen:
+
+- Autobahnen und Schnellstraßen (`motorway`, `trunk`) und Radinfrastruktur, die an ihnen gemappt ist. Sie stehen in `roads`.
+- Die Fahrbahn von Kraftfahrstraßen (`motorroad=yes`), weil Radfahren dort verboten ist. Sie steht in `roads`. Ein Radweg, der an einer Kraftfahrstraße gemappt ist, ist eine eigene Kante.
+- Kanten mit einem Fahrrad-Zugang, den `access_bicycle` nicht abbilden kann, zum Beispiel `bicycle=limited`. Ein leeres Feld würde „Radfahren erlaubt“ bedeuten.
+- Kurze Wege ohne Anschluss an das übrige Netz und kurze lose Enden.
+
+Wege, die TILDA gar nicht zeigt, fehlen in allen Tabellen und damit auch im Graphen, zum Beispiel private Wege, Zufahrten ohne Radinfrastruktur oder Mountainbike-Trails.
 
 ## Router müssen `access_bicycle` auswerten
 
