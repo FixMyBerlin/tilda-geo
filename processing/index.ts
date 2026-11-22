@@ -66,6 +66,8 @@ async function main() {
   } catch (error) {
     // This `catch` will only trigger if child functions are `await`ed AND file calls a `main()` function. Top level code does not work.
     console.error('[ERROR] Processing failed (catchall)', error)
+    // Exit non-zero so `docker ps -a` shows the failure (the meta row stays 'processing').
+    process.exitCode = 1
   }
 }
 
