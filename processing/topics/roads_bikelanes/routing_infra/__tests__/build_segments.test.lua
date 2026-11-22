@@ -484,7 +484,7 @@ describe('build_segments with a restricted way', function()
     })
   end
 
-  local roads_level = { level = 'roads', reason = 'x=y', may_have_bike_infra = false }
+  local roads_level = { level = 'roads', reason = 'x=y', liftable_by_bike_infra = false }
 
   it('level `roads` keeps the bikelane edge and drops the carriageway edge', function()
     local segments = segments_for(roads_level, 'residential', { right_lane })
@@ -497,7 +497,7 @@ describe('build_segments with a restricted way', function()
   end)
 
   it('level `roads` keeps the bikelane edge of an informal path with infrastructure', function()
-    local segments = segments_for({ level = 'roads', reason = 'informal=yes', may_have_bike_infra = true }, 'path', {
+    local segments = segments_for({ level = 'roads', reason = 'informal=yes', liftable_by_bike_infra = true }, 'path', {
       {
         _id = 'way/20',
         _side = 'self',

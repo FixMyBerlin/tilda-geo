@@ -35,7 +35,7 @@ local function process_roads_bikelanes_way(object)
 
   -- Stage 2: tags only. A `way` restriction without a hint of bike infrastructure is written nowhere.
   local restriction = ACCESS.access_restriction(object_tags)
-  if restriction and restriction.level == 'way' and not restriction.may_have_bike_infra then return end
+  if restriction and restriction.level == 'way' and not restriction.liftable_by_bike_infra then return end
 
   local object_geom = object:as_linestring() -- only compute once
   object_tags._length = round(object_geom:transform(5243):length(), 2) -- used in result_tags but also nested decision

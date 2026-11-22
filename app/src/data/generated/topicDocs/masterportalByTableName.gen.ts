@@ -5272,7 +5272,6 @@ const data = {
           designated: 'Gebaut / vorgesehen',
           permissive: 'Geduldet',
           use_sidepath: 'Benutzungspflichtiger Radweg daneben',
-          optional_sidepath: 'Radweg daneben, nicht benutzungspflichtig',
           discouraged: 'Unerwünscht',
           dismount: 'Absteigen',
           destination: 'Anlieger frei',

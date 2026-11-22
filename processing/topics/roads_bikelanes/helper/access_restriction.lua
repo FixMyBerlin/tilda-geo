@@ -26,7 +26,7 @@ local sanitize_access_tags = require('topics.roads_bikelanes.helper.sanitize_acc
 ---@class AccessRestriction
 ---@field level RestrictionLevel
 ---@field reason string the tag that caused it, e.g. `access=destination`
----@field may_have_bike_infra boolean tag hint, only set for reasons that own bike infrastructure can lift (`service`, `indoor`, `informal`)
+---@field liftable_by_bike_infra boolean own bike infrastructure can lift it: the reason is `service`, `indoor` or `informal` and the tags hint at bike infrastructure (`may_have_bike_infra`). Always false for access tags.
 
 -- Values of the restricting key that take the way out of all public tables. `no` is lifted when
 -- cycling is explicitly allowed (`access=no + bicycle=yes`, a Fahrradstraße with `access=no +
@@ -75,12 +75,12 @@ end
 local function access_tag_restriction(tags)
   local key, value = find_access_value(tags, closed_access)
   if key and not sanitize_access_tags.bicycle_explicitly_allowed(tags) then
-    return { level = 'way', reason = key .. '=' .. value, may_have_bike_infra = false }
+    return { level = 'way', reason = key .. '=' .. value, liftable_by_bike_infra = false }
   end
 
   key, value = find_access_value(tags, way_access)
   if key and not sanitize_access_tags.bicycle_designated(tags) then
-    return { level = 'way', reason = key .. '=' .. value, may_have_bike_infra = false }
+    return { level = 'way', reason = key .. '=' .. value, liftable_by_bike_infra = false }
   end
 
   key, value = find_access_value(tags, roads_access)
@@ -90,7 +90,7 @@ local function access_tag_restriction(tags)
     if sanitize_access_tags.bicycle_explicitly_allowed(tags) then
       return nil
     end
-    return { level = 'roads', reason = key .. '=' .. value, may_have_bike_infra = false }
+    return { level = 'roads', reason = key .. '=' .. value, liftable_by_bike_infra = false }
   end
 
   return nil
@@ -186,13 +186,13 @@ end
 ---@return AccessRestriction|nil
 local function structural_restriction(tags)
   if is_restricted_service(tags) then
-    return { level = 'way', reason = 'service=' .. tags.service, may_have_bike_infra = may_have_bike_infra(tags) }
+    return { level = 'way', reason = 'service=' .. tags.service, liftable_by_bike_infra = may_have_bike_infra(tags) }
   end
   if tags.indoor == 'yes' then
-    return { level = 'roads', reason = 'indoor=yes', may_have_bike_infra = may_have_bike_infra(tags) }
+    return { level = 'roads', reason = 'indoor=yes', liftable_by_bike_infra = may_have_bike_infra(tags) }
   end
   if tags.informal == 'yes' then
-    return { level = 'roads', reason = 'informal=yes', may_have_bike_infra = may_have_bike_infra(tags) }
+    return { level = 'roads', reason = 'informal=yes', liftable_by_bike_infra = may_have_bike_infra(tags) }
   end
   return nil
 end
@@ -231,7 +231,7 @@ end
 ---@param cycleways table[]
 ---@return AccessRestriction|nil
 local function after_categorisation(restriction, object_tags, cycleways)
-  if not restriction or not restriction.may_have_bike_infra then return restriction end
+  if not restriction or not restriction.liftable_by_bike_infra then return restriction end
   if not has_own_bike_infra(cycleways) then return restriction end
   return access_tag_restriction(object_tags)
 end

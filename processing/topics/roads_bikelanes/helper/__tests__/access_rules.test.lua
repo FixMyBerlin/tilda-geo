@@ -11,13 +11,15 @@
 --   routing edge
 --
 -- Rules:
--- - Values are mapped first: `unknown` reads as no tag, `military` as `no`, `residents` as `private`.
+-- - Values are mapped first (`transform_access_values`): `unknown` and `optional_sidepath` read as no
+--   tag, `official` as `designated`, `military` as `no`, `residents` as `private`, a list as its most
+--   open value.
 -- - `access` (or `foot` on a footway) in `no|private|delivery|permit` drops the way,
 --   `destination|customers` drops only the `roads` row.
 -- - `bicycle=designated` (resolved via `bicycle`, `vehicle`, `access`) lifts every one of these values.
 -- - `yes`, `permissive`, `discouraged` and `dismount` lift `no`, `destination` and `customers`, not
 --   `private|delivery|permit`.
--- - `use_sidepath` and `optional_sidepath` lift nothing: like `cycleway=separate` they point to a
+-- - `use_sidepath` lifts nothing: like `cycleway=separate` it points to a
 --   path next to the way.
 -- - `bicycle=no` on a cycleway always drops the way; nothing lifts it.
 -- - `vehicle`, `motor_vehicle` and `bicycle` on other ways never drop a way or its `roads` row:
@@ -71,7 +73,7 @@ local rows = {
   { 'access=no + bicycle=permissive', { highway = 'track', access = 'no', bicycle = 'permissive' }, ALL },
   { 'access=no + bicycle=dismount', { highway = 'footway', access = 'no', bicycle = 'dismount' }, ALL },
   { 'access=no + bicycle=use_sidepath (closed road at a construction site)', { highway = 'tertiary', access = 'no', bicycle = 'use_sidepath', foot = 'use_sidepath' }, NONE },
-  { 'access=no + bicycle=optional_sidepath', { highway = 'secondary', access = 'no', bicycle = 'optional_sidepath' }, NONE },
+  { 'access=no + bicycle=optional_sidepath (read as no tag)', { highway = 'secondary', access = 'no', bicycle = 'optional_sidepath' }, NONE },
 
   -- foot on footways
   { 'footway foot=no', { highway = 'footway', foot = 'no' }, NONE },

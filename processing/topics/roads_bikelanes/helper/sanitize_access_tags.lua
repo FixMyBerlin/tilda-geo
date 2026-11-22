@@ -64,11 +64,11 @@ end
 local on_way_bicycle_access = SET.set({ 'yes', 'designated', 'permissive', 'discouraged', 'dismount' })
 
 -- Bicycle access values under which cycling is allowed: an edge whose `access_bicycle` is empty or in
--- this set is routable. `use_sidepath` and `optional_sidepath` are on the carriageway and point, like
--- `cycleway=separate`, to a path next to it; they do not lift any access restriction.
+-- this set is routable. `use_sidepath` is on the carriageway and points, like
+-- `cycleway=separate`, to a path next to it; it does not lift any access restriction.
 local routable_bicycle_access = SET.join_sets({
   on_way_bicycle_access,
-  SET.set({ 'use_sidepath', 'optional_sidepath' }),
+  SET.set({ 'use_sidepath' }),
 })
 
 --- Cycling is explicitly allowed on the way itself: the resolved `bicycle` value
