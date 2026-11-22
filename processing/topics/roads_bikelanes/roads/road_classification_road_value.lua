@@ -52,6 +52,8 @@ local function road_classification_road_value(tags)
   -- https://taginfo.openstreetmap.org/keys/service#values
   if tags.highway == 'service' then
     local service_mapping = {
+      -- REMINDER: Which of these ways are public is decided by `allowed_service` in
+      -- `helper/access_restriction.lua`; keep both in sync.
       alley = 'service_alley',
       driveway = 'service_driveway',
       emergency_access = 'service_emergency_access',
@@ -68,8 +70,8 @@ local function road_classification_road_value(tags)
       road_value = 'service_road'
     end
 
-    -- Other `service` values are public only with bike infrastructure or `bicycle=designated`
-    -- (`helper/access_restriction.lua`).
+    -- Fallback, in use: a way with another `service` value (e.g. `drive-through`) is public when it has
+    -- bike infrastructure of its own or `bicycle=designated` (`helper/access_restriction.lua`).
     road_value = road_value or 'service_uncategorized'
   end
 

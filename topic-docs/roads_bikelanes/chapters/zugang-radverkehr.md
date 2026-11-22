@@ -2,53 +2,24 @@
 title: Zugang Radverkehr im Routing (`access_bicycle`)
 ---
 
-`access_bicycle` auf `routing` sagt, ob Radfahren auf einer Kante erlaubt ist. Die Kanten sind auch dann im Graphen, wenn Radfahren dort nicht erlaubt ist. Ein Fahrrad-Router muss diese Kanten selbst herausfiltern.
+## Was `routing` enthält
 
-## Auflösung
+`routing` ist ein Graph für Fahrrad-Router. Er baut auf denselben Wegen auf wie `bikelanes`, `roads` und `roadsPathClasses`: Jede Kante gehört zu genau einer Zeile dort (`source_table` und `source_id`), die Werte, die `routing` mitführt, sind dieselben wie dort. Die Geometrie ist für das Routing aufbereitet. Radinfrastruktur, die an der Fahrbahn gemappt ist, ist eine eigene Kante neben der Fahrbahn.
 
-Der Wert kommt aus der OSM-Kette `bicycle`, sonst `vehicle`, sonst `access`. Es zählt der erste Tag, der gesetzt ist. `agricultural`, `forestry` und ihre Kombinationen werden zu `agricultural_or_forestry`. Veröffentlicht werden nur die Werte aus der Tabelle unten (`routable_bicycle_access` und `not_routable_bicycle_access` in `helper/sanitize_access_tags.lua`). Hat eine Kante einen anderen Wert (zum Beispiel `foot` oder `limited`), steht sie nicht im Graphen, weil ein leeres Feld „erlaubt“ bedeuten würde.
+Wege, die TILDA nicht zeigt, fehlen auch im Graphen, zum Beispiel private Wege, Zufahrten ohne Radinfrastruktur oder Mountainbike-Trails. Autobahnen und Schnellstraßen (`motorway`, `trunk`) sind nicht enthalten.
 
-Vorher liest TILDA einige Werte um, auf allen Zugangs-Keys (`helper/transform_tags/transform_access_values.lua`):
+## Router müssen `access_bicycle` auswerten
 
-- `unknown` und `optional_sidepath` zählen wie kein Tag. Bei `optional_sidepath` ist die Fahrbahn normaler Mischverkehr, den Radweg daneben zeigt `cycleway=separate`.
-- `official` zählt wie `designated`.
-- `military`, `emergency`, `psv` und `bus` zählen wie `no`.
-- `residents`, `employees` und `restricted` zählen wie `private`.
-- Bei Listen wie `agricultural;destination` zählt der offenste Wert, hier `destination`.
+Der Graph enthält auch Kanten, auf denen Radfahren nicht erlaubt ist, zum Beispiel eine Fahrbahn mit Radverbot oder eine Anliegerstraße. Sie sind enthalten, damit ein Router selbst entscheiden kann, zum Beispiel für ein Ziel an einer Anliegerstraße. Ein Fahrrad-Router muss sie über `access_bicycle` selbst herausfiltern.
 
-Wege mit `bicycle=mtb` (Mountainbike-Trails) fehlen in allen Tabellen, weil TILDA den Alltagsradverkehr abbildet.
+| `access_bicycle`                                                                              | Radfahren     |
+| --------------------------------------------------------------------------------------------- | ------------- |
+| leer                                                                                          | erlaubt       |
+| `yes`, `designated`, `permissive`, `use_sidepath`, `discouraged`, `dismount`                  | erlaubt       |
+| `no`, `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry` | nicht erlaubt |
 
-Ob ein Weg überhaupt in den Daten steht, entscheidet nur `access` (gilt auch für Fußgänger), auf Fußwegen zusätzlich `foot` und auf Radwegen `bicycle`. `vehicle`, `motor_vehicle` und `bicycle` auf anderen Wegen nehmen keinen Weg heraus. Sie landen nur in `access_bicycle`. Ein Weg mit `access=private` fehlt also, ein Weg mit `vehicle=private` bleibt mit `access_bicycle=private` im Graphen.
+`use_sidepath` steht auf einer Fahrbahn mit benutzungspflichtigem Radweg daneben. Radfahren auf der Fahrbahn ist dann erlaubt, ein Router sollte aber den Radweg bevorzugen.
 
-## Regel für Router
+## Radinfrastruktur an der Fahrbahn
 
-| `access_bicycle`                                                                              | Radfahren     | Kante im Graphen                            |
-| --------------------------------------------------------------------------------------------- | ------------- | ------------------------------------------- |
-| leer (kein Zugangs-Tag)                                                                       | erlaubt       | ja                                          |
-| `yes`, `designated`, `permissive`, `use_sidepath`, `discouraged`, `dismount`                  | erlaubt       | ja                                          |
-| `no`, `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry` | nicht erlaubt | nur zur Information, der Router filtert sie |
-
-`use_sidepath` zählt als erlaubt: Der Wert steht auf der Fahrbahn und verweist auf einen benutzungspflichtigen Radweg daneben. Ein Router sollte diesen Radweg bevorzugen.
-
-Die Liste der erlaubten Werte steht in `routable_bicycle_access` in `helper/sanitize_access_tags.lua`.
-
-## Beispiele
-
-- Anliegerstraße mit `vehicle=destination`: `access_bicycle=destination`.
-- Fahrbahn mit `bicycle=no` neben einem Radweg: Die Fahrbahn hat `access_bicycle=no`, der Radweg hat seine eigene Kante.
-- Weg mit `access=destination` und `bicycle=yes`: `access_bicycle=yes`.
-
-## Radinfrastruktur an der Mittellinie
-
-Radinfrastruktur, die an der Fahrbahn-Mittellinie gemappt ist (`side=left` oder `side=right`), hat ein leeres `access_bicycle`. Der Zugang der Fahrbahn (zum Beispiel `use_sidepath` oder `no`) gilt nicht für den Radweg selbst.
-
-## Nicht in `routing`
-
-- Wege mit `access`, `foot` (auf Fußwegen) oder `bicycle` (auf Radwegen) `private`, `delivery` oder `permit`, außer bei `bicycle=designated` (ausgeschilderter Radweg).
-- Wege mit `service=*` außer `alley`, wenn sie keine eigene Radinfrastruktur haben.
-- Wege mit dauerhaftem `access=no` (auf Fußwegen auch `foot=no`), außer Radfahren ist auf dem Weg selbst ausdrücklich erlaubt: der aufgelöste Wert (`bicycle`, sonst `vehicle`, sonst `access`) ist `yes`, `designated`, `permissive`, `discouraged` oder `dismount`. `use_sidepath` zählt nicht. Es verweist wie `cycleway=separate` auf einen Weg daneben. Mit `access=no` sind das meist gesperrte Straßen an Baustellen.
-- `bicycle=no` auf einem Radweg schließt ihn aus. Ist der Radweg wegen einer Baustelle oder Sperrung zu (Text in `description`, `note`, `fixme` oder `access:reason`), wird er stattdessen als `lifecycle` geführt. Andere Fälle sind sehr selten und fast immer Tagging-Fehler.
-- Fahrbahn- und Wege-Kanten von Wegen, die keine Zeile in `roads` / `roadsPathClasses` haben: `access=destination` oder `customers` ohne Erlaubnis für Radfahrende, `indoor=yes` und `informal=yes` ohne eigene Radinfrastruktur. Radinfrastruktur dieser Wege bleibt erhalten.
-- Autobahnen und Schnellstraßen (`motorway`, `trunk`).
-
-Die Gründe stehen in `helper/access_restriction.lua`.
+Radinfrastruktur, die an der Fahrbahn gemappt ist (`side=left` oder `side=right`), hat ein leeres `access_bicycle`. Der Zugang der Fahrbahn gilt nicht für sie: Eine Fahrbahn mit `use_sidepath` oder `no` hat trotzdem einen befahrbaren Radfahrstreifen.

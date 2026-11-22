@@ -1,6 +1,7 @@
 require('topics.helper.osm2pgsql')
 
 local ACCESS = require('topics.roads_bikelanes.helper.access_restriction')
+local contains_substring = require('topics.helper.contains_substring')
 local exit_processing = require('topics.roads_bikelanes.helper.exit_processing')
 local bikelanes = require('topics.roads_bikelanes.bikelanes.extract_bikelanes')
 local transform_lifecycle_tags = require('topics.roads_bikelanes.helper.transform_tags.transform_lifecycle_tags')
@@ -368,7 +369,7 @@ describe('access_restriction', function()
         local cycleways = categorize(copy_tags(tags))
         local found = false
         for _, cycleway in ipairs(cycleways) do
-          if cycleway._infrastructureExists and cycleway.category and string.find(cycleway.category, expected, 1, true) then
+          if cycleway._infrastructureExists and contains_substring(cycleway.category, expected) then
             found = true
           end
         end

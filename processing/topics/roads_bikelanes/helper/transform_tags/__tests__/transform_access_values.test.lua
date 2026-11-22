@@ -1,3 +1,5 @@
+require('topics.helper.osm2pgsql')
+
 describe('transform_access_values', function()
   local transform_access_values = require('topics.roads_bikelanes.helper.transform_tags.transform_access_values')
 
@@ -36,11 +38,11 @@ describe('transform_access_values', function()
       ['agricultural;destination'] = 'destination',
       ['destination;agricultural;forestry'] = 'destination',
       ['private;delivery'] = 'delivery',
-      ['agricultural;private'] = 'agricultural',
+      ['agricultural;private'] = 'agricultural_or_forestry',
       ['psv;emergency'] = 'no',
       ['unknown;yes'] = 'yes',
       [' delivery ; destination '] = 'destination',
-      ['forestry;agricultural'] = 'agricultural;forestry',
+      ['forestry;agricultural'] = 'agricultural_or_forestry',
       ['foo;bar'] = 'foo;bar',
     }
     for value, expected in pairs(cases) do

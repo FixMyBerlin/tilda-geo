@@ -4,7 +4,9 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-11
 
-### `roads`, `roadsPathClasses`, `bikelanes`, `routing`: restricted access
+### Access: `roads`, `roadsPathClasses`, `bikelanes`, `routing`
+
+#### Which ways are public
 
 - Which ways are not public is decided in one place now (`helper/access_restriction.lua`), for all four tables.
 - `access=destination|customers` (also `foot` on a footway, `bicycle` on a cycleway) no longer takes a way out of `roads` / `roadsPathClasses` when cycling is allowed explicitly on the way itself (`bicycle`, else `vehicle`, else `access`, is `yes`, `designated`, `permissive`, `discouraged` or `dismount`), e.g. `access=destination` with `bicycle=yes`. `use_sidepath` does not count: like `cycleway=separate` it points to a path next to the way. Before, `routing` had the carriageway or path edge of such a way without a row in `roads` / `roadsPathClasses` to join.
@@ -17,13 +19,22 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 - `access=private|delivery|permit` (also `foot` on a footway, `bicycle` on a cycleway) no longer drops a way with `bicycle=designated` (resolved via `vehicle`), e.g. a signposted cycle path (Z240) through a private area. `bicycle=yes` does not lift them.
 - A way whose resolved `bicycle` access does not allow cycling (`bicycle=no`, `vehicle=destination`, `vehicle=private`, …) is public in all four tables, see `routing` below.
 - Only `access` restricts a way (it includes pedestrians), plus `foot` on a footway and `bicycle` on a cycleway. `vehicle`, `motor_vehicle` and `bicycle` elsewhere never do: `access=private` drops a way, `vehicle=private` keeps all its rows with `access_bicycle=private`.
+- `access=no` is decided with the other access values, after the `construction:` prefix is removed: `construction:access=no` now drops a way like `construction:access=private`.
+
+#### Access values
+
 - Access values are mapped on all access keys before (`transform_access_values`), so `roads` and `routing` see the same values and fewer edges are dropped for an unpublished value:
   - `unknown` and `optional_sidepath` read as no tag. `access=unknown` ways keep their `routing` edge now. `optional_sidepath` is no longer an `access_bicycle` value: the carriageway is mixed traffic, `cycleway=separate` shows the path next to it.
   - `official` reads as `designated`; `military`, `emergency`, `psv`, `bus` as `no`; `residents`, `employees`, `restricted` as `private`.
   - `bicycle=mtb` (mountain bike trails, mostly `path` / `track` with `mtb:scale`) drops the way from all tables: TILDA looks at everyday cycling. In Germany 623 ways / 218 km, a quarter of it around Regensburg.
   - A list reads as its most open value: `agricultural;destination` as `destination`, `private;delivery` as `delivery`.
   - In Germany: `access=unknown` 2,950 ways / 556 km, `bicycle=unknown` 174 km, `access=military` 298 km, lists of `vehicle` about 230 km, `bicycle=official` 77 km, `access=emergency` 61 km.
-- `access=no` is decided with the other access values, after the `construction:` prefix is removed: `construction:access=no` now drops a way like `construction:access=private`.
+
+#### `routing`: `access_bicycle`
+
+- New edges: carriageway and path edges where cycling is not allowed (resolved `bicycle` access `no`, `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry`, e.g. `bicycle=no`, `vehicle=destination`, `vehicle=private`) are in `routing`. They have `access_bicycle` set to that value. Routers filter on `access_bicycle`: empty (no access tag) or `yes`, `designated`, `permissive`, `use_sidepath`, `discouraged`, `dismount` allows cycling, every other value does not. Motorway and trunk stay out.
+- `access_bicycle` has the new values `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry` (it had `no` before). Lanes on the centerline (`side=left|right`) do not inherit the carriageway access.
+- An edge whose bicycle access value is still not published after the mapping above (e.g. `bicycle=limited`, `access=foot`) is not in `routing`.
 
 ### `bikelanes`: `oneway` without a tag follows the position
 
@@ -90,11 +101,8 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 - `width` and `width_effective` are empty for `0`: new helper `parse_width`. So `offset` and the parking road width use the highway fallback then. `buffer_*` keeps `0`.
 - New `todos_lines` id `unusual_width` for `roads` and `bikelanes`: a `width` we can't read, `0` or negative, or above 50 m (published as it is). Table-only. When the `bikelanes` row of the way itself has the todo, `roads` does not list it a second time. `check_date`, `check_date:width`, `survey:date`, `survey:date:width` or `survey_date` closes it, also on the road of a lane.
 
-### `routing`
+### `routing`: sanitized tags, `informal`
 
-- New edges: carriageway and path edges where cycling is not allowed (resolved `bicycle` access `no`, `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry`, e.g. `bicycle=no`, `vehicle=destination`, `vehicle=private`) are in `routing`. They have `access_bicycle` set to that value. Routers filter on `access_bicycle`: empty (no access tag) or `yes`, `designated`, `permissive`, `use_sidepath`, `discouraged`, `dismount` allows cycling, every other value does not. Motorway and trunk stay out.
-- `access_bicycle` has the new values `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry` (it had `no` before). Lanes on the centerline (`side=left|right`) do not inherit the carriageway access.
-- An edge with a bicycle access value that is not published (e.g. `psv`, `emergency`, `delivery;destination`) is not in `routing`.
 - Carriageway and path edges publish the sanitized values of `roads` / `roadsPathClasses` instead of raw OSM tags. `width` is a number in meters or empty (was the OSM text, e.g. `5,7`, which aborted the export). `surface` uses the same values as `roads` (e.g. `dirt` is now `ground`). `smoothness` is also derived from `surface` and other tags, like in `roads`.
 - New tag `informal` (`yes` when present), like on `bikelanes`, `roads` and `roadsPathClasses`. Ways with `informal=yes` are in `routing` only when they have own bike infrastructure, so these edges are now marked.
 - `prefix`, `parent_road`, `adjoining_road`, `adjoining_maxspeed` no longer read an OSM tag of the same name. No change in the data: no way in Germany has these tags (2026-10).

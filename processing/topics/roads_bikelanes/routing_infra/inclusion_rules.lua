@@ -49,7 +49,8 @@ end
 ---@param object_tags OsmTags the OSM way this segment was built from
 ---@return boolean
 local function unpublished_bicycle_access(segment, object_tags)
-  local value = sanitize_access_tags.normalize((sanitize_access_tags.resolve(access_tags(segment, object_tags), 'bicycle')))
+  local value = sanitize_access_tags.resolve(access_tags(segment, object_tags), 'bicycle') -- the value only, not the key
+  value = sanitize_access_tags.normalize(value)
   return value ~= nil and sanitize_access_tags.sanitize(value, 'bicycle') == nil
 end
 

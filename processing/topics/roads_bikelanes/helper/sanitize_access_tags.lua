@@ -15,10 +15,8 @@ local access_chain = {
   bus = { 'psv', 'motor_vehicle', 'vehicle', 'access' },
 }
 
--- Every key of the chains above (`access`, `vehicle`, `bicycle`, …), in a fixed order.
-local access_keys = { 'access' }
-for mode in pairs(access_chain) do table.insert(access_keys, mode) end
-table.sort(access_keys)
+-- Every key of the chains above, in order. Keep in sync with `access_chain`.
+local access_keys = { 'access', 'bicycle', 'bus', 'foot', 'hgv', 'motor_vehicle', 'motorcar', 'psv', 'vehicle' }
 
 --- Raw OSM access value for `mode`, resolved via the fallback chain (the explicit tag wins, else the
 --- chain). No sanitisation. The second return value is the key the value was read from.
@@ -129,7 +127,8 @@ end
 ---@param mode string
 ---@return string|nil
 local function sanitized_access(tags, mode)
-  return sanitize(normalize((resolve(tags, mode))), mode)
+  local value = resolve(tags, mode) -- the value only, not the key
+  return sanitize(normalize(value), mode)
 end
 
 return {
