@@ -1,6 +1,7 @@
 export const BBOX_PRESETS = {
   bussonderstreifen: '13.38486,52.43778,13.38956,52.43959',
   'berlin-full': '13.0883,52.3382,13.7611,52.6755',
+  'berlin-brandenburg': '11.2,51.3,14.8,53.6',
   'obstacle-parking-yes':
     '13.405287099192833,52.50837530588882,13.410218310776344,52.51078864624628',
   'circle-kreisverkehr':
