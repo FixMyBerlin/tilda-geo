@@ -8,6 +8,10 @@ title: Zugang Radverkehr im Routing (`access_bicycle`)
 
 Der Wert kommt aus der OSM-Kette `bicycle`, sonst `vehicle`, sonst `access`. Es zählt der erste Tag, der gesetzt ist. `agricultural`, `forestry` und ihre Kombinationen werden zu `agricultural_or_forestry`. Veröffentlicht werden nur die Werte aus der Tabelle unten (`routable_bicycle_access` und `not_routable_bicycle_access` in `helper/sanitize_access_tags.lua`). Hat eine Kante einen anderen Wert (zum Beispiel `psv`, `emergency` oder `delivery;destination`), steht sie nicht im Graphen, weil ein leeres Feld „erlaubt“ bedeuten würde.
 
+Vorher liest TILDA drei Werte um, auf allen Zugangs-Keys: `unknown` zählt wie kein Tag, `military` wie `no`, `residents` wie `private`.
+
+Ob ein Weg überhaupt in den Daten steht, entscheidet nur `access` (gilt auch für Fußgänger), auf Fußwegen zusätzlich `foot` und auf Radwegen `bicycle`. `vehicle`, `motor_vehicle` und `bicycle` auf anderen Wegen nehmen keinen Weg heraus. Sie landen nur in `access_bicycle`. Ein Weg mit `access=private` fehlt also, ein Weg mit `vehicle=private` bleibt mit `access_bicycle=private` im Graphen.
+
 ## Regel für Router
 
 | `access_bicycle`                                                                                  | Radfahren     | Kante im Graphen                            |

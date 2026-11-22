@@ -20,25 +20,14 @@ describe('exit_processing', function()
       assert.is_false(exit_processing({ highway = 'footway', foot = 'delivery' }))
       assert.is_false(exit_processing({ highway = 'footway', indoor = 'yes' }))
       assert.is_false(exit_processing({ highway = 'path', informal = 'yes' }))
+      assert.is_false(exit_processing({ highway = 'residential', access = 'no' }))
+      assert.is_false(exit_processing({ highway = 'cycleway', bicycle = 'no' }))
     end)
 
     it('exits for disallowed highway class', function()
       assert.is_true(exit_processing({
         highway = 'proposed',
       }))
-    end)
-
-    it('exits for forbidden access without lifecycle text', function()
-      assert.is_true(exit_processing({
-        highway = 'residential',
-        access = 'no',
-      }))
-    end)
-
-    it('exits for foot=no on footways and bicycle=no on cycleways', function()
-      assert.is_true(exit_processing({ highway = 'footway', foot = 'no' }))
-      assert.is_true(exit_processing({ highway = 'cycleway', bicycle = 'no' }))
-      assert.is_false(exit_processing({ highway = 'residential', bicycle = 'no' }))
     end)
   end)
 

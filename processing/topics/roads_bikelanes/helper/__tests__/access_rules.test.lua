@@ -5,12 +5,13 @@
 -- reason in the commit message.
 --
 -- Columns:
--- - `bikelanes`: the way passes `exit_processing` and is not restricted at level `way`: bikelanes,
+-- - `bikelanes`: the way is not restricted at level `way`: bikelanes,
 --   todos, presence, bikelane routing edges
 -- - `roads`: the way also gets a `roads` / `roadsPathClasses` row and its carriageway or path
 --   routing edge
 --
 -- Rules:
+-- - Values are mapped first: `unknown` reads as no tag, `military` as `no`, `residents` as `private`.
 -- - `access` (or `foot` on a footway) in `no|private|delivery|permit` drops the way,
 --   `destination|customers` drops only the `roads` row.
 -- - `bicycle=designated` (resolved via `bicycle`, `vehicle`, `access`) lifts every one of these values.
@@ -19,18 +20,22 @@
 -- - `use_sidepath` and `optional_sidepath` lift nothing: like `cycleway=separate` they point to a
 --   path next to the way.
 -- - `bicycle=no` on a cycleway always drops the way; nothing lifts it.
+-- - `vehicle`, `motor_vehicle` and `bicycle` on other ways never drop a way or its `roads` row:
+--   `access=private` drops the way, `vehicle=private` keeps it with `access_bicycle=private`.
 -- - `service` (except `alley`), `indoor=yes` and `informal=yes` are lifted by bike infrastructure of the
 --   way itself after the categorisation; see `access_restriction.test.lua`.
 -- - Temporary closures (`access=no` with Baustelle/Sperrung text) are lifecycle, not access:
 --   `transform_lifecycle_tags` runs first, see `exit_processing.test.lua`.
 
 local exit_processing = require('topics.roads_bikelanes.helper.exit_processing')
+local transform_access_values = require('topics.roads_bikelanes.helper.transform_tags.transform_access_values')
 local ACCESS = require('topics.roads_bikelanes.helper.access_restriction')
 
 ---@param tags OsmTags
 ---@return { bikelanes: boolean, roads: boolean }
 local function outcome(tags)
   if exit_processing(tags) then return { bikelanes = false, roads = false } end
+  transform_access_values(tags)
   local restriction = ACCESS.access_restriction(tags)
   local bikelanes = not (restriction and restriction.level == 'way')
   return { bikelanes = bikelanes, roads = bikelanes and not (restriction and restriction.level == 'roads') }
@@ -51,6 +56,13 @@ local rows = {
   { 'access=no + bicycle=no', { highway = 'residential', access = 'no', bicycle = 'no' }, NONE },
   { 'access=no + vehicle=no', { highway = 'residential', access = 'no', vehicle = 'no' }, NONE },
   { 'access=no + bicycle=unknown', { highway = 'residential', access = 'no', bicycle = 'unknown' }, NONE },
+  { 'access=no + bicycle=unknown (read as no tag)', { highway = 'track', access = 'no', bicycle = 'unknown' }, NONE },
+  { 'access=unknown (read as no tag)', { highway = 'track', access = 'unknown' }, ALL },
+  { 'access=military (read as no)', { highway = 'track', access = 'military' }, NONE },
+  { 'access=military + bicycle=yes', { highway = 'track', access = 'military', bicycle = 'yes' }, ALL },
+  { 'access=residents (read as private)', { highway = 'service', access = 'residents' }, NONE },
+  { 'access=residents + bicycle=designated', { highway = 'residential', access = 'residents', bicycle = 'designated' }, ALL },
+  { 'vehicle=private keeps the way', { highway = 'residential', vehicle = 'private' }, ALL },
   { 'access=no + bicycle=private', { highway = 'residential', access = 'no', bicycle = 'private' }, NONE },
   { 'Fahrradstraße access=no + bicycle=designated', { highway = 'residential', bicycle_road = 'yes', access = 'no', bicycle = 'designated', foot = 'yes', motor_vehicle = 'yes' }, ALL },
   { 'path access=no + bicycle=designated + foot=designated (radinfra#15)', { highway = 'path', access = 'no', bicycle = 'designated', foot = 'designated' }, ALL },

@@ -6,7 +6,8 @@ local sanitize_access_tags = require('topics.roads_bikelanes.helper.sanitize_acc
 
 -- The one place that decides which ways are not public, and why. Tags only, no geometry: this
 -- runs for every `highway` way, so keep it cheap and allocation-free for public ways. Do not copy
--- these value lists anywhere else. Only `access=no` is decided earlier, in `exit_processing`.
+-- these value lists anywhere else. Access values are already mapped by `transform_access_values`
+-- (`unknown` = no tag, `military` = `no`, `residents` = `private`).
 --
 -- Levels, strongest first:
 -- - `way`:     no public row at all (bikelanes, roads, roadsPathClasses, routing, sidepath source
@@ -14,8 +15,11 @@ local sanitize_access_tags = require('topics.roads_bikelanes.helper.sanitize_acc
 -- - `roads`:   bikelane rows and their routing edges stay; no roads / roadsPathClasses row and no
 --              carriageway / path routing edge (it would have no row to join)
 --
--- A way whose resolved `bicycle` access does not allow cycling (`bicycle=no`, `vehicle=private`, …) is
--- not restricted here: all its rows and edges are public, routers read `access_bicycle` on the edge.
+-- Which key restricts: `access` (all modes, pedestrians included) on every way, plus the key of the
+-- mode the way is built for: `foot` on a footway, `bicycle` on a cycleway. `vehicle`, `motor_vehicle`
+-- and `bicycle` on other ways never restrict the way: they only say who may drive there, the way
+-- stays public. So `access=private` drops the way, `vehicle=private` keeps all its rows and edges with
+-- `access_bicycle=private`, and routers read `access_bicycle` on the edge.
 
 ---@alias RestrictionLevel 'way'|'roads'
 
@@ -24,13 +28,30 @@ local sanitize_access_tags = require('topics.roads_bikelanes.helper.sanitize_acc
 ---@field reason string the tag that caused it, e.g. `access=destination`
 ---@field may_have_bike_infra boolean tag hint, only set for reasons that own bike infrastructure can lift (`service`, `indoor`, `informal`)
 
--- `access` / `foot` / `bicycle` values that take the way out of all public tables, unless the way is a
--- signposted cycle route (`bicycle=designated`). `bicycle=yes` does not lift them: `access=private +
--- bicycle=yes` is mostly a private service way.
+-- Values of the restricting key that take the way out of all public tables. `no` is lifted when
+-- cycling is explicitly allowed (`access=no + bicycle=yes`, a Fahrradstraße with `access=no +
+-- bicycle=designated`); temporary closures are already turned into `lifecycle` by
+-- `transform_lifecycle_tags`. `bicycle=no` on a cycleway always closes it.
+local closed_access = SET.set({ 'no' })
+
+-- Values that take the way out of all public tables unless it is a signposted cycle route
+-- (`bicycle=designated`). `bicycle=yes` does not lift them: `access=private + bicycle=yes` is mostly
+-- a private service way.
 local way_access = SET.set({ 'private', 'delivery', 'permit' })
 
 -- Values that only take it out of `roads` / `roadsPathClasses`, unless bicycle is explicitly allowed.
 local roads_access = SET.set({ 'destination', 'customers' })
+
+-- The mode a highway class is built for: its access key restricts the way like `access` does.
+local mode_access_key = { footway = 'foot', cycleway = 'bicycle' }
+
+--- The keys whose value restricts the way: `access`, and the mode key of footways / cycleways.
+---@param highway string|nil
+---@return string access_key always `access`
+---@return string|nil mode_key `foot` / `bicycle` or nil
+local function restricting_access_keys(highway)
+  return 'access', mode_access_key[highway]
+end
 
 ---@param tags OsmTags
 ---@param values table<string, boolean>
@@ -39,23 +60,25 @@ local roads_access = SET.set({ 'destination', 'customers' })
 local function find_access_value(tags, values)
   local value = tags.access
   if value and values[value] then return 'access', value end
-  if tags.highway == 'footway' then
-    value = tags.foot
-    if value and values[value] then return 'foot', value end
-  end
-  if tags.highway == 'cycleway' then
-    value = tags.bicycle
-    if value and values[value] then return 'bicycle', value end
+  local mode_key = mode_access_key[tags.highway]
+  if mode_key then
+    value = tags[mode_key]
+    if value and values[value] then return mode_key, value end
   end
   return nil, nil
 end
 
---- Restriction from the access tags only (`access`, and `foot` / `bicycle` on the highway classes
---- named there). These are never lifted by bike infrastructure.
+--- Restriction from the access tags only (`restricting_access_keys`). Never lifted by bike
+--- infrastructure.
 ---@param tags OsmTags
 ---@return AccessRestriction|nil
 local function access_tag_restriction(tags)
-  local key, value = find_access_value(tags, way_access)
+  local key, value = find_access_value(tags, closed_access)
+  if key and not sanitize_access_tags.bicycle_explicitly_allowed(tags) then
+    return { level = 'way', reason = key .. '=' .. value, may_have_bike_infra = false }
+  end
+
+  key, value = find_access_value(tags, way_access)
   if key and not sanitize_access_tags.bicycle_designated(tags) then
     return { level = 'way', reason = key .. '=' .. value, may_have_bike_infra = false }
   end
@@ -215,6 +238,7 @@ end
 
 return {
   access_restriction = access_restriction,
+  restricting_access_keys = restricting_access_keys,
   may_have_bike_infra = may_have_bike_infra,
   has_own_bike_infra = has_own_bike_infra,
   after_categorisation = after_categorisation,

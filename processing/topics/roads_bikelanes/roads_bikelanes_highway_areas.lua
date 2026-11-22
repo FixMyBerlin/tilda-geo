@@ -3,6 +3,7 @@ local default_id = require('topics.helper.default_id')
 local round = require('topics.helper.round')
 local extract_public_tags = require('topics.helper.extract_public_tags')
 local transform_lifecycle_tags = require('topics.roads_bikelanes.helper.transform_tags.transform_lifecycle_tags')
+local transform_access_values = require('topics.roads_bikelanes.helper.transform_tags.transform_access_values')
 local result_tags = require('topics.roads_bikelanes.helper.result_tags')
 local road_generalization = require('topics.roads_bikelanes.roads.road_generalization')
 local exit_processing = require('topics.roads_bikelanes.helper.exit_processing')
@@ -26,6 +27,7 @@ local function process_highway_area(object)
   if exit_processing(object_tags, true) then
     return
   end
+  transform_access_values(object_tags)
   -- Areas have no routing edges and no bike infrastructure; only `way` restrictions apply.
   local restriction = ACCESS.access_restriction(object_tags)
   if restriction and restriction.level == 'way' then

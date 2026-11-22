@@ -15,6 +15,11 @@ local access_chain = {
   bus = { 'psv', 'motor_vehicle', 'vehicle', 'access' },
 }
 
+-- Every key of the chains above (`access`, `vehicle`, `bicycle`, …), in a fixed order.
+local access_keys = { 'access' }
+for mode in pairs(access_chain) do table.insert(access_keys, mode) end
+table.sort(access_keys)
+
 --- Raw OSM access value for `mode`, resolved via the fallback chain (the explicit tag wins, else the
 --- chain). No sanitisation. The second return value is the key the value was read from.
 ---@param tags OsmTags
@@ -128,6 +133,7 @@ local function sanitized_access(tags, mode)
 end
 
 return {
+  access_keys = access_keys,
   resolve = resolve,
   normalize = normalize,
   sanitize = sanitize,

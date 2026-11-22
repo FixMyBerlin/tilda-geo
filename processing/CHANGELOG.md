@@ -16,6 +16,9 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 - `access=no` (also `foot=no` on a footway) no longer drops a way when cycling is explicitly allowed on the way itself (same values as above, not `use_sidepath` / `optional_sidepath`), e.g. a forest track with `access=no` + `bicycle=yes` or a Fahrradstraße with `access=no` + `bicycle=designated`. `access=no` + `bicycle=use_sidepath` is mostly a closed road at a construction site and stays out. `bicycle=no` on a cycleway still drops it. Refs tilda-geo#409, radinfra.de#15.
 - `access=private|delivery|permit` (also `foot` on a footway, `bicycle` on a cycleway) no longer drops a way with `bicycle=designated` (resolved via `vehicle`), e.g. a signposted cycle path (Z240) through a private area. `bicycle=yes` does not lift them.
 - A way whose resolved `bicycle` access does not allow cycling (`bicycle=no`, `vehicle=destination`, `vehicle=private`, …) is public in all four tables, see `routing` below.
+- Only `access` restricts a way (it includes pedestrians), plus `foot` on a footway and `bicycle` on a cycleway. `vehicle`, `motor_vehicle` and `bicycle` elsewhere never do: `access=private` drops a way, `vehicle=private` keeps all its rows with `access_bicycle=private`.
+- Access values are mapped on all access keys before: `unknown` reads as no tag (`access=unknown` ways keep their `routing` edge now), `military` as `no`, `residents` as `private`. In Germany: `access=unknown` 2,950 ways / 556 km, `bicycle=unknown` 890 / 174 km, `access=military` 503 / 298 km, `vehicle=military` 215 / 32 km, `access=residents` 90 / 15 km.
+- `access=no` is decided with the other access values, after the `construction:` prefix is removed: `construction:access=no` now drops a way like `construction:access=private`.
 
 ### `bikelanes`: `oneway` without a tag follows the position
 
