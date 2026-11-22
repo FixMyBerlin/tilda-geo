@@ -10,7 +10,7 @@ describe('bikelane_todos', function()
   local function run_bikelanes(input_object)
     input_object.tags._id = input_object.id
     input_object.tags._type = input_object.type
-    return bikelanes(input_object.tags, input_object)
+    return bikelanes(input_object.tags)
   end
 
   describe('`missing_access_tag_240`:', function()
@@ -132,7 +132,7 @@ describe('bikelane_todos', function()
     --     id = 1,
     --     type = 'way'
     --   }
-    --   local result = bikelanes(input_object.tags, input_object)
+    --   local result = bikelanes(input_object.tags)
     --   assert.are.equal(table_includes(result[1]._todo_list, 'currentness_too_old'), false)
     -- end)
   end)

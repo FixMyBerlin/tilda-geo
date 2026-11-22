@@ -58,6 +58,7 @@
 ---@field shared_result_tags SharedResultTags
 ---@field cycleways table[]
 ---@field cycleway_presence CyclewayPresence|nil
+---@field access AccessDecision in which tables the way is, see `roads_bikelanes/helper/access_restriction.lua`
 
 ---@alias SideKey 'left'|'right'|'self'
 ---@alias SideFilter fun(tags: OsmTags): boolean

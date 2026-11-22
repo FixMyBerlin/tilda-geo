@@ -21,9 +21,9 @@ Score-free road+bike edges for routing. Processing writes to `routing` (`roads_b
 | `bikelanes`        | Bikelane infra (left/right/self)              | `bikelanes.id = source_id`        |
 | `roadsPathClasses` | Path (self category id or `mixedTrafficFoot`) | `roadsPathClasses.id = source_id` |
 
-How to keep the last row true: **do not emit a path edge unless `roads_bikelanes_roads.lua` would insert the same OSM way into `roadsPathClasses`.** Both writers call `excluded_from_roads_tables.lua` (OSM sidewalk / `parent_road` sidepath, indoor, informal, `access`/`foot` in `private|no|delivery|permit|destination|customers`). If you change path-table inclusion, change that helper — not a copy in `build_segments`.
+How to keep the last row true: **do not emit a path edge unless `roads_bikelanes_roads.lua` would insert the same OSM way into `roadsPathClasses`.** `roads_bikelanes_roads.lua` skips a way for `roads` / `roadsPathClasses` when `category_is_sidepath` says so (OSM sidewalk / `parent_road` sidepath) or when `context.access.in_roads` is false (see § Exclusions). `build_segments` drops path edges in the same two cases. If you change path-table inclusion, change `category_is_sidepath` or `helper/access_restriction.lua` — not a copy in `build_segments`.
 
-Do **not** run `excluded_from_roads_tables` / `category_is_sidepath` on bikelane edges. `category_is_sidepath` is true when `parent_road` is set, which would drop centerline-derived `footwayBicycleYes*` / `sidewalk:*` that must stay (they join `bikelanes`, not the path table). Apply the helper only on the path-edge branch.
+Do **not** run `category_is_sidepath` on bikelane edges. `category_is_sidepath` is true when `parent_road` is set, which would drop centerline-derived `footwayBicycleYes*` / `sidewalk:*` that must stay (they join `bikelanes`, not the path table). Apply it only on the path-edge branch.
 
 Check: after processing, `routing` rows with `tags->>'source_table' = 'roadsPathClasses'` left-joined to `roadsPathClasses` on `tags->>'source_id' = id` must have 0 misses.
 
@@ -37,22 +37,36 @@ Check: after processing, `routing` rows with `tags->>'source_table' = 'roadsPath
 
 ### Exclusions
 
-Segments are skipped when (`inclusion_rules.lua` / `build_segments.lua` / `excluded_from_roads_tables.lua`):
+In which tables a way is, and why, is decided once per way by `helper/access_restriction.lua` (`ACCESS.decide`, tags only, before any geometry) and passed as `context.access`. `exit_processing` keeps only the hard exits of the highway class, `area` and pier/track; `access=no` puts a way in no table like `access=private`. `transform_access_values` maps values before (e.g. `unknown` to no tag, `official` to `designated`, lists to their most open value). The decision table for all access values is `helper/__tests__/access_rules.test.lua`. The writers and `build_segments` read `context.access.in_any_table`, `in_bikelanes` and `in_roads`; there is no second list of access values.
 
-| Condition                                                                                                          | Result   |
-| ------------------------------------------------------------------------------------------------------------------ | -------- |
-| `informal=yes` with no resolved `bicycle` access                                                                   | excluded |
-| Disallowed `bicycle` access (`no`, `private`, …)                                                                   | excluded |
-| Own or parent `highway` in `motorway`/`motorway_link`/`trunk`/`trunk_link`                                         | excluded |
-| Any path edge that `roadsPathClasses` omits (sidewalk/sidepath, indoor, informal, destination/customers access, …) | excluded |
-| `footwayBicycleYes*` and other bikelane categories on a sidewalk                                                   | kept     |
+| Decision            | Reasons                                                                                                                                                                                                                                   | `in_any_table` | `in_bikelanes`: rows and bikelane edges | `in_roads`: `roads` / `roadsPathClasses` row and carriageway / path edge |
+| ------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------- | --------------------------------------- | ------------------------------------------------------------------------ |
+| in all tables       | everything else                                                                                                                                                                                                                           | true           | true                                    | true                                                                     |
+| only in `bikelanes` | `access` (and `foot` on footway, `bicycle` on cycleway) `destination`/`customers`, unless the resolved `bicycle` is explicitly allowed; `indoor=yes`; `informal=yes`                                                                      | true           | true                                    | false                                                                    |
+| in no table         | `access` (and `foot` on footway, `bicycle` on cycleway) `no` unless cycling is explicitly allowed, `private`/`delivery`/`permit` unless `bicycle=designated`; `bicycle=mtb`; `service=*` except `alley` (and except `bicycle=designated`) | false          | false                                   | false                                                                    |
+
+The decision with fewer tables wins and keeps its `reason` (e.g. `access=destination`). `access=private` & co. are lifted only by `bicycle=designated` (resolved via `vehicle`), `access=destination|customers` by a bicycle value that allows cycling on the way itself (`yes`, `designated`, `permissive`, `discouraged`, `dismount`; not `use_sidepath`). Bike infrastructure of the way lifts `service`, `indoor` and `informal`: if the way has a hint of bike infrastructure (`may_change_with_bike_infra`, from the tag check `may_have_bike_infra`, generous on purpose) and the bikelane categorisation then finds bike infrastructure of its own (`has_own_bike_infra`, in `decide_after_categorisation`), the way is in all tables again, including its `roads` row and carriageway / path edge. A way in no table that has no hint, or that the categorisation finds no bike infrastructure on, stays in no table.
+
+Per segment, `inclusion_rules` drops edges on roads where cycling is prohibited (`cycling_prohibited_road`: own or parent `highway` motorway or trunk, the carriageway of a `motorroad=yes`; their `roads` rows stay) and edges with a bicycle access value that is not published (`unpublished_bicycle_access`, e.g. `psv`).
+
+| Condition                                                                         | Result   |
+| --------------------------------------------------------------------------------- | -------- |
+| Own or parent `highway` in `motorway`/`motorway_link`/`trunk`/`trunk_link`        | excluded |
+| Carriageway edge of a `motorroad=yes`, whatever `bicycle` says                    | excluded |
+| Lane edge tagged on a `motorroad=yes` (`cycleway:<side>=track`)                   | kept     |
+| Any path edge that `roadsPathClasses` omits (sidewalk/sidepath, or `roads` level) | excluded |
+| `footwayBicycleYes*` and other bikelane categories on a sidewalk                  | kept     |
 
 Unlike CQI scoring, **non-indexable categories** (`needsClarification`, `data_no`, …) are still emitted when cycling is allowed.
+
+#### Cycling not allowed: `access_bicycle`
+
+An edge where the resolved `bicycle` access (`bicycle` → `vehicle` → `access`) does not allow cycling (`bicycle=no`, `vehicle=destination`, `vehicle=private`, …) is a normal `routing` edge. It is published as `access_bicycle` (`no`, `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry`); the way keeps all its rows in the other tables. Routers decide on `access_bicycle`: an empty value (no access tag) or one of `sanitize_access_tags.routable_bicycle_access` (`yes`, `designated`, `permissive`, `use_sidepath`, `discouraged`, `dismount`) allows cycling, any other value does not. `use_sidepath` counts as routable, but routers should prefer the path next to the carriageway. `optional_sidepath` is read as no tag (`transform_access_values`). Lanes derived from the centerline (`source_table=bikelanes`, `side=left|right`) do not inherit the carriageway's access.
 
 ### Pipeline
 
 ```
-build_segments → inclusion_rules.exclude_segment → resolve_motor_road_context → build_public_tags → routing
+access_restriction (per way) → build_segments → inclusion_rules (cycling_prohibited_road, unpublished_bicycle_access) → resolve_motor_road_context → build_public_tags → routing
 ```
 
 `segment.tags` of carriageway and path edges is the raw OSM way, for the two steps in the middle. `build_public_tags` never publishes from it: those edges take `shared_result_tags` (same values as `roads` / `roadsPathClasses`), bikelane edges take their row from `extract_bikelanes`.

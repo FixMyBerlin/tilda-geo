@@ -61,6 +61,21 @@ describe('sanitize_access_tags.sanitize (allowlist per mode)', function()
     assert.are.equal('dismount', sanitize('dismount', 'bicycle'))
   end)
 
+  it('keeps the bicycle values that do not allow cycling', function()
+    for _, value in ipairs({ 'no', 'destination', 'private', 'customers', 'delivery', 'permit' }) do
+      assert.are.equal(value, sanitize(value, 'bicycle'), value)
+      assert.is_nil(sanitize_access_tags.routable_bicycle_access[value], value)
+    end
+  end)
+
+  it('lists the routable bicycle values once, all of them published', function()
+    for value in pairs(sanitize_access_tags.routable_bicycle_access) do
+      assert.are.equal(value, sanitize(value, 'bicycle'), value)
+    end
+    assert.is_true(sanitize_access_tags.routable_bicycle_access.dismount)
+    assert.is_nil(sanitize_access_tags.routable_bicycle_access.no)
+  end)
+
   it('drops values not allowlisted for the mode', function()
     assert.is_nil(sanitize('foobar', 'motor_vehicle'))
     assert.is_nil(sanitize('designated', 'motor_vehicle')) -- bicycle value, not a motor one

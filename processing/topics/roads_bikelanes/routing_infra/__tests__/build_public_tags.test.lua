@@ -1,5 +1,6 @@
 require('topics.helper.osm2pgsql')
 local SANITIZE_VALUES = require('topics.helper.sanitize_values')
+local ACCESS = require('topics.roads_bikelanes.helper.access_restriction')
 local build_public_tags = require('topics.roads_bikelanes.routing_infra.build_public_tags')
 local build_segments = require('topics.roads_bikelanes.routing_infra.build_segments')
 local inclusion_rules = require('topics.roads_bikelanes.routing_infra.inclusion_rules')
@@ -24,12 +25,13 @@ describe('build_public_tags', function()
       object_tags = object_tags,
       object_geom = line_geom,
       cycleways = cycleways or {},
+      access = ACCESS.IN_ALL_TABLES,
       shared_result_tags = result_tags(object_tags),
     }
 
     local rows = {}
     for _, segment in ipairs(build_segments(context)) do
-      if not inclusion_rules.exclude_segment(segment.tags) then
+      if not inclusion_rules.cycling_prohibited_road(segment.tags) then
         local motor_context = resolve_motor_road_context(segment, context)
         table.insert(rows, build_public_tags(segment, motor_context, context))
       end
@@ -81,6 +83,18 @@ describe('build_public_tags', function()
     end)
   end)
 
+  describe('informal', function()
+    it('publishes informal=yes on a path edge', function()
+      local row = row_of(public_rows({ highway = 'path', informal = 'yes' }), 'roadsPathClasses')
+      assert.are.equal(row.informal, 'yes')
+    end)
+
+    it('publishes no informal when the way has none', function()
+      local row = row_of(public_rows({ highway = 'path' }), 'roadsPathClasses')
+      assert.is_nil(row.informal)
+    end)
+  end)
+
   describe('bikelane edges', function()
     local object_tags = { highway = 'residential', width = '12 m', surface = 'asphalt' }
     local lane = {
@@ -107,6 +121,12 @@ describe('build_public_tags', function()
       assert.are.equal(row.offset, -6)
       assert.are.equal(row.oneway, 'yes')
     end)
+
+    it('keeps the lane of a motorroad and drops its carriageway', function()
+      local rows = public_rows({ highway = 'primary', motorroad = 'yes', ['cycleway:right'] = 'track' }, { lane })
+      assert.are.equal(#rows, 1)
+      assert.are.equal(rows[1].source_table, 'bikelanes')
+    end)
   end)
 
   describe('raw OSM tags', function()
@@ -115,7 +135,7 @@ describe('build_public_tags', function()
     local raw_keys = {
       'access_bicycle', 'adjoining_maxspeed', 'adjoining_road', 'category', 'length', 'maxspeed', 'offset',
       'oneway', 'oneway_motor', 'parent_id', 'prefix', 'road', 'side', 'smoothness', 'source_id', 'source_table',
-      'surface', 'width',
+      'surface', 'width', 'informal',
     }
 
     local function way_with_raw_tags(highway)

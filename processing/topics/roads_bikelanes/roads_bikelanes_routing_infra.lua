@@ -7,12 +7,17 @@ local roads_bikelanes_tables = require('topics.roads_bikelanes.roads_bikelanes_t
 
 local routing_infra_table = roads_bikelanes_tables.routing_infra_table
 
+--- Edges where cycling is not allowed stay in `routing`; `access_bicycle` tells the router.
+--- Motorway and trunk, the carriageway of a motorroad and edges with a bicycle access value we do
+--- not publish are dropped.
 ---@param context RoadsBikelanesWayContext
 local function roads_bikelanes_routing_infra(context)
   local segments = build_segments(context)
 
   for _, segment in ipairs(segments) do
-    if inclusion_rules.exclude_segment(segment.tags) then
+    if inclusion_rules.cycling_prohibited_road(segment.tags)
+      or inclusion_rules.unpublished_bicycle_access(segment, context.object_tags)
+    then
       goto continue
     end
 
