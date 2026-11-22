@@ -5,17 +5,17 @@ local function on_side(segment, side)
   return { source_table = segment.source_table, tags = segment.tags, side = side }
 end
 
-describe('inclusion_rules.prohibited_highway', function()
+describe('inclusion_rules.cycling_prohibited_road', function()
   it('prohibits motorway and trunk, own or parent', function()
-    assert.is_true(inclusion_rules.prohibited_highway({ highway = 'motorway_link' }))
-    assert.is_true(inclusion_rules.prohibited_highway({ highway = 'cycleway', parent_road = 'trunk' }))
-    assert.is_false(inclusion_rules.prohibited_highway({ highway = 'primary', bicycle = 'no' })) -- stays, routers filter on access_bicycle
+    assert.is_true(inclusion_rules.cycling_prohibited_road({ highway = 'motorway_link' }))
+    assert.is_true(inclusion_rules.cycling_prohibited_road({ highway = 'cycleway', parent_road = 'trunk' }))
+    assert.is_false(inclusion_rules.cycling_prohibited_road({ highway = 'primary', bicycle = 'no' })) -- stays, routers filter on access_bicycle
   end)
 
   it('prohibits the carriageway of a motorroad, also with bicycle=yes', function()
-    assert.is_true(inclusion_rules.prohibited_highway({ highway = 'primary', motorroad = 'yes' }))
-    assert.is_true(inclusion_rules.prohibited_highway({ highway = 'primary', motorroad = 'yes', bicycle = 'yes' }))
-    assert.is_false(inclusion_rules.prohibited_highway({ highway = 'primary', motorroad = 'no' }))
+    assert.is_true(inclusion_rules.cycling_prohibited_road({ highway = 'primary', motorroad = 'yes' }))
+    assert.is_true(inclusion_rules.cycling_prohibited_road({ highway = 'primary', motorroad = 'yes', bicycle = 'yes' }))
+    assert.is_false(inclusion_rules.cycling_prohibited_road({ highway = 'primary', motorroad = 'no' }))
   end)
 end)
 

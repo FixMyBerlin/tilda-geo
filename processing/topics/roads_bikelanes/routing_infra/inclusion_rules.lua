@@ -1,35 +1,23 @@
--- Per-edge rules of `routing`: motorway and trunk and the carriageway of a `motorroad=yes` are never
--- routed, and an edge whose bicycle access
--- value is not published (e.g. `psv`, `delivery;destination`) is dropped. Which edges a restricted
--- way has at all is decided once per way in `helper/access_restriction.lua`; see README.md
--- § Exclusions.
+-- Per-edge rules of `routing`. Which ways are public at all is decided once per way in
+-- `helper/access_restriction.lua`, for all tables alike; see README.md § Exclusions. The rules
+-- here only drop routing edges, the rows in `roads`, `roadsPathClasses` and `bikelanes` stay.
 local sanitize_access_tags = require('topics.roads_bikelanes.helper.sanitize_access_tags')
-local SET = require('topics.helper.sets')
+local highway_classes = require('topics.helper.highway_classes')
 
-local cycling_highway_prohibition = SET.set({
-  'motorway', 'motorway_link', 'trunk', 'trunk_link',
-})
-
---- Motorway / trunk (own or parent) and the carriageway of a motorroad: never routed.
---- `motorroad=yes` (Kraftfahrstraße, DE: Zeichen 331.1) prohibits cycling on the carriageway, whatever
---- `bicycle` says (`bicycle=yes` there is a mapping error). Bike infrastructure tagged on the way
---- (`cycleway:*=track|lane`) is a lane edge with its own tags and stays.
---- https://wiki.openstreetmap.org/wiki/DE:Tag:motorroad%3Dyes
+--- The edge is on a road where the law prohibits cycling: Autobahn and Schnellstraße
+--- (`motorway`, `trunk` and their links, also lanes tagged on them via `parent_road`) and the
+--- carriageway of a Kraftfahrstraße (`motorroad=yes`, DE: Zeichen 331.1), whatever `bicycle` says.
+--- These roads stay in `roads` like every other road; only a bike router must never use them.
+--- A lane tagged on a motorroad (`cycleway:*=track|lane`) has its own tags without `motorroad`
+--- and stays. https://wiki.openstreetmap.org/wiki/DE:Tag:motorroad%3Dyes
 ---@param tags OsmTags
 ---@return boolean
-local function prohibited_highway(tags)
-  local highway = tags.highway
-  if highway and cycling_highway_prohibition[highway] then
+local function cycling_prohibited_road(tags)
+  local motor_road_classes = highway_classes.trunk_motorway_classes
+  if motor_road_classes[tags.highway] or motor_road_classes[tags.parent_road] then
     return true
   end
-  if tags.motorroad == 'yes' then
-    return true
-  end
-  local parent_road = tags.parent_road
-  if parent_road and cycling_highway_prohibition[parent_road] then
-    return true
-  end
-  return false
+  return tags.motorroad == 'yes'
 end
 
 --- The tags whose bicycle access applies to the edge. A lane derived from the centerline
@@ -63,7 +51,7 @@ local function unpublished_bicycle_access(segment, object_tags)
 end
 
 return {
-  prohibited_highway = prohibited_highway,
+  cycling_prohibited_road = cycling_prohibited_road,
   access_bicycle = access_bicycle,
   unpublished_bicycle_access = unpublished_bicycle_access,
 }

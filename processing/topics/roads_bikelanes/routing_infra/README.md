@@ -46,7 +46,7 @@ Which ways are not public, and why, is decided once per way by `helper/access_re
 
 Precedence `way` > `roads`; `reason` (e.g. `access=destination`) is the strongest one. `access=private` & co. are lifted only by `bicycle=designated` (resolved via `vehicle`), `access=destination|customers` by a bicycle value that allows cycling on the way itself (`yes`, `designated`, `permissive`, `discouraged`, `dismount`; not `use_sidepath`). Bike infrastructure of the way lifts `service`, `indoor` and `informal`: if the way has a hint of bike infrastructure (`liftable_by_bike_infra`, from the tag check `may_have_bike_infra`, generous on purpose) and the bikelane categorisation then finds bike infrastructure of its own (`has_own_bike_infra`), the way is public again, including its `roads` row and carriageway / path edge. A way with `level = 'way'` that has no hint, or that the categorisation finds no bike infrastructure on, is written to no table.
 
-Per segment, `inclusion_rules` drops motorway and trunk (`prohibited_highway`, own or parent `highway`), the carriageway of a `motorroad=yes` and edges with a bicycle access value that is not published (`unpublished_bicycle_access`, e.g. `psv`).
+Per segment, `inclusion_rules` drops edges on roads where cycling is prohibited (`cycling_prohibited_road`: own or parent `highway` motorway or trunk, the carriageway of a `motorroad=yes`; their `roads` rows stay) and edges with a bicycle access value that is not published (`unpublished_bicycle_access`, e.g. `psv`).
 
 | Condition                                                                         | Result   |
 | --------------------------------------------------------------------------------- | -------- |
@@ -65,7 +65,7 @@ An edge where the resolved `bicycle` access (`bicycle` → `vehicle` → `access
 ### Pipeline
 
 ```
-access_restriction (per way) → build_segments → inclusion_rules (prohibited_highway, unpublished_bicycle_access) → resolve_motor_road_context → build_public_tags → routing
+access_restriction (per way) → build_segments → inclusion_rules (cycling_prohibited_road, unpublished_bicycle_access) → resolve_motor_road_context → build_public_tags → routing
 ```
 
 `segment.tags` of carriageway and path edges is the raw OSM way, for the two steps in the middle. `build_public_tags` never publishes from it: those edges take `shared_result_tags` (same values as `roads` / `roadsPathClasses`), bikelane edges take their row from `extract_bikelanes`.

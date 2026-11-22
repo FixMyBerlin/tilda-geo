@@ -15,7 +15,7 @@ local function roads_bikelanes_routing_infra(context)
   local segments = build_segments(context)
 
   for _, segment in ipairs(segments) do
-    if inclusion_rules.prohibited_highway(segment.tags)
+    if inclusion_rules.cycling_prohibited_road(segment.tags)
       or inclusion_rules.unpublished_bicycle_access(segment, context.object_tags)
     then
       goto continue

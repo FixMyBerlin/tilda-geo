@@ -46,7 +46,7 @@ local function outcome(tags)
   local restriction = ACCESS.access_restriction(tags)
   local bikelanes = not (restriction and restriction.level == 'way')
   local roads = bikelanes and not (restriction and restriction.level == 'roads')
-  return { bikelanes = bikelanes, roads = roads, routing = roads and not inclusion_rules.prohibited_highway(tags) }
+  return { bikelanes = bikelanes, roads = roads, routing = roads and not inclusion_rules.cycling_prohibited_road(tags) }
 end
 
 local ALL = { bikelanes = true, roads = true, routing = true }
