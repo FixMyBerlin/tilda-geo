@@ -102,29 +102,53 @@ attributes:
     ref: roads.smoothness
   - key: width
     ref: roads.width
+  - key: informal
+    ref: roads.informal
   - key: access_bicycle
     label: Zugang Radverkehr
+    chapterRefs:
+      - chapterId: zugang-radverkehr
     description: >-
       Aufgelöster Fahrrad-Zugang (OSM-Kette `bicycle` → `vehicle` → `access`,
-      Allowlist). Kein Roh-OSM-Wert. Router können `use_sidepath` und `dismount`
-      am Graphen entscheiden; die Kanten bleiben enthalten. Auf Radinfrastruktur,
-      die an der Fahrbahn-Mittellinie gemappt ist (`side=left`/`right`), leer: der
-      Zugang der Fahrbahn (z. B. `use_sidepath`) gilt nicht für den Radweg selbst.
+      Allowlist). Kein Roh-OSM-Wert. Leer: kein Zugangs-Tag, Radfahren ist erlaubt.
+      Kanten mit `no`, `destination`, `private`, `customers`, `delivery`,
+      `permit` oder `agricultural_or_forestry` sind im Graphen enthalten, Radfahren ist dort aber nicht erlaubt:
+      Router filtern sie selbst. Auf Radinfrastruktur an der Fahrbahn-Mittellinie
+      (`side=left`/`right`) leer.
     values:
       - value: yes
         label: Ja
-      - value: no
-        label: Nein
       - value: designated
         label: Gebaut / vorgesehen
       - value: permissive
         label: Geduldet
       - value: use_sidepath
-        label: Seitenweg benutzen
-        description: Fahrbahn rechtlich nicht vorgesehen; parallele Infrastruktur nutzen. Kante bleibt im Graphen.
-      - value: optional_sidepath
-        label: Seitenweg optional
+        label: Benutzungspflichtiger Radweg daneben
+        description: OSM-Wert auf der Fahrbahn. Neben der Fahrbahn liegt ein benutzungspflichtiger Radweg ([Zeichen 237 (Radweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:237), [Zeichen 240 (Gemeinsamer Geh- und Radweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:240) oder [Zeichen 241 (Getrennter Rad- und Gehweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:241)). Die Kante zählt als routbar, ein Router sollte aber den Radweg daneben bevorzugen.
       - value: discouraged
         label: Unerwünscht
       - value: dismount
         label: Absteigen
+      - value: destination
+        label: Anlieger frei
+        description: Radfahren nicht erlaubt (Router filtern die Kante), außer für Anlieger.
+      - value: private
+        label: Privat
+        description: Radfahren nicht erlaubt (Router filtern die Kante).
+      - value: customers
+        label: Kunden
+        description: Radfahren nicht erlaubt (Router filtern die Kante), außer für Kunden.
+      - value: delivery
+        label: Lieferverkehr
+        description: Radfahren nicht erlaubt (Router filtern die Kante), außer für den Lieferverkehr.
+      - value: permit
+        label: Mit Genehmigung
+        description: Radfahren nicht erlaubt (Router filtern die Kante), außer mit Genehmigung.
+      - value: agricultural_or_forestry
+        label: Land- und Forstwirtschaft
+        description: >-
+          Radfahren nicht erlaubt (Router filtern die Kante), nur land- oder forstwirtschaftlicher
+          Verkehr (OSM `agricultural`, `forestry` und Kombinationen).
+      - value: no
+        label: Nein
+        description: Radfahren nicht erlaubt (Router filtern die Kante).
