@@ -128,12 +128,25 @@ function parseNetscapeCookie(cookieContent: string) {
 }
 
 /**
+ * Map an internal Geofabrik URL to its public counterpart.
+ * The public server keeps each German state in its own folder (`europe/germany/berlin/berlin-latest.osm.pbf`),
+ * the internal server does not (`europe/germany/berlin-latest-internal.osm.pbf`).
+ */
+function toPublicDownloadUrl(url: string) {
+  return url
+    .replaceAll('osm-internal.download.geofabrik.de', 'download.geofabrik.de')
+    .replaceAll('-internal', '')
+    .replace(
+      /\/europe\/germany\/([a-z-]+)-latest\.osm\.pbf$/,
+      '/europe/germany/$1/$1-latest.osm.pbf',
+    )
+}
+
+/**
  * Switch to public Geofabrik downloads and disable OAuth credentials
  */
 export function fallbackToPublicDownload() {
-  params.pbfDownloadUrl = params.pbfDownloadUrl
-    .replaceAll('osm-internal.download.geofabrik.de', 'download.geofabrik.de')
-    .replaceAll('-internal', '')
+  params.pbfDownloadUrl = toPublicDownloadUrl(params.pbfDownloadUrl)
   params.osmUsername = undefined
   params.osmPassword = undefined
 }

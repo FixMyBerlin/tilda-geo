@@ -19,7 +19,7 @@ See [`index.ts`](./index.ts) for more.
 
 ### Freshness of source data
 
-The data is updated daily based on OSM extracts provided by [Geofabrik for Germany](https://download.geofabrik.de/europe/germany.html).
+The data is updated daily based on OSM extracts provided by [Geofabrik for Germany](https://download.geofabrik.de/europe/germany/).
 It includes OSM changes up until ~20:00 h of teh previous day.
 The processing should be finished at about 6:00 h of the current day (+/- 2 h).
 Which data is used in the app is visible in the download modal (Download-Icon on the bottom right of the map).
