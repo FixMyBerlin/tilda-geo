@@ -1,4 +1,5 @@
 local HIGHWAYS = require('topics.helper.highway_classes')
+local apply_cycleway_oneway_correction = require('topics.roads_bikelanes.pseudo_tags.apply_cycleway_oneway_correction')
 
 local function lookup_row(merged, object_id)
   return merged[tonumber(object_id)]
@@ -50,6 +51,9 @@ local function apply_pseudo_tags(object_tags, object_id, merged, _object_geom)
   apply_mapillary(object_tags, row)
   apply_sidepath(object_tags, row, object_tags.highway)
   apply_radnetz_berlin(object_tags, row)
+  if row and row.cycleway_oneway_correction then
+    apply_cycleway_oneway_correction(object_tags)
+  end
 end
 
 return apply_pseudo_tags

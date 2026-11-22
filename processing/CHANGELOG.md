@@ -4,6 +4,12 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-11
 
+### `bikelanes`: corrected direction of FMC cycleway oneway tags in Berlin (temporary)
+
+- Ways in `cycleway-oneway-corrections.csv` (FixMyBerlin/infravelo-radnetz, `osm-cleanup/oneway-2026-11/`, about 2,400 Berlin ways) are corrected before the direction is derived: `cycleway:both|left:oneway=yes`, `cycleway:oneway=yes` and `cycleway:right:oneway=yes` are dropped, a track on a corrected side gets its side default (`cycleway:left:oneway=-1`, `cycleway:right:oneway=yes`). Same change as the planned OSM edit.
+- Ways last edited on or after 2026-11-22 are used as tagged. The list is regenerated in that repo; TILDA downloads it on every run.
+- Temporary: removed once the OSM edit is done (FixMyBerlin/infravelo-radnetz#12, #13).
+
 ### `bikelanes`, `roads`, `bikelanesPresence`: sidewalks and `cyclewayOnHighwayProtected`
 
 - A protected bikelane (PBL) comes only from `cycleway:<side>=lane|track` on the road, a separately mapped `highway=cycleway`, or a separately mapped `highway=path` with `bicycle=designated`. Before, other ways with a physical separation (`separation:left=bump|bollard|…`) or parking on the left were PBLs, too: sidewalks mapped on the road (`sidewalk:<side>=*`), footways and e.g. `highway=service` sidepaths.

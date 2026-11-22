@@ -34,3 +34,17 @@ describe('apply_pseudo_tags', function()
     assert.are.equal('50', tags._sidepath_adjoining_maxspeed)
   end)
 end)
+
+describe('apply_pseudo_tags cycleway oneway correction', function()
+  local apply_pseudo_tags = require('topics.roads_bikelanes.pseudo_tags.apply_pseudo_tags')
+
+  it('corrects only listed ways', function()
+    local merged = { [1] = { cycleway_oneway_correction = true } }
+    local listed = { highway = 'secondary', ['cycleway:both'] = 'lane', ['cycleway:both:oneway'] = 'yes', _timestamp = 0 }
+    local other = { highway = 'secondary', ['cycleway:both'] = 'lane', ['cycleway:both:oneway'] = 'yes', _timestamp = 0 }
+    apply_pseudo_tags(listed, 1, merged, nil)
+    apply_pseudo_tags(other, 2, merged, nil)
+    assert.is_nil(listed['cycleway:both:oneway'])
+    assert.are.equal('yes', other['cycleway:both:oneway'])
+  end)
+end)
