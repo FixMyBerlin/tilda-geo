@@ -31,7 +31,7 @@ local function process_roads_bikelanes_way(object)
   -- Tag rewrite only, no geometry or pseudo tags needed. The two `cycleway` transforms below stay
   -- late: they only rewrite `cycleway*` keys, which are a hint (`may_have_bike_infra`) before and after.
   transform_construction_prefix(object_tags)
-  transform_access_values(object_tags) -- `unknown` = no tag, `military` = `no`, `residents` = `private`
+  transform_access_values(object_tags)
 
   -- Stage 2: tags only. A `way` restriction without a hint of bike infrastructure is written nowhere.
   local restriction = ACCESS.access_restriction(object_tags)
