@@ -1,5 +1,6 @@
 require('topics.helper.osm2pgsql')
 local SANITIZE_VALUES = require('topics.helper.sanitize_values')
+local ACCESS = require('topics.roads_bikelanes.helper.access_restriction')
 local build_public_tags = require('topics.roads_bikelanes.routing_infra.build_public_tags')
 local build_segments = require('topics.roads_bikelanes.routing_infra.build_segments')
 local inclusion_rules = require('topics.roads_bikelanes.routing_infra.inclusion_rules')
@@ -24,6 +25,7 @@ describe('build_public_tags', function()
       object_tags = object_tags,
       object_geom = line_geom,
       cycleways = cycleways or {},
+      access = ACCESS.IN_ALL_TABLES,
       shared_result_tags = result_tags(object_tags),
     }
 

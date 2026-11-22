@@ -5,8 +5,8 @@
 -- reason in the commit message.
 --
 -- Columns:
--- - `bikelanes`: the way is not restricted at level `way`: bikelanes,
---   todos, presence, bikelane routing edges
+-- - `bikelanes`: the way is in `bikelanes` (`in_bikelanes`): bikelane rows, todos, presence,
+--   bikelane routing edges
 -- - `roads`: the way also gets a `roads` / `roadsPathClasses` row
 -- - `routing`: the way also gets its carriageway or path routing edge
 --
@@ -43,10 +43,12 @@ local inclusion_rules = require('topics.roads_bikelanes.routing_infra.inclusion_
 local function outcome(tags)
   if exit_processing(tags) then return { bikelanes = false, roads = false, routing = false } end
   transform_access_values(tags)
-  local restriction = ACCESS.access_restriction(tags)
-  local bikelanes = not (restriction and restriction.level == 'way')
-  local roads = bikelanes and not (restriction and restriction.level == 'roads')
-  return { bikelanes = bikelanes, roads = roads, routing = roads and not inclusion_rules.cycling_prohibited_road(tags) }
+  local access = ACCESS.decide(tags)
+  return {
+    bikelanes = access.in_bikelanes,
+    roads = access.in_roads,
+    routing = access.in_roads and not inclusion_rules.cycling_prohibited_road(tags),
+  }
 end
 
 local ALL = { bikelanes = true, roads = true, routing = true }

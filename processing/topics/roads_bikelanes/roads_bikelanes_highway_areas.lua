@@ -28,9 +28,9 @@ local function process_highway_area(object)
     return
   end
   transform_access_values(object_tags)
-  -- Areas have no routing edges and no bike infrastructure; only `way` restrictions apply.
-  local restriction = ACCESS.access_restriction(object_tags)
-  if restriction and restriction.level == 'way' then
+  -- Areas have no routing edges and no bike infrastructure: they are in `highway_areas` unless the
+  -- way is in no table.
+  if not ACCESS.decide(object_tags).in_any_table then
     return
   end
 

@@ -1,5 +1,5 @@
 -- Mutate the input to map access values that TILDA reads as another value, on every key of the
--- access fallback chains (`sanitize_access_tags.lua`). Runs before `access_restriction`, so roads
+-- access fallback chains (`sanitize_access_tags.lua`). Runs before `ACCESS.decide` (`access_restriction.lua`), so roads
 -- and routing see the same values.
 -- - `unknown`: an explicit "nobody checked", read like no tag
 --   https://wiki.openstreetmap.org/wiki/Key:access

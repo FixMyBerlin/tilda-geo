@@ -4,46 +4,83 @@ local has_prefix = require('topics.helper.has_prefix')
 local has_tag_with_prefix = require('topics.helper.has_tag_with_prefix')
 local sanitize_access_tags = require('topics.roads_bikelanes.helper.sanitize_access_tags')
 
--- The one place that decides which ways are not public, and why. Tags only, no geometry: this
+-- The one place that decides in which tables a way is, and why. Tags only, no geometry: this
 -- runs for every `highway` way, so keep it cheap and allocation-free for public ways. Do not copy
 -- these value lists anywhere else. Access values are already mapped by `transform_access_values`
 -- (`unknown` = no tag, `military` = `no`, `residents` = `private`).
 --
--- Levels, strongest first:
--- - `way`:     no public row at all (bikelanes, roads, roadsPathClasses, routing, sidepath source
---              paths, todos, presence, errors)
--- - `roads`:   bikelane rows and their routing edges stay; no roads / roadsPathClasses row and no
---              carriageway / path routing edge (it would have no row to join)
+-- The decision (`AccessDecision`) has one of three shapes:
+-- - in all tables: the normal case.
+-- - only in `bikelanes`: its bikelane rows and their `routing` edges stay; no `roads` /
+--   `roadsPathClasses` row and no carriageway / path edge in `routing` (it would have no row to join).
+-- - in no table: like `exit_processing`, only decided later. No row in `bikelanes`, `roads`,
+--   `roadsPathClasses`, `routing`, `highway_areas`, no sidepath source path, todo, presence or error.
 --
 -- Which key restricts: `access` (all modes, pedestrians included) on every way, plus the key of the
 -- mode the way is built for: `foot` on a footway, `bicycle` on a cycleway. `vehicle`, `motor_vehicle`
 -- and `bicycle` on other ways never restrict the way: they only say who may drive there, the way
--- stays public. So `access=private` drops the way, `vehicle=private` keeps all its rows and edges with
+-- stays in all tables. So `access=private` puts the way in no table, `vehicle=private` keeps all its rows and edges with
 -- `access_bicycle=private`, and routers read `access_bicycle` on the edge.
 
----@alias RestrictionLevel 'way'|'roads'
+---@class AccessDecision
+---@field in_any_table boolean false: the way is written to no table at all
+---@field in_bikelanes boolean `bikelanes` rows and their `routing` edges
+---@field in_roads boolean the `roads` / `roadsPathClasses` row and the carriageway / path edge in `routing`
+---@field reason string|nil the tag that took the way out of a table, e.g. `access=destination`; nil when it is in all tables
+---@field may_change_with_bike_infra boolean own bike infrastructure can still put the way in all tables (`decide_after_categorisation`): the reason is `service`, `indoor` or `informal` and the tags hint at bike infrastructure (`may_have_bike_infra`). Always false for access tags.
 
----@class AccessRestriction
----@field level RestrictionLevel
----@field reason string the tag that caused it, e.g. `access=destination`
----@field liftable_by_bike_infra boolean own bike infrastructure can lift it: the reason is `service`, `indoor` or `informal` and the tags hint at bike infrastructure (`may_have_bike_infra`). Always false for access tags.
+--- Shared and read-only: public ways allocate nothing.
+---@type AccessDecision
+local IN_ALL_TABLES = {
+  in_any_table = true,
+  in_bikelanes = true,
+  in_roads = true,
+  reason = nil,
+  may_change_with_bike_infra = false,
+}
 
--- Values of the restricting key that take the way out of all public tables. `no` is lifted when
+---@param reason string
+---@param may_change_with_bike_infra boolean
+---@return AccessDecision
+local function in_bikelanes_only(reason, may_change_with_bike_infra)
+  return {
+    in_any_table = true,
+    in_bikelanes = true,
+    in_roads = false,
+    reason = reason,
+    may_change_with_bike_infra = may_change_with_bike_infra,
+  }
+end
+
+---@param reason string
+---@param may_change_with_bike_infra boolean
+---@return AccessDecision
+local function in_no_table(reason, may_change_with_bike_infra)
+  return {
+    in_any_table = false,
+    in_bikelanes = false,
+    in_roads = false,
+    reason = reason,
+    may_change_with_bike_infra = may_change_with_bike_infra,
+  }
+end
+
+-- Values of the restricting key that put the way in no table. `no` is lifted when
 -- cycling is explicitly allowed (`access=no + bicycle=yes`, a Fahrradstraße with `access=no +
 -- bicycle=designated`); temporary closures are already turned into `lifecycle` by
 -- `transform_lifecycle_tags`. `bicycle=no` on a cycleway always closes it.
 local closed_access = SET.set({ 'no' })
 
--- Values that take the way out of all public tables unless it is a signposted cycle route
+-- Values that put the way in no table unless it is a signposted cycle route
 -- (`bicycle=designated`). `bicycle=yes` does not lift them: `access=private + bicycle=yes` is mostly
 -- a private service way.
 local way_access = SET.set({ 'private', 'delivery', 'permit' })
 
 -- `bicycle=mtb`: a mountain bike trail (mostly `path` / `track` with `mtb:scale`). TILDA looks at
--- everyday cycling, so the way is in no public table; nothing lifts it.
+-- everyday cycling, so the way is in no table; nothing lifts it.
 local LEISURE_BICYCLE_ACCESS = 'mtb'
 
--- Values that only take it out of `roads` / `roadsPathClasses`, unless bicycle is explicitly allowed.
+-- Values that put the way only in `bikelanes`, unless bicycle is explicitly allowed.
 local roads_access = SET.set({ 'destination', 'customers' })
 
 -- The mode a highway class is built for: its access key restricts the way like `access` does.
@@ -72,47 +109,47 @@ local function find_access_value(tags, values)
   return nil, nil
 end
 
---- Restriction from the access tags only (`restricting_access_keys`). Never lifted by bike
---- infrastructure.
+--- Decision from the access tags only (`restricting_access_keys`). Bike infrastructure never
+--- changes it.
 ---@param tags OsmTags
----@return AccessRestriction|nil
-local function access_tag_restriction(tags)
+---@return AccessDecision
+local function decide_by_access_tags(tags)
   if tags.bicycle == LEISURE_BICYCLE_ACCESS then
-    return { level = 'way', reason = 'bicycle=' .. LEISURE_BICYCLE_ACCESS, liftable_by_bike_infra = false }
+    return in_no_table('bicycle=' .. LEISURE_BICYCLE_ACCESS, false)
   end
 
   local key, value = find_access_value(tags, closed_access)
   if key and not sanitize_access_tags.bicycle_explicitly_allowed(tags) then
-    return { level = 'way', reason = key .. '=' .. value, liftable_by_bike_infra = false }
+    return in_no_table(key .. '=' .. value, false)
   end
 
   key, value = find_access_value(tags, way_access)
   if key and not sanitize_access_tags.bicycle_designated(tags) then
-    return { level = 'way', reason = key .. '=' .. value, liftable_by_bike_infra = false }
+    return in_no_table(key .. '=' .. value, false)
   end
 
   key, value = find_access_value(tags, roads_access)
   if key then
     -- `bicycle=yes` & co. on an `access=destination` way: cycling is explicitly allowed, so the
-    -- way is public (and has a `roads` row for the routing edge to join).
+    -- way is in all tables (and has a `roads` row for the routing edge to join).
     if sanitize_access_tags.bicycle_explicitly_allowed(tags) then
-      return nil
+      return IN_ALL_TABLES
     end
-    return { level = 'roads', reason = key .. '=' .. value, liftable_by_bike_infra = false }
+    return in_bikelanes_only(key .. '=' .. value, false)
   end
 
-  return nil
+  return IN_ALL_TABLES
 end
 
--- `highway=service + service=<value>`: every value except `alley` is not public. Mainly:
+-- `highway=service + service=<value>`: every value except `alley` puts the way in no table. Mainly:
 -- - `driveway`: implicitly private
 -- - `parking_aisle`: not part of the road network (a connecting road needs a plain `highway=service`)
 -- - `emergency_access`: a special kind of driveway
 -- - `drive-through`: not part of the road network, and false positives in the oneway layer
 --
 -- Exception: a signposted cycle route (`bicycle=designated`) is part of the bicycle network even
--- without a bikelane category. Any other bike infrastructure lifts the restriction in stage 3
--- (`after_categorisation`).
+-- without a bikelane category. Any other bike infrastructure puts the way in all tables in stage 3
+-- (`decide_after_categorisation`).
 local allowed_service = SET.set({ 'alley' })
 
 ---@param tags OsmTags
@@ -189,34 +226,36 @@ local function may_have_bike_infra(tags)
   return has_sidewalk_bike_tag(tags)
 end
 
---- Restriction that bike infrastructure of the way itself can lift.
+--- Decision from `service`, `indoor` and `informal`, which bike infrastructure of the way itself
+--- can change.
 ---@param tags OsmTags
----@return AccessRestriction|nil
-local function structural_restriction(tags)
+---@return AccessDecision
+local function decide_by_way_kind(tags)
   if is_restricted_service(tags) then
-    return { level = 'way', reason = 'service=' .. tags.service, liftable_by_bike_infra = may_have_bike_infra(tags) }
+    return in_no_table('service=' .. tags.service, may_have_bike_infra(tags))
   end
   if tags.indoor == 'yes' then
-    return { level = 'roads', reason = 'indoor=yes', liftable_by_bike_infra = may_have_bike_infra(tags) }
+    return in_bikelanes_only('indoor=yes', may_have_bike_infra(tags))
   end
   if tags.informal == 'yes' then
-    return { level = 'roads', reason = 'informal=yes', liftable_by_bike_infra = may_have_bike_infra(tags) }
+    return in_bikelanes_only('informal=yes', may_have_bike_infra(tags))
   end
-  return nil
+  return IN_ALL_TABLES
 end
 
---- `nil` is public. Precedence `way` > `roads`; the reason of the strongest wins.
---- Within a level, access tags come first because bike infrastructure cannot lift them.
+--- Stage 2: in which tables is the way? The decision with fewer tables wins, its reason is kept.
+--- With the same tables, the access tags win because bike infrastructure cannot change them.
 ---@param object_tags OsmTags
----@return AccessRestriction|nil
-local function access_restriction(object_tags)
-  local by_access = access_tag_restriction(object_tags)
-  if by_access and by_access.level == 'way' then return by_access end
+---@return AccessDecision
+local function decide(object_tags)
+  local by_access_tags = decide_by_access_tags(object_tags)
+  if not by_access_tags.in_any_table then return by_access_tags end
 
-  local structural = structural_restriction(object_tags)
-  if structural and structural.level == 'way' then return structural end
+  local by_way_kind = decide_by_way_kind(object_tags)
+  if not by_way_kind.in_any_table then return by_way_kind end
 
-  return by_access or structural
+  if not by_access_tags.in_roads then return by_access_tags end
+  return by_way_kind
 end
 
 --- Stage 3: does the way carry bike infrastructure of its own (any side)?
@@ -231,23 +270,26 @@ local function has_own_bike_infra(cycleways)
   return false
 end
 
---- Stage 3: after the bikelane categorisation, bike infrastructure lifts a `service` / `indoor` /
---- `informal` restriction. What is left are the restrictions of the access tags alone (e.g.
---- `access=destination` on a service way still drops its carriageway edge).
----@param restriction AccessRestriction|nil
+--- Stage 3: after the bikelane categorisation, bike infrastructure of the way itself puts a
+--- `service` / `indoor` / `informal` way in all tables. What is left is the decision of the access
+--- tags alone (e.g. `access=destination` on a service way keeps it only in `bikelanes`).
+---@param decision AccessDecision
 ---@param object_tags OsmTags
 ---@param cycleways table[]
----@return AccessRestriction|nil
-local function after_categorisation(restriction, object_tags, cycleways)
-  if not restriction or not restriction.liftable_by_bike_infra then return restriction end
-  if not has_own_bike_infra(cycleways) then return restriction end
-  return access_tag_restriction(object_tags)
+---@return AccessDecision
+local function decide_after_categorisation(decision, object_tags, cycleways)
+  if not decision.may_change_with_bike_infra then return decision end
+  if not has_own_bike_infra(cycleways) then return decision end
+  return decide_by_access_tags(object_tags)
 end
 
 return {
-  access_restriction = access_restriction,
+  IN_ALL_TABLES = IN_ALL_TABLES,
+  in_bikelanes_only = in_bikelanes_only,
+  in_no_table = in_no_table,
+  decide = decide,
   restricting_access_keys = restricting_access_keys,
   may_have_bike_infra = may_have_bike_infra,
   has_own_bike_infra = has_own_bike_infra,
-  after_categorisation = after_categorisation,
+  decide_after_categorisation = decide_after_categorisation,
 }

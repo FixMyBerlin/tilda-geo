@@ -33,9 +33,9 @@ local function process_roads_bikelanes_way(object)
   transform_construction_prefix(object_tags)
   transform_access_values(object_tags)
 
-  -- Stage 2: tags only. A `way` restriction without a hint of bike infrastructure is written nowhere.
-  local restriction = ACCESS.access_restriction(object_tags)
-  if restriction and restriction.level == 'way' and not restriction.liftable_by_bike_infra then return end
+  -- Stage 2: tags only. In no table and no bike infrastructure that could change it: stop here.
+  local access = ACCESS.decide(object_tags)
+  if not access.in_any_table and not access.may_change_with_bike_infra then return end
 
   local object_geom = object:as_linestring() -- only compute once
   object_tags._length = round(object_geom:transform(5243):length(), 2) -- used in result_tags but also nested decision
@@ -54,9 +54,9 @@ local function process_roads_bikelanes_way(object)
   ---@type BikelaneState
   local shared_bikelane_state = prepare_shared_bikelane_state_roads_bikelanes(object_tags)
 
-  -- Stage 3: own bike infrastructure lifts `service` / `indoor` / `informal`
-  restriction = ACCESS.after_categorisation(restriction, object_tags, shared_bikelane_state.cycleways)
-  if restriction and restriction.level == 'way' then return end
+  -- Stage 3: own bike infrastructure puts a `service` / `indoor` / `informal` way in all tables
+  access = ACCESS.decide_after_categorisation(access, object_tags, shared_bikelane_state.cycleways)
+  if not access.in_any_table then return end
 
   ---@type RoadsBikelanesWayContext
   local context = {
@@ -66,7 +66,7 @@ local function process_roads_bikelanes_way(object)
     shared_result_tags = shared_result_tags,
     cycleways = shared_bikelane_state.cycleways,
     cycleway_presence = shared_bikelane_state.cycleway_presence,
-    restriction = restriction,
+    access = access,
   }
 
   roads_bikelanes_sidepath_source_paths(object_tags, object_geom)

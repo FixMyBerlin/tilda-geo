@@ -6,7 +6,7 @@ local exit_processing = require('topics.roads_bikelanes.helper.exit_processing')
 local bikelanes = require('topics.roads_bikelanes.bikelanes.extract_bikelanes')
 local transform_lifecycle_tags = require('topics.roads_bikelanes.helper.transform_tags.transform_lifecycle_tags')
 
-local access_restriction = ACCESS.access_restriction
+local decide = ACCESS.decide
 
 ---@param tags table
 ---@return table
@@ -35,141 +35,141 @@ local function category_of(cycleways, side)
   return nil
 end
 
-describe('access_restriction', function()
-  describe('public ways', function()
-    it('returns nil without access tags', function()
-      assert.is_nil(access_restriction({ highway = 'residential' }))
-      assert.is_nil(access_restriction({ highway = 'service', service = 'alley' }))
-      assert.is_nil(access_restriction({ highway = 'service' }))
+describe('decide', function()
+  describe('in all tables', function()
+    it('without access tags', function()
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'residential' }))
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'service', service = 'alley' }))
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'service' }))
     end)
 
     it('returns nil when cycling is allowed explicitly', function()
-      assert.is_nil(access_restriction({ highway = 'residential', bicycle = 'use_sidepath' }))
-      assert.is_nil(access_restriction({ highway = 'residential', vehicle = 'no', bicycle = 'yes' }))
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'residential', bicycle = 'use_sidepath' }))
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'residential', vehicle = 'no', bicycle = 'yes' }))
     end)
 
     it('lets explicit bicycle permission win over access=destination (way/6194793 Radieschenpfad)', function()
-      assert.is_nil(access_restriction({ highway = 'path', access = 'destination', bicycle = 'yes' }))
-      assert.is_nil(access_restriction({ highway = 'residential', access = 'customers', vehicle = 'yes' }))
-      assert.is_nil(access_restriction({ highway = 'footway', foot = 'destination', bicycle = 'permissive' }))
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'path', access = 'destination', bicycle = 'yes' }))
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'residential', access = 'customers', vehicle = 'yes' }))
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'footway', foot = 'destination', bicycle = 'permissive' }))
     end)
 
     it('does not apply temporary closures: lifecycle derivation removes the tag', function()
       local tags = { highway = 'residential', access = 'no', description = 'Weg gesperrt aufgrund einer Baustelle' }
       transform_lifecycle_tags(tags)
       assert.is_false(exit_processing(tags))
-      assert.is_nil(access_restriction(tags))
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide(tags))
     end)
 
     it('closes the way for access=no, foot=no on a footway and bicycle=no on a cycleway', function()
       assert.is_false(exit_processing({ highway = 'residential', access = 'no' }))
-      assert.are.same('access=no', access_restriction({ highway = 'residential', access = 'no' }).reason)
-      assert.are.same('way', access_restriction({ highway = 'residential', access = 'no' }).level)
-      assert.are.same('foot=no', access_restriction({ highway = 'footway', foot = 'no' }).reason)
-      assert.are.same('bicycle=no', access_restriction({ highway = 'cycleway', bicycle = 'no' }).reason)
-      assert.is_nil(access_restriction({ highway = 'residential', foot = 'no' }))
+      assert.are.same('access=no', decide({ highway = 'residential', access = 'no' }).reason)
+      assert.is_false(decide({ highway = 'residential', access = 'no' }).in_any_table)
+      assert.are.same('foot=no', decide({ highway = 'footway', foot = 'no' }).reason)
+      assert.are.same('bicycle=no', decide({ highway = 'cycleway', bicycle = 'no' }).reason)
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'residential', foot = 'no' }))
     end)
 
     it('keeps access=no public when cycling is explicitly allowed', function()
-      assert.is_nil(access_restriction({ highway = 'track', access = 'no', bicycle = 'yes' }))
-      assert.is_nil(access_restriction({ highway = 'residential', access = 'no', bicycle = 'designated' }))
-      assert.is_nil(access_restriction({ highway = 'footway', foot = 'no', bicycle = 'dismount' }))
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'track', access = 'no', bicycle = 'yes' }))
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'residential', access = 'no', bicycle = 'designated' }))
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'footway', foot = 'no', bicycle = 'dismount' }))
     end)
   end)
 
   describe('bicycle access that does not allow cycling', function()
-    it('is no restriction: the edge stays on the graph with access_bicycle', function()
-      assert.is_nil(access_restriction({ highway = 'primary', bicycle = 'no' })) -- Heerstraße
-      assert.is_nil(access_restriction({ highway = 'service', vehicle = 'destination' })) -- Maronensperlingweg
-      assert.is_nil(access_restriction({ highway = 'residential', vehicle = 'destination' }))
-      assert.is_nil(access_restriction({ highway = 'residential', vehicle = 'private' }))
-      assert.is_nil(access_restriction({ highway = 'residential', vehicle = 'no' }))
-      assert.is_nil(access_restriction({ highway = 'footway', bicycle = 'destination' }))
+    it('is no access: the edge stays on the graph with access_bicycle', function()
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'primary', bicycle = 'no' })) -- Heerstraße
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'service', vehicle = 'destination' })) -- Maronensperlingweg
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'residential', vehicle = 'destination' }))
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'residential', vehicle = 'private' }))
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'residential', vehicle = 'no' }))
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'footway', bicycle = 'destination' }))
     end)
   end)
 
-  describe('level `roads`', function()
+  describe('only in bikelanes', function()
     it('access=destination and customers without bicycle permission', function()
-      local restriction = access_restriction({ highway = 'residential', access = 'destination' })
-      assert.are.same({ level = 'roads', reason = 'access=destination', liftable_by_bike_infra = false }, restriction)
-      assert.are.equal('access=customers', access_restriction({ highway = 'path', access = 'customers' }).reason)
+      local access = decide({ highway = 'residential', access = 'destination' })
+      assert.are.same(ACCESS.in_bikelanes_only('access=destination', false), access)
+      assert.are.equal('access=customers', decide({ highway = 'path', access = 'customers' }).reason)
     end)
 
     it('foot on footway and bicycle on cycleway, like the other access tags', function()
-      assert.are.equal('foot=customers', access_restriction({ highway = 'footway', foot = 'customers' }).reason)
-      assert.are.equal('bicycle=destination', access_restriction({ highway = 'cycleway', bicycle = 'destination' }).reason)
-      assert.are.equal('roads', access_restriction({ highway = 'footway', foot = 'customers' }).level)
+      assert.are.equal('foot=customers', decide({ highway = 'footway', foot = 'customers' }).reason)
+      assert.are.equal('bicycle=destination', decide({ highway = 'cycleway', bicycle = 'destination' }).reason)
+      assert.is_false(decide({ highway = 'footway', foot = 'customers' }).in_roads)
     end)
 
     it('informal=yes path without infrastructure hint', function()
-      local restriction = access_restriction({ highway = 'path', informal = 'yes' })
-      assert.are.same({ level = 'roads', reason = 'informal=yes', liftable_by_bike_infra = false }, restriction)
+      local access = decide({ highway = 'path', informal = 'yes' })
+      assert.are.same(ACCESS.in_bikelanes_only('informal=yes', false), access)
     end)
 
     it('indoor=yes footway without infrastructure hint', function()
-      local restriction = access_restriction({ highway = 'footway', indoor = 'yes' })
-      assert.are.same({ level = 'roads', reason = 'indoor=yes', liftable_by_bike_infra = false }, restriction)
+      local access = decide({ highway = 'footway', indoor = 'yes' })
+      assert.are.same(ACCESS.in_bikelanes_only('indoor=yes', false), access)
     end)
   end)
 
-  describe('level `way`', function()
+  describe('in no table', function()
     it('service=driveway without hint', function()
-      local restriction = access_restriction({ highway = 'service', service = 'driveway' })
-      assert.are.same({ level = 'way', reason = 'service=driveway', liftable_by_bike_infra = false }, restriction)
+      local access = decide({ highway = 'service', service = 'driveway' })
+      assert.are.same(ACCESS.in_no_table('service=driveway', false), access)
     end)
 
     it('keeps the service exception for a signposted cycle route', function()
-      assert.is_nil(access_restriction({ highway = 'service', service = 'driveway', bicycle = 'designated' }))
-      assert.are.equal('way', access_restriction({ highway = 'service', service = 'driveway', ['bicycle:left'] = 'yes' }).level)
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'service', service = 'driveway', bicycle = 'designated' }))
+      assert.is_false(decide({ highway = 'service', service = 'driveway', ['bicycle:left'] = 'yes' }).in_any_table)
     end)
 
     it('way/34144223: driveway with Z239 + 1022-10 has a hint', function()
-      local restriction = access_restriction({
+      local access = decide({
         highway = 'service',
         service = 'driveway',
         bicycle = 'yes',
         traffic_sign = 'DE:239,1022-10,1000-31',
       })
-      assert.are.equal('way', restriction.level)
-      assert.is_true(restriction.liftable_by_bike_infra)
+      assert.is_false(access.in_any_table)
+      assert.is_true(access.may_change_with_bike_infra)
     end)
 
     it('access/foot/bicycle private, delivery, permit', function()
       assert.are.same(
-        { level = 'way', reason = 'access=private', liftable_by_bike_infra = false },
-        access_restriction({ highway = 'residential', access = 'private' })
+        ACCESS.in_no_table('access=private', false),
+        decide({ highway = 'residential', access = 'private' })
       )
-      assert.are.equal('access=delivery', access_restriction({ highway = 'residential', access = 'delivery' }).reason)
-      assert.are.equal('access=permit', access_restriction({ highway = 'residential', access = 'permit' }).reason)
-      assert.are.equal('foot=private', access_restriction({ highway = 'footway', foot = 'private' }).reason)
-      assert.are.equal('bicycle=permit', access_restriction({ highway = 'cycleway', bicycle = 'permit' }).reason)
-      assert.is_nil(access_restriction({ highway = 'residential', foot = 'private' })) -- foot only counts on footways
+      assert.are.equal('access=delivery', decide({ highway = 'residential', access = 'delivery' }).reason)
+      assert.are.equal('access=permit', decide({ highway = 'residential', access = 'permit' }).reason)
+      assert.are.equal('foot=private', decide({ highway = 'footway', foot = 'private' }).reason)
+      assert.are.equal('bicycle=permit', decide({ highway = 'cycleway', bicycle = 'permit' }).reason)
+      assert.are.same(ACCESS.IN_ALL_TABLES, decide({ highway = 'residential', foot = 'private' })) -- foot only counts on footways
     end)
 
     it('access=private is not lifted by bicycle=yes or infrastructure hints', function()
-      local restriction = access_restriction({ highway = 'path', access = 'private', bicycle = 'yes', traffic_sign = 'DE:240' })
-      assert.are.equal('way', restriction.level)
-      assert.are.equal('access=private', restriction.reason)
-      assert.is_false(restriction.liftable_by_bike_infra)
+      local access = decide({ highway = 'path', access = 'private', bicycle = 'yes', traffic_sign = 'DE:240' })
+      assert.is_false(access.in_any_table)
+      assert.are.equal('access=private', access.reason)
+      assert.is_false(access.may_change_with_bike_infra)
     end)
   end)
 
   describe('precedence', function()
     it('way over a bicycle access that does not allow cycling: service=driveway + vehicle=destination', function()
-      local restriction = access_restriction({ highway = 'service', service = 'driveway', vehicle = 'destination' })
-      assert.are.equal('way', restriction.level)
-      assert.are.equal('service=driveway', restriction.reason)
+      local access = decide({ highway = 'service', service = 'driveway', vehicle = 'destination' })
+      assert.is_false(access.in_any_table)
+      assert.are.equal('service=driveway', access.reason)
     end)
 
-    it('way over roads: access=private + informal=yes, service + access=destination', function()
-      assert.are.equal('access=private', access_restriction({ highway = 'path', access = 'private', informal = 'yes' }).reason)
-      assert.are.equal('service=driveway', access_restriction({ highway = 'service', service = 'driveway', access = 'destination' }).reason)
+    it('no table wins over only in bikelanes: access=private + informal=yes, service + access=destination', function()
+      assert.are.equal('access=private', decide({ highway = 'path', access = 'private', informal = 'yes' }).reason)
+      assert.are.equal('service=driveway', decide({ highway = 'service', service = 'driveway', access = 'destination' }).reason)
     end)
 
-    it('access tag before informal within `roads`', function()
-      local restriction = access_restriction({ highway = 'path', access = 'destination', informal = 'yes' })
-      assert.are.equal('access=destination', restriction.reason)
-      assert.is_false(restriction.liftable_by_bike_infra)
+    it('access tag before informal within only in bikelanes', function()
+      local access = decide({ highway = 'path', access = 'destination', informal = 'yes' })
+      assert.are.equal('access=destination', access.reason)
+      assert.is_false(access.may_change_with_bike_infra)
     end)
   end)
 
@@ -213,15 +213,15 @@ describe('access_restriction', function()
     end)
   end)
 
-  describe('after_categorisation (stage 3)', function()
+  describe('decide_after_categorisation (stage 3)', function()
     ---@param tags table
-    ---@return table|nil restriction before
-    ---@return table|nil restriction after
+    ---@return AccessDecision before
+    ---@return AccessDecision after
     ---@return table[] cycleways
     local function stage_three(tags)
-      local before = access_restriction(tags)
+      local before = decide(tags)
       local cycleways = categorize(tags)
-      return before, ACCESS.after_categorisation(before, tags, cycleways), cycleways
+      return before, ACCESS.decide_after_categorisation(before, tags, cycleways), cycleways
     end
 
     it('way/34144223: driveway with Z239 + 1022-10 stays restricted', function()
@@ -237,7 +237,7 @@ describe('access_restriction', function()
 
     it('driveway with Z240 and no bicycle tag becomes public as footAndCyclewayShared', function()
       local _, after, cycleways = stage_three({ highway = 'service', service = 'driveway', traffic_sign = 'DE:240' })
-      assert.is_nil(after)
+      assert.are.same(ACCESS.IN_ALL_TABLES, after)
       assert.are.equal('footAndCyclewayShared_isolated', category_of(cycleways, 'self'))
     end)
 
@@ -249,27 +249,27 @@ describe('access_restriction', function()
 
     it('driveway with a hint but no infrastructure stays restricted', function()
       local before, after = stage_three({ highway = 'service', service = 'driveway', ['cycleway:both'] = 'no' })
-      assert.is_true(before.liftable_by_bike_infra)
-      assert.are.equal('way', after.level)
+      assert.is_true(before.may_change_with_bike_infra)
+      assert.is_false(after.in_any_table)
     end)
 
     it('informal=yes with Z240 and no bicycle tag becomes public', function()
       local before, after, cycleways = stage_three({ highway = 'path', informal = 'yes', traffic_sign = 'DE:240' })
-      assert.are.equal('roads', before.level)
-      assert.is_nil(after)
+      assert.is_false(before.in_roads)
+      assert.are.same(ACCESS.IN_ALL_TABLES, after)
       assert.is_truthy(category_of(cycleways, 'self'))
     end)
 
     it('indoor=yes footway without infrastructure stays restricted', function()
       local before, after = stage_three({ highway = 'footway', indoor = 'yes' })
-      assert.is_false(before.liftable_by_bike_infra)
+      assert.is_false(before.may_change_with_bike_infra)
       assert.are.same(before, after)
     end)
 
-    it('keeps the restriction of the access tags once infrastructure lifts the structural one', function()
+    it('keeps the access of the access tags once infrastructure lifts the structural one', function()
       local before, after = stage_three({ highway = 'service', service = 'driveway', access = 'destination', traffic_sign = 'DE:240' })
-      assert.are.equal('way', before.level)
-      assert.are.same({ level = 'roads', reason = 'access=destination', liftable_by_bike_infra = false }, after)
+      assert.is_false(before.in_any_table)
+      assert.are.same(ACCESS.in_bikelanes_only('access=destination', false), after)
     end)
   end)
 

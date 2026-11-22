@@ -1,7 +1,7 @@
 -- Enumerates routing edges per `source_table` (`roads`, `bikelanes`, `roadsPathClasses`).
 -- One edge per source object; direction via `oneway` / `oneway_motor` + geometry (README.md).
--- A way of restriction level `roads` (`context.restriction`, see `helper/access_restriction.lua`)
--- keeps its bikelane edges as they are. It has no carriageway or path edge: there is no `roads` /
+-- A way that is only in `bikelanes` (`context.access`, see `helper/access_restriction.lua`) keeps
+-- its bikelane edges as they are. It has no carriageway or path edge: there is no `roads` /
 -- `roadsPathClasses` row to join.
 local merge_table = require('topics.helper.merge_table')
 local default_id = require('topics.helper.default_id')
@@ -122,8 +122,8 @@ local function build_segments(context)
   local virtual_uses_centerline_id = false
   local self_cycleway = nil
   local object_default_id = default_id({ type = object_tags._type, id = object_tags._id })
-  -- Carriageway and path edges join `roads` / `roadsPathClasses`; level `roads` has no such row.
-  local has_roads_row = not (context.restriction and context.restriction.level == 'roads')
+  -- Carriageway and path edges join the `roads` / `roadsPathClasses` row.
+  local has_roads_row = context.access.in_roads
 
   for _, cycleway in ipairs(context.cycleways) do
     if cycleway._side == 'self' then

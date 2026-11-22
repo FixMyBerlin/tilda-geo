@@ -18,12 +18,13 @@ package.loaded['topics.roads_bikelanes.roads_bikelanes_tables'] = {
 local bikelanes = require('topics.roads_bikelanes.bikelanes.extract_bikelanes')
 local result_tags = require('topics.roads_bikelanes.helper.result_tags')
 local roads_bikelanes_roads = require('topics.roads_bikelanes.roads_bikelanes_roads')
+local ACCESS = require('topics.roads_bikelanes.helper.access_restriction')
 
 describe('roads_bikelanes_roads', function()
   ---@param object_tags table
-  ---@param restriction table|nil
+  ---@param access AccessDecision|nil default: in all tables
   ---@return table[] cycleways
-  local function run(object_tags, restriction)
+  local function run(object_tags, access)
     rows.roads, rows.roadsPathClasses, rows.bikeSuitability, rows.todos_lines = {}, {}, {}, {}
     object_tags._type = 'way'
     object_tags._id = 42
@@ -36,7 +37,7 @@ describe('roads_bikelanes_roads', function()
       object_geom = object_geom,
       shared_result_tags = result_tags(object_tags),
       cycleways = cycleways,
-      restriction = restriction,
+      access = access or ACCESS.IN_ALL_TABLES,
     })
     return cycleways
   end
@@ -258,9 +259,9 @@ describe('roads_bikelanes_roads', function()
   end)
 
   describe('restricted ways', function()
-    it('level `roads` writes no roads, roadsPathClasses, bikeSuitability or todo row', function()
-      run({ highway = 'residential', width = '0', ['cycleway:right'] = 'lane' }, { level = 'roads', reason = 'access=destination' })
-      run({ highway = 'footway', width = '0' }, { level = 'roads', reason = 'indoor=yes' })
+    it('only in bikelanes: writes no roads, roadsPathClasses, bikeSuitability or todo row', function()
+      run({ highway = 'residential', width = '0', ['cycleway:right'] = 'lane' }, ACCESS.in_bikelanes_only('access=destination', false))
+      run({ highway = 'footway', width = '0' }, ACCESS.in_bikelanes_only('indoor=yes', false))
       for _, name in ipairs({ 'roads', 'roadsPathClasses', 'bikeSuitability', 'todos_lines' }) do
         assert.are.equal(0, #rows[name], name)
       end
@@ -292,6 +293,7 @@ describe('roads_bikelanes_roads', function()
         shared_result_tags = result_tags(object_tags),
         cycleways = bikelanes(object_tags, object_geom),
         cycleway_presence = cycleway_presence,
+        access = ACCESS.IN_ALL_TABLES,
       })
       return reversed_geom, object_geom
     end

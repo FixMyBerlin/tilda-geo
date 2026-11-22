@@ -39,10 +39,9 @@ local function roads_bikelanes_roads(context)
   local object_geom = context.object_geom
 
   -- Skip what `routing` has no path edge for (join symmetry with roadsPathClasses, see
-  -- `build_segments.lua` and `routing_infra/README.md` § Join symmetry): ways of restriction level
-  -- `roads`, OSM sidewalks and derived sidepaths.
-  local restriction = context.restriction
-  if restriction and restriction.level == 'roads' then return end
+  -- `build_segments.lua` and `routing_infra/README.md` § Join symmetry): ways that are not in
+  -- `roads` (`context.access.in_roads`), OSM sidewalks and derived sidepaths.
+  if not context.access.in_roads then return end
   if category_is_sidepath(object_tags) then return end
 
   local result_tags = merge_table({}, context.shared_result_tags)
