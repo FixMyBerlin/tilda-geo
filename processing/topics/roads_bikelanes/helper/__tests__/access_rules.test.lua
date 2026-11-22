@@ -7,8 +7,8 @@
 -- Columns:
 -- - `bikelanes`: the way is not restricted at level `way`: bikelanes,
 --   todos, presence, bikelane routing edges
--- - `roads`: the way also gets a `roads` / `roadsPathClasses` row and its carriageway or path
---   routing edge
+-- - `roads`: the way also gets a `roads` / `roadsPathClasses` row
+-- - `routing`: the way also gets its carriageway or path routing edge
 --
 -- Rules:
 -- - Values are mapped first (`transform_access_values`): `unknown` and `optional_sidepath` read as no
@@ -27,26 +27,32 @@
 --   `access=private` drops the way, `vehicle=private` keeps it with `access_bicycle=private`.
 -- - `service` (except `alley`), `indoor=yes` and `informal=yes` are lifted by bike infrastructure of the
 --   way itself after the categorisation; see `access_restriction.test.lua`.
+-- - `motorroad=yes` (Kraftfahrstraße) and motorway/trunk keep their `roads` row but get no
+--   carriageway routing edge, whatever `bicycle` says. Bike infrastructure tagged on the way
+--   (`cycleway:*=track|lane`) keeps its own lane edge; see `inclusion_rules.test.lua`.
 -- - Temporary closures (`access=no` with Baustelle/Sperrung text) are lifecycle, not access:
 --   `transform_lifecycle_tags` runs first, see `exit_processing.test.lua`.
 
 local exit_processing = require('topics.roads_bikelanes.helper.exit_processing')
 local transform_access_values = require('topics.roads_bikelanes.helper.transform_tags.transform_access_values')
 local ACCESS = require('topics.roads_bikelanes.helper.access_restriction')
+local inclusion_rules = require('topics.roads_bikelanes.routing_infra.inclusion_rules')
 
 ---@param tags OsmTags
----@return { bikelanes: boolean, roads: boolean }
+---@return { bikelanes: boolean, roads: boolean, routing: boolean }
 local function outcome(tags)
-  if exit_processing(tags) then return { bikelanes = false, roads = false } end
+  if exit_processing(tags) then return { bikelanes = false, roads = false, routing = false } end
   transform_access_values(tags)
   local restriction = ACCESS.access_restriction(tags)
   local bikelanes = not (restriction and restriction.level == 'way')
-  return { bikelanes = bikelanes, roads = bikelanes and not (restriction and restriction.level == 'roads') }
+  local roads = bikelanes and not (restriction and restriction.level == 'roads')
+  return { bikelanes = bikelanes, roads = roads, routing = roads and not inclusion_rules.prohibited_highway(tags) }
 end
 
-local ALL = { bikelanes = true, roads = true }
-local BIKELANES_ONLY = { bikelanes = true, roads = false }
-local NONE = { bikelanes = false, roads = false }
+local ALL = { bikelanes = true, roads = true, routing = true }
+local NOT_ROUTED = { bikelanes = true, roads = true, routing = false }
+local BIKELANES_ONLY = { bikelanes = true, roads = false, routing = false }
+local NONE = { bikelanes = false, roads = false, routing = false }
 
 local rows = {
   -- No access tags
@@ -112,6 +118,13 @@ local rows = {
   { 'access=customers + bicycle=permissive', { highway = 'service', access = 'customers', bicycle = 'permissive' }, ALL },
   { 'access=destination + bicycle=no', { highway = 'residential', access = 'destination', bicycle = 'no' }, BIKELANES_ONLY },
   { 'access=destination + bicycle=use_sidepath', { highway = 'residential', access = 'destination', bicycle = 'use_sidepath' }, BIKELANES_ONLY },
+
+  -- Motor roads: no carriageway edge in routing
+  { 'motorway', { highway = 'motorway' }, NOT_ROUTED },
+  { 'trunk', { highway = 'trunk', motorroad = 'yes' }, NOT_ROUTED },
+  { 'primary motorroad=yes (Kraftfahrstraße)', { highway = 'primary', motorroad = 'yes' }, NOT_ROUTED },
+  { 'primary motorroad=yes + bicycle=yes (mapping error)', { highway = 'primary', motorroad = 'yes', bicycle = 'yes' }, NOT_ROUTED },
+  { 'primary motorroad=yes + cycleway:right=track (the lane keeps its edge)', { highway = 'primary', motorroad = 'yes', ['cycleway:right'] = 'track' }, NOT_ROUTED },
 }
 
 describe('access rules (decision table)', function()

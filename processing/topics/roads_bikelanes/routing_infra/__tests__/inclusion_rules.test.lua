@@ -11,6 +11,12 @@ describe('inclusion_rules.prohibited_highway', function()
     assert.is_true(inclusion_rules.prohibited_highway({ highway = 'cycleway', parent_road = 'trunk' }))
     assert.is_false(inclusion_rules.prohibited_highway({ highway = 'primary', bicycle = 'no' })) -- stays, routers filter on access_bicycle
   end)
+
+  it('prohibits the carriageway of a motorroad, also with bicycle=yes', function()
+    assert.is_true(inclusion_rules.prohibited_highway({ highway = 'primary', motorroad = 'yes' }))
+    assert.is_true(inclusion_rules.prohibited_highway({ highway = 'primary', motorroad = 'yes', bicycle = 'yes' }))
+    assert.is_false(inclusion_rules.prohibited_highway({ highway = 'primary', motorroad = 'no' }))
+  end)
 end)
 
 describe('inclusion_rules.access_bicycle', function()

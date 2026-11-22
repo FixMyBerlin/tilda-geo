@@ -46,11 +46,13 @@ Which ways are not public, and why, is decided once per way by `helper/access_re
 
 Precedence `way` > `roads`; `reason` (e.g. `access=destination`) is the strongest one. `access=private` & co. are lifted only by `bicycle=designated` (resolved via `vehicle`), `access=destination|customers` by a bicycle value that allows cycling on the way itself (`yes`, `designated`, `permissive`, `discouraged`, `dismount`; not `use_sidepath`). Bike infrastructure of the way lifts `service`, `indoor` and `informal`: if the way has a hint of bike infrastructure (`liftable_by_bike_infra`, from the tag check `may_have_bike_infra`, generous on purpose) and the bikelane categorisation then finds bike infrastructure of its own (`has_own_bike_infra`), the way is public again, including its `roads` row and carriageway / path edge. A way with `level = 'way'` that has no hint, or that the categorisation finds no bike infrastructure on, is written to no table.
 
-Per segment, `inclusion_rules` drops motorway and trunk (`prohibited_highway`, own or parent `highway`) and edges with a bicycle access value that is not published (`unpublished_bicycle_access`, e.g. `psv`).
+Per segment, `inclusion_rules` drops motorway and trunk (`prohibited_highway`, own or parent `highway`), the carriageway of a `motorroad=yes` and edges with a bicycle access value that is not published (`unpublished_bicycle_access`, e.g. `psv`).
 
 | Condition                                                                         | Result   |
 | --------------------------------------------------------------------------------- | -------- |
 | Own or parent `highway` in `motorway`/`motorway_link`/`trunk`/`trunk_link`        | excluded |
+| Carriageway edge of a `motorroad=yes`, whatever `bicycle` says                    | excluded |
+| Lane edge tagged on a `motorroad=yes` (`cycleway:<side>=track`)                   | kept     |
 | Any path edge that `roadsPathClasses` omits (sidewalk/sidepath, or `roads` level) | excluded |
 | `footwayBicycleYes*` and other bikelane categories on a sidewalk                  | kept     |
 

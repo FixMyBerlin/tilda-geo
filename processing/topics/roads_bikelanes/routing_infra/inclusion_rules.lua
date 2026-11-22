@@ -1,4 +1,5 @@
--- Per-edge rules of `routing`: motorway and trunk are never routed, and an edge whose bicycle access
+-- Per-edge rules of `routing`: motorway and trunk and the carriageway of a `motorroad=yes` are never
+-- routed, and an edge whose bicycle access
 -- value is not published (e.g. `psv`, `delivery;destination`) is dropped. Which edges a restricted
 -- way has at all is decided once per way in `helper/access_restriction.lua`; see README.md
 -- § Exclusions.
@@ -9,12 +10,19 @@ local cycling_highway_prohibition = SET.set({
   'motorway', 'motorway_link', 'trunk', 'trunk_link',
 })
 
---- Motorway / trunk (own or parent): never routed.
+--- Motorway / trunk (own or parent) and the carriageway of a motorroad: never routed.
+--- `motorroad=yes` (Kraftfahrstraße, DE: Zeichen 331.1) prohibits cycling on the carriageway, whatever
+--- `bicycle` says (`bicycle=yes` there is a mapping error). Bike infrastructure tagged on the way
+--- (`cycleway:*=track|lane`) is a lane edge with its own tags and stays.
+--- https://wiki.openstreetmap.org/wiki/DE:Tag:motorroad%3Dyes
 ---@param tags OsmTags
 ---@return boolean
 local function prohibited_highway(tags)
   local highway = tags.highway
   if highway and cycling_highway_prohibition[highway] then
+    return true
+  end
+  if tags.motorroad == 'yes' then
     return true
   end
   local parent_road = tags.parent_road

@@ -119,6 +119,12 @@ describe('build_public_tags', function()
       assert.are.equal(row.offset, -6)
       assert.are.equal(row.oneway, 'yes')
     end)
+
+    it('keeps the lane of a motorroad and drops its carriageway', function()
+      local rows = public_rows({ highway = 'primary', motorroad = 'yes', ['cycleway:right'] = 'track' }, { lane })
+      assert.are.equal(#rows, 1)
+      assert.are.equal(rows[1].source_table, 'bikelanes')
+    end)
   end)
 
   describe('raw OSM tags', function()

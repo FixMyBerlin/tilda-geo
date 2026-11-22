@@ -6,7 +6,7 @@ title: Zugang Radverkehr im Routing (`access_bicycle`)
 
 `routing` ist ein Graph für Fahrrad-Router. Er baut auf denselben Wegen auf wie `bikelanes`, `roads` und `roadsPathClasses`: Jede Kante gehört zu genau einer Zeile dort (`source_table` und `source_id`), die Werte, die `routing` mitführt, sind dieselben wie dort. Die Geometrie ist für das Routing aufbereitet. Radinfrastruktur, die an der Fahrbahn gemappt ist, ist eine eigene Kante neben der Fahrbahn.
 
-Wege, die TILDA nicht zeigt, fehlen auch im Graphen, zum Beispiel private Wege, Zufahrten ohne Radinfrastruktur oder Mountainbike-Trails. Autobahnen und Schnellstraßen (`motorway`, `trunk`) sind nicht enthalten.
+Wege, die TILDA nicht zeigt, fehlen auch im Graphen, zum Beispiel private Wege, Zufahrten ohne Radinfrastruktur oder Mountainbike-Trails. Autobahnen, Schnellstraßen (`motorway`, `trunk`) und die Fahrbahn von Kraftfahrstraßen (`motorroad=yes`) sind nicht enthalten, weil Radfahren dort verboten ist. Ein Radweg, der an einer Kraftfahrstraße gemappt ist, ist als eigene Kante enthalten.
 
 ## Router müssen `access_bicycle` auswerten
 
