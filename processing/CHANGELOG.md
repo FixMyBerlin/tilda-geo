@@ -20,6 +20,7 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 - Access values are mapped on all access keys before (`transform_access_values`), so `roads` and `routing` see the same values and fewer edges are dropped for an unpublished value:
   - `unknown` and `optional_sidepath` read as no tag. `access=unknown` ways keep their `routing` edge now. `optional_sidepath` is no longer an `access_bicycle` value: the carriageway is mixed traffic, `cycleway=separate` shows the path next to it.
   - `official` reads as `designated`; `military`, `emergency`, `psv`, `bus` as `no`; `residents`, `employees`, `restricted` as `private`.
+  - `bicycle=mtb` (mountain bike trails, mostly `path` / `track` with `mtb:scale`) drops the way from all tables: TILDA looks at everyday cycling. In Germany 623 ways / 218 km, a quarter of it around Regensburg.
   - A list reads as its most open value: `agricultural;destination` as `destination`, `private;delivery` as `delivery`.
   - In Germany: `access=unknown` 2,950 ways / 556 km, `bicycle=unknown` 174 km, `access=military` 298 km, lists of `vehicle` about 230 km, `bicycle=official` 77 km, `access=emergency` 61 km.
 - `access=no` is decided with the other access values, after the `construction:` prefix is removed: `construction:access=no` now drops a way like `construction:access=private`.

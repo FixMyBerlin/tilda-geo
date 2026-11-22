@@ -22,6 +22,7 @@
 -- - `use_sidepath` lifts nothing: like `cycleway=separate` it points to a
 --   path next to the way.
 -- - `bicycle=no` on a cycleway always drops the way; nothing lifts it.
+-- - `bicycle=mtb` (mountain bike trail, not everyday cycling) always drops the way.
 -- - `vehicle`, `motor_vehicle` and `bicycle` on other ways never drop a way or its `roads` row:
 --   `access=private` drops the way, `vehicle=private` keeps it with `access_bicycle=private`.
 -- - `service` (except `alley`), `indoor=yes` and `informal=yes` are lifted by bike infrastructure of the
@@ -59,6 +60,8 @@ local rows = {
   { 'access=no + vehicle=no', { highway = 'residential', access = 'no', vehicle = 'no' }, NONE },
   { 'access=no + bicycle=unknown', { highway = 'residential', access = 'no', bicycle = 'unknown' }, NONE },
   { 'access=no + bicycle=unknown (read as no tag)', { highway = 'track', access = 'no', bicycle = 'unknown' }, NONE },
+  { 'bicycle=mtb trail', { highway = 'path', bicycle = 'mtb', foot = 'yes' }, NONE },
+  { 'bicycle=mtb on a track with access=yes', { highway = 'track', access = 'yes', bicycle = 'mtb' }, NONE },
   { 'access=unknown (read as no tag)', { highway = 'track', access = 'unknown' }, ALL },
   { 'access=military (read as no)', { highway = 'track', access = 'military' }, NONE },
   { 'access=military + bicycle=yes', { highway = 'track', access = 'military', bicycle = 'yes' }, ALL },

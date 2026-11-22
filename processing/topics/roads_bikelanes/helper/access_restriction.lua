@@ -39,6 +39,10 @@ local closed_access = SET.set({ 'no' })
 -- a private service way.
 local way_access = SET.set({ 'private', 'delivery', 'permit' })
 
+-- `bicycle=mtb`: a mountain bike trail (mostly `path` / `track` with `mtb:scale`). TILDA looks at
+-- everyday cycling, so the way is in no public table; nothing lifts it.
+local LEISURE_BICYCLE_ACCESS = 'mtb'
+
 -- Values that only take it out of `roads` / `roadsPathClasses`, unless bicycle is explicitly allowed.
 local roads_access = SET.set({ 'destination', 'customers' })
 
@@ -73,6 +77,10 @@ end
 ---@param tags OsmTags
 ---@return AccessRestriction|nil
 local function access_tag_restriction(tags)
+  if tags.bicycle == LEISURE_BICYCLE_ACCESS then
+    return { level = 'way', reason = 'bicycle=' .. LEISURE_BICYCLE_ACCESS, liftable_by_bike_infra = false }
+  end
+
   local key, value = find_access_value(tags, closed_access)
   if key and not sanitize_access_tags.bicycle_explicitly_allowed(tags) then
     return { level = 'way', reason = key .. '=' .. value, liftable_by_bike_infra = false }

@@ -6,7 +6,7 @@ title: Zugang Radverkehr im Routing (`access_bicycle`)
 
 ## Auflösung
 
-Der Wert kommt aus der OSM-Kette `bicycle`, sonst `vehicle`, sonst `access`. Es zählt der erste Tag, der gesetzt ist. `agricultural`, `forestry` und ihre Kombinationen werden zu `agricultural_or_forestry`. Veröffentlicht werden nur die Werte aus der Tabelle unten (`routable_bicycle_access` und `not_routable_bicycle_access` in `helper/sanitize_access_tags.lua`). Hat eine Kante einen anderen Wert (zum Beispiel `mtb`), steht sie nicht im Graphen, weil ein leeres Feld „erlaubt“ bedeuten würde.
+Der Wert kommt aus der OSM-Kette `bicycle`, sonst `vehicle`, sonst `access`. Es zählt der erste Tag, der gesetzt ist. `agricultural`, `forestry` und ihre Kombinationen werden zu `agricultural_or_forestry`. Veröffentlicht werden nur die Werte aus der Tabelle unten (`routable_bicycle_access` und `not_routable_bicycle_access` in `helper/sanitize_access_tags.lua`). Hat eine Kante einen anderen Wert (zum Beispiel `foot` oder `limited`), steht sie nicht im Graphen, weil ein leeres Feld „erlaubt“ bedeuten würde.
 
 Vorher liest TILDA einige Werte um, auf allen Zugangs-Keys (`helper/transform_tags/transform_access_values.lua`):
 
@@ -15,6 +15,8 @@ Vorher liest TILDA einige Werte um, auf allen Zugangs-Keys (`helper/transform_ta
 - `military`, `emergency`, `psv` und `bus` zählen wie `no`.
 - `residents`, `employees` und `restricted` zählen wie `private`.
 - Bei Listen wie `agricultural;destination` zählt der offenste Wert, hier `destination`.
+
+Wege mit `bicycle=mtb` (Mountainbike-Trails) fehlen in allen Tabellen, weil TILDA den Alltagsradverkehr abbildet.
 
 Ob ein Weg überhaupt in den Daten steht, entscheidet nur `access` (gilt auch für Fußgänger), auf Fußwegen zusätzlich `foot` und auf Radwegen `bicycle`. `vehicle`, `motor_vehicle` und `bicycle` auf anderen Wegen nehmen keinen Weg heraus. Sie landen nur in `access_bicycle`. Ein Weg mit `access=private` fehlt also, ein Weg mit `vehicle=private` bleibt mit `access_bicycle=private` im Graphen.
 
