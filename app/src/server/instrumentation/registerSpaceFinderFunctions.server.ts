@@ -92,7 +92,7 @@ async function ensureSpaceFinderSchema() {
     `ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS cluster_area_m2 real;`,
   )
   // "Fahrbahnen ausschließen": hexagon lies on a road buffered by its width
-  // (public._parking_roads); only set when the checkbox was active.
+  // (public._parking_roads, else public.roads); only set when the checkbox was active.
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS fahrbahn boolean NOT NULL DEFAULT false;`,
   )
@@ -126,7 +126,7 @@ async function ensureSpaceFinderSchema() {
       ndvi       real,
       flaeche_m2 real
     );`)
-  // Buffered carriageway areas (public._parking_roads, width as buffer); only
+  // Buffered carriageway areas (public._parking_roads, else public.roads; width as buffer); only
   // filled when „Fahrbahnen ausschließen" was active. Used for map display.
   await geoDataClient.$executeRawUnsafe(`
     CREATE TABLE IF NOT EXISTS space_finder.scenario_carriageways (

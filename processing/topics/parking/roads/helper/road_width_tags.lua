@@ -2,6 +2,8 @@ local parse_width = require('topics.helper.parse_width')
 
 -- Main roads (primary/secondary/tertiary): different values for oneway vs non-oneway (2/3 rule for dual carriageways).
 -- Other roads: same value regardless of oneway.
+-- REMINDER: Keep in sync with `WIDTH_FALLBACKS_M` in `space-finder-worker/scoring/carriageways.py`
+-- (Flächenfinder carriageways outside the parking bboxes).
 local highway_width_fallbacks_no_oneway = {
   ['primary'] = 18,
   ['secondary'] = 14,

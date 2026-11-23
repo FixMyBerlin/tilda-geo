@@ -313,41 +313,101 @@ class PostgisLoader:
             print(f"   ⚠️  PostGIS query _parking_intersection_corners (pedestrian zone) failed: {e}")
             return _empty("EPSG:4326")
 
+    def _has_parking_roads(self) -> bool:
+        """Whether `public._parking_roads` exists (only where the parking topic ran)."""
+        try:
+            return bool(
+                pd.read_sql("SELECT to_regclass('public._parking_roads') IS NOT NULL AS ok", self.engine)
+                .iloc[0]["ok"]
+            )
+        except Exception:
+            return False
+
     def load_roads(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
         """Road lines with width (for the carriageway exclusion).
 
-        Reads ALL rows from `public._parking_roads` (incl. service ways/
-        driveways/tracks, no class filter) with the width already computed by
-        the parking topic (`tags->>'width'`, see `road_width_tags.lua` — resolves
-        the OSM `width` tag or a highway type/oneway fallback, practically always set).
+        Two sources, mixed per road:
 
-        Bridges/tunnels (`tags->>'bridge'`/`tags->>'tunnel'` = 'yes', see
-        `result_tags.lua`) are excluded: the carriageway is not at ground level
-        there, so building beneath/next to it is possible in principle.
-        `IS DISTINCT FROM 'yes'` instead of `<> 'yes'` because both tags are
-        usually missing (NULL) and `NULL <> 'yes'` yields NULL (the row would
-        drop out of the WHERE instead of staying included).
+        1. All rows of `public._parking_roads` (incl. service ways/driveways/
+           tracks, no class filter) with the width computed by the parking topic
+           (`tags->>'width'`, see `road_width_tags.lua` — the OSM `width` tag or
+           a highway type/oneway default, practically always set). The parking
+           topic only runs in fixed bboxes (`processing/constants/topics.const.ts`).
+        2. Every road of `public.roads` (roads_bikelanes topic, runs everywhere)
+           that is not in `_parking_roads`, with its own OSM `width` tag (often
+           missing). The caller fills missing widths with a default per road
+           class and oneway (`scoring.carriageways.fallback_width`), so the
+           exclusion also works outside the parking bboxes. `public.roads` leaves
+           out driveways, parking aisles, private roads and paths, so those only
+           count where the parking topic ran. `motorway`/`trunk`/`trunk_link` are
+           left out like in `_parking_roads` (`is_road.lua`).
 
-        Dependency + fallback same as `load_intersection_corners`:
-        `_parking_roads` only exists if the parking topic was processed for the
-        region. Geometry is in EPSG:5243; returned in EPSG:4326.
+        Inside the parking bboxes every `public.roads` road is also in
+        `_parking_roads`, so the result there is the same as from source 1 alone.
+
+        Columns: `geom`, `road` (`public.roads` class, NULL for source 1),
+        `oneway` (`public.roads` value `yes`/`yes_dual_carriageway`, NULL for
+        source 1) and `width_m` (NULL when unknown).
+
+        Bridges/tunnels (`tags->>'bridge'`/`tags->>'tunnel'` = 'yes') are
+        excluded: the carriageway is not at ground level there, so building
+        beneath/next to it is possible in principle. `IS DISTINCT FROM 'yes'`
+        instead of `<> 'yes'` because both tags are usually missing (NULL) and
+        `NULL <> 'yes'` yields NULL (the row would drop out of the WHERE instead
+        of staying included).
+
+        The JSONB width is not guaranteed numeric, so a regex checks before
+        casting. Returned in EPSG:4326.
         """
         wkt = polygon_4326.wkt
-        sql = f"""
-            SELECT ST_Transform(geom, 4326) AS geom, (tags->>'width')::numeric AS width_m
-            FROM public."_parking_roads"
-            WHERE geom && ST_Transform(ST_GeomFromText('{wkt}', 4326), 5243)
-              AND tags->>'bridge' IS DISTINCT FROM 'yes'
-              AND tags->>'tunnel' IS DISTINCT FROM 'yes'
+        num = "~ '^[0-9]+(\\.[0-9]+)?$'"
+        roads_sql = f"""
+            SELECT ST_Transform(r.geom, 4326) AS geom,
+                   r.tags->>'road' AS road,
+                   r.tags->>'oneway' AS oneway,
+                   CASE WHEN NULLIF(r.tags->>'width', '') {num}
+                        THEN (r.tags->>'width')::numeric END AS width_m
+            FROM public."roads" r
+            WHERE r.geom && ST_Transform(ST_GeomFromText('{wkt}', 4326), 3857)
+              AND r.tags->>'road' IS DISTINCT FROM 'motorway'
+              AND r.tags->>'road' IS DISTINCT FROM 'trunk'
+              AND r.tags->>'road' IS DISTINCT FROM 'trunk_link'
+              AND r.tags->>'bridge' IS DISTINCT FROM 'yes'
+              AND r.tags->>'tunnel' IS DISTINCT FROM 'yes'
         """
+        has_parking_roads = self._has_parking_roads()
+        if has_parking_roads:
+            sql = f"""
+                SELECT ST_Transform(pr.geom, 4326) AS geom,
+                       NULL::text AS road,
+                       NULL::text AS oneway,
+                       CASE WHEN NULLIF(pr.tags->>'width', '') {num}
+                            THEN (pr.tags->>'width')::numeric END AS width_m
+                FROM public."_parking_roads" pr
+                WHERE pr.geom && ST_Transform(ST_GeomFromText('{wkt}', 4326), 5243)
+                  AND pr.tags->>'bridge' IS DISTINCT FROM 'yes'
+                  AND pr.tags->>'tunnel' IS DISTINCT FROM 'yes'
+                UNION ALL
+                {roads_sql}
+                  AND NOT EXISTS (
+                    SELECT 1 FROM public."_parking_roads" p2
+                    WHERE p2.osm_id = r.osm_id AND p2.osm_type = r.osm_type
+                  )
+            """
+        else:
+            sql = roads_sql
         try:
             gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
             if gdf.crs is None:
                 gdf = gdf.set_crs("EPSG:4326")
-            print(f"   ✓ PostGIS: {len(gdf)} roads from _parking_roads")
+            from_roads = int(gdf["road"].notna().sum()) if len(gdf) else 0
+            print(
+                f"   ✓ PostGIS: {len(gdf)} roads "
+                f"({len(gdf) - from_roads} from _parking_roads, {from_roads} from roads)"
+            )
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS query _parking_roads failed: {e}")
+            print(f"   ⚠️  PostGIS query roads/_parking_roads failed: {e}")
             return _empty("EPSG:4326")
 
     def load_car_parking(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
@@ -420,7 +480,7 @@ class PostgisLoader:
         for practically every road (tag or highway default, see
         `road_width_tags.lua`), but only exists where the parking topic ran – so
         it is joined by OSM id when the table exists. The caller fills the rest
-        with a default per road class (`scoring.carriageways`).
+        with a default per road class and oneway (`scoring.carriageways`).
 
         Fahrradstraßen (`road` = `bicycle_road`, i.e. `bicycle_road=yes`, see
         `road_classification_road_value.lua`) always count: they are at most
@@ -439,13 +499,7 @@ class PostgisLoader:
         bbox = f"ST_Transform(ST_GeomFromText('{wkt}', 4326), 3857)"
         num = "~ '^[0-9]+(\\.[0-9]+)?$'"
         own_width = f"CASE WHEN NULLIF(r.tags->>'width', '') {num} THEN (r.tags->>'width')::numeric END"
-        try:
-            has_parking_roads = bool(
-                pd.read_sql("SELECT to_regclass('public._parking_roads') IS NOT NULL AS ok", self.engine)
-                .iloc[0]["ok"]
-            )
-        except Exception:
-            has_parking_roads = False
+        has_parking_roads = self._has_parking_roads()
         if has_parking_roads:
             parking_width = f"CASE WHEN NULLIF(pr.tags->>'width', '') {num} THEN (pr.tags->>'width')::numeric END"
             width_sql = f"COALESCE({parking_width}, {own_width})"
@@ -459,6 +513,7 @@ class PostgisLoader:
         sql = f"""
             SELECT ST_Transform(r.geom, 4326) AS geom,
                    r.tags->>'road' AS road,
+                   r.tags->>'oneway' AS oneway,
                    {width_sql} AS width_m
             FROM public."roads" r
             {join_sql}

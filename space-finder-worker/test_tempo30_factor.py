@@ -1,9 +1,8 @@
-"""Tempo 30 bonus (scoring/scorer.py, scoring/carriageways.py) and its config."""
+"""Tempo 30 bonus (scoring/scorer.py) and its config. Widths: test_carriageway_widths.py."""
 
 import math
 import unittest
 
-from scoring.carriageways import tempo30_fallback_width
 from scoring.config import use_case_from_dict
 from scoring.geometry import FAR
 from scoring.scorer import tempo30_active, tempo30_factor
@@ -47,20 +46,6 @@ class Tempo30ConfigTest(unittest.TestCase):
 
     def test_reads_tolerance(self):
         self.assertEqual(use_case_from_dict({"tempo30_tolerance_m": 4}).tempo30_tolerance_m, 4.0)
-
-
-class Tempo30FallbackWidthTest(unittest.TestCase):
-    def test_matches_road_class_by_prefix(self):
-        self.assertEqual(tempo30_fallback_width("residential"), 8.0)
-        self.assertEqual(tempo30_fallback_width("residential_priority_road"), 8.0)
-        self.assertEqual(tempo30_fallback_width("service_road"), 4.0)
-        self.assertEqual(tempo30_fallback_width("living_street"), 5.0)
-        self.assertEqual(tempo30_fallback_width("secondary"), 14.0)
-
-    def test_links_and_unknown(self):
-        self.assertEqual(tempo30_fallback_width("secondary_link"), 6.0)
-        self.assertEqual(tempo30_fallback_width("something_else"), 8.0)
-        self.assertEqual(tempo30_fallback_width(None), 8.0)
 
 
 if __name__ == "__main__":

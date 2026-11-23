@@ -3,8 +3,9 @@ import { unwrapGeometry } from './censusSaettigung.server'
 
 /**
  * Whether OSM parking data exists for this Planungsgebiet at all — a prerequisite for the factors
- * „Parken (Umwidmung)", „Kreuzungen", „Fußgängerzonen" and „Fahrbahnen ausschließen", which all
- * read `public._parking_*` tables (see `scoring/postgis_loader.py`). The `parking` topic
+ * „Parken (Umwidmung)", „Kreuzungen" and „Fußgängerzonen", which all read `public._parking_*`
+ * tables (see `scoring/postgis_loader.py`). „Fahrbahnen ausschließen" falls back to `public.roads`
+ * and only uses this for its tooltip. The `parking` topic
  * only runs in fixed bboxes (`processing/constants/topics.const.ts`) — outside them there are
  * simply no rows, and the worker silently yields 0 points instead of a warning. So the UI hides
  * the affected factors instead of allowing a skewed scoring result.

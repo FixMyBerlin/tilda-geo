@@ -187,8 +187,8 @@ export const factorRangeHint = (weightKey: string, config: Partial<FactorConfig>
 /** Factors that read `public._parking_*` tables (see `postgis_loader.py`) — the `parking` topic
  * only runs in fixed bboxes (`processing/constants/topics.const.ts`); outside them there is no
  * data. `parkingDataAvailable` (from `getSpaceFinderVariantFn`) hides these factors in
- * `FactorEditorPanel` instead of silently contributing 0. `exclude_carriageways` belongs here
- * too, but isn't a weight and is handled separately there. */
+ * `FactorEditorPanel` instead of silently contributing 0. `exclude_carriageways` is not one of
+ * them: it falls back to `public.roads` without parking data (`load_roads` in postgis_loader.py). */
 export const PARKING_DATA_DEPENDENT_KEYS = ['w_parken', 'w_intersection', 'w_fussgaengerzone']
 
 export const WEIGHT_LABELS: Record<string, string> = {

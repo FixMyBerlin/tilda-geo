@@ -80,6 +80,13 @@ import { readZielortShares, type ZielortShares } from './zielortShares'
  * see [[PARKING_DATA_DEPENDENT_KEYS]] in spaceFinderDefaults.ts. */
 const PARKING_DATA_HINT = 'Keine Parkdaten für dieses Gebiet verfügbar — Faktor hier deaktiviert.'
 
+/** „Fahrbahnen ausschließen“ works everywhere: the worker takes the roads from the parking data
+ * where it exists and from `public.roads` elsewhere (`load_roads` in postgis_loader.py). Only
+ * driveways, parking aisles and paths are missing outside the parking data — the tooltip adds
+ * that when `parkingDataAvailable` is false. */
+const CARRIAGEWAYS_HELP =
+  'Straßenflächen (aus erfasster oder geschätzter Breite) werden ausgeschlossen. Nach der Berechnung eingeblendet: „Fahrbahnen“.'
+
 /** Tempo 30 rewards hexagons ON the carriageway, which „Fahrbahnen ausschließen“ removes — so the
  * worker ignores the weight then (`tempo30_active` in scorer.py) and the row is greyed out. */
 const TEMPO30_EXCLUDED_HINT =
@@ -639,17 +646,15 @@ const FactorFields = ({
             <input
               type="checkbox"
               checked={config.exclude_carriageways ?? false}
-              disabled={readOnly || !parkingDataAvailable}
+              disabled={readOnly}
               onChange={(e) => setField('exclude_carriageways', e.target.checked)}
               className="rounded border-gray-300"
             />
-            <span className={!parkingDataAvailable ? 'text-gray-400' : undefined}>
-              Fahrbahnen ausschließen
-            </span>
+            <span>Fahrbahnen ausschließen</span>
             <InfoTooltip>
               {parkingDataAvailable
-                ? 'Straßenflächen (aus erfasster oder geschätzter Breite) werden ausgeschlossen. Nach der Berechnung eingeblendet: „Fahrbahnen“.'
-                : PARKING_DATA_HINT}
+                ? CARRIAGEWAYS_HELP
+                : `${CARRIAGEWAYS_HELP} In diesem Gebiet gibt es keine Parkdaten: Grundstückszufahrten, Parkplatzgassen und Wege zählen hier nicht mit.`}
             </InfoTooltip>
           </label>
         </div>
