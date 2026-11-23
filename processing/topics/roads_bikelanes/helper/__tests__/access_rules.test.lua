@@ -17,7 +17,7 @@
 -- - `access` (or `foot` on a footway) in `no|private|delivery|permit` drops the way,
 --   `destination|customers` drops only the `roads` row.
 -- - `bicycle=designated` (resolved via `bicycle`, `vehicle`, `access`) lifts every one of these values.
--- - On a bicycle road (`bicycle_road=yes` or `traffic_sign=DE:244*`) without a `bicycle` tag,
+-- - On a bicycle road (`bicycle_road=yes`, or `traffic_sign=DE:244*` unless `bicycle_road=no`) without a `bicycle` tag,
 --   `bicycle` is `designated`: `access=destination` or `vehicle=destination` there is „Anlieger frei“
 --   for motor vehicles. An explicit `bicycle=*` wins.
 -- - `yes`, `permissive`, `discouraged` and `dismount` lift `no`, `destination` and `customers`, not
@@ -130,6 +130,7 @@ local rows = {
   { 'Fahrradstraße access=agricultural', { highway = 'track', bicycle_road = 'yes', access = 'agricultural' }, ALL },
   { 'traffic_sign=DE:244.1,1020-30 + access=destination, no bicycle_road', { highway = 'residential', traffic_sign = 'DE:244.1,1020-30', access = 'destination' }, ALL },
   { 'Fahrradzone DE:244.3 + access=destination', { highway = 'residential', traffic_sign = 'DE:244.3', access = 'destination' }, ALL },
+  { 'bicycle_road=no + DE:244.1 + access=destination (explicit no wins over the sign)', { highway = 'residential', bicycle_road = 'no', traffic_sign = 'DE:244.1', access = 'destination' }, BIKELANES_ONLY },
   { 'Fahrradstraße access=destination + bicycle=no (explicit tag wins)', { highway = 'residential', bicycle_road = 'yes', access = 'destination', bicycle = 'no' }, BIKELANES_ONLY },
 
   -- Motor roads: no carriageway edge in routing
