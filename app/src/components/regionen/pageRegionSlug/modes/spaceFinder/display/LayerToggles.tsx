@@ -48,20 +48,52 @@ const LayerToggle = ({
   onChange,
   onColorClass,
   info,
+  legend,
 }: {
   label: string
   checked: boolean
   onChange: (checked: boolean) => void
   onColorClass: string
   info?: ReactNode
+  /** Shown below the switch while the layer is on. */
+  legend?: ReactNode
 }) => (
-  <label className="flex items-center justify-between gap-2 rounded border border-gray-200 px-2.5 py-2 text-sm">
-    <span className="flex items-center gap-1 font-medium text-gray-800">
-      {label}
-      {info && <InfoTooltip>{info}</InfoTooltip>}
-    </span>
-    <ToggleSwitch checked={checked} onChange={onChange} onColorClass={onColorClass} />
-  </label>
+  <div className="rounded border border-gray-200 px-2.5 py-2 text-sm">
+    <label className="flex items-center justify-between gap-2">
+      <span className="flex items-center gap-1 font-medium text-gray-800">
+        {label}
+        {info && <InfoTooltip>{info}</InfoTooltip>}
+      </span>
+      <ToggleSwitch checked={checked} onChange={onChange} onColorClass={onColorClass} />
+    </label>
+    {checked && legend}
+  </div>
+)
+
+// Same colors as the census circles (`censusLayerProps` in SourcesLayersSpaceFinder.tsx); the
+// size only hints at the scale, the real radius also depends on the zoom.
+const CENSUS_LEGEND_STEPS = [
+  { label: '1', color: '#bfdbfe', size: 'size-2' },
+  { label: '25', color: '#60a5fa', size: 'size-2.5' },
+  { label: '100+', color: '#1d4ed8', size: 'size-3.5' },
+]
+
+const CensusLegend = () => (
+  <div className="mt-1.5 text-xs text-gray-600">
+    <div className="flex items-center gap-3">
+      <span>Einwohner je Gebäude:</span>
+      {CENSUS_LEGEND_STEPS.map(({ label, color, size }) => (
+        <span key={label} className="flex items-center gap-1">
+          <span
+            className={twJoin(size, 'inline-block rounded-full border border-blue-900/70')}
+            style={{ backgroundColor: color }}
+          />
+          {label}
+        </span>
+      ))}
+    </div>
+    <p className="mt-0.5 text-gray-500">Ab Zoom 17 steht die Zahl am Punkt.</p>
+  </div>
 )
 
 export const VegetationToggle = () => {
@@ -100,6 +132,7 @@ export const CensusToggle = () => {
       checked={censusOn}
       onChange={setCensusOn}
       onColorClass="bg-blue-700"
+      legend={<CensusLegend />}
       info="Die Einwohnerpunkte aus dem Zensus 2022 (Destatis, auf Gebäude verteilt). Sie gehen in den Faktor „Bewohnerbedarf“ ein, wenn er gewichtet ist. Punktgröße und -farbe zeigen die Einwohnerzahl, ab Zoom 17 auch als Zahl. Nur eine Anzeige in der Karte — das Ausblenden ändert die Berechnung nicht."
     />
   )
