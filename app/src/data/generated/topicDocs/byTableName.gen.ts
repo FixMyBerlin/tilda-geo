@@ -14661,7 +14661,7 @@ const data = {
         type: 'string',
         label: 'Zugang Radverkehr',
         description:
-          'Aufgelöster Fahrrad-Zugang (OSM-Kette `bicycle` → `vehicle` → `access`, Allowlist). Kein Roh-OSM-Wert. Leer: kein Zugangs-Tag, Radfahren ist erlaubt. Kanten mit `no`, `destination`, `private`, `customers`, `delivery`, `permit` oder `agricultural_or_forestry` sind im Graphen enthalten, Radfahren ist dort aber nicht erlaubt: Router filtern sie selbst. Auf Radinfrastruktur an der Fahrbahn-Mittellinie (`side=left`/`right`) leer.',
+          'Aufgelöster Fahrrad-Zugang (OSM-Kette `bicycle` → `vehicle` → `access`, Allowlist). Kein Roh-OSM-Wert. Leer: kein Zugangs-Tag, Radfahren ist erlaubt. Auf einer Fahrradstraße oder in einer Fahrradzone ohne eigenes `bicycle`-Tag ist der Wert `designated`: `vehicle=destination` gilt dort nur für Kfz („Anlieger frei“). Kanten mit `no`, `destination`, `private`, `customers`, `delivery`, `permit` oder `agricultural_or_forestry` sind im Graphen enthalten, Radfahren ist dort aber nicht erlaubt: Router filtern sie selbst. Auf Radinfrastruktur an der Fahrbahn-Mittellinie (`side=left`/`right`) leer.',
         chapterRefs: ['zugang-radverkehr'],
         values: [
           {

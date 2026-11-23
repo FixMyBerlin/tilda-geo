@@ -1,4 +1,5 @@
 local SET = require('topics.helper.sets')
+local is_bicycle_road = require('topics.roads_bikelanes.helper.is_bicycle_road')
 
 -- Access values of roads_bikelanes and routing, from tags only: resolve the OSM fallback chain,
 -- collapse agricultural/forestry, keep only the published values.
@@ -20,6 +21,10 @@ local access_keys = { 'access', 'bicycle', 'bus', 'foot', 'hgv', 'motor_vehicle'
 
 --- Raw OSM access value for `mode`, resolved via the fallback chain (the explicit tag wins, else the
 --- chain). No sanitisation. The second return value is the key the value was read from.
+---
+--- On a bicycle road without a `bicycle` tag, `bicycle` is `designated` (key `bicycle_road`): cycling
+--- is always allowed there. `vehicle=destination` or `access=destination` on a bicycle road means
+--- „Anlieger frei“ for motor vehicles, not for bicycles.
 ---@param tags OsmTags
 ---@param mode string
 ---@return string|nil value
@@ -28,6 +33,9 @@ local function resolve(tags, mode)
   local value = tags[mode]
   if value then
     return value, mode
+  end
+  if mode == 'bicycle' and is_bicycle_road(tags) then
+    return 'designated', 'bicycle_road'
   end
   local chain = access_chain[mode]
   if not chain then

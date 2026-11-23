@@ -27,6 +27,21 @@ describe('sanitize_access_tags.resolve (OSM access fallback chain)', function()
     assert.are.equal('no', resolve({ access = 'no' }, 'bus'))
   end)
 
+  it('reads bicycle as designated on a bicycle road without a bicycle tag', function()
+    assert.are.same({ 'designated', 'bicycle_road' }, { resolve({ bicycle_road = 'yes', vehicle = 'destination' }, 'bicycle') })
+    assert.are.equal('designated', resolve({ traffic_sign = 'DE:244.1,1020-30', vehicle = 'destination' }, 'bicycle'))
+    assert.are.equal('designated', resolve({ traffic_sign = 'DE:244.3', access = 'destination' }, 'bicycle'))
+    assert.are.equal('designated', sanitized_access({ bicycle_road = 'yes', vehicle = 'agricultural;forestry' }, 'bicycle'))
+  end)
+
+  it('lets an explicit bicycle tag win on a bicycle road', function()
+    assert.are.equal('no', resolve({ bicycle_road = 'yes', bicycle = 'no' }, 'bicycle'))
+  end)
+
+  it('keeps the motor vehicle chain on a bicycle road', function()
+    assert.are.equal('destination', resolve({ bicycle_road = 'yes', vehicle = 'destination' }, 'motor_vehicle'))
+  end)
+
   it('returns nil when nothing matches or the mode has no chain', function()
     assert.is_nil(resolve({}, 'bicycle'))
     assert.is_nil(resolve({ highway = 'residential' }, 'bicycle'))

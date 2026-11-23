@@ -4,6 +4,7 @@ local SET = require('topics.helper.sets')
 local category_is_sidepath = require('topics.roads_bikelanes.bikelanes.categories.category_is_sidepath')
 local create_subcategories_adjoining_or_isolated = require('topics.roads_bikelanes.bikelanes.categories.create_subcategories_adjoining_or_isolated')
 local sanitize_traffic_sign = require('topics.helper.sanitize_traffic_sign')
+local is_bicycle_road = require('topics.roads_bikelanes.helper.is_bicycle_road')
 local derive_traffic_signs = require('topics.helper.derive_traffic_signs')
 local derive_smoothness = require('topics.helper.derive_smoothness')
 local highway_classes = require('topics.helper.highway_classes')
@@ -151,13 +152,7 @@ local bicycleRoad = BikelaneCategory.new({
   copySurfaceSmoothnessFromParent = true,
   bicycleSurface = 'strip',
   condition = function(tags)
-    if tags.bicycle_road == 'yes' then
-      return true
-    end
-    local traffic_sign = sanitize_traffic_sign(tags.traffic_sign)
-    if osm2pgsql.has_prefix(traffic_sign, 'DE:244') then
-      return true
-    end
+    return is_bicycle_road(tags)
   end
 })
 
