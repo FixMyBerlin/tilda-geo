@@ -4,6 +4,16 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-11
 
+### `bikelanes`: `category`, `traffic_mode_left|right` – carriageway side of lanes on the road
+
+- For lanes and tracks tagged on the road (`cycleway:left|right|both`), the second left/right (`…:separation:left`, `…:traffic_mode:left`, buffer, marking) is read in the riding direction of the lane ([Key:separation](https://wiki.openstreetmap.org/wiki/Key:separation)). The carriageway is usually left of the lane, but right of it when the lane rides with its line on the left side of the way, e.g. `cycleway:left=lane` on `oneway=yes` or `cycleway:right=lane` on `oneway=-1`. Before, the carriageway was always assumed on the left.
+- `cyclewayOnHighwayProtected` needs the physical separation (or `traffic_mode=parking`) on the carriageway side now. Example: `oneway=yes` + `cycleway:left=lane` + `cycleway:left:separation:right=bollard` is protected, `…:separation:left=bollard` (kerb side) is not.
+- Without an explicit `traffic_mode`, `parking:<side>` of the road becomes `traffic_mode_left` (kerb side) when the carriageway is right of the lane; before always `traffic_mode_right`.
+- `separation_left|right`, `buffer_left|right`, `marking_left|right` and `traffic_mode_left|right` are published unchanged; they are relative to the published line in riding direction.
+- Separately mapped cycleways ridden against their drawing direction (`oneway=-1`, `oneway:bicycle=-1`) have the road on the right of the way: `cyclewayOnHighwayProtected` checks `separation:right` there. No such way in Berlin has a separation that counts.
+- A wrong `cycleway:left:oneway=yes` or `cycleway:both:oneway=yes` on a two-way road turns the left lane around, so its carriageway is right. In Berlin the FMC cases are corrected before (see the correction CSV below); other such tags give a wrong carriageway side until they are fixed in OSM.
+- A contraflow lane on the left of a `oneway=yes` road (`oneway:bicycle=no`) needs `cycleway:left:oneway=-1`. Without it the lane is read as riding with the cars, and its detail tags and parking come out mirrored. About 50 Berlin ways are listed for mapping in FixMyBerlin/infravelo-radnetz#15 and #18.
+
 ### `bikelanes`: corrected direction of FMC cycleway oneway tags in Berlin (temporary)
 
 - Ways in `cycleway-oneway-corrections.csv` (FixMyBerlin/infravelo-radnetz, `osm-cleanup/oneway-2026-11/`, about 2,400 Berlin ways) are corrected before the direction is derived: `cycleway:both|left:oneway=yes`, `cycleway:oneway=yes` and `cycleway:right:oneway=yes` are dropped, a track on a corrected side gets its side default (`cycleway:left:oneway=-1`, `cycleway:right:oneway=yes`). Same change as the planned OSM edit.

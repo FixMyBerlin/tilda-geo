@@ -656,6 +656,25 @@ describe('bikelanes', function()
       assert.are.equal(result[1].traffic_mode_left, nil)
       assert.are.equal(result[1].traffic_mode_right, 'parking')
     end)
+
+    it('apply parking on the kerb side of a left lane on oneway=yes', function()
+      local input_object = {
+        tags = {
+          highway = 'primary',
+          oneway = 'yes',
+          ['cycleway:left'] = 'lane',
+          ['cycleway:left:lane'] = 'advisory',
+          ['parking:left'] = 'street_side',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = run_bikelanes(input_object)
+      assert.are.equal(result[1].category, 'cyclewayOnHighway_advisory')
+      assert.are.equal(result[1].traffic_mode_left, 'parking')
+      assert.are.equal(result[1].traffic_mode_right, nil)
+      assert.is_true(result[1].offset > 0)
+    end)
   end)
 
   describe('`oneway=-1` roads:', function()

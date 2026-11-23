@@ -13,6 +13,7 @@ local SANITIZE_ROAD_TAGS = require('topics.roads_bikelanes.helper.sanitize_road_
 local SANITIZE_VALUES = require('topics.helper.sanitize_values')
 local inspect = require('inspect')
 local extract_value_from_lanes = require('topics.roads_bikelanes.bikelanes.helper.extract_value_from_lanes')
+local carriageway_side = require('topics.roads_bikelanes.bikelanes.helper.carriageway_side')
 
 local is_crossing_pattern -- forward declaration for use in category conditions below
 
@@ -700,12 +701,20 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
       'bollard', 'flex_post', 'vertical_panel', 'studs', 'bump', 'planter', 'fence', 'jersey_barrier', 'guard_rail'
     })
 
-    -- Has to have physical separation left
-    local traffic_mode_right = SANITIZE_ROAD_TAGS.traffic_mode(tags, 'right')
-    local separation_left = SANITIZE_ROAD_TAGS.separation(tags, 'left')
-    if separation_left ~= SANITIZE_VALUES.disallowed and allowed_separation_values[separation_left] then
+    -- The second left/right (`separation:left`, `traffic_mode:left`) is relative to the riding direction.
+    -- The carriageway usually lies left of the lane but right of it e.g. for `cycleway:left` on `oneway=yes`.
+    local road_side, far_side = carriageway_side(tags)
+
+    ---@param side 'left'|'right'
+    local function physically_separated(side)
+      return allowed_separation_values[SANITIZE_ROAD_TAGS.separation(tags, side)] ~= nil
+    end
+    local motor_vehicle_on_far_side = SANITIZE_ROAD_TAGS.traffic_mode(tags, far_side) == 'motor_vehicle'
+
+    -- Has to have physical separation towards the carriageway
+    if physically_separated(road_side) then
       -- But not in edge cases, when the separation protects a cyclewayOnHighwayBetweenLanes, see https://www.openstreetmap.org/way/80706109/history
-      if traffic_mode_right == 'motor_vehicle' then
+      if motor_vehicle_on_far_side then
         return false
       end
       -- But not when `segregated` is present, as it indicates infrastructure that is
@@ -716,9 +725,8 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
       return true
     end
 
-    -- Parked cars are treated as physical separation when left of the bikelane
-    local traffic_mode_left = SANITIZE_ROAD_TAGS.traffic_mode(tags, 'left')
-    if traffic_mode_left == 'parking' then
+    -- Parked cars are treated as physical separation when between the bikelane and the carriageway
+    if SANITIZE_ROAD_TAGS.traffic_mode(tags, road_side) == 'parking' then
       -- But not when `segregated` is present, as it indicates infrastructure that is
       -- not on the road ('Seitenraum'), in which case the parking condition does not apply
       if tags.segregated ~= nil then
@@ -727,12 +735,8 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
       return true
     end
 
-    -- For counter flow bikelanes with motorized traffic on the right, has to have physical separation right
-    local separation_right = SANITIZE_ROAD_TAGS.separation(tags, 'right')
-    if traffic_mode_right == 'motor_vehicle'
-      and separation_right ~= SANITIZE_VALUES.disallowed
-      and allowed_separation_values[separation_right]
-    then
+    -- Motor traffic on the other side (e.g. a lane between two motor vehicle lanes) needs physical separation there
+    if motor_vehicle_on_far_side and physically_separated(far_side) then
       return true
     end
   end

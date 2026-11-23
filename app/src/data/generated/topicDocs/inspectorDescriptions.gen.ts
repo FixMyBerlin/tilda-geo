@@ -35,6 +35,19 @@ const data = {
         'Ein berechneter Wert für das OpenStreetMap-Straßensegment. Die Berechnung nutzt die Projektion EPSG:5243 und hat somit eine gute Genauigkeit für Deutschland.',
       prefix:
         'Kennzeichnet, aus welcher OSM-Tagfamilie die Radverkehrsinformationen für dieses Objekt extrahiert wurden. Der Wert wird im Processing gesetzt und beschreibt die verwendete Tag-Präfixlogik, nicht die Quelle im Sinne eines externen Datensatzes.',
+      separation_left:
+        'Links des Radwegs in Fahrtrichtung, also links der Linie in ihrer Richtung.',
+      separation_right:
+        'Rechts des Radwegs in Fahrtrichtung, also rechts der Linie in ihrer Richtung.',
+      marking_left: 'Links des Radwegs in Fahrtrichtung, also links der Linie in ihrer Richtung.',
+      marking_right:
+        'Rechts des Radwegs in Fahrtrichtung, also rechts der Linie in ihrer Richtung.',
+      buffer_left: 'Links des Radwegs in Fahrtrichtung, also links der Linie in ihrer Richtung.',
+      buffer_right: 'Rechts des Radwegs in Fahrtrichtung, also rechts der Linie in ihrer Richtung.',
+      traffic_mode_left:
+        'Links des Radwegs in Fahrtrichtung, also links der Linie in ihrer Richtung.',
+      traffic_mode_right:
+        'Rechts des Radwegs in Fahrtrichtung, also rechts der Linie in ihrer Richtung.',
       mapillary_coverage:
         'Basiert auf einer Analyse der Mapillary-Foto-Sequenzen der letzten ca. 2 Jahre, die mit den OSM-Wegen verschnitten wurden. Mehr unter https://tilda-geo.de/docs/mapillary-coverage',
       mapillary:

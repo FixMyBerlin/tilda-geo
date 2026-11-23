@@ -260,6 +260,142 @@ describe('bikelane_categories', function()
       assert.are.equal(categorized.self.category.id, 'cyclewayOnHighwayBetweenLanes')
     end)
 
+    describe('second left/right in the riding direction (see `carriageway_side`)', function()
+      ---@param tags table
+      local function categories(tags)
+        tags.highway = tags.highway or 'secondary'
+        return extract_categories_by_side({ tags = tags, id = 1, type = 'way' })
+      end
+
+      it('two-way road, left lane rides against the way: separation:left protects (Hermannstraße w998258847)', function()
+        local categorized = categories({
+          ['cycleway:left'] = 'lane',
+          ['cycleway:left:separation:left'] = 'bollard',
+        })
+        assert.are.equal('cyclewayOnHighwayProtected', categorized.left.category.id)
+      end)
+
+      it('two-way road, right lane: separation:left protects', function()
+        local categorized = categories({
+          ['cycleway:right'] = 'lane',
+          ['cycleway:right:separation:left'] = 'bollard',
+        })
+        assert.are.equal('cyclewayOnHighwayProtected', categorized.right.category.id)
+      end)
+
+      it('oneway=yes, left lane: separation:right protects', function()
+        local categorized = categories({
+          oneway = 'yes',
+          ['cycleway:left'] = 'lane',
+          ['cycleway:left:separation:right'] = 'bollard',
+        })
+        assert.are.equal('cyclewayOnHighwayProtected', categorized.left.category.id)
+      end)
+
+      it('oneway=yes, left lane: separation:left is on the kerb side and does not protect', function()
+        local categorized = categories({
+          oneway = 'yes',
+          ['cycleway:left'] = 'lane',
+          ['cycleway:left:separation:left'] = 'bollard',
+        })
+        assert.are_not.equal('cyclewayOnHighwayProtected', categorized.left.category.id)
+      end)
+
+      it('oneway=yes, left lane: parking on the carriageway side (traffic_mode:right) protects', function()
+        local categorized = categories({
+          oneway = 'yes',
+          ['cycleway:left'] = 'lane',
+          ['cycleway:left:traffic_mode:right'] = 'parking',
+        })
+        assert.are.equal('cyclewayOnHighwayProtected', categorized.left.category.id)
+      end)
+
+      it('oneway=yes, left lane: parking at the kerb (traffic_mode:left) does not protect', function()
+        local categorized = categories({
+          oneway = 'yes',
+          ['cycleway:left'] = 'lane',
+          ['cycleway:left:traffic_mode:left'] = 'parking',
+        })
+        assert.are_not.equal('cyclewayOnHighwayProtected', categorized.left.category.id)
+      end)
+
+      it('oneway=yes, left lane: motor_vehicle on the kerb side blocks the separation (w80706109 mirrored)', function()
+        local categorized = categories({
+          oneway = 'yes',
+          ['cycleway:left'] = 'lane',
+          ['cycleway:left:separation:right'] = 'vertical_panel',
+          ['cycleway:left:traffic_mode:left'] = 'motor_vehicle',
+        })
+        assert.are_not.equal('cyclewayOnHighwayProtected', categorized.left.category.id)
+      end)
+
+      it('oneway=-1, right lane: separation:right protects', function()
+        local categorized = categories({
+          oneway = '-1',
+          ['cycleway:right'] = 'lane',
+          ['cycleway:right:separation:right'] = 'bollard',
+        })
+        assert.are.equal('cyclewayOnHighwayProtected', categorized.right.category.id)
+      end)
+
+      it('contraflow cycleway:left:oneway=-1 on oneway=yes: separation:left protects', function()
+        local categorized = categories({
+          oneway = 'yes',
+          ['oneway:bicycle'] = 'no',
+          ['cycleway:left'] = 'lane',
+          ['cycleway:left:oneway'] = '-1',
+          ['cycleway:left:separation:left'] = 'bollard',
+        })
+        assert.are.equal('cyclewayOnHighwayProtected', categorized.left.category.id)
+      end)
+
+      it('oneway=yes, cycleway:both:separation:left: protects only the right lane', function()
+        local categorized = categories({
+          oneway = 'yes',
+          ['cycleway:both'] = 'lane',
+          ['cycleway:both:separation:left'] = 'bollard',
+        })
+        assert.are.equal('cyclewayOnHighwayProtected', categorized.right.category.id)
+        assert.are_not.equal('cyclewayOnHighwayProtected', categorized.left.category.id)
+      end)
+
+      it('two-way road, right lane with motor traffic on the far side: separation there protects', function()
+        local categorized = categories({
+          ['cycleway:right'] = 'lane',
+          ['cycleway:right:traffic_mode:right'] = 'motor_vehicle',
+          ['cycleway:right:separation:right'] = 'bollard',
+        })
+        assert.are.equal('cyclewayOnHighwayProtected', categorized.right.category.id)
+      end)
+
+      it('oneway=yes, left lane with motor traffic on the far side (traffic_mode:left): separation:left protects', function()
+        local categorized = categories({
+          oneway = 'yes',
+          ['cycleway:left'] = 'lane',
+          ['cycleway:left:traffic_mode:left'] = 'motor_vehicle',
+          ['cycleway:left:separation:left'] = 'bollard',
+        })
+        assert.are.equal('cyclewayOnHighwayProtected', categorized.left.category.id)
+      end)
+
+      it('separate cycleway with oneway=-1: the road is right of the way', function()
+        local protected = categorize_bikelane({
+          highway = 'cycleway',
+          is_sidepath = 'yes',
+          oneway = '-1',
+          ['separation:right'] = 'bollard',
+        })
+        assert.are.equal('cyclewayOnHighwayProtected', protected.id)
+        local not_protected = categorize_bikelane({
+          highway = 'cycleway',
+          is_sidepath = 'yes',
+          oneway = '-1',
+          ['separation:left'] = 'bollard',
+        })
+        assert.are_not.equal('cyclewayOnHighwayProtected', not_protected.id)
+      end)
+    end)
+
     it('should not be PBL when segregated=yes is present even with separation:left=bollard', function()
       -- Test case: path with segregated=yes and separation:left=bollard
       -- The separation:left condition should NOT trigger because segregated=yes indicates

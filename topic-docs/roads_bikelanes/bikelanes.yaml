@@ -135,6 +135,7 @@ attributes:
     ref: roads.surface_color
   - key: separation_left
     label: Abgrenzung (Links)
+    description: Links des Radwegs in Fahrtrichtung, also links der Linie in ihrer Richtung.
     values:
       - value: no
         label: Keine physische Abgrenzung
@@ -179,8 +180,10 @@ attributes:
   - key: separation_right
     valuesRef: bikelanes.separation_left
     label: Abgrenzung (Rechts)
+    description: Rechts des Radwegs in Fahrtrichtung, also rechts der Linie in ihrer Richtung.
   - key: marking_left
     label: Markierung (Links)
+    description: Links des Radwegs in Fahrtrichtung, also links der Linie in ihrer Richtung.
     values:
       - value: solid_line
         label: Durchgezogene Linie
@@ -197,14 +200,18 @@ attributes:
   - key: marking_right
     valuesRef: bikelanes.marking_left
     label: Markierung (Rechts)
+    description: Rechts des Radwegs in Fahrtrichtung, also rechts der Linie in ihrer Richtung.
   - key: buffer_left
     format: meter
     label: Schutzraum (Links)
+    description: Links des Radwegs in Fahrtrichtung, also links der Linie in ihrer Richtung.
   - key: buffer_right
     format: meter
     label: Schutzraum (Rechts)
+    description: Rechts des Radwegs in Fahrtrichtung, also rechts der Linie in ihrer Richtung.
   - key: traffic_mode_left
     label: Verkehrsform (Links)
+    description: Links des Radwegs in Fahrtrichtung, also links der Linie in ihrer Richtung.
     values:
       - value: bicycle
         label: Fahrrad
@@ -221,6 +228,7 @@ attributes:
   - key: traffic_mode_right
     valuesRef: bikelanes.traffic_mode_left
     label: Verkehrsform (Rechts)
+    description: Rechts des Radwegs in Fahrtrichtung, also rechts der Linie in ihrer Richtung.
   - key: mapillary_coverage
     label: Mapillary-Abdeckung
     description: Basiert auf einer Analyse der Mapillary-Foto-Sequenzen der letzten ca. 2 Jahre, die mit den OSM-Wegen verschnitten wurden. Mehr unter https://tilda-geo.de/docs/mapillary-coverage

@@ -1584,6 +1584,7 @@ const data = {
         key: 'separation_left',
         type: 'string',
         label: 'Abgrenzung (Links)',
+        description: 'Links des Radwegs in Fahrtrichtung, also links der Linie in ihrer Richtung.',
         values: [
           {
             value: 'no',
@@ -1671,6 +1672,8 @@ const data = {
         key: 'separation_right',
         type: 'string',
         label: 'Abgrenzung (Rechts)',
+        description:
+          'Rechts des Radwegs in Fahrtrichtung, also rechts der Linie in ihrer Richtung.',
         values: [
           {
             value: 'no',
@@ -1758,6 +1761,7 @@ const data = {
         key: 'marking_left',
         type: 'string',
         label: 'Markierung (Links)',
+        description: 'Links des Radwegs in Fahrtrichtung, also links der Linie in ihrer Richtung.',
         values: [
           {
             value: 'solid_line',
@@ -1789,6 +1793,8 @@ const data = {
         key: 'marking_right',
         type: 'string',
         label: 'Markierung (Rechts)',
+        description:
+          'Rechts des Radwegs in Fahrtrichtung, also rechts der Linie in ihrer Richtung.',
         values: [
           {
             value: 'solid_line',
@@ -1820,18 +1826,22 @@ const data = {
         key: 'buffer_left',
         type: 'meter',
         label: 'Schutzraum (Links)',
+        description: 'Links des Radwegs in Fahrtrichtung, also links der Linie in ihrer Richtung.',
         values: [],
       },
       {
         key: 'buffer_right',
         type: 'meter',
         label: 'Schutzraum (Rechts)',
+        description:
+          'Rechts des Radwegs in Fahrtrichtung, also rechts der Linie in ihrer Richtung.',
         values: [],
       },
       {
         key: 'traffic_mode_left',
         type: 'string',
         label: 'Verkehrsform (Links)',
+        description: 'Links des Radwegs in Fahrtrichtung, also links der Linie in ihrer Richtung.',
         values: [
           {
             value: 'bicycle',
@@ -1863,6 +1873,8 @@ const data = {
         key: 'traffic_mode_right',
         type: 'string',
         label: 'Verkehrsform (Rechts)',
+        description:
+          'Rechts des Radwegs in Fahrtrichtung, also rechts der Linie in ihrer Richtung.',
         values: [
           {
             value: 'bicycle',

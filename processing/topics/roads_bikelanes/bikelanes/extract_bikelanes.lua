@@ -9,6 +9,7 @@ local bikelane_todo_categories = require('topics.roads_bikelanes.bikelanes.bikel
 local collect_todos = require('topics.helper.collect_todos')
 local derive_oneway = require('topics.roads_bikelanes.bikelanes.derive_oneway')
 local LINE_DIRECTION = require('topics.roads_bikelanes.helper.line_direction')
+local DIRECTION_SIDE = require('topics.helper.direction_side')
 local default_id = require('topics.helper.default_id')
 local derive_traffic_signs = require('topics.helper.derive_traffic_signs')
 local to_markdown_list = require('topics.helper.to_markdown_list')
@@ -113,7 +114,7 @@ local function bikelanes(object_tags)
           width_source = transformed_tags['source:width'],
           width_effective = parse_width(transformed_tags['width:effective']),
           oneway = derive_oneway(transformed_tags, category, {
-            other_side_has_cycling = side_has_cycling[transformed_tags._side == 'left' and 'right' or 'left'],
+            other_side_has_cycling = side_has_cycling[DIRECTION_SIDE.opposite_side(transformed_tags._side)],
           }),
           bridge = SANITIZE_TAGS.boolean_yes(object_tags.bridge),
           tunnel = SANITIZE_TAGS.tunnel(object_tags.tunnel),
@@ -148,7 +149,7 @@ local function bikelanes(object_tags)
           }),
         })
 
-        merge_table(result_tags, derive_traffic_mode(transformed_tags, object_tags, category.id, transformed_tags._side))
+        merge_table(result_tags, derive_traffic_mode(transformed_tags, object_tags, category.id))
         merge_table(result_tags, derive_traffic_signs(transformed_tags))
         local surface_tags = SURFACE_TAGS.derive(transformed_tags, category)
         merge_table(result_tags, derive_bikelane_surface(surface_tags, category))
@@ -172,9 +173,10 @@ local function bikelanes(object_tags)
           -- (+ left / - right of its direction). The geometry itself stays on the road
           -- centerline; this value is exported as the `offset` attribute and consumed purely
           -- visually by the map style (`line-offset`). See topic-doc chapter `versetzte-geometrien`.
-          -- In right-hand traffic the lane usually lies to the right of its line (negative).
-          local lane_left_of_line = (transformed_tags._side == 'left') ~= line_reversed
-          result_tags.offset = (lane_left_of_line and 1 or -1) * road_width(object_tags) / 2
+          -- In right-hand traffic the lane usually lies to the right of its line (negative),
+          -- with the carriageway on its left.
+          local sign = LINE_DIRECTION.lane_left_of_line(transformed_tags) and 1 or -1
+          result_tags.offset = sign * road_width(object_tags) / 2
         elseif HIGHWAYS.path_classes[transformed_tags.highway]
           or HIGHWAYS.sidepath_highway_classes[transformed_tags.highway] then
           merge_table(

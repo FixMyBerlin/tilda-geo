@@ -15,7 +15,16 @@ local function side_to_direction(side)
   return SIDE_TO_DIRECTION[side]
 end
 
+local OPPOSITE_SIDE = { left = 'right', right = 'left' }
+
+---@param side 'left'|'right'
+---@return 'right'|'left'
+local function opposite_side(side)
+  return OPPOSITE_SIDE[side]
+end
+
 return {
+  opposite_side = opposite_side,
   direction_to_side = direction_to_side,
   side_to_direction = side_to_direction,
 }
