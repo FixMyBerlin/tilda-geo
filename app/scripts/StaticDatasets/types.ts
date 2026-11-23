@@ -30,7 +30,11 @@ type MapDataDatasetsSourceBase = {
       >
     | Omit<
         LineLayerSpecification &
-          Required<Pick<LineLayerSpecification, 'paint'>> & { beforeId?: string },
+          Required<Pick<LineLayerSpecification, 'paint'>> & {
+            beforeId?: string
+            /** @desc The direction arrows point against the geometry, e.g. for a counter direction. */
+            reverseDirectionArrows?: boolean
+          },
         'source'
       >
     | Omit<

@@ -251,18 +251,32 @@
     "y": 284,
     "pixelRatio": 2
   },
+  "pattern-direction-arrow-selected-reverse": {
+    "width": 180,
+    "height": 24,
+    "x": 182,
+    "y": 284,
+    "pixelRatio": 2
+  },
   "dot": {
     "width": 22,
     "height": 22,
-    "x": 182,
+    "x": 364,
     "y": 284,
     "pixelRatio": 2
   },
   "pattern-direction-arrow-faint": {
     "width": 240,
     "height": 20,
-    "x": 206,
-    "y": 284,
+    "x": 0,
+    "y": 310,
+    "pixelRatio": 2
+  },
+  "pattern-direction-arrow-faint-reverse": {
+    "width": 240,
+    "height": 20,
+    "x": 242,
+    "y": 310,
     "pixelRatio": 2
   }
 }

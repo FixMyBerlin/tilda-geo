@@ -97,4 +97,17 @@ describe('buildDirectionArrowLayers', () => {
       3,
     ])
   })
+
+  test('reversed lines get their own layers with the reversed patterns', () => {
+    const layers = buildDirectionArrowLayers([
+      entry(line('forward')),
+      entry(line('backward'), { reverseDirectionArrows: true }),
+    ])
+    expect(layers.map((layer) => layer.paint?.['line-pattern'])).toEqual([
+      'pattern-direction-arrow-faint',
+      'pattern-direction-arrow-selected',
+      'pattern-direction-arrow-faint-reverse',
+      'pattern-direction-arrow-selected-reverse',
+    ])
+  })
 })
