@@ -11,10 +11,9 @@ import type { SpaceFinderScoreMode } from '@/shared/regionen/spaceFinderScoreMod
  * (hexagon inspector) and the mode buttons (`ScoreModeSwitcher`).
  * The colors match the hexagon ramps on the map (`HEXAGON_SCORE_RAMP` in
  * `SourcesLayersSpaceFinder.tsx`): Bedarf blue, Bebauung pink, and Kombination purple as the mix
- * of both (`spaceFinderKombinationStyle`, not a factor group). `eigendaten` is amber/orange: away
- * from blue, purple and pink on the color wheel. The map layer of the uploaded areas
- * (`UserObstaclesLayer`) and its switch are orange for the same reason — purple would read as
- * Kombination or Bebauung.
+ * of both (`spaceFinderKombinationStyle`, not a factor group). `eigendaten` is orange, like the
+ * map layer of the uploaded areas (`UserObstaclesLayer`) and its switch: away from blue, purple and
+ * pink on the color wheel, so it does not read as Kombination or Bebauung. Warnings stay amber.
  *
  * `chip` = colored value chip, `block` = left stripe + tint of a group block,
  * `headline` = underline color of the heading, `title` = heading text color (size/weight:
@@ -42,12 +41,12 @@ export const spaceFinderGroupStyle: Record<
     button: 'border-pink-600 bg-pink-50 text-pink-700',
   },
   eigendaten: {
-    chip: 'bg-amber-100 text-amber-800',
-    block: 'border-amber-400 bg-amber-50/60',
-    headline: 'border-amber-200',
-    title: 'text-amber-900',
-    text: 'text-amber-800',
-    button: 'border-amber-600 bg-amber-50 text-amber-700',
+    chip: 'bg-orange-100 text-orange-800',
+    block: 'border-orange-400 bg-orange-50/60',
+    headline: 'border-orange-200',
+    title: 'text-orange-900',
+    text: 'text-orange-800',
+    button: 'border-orange-600 bg-orange-50 text-orange-700',
   },
 }
 
@@ -63,7 +62,7 @@ export const spaceFinderGroupBarStyle: Record<
 > = {
   bedarf: { full: 'bg-blue-600', pale: 'bg-blue-200' },
   bebauung: { full: 'bg-pink-600', pale: 'bg-pink-200' },
-  eigendaten: { full: 'bg-amber-600', pale: 'bg-amber-200' },
+  eigendaten: { full: 'bg-orange-600', pale: 'bg-orange-200' },
 }
 
 /**

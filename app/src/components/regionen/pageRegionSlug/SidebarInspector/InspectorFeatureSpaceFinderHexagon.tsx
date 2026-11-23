@@ -478,9 +478,8 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
             )
           })}
 
-          {/* Eigene Daten: its own category (not in Bedarf/Bebauung), amber (away from
-              blue/purple/pink on the color wheel, see spaceFinderPanelStyles.ts), like the
-              orange map layer of the uploaded areas.
+          {/* Eigene Daten: its own category (not in Bedarf/Bebauung), orange like the map
+              layer of the uploaded areas (see spaceFinderPanelStyles.ts).
               One row per dataset: bonus/penalty in points or „ausgeschlossen“ (hard cut,
               no points). Without breakdown (legacy runs, coarse cells) only the total effect. */}
           {showEigendaten && (

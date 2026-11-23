@@ -184,7 +184,7 @@ const EigendatenDatasetBlock = ({
 
 /**
  * Share of both factor groups in the base score as colored chips — the short form of the group
- * headings for the collapsed factors header. If user datasets are uploaded, their chip (amber,
+ * headings for the collapsed factors header. If user datasets are uploaded, their chip (orange,
  * like the "Eigene Daten" block) is added so their effect is visible when collapsed, too.
  */
 const GroupShareChips = ({ config }: { config: FactorConfig }) => {

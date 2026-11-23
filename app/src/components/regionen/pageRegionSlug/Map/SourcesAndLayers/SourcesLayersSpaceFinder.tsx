@@ -354,7 +354,8 @@ const BoundaryHighlightLayer = () => {
 // Control layer for the uploaded „Eigene Daten" (all datasets from factorConfig.user_datasets).
 // The geometry lives client-side in the store (set by `SpaceFinderBody`); points,
 // lines and polygons get their own layers. Toggled via the panel switch
-// (userObstaclesVisible) like vegetation/carriageways.
+// (userObstaclesVisible) like vegetation/carriageways. Orange like the »Eigene Daten« group
+// (`spaceFinderGroupStyle.eigendaten`) — purple would read as Kombination/Bebauung.
 const UserObstaclesLayer = () => {
   const geom = useSpaceFinderUserObstaclesGeom()
   const visible = useSpaceFinderUserObstaclesVisible()
@@ -366,14 +367,14 @@ const UserObstaclesLayer = () => {
         beforeId={spaceFinderOverlayFloorLayerId}
         type="fill"
         filter={['==', ['geometry-type'], 'Polygon']}
-        paint={{ 'fill-color': '#7c3aed', 'fill-opacity': 0.2 }}
+        paint={{ 'fill-color': '#f97316', 'fill-opacity': 0.2 }}
       />
       <Layer
         id="space-finder-user-obstacles-line"
         beforeId={spaceFinderOverlayFloorLayerId}
         type="line"
         filter={['in', ['geometry-type'], ['literal', ['LineString', 'Polygon']]]}
-        paint={{ 'line-color': '#6d28d9', 'line-width': 2 }}
+        paint={{ 'line-color': '#c2410c', 'line-width': 2 }}
       />
       <Layer
         id="space-finder-user-obstacles-circle"
@@ -382,8 +383,8 @@ const UserObstaclesLayer = () => {
         filter={['==', ['geometry-type'], 'Point']}
         paint={{
           'circle-radius': 4,
-          'circle-color': '#7c3aed',
-          'circle-stroke-color': '#6d28d9',
+          'circle-color': '#f97316',
+          'circle-stroke-color': '#c2410c',
           'circle-stroke-width': 1,
         }}
       />

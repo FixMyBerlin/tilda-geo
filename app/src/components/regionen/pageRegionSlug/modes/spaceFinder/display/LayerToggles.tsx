@@ -113,7 +113,7 @@ export const UserObstaclesToggle = () => {
       label="Eigene Daten"
       checked={userObstaclesOn}
       onChange={setUserObstaclesOn}
-      onColorClass="bg-violet-700"
+      onColorClass="bg-orange-600"
       info="Die für diese Variante hochgeladene GeoJSON-Datei. Nur eine Anzeige in der Karte — das Ausblenden ändert die Berechnung nicht."
     />
   )
