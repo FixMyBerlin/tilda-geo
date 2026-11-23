@@ -214,6 +214,38 @@ def apply_bebauung_exclusion(hex_proj, mask) -> None:
     apply_score_exclusion(hex_proj, mask, cols=("mce_gesamtscore", "score_bebauung"))
 
 
+# Modifier weights (bonus/penalty in points) per sub-score group. Must match
+# `WEIGHT_GROUPS` in the app (spaceFinderDefaults.ts); the criteria of each group
+# are `BEDARF_TERMS` / `BEBAUUNG_TERMS` in `run_flaechenfinder`.
+BEDARF_MODIFIER_KEYS = (
+    "w_fussgaengerzone",
+    "w_bewohnerbedarf",
+    "w_target",
+    "w_bestand",
+)
+BEBAUUNG_MODIFIER_KEYS = (
+    "w_vegetation",
+    "w_intersection",
+    "w_parken",
+    "w_platz",
+    "w_tempo30",
+)
+
+
+def group_base_score(criteria_score: pd.Series, weights: dict, modifier_keys) -> pd.Series:
+    """Base of a sub-score group before its modifier deltas are added.
+
+    `criteria_score` is the weighted average of the group's criteria (NaN where
+    no weighted criterion has a value). As soon as one modifier of the group has
+    weight > 0, missing values start at 0 (like the total score), so the modifiers
+    alone still fill the sub-score. Only a group with nothing weighted stays NaN
+    (→ DB NULL).
+    """
+    if any((weights.get(k, 0) or 0) > 0 for k in modifier_keys):
+        return criteria_score.fillna(0.0)
+    return criteria_score
+
+
 def _census_demand_sources(
     census_proj: gpd.GeoDataFrame, buildings_proj: gpd.GeoDataFrame | None
 ) -> gpd.GeoDataFrame:
@@ -818,6 +850,8 @@ def run_flaechenfinder(
     BEBAUUNG_TERMS = [
         ("score_hangneigung", "w_slope"),
     ]
+    # The modifiers of each group: BEDARF_MODIFIER_KEYS / BEBAUUNG_MODIFIER_KEYS
+    # (module level, used for the sub-scores below).
     # Without a single weighted criterion the base score stays 0 (instead of NaN),
     # so the total score then consists of the modifiers only and the NOT NULL
     # column `mce_gesamtscore` stays filled.
@@ -1122,18 +1156,22 @@ def run_flaechenfinder(
     #       + modifiers vegetation, intersections, parking, Tempo 30, squares; hard exclusions.
     # Each group is divided by the sum of its active weights (the same `_group_score`
     # as for the base score above) so the sub-score stays 0–100 regardless of the
-    # weight distribution. If a group is completely unweighted, its score stays NaN
-    # (→ DB NULL).
+    # weight distribution. As soon as one modifier of a group is weighted, its base
+    # starts at 0 where no criterion has a value (like the total score), so modifiers
+    # alone still fill the sub-score. Only a group with nothing weighted (no criterion,
+    # no modifier) stays NaN (→ DB NULL). See `group_base_score`.
     #
     # Pedestrian zone bonus, resident demand and target locations (bonuses) as well
     # as existing parking (penalty) are demand modifiers (like intersections/parking
     # for buildability): normalize first, then add the deltas, then clip.
-    base_bedarf = _group_score(BEDARF_TERMS)
+    base_bedarf = group_base_score(_group_score(BEDARF_TERMS), w, BEDARF_MODIFIER_KEYS)
     score_bedarf = (
         base_bedarf + fussgz_delta + bewohner_delta + ziel_delta + bestand_delta
     ).clip(lower=0.0, upper=100.0)
 
-    base_bebauung = _group_score(BEBAUUNG_TERMS)
+    base_bebauung = group_base_score(
+        _group_score(BEBAUUNG_TERMS), w, BEBAUUNG_MODIFIER_KEYS
+    )
     score_bebauung = (
         base_bebauung + veg_delta + kreuz_delta + parken_delta + tempo30_delta + platz_delta
     ).clip(lower=0.0, upper=100.0)
