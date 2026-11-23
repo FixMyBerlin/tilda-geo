@@ -140,4 +140,30 @@ describe('partitionClickedFeatures', () => {
       ['atlas_bikelanes', 10],
     ])
   })
+
+  test('Ctrl/Cmd click adds features that only have a promoted id (hexagons)', () => {
+    const hexagon = (h3Id: string) =>
+      ({
+        id: h3Id,
+        source: 'space-finder-hexagons',
+        properties: { h3_id: h3Id },
+        geometry: { type: 'Point', coordinates: [13.4, 52.5] },
+      }) as unknown as MapGeoJSONFeature
+
+    const added = partition([hexagon('b')], {
+      currentMode: 'map',
+      previousUrlFeatures: [],
+      previousInspectorFeatures: [hexagon('a')],
+      multiselect: true,
+    })
+    expect(added.nextInspectorFeatures.map((feature) => feature.id)).toEqual(['a', 'b'])
+
+    const removed = partition([hexagon('a')], {
+      currentMode: 'map',
+      previousUrlFeatures: [],
+      previousInspectorFeatures: [hexagon('a'), hexagon('b')],
+      multiselect: true,
+    })
+    expect(removed.nextInspectorFeatures.map((feature) => feature.id)).toEqual(['b'])
+  })
 })

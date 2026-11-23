@@ -9,10 +9,15 @@ import {
   modeForSource,
 } from '@/components/regionen/pageRegionSlug/modes/modeScopedSelection'
 import type { RegionMode } from '@/components/regionen/pageRegionSlug/modes/useCurrentMode'
-import { uniqueDataFeatures } from './uniqueDataFeatures'
+import { dataFeatureKey, uniqueDataFeatures } from './uniqueDataFeatures'
 
-const featureInArray = (feature: MapGeoJSONFeature, features: MapGeoJSONFeature[]) =>
-  features.some((other) => feature.properties?.id === other.properties?.id)
+// Same identity as `uniqueDataFeatures` (data source + `properties.id`, else `feature.id`).
+// Sources that only promote an id (Flächenfinder hexagons: `promoteId="h3_id"`) have no
+// `properties.id`; comparing that alone made every such feature equal to every other.
+const featureInArray = (feature: MapGeoJSONFeature, features: MapGeoJSONFeature[]) => {
+  const key = dataFeatureKey(feature)
+  return key !== undefined && features.some((other) => dataFeatureKey(other) === key)
+}
 
 const inspectorUrlFeatures = (features: UrlFeature[]) =>
   features.filter((feature) => !isModeOwnedSource(feature.sourceId))

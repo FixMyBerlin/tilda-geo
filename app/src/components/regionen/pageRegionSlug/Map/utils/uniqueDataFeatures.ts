@@ -12,7 +12,7 @@ import {
  * `properties.id` comes before `feature.id` because some sources promote another property
  * (`lars_parking_areas` promotes `osm_id`, which repeats across OSM types).
  */
-const dataFeatureKey = (feature: MapGeoJSONFeature) => {
+export const dataFeatureKey = (feature: MapGeoJSONFeature) => {
   const featureId = feature.properties?.id ?? feature.id
   // Without an id we cannot tell duplicates from different features, so we keep them all.
   if (featureId === undefined) return undefined
