@@ -42,8 +42,8 @@ const FactorBadge = ({
   muted: boolean
   valueClassName?: string
 }) => (
-  <span className="flex shrink-0 items-baseline gap-1">
-    {muted && <span className="text-[11px] text-gray-400">geht nicht ein</span>}
+  <span className="ml-auto flex shrink-0 items-baseline gap-1">
+    {muted && <span className="text-[11px] whitespace-nowrap text-gray-400">geht nicht ein</span>}
     <span
       className={twJoin(
         'rounded px-1.5 py-0.5 text-xs font-semibold tabular-nums',
@@ -73,10 +73,10 @@ const FactorRow = ({
   nested?: React.ReactNode
 }) => (
   <div className={readOnly ? 'py-0.5' : 'py-1'}>
-    <div className="flex items-baseline justify-between gap-2">
+    <div className="flex flex-wrap items-baseline justify-between gap-x-2">
       <span
         className={twJoin(
-          'flex items-center gap-1 text-xs',
+          'flex min-w-0 items-center gap-1 text-xs',
           muted ? spaceFinderFactorMutedTextClass : spaceFinderFactorActiveTextClass,
         )}
       >
@@ -102,7 +102,7 @@ export const ComingSoonFactorRow = ({ label, info }: { label: string; info?: Rea
     readOnly
     info={info}
     badge={
-      <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-400">
+      <span className="ml-auto rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-400">
         bald verfügbar
       </span>
     }
@@ -132,7 +132,7 @@ export const UnavailableFactorRow = ({
     readOnly
     info={info}
     badge={
-      <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-400">
+      <span className="ml-auto rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-400">
         {badge}
       </span>
     }

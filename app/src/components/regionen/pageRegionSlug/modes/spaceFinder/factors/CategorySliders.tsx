@@ -108,8 +108,9 @@ export const CategorySliders = <K extends string>({
             const effect = Math.round(categoryEffect(keys, shares, key) * 100)
             return (
               <div key={key}>
-                <div className="flex items-baseline justify-between gap-2">
-                  <span className="flex items-center gap-1 text-xs text-gray-700">
+                {/* Wraps in a narrow panel: the share then moves below the label, right-aligned. */}
+                <div className="flex flex-wrap items-baseline justify-between gap-x-2">
+                  <span className="flex min-w-0 items-center gap-1 text-xs text-gray-700">
                     <span
                       aria-hidden
                       className="size-2.5 shrink-0 rounded-full ring-1 ring-gray-300"
@@ -118,9 +119,9 @@ export const CategorySliders = <K extends string>({
                     {label}
                     <InfoTooltip>{help}</InfoTooltip>
                   </span>
-                  <span className="flex shrink-0 items-baseline gap-1.5">
+                  <span className="ml-auto flex shrink-0 items-baseline gap-1.5">
                     {effect < 100 && (
-                      <span className="text-[11px] text-gray-400 tabular-nums">
+                      <span className="text-[11px] whitespace-nowrap text-gray-400 tabular-nums">
                         wirkt zu {effect} %
                       </span>
                     )}
