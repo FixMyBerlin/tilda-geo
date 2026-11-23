@@ -230,9 +230,31 @@ SOURCE_HESSEN = CirSource(
 )
 
 
-# Approximate geographic bounding box of Hessen (from WMS GetCapabilities,
-# EX_GeographicBoundingBox of he_dop20_cir) for "auto" detection.
-_HESSEN_BBOX_LONLAT = (7.6, 49.3, 10.3, 51.7)  # (west, south, east, north)
+# ── Coverage for "auto" ────────────────────────────────────────────────────────
+#
+# Rough lon/lat rectangles (west, south, east, north) per source. They are
+# approximate at the state borders: a study area right at a border can still
+# get a neighbouring source, or none. Set `cir_source` explicitly in that case.
+# Bayern and Brandenburg/Berlin use two rectangles each, so that large parts of
+# Baden-Württemberg (Stuttgart) and Sachsen-Anhalt (Magdeburg) are not counted.
+#
+# Checked in this order; the first match wins. Hessen comes first because its
+# rectangle overlaps Bayern in Unterfranken (Aschaffenburg); that keeps the
+# behaviour of the earlier Hessen-first rule.
+_Box = tuple[float, float, float, float]
+
+AUTO_COVERAGE_LONLAT: tuple[tuple[CirSource, tuple[_Box, ...]], ...] = (
+    # From WMS GetCapabilities, EX_GeographicBoundingBox of he_dop20_cir.
+    (SOURCE_HESSEN, ((7.6, 49.3, 10.3, 51.7),)),
+    (SOURCE_BAYERN, (
+        (8.95, 49.4, 13.85, 50.6),   # Franken (north)
+        (9.9, 47.25, 13.85, 49.4),   # Schwaben, Oberbayern, Niederbayern, Oberpfalz
+    )),
+    (SOURCE_BB, (
+        (11.25, 52.6, 14.8, 53.6),   # Prignitz, Uckermark, Berlin
+        (12.2, 51.35, 14.8, 52.6),   # Fläming, Lausitz
+    )),
+)
 
 
 # ── Registry ──────────────────────────────────────────────────────────────────
@@ -247,12 +269,12 @@ KNOWN_SOURCES: dict[str, CirSource] = {
 def resolve_source(key: str, study_area_geom: BaseGeometry) -> CirSource | None:
     """Return the CirSource for `key`.
 
-    "auto" picks by the study area centroid:
-      1. inside the Hessen bounding box → Hessen (EPSG:25832, WMS)
-      2. otherwise < 12°E → Bayern (EPSG:25832); ≥ 12°E → Brandenburg/Berlin (EPSG:25833).
-    The Hessen box overlaps Bayern at the edge (Unterfranken); if in doubt, set the
-    source explicitly via `cir_source` instead of "auto".
-    Unknown keys return None (vegetation computation is skipped).
+    An explicit key ("bayern", "bb", "hessen") always returns that source,
+    wherever the study area lies.
+    "auto" returns the first source in `AUTO_COVERAGE_LONLAT` whose coverage
+    contains the study area centroid, or None if no source covers it
+    (e.g. Köln, Hamburg). None skips the vegetation computation.
+    Unknown keys also return None.
     """
     if key in KNOWN_SOURCES:
         return KNOWN_SOURCES[key]
@@ -260,12 +282,16 @@ def resolve_source(key: str, study_area_geom: BaseGeometry) -> CirSource | None:
         try:
             c = study_area_geom.centroid
             lon, lat = c.x, c.y
-            w, s, e, n = _HESSEN_BBOX_LONLAT
-            if w <= lon <= e and s <= lat <= n:
-                return SOURCE_HESSEN
-            return SOURCE_BAYERN if lon < 12.0 else SOURCE_BB
         except Exception as exc:
             print(f"   ⚠️  Auto-detection of the CIR source failed: {exc}")
             return None
+        for source, boxes in AUTO_COVERAGE_LONLAT:
+            if any(w <= lon <= e and s <= lat <= n for w, s, e, n in boxes):
+                return source
+        print(
+            f"   ℹ️  No aerial imagery (CIR) covers this area "
+            f"(centroid {lon:.3f}, {lat:.3f}) – skipping vegetation computation"
+        )
+        return None
     print(f"   ⚠️  Unknown cir_source {key!r} – skipping vegetation computation")
     return None

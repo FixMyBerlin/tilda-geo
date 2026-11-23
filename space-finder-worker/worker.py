@@ -254,10 +254,20 @@ def process_job(conn, engine, job_id: int, variant_id: int):
     else:
         cir_source = resolve_source(use_case.cir_source, study_area)
         if cir_source is None:
-            print("   ℹ️  No CIR source for this area – vegetation skipped")
+            # No aerial imagery covers the area ("auto" outside Bayern,
+            # Brandenburg/Berlin, Hessen) or the key is unknown. The run goes on
+            # without vegetation instead of reading "nothing green" from a WMS
+            # that has no images there.
+            print(
+                f"   ℹ️  No CIR source for this area (cir_source={use_case.cir_source!r}) "
+                "– vegetation skipped"
+            )
             vegetation = None
             data_notes.append({"factor": "vegetation", "reason": "keine_luftbildquelle"})
-            set_progress(conn, job_id, VEG_SKIPPED_PCT, step1_label)
+            set_progress(
+                conn, job_id, VEG_SKIPPED_PCT,
+                f"{step1_label} – übersprungen, keine Luftbilder für dieses Gebiet",
+            )
         else:
             try:
                 vegetation = _find_reusable_vegetation(conn, engine, variant_id, run_id, study_area)

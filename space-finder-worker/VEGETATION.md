@@ -39,8 +39,13 @@ Everywhere NIR = band 1, red = band 2, ground resolution 0.2 m.
 | Brandenburg/Berlin DOP20 CIR | `bb`         | EPSG:25833 | 1000 m | 5000×5000 px | PNG    |
 | Hessen DOP20 CIR             | `hessen`     | EPSG:25832 | 500 m  | 2500×2500 px | TIFF   |
 
-`cir_source: "auto"` (default) picks by the study area centroid:
-Hessen bounding box → Hessen, otherwise < 12° E → Bayern, ≥ 12° E → Brandenburg/Berlin.
+`cir_source: "auto"` (default) picks the source whose coverage contains the study area
+centroid (rough lon/lat rectangles per state, `AUTO_COVERAGE_LONLAT` in
+`cir_sources.py`; checked Hessen → Bayern → Brandenburg/Berlin, first match wins).
+Outside all of them (e.g. Köln, Hamburg) there is **no** source: the run goes on without
+vegetation and the progress text says "übersprungen, keine Luftbilder für dieses Gebiet".
+The rectangles are approximate at the state borders; set `cir_source` explicitly there.
+An explicit `cir_source` is always used, wherever the area lies.
 
 > **Hessen: the 500 m grid is mandatory.** The MapServer behind the HVBG WMS hard-limits
 > `WIDTH`/`HEIGHT` to **3000 px** and above that returns a ServiceException instead of
