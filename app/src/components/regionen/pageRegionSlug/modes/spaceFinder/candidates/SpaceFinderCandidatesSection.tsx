@@ -35,18 +35,14 @@ import { TOP_FILTER_LABEL } from '../factors/spaceFinderDefaults'
 import { RemoveIconButton } from '../RemoveIconButton'
 import { useSpaceFinderTopHexagons } from '../search/useSpaceFinderTopHexagons'
 import { FINE_HEXAGON_ZOOM } from '../spaceFinderHexagonResolution'
-import { spaceFinderDiscardLinkClass, spaceFinderDiscardRowClass } from '../spaceFinderPanelStyles'
+import {
+  spaceFinderDiscardLinkClass,
+  spaceFinderDiscardRowClass,
+  spaceFinderTagClass,
+} from '../spaceFinderPanelStyles'
 import { useSpaceFinderSelection } from '../useSpaceFinderSelection'
 import { candidateExportFileName, downloadCandidatesGeojson } from './spaceFinderCandidateExport'
 import { SpaceFinderReviewListModal } from './SpaceFinderReviewListModal'
-
-const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
-  ausgeschlossen: 'bg-gray-200 text-gray-700',
-  schlecht: 'bg-red-100 text-red-800',
-  mittel: 'bg-orange-100 text-orange-800',
-  gut: 'bg-yellow-100 text-yellow-800',
-  'sehr gut': 'bg-green-100 text-green-800',
-}
 
 /**
  * Turns the candidate-selection tool off whenever the shown run changes and on unmount (leaving
@@ -119,15 +115,7 @@ const CandidateRow = ({
         <span className={twJoin('min-w-0 flex-1 truncate font-mono', modePanelListMetaClassName)}>
           {candidate.h3Id}
         </span>
-        {eignungsklasse && (
-          <span
-            className={`shrink-0 rounded px-1.5 py-0.5 text-xs font-medium ${
-              EIGNUNGSKLASSE_COLORS[eignungsklasse] ?? 'bg-gray-100 text-gray-600'
-            }`}
-          >
-            {eignungsklasse}
-          </span>
-        )}
+        {eignungsklasse && <span className={spaceFinderTagClass}>{eignungsklasse}</span>}
         <span className={twJoin('w-8 shrink-0 text-right', modePanelListTitleClassName)}>
           {typeof score === 'number' ? Math.round(score) : '–'}
         </span>

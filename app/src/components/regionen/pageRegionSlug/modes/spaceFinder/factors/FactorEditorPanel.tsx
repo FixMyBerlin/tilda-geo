@@ -40,6 +40,7 @@ import {
   spaceFinderFactorGroupRowsClass,
   spaceFinderGroupHeadingClass,
   spaceFinderGroupStyle,
+  spaceFinderTagClass,
   spaceFinderNumberInputClass,
   spaceFinderParamLabelMutedClass,
 } from '../spaceFinderPanelStyles'
@@ -153,7 +154,7 @@ const EigendatenDatasetBlock = ({
             {dataset.name}
           </span>
           <span
-            className="shrink-0 rounded border border-gray-400 bg-white px-1.5 py-px text-[11px] font-semibold text-gray-800"
+            className={spaceFinderTagClass}
             title="Der Modus gilt für alle Varianten und wird am Planungsgebiet eingestellt."
           >
             {modeLabel}

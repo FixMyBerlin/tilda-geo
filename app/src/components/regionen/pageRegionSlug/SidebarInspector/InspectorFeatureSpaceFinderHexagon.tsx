@@ -29,6 +29,8 @@ import {
   spaceFinderGroupBarStyle,
   spaceFinderGroupHeadingClass,
   spaceFinderGroupStyle,
+  spaceFinderKombinationStyle,
+  spaceFinderTagClass,
 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderPanelStyles'
 import { spaceFinderOpenRunStatus } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderRunStatus'
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
@@ -112,14 +114,6 @@ const EXCLUSION_REASONS: { check: (props: Record<string, any>) => boolean; text:
     text: 'Diese Fläche ist zu steil (Hangneigung > 10°) – eine Bebauung ist hier nicht möglich.',
   },
 ]
-
-const EIGNUNGSKLASSE_COLORS: Record<string, string> = {
-  ausgeschlossen: 'bg-gray-200 text-gray-700',
-  schlecht: 'bg-red-100 text-red-800',
-  mittel: 'bg-orange-100 text-orange-800',
-  gut: 'bg-yellow-100 text-yellow-800',
-  'sehr gut': 'bg-green-100 text-green-800',
-}
 
 // Shared column grid for all factor rows (criteria, bonuses/penalties, "bald verfügbar"):
 // the label gets the remaining space, bar/value/percent have fixed widths. This keeps the bars
@@ -284,10 +278,6 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
 
   const gesamtscore: number | null = props.mce_gesamtscore ?? null
   const eignungsklasse: string | null = props.eignungsklasse ?? null
-  const badgeClass =
-    eignungsklasse && EIGNUNGSKLASSE_COLORS[eignungsklasse]
-      ? EIGNUNGSKLASSE_COLORS[eignungsklasse]
-      : 'bg-gray-100 text-gray-600'
 
   return (
     <Disclosure title="Potenzialflächen-Hexagon">
@@ -299,15 +289,25 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
           </p>
         )}
 
-        <div className="flex items-center justify-between rounded-r border-l-[3px] border-gray-400 bg-gray-50 py-1.5 pr-2 pl-2">
-          <span className="text-xs font-bold text-gray-700 uppercase">Gesamtscore</span>
+        <div
+          className={twJoin(
+            'flex items-center justify-between rounded-r border-l-[3px] bg-purple-50/60 py-1.5 pr-2 pl-2',
+            spaceFinderKombinationStyle.block,
+          )}
+        >
+          <span
+            className={twJoin('text-xs font-bold uppercase', spaceFinderKombinationStyle.title)}
+          >
+            Gesamtscore
+          </span>
           <div className="flex items-center gap-2">
-            {eignungsklasse && (
-              <span className={`rounded px-1.5 py-0.5 text-xs font-medium ${badgeClass}`}>
-                {eignungsklasse}
-              </span>
-            )}
-            <span className="text-4xl leading-none font-bold text-gray-800 tabular-nums">
+            {eignungsklasse && <span className={spaceFinderTagClass}>{eignungsklasse}</span>}
+            <span
+              className={twJoin(
+                'text-4xl leading-none font-bold tabular-nums',
+                spaceFinderKombinationStyle.title,
+              )}
+            >
               {gesamtscore != null ? Math.round(gesamtscore) : '–'}
             </span>
           </div>
@@ -478,9 +478,9 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
             )
           })}
 
-          {/* Eigene Daten: its own category (not in Bedarf/Bebauung), amber (largest
-              hue distance to blue/purple on the color wheel, see spaceFinderPanelStyles.ts) —
-              independent of the map layer color of the uploaded areas (violet).
+          {/* Eigene Daten: its own category (not in Bedarf/Bebauung), amber (away from
+              blue/purple/pink on the color wheel, see spaceFinderPanelStyles.ts), like the
+              orange map layer of the uploaded areas.
               One row per dataset: bonus/penalty in points or „ausgeschlossen“ (hard cut,
               no points). Without breakdown (legacy runs, coarse cells) only the total effect. */}
           {showEigendaten && (

@@ -9,15 +9,12 @@ import type { SpaceFinderScoreMode } from '@/shared/regionen/spaceFinderScoreMod
  * Color of the factor groups. Only serves to tell the groups apart at a glance — share chip in
  * the collapsed factors header, block/heading in the open form, the same groups in the sidebar
  * (hexagon inspector) and the mode buttons (`ScoreModeSwitcher`).
- * Kombination deliberately has no color of its own (stays neutral/green) — it is not a factor
- * group but the combined result. `eigendaten` is amber: on the color wheel the furthest from
- * blue (bedarf, ~221°) and purple (bebauung, ~271°) — violet (~258°) would sit in between and be
- * hard to tell apart. Accepted on purpose: the map layer of the uploaded areas
- * (`UserObstaclesLayer` in `SourcesLayersSpaceFinder.tsx`) stays violet (`#7c3aed`) and the
- * carriageway exclusion layer is amber too (`carriageways.py`/`SourcesLayersSpaceFinder.tsx`,
- * different layer, different meaning) — both overlap in color with other map layers, but not
- * with the two other factor groups. The colors carry no meaning of their own and are
- * deliberately not those of the map layers.
+ * The colors match the hexagon ramps on the map (`HEXAGON_SCORE_RAMP` in
+ * `SourcesLayersSpaceFinder.tsx`): Bedarf blue, Bebauung pink, and Kombination purple as the mix
+ * of both (`spaceFinderKombinationStyle`, not a factor group). `eigendaten` is amber/orange: away
+ * from blue, purple and pink on the color wheel. The map layer of the uploaded areas
+ * (`UserObstaclesLayer`) and its switch are orange for the same reason — purple would read as
+ * Kombination or Bebauung.
  *
  * `chip` = colored value chip, `block` = left stripe + tint of a group block,
  * `headline` = underline color of the heading, `title` = heading text color (size/weight:
@@ -37,12 +34,12 @@ export const spaceFinderGroupStyle: Record<
     button: 'border-blue-600 bg-blue-50 text-blue-700',
   },
   bebauung: {
-    chip: 'bg-purple-100 text-purple-800',
-    block: 'border-purple-400 bg-purple-50/60',
-    headline: 'border-purple-200',
-    title: 'text-purple-900',
-    text: 'text-purple-800',
-    button: 'border-purple-600 bg-purple-50 text-purple-700',
+    chip: 'bg-pink-100 text-pink-800',
+    block: 'border-pink-400 bg-pink-50/60',
+    headline: 'border-pink-200',
+    title: 'text-pink-900',
+    text: 'text-pink-800',
+    button: 'border-pink-600 bg-pink-50 text-pink-700',
   },
   eigendaten: {
     chip: 'bg-amber-100 text-amber-800',
@@ -65,20 +62,31 @@ export const spaceFinderGroupBarStyle: Record<
   { full: string; pale: string }
 > = {
   bedarf: { full: 'bg-blue-600', pale: 'bg-blue-200' },
-  bebauung: { full: 'bg-purple-600', pale: 'bg-purple-200' },
+  bebauung: { full: 'bg-pink-600', pale: 'bg-pink-200' },
   eigendaten: { full: 'bg-amber-600', pale: 'bg-amber-200' },
 }
 
 /**
- * Toggle button in the group color (active) or neutral (inactive) — for `ScoreModeSwitcher`.
- * Kombination has no group color and falls back to the original green accent.
+ * Color of Kombination (Gesamtscore): purple, the mix of Bedarf blue and Bebauung pink — same hue
+ * as the Kombination hexagon ramp. `block` = left stripe of the Gesamtscore header in the inspector.
  */
+export const spaceFinderKombinationStyle = {
+  block: 'border-purple-400',
+  title: 'text-purple-900',
+  button: 'border-purple-600 bg-purple-50 text-purple-700',
+}
+
+/** Neutral tag: the mode of an »Eigene Daten« dataset and the suitability class (Eignungsklasse). */
+export const spaceFinderTagClass =
+  'shrink-0 rounded border border-gray-400 bg-white px-1.5 py-px text-[11px] font-semibold text-gray-800'
+
+/** Toggle button in the group color (active) or neutral (inactive) — for `ScoreModeSwitcher`. */
 export const spaceFinderGroupButtonClass = (active: boolean, mode: SpaceFinderScoreMode) =>
   twJoin(
     toggleButtonBase,
     active
       ? mode === 'kombination'
-        ? 'border-green-700 bg-green-50 text-green-700'
+        ? spaceFinderKombinationStyle.button
         : spaceFinderGroupStyle[mode].button
       : toggleButtonInactive,
   )

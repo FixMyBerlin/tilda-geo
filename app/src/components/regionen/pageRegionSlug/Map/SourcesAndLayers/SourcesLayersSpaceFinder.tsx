@@ -104,22 +104,22 @@ const HEXAGON_LABEL_MIN_ZOOM = 18
 // (instead of switching hard at 0) – otherwise many values just above 0 produce a
 // patchy pattern of abruptly alternating transparent and opaque neighbor hexagons.
 // The hue depends on the active display mode — same colors as `spaceFinderGroupStyle`
-// (Bedarf blue, Bebauung purple); Kombination is not a factor group and gets a
-// positive yellow-green/lime (red reads as negative, good areas should read positive).
-// The vegetation layer uses a bluish emerald so both stay distinguishable.
+// (Bedarf blue, Bebauung pink). Kombination is purple, the mix of both, so its color
+// reads as the combination of Bedarf and Bebauung. All three ramps share the same
+// lightness steps. The vegetation layer uses a bluish emerald.
 const HEXAGON_FADE_IN_THRESHOLD = 10
 const HEXAGON_SCORE_RAMP: Record<SpaceFinderScoreMode, { fadeFrom: string; stops: string[] }> = {
   kombination: {
-    fadeFrom: 'rgba(247,254,231,0)',
-    stops: ['#f7fee7', '#bef264', '#84cc16', '#3f6212'],
+    fadeFrom: 'rgba(243,232,253,0)',
+    stops: ['#f3e8fd', '#b16bf0', '#9333ea', '#550f94'],
   },
   bedarf: {
-    fadeFrom: 'rgba(239,246,255,0)',
-    stops: ['#eff6ff', '#60a5fa', '#2563eb', '#1e3a8a'],
+    fadeFrom: 'rgba(232,238,253,0)',
+    stops: ['#e8eefd', '#6a94f1', '#2563eb', '#0e3895'],
   },
   bebauung: {
-    fadeFrom: 'rgba(250,245,255,0)',
-    stops: ['#faf5ff', '#c084fc', '#9333ea', '#581c87'],
+    fadeFrom: 'rgba(252,232,245,0)',
+    stops: ['#fce8f5', '#ee6dbf', '#e941ac', '#921163'],
   },
 }
 const scoreColor = (property: string, mode: SpaceFinderScoreMode) => {
@@ -309,8 +309,7 @@ const censusLabelLayerProps = {
   },
 }
 
-// Vegetation as a light emerald fill. The bluish green stands out from the yellow-green
-// (lime) hexagon ramp.
+// Vegetation as a light emerald fill, distinct from the blue/purple/pink hexagon ramps.
 const VEGETATION_FILL_COLOR = '#6ee7b7'
 const VEGETATION_LINE_COLOR = '#047857'
 
