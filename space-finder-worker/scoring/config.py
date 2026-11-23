@@ -81,7 +81,7 @@ def oepnv_category_factors(shares: Dict[str, float]) -> Dict[str, float]:
 class UseCaseConfig:
     name: str
     weights: Dict[str, float]
-    dem_source: str = "srtm"                 # "dgm1" | "mapterhorn" | "srtm"
+    dem_source: str = "mapterhorn"           # "dgm1" | "mapterhorn" | "srtm"
     dgm1_path: Optional[str] = None
 
     # Vegetation factor (NDVI). The direction sets the sign of the effect:
@@ -308,7 +308,7 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
     return UseCaseConfig(
         name=cfg.get("name", "Szenario"),
         weights=weights,
-        dem_source=cfg.get("dem_source", "srtm"),
+        dem_source=cfg.get("dem_source", "mapterhorn"),
         dgm1_path=cfg.get("dgm1_path"),
         vegetation_direction=cfg.get("vegetation_direction", "negative"),
         vegetation_penalty_threshold_pct=float(

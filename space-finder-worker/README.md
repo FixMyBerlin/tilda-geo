@@ -80,8 +80,8 @@ Available worldwide, no data download needed – the worker needs internet acces
 
 Higher accuracy for individual regions: mount real DGM1 GeoTIFFs via the
 `space_finder_dem` volume (`/dem`) and enable them with `dem_source: "dgm1"`.
-`dem_source: "srtm"` remains as a fallback with constant slope (2°) in case
-neither Mapterhorn nor DGM1 is available.
+`dem_source: "srtm"` means no elevation source: the slope stays empty for every
+hexagon and is left out of the score (it never scores 100 without data).
 
 Where elevation is missing for a hexagon (tile not loadable, DGM1
 nodata), the slope is NaN – not 0°. The slope then neither counts as flat nor triggers

@@ -9,10 +9,10 @@ class DEMAdapter:
     Sources (priority):
       1. dgm1   – DGM1 GeoTIFF via rasterio + np.gradient (volume `space_finder_dem`)
       2. mapterhorn – PMTiles extract (Terrarium encoding) – stub
-      3. srtm   – constant fallback (MVP without a real DEM)
+      3. srtm   – no elevation data: every slope is NaN (left out of the score)
     """
 
-    def __init__(self, source: str = "srtm", dgm1_path: Optional[str] = None):
+    def __init__(self, source: str = "mapterhorn", dgm1_path: Optional[str] = None):
         self.source = source
         self.dgm1_path = dgm1_path
         self._dgm1_ds = None
@@ -67,7 +67,7 @@ class DEMAdapter:
             return slopes
 
         except ImportError:
-            print("   ⚠️  rasterio not available – falling back to SRTM")
+            print("   ⚠️  rasterio not available – slope left empty")
             return self._slopes_srtm_fallback(points)
 
     # Same tile source/scheme as the elevation profile in the frontend
@@ -127,7 +127,7 @@ class DEMAdapter:
         try:
             from PIL import Image  # noqa: F401 – availability check only
         except ImportError:
-            print("   ⚠️  Pillow not available – falling back to SRTM")
+            print("   ⚠️  Pillow not available – slope left empty")
             return self._slopes_srtm_fallback(points)
 
         tile_size = self._MAPTERHORN_TILE_SIZE
@@ -163,9 +163,9 @@ class DEMAdapter:
 
     def _slopes_srtm_fallback(self, points):
         """
-        MVP fallback: constant slope of 2.0° for all points. The slope factor
-        can effectively be disabled via `w_slope=0` in factorConfig. Real
-        DGM1 rasters are added later via the `space_finder_dem` volume.
+        No elevation source: every slope is NaN. A made-up constant would score
+        every spot as perfectly flat (100 points) without any data behind it;
+        NaN drops the slope out of the score per hexagon (see scorer.py).
         """
-        print("   ℹ️  DEM fallback active: constant slope 2.0°")
-        return [2.0] * len(points)
+        print("   ⚠️  No elevation data – slope left empty for all points")
+        return [float("nan")] * len(points)
