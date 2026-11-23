@@ -2,6 +2,11 @@ import { twJoin } from 'tailwind-merge'
 import { useSpaceFinderMinAreaDraft } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-factor-draft-store'
 import type { StoreFeaturesInspector } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import {
+  AdminFactorBox,
+  adminOnlyFactorHidden,
+  isAdminOnlyFactor,
+} from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/adminOnlyFactors'
+import {
   factorRangeHint,
   WEIGHT_GROUPS,
 } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/factors/spaceFinderDefaults'
@@ -28,6 +33,7 @@ import {
 import { spaceFinderOpenRunStatus } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderRunStatus'
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
+import { useIsAdmin } from '@/components/shared/hooks/useIsAdmin'
 import { parseEigendatenDetails } from '@/shared/regionen/spaceFinderEigendatenDetails'
 import {
   SPACE_FINDER_SCORE_GROUPS,
@@ -55,6 +61,7 @@ const MODIFIER_WEIGHT_KEYS: Record<string, string> = {
   score_bewohnerbedarf: 'w_bewohnerbedarf',
   score_kreuzung: 'w_intersection',
   score_parken: 'w_parken',
+  score_tempo30: 'w_tempo30',
   score_platz: 'w_platz',
   score_eigendaten: 'w_eigendaten',
   score_zielorte: 'w_target',
@@ -195,6 +202,7 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
   const { spaceFinderMode } = useSpaceFinderModeParam()
   const minAreaDraft = useSpaceFinderMinAreaDraft()
   const { runId, variant } = useSpaceFinderSelection()
+  const isAdmin = useIsAdmin()
   const areaFilterOn =
     appliedMinAreaM2(
       spaceFinderMode.minArea === true,
@@ -429,7 +437,12 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
                       const value = props[key] as number | null | undefined
                       const max = modifierMax(key)
                       const active = modifierActive(key)
-                      return (
+                      const weightKey = MODIFIER_WEIGHT_KEYS[key] ?? key
+                      // Off in this run (or a legacy run without weights): non-admins do not see the row.
+                      if (adminOnlyFactorHidden(weightKey, weights?.[weightKey], isAdmin)) {
+                        return null
+                      }
+                      const row = (
                         <div key={key} className={twJoin(ROW_GRID, 'py-1')}>
                           <FactorLabel
                             label={SCORE_LABELS[key] ?? key}
@@ -452,6 +465,11 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
                             {formatModifierValue(value, max)}
                           </span>
                         </div>
+                      )
+                      return isAdmin && isAdminOnlyFactor(weightKey) ? (
+                        <AdminFactorBox key={key}>{row}</AdminFactorBox>
+                      ) : (
+                        row
                       )
                     })}
                   </div>

@@ -76,6 +76,7 @@ describe('VariantFactorConfigSchema', () => {
   it('rejects weights outside 0–1 and negative radii', () => {
     expect(VariantFactorConfigSchema.safeParse({ weights: { w_target: 2 } }).success).toBe(false)
     expect(VariantFactorConfigSchema.safeParse({ parken_radius_m: -1 }).success).toBe(false)
+    expect(VariantFactorConfigSchema.safeParse({ tempo30_tolerance_m: -1 }).success).toBe(false)
   })
 
   it('keeps the census marker so the suggestion is not stored as a user value', () => {

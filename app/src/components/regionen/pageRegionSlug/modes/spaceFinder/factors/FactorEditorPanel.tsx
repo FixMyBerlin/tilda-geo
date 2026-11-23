@@ -7,6 +7,7 @@ import {
   collapsibleBoxClass,
   collapsibleBoxHeaderClass,
 } from '@/components/shared/CollapsibleBox/collapsibleBoxStyles'
+import { useIsAdmin } from '@/components/shared/hooks/useIsAdmin'
 import { InfoTooltip } from '@/components/shared/InfoTooltip/InfoTooltip'
 import { SegmentedChoice } from '@/components/shared/SegmentedChoice/SegmentedChoice'
 import { toastError } from '@/components/shared/toast/toastError'
@@ -42,6 +43,7 @@ import {
   spaceFinderNumberInputClass,
   spaceFinderParamLabelMutedClass,
 } from '../spaceFinderPanelStyles'
+import { AdminFactorBox, adminOnlyFactorHidden, isAdminOnlyFactor } from './adminOnlyFactors'
 import { OepnvCategorySliders } from './OepnvCategorySliders'
 import { readOepnvShares, type OepnvShares } from './oepnvShares'
 import {
@@ -50,6 +52,7 @@ import {
   FACTOR_PARAMS,
   GROUP_HELP,
   MIN_SCORE_THRESHOLD_LABEL,
+  type ModifierDirection,
   PARKING_DATA_DEPENDENT_KEYS,
   WEIGHT_GROUPS,
   WEIGHT_LABELS,
@@ -75,6 +78,11 @@ import { readZielortShares, type ZielortShares } from './zielortShares'
 /** Note below the parking-data-dependent factors when `parkingDataAvailable` is false —
  * see [[PARKING_DATA_DEPENDENT_KEYS]] in spaceFinderDefaults.ts. */
 const PARKING_DATA_HINT = 'Keine Parkdaten für dieses Gebiet verfügbar — Faktor hier deaktiviert.'
+
+/** Tempo 30 rewards hexagons ON the carriageway, which „Fahrbahnen ausschließen“ removes — so the
+ * worker ignores the weight then (`tempo30_active` in scorer.py) and the row is greyed out. */
+const TEMPO30_EXCLUDED_HINT =
+  '„Fahrbahnen ausschließen“ ist aktiv — der Zuschlag gilt nur auf der Fahrbahn und entfällt deshalb.'
 
 const FactorInfo = ({ factorKey, extra }: { factorKey: string; extra?: string }) => {
   const text = [FACTOR_HELP[factorKey], extra].filter(Boolean).join(' ')
@@ -343,7 +351,8 @@ const FactorFields = ({
   const setWeightFromWeights = (key: string, value: number) =>
     setWeights({ ...weights, [key]: value })
   const shares = criterionShares(weights)
-  const points = modifierPointRange(weights, directions)
+  const tempo30Off = config.exclude_carriageways ?? false
+  const points = modifierPointRange(tempo30Off ? { ...weights, w_tempo30: 0 } : weights, directions)
   const zielortShares = readZielortShares(config.zielort_category_shares)
   // Open/closed state of the target-location types lives here because the highlight of the whole
   // Zielorte row depends on it (see below) — not just the content below the slider.
@@ -351,6 +360,103 @@ const FactorFields = ({
   const oepnvShares = readOepnvShares(config.oepnv_category_shares)
   // Same pattern as Zielorte, but on the criteria slider w_transit instead of the modifier w_target.
   const [oepnvCategoriesOpen, setOepnvCategoriesOpen] = useState(false)
+  const isAdmin = useIsAdmin()
+
+  const renderModifier = (key: string, direction: ModifierDirection) => {
+    const dataUnavailable = !parkingDataAvailable && PARKING_DATA_DEPENDENT_KEYS.includes(key)
+    if (dataUnavailable) {
+      return (
+        <UnavailableFactorRow
+          key={key}
+          label={WEIGHT_LABELS[key] ?? key}
+          info={<FactorInfo factorKey={key} extra={PARKING_DATA_HINT} />}
+        />
+      )
+    }
+    if (key === 'w_tempo30' && tempo30Off) {
+      return (
+        <UnavailableFactorRow
+          key={key}
+          label={WEIGHT_LABELS[key] ?? key}
+          badge="aus"
+          info={<FactorInfo factorKey={key} extra={TEMPO30_EXCLUDED_HINT} />}
+        />
+      )
+    }
+    const slider = (
+      <ModifierSlider
+        label={WEIGHT_LABELS[key] ?? key}
+        weight={weights[key]}
+        direction={resolveModifierDirection(direction, directions)}
+        onChange={(value) => setWeightFromWeights(key, value)}
+        readOnly={readOnly}
+        info={<FactorInfo factorKey={key} />}
+        nested={
+          <>
+            {key === 'w_vegetation' && (
+              <SegmentedChoice
+                options={
+                  [
+                    ['negative', 'Grün schützen'],
+                    ['positive', 'Grün bevorzugen'],
+                  ] as const
+                }
+                value={vegetationDirection}
+                onChange={setVegetationDirection}
+                disabled={readOnly || weightToPoints(weights[key]) === 0}
+              />
+            )}
+            {key === 'w_platz' && (
+              <SegmentedChoice
+                options={
+                  [
+                    ['negative', 'Platz freihalten'],
+                    ['positive', 'Belebung bevorzugen'],
+                  ] as const
+                }
+                value={platzDirection}
+                onChange={setPlatzDirection}
+                disabled={readOnly || weightToPoints(weights[key]) === 0}
+              />
+            )}
+            <FactorParamInputs
+              factorKey={key}
+              config={config}
+              weight={weights[key]}
+              setField={setField}
+              restoreAutoSaettigung={restoreAutoSaettigung}
+              readOnly={readOnly}
+            />
+            {/* The category split hangs off the Zielorte slider: it distributes its
+              points across the four target-location types without touching the other factors. */}
+            {key === 'w_target' && (
+              <ZielortCategorySliders
+                shares={zielortShares}
+                onChange={setZielortShares}
+                open={zielortCategoriesOpen}
+                onOpenChange={setZielortCategoriesOpen}
+                disabled={readOnly || weightToPoints(weights[key]) === 0}
+              />
+            )}
+          </>
+        }
+      />
+    )
+    // When expanded, the Zielorte slider and the type sliders visibly belong together: the
+    // white card lifts both out of the tinted group block, instead of leaving the types
+    // as loose sliders below the factor.
+    if (key === 'w_target' && zielortCategoriesOpen) {
+      return (
+        <div
+          key={key}
+          className="-mx-1 my-1 rounded border border-gray-300 bg-white px-2 py-0.5 shadow-sm"
+        >
+          {slider}
+        </div>
+      )
+    }
+    return <div key={key}>{slider}</div>
+  }
 
   return (
     <>
@@ -454,92 +560,15 @@ const FactorFields = ({
               Zu- und Abschläge
             </div>
             <div className={spaceFinderFactorGroupRowsClass}>
-              {group.modifiers.map(({ key, direction }) => {
-                const dataUnavailable =
-                  !parkingDataAvailable && PARKING_DATA_DEPENDENT_KEYS.includes(key)
-                if (dataUnavailable) {
-                  return (
-                    <UnavailableFactorRow
-                      key={key}
-                      label={WEIGHT_LABELS[key] ?? key}
-                      info={<FactorInfo factorKey={key} extra={PARKING_DATA_HINT} />}
-                    />
-                  )
-                }
-                const slider = (
-                  <ModifierSlider
-                    label={WEIGHT_LABELS[key] ?? key}
-                    weight={weights[key]}
-                    direction={resolveModifierDirection(direction, directions)}
-                    onChange={(value) => setWeightFromWeights(key, value)}
-                    readOnly={readOnly}
-                    info={<FactorInfo factorKey={key} />}
-                    nested={
-                      <>
-                        {key === 'w_vegetation' && (
-                          <SegmentedChoice
-                            options={
-                              [
-                                ['negative', 'Grün schützen'],
-                                ['positive', 'Grün bevorzugen'],
-                              ] as const
-                            }
-                            value={vegetationDirection}
-                            onChange={setVegetationDirection}
-                            disabled={readOnly || weightToPoints(weights[key]) === 0}
-                          />
-                        )}
-                        {key === 'w_platz' && (
-                          <SegmentedChoice
-                            options={
-                              [
-                                ['negative', 'Platz freihalten'],
-                                ['positive', 'Belebung bevorzugen'],
-                              ] as const
-                            }
-                            value={platzDirection}
-                            onChange={setPlatzDirection}
-                            disabled={readOnly || weightToPoints(weights[key]) === 0}
-                          />
-                        )}
-                        <FactorParamInputs
-                          factorKey={key}
-                          config={config}
-                          weight={weights[key]}
-                          setField={setField}
-                          restoreAutoSaettigung={restoreAutoSaettigung}
-                          readOnly={readOnly}
-                        />
-                        {/* The category split hangs off the Zielorte slider: it distributes its
-                          points across the four target-location types without touching the other factors. */}
-                        {key === 'w_target' && (
-                          <ZielortCategorySliders
-                            shares={zielortShares}
-                            onChange={setZielortShares}
-                            open={zielortCategoriesOpen}
-                            onOpenChange={setZielortCategoriesOpen}
-                            disabled={readOnly || weightToPoints(weights[key]) === 0}
-                          />
-                        )}
-                      </>
-                    }
-                  />
-                )
-                // When expanded, the Zielorte slider and the type sliders visibly belong together: the
-                // white card lifts both out of the tinted group block, instead of leaving the types
-                // as loose sliders below the factor.
-                if (key === 'w_target' && zielortCategoriesOpen) {
-                  return (
-                    <div
-                      key={key}
-                      className="-mx-1 my-1 rounded border border-gray-300 bg-white px-2 py-0.5 shadow-sm"
-                    >
-                      {slider}
-                    </div>
-                  )
-                }
-                return <div key={key}>{slider}</div>
-              })}
+              {group.modifiers
+                .filter(({ key }) => !adminOnlyFactorHidden(key, weights[key], isAdmin))
+                .map(({ key, direction }) =>
+                  isAdminOnlyFactor(key) && isAdmin ? (
+                    <AdminFactorBox key={key}>{renderModifier(key, direction)}</AdminFactorBox>
+                  ) : (
+                    renderModifier(key, direction)
+                  ),
+                )}
             </div>
           </div>
         ))}

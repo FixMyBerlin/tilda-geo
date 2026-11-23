@@ -117,6 +117,22 @@ class UseCaseConfig:
     #   d > radius               → 0
     parken_radius_m: float = 15.0             # reach of the bonus (adjustable in the UI)
 
+    # Tempo 30 bonus: on roads with maxspeed ≤ 30 (public.roads, incl. living
+    # streets and bicycle roads) bike parking can be built directly on the
+    # carriageway instead of on the pavement. So the bonus only applies ON the
+    # carriageway area (road buffered by its width, see scoring.carriageways),
+    # not to the pavement next to it. Strength = weights["w_tempo30"]:
+    #   hexagon centre on the carriageway or ≤ tolerance from its edge → full bonus
+    #   otherwise                                                     → 0
+    # The width already runs kerb to kerb (parking lanes included), so the
+    # tolerance only catches inaccurate widths (mostly class defaults) and hexagons
+    # (~3.5 m at resolution 13) that overlap the edge. Kept small so the pavement
+    # next to the road gets no bonus.
+    # Roads without maxspeed get no bonus (unknown ≠ calm), except Fahrradstraßen
+    # (≤ 30 by law). With exclude_carriageways the bonus is off: those hexagons
+    # are excluded anyway.
+    tempo30_tolerance_m: float = 2.0          # adjustable in the UI
+
     # Square bonus/penalty: squares (place=square, public._places_squares) are
     # attractive public space – depending on the goal an argument FOR building
     # nearby (activity, visibility) or AGAINST it (keep the square open).
@@ -268,6 +284,7 @@ DEFAULT_WEIGHTS = {
     "w_vegetation": 0.0,   # neutral by default → existing scenarios keep their behavior
     "w_intersection": 0.1, # intersection bonus (max. bonus in points × 100)
     "w_parken": 0.1,       # parking bonus (car → bike conversion)
+    "w_tempo30": 0.0,      # Tempo 30 bonus; neutral by default → non-breaking
     "w_platz": 0.0,        # square bonus/penalty; neutral by default → non-breaking
     "w_fussgaengerzone": 0.0,  # pedestrian zone bonus (neutral by default → non-breaking)
     "w_bestand": 0.0,          # demand reduction by existing parking (neutral by default → non-breaking)
@@ -303,6 +320,7 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         intersection_ideal_min_m=float(cfg.get("intersection_ideal_min_m", 5.0)),
         intersection_ideal_max_m=float(cfg.get("intersection_ideal_max_m", 8.0)),
         parken_radius_m=float(cfg.get("parken_radius_m", 15.0)),
+        tempo30_tolerance_m=float(cfg.get("tempo30_tolerance_m", 2.0)),
         platz_direction=cfg.get("platz_direction", "positive"),
         fussgaengerzone_radius_m=float(cfg.get("fussgaengerzone_radius_m", 20.0)),
         bestand_default_diameter_m=float(cfg.get("bestand_default_diameter_m", 20.0)),

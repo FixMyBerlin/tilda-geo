@@ -75,6 +75,14 @@ class TildaLoader:
             print(f"   ⚠️  Car parking query failed: {e}")
             return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
 
+    def load_tempo30_roads(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
+        """Road lines with maxspeed ≤ 30 (and width_m, NULL if unknown) for the Tempo 30 bonus."""
+        try:
+            return self._loader.load_tempo30_roads(study_area_geom)
+        except Exception as e:
+            print(f"   ⚠️  Tempo 30 road query failed: {e}")
+            return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
+
     def load_squares(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame:
         """Squares (place=square) for the square bonus/penalty."""
         try:

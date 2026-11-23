@@ -43,6 +43,10 @@ ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS score_kreuzu
 -- scenario.
 ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS score_parken real;
 
+-- Tempo 30 bonus: boost next to calm roads (maxspeed <= 30); NULL when the
+-- factor (w_tempo30) is not weighted in the scenario.
+ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS score_tempo30 real;
+
 -- Square bonus/penalty: signed effect (bonus > 0 / penalty < 0, per
 -- platz_direction) on/near squares (place=square); NULL when the factor
 -- (w_platz) is not weighted in the scenario.

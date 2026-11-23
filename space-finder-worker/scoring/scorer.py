@@ -23,6 +23,7 @@ from .geometry import (
     dist_to_union as _dist_to_union,
     weighted_proximity_sum,
 )
+from .carriageways import compute_tempo30_carriageways
 from .tilda import TildaLoader
 
 
@@ -42,7 +43,7 @@ _SCORE_COLS = [
     "mce_gesamtscore", "score_bedarf", "score_bebauung",
     "score_radweg", "score_zielorte",
     "score_hangneigung", "score_oepnv", "score_vegetation",
-    "score_kreuzung", "score_parken", "score_platz", "score_fussgaengerzone",
+    "score_kreuzung", "score_parken", "score_tempo30", "score_platz", "score_fussgaengerzone",
     "score_bestand", "score_eigendaten", "score_bewohnerbedarf",
 ]
 
@@ -165,7 +166,7 @@ SCORING_STEPS = [
     "Bewohnerbedarf laden (Zensus)",
     "ÖPNV + Bikesharing laden",
     "Kreuzungen laden",
-    "KFZ-Parkflächen laden",
+    "KFZ-Parkflächen & Tempo-30-Straßen laden",
     "Zielorte laden",
     "Hangneigung berechnen",
     "Vegetationsabdeckung verschneiden",
@@ -174,6 +175,20 @@ SCORING_STEPS = [
     "Ergebnisse speichern",
 ]
 SCORING_STEP_COUNT = len(SCORING_STEPS)
+
+
+def tempo30_active(use_case) -> bool:
+    """Tempo 30 bonus counts: weighted and carriageways not excluded."""
+    return (use_case.weights.get("w_tempo30", 0) or 0) > 0 and not use_case.exclude_carriageways
+
+
+def tempo30_factor(d: float, tolerance_m: float) -> float:
+    """1.0 when the hexagon centre is on a Tempo 30 carriageway (`d` = distance in m
+    to its area, 0 inside) or within `tolerance_m` of its edge, else 0.0
+    (also without a Tempo 30 road nearby: NaN/far distance)."""
+    if not np.isfinite(d):
+        return 0.0
+    return 1.0 if d <= tolerance_m else 0.0
 
 
 def apply_score_exclusion(hex_proj, mask, cols=("mce_gesamtscore",)) -> None:
@@ -612,6 +627,19 @@ def run_flaechenfinder(
     else:
         hex_proj["abstand_parken_m"] = np.nan
 
+    # Carriageways of calm roads (maxspeed ≤ 30) for the Tempo 30 bonus: distance
+    # of the hexagon centre to the carriageway AREA (0 = on it). Load only with
+    # weight > 0 and without "Fahrbahnen ausschließen" (those hexagons would be
+    # excluded anyway); otherwise NaN.
+    if tempo30_active(use_case):
+        tempo30_proj = compute_tempo30_carriageways(study_area_geom, tilda_loader)
+        hex_proj["abstand_tempo30_m"] = _dist_to_union(centroids, tempo30_proj)
+        del tempo30_proj
+    else:
+        if (use_case.weights.get("w_tempo30", 0) or 0) > 0:
+            print("   ℹ️  w_tempo30 ignored: carriageways are excluded")
+        hex_proj["abstand_tempo30_m"] = np.nan
+
     # Squares (place=square) for the square bonus/penalty – same area distance
     # mechanism as parking, but own loader/weight.
     # Load only with weight > 0. Effect derivation also in the MCE step (13).
@@ -877,6 +905,24 @@ def run_flaechenfinder(
         hex_proj["score_parken"] = np.nan
         parken_delta = 0.0
 
+    # ── Tempo 30 bonus: bonus on the carriageway of calm roads ─────────────
+    # On roads with maxspeed ≤ 30 bike parking can go directly on the
+    # carriageway. Full bonus when the hexagon centre lies on that carriageway
+    # or within `tempo30_tolerance_m` of its edge, otherwise 0 – no decay onto
+    # the pavement. `w_tempo30` (0–1) is the bonus in points (× 100). Off with
+    # "Fahrbahnen ausschließen" (see step 8); then `score_tempo30` stays NaN
+    # (→ DB NULL), like without weight.
+    w_tempo30 = w.get("w_tempo30", 0) or 0
+    if tempo30_active(use_case):
+        tempo30_bonus = (w_tempo30 * 100.0) * hex_proj["abstand_tempo30_m"].apply(
+            lambda d, t=use_case.tempo30_tolerance_m: tempo30_factor(d, t)
+        )
+        hex_proj["score_tempo30"] = tempo30_bonus.round(1)
+        tempo30_delta = tempo30_bonus
+    else:
+        hex_proj["score_tempo30"] = np.nan
+        tempo30_delta = 0.0
+
     # ── Square bonus/penalty: bonus or penalty on squares ──────────────────
     # Squares (place=square, public._places_squares) are attractive public space.
     # The effect is a modifier on the base score (like intersections/parking);
@@ -1051,7 +1097,7 @@ def run_flaechenfinder(
     )
 
     # ── Total score (combination) ──────────────────────────────────────────
-    # `total` = `base_score ± veg + kreuz + parken + fussgz + bewohner + ziel + bestand
+    # `total` = `base_score ± veg + kreuz + parken + tempo30 + fussgz + bewohner + ziel + bestand
     # + eigendaten`; the modifiers are separate delta series so they can be reused
     # below for the sub-scores. `fussgz_delta`/`bewohner_delta`/`bestand_delta`/
     # `eigendaten_delta` default to 0 (weights 0), so they don't change existing runs.
@@ -1059,7 +1105,7 @@ def run_flaechenfinder(
     # default weight 0.15, now it is a modifier with the same weight – existing runs
     # therefore behave differently on their next recalculation.
     total = (
-        base_score + veg_delta + kreuz_delta + parken_delta + platz_delta
+        base_score + veg_delta + kreuz_delta + parken_delta + tempo30_delta + platz_delta
         + fussgz_delta + bewohner_delta + ziel_delta + bestand_delta + eigendaten_delta
     )
     # Clamp the total score to [0, 100] – it must never drop below 0.
@@ -1073,7 +1119,7 @@ def run_flaechenfinder(
     #       public transport (w_transit), target locations (w_target) + modifiers
     #       pedestrian zones (bonus), resident demand (bonus) and existing parking (penalty)
     #   Buildability ("Bebauung", "can build here") → slope (w_slope)
-    #       + modifiers vegetation, intersections, parking, squares; hard exclusions.
+    #       + modifiers vegetation, intersections, parking, Tempo 30, squares; hard exclusions.
     # Each group is divided by the sum of its active weights (the same `_group_score`
     # as for the base score above) so the sub-score stays 0–100 regardless of the
     # weight distribution. If a group is completely unweighted, its score stays NaN
@@ -1089,7 +1135,7 @@ def run_flaechenfinder(
 
     base_bebauung = _group_score(BEBAUUNG_TERMS)
     score_bebauung = (
-        base_bebauung + veg_delta + kreuz_delta + parken_delta + platz_delta
+        base_bebauung + veg_delta + kreuz_delta + parken_delta + tempo30_delta + platz_delta
     ).clip(lower=0.0, upper=100.0)
 
     hex_proj["score_bedarf"] = score_bedarf.round(1)

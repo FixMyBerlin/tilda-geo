@@ -59,6 +59,7 @@ BEGIN
             score_vegetation,
             score_kreuzung,
             score_parken,
+            score_tempo30,
             score_platz,
             score_fussgaengerzone,
             score_bestand,

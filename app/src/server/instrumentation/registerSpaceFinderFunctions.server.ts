@@ -35,6 +35,7 @@ async function ensureSpaceFinderSchema() {
       score_vegetation        real,
       score_kreuzung          real,
       score_parken            real,
+      score_tempo30           real,
       score_platz             real,
       score_fussgaengerzone   real,
       score_bestand           real,
@@ -61,6 +62,9 @@ async function ensureSpaceFinderSchema() {
   )
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS score_parken real;`,
+  )
+  await geoDataClient.$executeRawUnsafe(
+    `ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS score_tempo30 real;`,
   )
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS score_platz real;`,
@@ -197,6 +201,7 @@ async function registerHexagonsFunction() {
           score_vegetation,
           score_kreuzung,
           score_parken,
+          score_tempo30,
           score_platz,
           score_fussgaengerzone,
           score_bestand,

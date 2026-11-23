@@ -114,14 +114,17 @@ export const ComingSoonFactorRow = ({ label, info }: { label: string; info?: Rea
  * Row for a factor that is implemented but has no data for this Planungsgebiet (e.g.
  * parking/intersections/pedestrian zones outside the parking topic bboxes, see
  * `parkingDataAvailability.server.ts`). Like `ComingSoonFactorRow`, just with a different hint
- * text — the factor is implemented, only without data here.
+ * text — the factor is implemented, only without data here. `badge` replaces „keine Daten“ when
+ * the factor is off for another reason (e.g. Tempo 30 while carriageways are excluded).
  */
 export const UnavailableFactorRow = ({
   label,
   info,
+  badge = 'keine Daten',
 }: {
   label: string
   info?: React.ReactNode
+  badge?: string
 }) => (
   <FactorRow
     label={label}
@@ -130,7 +133,7 @@ export const UnavailableFactorRow = ({
     info={info}
     badge={
       <span className="rounded bg-gray-100 px-1.5 py-0.5 text-[11px] font-medium text-gray-400">
-        keine Daten
+        {badge}
       </span>
     }
     slider={null}

@@ -15,6 +15,7 @@ const SPACE_FINDER_FACTOR_LAYERS = {
   w_bestand: BICYCLE_PARKING_LAYERS,
   w_cyclepath: ['bikelanes/bikelanes', 'bikelanes-minimal/bikelanes'],
   w_parken: ['parkingTilda/parkingTilda', 'parkingTilda/parkingTildaOffStreet'],
+  w_tempo30: ['roads/maxspeed'],
 } satisfies Record<string, string[]>
 
 export const spaceFinderWantedFactorLayers = (weights: Record<string, number>) => {

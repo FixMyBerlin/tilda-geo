@@ -22,6 +22,7 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
     w_vegetation: 0,
     w_intersection: 0.1,
     w_parken: 0.1,
+    w_tempo30: 0,
     w_platz: 0,
     w_fussgaengerzone: 0.1,
     w_bestand: 0,
@@ -34,6 +35,7 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
   exclude_carriageways: false,
   intersection_radius_m: 20,
   parken_radius_m: 15,
+  tempo30_tolerance_m: 2,
   fussgaengerzone_radius_m: 20,
   bestand_default_diameter_m: 20,
   // Equal split of the four target location types: the factor behaves as it did before
@@ -85,7 +87,7 @@ export const GROUP_HELP: Record<'bedarf' | 'bebauung' | 'eigendaten', string> = 
   bedarf:
     'Wo würden Menschen eine Abstellanlage nutzen? Hier zählt die Lage im Netz: Radwege und ÖPNV, plus Zuschläge an Fußgängerzonen, rund um bewohnte Gebäude und rund um Gebäude mit Alltagszielen sowie ein Abzug, wo schon Anlagen stehen.',
   bebauung:
-    'Wo lässt sich baulich etwas errichten? Die Hangneigung bildet den Grund, Vegetation, Kreuzungen, Parkflächen und Plätze schieben danach Punkte. Gebäude und zu steile Lagen schließen die Fläche ganz aus — der Bedarf bleibt davon unberührt.',
+    'Wo lässt sich baulich etwas errichten? Die Hangneigung bildet den Grund, Vegetation, Kreuzungen, Parkflächen, Tempo-30-Straßen und Plätze schieben danach Punkte. Gebäude und zu steile Lagen schließen die Fläche ganz aus — der Bedarf bleibt davon unberührt.',
   eigendaten:
     'Ihre hochgeladenen Datensätze greifen in den Gesamtscore ein, ohne Bedarf oder Bebauung zu verändern. Jeder Datensatz hat einen Namen und wirkt einzeln mit eigenem Modus und eigener Stärke — so lassen sich Wunschstandorte, Tabuzonen oder eigene Planungen nebeneinander berücksichtigen.',
 }
@@ -114,6 +116,8 @@ export const FACTOR_HELP: Record<string, string> = {
     'Zuschlag an Straßenecken: voll rund 5–8 m von der Bordsteinecke, bis zum Radius abnehmend.',
   w_parken:
     'Kfz-Parkflächen eignen sich zur Umwidmung: voller Zuschlag direkt auf dem Parken, bis zum Radius abnehmend. Nach der Berechnung eingeblendet: „Öffentliches Straßenparken“ und „Öffentliches Parken abseits des Straßenraums“.',
+  w_tempo30:
+    'Auf Straßen mit Tempo 30 oder weniger (auch verkehrsberuhigte Bereiche und Fahrradstraßen) kann eine Anlage direkt auf die Fahrbahn statt auf den Gehweg. Zuschlag nur auf der Fahrbahn selbst (Breite aus OSM oder geschätzt), plus Toleranz ab Fahrbahnrand. Fahrradstraßen zählen immer, andere Straßen ohne Tempoangabe geben keinen Zuschlag. Nicht kombinierbar mit „Fahrbahnen ausschließen“. Nach der Berechnung eingeblendet: „Höchstgeschwindigkeit“.',
   w_platz:
     'Auf Plätzen gibt „Belebung bevorzugen“ einen Zuschlag, „Platz freihalten“ einen Abzug — nur direkt auf dem Platz.',
   w_eigendaten:
@@ -134,6 +138,9 @@ export const FACTOR_PARAMS: Record<
   ],
   w_intersection: [{ key: 'intersection_radius_m', label: 'Radius (m)', step: 1, min: 0 }],
   w_parken: [{ key: 'parken_radius_m', label: 'Radius (m)', step: 1, min: 0 }],
+  w_tempo30: [
+    { key: 'tempo30_tolerance_m', label: 'Toleranz ab Fahrbahnrand (m)', step: 1, min: 0 },
+  ],
   // No entry for w_platz: no radius/distance decay, only effective directly on the square.
   // The 20 m radius is deliberately hard-wired (no UI field) and is a constant in
   // scoring/config.py. Only saturation is adjustable; its label names the unit, because
@@ -166,6 +173,7 @@ const FACTOR_RANGE_HINTS: Record<
   w_fussgaengerzone: { key: 'fussgaengerzone_radius_m', prefix: 'Radius' },
   w_intersection: { key: 'intersection_radius_m', prefix: 'Radius' },
   w_parken: { key: 'parken_radius_m', prefix: 'Radius' },
+  w_tempo30: { key: 'tempo30_tolerance_m', prefix: 'Toleranz' },
 }
 
 /** E.g. „bis 50 m“ / „Radius 20 m“; undefined when the factor has no configured reach. */
@@ -191,6 +199,7 @@ export const WEIGHT_LABELS: Record<string, string> = {
   w_vegetation: 'Vegetation',
   w_intersection: 'Kreuzungen',
   w_parken: 'Parken (Umwidmung)',
+  w_tempo30: 'Tempo 30',
   w_platz: 'Plätze',
   w_fussgaengerzone: 'Fußgängerzonen',
   w_bestand: 'Bestandsanlagen',
@@ -208,7 +217,7 @@ export type ModifierDirection = 'positive' | 'negative' | 'vegetation' | 'platz'
 //   Bedarf   → Radwegnähe, ÖPNV + modifiers Bestandsanlagen (penalty), Bewohnerbedarf
 //              (bonus), Zielorte (bonus) and Fußgängerzonen (bonus)
 //   Bebauung → Hangneigung + modifiers
-//              (Vegetation, Plätze, Kreuzungen, Parken)
+//              (Vegetation, Plätze, Kreuzungen, Parken, Tempo 30)
 //
 // Within each group we also split by computation type, because the two types act differently
 // in scorer.py and are therefore set differently (see `weightScale.ts`):
@@ -243,6 +252,7 @@ export const WEIGHT_GROUPS: {
       { key: 'w_platz', direction: 'platz' },
       { key: 'w_intersection', direction: 'positive' },
       { key: 'w_parken', direction: 'positive' },
+      { key: 'w_tempo30', direction: 'positive' },
     ],
   },
 ]

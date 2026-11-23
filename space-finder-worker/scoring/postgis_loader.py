@@ -10,6 +10,7 @@ Extension point: `_TRANSIT_TAG_MAP` maps OSM tag dicts to DB categories in
 from __future__ import annotations
 
 import geopandas as gpd
+import pandas as pd
 from shapely.geometry.base import BaseGeometry
 
 from .config import BIKESHARING_KIND, NON_PARKING_KINDS, ZIELORT_CATEGORIES
@@ -404,6 +405,84 @@ class PostgisLoader:
             return gdf
         except Exception as e:
             print(f"   ⚠️  PostGIS query parkings/parkings_separate failed: {e}")
+            return _empty("EPSG:4326")
+
+    def load_tempo30_roads(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
+        """Calm roads (maxspeed ≤ 30) with their width, for the Tempo 30 bonus.
+
+        Reads `public.roads` (roads_bikelanes topic), whose `maxspeed` tag is
+        already resolved from the OSM `maxspeed`/`maxspeed:forward|backward`
+        tags, maxspeed zones and the highway type (living_street → 7), see
+        `processing/topics/roads_bikelanes/maxspeed/maxspeed.lua`.
+
+        Width (column `width_m`, NULL when unknown): `public.roads` only has the
+        OSM `width` tag, which is rarely set. `public._parking_roads` has a width
+        for practically every road (tag or highway default, see
+        `road_width_tags.lua`), but only exists where the parking topic ran – so
+        it is joined by OSM id when the table exists. The caller fills the rest
+        with a default per road class (`scoring.carriageways`).
+
+        Fahrradstraßen (`road` = `bicycle_road`, i.e. `bicycle_road=yes`, see
+        `road_classification_road_value.lua`) always count: they are at most
+        30 km/h by law, but `maxspeed.lua` only knows that from a zone tag, so
+        many of them have no maxspeed.
+
+        The JSONB values are not guaranteed numeric, so a regex checks before
+        casting – inside a CASE, because Postgres does not evaluate AND in order.
+        Other roads without maxspeed are left out (no bonus). Bridges and
+        tunnels are left out like in `load_roads`: the road is not at ground
+        level there.
+
+        Geometry is in EPSG:3857; returned in EPSG:4326.
+        """
+        wkt = polygon_4326.wkt
+        bbox = f"ST_Transform(ST_GeomFromText('{wkt}', 4326), 3857)"
+        num = "~ '^[0-9]+(\\.[0-9]+)?$'"
+        own_width = f"CASE WHEN NULLIF(r.tags->>'width', '') {num} THEN (r.tags->>'width')::numeric END"
+        try:
+            has_parking_roads = bool(
+                pd.read_sql("SELECT to_regclass('public._parking_roads') IS NOT NULL AS ok", self.engine)
+                .iloc[0]["ok"]
+            )
+        except Exception:
+            has_parking_roads = False
+        if has_parking_roads:
+            parking_width = f"CASE WHEN NULLIF(pr.tags->>'width', '') {num} THEN (pr.tags->>'width')::numeric END"
+            width_sql = f"COALESCE({parking_width}, {own_width})"
+            join_sql = (
+                'LEFT JOIN public."_parking_roads" pr '
+                "ON pr.osm_id = r.osm_id AND pr.osm_type = r.osm_type"
+            )
+        else:
+            width_sql = own_width
+            join_sql = ""
+        sql = f"""
+            SELECT ST_Transform(r.geom, 4326) AS geom,
+                   r.tags->>'road' AS road,
+                   {width_sql} AS width_m
+            FROM public."roads" r
+            {join_sql}
+            WHERE r.geom && {bbox}
+              AND (
+                CASE WHEN NULLIF(r.tags->>'maxspeed', '') {num}
+                  THEN (r.tags->>'maxspeed')::numeric END <= 30
+                OR r.tags->>'road' = 'bicycle_road'
+              )
+              AND r.tags->>'bridge' IS DISTINCT FROM 'yes'
+              AND r.tags->>'tunnel' IS DISTINCT FROM 'yes'
+        """
+        try:
+            gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
+            if gdf.crs is None:
+                gdf = gdf.set_crs("EPSG:4326")
+            with_width = int(gdf["width_m"].notna().sum()) if len(gdf) else 0
+            print(
+                f"   ✓ PostGIS: {len(gdf)} roads with maxspeed ≤ 30 from roads "
+                f"({with_width} with width{' via _parking_roads' if has_parking_roads else ''})"
+            )
+            return gdf
+        except Exception as e:
+            print(f"   ⚠️  PostGIS query roads (maxspeed) failed: {e}")
             return _empty("EPSG:4326")
 
     def load_bicycle_parking(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
