@@ -65,6 +65,7 @@ const MODIFIER_WEIGHT_KEYS: Record<string, string> = {
   score_parken: 'w_parken',
   score_tempo30: 'w_tempo30',
   score_platz: 'w_platz',
+  score_versiegelung: 'w_versiegelung',
   score_eigendaten: 'w_eigendaten',
   score_zielorte: 'w_target',
 }
@@ -191,6 +192,12 @@ const modifierFillClassName = (
     : value != null && value < 0
       ? spaceFinderGroupBarStyle[groupKey].pale
       : 'bg-gray-300'
+
+/** Sealed share of the hexagon (0–100, NULL where not computed) as a hint next to the factor. */
+const versiegelungHint = (pct: unknown) =>
+  typeof pct === 'number' && Number.isFinite(pct)
+    ? `Versiegelter Anteil: ${Math.round(pct)} %`
+    : undefined
 
 export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
   const { spaceFinderMode } = useSpaceFinderModeParam()
@@ -447,7 +454,11 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
                           <FactorLabel
                             label={SCORE_LABELS[key] ?? key}
                             active={active}
-                            hint={factorRangeHint(MODIFIER_WEIGHT_KEYS[key] ?? key, snapshot)}
+                            hint={
+                              key === 'score_versiegelung'
+                                ? versiegelungHint(props.versiegelung_anteil_pct)
+                                : factorRangeHint(MODIFIER_WEIGHT_KEYS[key] ?? key, snapshot)
+                            }
                           />
                           <BarTrack
                             pct={modifierBarPct(value, max)}

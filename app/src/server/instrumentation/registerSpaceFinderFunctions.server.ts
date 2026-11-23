@@ -37,6 +37,8 @@ async function ensureSpaceFinderSchema() {
       score_parken            real,
       score_tempo30           real,
       score_platz             real,
+      score_versiegelung      real,
+      versiegelung_anteil_pct real,
       score_fussgaengerzone   real,
       score_bestand           real,
       score_eigendaten        real,
@@ -68,6 +70,14 @@ async function ensureSpaceFinderSchema() {
   )
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS score_platz real;`,
+  )
+  // Versiegelung (sealed ground): bonus points and the sealed share in percent; NULL without
+  // weight, without OSM source data, and for old runs.
+  await geoDataClient.$executeRawUnsafe(
+    `ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS score_versiegelung real;`,
+  )
+  await geoDataClient.$executeRawUnsafe(
+    `ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS versiegelung_anteil_pct real;`,
   )
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS score_fussgaengerzone real;`,
@@ -203,6 +213,8 @@ async function registerHexagonsFunction() {
           score_parken,
           score_tempo30,
           score_platz,
+          score_versiegelung,
+          versiegelung_anteil_pct,
           score_fussgaengerzone,
           score_bestand,
           score_eigendaten,

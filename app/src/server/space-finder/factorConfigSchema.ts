@@ -25,6 +25,7 @@ const variantFactorConfigShape = {
   bestand_default_diameter_m: z.number().optional(),
   bewohnerbedarf_radius_m: z.number().optional(),
   bewohnerbedarf_saettigung_ew: z.number().optional(),
+  versiegelung_saettigung_pct: z.number().optional(),
   zielort_category_shares: z.record(z.string(), z.number().min(0).max(100)).optional(),
   oepnv_category_shares: z.record(z.string(), z.number().min(0).max(100)).optional(),
   min_score_threshold: z.number().min(0).max(100).optional(),
@@ -45,6 +46,7 @@ export const VariantFactorConfigSchema = z.object({
   bestand_default_diameter_m: z.number().min(0).optional(),
   bewohnerbedarf_radius_m: z.number().min(0).optional(),
   bewohnerbedarf_saettigung_ew: z.number().min(0).optional(),
+  versiegelung_saettigung_pct: z.number().min(1).max(100).optional(),
   // Markers of the merged config the editor sends back. `stripAutoSaettigung` needs them to
   // decide whether `bewohnerbedarf_saettigung_ew` is the census suggestion, then drops them.
   bewohnerbedarf_saettigung_auto: z.boolean().optional(),

@@ -28,6 +28,31 @@ Core code: [`scoring/scorer.py`](scoring/scorer.py)
 4. **Vegetation effect** – not an additive sub-score but a continuous
    penalty/bonus on the base score (details: [`VEGETATION.md`](VEGETATION.md)).
    `mce_gesamtscore = clamp(base ± effect, 0, 100)`.
+   **Sealed ground bonus** (`w_versiegelung`, default 0) – a buildability modifier:
+   `score_versiegelung = w_versiegelung × 100 × min(1, share / versiegelung_saettigung_pct)`,
+   where `versiegelung_anteil_pct` is the sealed share of the hexagon area. The full bonus
+   comes at 50 % sealed by default (a bike parking needs only part of a hexagon). Code: [`scoring/sealing.py`](scoring/sealing.py),
+   input `public._sealing_surfaces` (processing topic `sealing`).
+   - Counts: sealed `surface` (fully), `grass_paver` (half), and area types that are
+     almost always paved (square, pedestrian area, ground-level parking incl. street-side,
+     footway/cycleway lines, sidewalks tagged on roads (`sidewalk=both|left|right`, shifted
+     next to the carriageway)
+     without `surface`; lines buffered by `width` or a default per type).
+   - Deducted: unsealed `surface`, open ground and green area tags (incl. cemeteries
+     and allotments), and tree pits
+     (1.5 m around a mapped tree). The aerial image is not used: over paving its
+     green is almost always a tree crown, and the image quality differs by state.
+   - An object's own `surface` wins; otherwise the smaller area wins.
+     A footway without `surface` only counts as unpaved when it lies mostly (> 50 %) inside a
+     green or unsealed area; a sidewalk tagged on a road is dropped when the same sidewalk is
+     also mapped as its own way.
+   - Not at ground level (bridge, tunnel, indoor, `location=underground|rooftop`, negative
+     `layer`/`level`) does not count.
+   - Carriageways count as sealed when "Fahrbahn ausschließen" is off and are
+     deducted when it is on.
+   - Stacks with Platz, Vegetation and Tempo 30. Only knows what is mapped in OSM.
+   - Without the table (topic never ran): NULL plus a run data note
+     (`SpaceFinderRun.dataNotes`), not 0.
 5. **Hard exclusions** – regardless of the weighted score, `mce_gesamtscore`
    is set to 0 if any of these applies:
    - slope too steep (`score_hangneigung == 0`)

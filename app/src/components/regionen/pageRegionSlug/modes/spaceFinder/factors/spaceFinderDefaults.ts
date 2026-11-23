@@ -24,6 +24,7 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
     w_parken: 0.1,
     w_tempo30: 0,
     w_platz: 0,
+    w_versiegelung: 0,
     w_fussgaengerzone: 0.1,
     w_bestand: 0,
     w_bewohnerbedarf: 0,
@@ -38,6 +39,8 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
   tempo30_tolerance_m: 2,
   fussgaengerzone_radius_m: 20,
   bestand_default_diameter_m: 20,
+  // Full sealed ground bonus from this sealed share of a hexagon (mirrors scoring/config.py).
+  versiegelung_saettigung_pct: 50,
   // Equal split of the four target location types: the factor behaves as it did before
   // category weighting (see `zielortShares.ts`).
   zielort_category_shares: { ...DEFAULT_ZIELORT_SHARES },
@@ -87,7 +90,7 @@ export const GROUP_HELP: Record<'bedarf' | 'bebauung' | 'eigendaten', string> = 
   bedarf:
     'Wo würden Menschen eine Abstellanlage nutzen? Hier zählt die Lage im Netz: Radwege und ÖPNV, plus Zuschläge an Fußgängerzonen, rund um bewohnte Gebäude und rund um Gebäude mit Alltagszielen sowie ein Abzug, wo schon Anlagen stehen.',
   bebauung:
-    'Wo lässt sich baulich etwas errichten? Die Hangneigung bildet den Grund, Vegetation, Kreuzungen, Parkflächen, Tempo-30-Straßen und Plätze schieben danach Punkte. Gebäude und zu steile Lagen schließen die Fläche ganz aus — der Bedarf bleibt davon unberührt.',
+    'Wo lässt sich baulich etwas errichten? Die Hangneigung bildet den Grund, Vegetation, Versiegelung, Kreuzungen, Parkflächen, Tempo-30-Straßen und Plätze schieben danach Punkte. Gebäude und zu steile Lagen schließen die Fläche ganz aus — der Bedarf bleibt davon unberührt.',
   eigendaten:
     'Ihre hochgeladenen Datensätze greifen in den Gesamtscore ein, ohne Bedarf oder Bebauung zu verändern. Jeder Datensatz hat einen Namen und wirkt einzeln mit eigenem Modus und eigener Stärke — so lassen sich Wunschstandorte, Tabuzonen oder eigene Planungen nebeneinander berücksichtigen.',
 }
@@ -111,7 +114,7 @@ export const FACTOR_HELP: Record<string, string> = {
   w_slope:
     'Flaches Gelände (bis etwa 2°) ist ideal, ab etwa 10° ist die Fläche ausgeschlossen. Bei Gewicht 0 entfällt auch der Ausschluss.',
   w_vegetation:
-    'Grünanteil aus Infrarot-Luftbildern: „Grün schützen“ zieht ab, „Grün bevorzugen“ gibt Zuschlag, je mehr Grün, desto stärker. Nach der Berechnung eingeblendet: „Vegetationsflächen“.',
+    'Grünanteil aus Infrarot-Luftbildern (DOP20 der Landesvermessung Bayern, Berlin/Brandenburg und Hessen). Das Luftbild zeigt die Draufsicht: Baumkronen zählen als Grün, auch wenn darunter Gehweg oder Fahrbahn liegt. „Grün schützen“ zieht ab, „Grün bevorzugen“ gibt Zuschlag, je mehr Grün, desto stärker. Nach der Berechnung eingeblendet: „Vegetationsflächen“.',
   w_intersection:
     'Zuschlag an Straßenecken: voll rund 5–8 m von der Bordsteinecke, bis zum Radius abnehmend.',
   w_parken:
@@ -120,6 +123,8 @@ export const FACTOR_HELP: Record<string, string> = {
     'Auf Straßen mit Tempo 30 oder weniger (auch verkehrsberuhigte Bereiche und Fahrradstraßen) kann eine Anlage direkt auf die Fahrbahn statt auf den Gehweg. Zuschlag nur auf der Fahrbahn selbst (Breite aus OSM oder geschätzt), plus Toleranz ab Fahrbahnrand. Fahrradstraßen zählen immer, andere Straßen ohne Tempoangabe geben keinen Zuschlag. Nicht kombinierbar mit „Fahrbahnen ausschließen“. Nach der Berechnung eingeblendet: „Höchstgeschwindigkeit“.',
   w_platz:
     'Auf Plätzen gibt „Belebung bevorzugen“ einen Zuschlag, „Platz freihalten“ einen Abzug — nur direkt auf dem Platz.',
+  w_versiegelung:
+    'Zuschlag auf versiegeltem Boden: Pflaster, Asphalt, Plätze, Fußgängerzonen, Gehwege und Parkplätze (auch Parkstreifen). Unversiegelte Flächen, Grünflächen und Baumscheiben zählen nicht. Grundlage ist nur OpenStreetMap, nicht das Luftbild. Der volle Zuschlag gilt schon ab einem Teil der Fläche (Standard 50 %), weil eine Anlage selten das ganze Hexagon braucht. Die Fahrbahn zählt nur als versiegelt, wenn „Fahrbahnen ausschließen“ aus ist.',
   w_eigendaten:
     'Eigene Punkte, Linien oder Flächen: Bonus und Abzug verschieben den Score innerhalb, Ausschluss setzt ihn innen oder außen auf null. Dateien und Modus gelten am Planungsgebiet, die Stärke stellt jede Variante je Datensatz ein.',
   w_bewohnerbedarf:
@@ -151,6 +156,14 @@ export const FACTOR_PARAMS: Record<
       label: 'Voller Zuschlag ab (Einwohnern) bis 20 Meter Radius',
       step: 5,
       min: 0,
+    },
+  ],
+  w_versiegelung: [
+    {
+      key: 'versiegelung_saettigung_pct',
+      label: 'Voller Zuschlag ab (% versiegelt)',
+      step: 5,
+      min: 1,
     },
   ],
   // No entry for w_target: radius (20 m) AND saturation (fixed 1.0) are both not adjustable
@@ -201,6 +214,7 @@ export const WEIGHT_LABELS: Record<string, string> = {
   w_parken: 'Parken (Umwidmung)',
   w_tempo30: 'Tempo 30',
   w_platz: 'Plätze',
+  w_versiegelung: 'Versiegelung',
   w_fussgaengerzone: 'Fußgängerzonen',
   w_bestand: 'Bestandsanlagen',
   w_bewohnerbedarf: 'Bewohnerbedarf (Zensus)',
@@ -217,7 +231,7 @@ export type ModifierDirection = 'positive' | 'negative' | 'vegetation' | 'platz'
 //   Bedarf   → Radwegnähe, ÖPNV + modifiers Bestandsanlagen (penalty), Bewohnerbedarf
 //              (bonus), Zielorte (bonus) and Fußgängerzonen (bonus)
 //   Bebauung → Hangneigung + modifiers
-//              (Vegetation, Plätze, Kreuzungen, Parken, Tempo 30)
+//              (Vegetation, Plätze, Versiegelung, Kreuzungen, Parken, Tempo 30)
 //
 // Within each group we also split by computation type, because the two types act differently
 // in scorer.py and are therefore set differently (see `weightScale.ts`):
@@ -249,6 +263,7 @@ export const WEIGHT_GROUPS: {
     criteria: ['w_slope'],
     modifiers: [
       { key: 'w_vegetation', direction: 'vegetation' },
+      { key: 'w_versiegelung', direction: 'positive' },
       { key: 'w_platz', direction: 'platz' },
       { key: 'w_intersection', direction: 'positive' },
       { key: 'w_parken', direction: 'positive' },

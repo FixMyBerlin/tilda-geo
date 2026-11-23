@@ -95,6 +95,11 @@ class UseCaseConfig:
     # green remnants/edge pixels), above it a linear rise up to 100 %.
     vegetation_penalty_threshold_pct: float = 20.0
 
+    # Sealed ground bonus: the full bonus is reached at this sealed share of the
+    # hexagon (%), below it the bonus rises linearly. A bike parking needs only part
+    # of a hexagon (res 13 ≈ 44 m²); a 2.5 m footway already covers about 35 %.
+    versiegelung_saettigung_pct: float = 50.0
+
     # Intersection bonus: bike parking fits well at street corners – ideally ~5–8 m
     # from the curb corner (not in the middle of the intersection). The bonus is a
     # continuous modifier on the base score (like vegetation, see scorer.py);
@@ -286,6 +291,7 @@ DEFAULT_WEIGHTS = {
     "w_parken": 0.1,       # parking bonus (car → bike conversion)
     "w_tempo30": 0.0,      # Tempo 30 bonus; neutral by default → non-breaking
     "w_platz": 0.0,        # square bonus/penalty; neutral by default → non-breaking
+    "w_versiegelung": 0.0, # sealed ground bonus; neutral by default → non-breaking
     "w_fussgaengerzone": 0.0,  # pedestrian zone bonus (neutral by default → non-breaking)
     "w_bestand": 0.0,          # demand reduction by existing parking (neutral by default → non-breaking)
     "w_bewohnerbedarf": 0.0,   # resident demand from census data; neutral by default → non-breaking
@@ -314,6 +320,7 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         vegetation_penalty_threshold_pct=float(
             cfg.get("vegetation_penalty_threshold_pct", 20.0)
         ),
+        versiegelung_saettigung_pct=float(cfg.get("versiegelung_saettigung_pct", 50.0)),
         max_cyclepath_dist_m=float(cfg.get("max_cyclepath_dist_m", 50.0)),
         cir_source=cfg.get("cir_source", "auto"),
         intersection_radius_m=float(cfg.get("intersection_radius_m", 20.0)),

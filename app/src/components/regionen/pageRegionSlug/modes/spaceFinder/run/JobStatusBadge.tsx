@@ -51,7 +51,9 @@ export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId:
     if (!data) return
     activateFactorLayers(data.weights)
     // Only ever on, never off: a layer the user switched on stays.
-    if ((data.weights.w_vegetation ?? 0) > 0) setVegetationVisible(true)
+    // The aerial-image phase also runs (and stores the layer) for Versiegelung alone.
+    if ((data.weights.w_vegetation ?? 0) > 0 || (data.weights.w_versiegelung ?? 0) > 0)
+      setVegetationVisible(true)
     if (data.excludeCarriageways) setCarriagewaysVisible(true)
     if ((data.weights.w_bewohnerbedarf ?? 0) > 0) setCensusVisible(true)
   })

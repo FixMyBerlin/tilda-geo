@@ -3,6 +3,7 @@ import { useEffect } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { comparableRunSnapshot } from '@/server/space-finder/factorFingerprint'
 import { areaInputFromRow } from '@/server/space-finder/mergeFactorConfig'
+import { spaceFinderDataNoteText } from '@/shared/regionen/spaceFinderDataNotes'
 import { useSpaceFinderLayersActions } from '../../hooks/mapState/space-finder-layers-store'
 import { modePanelMutedClassName } from '../modePanel.const'
 import { SpaceFinderCandidatesSection } from './candidates/SpaceFinderCandidatesSection'
@@ -15,7 +16,7 @@ import type { SpaceFinderVariantDetail } from './spaceFinderVariantDetail'
 
 /** Status line (D5): same run state as the Varianten dropdown and the run button. */
 const StatusSection = ({ variant }: { variant: SpaceFinderVariantDetail }) => {
-  const { status, outdatedReason, latestJob } = spaceFinderOpenRunStatus(variant)
+  const { status, outdatedReason, latestJob, latestRun } = spaceFinderOpenRunStatus(variant)
 
   return (
     <div className="flex flex-col gap-2 px-4 py-2">
@@ -24,6 +25,14 @@ const StatusSection = ({ variant }: { variant: SpaceFinderVariantDetail }) => {
           {outdatedReason ? `${outdatedReason} — ` : ''}Ergebnis veraltet. Bitte neu berechnen.
         </p>
       )}
+      {latestRun?.dataNotes.map((note) => (
+        <p
+          key={`${note.factor}:${note.reason}`}
+          className="rounded bg-amber-50 px-2 py-1.5 text-xs text-amber-800"
+        >
+          {spaceFinderDataNoteText(note)}
+        </p>
+      ))}
       {latestJob != null && <JobStatusBadge jobId={latestJob.id} variantId={variant.id} />}
       {status === 'none' && latestJob == null && (
         <p className={modePanelMutedClassName}>Noch nicht berechnet.</p>

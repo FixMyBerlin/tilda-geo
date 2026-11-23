@@ -13,6 +13,7 @@ type TopicChartHue =
   | 'emerald'
   | 'teal'
   | 'cyan'
+  | 'stone'
 
 const topicChartHueById: Record<TopicId, TopicChartHue> = {
   roads_bikelanes: 'blue',
@@ -27,6 +28,7 @@ const topicChartHueById: Record<TopicId, TopicChartHue> = {
   entrances: 'emerald',
   landcover: 'teal',
   parking: 'cyan',
+  sealing: 'stone',
 }
 
 const luaBg: Record<TopicChartHue, string> = {
@@ -42,6 +44,7 @@ const luaBg: Record<TopicChartHue, string> = {
   emerald: 'bg-emerald-400',
   teal: 'bg-teal-400',
   cyan: 'bg-cyan-400',
+  stone: 'bg-stone-400',
 }
 
 const sqlBg: Record<TopicChartHue, string> = {
@@ -57,6 +60,7 @@ const sqlBg: Record<TopicChartHue, string> = {
   emerald: 'bg-emerald-600',
   teal: 'bg-teal-600',
   cyan: 'bg-cyan-600',
+  stone: 'bg-stone-600',
 }
 
 const luaDotFill: Record<TopicChartHue, string> = {
@@ -72,6 +76,7 @@ const luaDotFill: Record<TopicChartHue, string> = {
   emerald: 'fill-emerald-400',
   teal: 'fill-teal-400',
   cyan: 'fill-cyan-400',
+  stone: 'fill-stone-400',
 }
 
 export const getTopicLuaBgClass = (topicId: TopicId) => luaBg[topicChartHueById[topicId]]
@@ -93,6 +98,7 @@ const sqlDotFill: Record<TopicChartHue, string> = {
   emerald: 'fill-emerald-600',
   teal: 'fill-teal-600',
   cyan: 'fill-cyan-600',
+  stone: 'fill-stone-600',
 }
 
 export const getTopicLuaFillClass = (topicId: TopicId) => luaDotFill[topicChartHueById[topicId]]

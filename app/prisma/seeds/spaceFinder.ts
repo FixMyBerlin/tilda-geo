@@ -123,6 +123,7 @@ const oepnvNahFactorConfig: VariantFactorConfig = {
     w_fussgaengerzone: 0.02,
     w_vegetation: 0,
     w_platz: 0,
+    w_versiegelung: 0,
     w_bestand: 0,
     w_bewohnerbedarf: 0,
   },

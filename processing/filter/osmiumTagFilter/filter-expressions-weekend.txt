@@ -5,3 +5,20 @@
 wr/landuse
 wr/building
 wr/leisure
+
+# Topic: Sealing (`_sealing_surfaces`; `wr/landuse` and `wr/leisure` above are part of it)
+# Keep in sync with topics/sealing/helper/classify_sealing.lua.
+# Lines: footways, cycleways, paths, pedestrian and living streets; tree rows; road sidewalks; trees (nodes)
+w/highway=footway,cycleway,path,pedestrian,living_street
+w/natural=tree_row
+# Sidewalks tagged on roads (`sidewalk=both|left|right`, `sidewalk:<side>=yes`)
+w/sidewalk,sidewalk:both,sidewalk:left,sidewalk:right
+n/natural=tree
+# Areas: type defaults and area-type objects (`area=yes` carries the explicit-surface footway/pedestrian areas)
+wr/area=yes
+wr/area:highway
+wr/place=square
+wr/amenity=parking
+wr/natural=sand,bare_rock,scree,beach,scrub,grassland,wood,heath,wetland
+# Pedestrian zones / footway areas mapped as multipolygon relations (no `area=yes` needed)
+r/highway=pedestrian,footway,cycleway

@@ -11,6 +11,7 @@ export const SPACE_FINDER_SCORE_LABELS: Record<string, string> = {
   score_parken: 'Parken',
   score_tempo30: 'Tempo 30',
   score_platz: 'Plätze',
+  score_versiegelung: 'Versiegelung',
   score_fussgaengerzone: 'Fußgängerzonen',
   score_bestand: 'Bestandsanlagen',
   score_eigendaten: 'Eigene Daten',
@@ -47,6 +48,7 @@ export const SPACE_FINDER_SCORE_GROUPS: {
     criteria: ['score_hangneigung'],
     modifiers: [
       'score_vegetation',
+      'score_versiegelung',
       'score_platz',
       'score_kreuzung',
       'score_parken',

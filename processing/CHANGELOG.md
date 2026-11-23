@@ -4,6 +4,12 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-11
 
+### `sealing` (new weekend topic)
+
+- New processing-only table `_sealing_surfaces` (SRID 5243, one row per OSM object, no map layer) for the Flächenfinder sealed-share score: `sealing_group` (`A` sealed, `A2` grass pavers, `B` sealed by type, `D` unsealed, `tree`), `surface_explicit`, `surface`, `highway`, `width_m` / `width_source` (lines), `crown_m` / `crown_source` (tree points). Weekend (Saturday run), also on demand with `PROCESS_ONLY_TOPICS=sealing`.
+- Sources: footways, cycleways, paths, pedestrian and living streets, pedestrian/footway/cycleway areas, squares, surface car parks, unsealed land cover types (`natural`, `landuse`, `leisure`) and trees (`natural=tree`, `natural=tree_row`). A known `surface` tag decides the group over the type default. Bridges, tunnels, covered, indoor and lifecycle objects are left out.
+- The weekend tag filter has new expressions for highway lines, trees, `area=yes`, `area:highway`, `place=square`, `amenity=parking` and `natural=*` areas. The weekend PBF is bigger, so `landcover` reads it too.
+
 ### `entrances` (new nightly topic), `_buildings`
 
 - New table `entrances` (map layer „Eingänge"): building entrances (`entrance=*`) and subway entrances (`railway=subway_entrance`, not `disused=yes`) in one table, with `category` = `building` or `public_transport`. Nightly. It replaces `buildingEntrances` (weekend, `landcover`) and `_publicTransport_entrances` (nightly, `publicTransport`).

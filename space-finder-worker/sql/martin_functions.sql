@@ -65,6 +65,8 @@ BEGIN
             score_bestand,
             score_eigendaten,
             score_bewohnerbedarf,
+            score_versiegelung,
+            versiegelung_anteil_pct,
             cluster_area_m2,
             eignungsklasse,
             gebaeude,

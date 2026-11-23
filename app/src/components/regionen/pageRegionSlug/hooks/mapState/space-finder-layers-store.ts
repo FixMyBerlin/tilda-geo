@@ -19,7 +19,7 @@ type SpaceFinderLayersStore = {
   /**
    * MapLibre attribution string for the active variant's CIR source.
    * Set by `SpaceFinderBody`. Null when no vegetation source applies
-   * (`w_vegetation` = 0 or study area outside known CIR coverage).
+   * (`w_vegetation` and `w_versiegelung` = 0 or study area outside known CIR coverage).
    * Passed to the vegetation `<Source>` so MapLibre's AttributionControl shows it
    * whenever the vegetation layer is visible.
    */

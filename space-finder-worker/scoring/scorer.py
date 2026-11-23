@@ -24,6 +24,7 @@ from .geometry import (
     weighted_proximity_sum,
 )
 from .carriageways import compute_tempo30_carriageways
+from .sealing import compute_sealed_share, sealing_bonus_factor
 from .tilda import TildaLoader
 
 
@@ -44,7 +45,7 @@ _SCORE_COLS = [
     "score_radweg", "score_zielorte",
     "score_hangneigung", "score_oepnv", "score_vegetation",
     "score_kreuzung", "score_parken", "score_tempo30", "score_platz", "score_fussgaengerzone",
-    "score_bestand", "score_eigendaten", "score_bewohnerbedarf",
+    "score_bestand", "score_eigendaten", "score_bewohnerbedarf", "score_versiegelung",
 ]
 
 # Classification thresholds for eignungsklasse (shared by run_flaechenfinder
@@ -154,10 +155,10 @@ def assign_clusters(hex_proj: gpd.GeoDataFrame, min_score: float) -> gpd.GeoData
 # The 14 domain steps of a run, in order. Used both for the log output and (via
 # progress_cb) for the progress display in the UI, so the names (German UI labels)
 # must match the step list in the frontend (SpaceFinderRunSteps.tsx). Step 1
-# ("Vegetationsflächen berechnen") and step 14 ("Ergebnisse speichern") run outside
+# ("Vegetationsflächen berechnen") and step 15 ("Ergebnisse speichern") run outside
 # run_flaechenfinder() in the worker (worker.py); numbering here therefore starts at 2.
 # Intersections (7) and car parking areas (8) are separate, visible loading steps –
-# only the bonus derivation itself happens later in the MCE step (13).
+# only the bonus derivation itself happens later in the MCE step (14).
 SCORING_STEPS = [
     "Vegetationsflächen berechnen",
     "H3-Gitter generieren",
@@ -170,6 +171,7 @@ SCORING_STEPS = [
     "Zielorte laden",
     "Hangneigung berechnen",
     "Vegetationsabdeckung verschneiden",
+    "Versiegelung verschneiden",
     "Eigene Daten verschneiden",
     "MCE-Score berechnen",
     "Ergebnisse speichern",
@@ -229,6 +231,7 @@ BEBAUUNG_MODIFIER_KEYS = (
     "w_parken",
     "w_platz",
     "w_tempo30",
+    "w_versiegelung",
 )
 
 
@@ -372,9 +375,11 @@ def run_flaechenfinder(
     osm_loader=None,
     vegetation_gdf=None,
     carriageway_gdf=None,
+    sealing_carriageway_gdf=None,
     user_datasets=None,
     eigendaten_weights=None,
     progress_cb=None,
+    data_notes=None,
 ):
     """Computes the H3 scoring grid with an MCE score per hexagon.
 
@@ -391,10 +396,17 @@ def run_flaechenfinder(
     buildability exclusion; the worker renders the map layer directly from the
     same GeoDataFrame (see `results.py`).
 
+    `sealing_carriageway_gdf` (optional, like `carriageway_gdf`) holds the same road
+    surfaces for the sealing bonus, also when the carriageways are not excluded
+    (they then count as sealed ground, otherwise they are deducted).
+
+    `data_notes` (optional list) collects run-level notes about missing data
+    sources as `{"factor": …, "reason": …}`; the worker stores them on the run.
+
     `progress_cb` (optional) is called before each step run here
-    (step:int 2..13, total:int, label:str) so the worker can pass the current step
+    (step:int 2..14, total:int, label:str) so the worker can pass the current step
     on to the UI. The worker reports step 1 ("Vegetationsflächen berechnen") and
-    step 14 ("Ergebnisse speichern") itself, outside this function.
+    step 15 ("Ergebnisse speichern") itself, outside this function.
     """
 
     def _step(n: int):
@@ -529,7 +541,7 @@ def run_flaechenfinder(
     # building loaded in step 4 within CENSUS_BUILDING_TOLERANCE_M
     # (`_census_demand_sources`). The result is
     # the weighted neighborhood sum `bewohner_ew`: residents, decreasing linearly with
-    # distance. The bonus derivation happens in the MCE step (13). Loaded only with
+    # distance. The bonus derivation happens in the MCE step (14). Loaded only with
     # weight > 0; otherwise `bewohner_ew` stays NaN (→ score_bewohnerbedarf NaN → DB NULL).
     _step(5)
     hex_proj["bewohner_ew"] = np.nan
@@ -626,7 +638,7 @@ def run_flaechenfinder(
     # ── 7. Load intersections ─────────────────────────────────────
     # Curb corners for the intersection bonus. Run the (expensive) PostGIS query only
     # with weight > 0; otherwise mark abstand_kreuzung_m as NaN. The bonus itself is
-    # derived from this distance in the MCE step (13).
+    # derived from this distance in the MCE step (14).
     _step(7)
     if (use_case.weights.get("w_intersection", 0) or 0) > 0:
         corners = tilda_loader.load_intersection_corners(study_area_geom)
@@ -638,7 +650,7 @@ def run_flaechenfinder(
 
     # Pedestrian zone corners (street × pedestrian zone) – same corner mechanism, but
     # own loader/weight. Run the PostGIS query only with weight > 0.
-    # Bonus derivation also in the MCE step (13).
+    # Bonus derivation also in the MCE step (14).
     if (use_case.weights.get("w_fussgaengerzone", 0) or 0) > 0:
         fussgz = tilda_loader.load_pedestrian_intersection_corners(study_area_geom)
         fussgz_proj = fussgz.to_crs("EPSG:25832") if len(fussgz) else fussgz
@@ -649,7 +661,7 @@ def run_flaechenfinder(
 
     # ── 8. Load car parking areas ─────────────────────────────────
     # Car parking areas for the conversion bonus. Load only with weight > 0; otherwise
-    # mark abstand_parken_m as NaN. Bonus derivation in the MCE step (13).
+    # mark abstand_parken_m as NaN. Bonus derivation in the MCE step (14).
     _step(8)
     if (use_case.weights.get("w_parken", 0) or 0) > 0:
         parken = tilda_loader.load_car_parking(study_area_geom)
@@ -674,7 +686,7 @@ def run_flaechenfinder(
 
     # Squares (place=square) for the square bonus/penalty – same area distance
     # mechanism as parking, but own loader/weight.
-    # Load only with weight > 0. Effect derivation also in the MCE step (13).
+    # Load only with weight > 0. Effect derivation also in the MCE step (14).
     if (use_case.weights.get("w_platz", 0) or 0) > 0:
         platz = tilda_loader.load_squares(study_area_geom)
         platz_proj = platz.to_crs("EPSG:25832") if len(platz) else platz
@@ -691,7 +703,7 @@ def run_flaechenfinder(
     # per-category weighting via `zielort_category_shares`), then the weighted
     # neighborhood sum `ziel_praesenz` (number of reachable target buildings,
     # decreasing linearly with distance). The bonus derivation happens in the MCE
-    # step (13). Loaded only with weight > 0; otherwise `ziel_praesenz` stays NaN
+    # step (14). Loaded only with weight > 0; otherwise `ziel_praesenz` stays NaN
     # (→ score_zielorte NaN → DB NULL).
     _step(9)
     hex_proj["ziel_praesenz"] = np.nan
@@ -761,12 +773,41 @@ def run_flaechenfinder(
             del hexes
         del veg_proj
 
-    # ── 12. Intersect user data ("Eigene Daten") ─────────────────
+    # ── 12. Intersect sealed ground ("Versiegelung") ────────────────
+    # Share of sealed ground per hexagon from OSM (public._sealing_surfaces), see
+    # scoring/sealing.py (no aerial image). Only with weight > 0. A missing table (topic never ran
+    # on this server) or a failed query leaves the factor NaN and adds a data
+    # note – an empty table means nothing is mapped there (share 0).
+    _step(12)
+    hex_proj["versiegelung_anteil_pct"] = np.nan
+    w_vers = use_case.weights.get("w_versiegelung", 0) or 0
+    if w_vers > 0:
+        try:
+            surfaces = tilda_loader.load_sealing_surfaces(study_area_geom)
+        except Exception as e:
+            print(f"   ⚠️  Sealing query failed: {e}")
+            surfaces = None
+            if data_notes is not None:
+                data_notes.append({"factor": "versiegelung", "reason": "abfrage_fehlgeschlagen"})
+        else:
+            if surfaces is None and data_notes is not None:
+                data_notes.append({"factor": "versiegelung", "reason": "tabelle_fehlt"})
+        if surfaces is not None:
+            share = compute_sealed_share(
+                hex_proj.geometry,
+                surfaces,
+                carriageways=sealing_carriageway_gdf,
+                carriageways_sealed=not use_case.exclude_carriageways,
+            )
+            hex_proj["versiegelung_anteil_pct"] = np.round(share * 100.0, 1)
+        del surfaces
+
+    # ── 13. Intersect user data ("Eigene Daten") ─────────────────
     # User uploads (factorConfig.user_datasets): per dataset, points/lines are buffered
     # (1.5 m / 2.5 m), polygons stay unchanged; distance per hexagon to the dataset's union.
     # The actual score/exclusion derivation happens in the MCE step. Without datasets
     # `eigendaten_distances` stays empty (→ factor has no effect).
-    _step(12)
+    _step(13)
     eigendaten_distances: dict[str, pd.Series] = {}
     for _dataset in user_datasets or []:
         _ds_id = _dataset.get("id")
@@ -787,8 +828,8 @@ def run_flaechenfinder(
             del user_proj
         del user_gdf
 
-    # ── 13. MCE scoring ────────────────────────────────────────────
-    _step(13)
+    # ── 14. MCE scoring ────────────────────────────────────────────
+    _step(14)
     w = use_case.weights
 
     # Missing elevation (NaN slope, see dem.py) stays NaN: without this check the
@@ -978,6 +1019,24 @@ def run_flaechenfinder(
         hex_proj["score_platz"] = np.nan
         platz_delta = 0.0
 
+    # ── Sealed ground bonus ("Versiegelung") ────────────────────────────────
+    # `w_versiegelung` (0–1) is the maximum bonus in points (× 100), reached once the
+    # sealed share from step 12 hits `versiegelung_saettigung_pct` (default 50 %);
+    # below it the bonus rises linearly (sealing.sealing_bonus_factor).
+    # A buildability modifier (firm ground, no unsealing needed). Without weight,
+    # or when the data source is missing (share NaN), `score_versiegelung` stays
+    # NaN (→ DB NULL) and adds nothing.
+    w_vers = w.get("w_versiegelung", 0) or 0
+    if w_vers > 0:
+        versiegelung_score = (w_vers * 100.0) * sealing_bonus_factor(
+            hex_proj["versiegelung_anteil_pct"], use_case.versiegelung_saettigung_pct
+        )
+        hex_proj["score_versiegelung"] = versiegelung_score.round(1)
+        versiegelung_delta = versiegelung_score.fillna(0.0)
+    else:
+        hex_proj["score_versiegelung"] = np.nan
+        versiegelung_delta = 0.0
+
     # ── Pedestrian zone bonus: bonus at street × pedestrian zone corners ───
     # Where one of the usual street categories meets a pedestrian zone, demand is
     # particularly high. Same curb corner mechanism and distance ramp as the
@@ -1102,7 +1161,7 @@ def run_flaechenfinder(
         bestand_delta = 0.0
 
     # ── User data ("Eigene Daten"): soft modifier OR hard exclusion ──────
-    # Each dataset carries its mode; the distances from step 12 are already buffered
+    # Each dataset carries its mode; the distances from step 13 are already buffered
     # (points/lines) or exact (polygons) – a hexagon counts as "inside" when its
     # distance to the dataset's union is 0 (see `eigendaten.combine_eigendaten`).
     #   bonus/penalty    → full bonus/penalty inside, 0 outside; strength per dataset
@@ -1140,6 +1199,7 @@ def run_flaechenfinder(
     # therefore behave differently on their next recalculation.
     total = (
         base_score + veg_delta + kreuz_delta + parken_delta + tempo30_delta + platz_delta
+        + versiegelung_delta
         + fussgz_delta + bewohner_delta + ziel_delta + bestand_delta + eigendaten_delta
     )
     # Clamp the total score to [0, 100] – it must never drop below 0.
@@ -1153,7 +1213,8 @@ def run_flaechenfinder(
     #       public transport (w_transit), target locations (w_target) + modifiers
     #       pedestrian zones (bonus), resident demand (bonus) and existing parking (penalty)
     #   Buildability ("Bebauung", "can build here") → slope (w_slope)
-    #       + modifiers vegetation, intersections, parking, Tempo 30, squares; hard exclusions.
+    #       + modifiers vegetation, intersections, parking, Tempo 30, squares, sealed
+    #       ground; hard exclusions.
     # Each group is divided by the sum of its active weights (the same `_group_score`
     # as for the base score above) so the sub-score stays 0–100 regardless of the
     # weight distribution. As soon as one modifier of a group is weighted, its base
@@ -1174,6 +1235,7 @@ def run_flaechenfinder(
     )
     score_bebauung = (
         base_bebauung + veg_delta + kreuz_delta + parken_delta + tempo30_delta + platz_delta
+        + versiegelung_delta
     ).clip(lower=0.0, upper=100.0)
 
     hex_proj["score_bedarf"] = score_bedarf.round(1)

@@ -49,6 +49,23 @@ describe('parseVariantFactorConfig', () => {
     expect(parseVariantFactorConfig([1, 2])).toEqual({})
   })
 
+  it('accepts the Versiegelung weight within 0–1 only', () => {
+    expect(VariantFactorConfigSchema.safeParse({ weights: { w_versiegelung: 0.3 } }).success).toBe(
+      true,
+    )
+    expect(VariantFactorConfigSchema.safeParse({ weights: { w_versiegelung: 1.5 } }).success).toBe(
+      false,
+    )
+  })
+
+  it('accepts the Versiegelung saturation within 1–100 % only', () => {
+    const parse = (pct: number) =>
+      VariantFactorConfigSchema.safeParse({ versiegelung_saettigung_pct: pct }).success
+    expect(parse(50)).toBe(true)
+    expect(parse(0)).toBe(false)
+    expect(parse(120)).toBe(false)
+  })
+
   it('leaves the input schema strict', () => {
     expect(VariantFactorConfigSchema.safeParse(oldStored).success).toBe(false)
   })

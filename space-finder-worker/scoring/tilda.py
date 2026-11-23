@@ -125,6 +125,11 @@ class TildaLoader:
             print(f"   ⚠️  Road query failed: {e}")
             return gpd.GeoDataFrame(geometry=[], crs="EPSG:4326")
 
+    def load_sealing_surfaces(self, study_area_geom: BaseGeometry) -> gpd.GeoDataFrame | None:
+        """OSM input for the sealing bonus. None = table missing (see PostgisLoader);
+        errors are not swallowed here either, so a broken query fails visibly."""
+        return self._loader.load_sealing_surfaces(study_area_geom)
+
     @staticmethod
     def score_cycleway_proximity(dist_m: float, max_dist_m: float) -> float:
         """0–100: < 20 m → 100, linear down to 0 at max_dist_m, 0 beyond."""

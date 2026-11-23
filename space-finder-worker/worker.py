@@ -61,6 +61,12 @@ def _study_area_from_config(cfg: dict):
 _VEGETATION_REUSE_CANDIDATES = 5
 
 
+def vegetation_needed(weights: dict) -> bool:
+    """The aerial-image vegetation phase only runs when vegetation is weighted
+    (the sealing bonus works from OSM alone)."""
+    return (weights.get("w_vegetation", 0) or 0) > 0
+
+
 def _find_reusable_vegetation(conn, engine, variant_id: int, current_run_id: int, study_area):
     """Among the latest runs of the same variant, find one with an identical study
     area in which vegetation was actually computed, and load its
@@ -79,7 +85,7 @@ def _find_reusable_vegetation(conn, engine, variant_id: int, current_run_id: int
         candidates = cur.fetchall()
 
     for prev_run_id, snapshot in candidates:
-        if not ((snapshot.get("weights") or {}).get("w_vegetation", 0) or 0):
+        if not vegetation_needed(snapshot.get("weights") or {}):
             continue  # vegetation was not computed in this run
         try:
             prev_study_area = _study_area_from_config(snapshot)
@@ -238,7 +244,10 @@ def process_job(conn, engine, job_id: int, variant_id: int):
 
     cir_source = None
     veg_phase_ran = False
-    if not (use_case.weights.get("w_vegetation", 0) or 0):
+    # Run-level notes about missing data sources ({"factor", "reason"}), stored on
+    # the run (SpaceFinderRun.dataNotes) and shown in the app.
+    data_notes: list[dict] = []
+    if not vegetation_needed(use_case.weights):
         print("   ℹ️  w_vegetation=0 – vegetation computation skipped")
         vegetation = None
         set_progress(conn, job_id, VEG_SKIPPED_PCT, step1_label)
@@ -247,6 +256,7 @@ def process_job(conn, engine, job_id: int, variant_id: int):
         if cir_source is None:
             print("   ℹ️  No CIR source for this area – vegetation skipped")
             vegetation = None
+            data_notes.append({"factor": "vegetation", "reason": "keine_luftbildquelle"})
             set_progress(conn, job_id, VEG_SKIPPED_PCT, step1_label)
         else:
             try:
@@ -268,21 +278,31 @@ def process_job(conn, engine, job_id: int, variant_id: int):
                 except Exception as e:
                     print(f"   ⚠️  Vegetation computation failed: {e}")
                     vegetation = None
+                    data_notes.append({"factor": "vegetation", "reason": "luftbild_fehlgeschlagen"})
                 set_progress(conn, job_id, VEG_RANGE[1], step1_label)
 
     # "Fahrbahnen ausschließen" (checkbox, not a scoring step of its own): load and
     # buffer roads once, so the same GeoDataFrame serves both the hard exclusion
     # (run_flaechenfinder) and the map display (scenario_carriageways), like
     # vegetation above.
+    # The sealing bonus needs the same road surfaces also when they are not
+    # excluded (then they count as sealed ground); the exclusion and the map
+    # layer still only get them with the checkbox on.
     carriageways = None
-    if use_case.exclude_carriageways:
+    sealing_carriageways = None
+    sealing_weighted = (use_case.weights.get("w_versiegelung", 0) or 0) > 0
+    if use_case.exclude_carriageways or sealing_weighted:
         try:
-            carriageways = compute_carriageway_areas(study_area, tilda_loader)
+            road_areas = compute_carriageway_areas(study_area, tilda_loader)
         except Exception as e:
             print(f"   ⚠️  Carriageway computation failed: {e}")
-            carriageways = None
+            road_areas = None
+        if use_case.exclude_carriageways:
+            carriageways = road_areas
+        if sealing_weighted:
+            sealing_carriageways = road_areas
 
-    # Map steps 2–11 (scoring in run_flaechenfinder) onto the remaining budget up
+    # Map steps 2–14 (scoring in run_flaechenfinder) onto the remaining budget up
     # to SCORING_END: 72–90 % if the vegetation phase ran, otherwise 3–90 %. Pass
     # the name to the app as progressLabel in the format "n/total · Name", so the
     # frontend can highlight the current step in the step list.
@@ -304,9 +324,11 @@ def process_job(conn, engine, job_id: int, variant_id: int):
         osm_loader=loader,
         vegetation_gdf=vegetation,
         carriageway_gdf=carriageways,
+        sealing_carriageway_gdf=sealing_carriageways,
         user_datasets=cfg.get("user_datasets"),
         eigendaten_weights=cfg.get("eigendaten_weights"),
         progress_cb=_scoring_progress,
+        data_notes=data_notes,
     )
 
     # Coarse aggregate grid for low zoom levels (z < 16). Pure post-processing
@@ -317,10 +339,11 @@ def process_job(conn, engine, job_id: int, variant_id: int):
     hex_count, veg_count, _carriageway_count = write_results(
         engine, conn, run_id, hex_proj, vegetation, carriageways, hex_agg=hex_agg
     )
-    del hex_proj, hex_agg, vegetation, carriageways
+    del hex_proj, hex_agg, vegetation, carriageways, sealing_carriageways
     gc.collect()
     set_progress(conn, job_id, 100, "Fertig")
 
+    _save_data_notes(conn, run_id, data_notes)
     run_status = "COMPLETE" if hex_count > 0 else "EMPTY"
     with conn.cursor() as cur:
         cur.execute(
@@ -338,6 +361,21 @@ def process_job(conn, engine, job_id: int, variant_id: int):
             (run_id, job_id),
         )
     print(f"=== Job {job_id} DONE (run_id={run_id}) ===")
+
+
+def _save_data_notes(conn, run_id: int, data_notes: list[dict]) -> None:
+    """Stores the run's data notes (NULL when there are none). Kept separate so a
+    database without the migrated column only loses the notes, not the run."""
+    if data_notes:
+        print(f"   ℹ️  Data notes: {data_notes}")
+    try:
+        with conn.cursor() as cur:
+            cur.execute(
+                'UPDATE prisma."SpaceFinderRun" SET "dataNotes"=%s WHERE id=%s',
+                (Jsonb(data_notes) if data_notes else None, run_id),
+            )
+    except Exception as e:
+        print(f"   ⚠️  Could not save data notes: {e}")
 
 
 def fail_job(conn, job_id: int, message: str):

@@ -313,6 +313,43 @@ class PostgisLoader:
             print(f"   ⚠️  PostGIS query _parking_intersection_corners (pedestrian zone) failed: {e}")
             return _empty("EPSG:4326")
 
+    def load_sealing_surfaces(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame | None:
+        """OSM input for the sealing bonus from `public._sealing_surfaces`
+        (processing topic `sealing`, see processing/topics/sealing).
+
+        Returns None when the table does not exist (topic never ran on this
+        server) – unlike the other loaders, which return an empty frame. The
+        caller then leaves the factor NaN and adds a data note to the run,
+        instead of scoring "nothing sealed anywhere". An existing but empty
+        table returns an empty frame (= nothing mapped there, share 0).
+        Query errors are raised, not swallowed.
+
+        The SRID is read from the table itself (Find_SRID). Returned in EPSG:4326.
+        """
+        exists = pd.read_sql(
+            "SELECT to_regclass('public._sealing_surfaces') IS NOT NULL AS ok", self.engine
+        ).iloc[0]["ok"]
+        if not exists:
+            print("   ⚠️  public._sealing_surfaces missing (processing topic 'sealing' has not run)")
+            return None
+        wkt = polygon_4326.wkt
+        sql = f"""
+            SELECT sealing_group, surface_explicit, highway, width_m, crown_m,
+                   -- via jsonb: tables processed before `offset_m` existed still load
+                   (to_jsonb(s) ->> 'offset_m')::real AS offset_m,
+                   ST_Transform(geom, 4326) AS geom
+            FROM public."_sealing_surfaces" s
+            WHERE geom && ST_Transform(
+                ST_GeomFromText('{wkt}', 4326),
+                Find_SRID('public', '_sealing_surfaces', 'geom')
+            )
+        """
+        gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
+        if gdf.crs is None:
+            gdf = gdf.set_crs("EPSG:4326")
+        print(f"   ✓ PostGIS: {len(gdf)} features from public._sealing_surfaces")
+        return gdf
+
     def _has_parking_roads(self) -> bool:
         """Whether `public._parking_roads` exists (only where the parking topic ran)."""
         try:

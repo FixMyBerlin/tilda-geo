@@ -14,6 +14,7 @@ export const topicIds = [
   'barriers',
   'entrances',
   'landcover',
+  'sealing',
   'parking',
   // (oxlint: one line per entry)
 ] as const
@@ -33,5 +34,6 @@ export const topicScheduleById = {
   barriers: 'nightly',
   entrances: 'nightly',
   landcover: 'weekend',
+  sealing: 'weekend',
   parking: 'nightly',
 } as const satisfies Record<TopicId, TopicSchedule>

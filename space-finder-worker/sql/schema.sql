@@ -73,6 +73,14 @@ ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS score_eigend
 -- NULL when the factor (w_bewohnerbedarf) is not weighted.
 ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS score_bewohnerbedarf real;
 
+-- Versiegelung (sealed ground bonus): points from the sealed share of the hexagon
+-- (OSM surfaces from public._sealing_surfaces minus aerial-image green, see
+-- scoring/sealing.py); NULL when the factor (w_versiegelung) is not weighted or the
+-- OSM source table is missing. `versiegelung_anteil_pct` is the share itself
+-- (0–100), only on the fine grid (res 13).
+ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS score_versiegelung real;
+ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS versiegelung_anteil_pct real;
+
 -- Area clusters (connected-component labeling over H3 neighborhood): total
 -- area of the contiguous area a hexagon belongs to (only cells with
 -- mce_gesamtscore >= min_score_threshold; otherwise NULL). The client filters on it

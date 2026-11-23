@@ -44,6 +44,9 @@ const config = [
   // (dissolved into public._settlement_areas by landcover.sql) and `_buildings`. Also runnable on
   // demand with PROCESS_ONLY_TOPICS=landcover.
   { id: 'landcover', bboxes: null, schedule: 'weekend' },
+  // Weekend: produces the processing-only `_sealing_surfaces` (OSM input of the Flächenfinder
+  // sealed-share score per H3 hexagon). Also runnable on demand with PROCESS_ONLY_TOPICS=sealing.
+  { id: 'sealing', bboxes: null, schedule: 'weekend' },
   {
     id: 'parking',
     bboxes: [bboxBerlin, bboxBiBi, bboxLoerrach, bboxFriedberg, bboxMuenchen],

@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 
-// The 14 domain steps of a run, in order. Must match SCORING_STEPS in the
+// The 15 domain steps of a run, in order. Must match SCORING_STEPS in the
 // space-finder-worker (scoring/scorer.py).
 const SCORING_STEPS = [
   'Vegetationsflächen berechnen',
@@ -15,6 +15,7 @@ const SCORING_STEPS = [
   'Zielorte laden',
   'Hangneigung berechnen',
   'Vegetationsabdeckung verschneiden',
+  'Versiegelung verschneiden',
   'Eigene Daten verschneiden',
   'MCE-Score berechnen',
   'Ergebnisse speichern',
@@ -25,7 +26,7 @@ const SCORING_STEPS = [
 // A step counts as "without weight" if ALL listed weights are 0.
 // Step 4 loads buildings (hard exclusion, always runs, no weight).
 const STEP_WEIGHT_KEYS: string[][] = [
-  ['w_vegetation'], //  1 Vegetationsflächen berechnen
+  ['w_vegetation'], //  1 Vegetationsflächen berechnen (Luftbild-Phase)
   [], //                2 H3-Gitter generieren
   ['w_cyclepath'], //   3 Radwege laden
   [], //                    4 Gebäude laden
@@ -36,18 +37,19 @@ const STEP_WEIGHT_KEYS: string[][] = [
   ['w_target'], //          9 Zielorte laden
   ['w_slope'], //           10 Hangneigung berechnen
   ['w_vegetation'], //      11 Vegetationsabdeckung verschneiden
-  ['w_eigendaten'], //      12 Eigene Daten verschneiden (special case, see stepDisplay)
-  [], //                    13 MCE-Score berechnen
-  [], //                    14 Ergebnisse speichern
+  ['w_versiegelung'], //    12 Versiegelung verschneiden
+  ['w_eigendaten'], //      13 Eigene Daten verschneiden (special case, see stepDisplay)
+  [], //                    14 MCE-Score berechnen
+  [], //                    15 Ergebnisse speichern
 ]
 
 // 0-based index of the user datasets step: runs as soon as the area has datasets,
 // otherwise it is skipped.
-const USER_DATASETS_STEP_INDEX = 11
+const USER_DATASETS_STEP_INDEX = 12
 
-// The collapsible block groups all factor steps (1-based step numbers 3–12).
-// Steps 1/2 (vegetation pre-phase, H3) and 13/14 (MCE, save) stay top-level.
-const LOAD_GROUP = { firstStep: 3, lastStep: 12, label: 'Eingangsdaten & Faktoren' }
+// The collapsible block groups all factor steps (1-based step numbers 3–13).
+// Steps 1/2 (vegetation pre-phase, H3) and 14/15 (MCE, save) stay top-level.
+const LOAD_GROUP = { firstStep: 3, lastStep: 13, label: 'Eingangsdaten & Faktoren' }
 
 type StepDisplay = {
   done: boolean
@@ -219,7 +221,7 @@ const CollapsibleStepGroup = ({
 
 /**
  * Checklist of the scoring steps, highlighting the current step. The factor
- * steps (3–12) are grouped in a collapsible block. `weights` (the scenario's
+ * steps (3–13) are grouped in a collapsible block. `weights` (the scenario's
  * factor weights) marks a step with weight 0 as "übersprungen".
  */
 export const SpaceFinderRunSteps = ({

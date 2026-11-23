@@ -891,6 +891,7 @@ model SpaceFinderRun {
   hexCount             Int?
   vegCount             Int?
   cirAttribution       String?
+  dataNotes            Json? // [{ factor, reason }] run-level notes of the worker, see spaceFinderDataNotes.ts
   //
   job                  SpaceFinderJob?
 

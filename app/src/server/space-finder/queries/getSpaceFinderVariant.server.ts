@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { StoredUserDatasetsSchema } from '@/lib/spaceFinderUserGeojson'
 import db from '@/server/db.server'
+import { parseSpaceFinderDataNotes } from '@/shared/regionen/spaceFinderDataNotes'
 import { authorizeSpaceFinderVariant } from '../authorizeSpaceFinderRegion.server'
 import { ensureAreaCensusStats } from '../censusSaettigung.server'
 import { parseFactorConfigSnapshot, parseVariantFactorConfig } from '../factorConfigSchema'
@@ -40,6 +41,7 @@ export async function getSpaceFinderVariant(
           stale: true,
           createdAt: true,
           cirAttribution: true,
+          dataNotes: true,
           factorConfigSnapshot: true,
         },
       },
@@ -71,6 +73,7 @@ export async function getSpaceFinderVariant(
     runs: variant.runs.map((run) => ({
       ...run,
       factorConfigSnapshot: parseFactorConfigSnapshot(run.factorConfigSnapshot),
+      dataNotes: parseSpaceFinderDataNotes(run.dataNotes),
     })),
   }
 }

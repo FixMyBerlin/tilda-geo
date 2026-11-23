@@ -22,6 +22,8 @@ export type VariantFactorConfig = {
   bestand_default_diameter_m?: number
   bewohnerbedarf_radius_m?: number
   bewohnerbedarf_saettigung_ew?: number
+  /** Sealed share of a hexagon (%) from which the sealed ground bonus is full (default 50). */
+  versiegelung_saettigung_pct?: number
   /** Ratio of the four target location categories in percent (sum 100) — only applies within
    * the factor `w_target`, see `zielortShares.ts` and `scorer.py`. If the field is missing
    * (variants from before category weighting), an equal split applies. */
