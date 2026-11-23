@@ -10,7 +10,7 @@ Use this skill when adding or editing topic-docs YAML.
 
 ## Primary reference
 
-- Read `topic-docs/README.md` first.
+- Read `topic-docs/README.md` first, above all the section **Audience**: topic docs explain the published data to its readers. No OSM tagging lessons, no processing details, no wrong-tagging cases.
 
 ## Source of truth for edge cases
 
@@ -24,8 +24,9 @@ If anything is unclear or conflicting, follow code validation/build behavior in:
 1. Identify the target table file in `topic-docs/<topic>/<tableName>.yaml`.
 2. Apply the field and combination rules from `topic-docs/README.md`.
 3. For `ref` and `valuesRef`, ensure pointers use `<tableName>.<attributeKey>` and targets exist.
-4. Keep docs human-readable (`label`/`description`) unless `format: ignore` is intentional.
-5. Verify changes from `app/`:
+4. Check every new text against **Audience** in `topic-docs/README.md`: does a reader of the published data need it? If not, leave it out.
+5. Keep docs human-readable (`label`/`description`) unless `format: ignore` is intentional.
+6. Verify changes from `app/`:
    - `bun run topic-docs-build`
    - Optional: `bun run topic-docs-coverage-check -- --table <tableName>`
 

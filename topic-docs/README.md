@@ -9,6 +9,17 @@ Canonical validation and build logic:
 
 If this guide and code ever differ, the code is authoritative.
 
+## Audience
+
+Topic docs explain the **published TILDA data** to the people who read it: planners, analysts, users of the downloads and the inspector. They are not OSM documentation and not processing documentation.
+
+- Describe what an attribute or value means in the data, as the reader sees it: one geometry, its attributes, their values. Example: `separation_left` gets the description "left of the bikelane in riding direction". Explain how OSM tags this or how processing derives it only when the reader needs it to use the value correctly, and then in one sentence.
+- Never document wrong tagging, data errors, cleanup work or corrections that are in progress. They belong in tickets and in `processing/CHANGELOG.md`.
+- Do not explain processing steps, helpers, tag fallbacks or edge cases of the Lua code. The changelog records what changed and why.
+- Prefer a `description` on the attribute or value over a chapter. Add a chapter only when several attributes share a concept a reader cannot understand from the attribute descriptions alone (e.g. `versetzte-geometrien`, `routen`).
+- Do not add docs only because the processing changed. If the meaning of a published value is the same, the topic docs stay as they are.
+- Write short German sentences for people who do not map in OSM. OSM keys in backticks are fine where the reader sees them in the data.
+
 ## File layout
 
 `topic-docs/` uses three relevant file types:
