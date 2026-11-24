@@ -123,6 +123,9 @@ CREATE TABLE IF NOT EXISTS space_finder.scenario_vegetation (
   ndvi       real,
   flaeche_m2 real
 );
+-- NDVI threshold the areas were computed with. A later run only reuses them
+-- (worker._find_reusable_vegetation) at the same threshold; NULL = legacy rows.
+ALTER TABLE space_finder.scenario_vegetation ADD COLUMN IF NOT EXISTS ndvi_min real;
 
 -- Buffered carriageway areas (public._parking_roads, width as buffer), stored per
 -- run. Only filled when „Fahrbahnen ausschließen" was active

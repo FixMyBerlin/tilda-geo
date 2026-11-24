@@ -67,10 +67,14 @@ def vegetation_needed(weights: dict) -> bool:
     return (weights.get("w_vegetation", 0) or 0) > 0
 
 
-def _find_reusable_vegetation(conn, engine, variant_id: int, current_run_id: int, study_area):
+def _find_reusable_vegetation(
+    conn, engine, variant_id: int, current_run_id: int, study_area, ndvi_min: float
+):
     """Among the latest runs of the same variant, find one with an identical study
-    area in which vegetation was actually computed, and load its
-    `scenario_vegetation` rows. None = no match, must be recomputed.
+    area in which vegetation was actually computed with the same NDVI threshold,
+    and load its `scenario_vegetation` rows. None = no match, must be recomputed.
+    Rows from before the threshold was stored (NULL) never match, so a changed
+    threshold takes effect on the next run.
 
     Runs without stored areas don't count as a match: 0 rows in practice means
     the computation failed back then (e.g. WMS outage). Reusing them would let a
@@ -93,17 +97,19 @@ def _find_reusable_vegetation(conn, engine, variant_id: int, current_run_id: int
             continue
         if not study_area.equals(prev_study_area):
             continue
-        gdf = _load_vegetation_rows(engine, prev_run_id)
+        gdf = _load_vegetation_rows(engine, prev_run_id, ndvi_min)
         if not len(gdf):
             continue  # empty run = failed back then, don't reuse
         return gdf
     return None
 
 
-def _load_vegetation_rows(engine, run_id: int) -> gpd.GeoDataFrame:
+def _load_vegetation_rows(engine, run_id: int, ndvi_min: float) -> gpd.GeoDataFrame:
+    # `ndvi_min` is stored as real: compare with a tolerance, not with =.
     gdf = gpd.read_postgis(
-        'SELECT geom, ndvi, flaeche_m2 FROM space_finder.scenario_vegetation WHERE run_id = %(run_id)s',
-        engine, geom_col="geom", params={"run_id": run_id},
+        """SELECT geom, ndvi, flaeche_m2, ndvi_min FROM space_finder.scenario_vegetation
+           WHERE run_id = %(run_id)s AND abs(ndvi_min - %(ndvi_min)s) < 1e-6""",
+        engine, geom_col="geom", params={"run_id": run_id, "ndvi_min": ndvi_min},
     )
     if not len(gdf):
         return gpd.GeoDataFrame({"ndvi": [], "flaeche_m2": []}, geometry=[], crs="EPSG:3857")
@@ -270,7 +276,9 @@ def process_job(conn, engine, job_id: int, variant_id: int):
             )
         else:
             try:
-                vegetation = _find_reusable_vegetation(conn, engine, variant_id, run_id, study_area)
+                vegetation = _find_reusable_vegetation(
+                    conn, engine, variant_id, run_id, study_area, cir_source.ndvi_min
+                )
             except Exception as e:
                 print(f"   ⚠️  Vegetation cache lookup failed: {e}")
                 vegetation = None

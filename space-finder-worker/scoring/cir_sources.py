@@ -31,6 +31,9 @@ class CirSource:
     download_fn: Callable[[int, int, str], bool]
     # Attribution required by the license (for MapLibre AttributionControl)
     attribution: str
+    # NDVI above this counts as vegetation. Measured against OSM roofs and green
+    # areas per source (see VEGETATION.md): the BB PNGs are shifted by about +0.3.
+    ndvi_min: float = 0.1
 
 
 # ── Helper ────────────────────────────────────────────────────────────────────
@@ -154,6 +157,9 @@ SOURCE_BB = CirSource(
     cache_filename_fn=lambda e, n: f"bb_{e}_{n}.png",
     download_fn=_bb_wms_download,
     attribution="© GeoBasis-DE/LGB, dl-de/by-2-0",
+    # The WMS serves display-stretched 8-bit PNGs: roofs and asphalt reach a median
+    # NDVI of about 0.1, so 0.1 counted half of them as green.
+    ndvi_min=0.2,
 )
 
 

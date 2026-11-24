@@ -9,7 +9,7 @@ Processing:
   1. Project study area → source CRS
   2. Determine tiles (grid size per source; cache check / download)
   3. NDVI = (NIR – red) / (NIR + red) per tile
-  4. Binary mask > NDVI_MIN + morphological closing
+  4. Binary mask > source.ndvi_min + morphological closing
   5. Vectorize, simplify, drop small areas
   6. Clip to study area
 """
@@ -25,8 +25,6 @@ from shapely.geometry.base import BaseGeometry
 from scoring.cir_sources import CirSource
 
 # ── Algorithm parameters ──────────────────────────────────────────────────────
-
-NDVI_MIN = 0.1          # Threshold: above = vegetation
 
 # Morphological closing fills gaps ≤ ITER × pixel size.
 MORPH_CLOSING_ITER = 3
@@ -95,7 +93,7 @@ def _ensure_tile(
 
 
 def _verarbeite_kachel(
-    pfad: str, band_nir: int, band_red: int, tile_transform=None
+    pfad: str, band_nir: int, band_red: int, ndvi_min: float, tile_transform=None
 ) -> list[dict]:
     """Read a tile, compute NDVI and return polygon dicts (source CRS).
 
@@ -117,7 +115,7 @@ def _verarbeite_kachel(
         transform = tile_transform if tile_transform is not None else src.transform
 
         ndvi = _ndvi_array(nir, rot)
-        maske = (ndvi > NDVI_MIN).astype(np.uint8)
+        maske = (ndvi > ndvi_min).astype(np.uint8)
         maske = _closing(maske)
 
         for geom_dict, wert in shapes(maske, transform=transform):
@@ -141,7 +139,7 @@ def _verarbeite_kachel(
             ndvi_mean = (
                 float(ndvi_patch[mask_patch == 1].mean())
                 if mask_patch.any()
-                else float(NDVI_MIN)
+                else float(ndvi_min)
             )
             ergebnisse.append({"geometry": geom, "ndvi": round(ndvi_mean, 4)})
 
@@ -158,19 +156,21 @@ def compute_vegetation_areas(
     study_area_geom: BaseGeometry,
     source: CirSource,
     cir_dir: str | None = None,
-    ndvi_min: float = NDVI_MIN,
+    ndvi_min: float | None = None,
     progress_cb=None,
 ) -> gpd.GeoDataFrame:
     """Compute vegetation areas on demand for the study area.
 
     `study_area_geom` is in EPSG:4326. `source` determines the tile source, CRS
     and band layout. Returns a GeoDataFrame in `source.crs` with the columns
-    `geometry`, `ndvi`, `flaeche_m2` – clipped to the study area.
+    `geometry`, `ndvi`, `flaeche_m2`, `ndvi_min` – clipped to the study area.
+    `ndvi_min` defaults to the source's threshold; it is stored with the rows so
+    a later run only reuses areas computed with the same threshold.
 
     `progress_cb(fraction: float, label: str)` is optionally called with 0.0–1.0.
     """
-    global NDVI_MIN
-    NDVI_MIN = ndvi_min
+    if ndvi_min is None:
+        ndvi_min = source.ndvi_min
 
     cir_dir = cir_dir or os.environ.get("SPACE_FINDER_CIR_DIR", "/cir")
     os.makedirs(cir_dir, exist_ok=True)
@@ -229,7 +229,7 @@ def compute_vegetation_areas(
         px = source.pixel_size_m
         tile_transform = Affine(px, 0, e, 0, -px, n + source.tile_size_m)
         try:
-            polys = _verarbeite_kachel(pfad, source.band_nir, source.band_red, tile_transform)
+            polys = _verarbeite_kachel(pfad, source.band_nir, source.band_red, ndvi_min, tile_transform)
             for p in polys:
                 alle_geom.append(p["geometry"])
                 alle_ndvi.append(p["ndvi"])
@@ -257,6 +257,7 @@ def compute_vegetation_areas(
 
     gdf["flaeche_m2"] = gdf.geometry.area.round(2)
     gdf = gdf[gdf["flaeche_m2"] >= MIN_FLAECHE_M2].reset_index(drop=True)
+    gdf["ndvi_min"] = ndvi_min
 
     print(
         f"   ✓ {len(gdf)} vegetation areas "
