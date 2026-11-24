@@ -5263,6 +5263,30 @@ const data = {
           yes: 'Weg als informeller Weg erfasst',
         },
       },
+      tunnel: {
+        name: 'Tunnel',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          yes: 'Ja',
+        },
+      },
+      dual_carriageway: {
+        name: 'Richtungsfahrbahn',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          yes: 'Ja',
+        },
+      },
+      roundabout: {
+        name: 'Kreisverkehr',
+        condition: 'contains',
+        type: 'string',
+        format: {
+          yes: 'Ja',
+        },
+      },
       access_bicycle: {
         name: 'Zugang Radverkehr',
         condition: 'contains',

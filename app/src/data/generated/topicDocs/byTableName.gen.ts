@@ -13839,7 +13839,7 @@ const data = {
     sourceIds: [],
     title: 'Routing',
     summary:
-      'Score-free road+bike edges for routing (one row per carriageway, bike lane or path), derived from roads_bikelanes infrastructure.',
+      'Straßen, Radinfrastruktur und Wege als Grundlage für Fahrrad-Routing, mit Fahrtrichtung, Radzugang und den Angaben, die ein Router zur Bewertung braucht.',
     groups: [],
     attributes: [
       {
@@ -13847,7 +13847,7 @@ const data = {
         type: 'string',
         label: 'Bauliche Führung',
         description:
-          'TILDA-Bikelane-Kategorie (maßgebliche Klassifikation). `mixedTrafficFoot` auf Wege-Kanten (`source_table=roadsPathClasses`), wenn keine Self-Kategorie vorliegt.',
+          'TILDA-Bikelane-Kategorie (maßgebliche Klassifikation). `mixedTrafficFoot` auf Wegen (`source_table=roadsPathClasses`), wenn keine Self-Kategorie vorliegt.',
         values: [
           {
             value: 'bicycleRoad',
@@ -13960,13 +13960,13 @@ const data = {
             value: 'mixedTrafficMotor',
             label: 'Mischverkehr mit Kfz-Verkehr',
             description:
-              'Verarbeitung zugewiesen (keine OSM-Kategorie). Fahrbahn-Kante ohne bauliche Radinfrastruktur.',
+              'Verarbeitung zugewiesen (keine OSM-Kategorie). Fahrbahn ohne bauliche Radinfrastruktur.',
           },
           {
             value: 'mixedTrafficFoot',
             label: 'Mischverkehr mit Fußverkehr',
             description:
-              'Verarbeitung zugewiesen auf Wege-Kanten (`source_table=roadsPathClasses`), wenn keine Self-Bikelane-Kategorie vorliegt.',
+              'Verarbeitung zugewiesen auf Wegen (`source_table=roadsPathClasses`), wenn keine Self-Bikelane-Kategorie vorliegt.',
           },
         ],
       },
@@ -14407,7 +14407,7 @@ const data = {
         label: 'Linien-Offset',
         purpose: 'rendering',
         description:
-          'Wie `bikelanes.offset`: Geometrie bleibt auf der Mittellinie; der Wert ist nur für die Kartendarstellung (`line-offset`). Fehlt auf der Mittellinie (`self`). Sonst halbe Straßenbreite (`road_width`: OSM `width`/`est_width`, sonst Highway-Default), positiv = links, negativ = rechts der Linie. Radinfrastruktur-Kanten (`source_table=bikelanes`) haben dieselbe Linienrichtung wie `bikelanes` (Fahrtrichtung; bei beiden Richtungen links gegen und rechts mit dem OSM-Way). Fahrbahn-Kanten haben keinen Versatz. Transformierte Bikelanes übernehmen den bereits berechneten Wert.',
+          'Wie `bikelanes.offset`: Geometrie bleibt auf der Mittellinie; der Wert ist nur für die Kartendarstellung (`line-offset`). Fehlt auf der Mittellinie (`self`). Sonst halbe Straßenbreite (`road_width`: OSM `width`/`est_width`, sonst Highway-Default), positiv = links, negativ = rechts der Linie. Abschnitte der Radinfrastruktur (`source_table=bikelanes`) haben dieselbe Linienrichtung wie `bikelanes` (Fahrtrichtung; bei beiden Richtungen links gegen und rechts mit dem OSM-Way). Fahrbahnen haben keinen Versatz. Transformierte Bikelanes übernehmen den bereits berechneten Wert.',
         chapterRefs: ['versetzte-geometrien'],
         values: [],
       },
@@ -14455,7 +14455,7 @@ const data = {
         label: 'Parent-Way',
         purpose: 'processing',
         description:
-          'OSM-Parent-Way (`way/N`) für Carriageway- und Infrastruktur-Kanten. Join-Schlüssel (indiziert).',
+          'OSM-Parent-Way (`way/N`) für Fahrbahnen und Radinfrastruktur. Join-Schlüssel (indiziert).',
         values: [],
       },
       {
@@ -14464,7 +14464,7 @@ const data = {
         label: 'Quelltabelle',
         purpose: 'processing',
         description:
-          'Kantentyp und TILDA-Tabelle, aus der fachliche Attribute gejoint werden (`bikelanes`, `roads`, `roadsPathClasses`). Join-Schlüssel.',
+          'Art des Abschnitts und TILDA-Tabelle, aus der fachliche Attribute gejoint werden (`bikelanes`, `roads`, `roadsPathClasses`). Join-Schlüssel.',
         values: [
           {
             value: 'bikelanes',
@@ -14478,7 +14478,7 @@ const data = {
             value: 'roadsPathClasses',
             label: 'Wege',
             description:
-              'Join-Ziel für Wege-Kanten (Kategorie-ID der Self-Cycleway-Zeile oder mixedTrafficFoot). Jede solche Kante muss in roadsPathClasses existieren (gleicher Skip-Helper wie der Path-Writer).',
+              'Join-Ziel für Wege (Kategorie-ID der Self-Cycleway-Zeile oder mixedTrafficFoot). Jeder solche Weg muss in roadsPathClasses existieren (gleicher Skip-Helper wie der Path-Writer).',
           },
         ],
       },
@@ -14669,11 +14669,49 @@ const data = {
         ],
       },
       {
+        key: 'tunnel',
+        type: 'string',
+        label: 'Tunnel',
+        values: [
+          {
+            value: 'yes',
+            label: 'Ja',
+            description:
+              'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',
+          },
+        ],
+      },
+      {
+        key: 'dual_carriageway',
+        type: 'string',
+        label: 'Richtungsfahrbahn',
+        description:
+          '`yes`, wenn der Abschnitt zu einer Straße mit baulich getrennten Richtungsfahrbahnen gehört (ein OSM-Weg pro Fahrtrichtung). Sonst leer.',
+        values: [
+          {
+            value: 'yes',
+            label: 'Ja',
+          },
+        ],
+      },
+      {
+        key: 'roundabout',
+        type: 'string',
+        label: 'Kreisverkehr',
+        description: '`yes`, wenn der Abschnitt Teil eines Kreisverkehrs ist. Sonst leer.',
+        values: [
+          {
+            value: 'yes',
+            label: 'Ja',
+          },
+        ],
+      },
+      {
         key: 'access_bicycle',
         type: 'string',
         label: 'Zugang Radverkehr',
         description:
-          'Aufgelöster Fahrrad-Zugang (OSM-Kette `bicycle` → `vehicle` → `access`, Allowlist). Kein Roh-OSM-Wert. Leer: kein Zugangs-Tag, Radfahren ist erlaubt. Auf einer Fahrradstraße oder in einer Fahrradzone ohne eigenes `bicycle`-Tag ist der Wert `designated`: `vehicle=destination` gilt dort nur für Kfz („Anlieger frei“). Kanten mit `no`, `destination`, `private`, `customers`, `delivery`, `permit` oder `agricultural_or_forestry` sind im Graphen enthalten, Radfahren ist dort aber nicht erlaubt: Router filtern sie selbst. Auf Radinfrastruktur an der Fahrbahn-Mittellinie (`side=left`/`right`) leer.',
+          'Aufgelöster Fahrrad-Zugang (OSM-Kette `bicycle` → `vehicle` → `access`, Allowlist). Kein Roh-OSM-Wert. Leer: kein Zugangs-Tag, Radfahren ist erlaubt. Auf einer Fahrradstraße oder in einer Fahrradzone ohne eigenes `bicycle`-Tag ist der Wert `designated`: `vehicle=destination` gilt dort nur für Kfz („Anlieger frei“). Abschnitte mit `no`, `destination`, `private`, `customers`, `delivery`, `permit` oder `agricultural_or_forestry` sind im Graphen enthalten, Radfahren ist dort aber nicht erlaubt: Router filtern sie selbst. Auf Radinfrastruktur an der Fahrbahn-Mittellinie (`side=left`/`right`) leer.',
         chapterRefs: ['zugang-radverkehr'],
         values: [
           {
@@ -14692,7 +14730,7 @@ const data = {
             value: 'use_sidepath',
             label: 'Benutzungspflichtiger Radweg daneben',
             description:
-              'OSM-Wert auf der Fahrbahn. Neben der Fahrbahn liegt ein benutzungspflichtiger Radweg ([Zeichen 237 (Radweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:237), [Zeichen 240 (Gemeinsamer Geh- und Radweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:240) oder [Zeichen 241 (Getrennter Rad- und Gehweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:241)). Die Kante zählt als routbar, ein Router sollte aber den Radweg daneben bevorzugen.',
+              'OSM-Wert auf der Fahrbahn. Neben der Fahrbahn liegt ein benutzungspflichtiger Radweg ([Zeichen 237 (Radweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:237), [Zeichen 240 (Gemeinsamer Geh- und Radweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:240) oder [Zeichen 241 (Getrennter Rad- und Gehweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:241)). Die Fahrbahn zählt als routbar, ein Router sollte aber den Radweg daneben bevorzugen.',
           },
           {
             value: 'discouraged',
@@ -14705,40 +14743,42 @@ const data = {
           {
             value: 'destination',
             label: 'Anlieger frei',
-            description: 'Radfahren nicht erlaubt (Router filtern die Kante), außer für Anlieger.',
+            description:
+              'Radfahren nicht erlaubt (Router filtern den Abschnitt), außer für Anlieger.',
           },
           {
             value: 'private',
             label: 'Privat',
-            description: 'Radfahren nicht erlaubt (Router filtern die Kante).',
+            description: 'Radfahren nicht erlaubt (Router filtern den Abschnitt).',
           },
           {
             value: 'customers',
             label: 'Kunden',
-            description: 'Radfahren nicht erlaubt (Router filtern die Kante), außer für Kunden.',
+            description:
+              'Radfahren nicht erlaubt (Router filtern den Abschnitt), außer für Kunden.',
           },
           {
             value: 'delivery',
             label: 'Lieferverkehr',
             description:
-              'Radfahren nicht erlaubt (Router filtern die Kante), außer für den Lieferverkehr.',
+              'Radfahren nicht erlaubt (Router filtern den Abschnitt), außer für den Lieferverkehr.',
           },
           {
             value: 'permit',
             label: 'Mit Genehmigung',
             description:
-              'Radfahren nicht erlaubt (Router filtern die Kante), außer mit Genehmigung.',
+              'Radfahren nicht erlaubt (Router filtern den Abschnitt), außer mit Genehmigung.',
           },
           {
             value: 'agricultural_or_forestry',
             label: 'Land- und Forstwirtschaft',
             description:
-              'Radfahren nicht erlaubt (Router filtern die Kante), nur land- oder forstwirtschaftlicher Verkehr (OSM `agricultural`, `forestry` und Kombinationen).',
+              'Radfahren nicht erlaubt (Router filtern den Abschnitt), nur land- oder forstwirtschaftlicher Verkehr (OSM `agricultural`, `forestry` und Kombinationen).',
           },
           {
             value: 'no',
             label: 'Nein',
-            description: 'Radfahren nicht erlaubt (Router filtern die Kante).',
+            description: 'Radfahren nicht erlaubt (Router filtern den Abschnitt).',
           },
         ],
       },

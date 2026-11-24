@@ -4,6 +4,12 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-11
 
+### `routing`: new attributes `tunnel`, `dual_carriageway`, `roundabout`
+
+- `tunnel` is the sanitized value of `roads` / `bikelanes` (`yes`, also for `tunnel=building_passage`).
+- `dual_carriageway=yes` when the edge belongs to one carriageway of a road with separated directions (`roads.oneway=yes_dual_carriageway`).
+- `roundabout=yes` for ways with `junction=roundabout|circular`.
+
 ### `bikelanes`: `category`, `traffic_mode_left|right` – carriageway side of lanes on the road
 
 - For lanes and tracks tagged on the road (`cycleway:left|right|both`), the second left/right (`…:separation:left`, `…:traffic_mode:left`, buffer, marking) is read in the riding direction of the lane ([Key:separation](https://wiki.openstreetmap.org/wiki/Key:separation)). The carriageway is usually left of the lane, but right of it when the lane rides with its line on the left side of the way, e.g. `cycleway:left=lane` on `oneway=yes` or `cycleway:right=lane` on `oneway=-1`. Before, the carriageway was always assumed on the left.

@@ -9,11 +9,12 @@ Score-free road+bike edges for routing. Processing writes to `routing` (`roads_b
 - **`oneway_motor=yes`**: cars are one-way, bikes ride both ways (carriageway, Fahrradstraße). The line points along the car direction, so riding against it is contraflow. Routers can use this for a separate reverse cost.
 - Left/right lanes stay on the centerline and use the same line direction as `bikelanes`: lines point in the riding direction (`cycleway:<side>:oneway`; without it right with the OSM way and left against it, on a oneway road both in the road direction). Two-way lanes keep left against and right with the OSM way. `offset` is signed relative to that line (`+` left / `-` right).
 - Segments are distinguished by **`segment_id`**, **`side`**, and **`prefix`**.
+- What a row carries: everything a router or the CQI needs to judge and traverse the segment, so that consumers score and render from `routing` alone. That is direction and access, `surface`, `smoothness`, `width`, `road`, `maxspeed` and the shape of the road (`tunnel`, `dual_carriageway`, `roundabout`). `build_public_tags` decides once which value belongs to a row (the lane's own value or the road's), with the same sanitized values as the source tables. Descriptive details (names of sources, todos, Mapillary, traffic signs, …) are not copied; consumers get them via the join keys.
 - Join keys (in `tags`, like every rendering table; `parent_id` and `source_id` have expression indexes): **`parent_id`**, **`source_table`**, **`source_id`**. `source_table` is the edge type. Carriageway edges join `roads` on `way/{id}`; bikelane edges join `bikelanes` on the same id as `bikelanes.id`; path edges always join `roadsPathClasses` (category is the non-infra self cycleway id when present, else `mixedTrafficFoot`).
 
 ### Join symmetry (path edges ⊆ `roadsPathClasses`)
 
-`routing` does not copy full tags. Consumers join `source_table`/`source_id`. That only works if every emitted join key exists in the target table.
+For everything a row does not carry, consumers join `source_table`/`source_id`. That only works if every emitted join key exists in the target table.
 
 | `source_table`     | Edge                                          | Must exist in that table          |
 | ------------------ | --------------------------------------------- | --------------------------------- |

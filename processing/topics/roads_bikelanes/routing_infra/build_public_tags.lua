@@ -1,8 +1,6 @@
 local inclusion_rules = require('topics.roads_bikelanes.routing_infra.inclusion_rules')
 local CLEANER = require('topics.helper.sanitize_cleaner')
-
--- `junction` values of a roundabout (same set as the implied `oneway=yes` in `normalize_oneway_tags`)
-local ROUNDABOUT_JUNCTIONS = { roundabout = true, circular = true }
+local is_roundabout = require('topics.helper.is_roundabout')
 
 -- `segment.tags` of carriageway and path edges is the raw OSM way: the inclusion rules and the
 -- motor-road context need it, the published row must not read it. Those edges publish
@@ -36,10 +34,8 @@ local function build_public_tags(segment, motor_context, context)
     width = sanitized_tags.width,
     informal = shared_result_tags.informal,
     tunnel = sanitized_tags.tunnel,
-    -- The OSM way is one carriageway of a road with separated directions (`oneway=yes` + `dual_carriageway=yes`).
     dual_carriageway = shared_result_tags.oneway == 'yes_dual_carriageway' and 'yes' or nil,
-    -- The OSM way is part of a roundabout (`junction=roundabout|circular`).
-    roundabout = ROUNDABOUT_JUNCTIONS[context.object_tags.junction] and 'yes' or nil,
+    roundabout = is_roundabout(context.object_tags) and 'yes' or nil,
     maxspeed = motor_context.maxspeed,
     adjoining_road = motor_context.adjoining_road,
     adjoining_maxspeed = motor_context.adjoining_maxspeed,
