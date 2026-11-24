@@ -45,6 +45,7 @@ export async function processLocalSource(
       transformedFilepath,
       tempFolder,
       metaData.geometricPrecision,
+      metaData.minZoom,
     )
 
     console.log(`  Uploading PMTiles file to S3...`)

@@ -7,6 +7,7 @@ export const generatePMTilesFile = (
   inputFullFile: string,
   outputFolder: string,
   precision: Extract<MetaData, { dataSourceType: 'local' }>['geometricPrecision'],
+  minZoom: number = 7,
 ) => {
   const outputFilename = path.parse(inputFullFile).name
   const outputFullFile = path.join(outputFolder, `${outputFilename}.pmtiles`)
@@ -31,7 +32,7 @@ export const generatePMTilesFile = (
 
   console.log(
     `  Generating PMTiles file "${outputFullFile}"...`,
-    precision ? styleText('yellow', JSON.stringify({ maxZoom })) : '',
+    precision || minZoom !== 7 ? styleText('yellow', JSON.stringify({ minZoom, maxZoom })) : '',
   )
 
   // NOTE IMPROVEMENT: Check out https://github.com/amandasaurus/waterwaymap.org/blob/main/functions.sh#L20-L33
@@ -50,8 +51,8 @@ export const generatePMTilesFile = (
     '--force',
     '--layer=default',
     // CONFIG:
-    // Lowest zoom level for which tiles are generated (default `0`) (`6` is all of Germany on a Laptop, `8` is a litte smaller than a State in Germany)
-    '--minimum-zoom=7',
+    // Lowest zoom level for which tiles are generated (tippecanoe default `0`, ours `7`, see `minZoom` in meta.ts) (`6` is all of Germany on a Laptop, `8` is a litte smaller than a State in Germany)
+    `--minimum-zoom=${minZoom}`,
     // https://github.com/felt/tippecanoe#zoom-levels
     // The automatic --maximum-zoom didn't have the required precision.
     // Instead, we force a maximum-zoom of at least 15 (https://github.com/felt/tippecanoe#zoom-levels) … or higher.

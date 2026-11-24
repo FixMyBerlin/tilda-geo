@@ -139,6 +139,8 @@ export type MetaDataUser = MetaDataFileLevelMetadata &
         dataSourceType: 'local'
         /** @desc Change the tippecanoe settings  */
         geometricPrecision?: 'mask' | 'regular' | 'high' | null
+        /** @desc Lowest zoom level of the PMTiles (tippecanoe `--minimum-zoom`). Default: 7. Lower it for datasets that should be visible for all of Germany (5) */
+        minZoom?: number
         /** @desc Which file format to use for map rendering. Default: 'auto' (PMTiles for large files, GeoJSON for small) */
         mapRenderFormat?: 'pmtiles' | 'geojson' | 'auto'
         /** @desc Configuration for user-selectable datasets */
@@ -178,6 +180,8 @@ export type MetaDataSystemLayer = MetaDataFileLevelMetadata & {
   dataSourceType: 'local'
   /** @desc Change the tippecanoe settings  */
   geometricPrecision?: 'mask' | 'regular' | 'high' | null
+  /** @desc Lowest zoom level of the PMTiles (tippecanoe `--minimum-zoom`). Default: 7 */
+  minZoom?: number
   /** @desc Which file format to use for map rendering. Default: 'auto' (PMTiles for large files, GeoJSON for small) */
   mapRenderFormat?: 'pmtiles' | 'geojson'
   /** @desc Configuration for system layers (masks, etc.) - minimal properties, always active */
