@@ -422,6 +422,10 @@ model MapDatasetUpload {
   slug              String                    @unique
   configs           Json
   public            Boolean                   @default(false)
+  /// Non-public uploads only: also served to a TILDA external API token (scope `uploads`), which a
+  /// browser app on another origin gets from the token exchange. Off by default, so a third-party
+  /// app that holds a user's OSM token cannot read every private upload of that user.
+  externalTokenAccess Boolean                 @default(false)
   hideDownloadLink  Boolean                   @default(false)
   mapRenderFormat   MapRenderFormatEnum
   mapRenderUrl      String

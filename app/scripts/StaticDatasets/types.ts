@@ -131,6 +131,8 @@ export type MetaDataUser = MetaDataFileLevelMetadata &
     | {
         regions: string[]
         public: boolean
+        /** @desc Only for `public: false`. When true, browser apps on another origin may read the file with a TILDA token (scope `uploads`) of a user who is a member of a region or an admin. Default: false, then only the user's own TILDA login (cookie) works. See docs/Uploads.md */
+        externalTokenAccess?: boolean
         /** @desc Hide download links from non-admin users. When true, only admins can see download links */
         hideDownloadLink?: boolean
         /** @desc System layers are hidden from UI but always active on the map. When false or undefined, configs must be user-selectable datasets. */
@@ -151,6 +153,8 @@ export type MetaDataUser = MetaDataFileLevelMetadata &
     | {
         regions: string[]
         public: boolean
+        /** @desc Only for `public: false`. When true, browser apps on another origin may read the file with a TILDA token (scope `uploads`) of a user who is a member of a region or an admin. Default: false, then only the user's own TILDA login (cookie) works. See docs/Uploads.md */
+        externalTokenAccess?: boolean
         /** @desc Hide download links from non-admin users. When true, only admins can see download links */
         hideDownloadLink?: boolean
         /** @desc System layers are hidden from UI but always active on the map. When false or undefined, configs must be user-selectable datasets. */
@@ -173,6 +177,8 @@ export type MetaDataUser = MetaDataFileLevelMetadata &
 export type MetaDataSystemLayer = MetaDataFileLevelMetadata & {
   regions: string[]
   public: true
+  /** @desc System layers are public, so there is nothing to opt in to */
+  externalTokenAccess?: undefined
   hideDownloadLink: true
   /** @desc System layers are hidden from UI but always active on the map. When true, configs must be system layer configs. */
   systemLayer: true

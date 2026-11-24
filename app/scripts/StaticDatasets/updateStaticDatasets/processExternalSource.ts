@@ -19,6 +19,7 @@ export async function processExternalSource(
     uploadSlug,
     regionSlugs,
     isPublic: metaData.public,
+    externalTokenAccess: metaData.externalTokenAccess ?? false,
     hideDownloadLink: metaData.hideDownloadLink ?? false,
     configs: metaData.configs,
     styleGroups: metaData.styleGroups ?? null,

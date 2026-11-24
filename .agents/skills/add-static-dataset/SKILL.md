@@ -197,7 +197,7 @@ import { defaultLayerStyles } from '../../_utils/defaultLayerStyles'
 
 export const data: MetaData = {
   regions: ['infravelo'], // From user or infer from group folder
-  public: true,
+  public: true, // `false`: members and admins only. Add `externalTokenAccess: true` only when a browser app on another origin has to load it (docs/Uploads.md#auth)
   dataSourceType: 'local',
   attributionHtml: 'Source Name', // Ask if unclear
   licence: 'DL-DE/ZERO-2.0', // Infer from similar datasets

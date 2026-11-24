@@ -32,6 +32,7 @@ type UploadData = {
   uploadSlug: string
   regionSlugs: string[]
   isPublic: boolean
+  externalTokenAccess: boolean
   hideDownloadLink: boolean
 
   configs: Record<string, unknown>[]

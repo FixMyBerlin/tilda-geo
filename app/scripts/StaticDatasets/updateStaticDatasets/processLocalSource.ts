@@ -68,6 +68,7 @@ export async function processLocalSource(
     uploadSlug,
     regionSlugs,
     isPublic: metaData.public,
+    externalTokenAccess: metaData.externalTokenAccess ?? false,
     hideDownloadLink: metaData.hideDownloadLink ?? false,
     configs: metaData.configs,
     styleGroups: 'styleGroups' in metaData ? (metaData.styleGroups ?? null) : null,
