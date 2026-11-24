@@ -14,7 +14,7 @@ import db from '@/server/db.server'
 // A browser on another origin sends the Bearer token, which makes the request non-simple.
 const uploadsPreflightResponse = () =>
   preflightResponse({
-    methods: 'GET, OPTIONS',
+    methods: 'GET, HEAD, OPTIONS',
     allowHeaders: 'Authorization, Content-Type, Accept, Accept-Encoding, Range, If-None-Match',
   })
 
@@ -23,6 +23,8 @@ export const Route = createFileRoute('/api/uploads/$slug')({
   server: {
     handlers: {
       OPTIONS: uploadsPreflightResponse,
+      // TanStack Start answers HEAD with this handler too and drops the body: same access check,
+      // CORS and caching headers as GET (`proxyS3Url` skips the file transfer for HEAD).
       GET: async ({ request, params }) => {
         const { slug } = params
 

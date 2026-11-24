@@ -67,7 +67,7 @@ An **expired** token is the normal end of a session and is not counted. Expired 
 
 Browser apps on any origin may call these routes (`Access-Control-Allow-Origin: *`); the token and the member checks behind it are the access check. No cookies are used for this: send requests without `credentials`. The code is in `app/src/server/api/util/cors.ts` (`corsHeaders`, `preflightResponse`).
 
-- Every answer has `Access-Control-Allow-Origin: *` and `Access-Control-Expose-Headers: ETag, Content-Range, Content-Length, Content-Disposition`, errors too.
+- Every answer has `Access-Control-Allow-Origin: *` and `Access-Control-Expose-Headers: ETag, Last-Modified, Content-Range, Content-Length, Content-Disposition`, errors too.
 - Preflight (`OPTIONS`): `204` with `Access-Control-Allow-Methods`, `Access-Control-Allow-Headers` and `Access-Control-Max-Age`. The values are per API (see the docs of the API); the other answers do not repeat them.
 
 ## Operations

@@ -6,6 +6,9 @@ vi.mock('@aws-sdk/client-s3', () => ({
     send = send
   },
   GetObjectCommand: class {},
+  HeadObjectCommand: class {
+    constructor(readonly input: unknown) {}
+  },
 }))
 
 import { proxyExternalUrl } from './proxyExternalUrl'
@@ -50,6 +53,31 @@ describe('proxies answer with CORS headers, also on errors', () => {
     const file = await proxyS3Url(request, 'https://bucket.s3.example/x.pmtiles')
     expect(file.status).toBe(200)
     expectCors(file)
+  })
+
+  test('S3 HEAD: only the metadata is asked for, no body, headers to check for a new version', async () => {
+    send.mockResolvedValueOnce({
+      ContentLength: 2,
+      ContentType: 'application/x-protobuf',
+      ETag: '"abc"',
+      LastModified: new Date('2026-11-01T10:00:00Z'),
+    })
+    const response = await proxyS3Url(
+      new Request('https://tilda-geo.de/api/uploads/x.pmtiles', {
+        method: 'HEAD',
+        headers: { 'If-None-Match': '"old"' },
+      }),
+      'https://bucket.s3.example/x.pmtiles',
+    )
+
+    expect(send.mock.calls[0]?.[0].input).toMatchObject({ IfNoneMatch: '"old"' })
+    expect(response.status).toBe(200)
+    expect(response.body).toBeNull()
+    expect(response.headers.get('ETag')).toBe('"abc"')
+    expect(response.headers.get('Last-Modified')).toBe('Sun, 01 Nov 2026 10:00:00 GMT')
+    expect(response.headers.get('Content-Length')).toBe('2')
+    expectCors(response)
+    expect(response.headers.get('Access-Control-Expose-Headers')).toContain('Last-Modified')
   })
 
   test('external: fetch error', async () => {

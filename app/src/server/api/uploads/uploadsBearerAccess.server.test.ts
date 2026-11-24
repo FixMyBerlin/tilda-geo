@@ -32,9 +32,14 @@ const handlers = Route.options.server!.handlers as unknown as {
   OPTIONS: () => Response
 }
 
-function get(headers: Record<string, string> = {}, slug = 'bewertung-rvn-app.geojson') {
+// TanStack Start answers a HEAD request with the GET handler and drops the body.
+function get(
+  headers: Record<string, string> = {},
+  slug = 'bewertung-rvn-app.geojson',
+  method = 'GET',
+) {
   return handlers.GET({
-    request: new Request(URL_, { headers }),
+    request: new Request(URL_, { method, headers }),
     params: { slug },
   })
 }
@@ -202,6 +207,33 @@ describe('GET /api/uploads/$slug with a Bearer token: files and statuses', () =>
     expect(partial.status).toBe(206)
     expect(partial.headers.get('Content-Range')).toBe('bytes 0-3/10')
     expect(partial.headers.get('Cache-Control')).toBe('private, no-cache')
+  })
+
+  test('HEAD with a token: same access check, private headers, proxy gets the HEAD request', async () => {
+    const response = await get(withToken(), 'bewertung-rvn-app.geojson', 'HEAD')
+
+    expect(response.status).toBe(200)
+    expect(response.headers.get('ETag')).toBe('"abc"')
+    expect(response.headers.get('Cache-Control')).toBe('private, no-cache')
+    expect(response.headers.get('Vary')).toBe('Authorization, Cookie')
+    expect(response.headers.get('Access-Control-Allow-Origin')).toBe('*')
+    expect(proxyS3Url.mock.calls[0]?.[0].method).toBe('HEAD')
+  })
+
+  test('HEAD with a bad token or a non-member is refused like GET', async () => {
+    db.externalApiToken.findUnique.mockResolvedValue(null)
+    const unknown = await get(
+      withToken('tildageode_ext_unknown'),
+      'bewertung-rvn-app.geojson',
+      'HEAD',
+    )
+    expect(unknown.status).toBe(401)
+    expect(unknown.headers.get('Access-Control-Expose-Headers')).toContain('Last-Modified')
+
+    db.externalApiToken.findUnique.mockResolvedValue(tokenRow())
+    db.membership.count.mockResolvedValue(0)
+    expect((await get(withToken(), 'bewertung-rvn-app.geojson', 'HEAD')).status).toBe(403)
+    expect(proxyS3Url).not.toHaveBeenCalled()
   })
 
   test('CSV export with a token is private', async () => {

@@ -7,8 +7,9 @@
 export const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   // Without this a browser app cannot read these headers of a cross-origin answer
-  // (ETag for revalidation, Content-Range for PMTiles, Content-Disposition for downloads).
-  'Access-Control-Expose-Headers': 'ETag, Content-Range, Content-Length, Content-Disposition',
+  // (ETag and Last-Modified to see a new version, Content-Range for PMTiles, Content-Disposition for downloads).
+  'Access-Control-Expose-Headers':
+    'ETag, Last-Modified, Content-Range, Content-Length, Content-Disposition',
 }
 
 export function preflightResponse(input: { methods: string; allowHeaders: string }) {

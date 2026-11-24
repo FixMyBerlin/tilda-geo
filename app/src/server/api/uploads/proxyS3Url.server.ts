@@ -1,8 +1,26 @@
 import type { GetObjectCommandOutput } from '@aws-sdk/client-s3'
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { GetObjectCommand, HeadObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import type { GetObjectCommandInput } from '@aws-sdk/client-s3/dist-types/commands/GetObjectCommand'
 import { getOptimalCompression } from '@/scripts/StaticDatasets/updateStaticDatasets/getOptimalCompression'
 import { corsHeaders } from '@/server/api/util/cors'
+
+function s3ErrorResponse(e: unknown) {
+  const metadata =
+    e && typeof e === 'object' && '$metadata' in e
+      ? (e as { $metadata: { httpStatusCode?: number } }).$metadata
+      : undefined
+  const message = e instanceof Error ? e.message : String(e)
+
+  // Handle 304 Not Modified for conditional requests
+  if (metadata?.httpStatusCode === 304) {
+    return new Response(null, { status: 304, headers: corsHeaders })
+  }
+
+  return Response.json(
+    { source: 'S3', statusText: message },
+    { status: metadata?.httpStatusCode ?? 500, headers: corsHeaders },
+  )
+}
 
 /**
  * Proxies S3 URLs with optimal compression and caching headers.
@@ -34,25 +52,42 @@ export async function proxyS3Url(request: Request, url: string, downloadFilename
     sendParams.IfNoneMatch = ifNoneMatch
   }
 
+  // HEAD (e.g. an app checks for a new version by ETag / Last-Modified) must not transfer the file.
+  if (request.method === 'HEAD') {
+    try {
+      const head = await s3Client.send(
+        new HeadObjectCommand({
+          Bucket: sendParams.Bucket,
+          Key: sendParams.Key,
+          IfNoneMatch: ifNoneMatch ?? undefined,
+        }),
+      )
+      const isGeojson = url.endsWith('.geojson')
+      return new Response(null, {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          // The size of the stored file; a GET of a GeoJSON may send it compressed.
+          ...(head.ContentLength !== undefined && !isGeojson
+            ? { 'Content-Length': String(head.ContentLength) }
+            : {}),
+          'Content-Type': isGeojson ? 'application/geo+json' : (head.ContentType ?? ''),
+          'X-Content-Type-Options': 'nosniff',
+          ETag: head.ETag ?? '',
+          'Cache-Control': 'public, max-age=3600, must-revalidate',
+          ...(head.LastModified ? { 'Last-Modified': head.LastModified.toUTCString() } : {}),
+        },
+      })
+    } catch (e: unknown) {
+      return s3ErrorResponse(e)
+    }
+  }
+
   let response: GetObjectCommandOutput
   try {
     response = await s3Client.send(new GetObjectCommand(sendParams))
   } catch (e: unknown) {
-    const metadata =
-      e && typeof e === 'object' && '$metadata' in e
-        ? (e as { $metadata: { httpStatusCode?: number } }).$metadata
-        : undefined
-    const message = e instanceof Error ? e.message : String(e)
-
-    // Handle 304 Not Modified for conditional requests
-    if (metadata?.httpStatusCode === 304) {
-      return new Response(null, { status: 304, headers: corsHeaders })
-    }
-
-    return Response.json(
-      { source: 'S3', statusText: message },
-      { status: metadata?.httpStatusCode ?? 500, headers: corsHeaders },
-    )
+    return s3ErrorResponse(e)
   }
 
   // @ts-expect-error - S3 SDK Body type is complex and not fully typed
