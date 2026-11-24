@@ -10,6 +10,7 @@ import type {
   MapDataOsmIdConfig,
   MapDataSourceInspectorEditor,
 } from '@/components/regionen/pageRegionSlug/mapData/types'
+import type { InspectorCharts } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/charts/inspectorChart.schema'
 import type { translations } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/translations.const'
 
 // a modified version of MapDataDatasetsSource from '../../src/regionen/[regionSlug]/_mapData/types'
@@ -69,6 +70,8 @@ type MapDataDatasetsSource = MapDataDatasetsSourceBase & {
         /** @desc Array of key strings OR `false` to list all available keys */
         documentedKeys: string[] | false
         editors?: MapDataSourceInspectorEditor[]
+        /** @desc See `SidebarInspector/TagsTable/charts/README.md` */
+        charts?: InspectorCharts
       } & (
         | { disableTranslations?: false; translations: typeof translations }
         | { disableTranslations: true; translations?: never }
