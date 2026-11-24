@@ -3,7 +3,7 @@ export const SPACE_FINDER_SCORE_LABELS: Record<string, string> = {
   score_bedarf: 'Bedarf',
   score_bebauung: 'Bebauung',
   score_radweg: 'Radweg',
-  score_hangneigung: 'Hangneigung',
+  score_hangneigung: 'Geländeneigung',
   score_oepnv: 'ÖPNV + Bikesharing',
   score_zielorte: 'Zielorte',
   score_vegetation: 'Vegetation',

@@ -90,7 +90,7 @@ export const GROUP_HELP: Record<'bedarf' | 'bebauung' | 'eigendaten', string> = 
   bedarf:
     'Wo würden Menschen eine Abstellanlage nutzen? Hier zählt die Lage im Netz: Radwege und ÖPNV, plus Zuschläge an Fußgängerzonen, rund um bewohnte Gebäude und rund um Gebäude mit Alltagszielen sowie ein Abzug, wo schon Anlagen stehen.',
   bebauung:
-    'Wo lässt sich baulich etwas errichten? Die Hangneigung bildet den Grund, Vegetation, Versiegelung, Kreuzungen, Parkflächen, Tempo-30-Straßen und Plätze schieben danach Punkte. Gebäude und zu steile Lagen schließen die Fläche ganz aus — der Bedarf bleibt davon unberührt.',
+    'Wo lässt sich baulich etwas errichten? Die Geländeneigung bildet den Grund, Vegetation, Versiegelung, Kreuzungen, Parkflächen, Tempo-30-Straßen und Plätze schieben danach Punkte. Gebäude und zu steile Lagen schließen die Fläche ganz aus — der Bedarf bleibt davon unberührt.',
   eigendaten:
     'Ihre hochgeladenen Datensätze greifen in den Gesamtscore ein, ohne Bedarf oder Bebauung zu verändern. Jeder Datensatz hat einen Namen und wirkt einzeln mit eigenem Modus und eigener Stärke — so lassen sich Wunschstandorte, Tabuzonen oder eigene Planungen nebeneinander berücksichtigen.',
 }
@@ -207,7 +207,7 @@ export const PARKING_DATA_DEPENDENT_KEYS = ['w_parken', 'w_intersection', 'w_fus
 export const WEIGHT_LABELS: Record<string, string> = {
   w_cyclepath: 'Radwegnähe',
   w_target: 'Zielorte',
-  w_slope: 'Hangneigung',
+  w_slope: 'Geländeneigung',
   w_transit: 'ÖPNV + Bikesharing',
   w_vegetation: 'Vegetation',
   w_intersection: 'Kreuzungen',
@@ -230,7 +230,7 @@ export type ModifierDirection = 'positive' | 'negative' | 'vegetation' | 'platz'
 // sync with the backend split in scoring/scorer.py (_group_score):
 //   Bedarf   → Radwegnähe, ÖPNV + modifiers Bestandsanlagen (penalty), Bewohnerbedarf
 //              (bonus), Zielorte (bonus) and Fußgängerzonen (bonus)
-//   Bebauung → Hangneigung + modifiers
+//   Bebauung → Geländeneigung + modifiers
 //              (Vegetation, Plätze, Versiegelung, Kreuzungen, Parken, Tempo 30)
 //
 // Within each group we also split by computation type, because the two types act differently

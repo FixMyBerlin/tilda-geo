@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS space_finder.scenario_hexagons (
 ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS score_vegetation real;
 
 -- Separate sub-scores (issue #3415): demand likelihood (ÖPNV, Zielorte)
--- and build likelihood (Radweg, Hangneigung
+-- and build likelihood (Radweg, Geländeneigung
 -- + modifiers + exclusion). NULL for legacy runs or when the
 -- group is entirely unweighted in the scenario. mce_gesamtscore stays the
 -- unchanged combination.

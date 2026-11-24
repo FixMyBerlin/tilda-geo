@@ -113,7 +113,7 @@ const EXCLUSION_REASONS: { check: (props: Record<string, any>) => boolean; text:
   },
   {
     check: (props) => props.score_hangneigung === 0,
-    text: 'Diese Fläche ist zu steil (Hangneigung > 10°) – eine Bebauung ist hier nicht möglich.',
+    text: 'Diese Fläche ist zu steil (Geländeneigung > 10°) – eine Bebauung ist hier nicht möglich.',
   },
 ]
 

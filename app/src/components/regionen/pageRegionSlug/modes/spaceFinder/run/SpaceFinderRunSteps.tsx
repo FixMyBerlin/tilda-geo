@@ -13,7 +13,7 @@ const SCORING_STEPS = [
   'Kreuzungen laden',
   'KFZ-Parkflächen & Straßen laden',
   'Zielorte laden',
-  'Hangneigung berechnen',
+  'Geländeneigung berechnen',
   'Vegetationsabdeckung verschneiden',
   'Versiegelung verschneiden',
   'Eigene Daten verschneiden',
@@ -35,7 +35,7 @@ const STEP_WEIGHT_KEYS: string[][] = [
   ['w_intersection', 'w_fussgaengerzone'], // 7 Kreuzungen & Fußgängerzonen laden
   ['w_parken', 'w_tempo30'], // 8 KFZ-Parkflächen & Straßen (Tempo 30) laden
   ['w_target'], //          9 Zielorte laden
-  ['w_slope'], //           10 Hangneigung berechnen
+  ['w_slope'], //           10 Geländeneigung berechnen
   ['w_vegetation'], //      11 Vegetationsabdeckung verschneiden
   ['w_versiegelung'], //    12 Versiegelung verschneiden
   ['w_eigendaten'], //      13 Eigene Daten verschneiden (special case, see stepDisplay)

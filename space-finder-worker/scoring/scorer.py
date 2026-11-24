@@ -169,7 +169,7 @@ SCORING_STEPS = [
     "Kreuzungen laden",
     "KFZ-Parkflächen & Tempo-30-Straßen laden",
     "Zielorte laden",
-    "Hangneigung berechnen",
+    "Geländeneigung berechnen",
     "Vegetationsabdeckung verschneiden",
     "Versiegelung verschneiden",
     "Eigene Daten verschneiden",

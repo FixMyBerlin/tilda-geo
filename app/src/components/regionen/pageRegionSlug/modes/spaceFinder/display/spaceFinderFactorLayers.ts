@@ -8,7 +8,7 @@ const BICYCLE_PARKING_LAYERS = [
 ]
 
 // The map layers of the tables the space-finder-worker reads (space-finder-worker/scoring/postgis_loader.py).
-// Factors without a normal map layer (Kreuzungen, Fußgängerzonen, Vegetation, Bewohnerbedarf, Hangneigung, Plätze) are not listed.
+// Factors without a normal map layer (Kreuzungen, Fußgängerzonen, Vegetation, Bewohnerbedarf, Geländeneigung, Plätze) are not listed.
 const SPACE_FINDER_FACTOR_LAYERS = {
   w_transit: ['poi/poiPlusPublicTransport', ...BICYCLE_PARKING_LAYERS],
   w_target: ['poi/poi'],
