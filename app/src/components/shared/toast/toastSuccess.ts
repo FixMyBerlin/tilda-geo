@@ -2,6 +2,8 @@ import { toast } from 'sonner'
 
 type ToastSuccessOptions = {
   id?: string | number
+  description?: string
+  duration?: number
 }
 
 /** Show a success toast. A stable `id` replaces the previous toast instead of stacking. */

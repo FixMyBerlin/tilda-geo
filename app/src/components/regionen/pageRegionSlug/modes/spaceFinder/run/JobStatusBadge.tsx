@@ -1,8 +1,14 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useEffect, useEffectEvent, useRef } from 'react'
-import { useSpaceFinderLayersActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-layers-store'
+import {
+  useSpaceFinderCarriagewaysVisible,
+  useSpaceFinderCensusVisible,
+  useSpaceFinderLayersActions,
+  useSpaceFinderVegetationVisible,
+} from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-layers-store'
 import { useMapActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/useMapState'
 import { Spinner } from '@/components/shared/Spinner/Spinner'
+import { toastSuccess } from '@/components/shared/toast/toastSuccess'
 import {
   spaceFinderJobQueryOptions,
   spaceFinderVariantQueryOptions,
@@ -47,15 +53,37 @@ export const JobStatusBadge = ({ jobId, variantId }: { jobId: number; variantId:
   const activateFactorLayers = useActivateSpaceFinderFactorLayers()
   const { setVegetationVisible, setCarriagewaysVisible, setCensusVisible } =
     useSpaceFinderLayersActions()
+  const vegetationVisible = useSpaceFinderVegetationVisible()
+  const carriagewaysVisible = useSpaceFinderCarriagewaysVisible()
+  const censusVisible = useSpaceFinderCensusVisible()
   const showFactorLayers = useEffectEvent(() => {
     if (!data) return
-    activateFactorLayers(data.weights)
+    let switchedOn = activateFactorLayers(data.weights)
     // Only ever on, never off: a layer the user switched on stays.
     // The aerial-image phase also runs (and stores the layer) for Versiegelung alone.
-    if ((data.weights.w_vegetation ?? 0) > 0 || (data.weights.w_versiegelung ?? 0) > 0)
+    if (
+      !vegetationVisible &&
+      ((data.weights.w_vegetation ?? 0) > 0 || (data.weights.w_versiegelung ?? 0) > 0)
+    ) {
       setVegetationVisible(true)
-    if (data.excludeCarriageways) setCarriagewaysVisible(true)
-    if ((data.weights.w_bewohnerbedarf ?? 0) > 0) setCensusVisible(true)
+      switchedOn = true
+    }
+    if (!carriagewaysVisible && data.excludeCarriageways) {
+      setCarriagewaysVisible(true)
+      switchedOn = true
+    }
+    if (!censusVisible && (data.weights.w_bewohnerbedarf ?? 0) > 0) {
+      setCensusVisible(true)
+      switchedOn = true
+    }
+    if (switchedOn) {
+      toastSuccess('Relevante Kartenebenen wurden eingeblendet', {
+        id: 'space-finder-layers-switched-on',
+        description:
+          'Die Ebenen der gewichteten Faktoren sind jetzt sichtbar. Ausblenden können Sie sie links unter »Kategorien« und im Flächenfinder-Panel unter »Anzeige«.',
+        duration: 15_000,
+      })
+    }
   })
 
   useEffect(() => {

@@ -7,7 +7,7 @@ import {
 /**
  * Returns a function that switches on the normal map layers with the input data of the weighted
  * factors. Called once when a run finishes; the layers then stay on like any layer the user
- * switched on.
+ * switched on. Returns whether a layer was switched on.
  */
 export const useActivateSpaceFinderFactorLayers = () => {
   const { categoriesConfig, setCategoriesConfig } = useCategoriesConfig()
@@ -18,5 +18,6 @@ export const useActivateSpaceFinderFactorLayers = () => {
       wanted: spaceFinderWantedFactorLayers(weights),
     })
     if (result.changed) setCategoriesConfig(result.categoriesConfig, { replace: true })
+    return result.changed
   }
 }
