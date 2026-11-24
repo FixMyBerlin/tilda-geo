@@ -198,6 +198,7 @@ describe.skipIf(!integrationDb)('admin MCP tools (integration)', () => {
     expect(JSON.parse(list.text)).toContainEqual({
       slug: UPLOAD_SLUG,
       public: false,
+      externalTokenAccess: false,
       createdBy: 'SCRIPT',
       updatedAt: expect.any(String),
       dataUpdatedNote: '2026-01-01',

@@ -85,7 +85,7 @@ export const externalApiPreflightResponse = () =>
   })
 
 /**
- * Runs one external notes API request: turns the handler's result into JSON, maps errors to
+ * Runs one request of the external API (notes API and token exchange): turns the handler's result into JSON, maps errors to
  * `{ error, message }` and adds the CORS headers.
  */
 export async function handleExternalApiRequest(

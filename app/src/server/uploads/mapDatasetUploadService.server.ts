@@ -24,6 +24,7 @@ export async function listMapDatasetUploads(input: ListMapDatasetUploadsInput = 
     select: {
       slug: true,
       public: true,
+      externalTokenAccess: true,
       createdBy: true,
       updatedAt: true,
       dataUpdatedNote: true,

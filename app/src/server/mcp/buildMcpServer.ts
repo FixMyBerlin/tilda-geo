@@ -358,7 +358,7 @@ export function buildMcpServer({ auth, request }: { auth: AdminApiAuth; request:
     'map_dataset_uploads_list',
     {
       description:
-        'List map dataset uploads (static datasets), ordered by slug. Each item has slug, public, ' +
+        'List map dataset uploads (static datasets), ordered by slug. Each item has slug, public, externalTokenAccess, ' +
         'createdBy, updatedAt, dataUpdatedNote, regionSlugs and configs [{ name, categoryKey }] — ' +
         'no layers. Optional filters: regionSlug (uploads linked to that region) and categoryKey ' +
         '(uploads with a config in that category, see map_dataset_categories_list). ' +

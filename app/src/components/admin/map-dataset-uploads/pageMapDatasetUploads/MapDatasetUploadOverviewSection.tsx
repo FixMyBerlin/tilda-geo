@@ -35,7 +35,12 @@ export const MapDatasetUploadOverviewSection = ({ id, title, upload }: Props) =>
     { label: 'Slug', value: <code>{upload.slug}</code> },
     {
       label: 'Zugriff',
-      value: upload.public ? <Pill color="purple">Public</Pill> : <Pill color="green">Login</Pill>,
+      value: (
+        <span className="flex flex-wrap gap-1">
+          {upload.public ? <Pill color="purple">Public</Pill> : <Pill color="green">Login</Pill>}
+          {upload.externalTokenAccess ? <Pill color="yellow">Externer Token</Pill> : null}
+        </span>
+      ),
     },
     { label: 'Art', value: upload.systemLayer ? <Pill color="gray">System</Pill> : 'Daten' },
     { label: 'Render-Format', value: <code>{upload.mapRenderFormat}</code> },

@@ -53,20 +53,20 @@ Set `externalTokenAccess: true` only for a dataset that a known browser app has 
 
 **Answers of a non-public file** (the checks run before the format is looked at, so a guest cannot tell which formats a private file has; a missing slug is `404`, an existing private file answers `401` / `403` for every format; that a private slug exists is therefore visible, accepted because slugs are not secrets):
 
-| Status | Body                                                                  | When                                                                                                  |
-| ------ | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| 401    | `{ statusText, message }`                                             | Cookie path: not signed in                                                                            |
-| 403    | `{ statusText, message }`                                             | Cookie path: signed in, but not admin or member                                                       |
-| 401    | `{ error: missing_token \| invalid_token \| token_expired, message }` | Bearer path: no, unknown, wrong-scope (e.g. `notes`) or expired token. Has `WWW-Authenticate: Bearer` |
-| 403    | `{ error: not_member, message }`                                      | Bearer path: the token's user is not admin or member                                                  |
-| 403    | `{ error: token_access_disabled, message }`                           | Bearer path: member, but the upload has no `externalTokenAccess`                                      |
-| 429    | `{ error: rate_limited, message }`                                    | Bearer path: too many failed attempts from this IP; has `Retry-After`                                 |
+| Status | Body                                                 | When                                                                                              |
+| ------ | ---------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| 401    | `{ statusText, message }`                            | Cookie path: not signed in                                                                        |
+| 403    | `{ statusText, message }`                            | Cookie path: signed in, but not admin or member                                                   |
+| 401    | `{ error: invalid_token \| token_expired, message }` | Bearer path: unknown, wrong-scope (e.g. `notes`) or expired token. Has `WWW-Authenticate: Bearer` |
+| 403    | `{ error: not_member, message }`                     | Bearer path: the token's user is not admin or member                                              |
+| 403    | `{ error: token_access_disabled, message }`          | Bearer path: member, but the upload has no `externalTokenAccess`                                  |
+| 429    | `{ error: rate_limited, message }`                   | Bearer path: too many failed attempts from this IP; has `Retry-After`                             |
 
 401 / 403 / 429 are `Cache-Control: no-store` and carry the CORS headers. The errors of the file route itself (`404` unknown slug, `400` format not available, `500` missing file URL) keep `{ statusText, message }` on both paths. The `error` formats of the Bearer path are the external API errors, see [External-API-Token.md](External-API-Token.md#errors).
 
 **Caching:** every answer of a non-public upload (cookie or token; file, `304`, `206`, CSV and external sources) is `Cache-Control: private, no-cache` with `Vary: Authorization, Cookie`: no shared cache keeps it, and the browser revalidates with `If-None-Match` (cheap `304` after the access check). Public uploads keep `public, max-age=3600, must-revalidate` (S3) or the TTL of the external source. Code: `withPrivateCaching` in `app/src/server/api/util/cacheHeaders.server.ts`.
 
-**HEAD:** `HEAD /api/uploads/{slug}.{format}` has the same access check, CORS and caching headers as `GET`, without a body (an app can check `ETag` / `Last-Modified` for a new version with its token). For files on S3 the file is not transferred.
+**HEAD:** `HEAD /api/uploads/{slug}.{format}` has the same access check, CORS, caching, `ETag` and `Last-Modified` as `GET`, without a body (no `Content-Disposition`, and no `Content-Length` for GeoJSON) (an app can check `ETag` / `Last-Modified` for a new version with its token). For files on S3 the file is not transferred.
 
 **CORS:** `Access-Control-Allow-Origin: *` and `Access-Control-Expose-Headers: ETag, Last-Modified, Content-Range, Content-Length, Content-Disposition` on every answer, errors included. The preflight (`OPTIONS`) allows `GET, HEAD, OPTIONS` and `Authorization, Content-Type, Accept, Accept-Encoding, Range, If-None-Match`.
 
