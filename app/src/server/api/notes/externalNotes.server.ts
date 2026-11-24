@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { requireExternalSession } from '@/server/api/auth/osmToken.server'
 import { ExternalApiError, jsonBody } from '@/server/api/util/externalApiResponses.server'
+import { requireExternalSession } from '@/server/auth/externalSession.server'
 import type { ExternalNotesCaller } from '@/server/auth/memberCaller.server'
 import { canAccessMemberModeForRegion } from '@/server/authorization/canAccessMemberModeForRegion.server'
 import db from '@/server/db.server'

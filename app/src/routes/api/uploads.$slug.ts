@@ -6,43 +6,23 @@ import { proxyExternalUrl } from '@/server/api/uploads/proxyExternalUrl'
 import { proxyS3Url } from '@/server/api/uploads/proxyS3Url.server'
 import { staticDatasetUploadFormats } from '@/server/api/uploads/staticDatasetUploadFormats.const'
 import { notFoundJson } from '@/server/api/util/apiJsonResponses.server'
-import {
-  guardRegionMembership,
-  guardRegionMembershipBearer,
-  hasBearerToken,
-} from '@/server/api/util/authGuards.server'
-import { corsHeaders } from '@/server/api/util/cors'
+import { guardRegionMembershipBySessionOrToken } from '@/server/api/util/authGuards.server'
+import { withPrivateCaching } from '@/server/api/util/cacheHeaders.server'
+import { corsHeaders, preflightResponse } from '@/server/api/util/cors'
 import db from '@/server/db.server'
 
 // A browser on another origin sends the Bearer token, which makes the request non-simple.
-const preflightResponse = () =>
-  new Response(null, {
-    status: 204,
-    headers: {
-      ...corsHeaders,
-      'Access-Control-Allow-Methods': 'GET, OPTIONS',
-      'Access-Control-Allow-Headers':
-        'Authorization, Content-Type, Accept, Accept-Encoding, Range, If-None-Match',
-      'Access-Control-Max-Age': '600',
-    },
+const uploadsPreflightResponse = () =>
+  preflightResponse({
+    methods: 'GET, OPTIONS',
+    allowHeaders: 'Authorization, Content-Type, Accept, Accept-Encoding, Range, If-None-Match',
   })
-
-/**
- * The answer depends on who asks: shared caches must not keep it, and the browser has to ask again
- * each time (If-None-Match gives a cheap 304 once the token is checked).
- */
-function withPrivateCaching(response: Response) {
-  const headers = new Headers(response.headers)
-  headers.set('Cache-Control', 'private, no-cache')
-  headers.append('Vary', 'Authorization')
-  return new Response(response.body, { status: response.status, headers })
-}
 
 export const Route = createFileRoute('/api/uploads/$slug')({
   ssr: false,
   server: {
     handlers: {
-      OPTIONS: preflightResponse,
+      OPTIONS: uploadsPreflightResponse,
       GET: async ({ request, params }) => {
         const { slug } = params
 
@@ -63,6 +43,21 @@ export const Route = createFileRoute('/api/uploads/$slug')({
 
         if (upload === null) {
           return notFoundJson({ headers: corsHeaders })
+        }
+
+        // Access first: a guest must not learn which formats a private file has. Existing private
+        // files answer 401 / 403 for every format (a missing slug stays 404).
+        if (!upload.public) {
+          const authResponse = await guardRegionMembershipBySessionOrToken({
+            request,
+            regionIds: upload.regions.map((region) => region.id),
+            tokenScope: 'uploads',
+            tokenAccess: upload.externalTokenAccess,
+            responseHeaders: corsHeaders,
+          })
+          if (authResponse) {
+            return authResponse
+          }
         }
 
         const allowedFormats: string[] = []
@@ -94,34 +89,9 @@ export const Route = createFileRoute('/api/uploads/$slug')({
           )
         }
 
-        let tokenAuthenticated = false
-        if (!upload.public) {
-          const regionIds = upload.regions.map((region) => region.id)
-          // A Bearer token is used on its own (no cookie fallback), so its errors say what is wrong.
-          if (hasBearerToken(request)) {
-            const authResponse = await guardRegionMembershipBearer({
-              request,
-              regionIds,
-              responseHeaders: corsHeaders,
-            })
-            if (authResponse) {
-              return authResponse
-            }
-            tokenAuthenticated = true
-          } else {
-            const authResponse = await guardRegionMembership({
-              headers: request.headers,
-              regionIds,
-              responseHeaders: corsHeaders,
-            })
-            if (authResponse) {
-              return authResponse
-            }
-          }
-        }
-
+        // Private files depend on who asks (cookie or token): no shared cache, always revalidate.
         const finish = (response: Response) =>
-          tokenAuthenticated ? withPrivateCaching(response) : response
+          upload.public ? response : withPrivateCaching(response)
 
         if (extension === 'csv') {
           const geojsonUrl = upload.geojsonUrl

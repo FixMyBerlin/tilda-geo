@@ -4,6 +4,7 @@ import { gunzipSync } from 'node:zlib'
 import { z } from 'zod'
 import type { MapDataSourceExternalRenderFormat } from '@/scripts/StaticDatasets/types'
 import { getOptimalCompression } from '@/scripts/StaticDatasets/updateStaticDatasets/getOptimalCompression'
+import { corsHeaders } from '@/server/api/util/cors'
 
 const CACHE_DIR = path.join(process.cwd(), 'public', 'temp', 'uploads-cache')
 
@@ -90,7 +91,7 @@ export async function proxyExternalUrl(
     const message = error instanceof Error ? error.message : String(error)
     return Response.json(
       { source: 'external', statusText: `Failed to fetch: ${message}` },
-      { status: 500 },
+      { status: 500, headers: corsHeaders },
     )
   }
 
@@ -105,7 +106,7 @@ export async function proxyExternalUrl(
   if (!response.ok) {
     return Response.json(
       { source: 'external', statusText: response.statusText },
-      { status: response.status },
+      { status: response.status, headers: corsHeaders },
     )
   }
 
@@ -131,7 +132,7 @@ export async function proxyExternalUrl(
       const message = error instanceof Error ? error.message : String(error)
       return Response.json(
         { source: 'external', statusText: `Failed to decompress: ${message}` },
-        { status: 500 },
+        { status: 500, headers: corsHeaders },
       )
     }
   }
@@ -192,9 +193,7 @@ function buildResponse(
         return new Response(chunk, {
           status: 206,
           headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, Accept-Encoding',
+            ...corsHeaders,
             'Content-Range': `bytes ${start}-${end}/${fileBuffer.length}`,
             'Content-Length': String(chunk.length),
             'Content-Type': 'application/x-protobuf',
@@ -231,9 +230,7 @@ function buildResponse(
   }
 
   const headers: HeadersInit = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, Accept-Encoding',
+    ...corsHeaders,
     'Content-Length': String(contentLength),
     'Content-Type': format === 'geojson' ? 'application/geo+json' : 'application/x-protobuf',
     ...(format === 'pmtiles' && { 'Accept-Ranges': 'bytes' }),

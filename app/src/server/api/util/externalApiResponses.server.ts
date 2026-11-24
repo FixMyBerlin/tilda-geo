@@ -1,8 +1,12 @@
 import { z } from 'zod'
-import { externalApiCorsHeaders } from '@/server/api/util/externalApiCors.server'
+import { noStoreHeaders } from '@/server/api/util/cacheHeaders.server'
+import { corsHeaders, preflightResponse } from '@/server/api/util/cors'
 import { AuthorizationError } from '@/server/auth/errors'
 
-/** Machine-readable `error` values of the external notes API; see docs/External-Notes-API.md. */
+/**
+ * Machine-readable `error` values of the external API (token exchange, notes, uploads with a
+ * token); see docs/External-API-Token.md.
+ */
 type ExternalApiErrorCode =
   | 'rate_limited'
   | 'missing_token'
@@ -12,6 +16,7 @@ type ExternalApiErrorCode =
   | 'invalid_token'
   | 'token_expired'
   | 'not_member'
+  | 'token_access_disabled'
   | 'region_not_found'
   | 'folder_not_found'
   | 'note_not_found'
@@ -25,6 +30,8 @@ export class ExternalApiError extends Error {
     readonly code: ExternalApiErrorCode,
     message: string,
     readonly info?: unknown,
+    /** Extra response headers of this error, e.g. `Retry-After`. */
+    readonly headers?: Record<string, string>,
   ) {
     super(message)
     this.name = 'ExternalApiError'
@@ -52,14 +59,30 @@ function toExternalApiError(error: unknown) {
   return new ExternalApiError(500, 'internal_error', 'An unexpected error occurred')
 }
 
-/** The JSON error answer with the headers of the external API (CORS, never cached). */
+/**
+ * The JSON error answer with the headers of the external API (CORS, never cached). A 401 names the
+ * scheme (`WWW-Authenticate`), a 429 says when to retry.
+ */
 export function externalApiErrorResponse(error: unknown, headers?: HeadersInit) {
   const apiError = toExternalApiError(error)
-  return Response.json(errorBody(apiError), {
-    status: apiError.status,
-    headers: { ...externalApiCorsHeaders, ...headers, 'Cache-Control': 'no-store' },
-  })
+  const responseHeaders = new Headers(headers)
+  for (const [name, value] of Object.entries({
+    ...corsHeaders,
+    ...noStoreHeaders,
+    ...apiError.headers,
+  })) {
+    responseHeaders.set(name, value)
+  }
+  if (apiError.status === 401) responseHeaders.set('WWW-Authenticate', 'Bearer')
+  return Response.json(errorBody(apiError), { status: apiError.status, headers: responseHeaders })
 }
+
+/** Preflight of the token exchange and the notes API. The uploads route has its own. */
+export const externalApiPreflightResponse = () =>
+  preflightResponse({
+    methods: 'GET, POST, PATCH, OPTIONS',
+    allowHeaders: 'Authorization, Content-Type',
+  })
 
 /**
  * Runs one external notes API request: turns the handler's result into JSON, maps errors to
@@ -68,19 +91,13 @@ export function externalApiErrorResponse(error: unknown, headers?: HeadersInit) 
 export async function handleExternalApiRequest(
   handler: () => Promise<{ status: number; body: unknown }>,
 ) {
-  // Answers depend on the Bearer token; they must never be served from a cache.
-  const headers = { ...externalApiCorsHeaders, 'Cache-Control': 'no-store' }
   try {
     const { status, body } = await handler()
-    return Response.json(body, { status, headers })
+    // Answers depend on the Bearer token; they must never be served from a cache.
+    return Response.json(body, { status, headers: { ...corsHeaders, ...noStoreHeaders } })
   } catch (error) {
     return externalApiErrorResponse(error)
   }
-}
-
-export function bearerToken(request: Request) {
-  const match = request.headers.get('authorization')?.match(/^Bearer\s+(.+)$/i)
-  return match?.[1]?.trim() || null
 }
 
 export async function jsonBody(request: Request) {

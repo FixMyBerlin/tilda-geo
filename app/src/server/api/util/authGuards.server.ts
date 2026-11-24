@@ -1,14 +1,11 @@
-import { UserRoleEnum } from '@/prisma/generated/client'
-import { requireExternalSession } from '@/server/api/auth/osmToken.server'
 import { AuthorizationError } from '@/server/auth/errors'
+import type { ExternalApiTokenScope } from '@/server/auth/externalApiToken.const'
+import { bearerToken, requireExternalSession } from '@/server/auth/externalSession.server'
 import { getAppSession, requireAdmin } from '@/server/auth/session.server'
-import db from '@/server/db.server'
+import { isAdminOrRegionMember } from '@/server/authorization/isAdminOrRegionMember.server'
 import { forbiddenJson, unauthorizedJson } from './apiJsonResponses.server'
-import {
-  bearerToken,
-  ExternalApiError,
-  externalApiErrorResponse,
-} from './externalApiResponses.server'
+import { noStoreHeaders } from './cacheHeaders.server'
+import { ExternalApiError, externalApiErrorResponse } from './externalApiResponses.server'
 
 type GuardRegionMembershipInput = {
   headers: Headers
@@ -33,49 +30,63 @@ export async function guardAdmin(headers: Headers, responseHeaders?: HeadersInit
   }
 }
 
-async function isAdminOrRegionMember(
-  session: { userId: string; role: UserRoleEnum },
-  regionIds: number[],
-) {
-  if (session.role === UserRoleEnum.ADMIN) return true
-
-  return !!(await db.membership.count({
-    where: { userId: session.userId, regionId: { in: regionIds } },
-  }))
-}
-
+/** Cookie session: admin or member of one of the regions. Errors are `{ statusText, message }`, `no-store`. */
 export async function guardRegionMembership(input: GuardRegionMembershipInput) {
+  const errorHeaders = new Headers(input.responseHeaders)
+  for (const [name, value] of Object.entries(noStoreHeaders)) errorHeaders.set(name, value)
+
   const session = await getAppSession(input.headers)
   if (!session?.userId) {
-    return unauthorizedJson({ headers: input.responseHeaders })
+    return unauthorizedJson({ headers: errorHeaders })
   }
 
   if (!(await isAdminOrRegionMember(session, input.regionIds))) {
-    return forbiddenJson({ headers: input.responseHeaders })
+    return forbiddenJson({ headers: errorHeaders })
   }
 
   return null
 }
 
-/** The request brings an `Authorization: Bearer` header, so it is meant to use a token, not the cookie. */
-export function hasBearerToken(request: Request) {
-  return bearerToken(request) !== null
-}
-
 /**
- * Same member rule as `guardRegionMembership`, for a TILDA external API token of scope `uploads`
- * (Bearer, no cookie). Errors are the external API errors (`{ error, message }`), see
- * docs/External-Notes-API.md.
+ * Region member files that a browser app on another origin may read with a TILDA external API
+ * token. Decides itself how the request signs in and how an error looks:
+ *
+ * - `Authorization: Bearer …`: the token is used on its own (no cookie fallback), checked for
+ *   `tokenScope`, then the member rule of the cookie. Errors are the external API errors
+ *   `{ error, message }` (docs/External-API-Token.md). With `tokenAccess: false` a valid token of a
+ *   member is refused with 403 `token_access_disabled` (after the member check, so an outsider
+ *   learns nothing about the file).
+ * - Any other request (no header, `Basic …`): the cookie session, errors are `{ statusText, message }`.
+ *
+ * Returns the error response, or null when access is granted.
  */
-export async function guardRegionMembershipBearer(input: {
+export async function guardRegionMembershipBySessionOrToken(input: {
   request: Request
   regionIds: number[]
+  tokenScope: ExternalApiTokenScope
+  /** Does this file accept external API tokens at all (e.g. `MapDatasetUpload.externalTokenAccess`)? */
+  tokenAccess: boolean
   responseHeaders?: HeadersInit
 }) {
+  if (bearerToken(input.request) === null) {
+    return guardRegionMembership({
+      headers: input.request.headers,
+      regionIds: input.regionIds,
+      responseHeaders: input.responseHeaders,
+    })
+  }
+
   try {
-    const { session } = await requireExternalSession(input.request, 'uploads')
+    const { session } = await requireExternalSession(input.request, input.tokenScope)
     if (!(await isAdminOrRegionMember(session, input.regionIds))) {
-      throw new ExternalApiError(403, 'not_member', 'Not a member of a region of this upload')
+      throw new ExternalApiError(403, 'not_member', 'Not a member of a region of this file')
+    }
+    if (!input.tokenAccess) {
+      throw new ExternalApiError(
+        403,
+        'token_access_disabled',
+        'This file is not available with an external API token',
+      )
     }
     return null
   } catch (error) {

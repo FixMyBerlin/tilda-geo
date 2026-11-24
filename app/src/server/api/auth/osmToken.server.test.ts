@@ -17,10 +17,13 @@ vi.mock('@/server/db.server', () => ({
 
 import { exchangeOsmToken } from '@/server/api/auth/osmToken.server'
 import { handleExternalApiRequest } from '@/server/api/util/externalApiResponses.server'
+import { resetFailedAuthRateLimits } from '@/server/api/util/failedAuthRateLimit.server'
 import {
+  EXTERNAL_API_TOKEN_EXPIRED_RETENTION_MS,
   EXTERNAL_API_TOKEN_PREFIX,
   EXTERNAL_API_TOKEN_TTL_MS,
 } from '@/server/auth/externalApiToken.const'
+import { requireExternalSession } from '@/server/auth/externalSession.server'
 
 const OSM_TOKEN = 'osm-access-token-secret'
 
@@ -37,6 +40,7 @@ async function exchange(headers: Record<string, string>, query = '') {
 }
 
 beforeEach(() => {
+  resetFailedAuthRateLimits()
   fetchOsmUserDetails.mockReset()
   userFindUnique.mockReset()
   tokenCreate.mockReset()
@@ -113,8 +117,11 @@ describe('POST /api/auth/osm-token', () => {
     expect(stored).not.toContain(OSM_TOKEN)
     expect(stored).not.toContain(body.token)
     expect(tokenCreate.mock.calls[0]?.[0].data).toMatchObject({ scope: 'notes', userId: 'user-1' })
-    // Expired tokens are cleared on the way.
-    expect(tokenDeleteMany).toHaveBeenCalledWith({ where: { expiresAt: { lt: expect.any(Date) } } })
+    // Old tokens are cleared on the way; recently expired ones stay for `token_expired`.
+    const cutoff = tokenDeleteMany.mock.calls[0]?.[0].where.expiresAt.lt as Date
+    expect(Date.now() - cutoff.getTime()).toBeGreaterThanOrEqual(
+      EXTERNAL_API_TOKEN_EXPIRED_RETENTION_MS - 1000,
+    )
   })
 
   test('?scope=uploads issues a token of scope uploads', async () => {
@@ -148,5 +155,25 @@ describe('POST /api/auth/osm-token', () => {
     expect(body.info).toEqual({ allowed: ['notes', 'uploads'] })
     expect(fetchOsmUserDetails).not.toHaveBeenCalled()
     expect(tokenCreate).not.toHaveBeenCalled()
+  })
+})
+
+describe('rate limit of failed attempts', () => {
+  const failedExchange = () => exchange({})
+
+  test('429 with Retry-After after 20 failed exchanges; the exchange has its own bucket', async () => {
+    for (let attempt = 0; attempt < 20; attempt++) {
+      expect((await failedExchange()).response.status).toBe(401)
+    }
+    const { response, body } = await failedExchange()
+    expect(response.status).toBe(429)
+    expect(body.error).toBe('rate_limited')
+    expect(Number(response.headers.get('Retry-After'))).toBeGreaterThan(0)
+
+    // The API calls of the same IP are not locked out by failed exchanges.
+    const request = new Request('https://tilda-geo.de/api/notes/berlin/7')
+    await expect(requireExternalSession(request, 'notes')).rejects.toMatchObject({
+      code: 'missing_token',
+    })
   })
 })

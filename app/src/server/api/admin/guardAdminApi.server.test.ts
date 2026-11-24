@@ -8,6 +8,7 @@ vi.mock('@/server/db.server', () => ({
 }))
 
 import { ADMIN_API_TOKEN_PREFIX } from '@/server/admin/adminApiTokenPrefix.const'
+import { resetFailedAuthRateLimits } from '@/server/api/util/failedAuthRateLimit.server'
 import { guardAdminApi } from './guardAdminApi.server'
 
 const token = `${ADMIN_API_TOKEN_PREFIX}secret`
@@ -32,6 +33,7 @@ const tokenRow = (overrides: Record<string, unknown> = {}) => ({
 })
 
 beforeEach(() => {
+  resetFailedAuthRateLimits()
   adminApiTokenFindUnique.mockReset()
 })
 
@@ -65,5 +67,17 @@ describe('guardAdminApi', () => {
     const result = await guardAdminApi(request(`Bearer ${token}`))
     expect(result.access).toBe(true)
     expect(result.auth).toEqual({ tokenId: 'token-1', createdById: 'admin-1', changeSource: 'API' })
+  })
+
+  test('429 with Retry-After after 20 failed attempts of one IP', async () => {
+    const sameIp = () =>
+      new Request('https://tilda-geo.de/mcp', { headers: { 'x-forwarded-for': '10.9.9.9' } })
+    for (let attempt = 0; attempt < 20; attempt++) {
+      expect((await guardAdminApi(sameIp())).response?.status).toBe(401)
+    }
+
+    const limited = await guardAdminApi(sameIp())
+    expect(limited.response?.status).toBe(429)
+    expect(Number(limited.response?.headers.get('Retry-After'))).toBeGreaterThan(0)
   })
 })

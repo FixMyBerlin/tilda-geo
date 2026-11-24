@@ -1,10 +1,11 @@
 import { UserRoleEnum } from '@/prisma/generated/client'
 import { verifyAdminApiToken } from '@/server/admin/adminApiTokens.server'
 import {
+  failedAuthRetryAfterSeconds,
   getClientIp,
-  isAdminApiAuthRateLimited,
-  recordFailedAdminApiAuth,
-} from '@/server/api/admin/adminApiAuthRateLimit.server'
+  isFailedAuthRateLimited,
+  recordFailedAuth,
+} from '@/server/api/util/failedAuthRateLimit.server'
 import type { AuditChangeSource } from '@/server/audit/auditChangeSources.const'
 import type { AdminApiCaller } from '@/server/auth/memberCaller.server'
 
@@ -24,19 +25,25 @@ type GuardResult =
  * attribution (userId = token owner, changeSource API, adminTokenId) for write endpoints.
  */
 export async function guardAdminApi(request: Request): Promise<GuardResult> {
-  const clientIp = getClientIp(request)
-  if (isAdminApiAuthRateLimited(clientIp)) {
+  const rateLimitKey = `admin:${getClientIp(request)}`
+  if (isFailedAuthRateLimited(rateLimitKey)) {
     return {
       access: false,
       auth: null,
-      response: Response.json({ message: 'Too many requests' }, { status: 429 }),
+      response: Response.json(
+        { message: 'Too many requests' },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(failedAuthRetryAfterSeconds(rateLimitKey)) },
+        },
+      ),
     }
   }
 
   const header = request.headers.get('authorization') ?? request.headers.get('Authorization')
   const match = header?.match(/^Bearer\s+(.+)$/i)
   if (!match?.[1]) {
-    recordFailedAdminApiAuth(clientIp)
+    recordFailedAuth(rateLimitKey)
     return {
       access: false,
       auth: null,
@@ -46,7 +53,7 @@ export async function guardAdminApi(request: Request): Promise<GuardResult> {
 
   const verified = await verifyAdminApiToken(match[1].trim())
   if (!verified) {
-    recordFailedAdminApiAuth(clientIp)
+    recordFailedAuth(rateLimitKey)
     return {
       access: false,
       auth: null,
