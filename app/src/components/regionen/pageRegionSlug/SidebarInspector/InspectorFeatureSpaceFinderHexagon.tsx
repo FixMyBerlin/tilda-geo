@@ -35,6 +35,7 @@ import {
 import { spaceFinderOpenRunStatus } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/spaceFinderRunStatus'
 import { useSpaceFinderModeParam } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderModeParam'
 import { useSpaceFinderSelection } from '@/components/regionen/pageRegionSlug/modes/spaceFinder/useSpaceFinderSelection'
+import { Callout } from '@/components/shared/Callout/Callout'
 import { useIsAdmin } from '@/components/shared/hooks/useIsAdmin'
 import { parseEigendatenDetails } from '@/shared/regionen/spaceFinderEigendatenDetails'
 import {
@@ -290,10 +291,10 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
     <Disclosure title="Potenzialflächen-Hexagon">
       <div className="space-y-3 px-4 py-3">
         {runStatus?.status === 'stale' && (
-          <p className="rounded bg-amber-50 px-2 py-1 text-xs text-amber-800">
+          <Callout tone="notice" compact>
             {runStatus.outdatedReason ? `${runStatus.outdatedReason} — ` : ''}Ergebnis veraltet. Die
             Werte stammen aus der letzten Berechnung. Bitte neu berechnen.
-          </p>
+          </Callout>
         )}
 
         <div
@@ -321,9 +322,9 @@ export const InspectorFeatureSpaceFinderHexagon = ({ feature }: Props) => {
         </div>
 
         {exclusionTexts.map((text) => (
-          <div key={text} className="rounded bg-amber-100 px-3 py-2 text-xs text-amber-900">
-            <strong>Hinweis:</strong> {text}
-          </div>
+          <Callout key={text} tone="notice" compact>
+            {text}
+          </Callout>
         ))}
 
         {coarseCell && (

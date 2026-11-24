@@ -1,6 +1,6 @@
-import { ExclamationTriangleIcon } from '@heroicons/react/24/outline'
 import { useDeferredValue, useState } from 'react'
 import { twJoin } from 'tailwind-merge'
+import { Callout } from '@/components/shared/Callout/Callout'
 import {
   fieldErrorClass,
   inputBase,
@@ -51,12 +51,11 @@ export const USER_DATASET_MODE_OPTIONS = [
   ],
 ] as const satisfies readonly (readonly [UserDatasetMode, string, string])[]
 
-/** Amber hint when data lies (fully or partly) outside the Planungsgebiet. */
+/** Hint when data lies (fully or partly) outside the Planungsgebiet. */
 export const UserDatasetCoverageHint = ({ message }: { message: string }) => (
-  <p className="flex items-start gap-1 rounded bg-amber-50 px-2 py-1 text-xs text-amber-800">
-    <ExclamationTriangleIcon className="mt-px h-4 w-4 shrink-0" aria-hidden="true" />
-    <span>{message}</span>
-  </p>
+  <Callout tone="notice" compact>
+    {message}
+  </Callout>
 )
 
 /**

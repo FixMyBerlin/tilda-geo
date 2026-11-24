@@ -1,6 +1,7 @@
 import { feature, featureCollection } from '@turf/helpers'
 import { useEffect } from 'react'
 import { twJoin } from 'tailwind-merge'
+import { Callout } from '@/components/shared/Callout/Callout'
 import { comparableRunSnapshot } from '@/server/space-finder/factorFingerprint'
 import { areaInputFromRow } from '@/server/space-finder/mergeFactorConfig'
 import { spaceFinderDataNoteText } from '@/shared/regionen/spaceFinderDataNotes'
@@ -21,17 +22,14 @@ const StatusSection = ({ variant }: { variant: SpaceFinderVariantDetail }) => {
   return (
     <div className="flex flex-col gap-2 px-4 py-2">
       {status === 'stale' && (
-        <p className="rounded bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
+        <Callout tone="notice" compact>
           {outdatedReason ? `${outdatedReason} — ` : ''}Ergebnis veraltet. Bitte neu berechnen.
-        </p>
+        </Callout>
       )}
       {latestRun?.dataNotes.map((note) => (
-        <p
-          key={`${note.factor}:${note.reason}`}
-          className="rounded bg-amber-50 px-2 py-1.5 text-xs text-amber-800"
-        >
+        <Callout key={`${note.factor}:${note.reason}`} tone="notice" compact>
           {spaceFinderDataNoteText(note)}
-        </p>
+        </Callout>
       ))}
       {latestJob != null && <JobStatusBadge jobId={latestJob.id} variantId={variant.id} />}
       {status === 'none' && latestJob == null && (

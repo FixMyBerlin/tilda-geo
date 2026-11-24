@@ -20,6 +20,7 @@ import { useFeaturesParam } from '@/components/regionen/pageRegionSlug/hooks/use
 import { useMapParam } from '@/components/regionen/pageRegionSlug/hooks/useQueryState/useMapParam'
 import { spaceFinderCandidateListItemId } from '@/components/regionen/pageRegionSlug/Map/SourcesAndLayers/SourcesLayersSpaceFinder'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
+import { Callout } from '@/components/shared/Callout/Callout'
 import { CollapsibleBox } from '@/components/shared/CollapsibleBox/CollapsibleBox'
 import { buttonStylesSecondary } from '@/components/shared/links/styles'
 import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
@@ -216,20 +217,23 @@ export const SpaceFinderCandidatesSection = ({
       {/* Like `QaZoomNotice`: below FINE_HEXAGON_ZOOM clicks go to the coarse overview
           cells, which RegionMap does not accept as candidates. */}
       {selectActive && (mapParam?.zoom ?? 0) < FINE_HEXAGON_ZOOM && (
-        <div className="flex items-start justify-between gap-3 rounded border border-yellow-200 bg-yellow-50 px-2 py-1.5">
-          <p className="text-xs text-yellow-900">
-            Kandidaten lassen sich erst weiter hineingezoomt auswählen — vorher zeigt die Karte je
-            Zelle nur einen Überblick über die besten Flächen.
-          </p>
-          <button
-            type="button"
-            className={twJoin(modePanelSmallButtonClassName, 'shrink-0 border-yellow-300 bg-white')}
-            disabled={!map}
-            onClick={() => map?.zoomTo(FINE_HEXAGON_ZOOM, { duration: 600 })}
-          >
-            Hineinzoomen
-          </button>
-        </div>
+        <Callout
+          tone="notice"
+          compact
+          actions={
+            <button
+              type="button"
+              className={twJoin(modePanelSmallButtonClassName, 'border-yellow-300 bg-white')}
+              disabled={!map}
+              onClick={() => map?.zoomTo(FINE_HEXAGON_ZOOM, { duration: 600 })}
+            >
+              Hineinzoomen
+            </button>
+          }
+        >
+          Kandidaten lassen sich erst weiter hineingezoomt auswählen — vorher zeigt die Karte je
+          Zelle nur einen Überblick über die besten Flächen.
+        </Callout>
       )}
 
       {candidates.length === 0 ? (

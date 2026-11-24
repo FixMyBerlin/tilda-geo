@@ -5,6 +5,7 @@ import { useState } from 'react'
 import { useMap } from 'react-map-gl/maplibre'
 import { useSpaceFinderDrawActions } from '@/components/regionen/pageRegionSlug/hooks/mapState/space-finder-draw-store'
 import { useRegionSlug } from '@/components/regionen/pageRegionSlug/regionUtils/useRegionSlug'
+import { Callout } from '@/components/shared/Callout/Callout'
 import { useDebouncedValue } from '@/components/shared/hooks/useDebouncedValue'
 import {
   adminBoundariesQueryOptions,
@@ -97,11 +98,11 @@ export const BoundaryPicker = ({
   // „nichts gefunden“ and is reported in the list below.
   if (debouncedQuery === '' && boundaries.length === 0)
     return (
-      <div className="rounded border border-amber-300 bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
+      <Callout tone="notice" compact>
         Für diese Region sind keine Gebietsgrenzen verfügbar (Tabelle <code>public.boundaries</code>{' '}
         ist leer). Bitte über „Eigenes Gebiet“ ein Polygon zeichnen oder eine GeoJSON-Datei
         hochladen.
-      </div>
+      </Callout>
     )
 
   return (

@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { twJoin } from 'tailwind-merge'
+import { Callout } from '@/components/shared/Callout/Callout'
 import { fieldErrorClass } from '@/components/shared/form/fields/sharedStyles'
 import { Form } from '@/components/shared/form/Form'
 import { getErrorMessage } from '@/components/shared/toast/toastError'
@@ -97,10 +98,10 @@ const AreaEditorForm = ({
             <form.Subscribe selector={(state) => areaInputsChanged(state.values, savedValues)}>
               {(changed) =>
                 changed && (
-                  <p className="mx-3 mt-3 rounded bg-amber-50 px-2 py-1.5 text-xs text-amber-800">
+                  <Callout tone="notice" compact className="mx-3 mt-3">
                     Änderungen am Planungsgebiet (Gebiet, eigene Daten, Art oder Größe) markieren
                     bestehende Ergebnisse als veraltet. Bitte betroffene Varianten neu berechnen.
-                  </p>
+                  </Callout>
                 )
               }
             </form.Subscribe>
