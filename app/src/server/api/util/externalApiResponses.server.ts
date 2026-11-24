@@ -52,6 +52,15 @@ function toExternalApiError(error: unknown) {
   return new ExternalApiError(500, 'internal_error', 'An unexpected error occurred')
 }
 
+/** The JSON error answer with the headers of the external API (CORS, never cached). */
+export function externalApiErrorResponse(error: unknown, headers?: HeadersInit) {
+  const apiError = toExternalApiError(error)
+  return Response.json(errorBody(apiError), {
+    status: apiError.status,
+    headers: { ...externalApiCorsHeaders, ...headers, 'Cache-Control': 'no-store' },
+  })
+}
+
 /**
  * Runs one external notes API request: turns the handler's result into JSON, maps errors to
  * `{ error, message }` and adds the CORS headers.
@@ -65,8 +74,7 @@ export async function handleExternalApiRequest(
     const { status, body } = await handler()
     return Response.json(body, { status, headers })
   } catch (error) {
-    const apiError = toExternalApiError(error)
-    return Response.json(errorBody(apiError), { status: apiError.status, headers })
+    return externalApiErrorResponse(error)
   }
 }
 

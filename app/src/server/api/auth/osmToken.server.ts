@@ -4,7 +4,11 @@ import {
   recordFailedAdminApiAuth,
 } from '@/server/api/admin/adminApiAuthRateLimit.server'
 import { bearerToken, ExternalApiError } from '@/server/api/util/externalApiResponses.server'
-import type { ExternalApiTokenScope } from '@/server/auth/externalApiToken.const'
+import {
+  EXTERNAL_API_DEFAULT_SCOPE,
+  EXTERNAL_API_TOKEN_SCOPES,
+  type ExternalApiTokenScope,
+} from '@/server/auth/externalApiToken.const'
 import {
   createExternalApiToken,
   verifyExternalApiToken,
@@ -22,14 +26,26 @@ function assertNotRateLimited(request: Request) {
   }
 }
 
+function requestedScope(request: Request) {
+  const scope = new URL(request.url).searchParams.get('scope') ?? EXTERNAL_API_DEFAULT_SCOPE
+  const known = EXTERNAL_API_TOKEN_SCOPES.find((knownScope) => knownScope === scope)
+  if (!known) {
+    throw new ExternalApiError(400, 'invalid_input', 'Unknown scope', {
+      allowed: EXTERNAL_API_TOKEN_SCOPES,
+    })
+  }
+  return known
+}
+
 /**
  * Token exchange: the caller proves its OSM identity with an OSM OAuth2 access token and gets a
- * short-lived TILDA token for the notes endpoints. The OSM token is only passed on to OSM to ask
+ * short-lived TILDA token for one scope (`?scope=notes` (default) or `?scope=uploads`). The OSM token is only passed on to OSM to ask
  * who it belongs to — it is never stored or logged. No user is created here: the mapper has to
  * sign in to TILDA once.
  */
 export async function exchangeOsmToken(request: Request) {
   assertNotRateLimited(request)
+  const scope = requestedScope(request)
 
   const osmAccessToken = bearerToken(request)
   if (!osmAccessToken) {
@@ -69,7 +85,6 @@ export async function exchangeOsmToken(request: Request) {
     )
   }
 
-  const scope = 'notes' satisfies ExternalApiTokenScope
   const { token, expiresAt } = await createExternalApiToken({ userId: user.id, scope })
   return {
     token,

@@ -6,14 +6,43 @@ import { proxyExternalUrl } from '@/server/api/uploads/proxyExternalUrl'
 import { proxyS3Url } from '@/server/api/uploads/proxyS3Url.server'
 import { staticDatasetUploadFormats } from '@/server/api/uploads/staticDatasetUploadFormats.const'
 import { notFoundJson } from '@/server/api/util/apiJsonResponses.server'
-import { guardRegionMembership } from '@/server/api/util/authGuards.server'
+import {
+  guardRegionMembership,
+  guardRegionMembershipBearer,
+  hasBearerToken,
+} from '@/server/api/util/authGuards.server'
 import { corsHeaders } from '@/server/api/util/cors'
 import db from '@/server/db.server'
+
+// A browser on another origin sends the Bearer token, which makes the request non-simple.
+const preflightResponse = () =>
+  new Response(null, {
+    status: 204,
+    headers: {
+      ...corsHeaders,
+      'Access-Control-Allow-Methods': 'GET, OPTIONS',
+      'Access-Control-Allow-Headers':
+        'Authorization, Content-Type, Accept, Accept-Encoding, Range, If-None-Match',
+      'Access-Control-Max-Age': '600',
+    },
+  })
+
+/**
+ * The answer depends on who asks: shared caches must not keep it, and the browser has to ask again
+ * each time (If-None-Match gives a cheap 304 once the token is checked).
+ */
+function withPrivateCaching(response: Response) {
+  const headers = new Headers(response.headers)
+  headers.set('Cache-Control', 'private, no-cache')
+  headers.append('Vary', 'Authorization')
+  return new Response(response.body, { status: response.status, headers })
+}
 
 export const Route = createFileRoute('/api/uploads/$slug')({
   ssr: false,
   server: {
     handlers: {
+      OPTIONS: preflightResponse,
       GET: async ({ request, params }) => {
         const { slug } = params
 
@@ -65,16 +94,34 @@ export const Route = createFileRoute('/api/uploads/$slug')({
           )
         }
 
+        let tokenAuthenticated = false
         if (!upload.public) {
-          const authResponse = await guardRegionMembership({
-            headers: request.headers,
-            regionIds: upload.regions.map((region) => region.id),
-            responseHeaders: corsHeaders,
-          })
-          if (authResponse) {
-            return authResponse
+          const regionIds = upload.regions.map((region) => region.id)
+          // A Bearer token is used on its own (no cookie fallback), so its errors say what is wrong.
+          if (hasBearerToken(request)) {
+            const authResponse = await guardRegionMembershipBearer({
+              request,
+              regionIds,
+              responseHeaders: corsHeaders,
+            })
+            if (authResponse) {
+              return authResponse
+            }
+            tokenAuthenticated = true
+          } else {
+            const authResponse = await guardRegionMembership({
+              headers: request.headers,
+              regionIds,
+              responseHeaders: corsHeaders,
+            })
+            if (authResponse) {
+              return authResponse
+            }
           }
         }
+
+        const finish = (response: Response) =>
+          tokenAuthenticated ? withPrivateCaching(response) : response
 
         if (extension === 'csv') {
           const geojsonUrl = upload.geojsonUrl
@@ -84,16 +131,18 @@ export const Route = createFileRoute('/api/uploads/$slug')({
               { status: 500, headers: corsHeaders },
             )
           }
-          return handleCsvExport(geojsonUrl, baseName)
+          return finish(await handleCsvExport(geojsonUrl, baseName))
         }
 
         if (upload.externalSourceUrl && upload.cacheTtlSeconds) {
-          return proxyExternalUrl(
-            request,
-            upload.externalSourceUrl,
-            upload.cacheTtlSeconds,
-            extension as MapDataSourceExternalRenderFormat,
-            baseName,
+          return finish(
+            await proxyExternalUrl(
+              request,
+              upload.externalSourceUrl,
+              upload.cacheTtlSeconds,
+              extension as MapDataSourceExternalRenderFormat,
+              baseName,
+            ),
           )
         }
 
@@ -105,7 +154,7 @@ export const Route = createFileRoute('/api/uploads/$slug')({
           )
         }
         const downloadFilename = extension === 'geojson' ? `${baseName}.geojson` : undefined
-        return proxyS3Url(request, fileUrl, downloadFilename)
+        return finish(await proxyS3Url(request, fileUrl, downloadFilename))
       },
     },
   },

@@ -24,8 +24,8 @@ import {
 
 const OSM_TOKEN = 'osm-access-token-secret'
 
-async function exchange(headers: Record<string, string>) {
-  const request = new Request('https://tilda-geo.de/api/auth/osm-token', {
+async function exchange(headers: Record<string, string>, query = '') {
+  const request = new Request(`https://tilda-geo.de/api/auth/osm-token${query}`, {
     method: 'POST',
     headers,
   })
@@ -115,5 +115,38 @@ describe('POST /api/auth/osm-token', () => {
     expect(tokenCreate.mock.calls[0]?.[0].data).toMatchObject({ scope: 'notes', userId: 'user-1' })
     // Expired tokens are cleared on the way.
     expect(tokenDeleteMany).toHaveBeenCalledWith({ where: { expiresAt: { lt: expect.any(Date) } } })
+  })
+
+  test('?scope=uploads issues a token of scope uploads', async () => {
+    const { response, body } = await exchange(
+      { Authorization: `Bearer ${OSM_TOKEN}` },
+      '?scope=uploads',
+    )
+
+    expect(response.status).toBe(201)
+    expect(body.scope).toBe('uploads')
+    expect(tokenCreate.mock.calls[0]?.[0].data).toMatchObject({
+      scope: 'uploads',
+      userId: 'user-1',
+    })
+  })
+
+  test('?scope=notes is the same as no scope', async () => {
+    const { body } = await exchange({ Authorization: `Bearer ${OSM_TOKEN}` }, '?scope=notes')
+
+    expect(body.scope).toBe('notes')
+  })
+
+  test('unknown scope is 400 invalid_input; OSM is not asked and no token is created', async () => {
+    const { response, body } = await exchange(
+      { Authorization: `Bearer ${OSM_TOKEN}` },
+      '?scope=admin',
+    )
+
+    expect(response.status).toBe(400)
+    expect(body.error).toBe('invalid_input')
+    expect(body.info).toEqual({ allowed: ['notes', 'uploads'] })
+    expect(fetchOsmUserDetails).not.toHaveBeenCalled()
+    expect(tokenCreate).not.toHaveBeenCalled()
   })
 })

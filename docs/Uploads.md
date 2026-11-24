@@ -40,7 +40,7 @@ Proxies: `proxyS3Url.server.ts` (S3) and `proxyExternalUrl.ts` (external + file 
 ### Auth
 
 - `public: true` — anyone
-- `public: false` — admin, or member of a related region
+- `public: false` — admin, or member of a related region. Logged in with the cookie, or (browser app on another origin) with `Authorization: Bearer <TILDA token with scope uploads>`; see [External-Notes-API.md](External-Notes-API.md#scope-uploads). Answers to a token are `Cache-Control: private, no-cache`.
 
 ## Region uploads (logos, welcome images)
 
