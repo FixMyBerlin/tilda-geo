@@ -126,6 +126,9 @@ CREATE TABLE IF NOT EXISTS space_finder.scenario_vegetation (
 -- NDVI threshold the areas were computed with. A later run only reuses them
 -- (worker._find_reusable_vegetation) at the same threshold; NULL = legacy rows.
 ALTER TABLE space_finder.scenario_vegetation ADD COLUMN IF NOT EXISTS ndvi_min real;
+-- Aerial image source the areas come from (CirSource.key, e.g. "berlin"). Reuse
+-- also needs the same source; NULL = legacy rows, recomputed once.
+ALTER TABLE space_finder.scenario_vegetation ADD COLUMN IF NOT EXISTS cir_source text;
 
 -- Buffered carriageway areas (public._parking_roads, width as buffer), stored per
 -- run. Only filled when „Fahrbahnen ausschließen" was active

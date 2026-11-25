@@ -14,8 +14,8 @@ Core code: [`scoring/vegetation.py`](scoring/vegetation.py).
 2. **NDVI per tile** – `NDVI = (NIR − Red) / (NIR + Red)` (band 1 = NIR, band 2 = red),
    mask `NDVI > ndvi_min` (per source, see below), morphological closing, polygonization, simplification,
    removal of small holes/areas.
-3. **Merge & clip** to the study area → GeoDataFrame (EPSG:25832) with
-   `geometry`, `ndvi`, `flaeche_m2`, `ndvi_min`.
+3. **Merge & clip** to the study area → GeoDataFrame (in the source CRS) with
+   `geometry`, `ndvi`, `flaeche_m2`, `ndvi_min`, `cir_source`.
 
 ### Parameters (1:1 from the standalone Flächenfinder)
 
@@ -32,33 +32,57 @@ Tiles are fetched at runtime via **WMS GetMap**; each source is a
 `CirSource` in [`scoring/cir_sources.py`](scoring/cir_sources.py).
 Everywhere NIR = band 1, red = band 2, ground resolution 0.2 m.
 
-| Source                       | `cir_source` | CRS        | Tile   | Image        | Format | `ndvi_min` |
-| ---------------------------- | ------------ | ---------- | ------ | ------------ | ------ | ---------- |
-| Bayern DOP20 CIR             | `bayern`     | EPSG:25832 | 1000 m | 5000×5000 px | TIFF   | 0.1        |
-| Brandenburg/Berlin DOP20 CIR | `bb`         | EPSG:25833 | 1000 m | 5000×5000 px | PNG    | 0.2        |
-| Hessen DOP20 CIR             | `hessen`     | EPSG:25832 | 500 m  | 2500×2500 px | TIFF   | 0.1        |
+| Source                           | `cir_source` | CRS        | Tile   | Image        | Format | `ndvi_min` |
+| -------------------------------- | ------------ | ---------- | ------ | ------------ | ------ | ---------- |
+| Bayern DOP20 CIR                 | `bayern`     | EPSG:25832 | 1000 m | 5000×5000 px | TIFF   | 0.1        |
+| Berlin TrueDOP20 CIR Sommer 2025 | `berlin`     | EPSG:25833 | 1000 m | 5000×5000 px | TIFF   | 0.25       |
+| Brandenburg/Berlin DOP20 CIR     | `bb`         | EPSG:25833 | 1000 m | 5000×5000 px | PNG    | 0.1        |
+| Hessen DOP20 CIR                 | `hessen`     | EPSG:25832 | 500 m  | 2500×2500 px | TIFF   | 0.1        |
 
 **NDVI threshold per source.** Measured in November 2026 against OSM buildings and
-green areas (one inner-city tile each):
+green areas (Bayern/Hessen: one inner-city tile each):
 
 | Tile               | Roofs: median NDVI | Roofs > 0.1 | Green: median NDVI | Green > threshold |
 | ------------------ | ------------------ | ----------- | ------------------ | ----------------- |
 | München (Bayern)   | −0.22              | 2 %         | 0.39               | 86 %              |
 | Frankfurt (Hessen) | −0.13              | 4 %         | 0.27               | 86 %              |
-| Neukölln (BB)      | +0.09              | 46 %        | 0.29               | 79 % (> 0.2)      |
 
-The BB WMS serves display-stretched 8-bit PNGs, so roofs and asphalt sit about 0.3
-higher than in the Bayern and Hessen TIFFs. With 0.1, half of Neukölln's roofs and
-asphalt counted as green and the closing merged them into blocks of 80,000 m².
-At 0.2 about 11 % of roofs and asphalt still pass. Re-measure when adding a source.
+Berlin and Brandenburg (7 Berlin tiles: Neukölln, Alexanderplatz, Tiergarten,
+Siemensstadt, Marienfelde, Zehlendorf, Hellersdorf; 4 Brandenburg tiles: Potsdam,
+Cottbus, Fürstenwalde, Luckenwalde). Share of pixels above the threshold, mean over
+the tiles:
+
+| Images                                 | Threshold | Roofs  | Park/lawn | Wood   |
+| -------------------------------------- | --------- | ------ | --------- | ------ |
+| `berlin` (summer 2025)                 | 0.2       | 7.6 %  | 89.9 %    | 97.7 % |
+| `berlin` (summer 2025)                 | **0.25**  | 4.7 %  | 87.2 %    | 96.9 % |
+| `berlin` (summer 2025)                 | 0.3       | 2.5 %  | 83.2 %    | 95.2 % |
+| `bb` inside Berlin (spring, no leaves) | 0.2       | 17.8 % | 80.1 %    | 87.3 % |
+| `bb` outside Berlin (summer)           | **0.1**   | 4.1 %  | 70.6 %    | 83.9 % |
+| `bb` outside Berlin (summer)           | 0.2       | 1.5 %  | 53.9 %    | 68.0 % |
+
+The BB WMS shows summer images outside Berlin, but a spring flight without leaves
+for Berlin itself, display-stretched so that roofs and asphalt sit at NDVI ~0.1.
+Berlin therefore has its own source with the summer flight of 11–12 August 2025.
+Roads and squares under street trees reach the Berlin threshold more often
+(15–22 %); that is canopy, not a misclassification. Green areas in Brandenburg
+stay at about 70 % because of dry lawns in late summer. Re-measure when adding a
+source or a newer flight. Other Berlin flights: TrueDOP 2024 (spring, NIR only as
+2 km JP2 download, roofs 12 % / green 79 % at 0.2) and 2026 (no leaves) are worse.
 
 `cir_source: "auto"` (default) picks the source whose coverage contains the study area
-centroid (rough lon/lat rectangles per state, `AUTO_COVERAGE_LONLAT` in
-`cir_sources.py`; checked Hessen → Bayern → Brandenburg/Berlin, first match wins).
+centroid (rough lon/lat rectangles per state and a simplified outline of Berlin,
+`AUTO_COVERAGE_LONLAT` in `cir_sources.py` and `scoring/berlin_outline.py`; checked
+Hessen → Bayern → Berlin → Brandenburg, first match wins).
 Outside all of them (e.g. Köln, Hamburg) there is **no** source: the run goes on without
 vegetation and the progress text says "übersprungen, keine Luftbilder für dieses Gebiet".
 The rectangles are approximate at the state borders; set `cir_source` explicitly there.
 An explicit `cir_source` is always used, wherever the area lies.
+
+> **Berlin: images end at the city border.** The Berlin WMS paints everything outside
+> Berlin white (NDVI 0), also whole tiles beyond the border. A study area centred in Berlin that
+> reaches into Brandenburg gets no vegetation beyond the border; set `cir_source: "bb"`
+> for such areas if that part matters.
 
 > **Hessen: the 500 m grid is mandatory.** The MapServer behind the HVBG WMS hard-limits
 > `WIDTH`/`HEIGHT` to **3000 px** and above that returns a ServiceException instead of
@@ -72,8 +96,9 @@ rest of the scoring runs normally.
 Each km² takes ~100–200 MB – the first run for a larger area downloads accordingly.
 A failed run is **not** reused as a cache hit (see `_find_reusable_vegetation` in
 `worker.py`); otherwise a single WMS outage would keep all later runs of the same
-variant empty. Areas are only reused when they were computed with the same
-`ndvi_min` (stored per row; legacy rows without it are recomputed).
+variant empty. Areas are only reused when they were computed from the same source
+with the same `ndvi_min` (both stored per row; legacy rows without them are
+recomputed).
 
 ## Scoring integration
 
@@ -100,7 +125,7 @@ variant empty. Areas are only reused when they were computed with the same
 ## Storage & tiles
 
 - Table `space_finder.scenario_vegetation` (`run_id`, `geom` MultiPolygon/3857, `ndvi`,
-  `flaeche_m2`, `ndvi_min`) – per run, immutable. Schema: [`sql/schema.sql`](sql/schema.sql).
+  `flaeche_m2`, `ndvi_min`, `cir_source`) – per run, immutable. Schema: [`sql/schema.sql`](sql/schema.sql).
 - Tile function `space_finder.space_finder_vegetation(z,x,y,{run_id})` – see
   [`sql/martin_functions.sql`](sql/martin_functions.sql). Not published through Martin; the app
   serves the tiles to members only (`/api/regions/:slug/space-finder-tiles/vegetation/...`).
@@ -116,13 +141,15 @@ variant empty. Areas are only reused when they were computed with the same
 
 ## Configuration (env)
 
-| Variable                              | Default              | Purpose                          |
-| ------------------------------------- | -------------------- | -------------------------------- |
-| `SPACE_FINDER_CIR_DIR`                | `/cir`               | Tile cache directory             |
-| `SPACE_FINDER_CIR_DOWNLOAD`           | `1`                  | Auto-download (`0` = cache only) |
-| `SPACE_FINDER_CIR_WMS_URL`            | Bayern WMS           | WMS endpoint                     |
-| `SPACE_FINDER_CIR_WMS_LAYER`          | `by_dop20cir_bayern` | WMS layer                        |
-| `SPACE_FINDER_CIR_DOWNLOAD_TIMEOUT_S` | `180`                | Timeout per tile                 |
+| Variable                              | Default                   | Purpose                          |
+| ------------------------------------- | ------------------------- | -------------------------------- |
+| `SPACE_FINDER_CIR_DIR`                | `/cir`                    | Tile cache directory             |
+| `SPACE_FINDER_CIR_DOWNLOAD`           | `1`                       | Auto-download (`0` = cache only) |
+| `SPACE_FINDER_CIR_WMS_URL`            | Bayern WMS                | WMS endpoint                     |
+| `SPACE_FINDER_CIR_WMS_LAYER`          | `by_dop20cir_bayern`      | WMS layer                        |
+| `SPACE_FINDER_CIR_BE_WMS_URL`         | Berlin summer 2025        | WMS endpoint Berlin              |
+| `SPACE_FINDER_CIR_BE_WMS_LAYER`       | `truedop_2025_sommer_cir` | WMS layer Berlin                 |
+| `SPACE_FINDER_CIR_DOWNLOAD_TIMEOUT_S` | `180`                     | Timeout per tile                 |
 
 ## Dependencies
 

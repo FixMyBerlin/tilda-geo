@@ -79,10 +79,10 @@ def write_results(
         vg["geom"] = vg["geom"].apply(_to_multipolygon)
         vg = vg[vg["geom"].notna()]
         vg["run_id"] = run_id
-        for col in ("ndvi", "flaeche_m2", "ndvi_min"):
+        for col in ("ndvi", "flaeche_m2", "ndvi_min", "cir_source"):
             if col not in vg.columns:
                 vg[col] = None
-        vg = vg.set_geometry("geom")[["run_id", "geom", "ndvi", "flaeche_m2", "ndvi_min"]]
+        vg = vg.set_geometry("geom")[["run_id", "geom", "ndvi", "flaeche_m2", "ndvi_min", "cir_source"]]
         if len(vg):
             vg.to_postgis("scenario_vegetation", engine, schema="space_finder", if_exists="append", index=False)
         veg_count = len(vg)

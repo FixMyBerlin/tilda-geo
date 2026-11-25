@@ -2,8 +2,9 @@
 
 Source-agnostic: band layout, CRS and download logic come from the
 CirSource object (cir_sources.py). Currently supported: Bayern DOP20 CIR
-(EPSG:25832, WMS, NIR=B1), Hessen DOP20 CIR (EPSG:25832, WMS, NIR=B1) and
-Brandenburg/Berlin DOP20 CIR (EPSG:25833, WMS, NIR=B1).
+(EPSG:25832, WMS, NIR=B1), Hessen DOP20 CIR (EPSG:25832, WMS, NIR=B1),
+Brandenburg/Berlin DOP20 CIR and Berlin TrueDOP20 CIR summer 2025
+(both EPSG:25833, WMS, NIR=B1).
 
 Processing:
   1. Project study area → source CRS
@@ -163,9 +164,10 @@ def compute_vegetation_areas(
 
     `study_area_geom` is in EPSG:4326. `source` determines the tile source, CRS
     and band layout. Returns a GeoDataFrame in `source.crs` with the columns
-    `geometry`, `ndvi`, `flaeche_m2`, `ndvi_min` – clipped to the study area.
-    `ndvi_min` defaults to the source's threshold; it is stored with the rows so
-    a later run only reuses areas computed with the same threshold.
+    `geometry`, `ndvi`, `flaeche_m2`, `ndvi_min`, `cir_source` – clipped to the
+    study area. `ndvi_min` defaults to the source's threshold; both are stored
+    with the rows so a later run only reuses areas computed from the same
+    source with the same threshold.
 
     `progress_cb(fraction: float, label: str)` is optionally called with 0.0–1.0.
     """
@@ -258,6 +260,7 @@ def compute_vegetation_areas(
     gdf["flaeche_m2"] = gdf.geometry.area.round(2)
     gdf = gdf[gdf["flaeche_m2"] >= MIN_FLAECHE_M2].reset_index(drop=True)
     gdf["ndvi_min"] = ndvi_min
+    gdf["cir_source"] = source.key
 
     print(
         f"   ✓ {len(gdf)} vegetation areas "

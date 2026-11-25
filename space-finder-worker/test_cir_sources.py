@@ -4,7 +4,9 @@ import unittest
 
 from shapely.geometry import Point
 
-from scoring.cir_sources import SOURCE_BAYERN, SOURCE_BB, SOURCE_HESSEN, resolve_source
+from scoring.cir_sources import (
+    SOURCE_BAYERN, SOURCE_BB, SOURCE_BERLIN, SOURCE_HESSEN, resolve_source,
+)
 
 
 def area(lon, lat):
@@ -17,9 +19,17 @@ class TestResolveSourceAuto(unittest.TestCase):
         self.assertIs(resolve_source("auto", area(11.58, 48.14)), SOURCE_BAYERN)  # München
         self.assertIs(resolve_source("auto", area(11.08, 49.45)), SOURCE_BAYERN)  # Nürnberg
 
-    def test_brandenburg_berlin(self):
-        self.assertIs(resolve_source("auto", area(13.40, 52.52)), SOURCE_BB)  # Berlin
+    def test_berlin(self):
+        self.assertIs(resolve_source("auto", area(13.40, 52.52)), SOURCE_BERLIN)  # Mitte
+        self.assertIs(resolve_source("auto", area(13.44, 52.48)), SOURCE_BERLIN)  # Neukölln
+        self.assertIs(resolve_source("auto", area(13.60, 52.54)), SOURCE_BERLIN)  # Hellersdorf
+        self.assertIs(resolve_source("auto", area(13.20, 52.54)), SOURCE_BERLIN)  # Spandau
+
+    def test_brandenburg_around_berlin(self):
+        # Inside the Brandenburg rectangle but outside Berlin's outline.
         self.assertIs(resolve_source("auto", area(13.06, 52.40)), SOURCE_BB)  # Potsdam
+        self.assertIs(resolve_source("auto", area(13.24, 52.40)), SOURCE_BB)  # Kleinmachnow
+        self.assertIs(resolve_source("auto", area(13.53, 52.39)), SOURCE_BB)  # Schönefeld
         self.assertIs(resolve_source("auto", area(14.33, 51.76)), SOURCE_BB)  # Cottbus
 
     def test_hessen(self):
@@ -38,6 +48,7 @@ class TestResolveSourceExplicit(unittest.TestCase):
         koeln = area(6.96, 50.94)
         self.assertIs(resolve_source("bayern", koeln), SOURCE_BAYERN)
         self.assertIs(resolve_source("bb", koeln), SOURCE_BB)
+        self.assertIs(resolve_source("berlin", koeln), SOURCE_BERLIN)
         self.assertIs(resolve_source("hessen", koeln), SOURCE_HESSEN)
 
     def test_unknown_key_returns_none(self):

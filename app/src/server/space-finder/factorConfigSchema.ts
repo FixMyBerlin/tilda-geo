@@ -15,7 +15,7 @@ const variantFactorConfigShape = {
   eigendaten_weights: z.record(z.string(), z.number().min(0).max(1)).optional(),
   vegetation_direction: z.enum(['positive', 'negative']).optional(),
   platz_direction: z.enum(['positive', 'negative']).optional(),
-  cir_source: z.enum(['auto', 'bayern', 'bb', 'hessen']).optional(),
+  cir_source: z.enum(['auto', 'bayern', 'bb', 'berlin', 'hessen']).optional(),
   max_cyclepath_dist_m: z.number().optional(),
   exclude_carriageways: z.boolean().optional(),
   intersection_radius_m: z.number().optional(),

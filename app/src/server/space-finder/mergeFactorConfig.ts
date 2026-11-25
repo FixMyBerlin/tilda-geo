@@ -12,7 +12,7 @@ export type VariantFactorConfig = {
   weights?: Record<string, number>
   vegetation_direction?: 'positive' | 'negative'
   platz_direction?: 'positive' | 'negative'
-  cir_source?: 'auto' | 'bayern' | 'bb' | 'hessen'
+  cir_source?: 'auto' | 'bayern' | 'bb' | 'berlin' | 'hessen'
   max_cyclepath_dist_m?: number
   exclude_carriageways?: boolean
   intersection_radius_m?: number
