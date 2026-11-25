@@ -9,7 +9,7 @@ import {
 import { getLayerHighlightId } from '../utils/layerHighlight'
 import { LayersWithHighlights } from './LayersWithHighlights'
 import { buildUploadLayerProps, type RenderableUploadLayer } from './utils/buildUploadLayerProps'
-import { createPmtilesUrl } from './utils/createPmtilesUrl'
+import { createPmtilesUrl } from './utils/pmtilesProtocol'
 
 // The static datasets selected in the URL. System datasets: `SourcesLayersSystemDatasets`.
 // Sources and layers are two components, see <AllSources> and <AllLayers>.
