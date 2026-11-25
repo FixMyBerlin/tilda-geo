@@ -208,7 +208,7 @@ export const NoticeMaprouletteTask = ({
       </div>
       <Markdown
         markdown={text}
-        className="prose-sm marker:text-purple-700 [&>p:first-child]:mt-0"
+        className="prose-sm max-w-none marker:text-purple-700 [&>p:first-child]:mt-0"
       />
     </>
   )

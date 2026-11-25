@@ -21,7 +21,7 @@ export const NoticeTransformedGeometry = ({ sourceId, properties }: Props) => {
   if (!properties.prefix && !isBicycleParking) return null
 
   return (
-    <details className="prose prose-sm bg-indigo-200 p-1 px-4 py-1.5">
+    <details className="prose prose-sm max-w-none bg-indigo-200 p-1 px-4 py-1.5">
       <summary className="cursor-pointer hover:font-semibold">
         Hinweis: Transformierte Geometrie
       </summary>

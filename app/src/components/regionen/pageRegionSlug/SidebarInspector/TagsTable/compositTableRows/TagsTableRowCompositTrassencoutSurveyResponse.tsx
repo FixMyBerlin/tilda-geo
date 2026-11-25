@@ -44,11 +44,11 @@ export const TagsTableRowCompositTrassencoutSurveyResponse = ({ properties }: Co
           <Pill color="gray">{properties.category}</Pill>
         </p>
         <hr />
-        <Markdown markdown={properties.text} />
+        <Markdown className="max-w-none" markdown={properties.text} />
 
         {properties.answer ? (
           <div className="-mt-2 -mr-2 -ml-2 bg-gray-800 px-2 py-2.5">
-            <Markdown className="prose-invert" markdown={properties.answer} />
+            <Markdown className="max-w-none prose-invert" markdown={properties.answer} />
           </div>
         ) : null}
       </td>
