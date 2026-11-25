@@ -17,9 +17,9 @@ These scripts manage geodata files, which are made public or semi-public in tild
 - [Install Bun](https://bun.sh/docs/installation)
   - macOS `brew tap oven-sh/bun && brew install bun`
   - Archlinux `yay -S bun-bin`
-- [Install felt/tippecanoe](https://github.com/felt/tippecanoe/blob/main/README.md#installation) — also listed under [Host binaries](../../README.md#host-binaries-local-vs-server)
-  - macOS `brew install tippecanoe`
-  - Archlinux `yay -S tippecanoe`
+- [Install manby](https://github.com/birkskyum/manby), a more modern Rust alternative to [tippecanoe](https://github.com/felt/tippecanoe), with MLT support — also listed under [Host binaries](../../README.md#host-binaries-local-vs-server)
+  - `rustup toolchain install 1.98.1 && cargo +1.98.1 install manby --features mlt`
+  - manby takes tippecanoe's options and makes the same tiles. We use it because it writes [MapLibre Tiles (MLT)](https://github.com/birkskyum/manby#maplibre-tiles), which tippecanoe cannot. The PMTiles files are smaller; the app reads the tile type from the PMTiles header.
 - [GDAL](https://gdal.org) 3.8+ (`ogr2ogr`) for GeoPackage → GeoJSON and CRS/precision. Not needed for `bun run dev`.
   - macOS `brew install gdal`
 - Setup [`tilda-static-data`](https://github.com/FixMyBerlin/tilda-static-data), see README.

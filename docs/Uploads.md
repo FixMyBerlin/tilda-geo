@@ -27,7 +27,7 @@ Per-layer “Ansichten” come from `meta.ts` `configs[]` (field `categoryKey`).
 
 Configured in `meta.ts`:
 
-- **`local`** — GeoJSON → tippecanoe → PMTiles; files uploaded to S3; DB row points at those URLs.
+- **`local`** — GeoJSON → manby → PMTiles (MLT tiles); files uploaded to S3; DB row points at those URLs.
 - **`external`** — DB row points at `externalSourceUrl` with `cacheTtlSeconds`; API caches the remote file on the server.
 
 ### API

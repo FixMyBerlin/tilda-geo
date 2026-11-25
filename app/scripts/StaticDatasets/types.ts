@@ -140,9 +140,9 @@ export type MetaDataUser = MetaDataFileLevelMetadata &
         systemLayer?: false | undefined
         /** @desc Data source type: source data local file from disk (Github) and S3 on the server */
         dataSourceType: 'local'
-        /** @desc Change the tippecanoe settings  */
+        /** @desc Change the manby (tippecanoe options) settings  */
         geometricPrecision?: 'mask' | 'regular' | 'high' | null
-        /** @desc Lowest zoom level of the PMTiles (tippecanoe `--minimum-zoom`). Default: 7. Lower it for datasets that should be visible for all of Germany (5) */
+        /** @desc Lowest zoom level of the PMTiles (manby/tippecanoe `--minimum-zoom`). Default: 7. Lower it for datasets that should be visible for all of Germany (5) */
         minZoom?: number
         /** @desc Which file format to use for map rendering. Default: 'auto' (PMTiles for large files, GeoJSON for small) */
         mapRenderFormat?: 'pmtiles' | 'geojson' | 'auto'
@@ -181,9 +181,9 @@ export type MetaDataSystemLayer = MetaDataFileLevelMetadata & {
   systemLayer: true
   /** @desc Data source type: source data local file from disk (Github) and S3 on the server */
   dataSourceType: 'local'
-  /** @desc Change the tippecanoe settings  */
+  /** @desc Change the manby (tippecanoe options) settings  */
   geometricPrecision?: 'mask' | 'regular' | 'high' | null
-  /** @desc Lowest zoom level of the PMTiles (tippecanoe `--minimum-zoom`). Default: 7 */
+  /** @desc Lowest zoom level of the PMTiles (manby/tippecanoe `--minimum-zoom`). Default: 7 */
   minZoom?: number
   /** @desc Which file format to use for map rendering. Default: 'auto' (PMTiles for large files, GeoJSON for small) */
   mapRenderFormat?: 'pmtiles' | 'geojson'

@@ -34,7 +34,7 @@ Run `nvm use` for Prisma and Playwright (they spawn Node; `bun run dev` uses Bun
 
 ### Host binaries (local vs server)
 
-The app looks up `ogr2ogr`, `pg_restore`, and `tippecanoe` on **PATH**. They are only used when you run the features below.
+The app looks up `ogr2ogr`, `pg_restore`, and `manby` on **PATH**. They are only used when you run the features below.
 
 #### Staging / production
 
@@ -50,11 +50,11 @@ Already in the app image ([`app.Dockerfile` L14–L17](../app.Dockerfile#L14-L17
 - **PostgreSQL client** (`pg_restore`)
   - Used: `/admin/data-schema` **Import**. Must match the dump major ([data-schema README](../data-schema/README.md#postgres-major-versions)). Staging/production: `postgresql-client` in the app image.
   - Install: `brew install libpq`. Homebrew does not put `pg_restore` on PATH (keg-only). Add `export PATH="$(brew --prefix libpq)/bin:$PATH"` to `~/.zshrc`, then `source ~/.zshrc` or open a new terminal, then start `bun run dev`.
-- **tippecanoe**
+- **manby** (with MLT support)
   - Used: static-dataset PMTiles on the laptop. See [StaticDatasets README](./scripts/StaticDatasets/README.md).
-  - Install: `brew install tippecanoe`
+  - Install: `cargo +1.98.1 install manby --features mlt` (needs `rustup toolchain install 1.98.1`). The release binaries include MLT too.
 
-Linux: `eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"` puts `brew` (and `gdal` / `tippecanoe`) on PATH ([Homebrew on Linux](https://docs.brew.sh/Homebrew-on-Linux)). `libpq` is still keg-only — use the PATH line above for `pg_restore`.
+Linux: `eval "$(/home/linuxbrew/.linuxbrew/bin/brew shellenv)"` puts `brew` (and `gdal`) on PATH ([Homebrew on Linux](https://docs.brew.sh/Homebrew-on-Linux)). `libpq` is still keg-only — use the PATH line above for `pg_restore`.
 
 Note: `pg_dump` and `psql` are not on this list. `data-schema-publish` and `db-pull` run them in Docker, so you do not install those on the host.
 
