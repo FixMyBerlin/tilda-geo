@@ -28,6 +28,8 @@ const bboxBiBi: TopicConfigBbox = [9.0671, 48.9229, 9.1753, 48.9838]
 const bboxLoerrach: TopicConfigBbox = [7.63351, 47.5919, 7.72901, 47.67736]
 const bboxFriedberg: TopicConfigBbox = [8.611736, 50.267728, 8.897381, 50.417597]
 const bboxMuenchen: TopicConfigBbox = [11.25, 47.991071, 11.821289, 48.304436]
+// FrankfurtRheinMain: extent of the region mask (23 OSM relations + 5 km buffer)
+const bboxFrm: TopicConfigBbox = [7.317835, 49.425789, 9.819057, 50.544807]
 
 const config = [
   { id: 'roads_bikelanes', bboxes: null, schedule: 'nightly' },
@@ -49,7 +51,7 @@ const config = [
   { id: 'sealing', bboxes: null, schedule: 'weekend' },
   {
     id: 'parking',
-    bboxes: [bboxBerlin, bboxBiBi, bboxLoerrach, bboxFriedberg, bboxMuenchen],
+    bboxes: [bboxBerlin, bboxBiBi, bboxLoerrach, bboxFriedberg, bboxMuenchen, bboxFrm],
     schedule: 'nightly',
   },
 ] as const satisfies readonly TopicConfigEntry[]
