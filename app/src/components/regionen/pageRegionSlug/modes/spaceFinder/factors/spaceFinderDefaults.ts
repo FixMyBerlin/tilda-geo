@@ -114,7 +114,7 @@ export const FACTOR_HELP: Record<string, string> = {
   w_slope:
     'Flaches Gelände (bis etwa 2°) ist ideal, ab etwa 10° ist die Fläche ausgeschlossen. Bei Gewicht 0 entfällt auch der Ausschluss.',
   w_vegetation:
-    'Grünanteil aus Infrarot-Luftbildern (DOP20 der Landesvermessung Bayern, Berlin/Brandenburg und Hessen). Das Luftbild zeigt die Draufsicht: Baumkronen zählen als Grün, auch wenn darunter Gehweg oder Fahrbahn liegt. „Grün schützen“ zieht ab, „Grün bevorzugen“ gibt Zuschlag, je mehr Grün, desto stärker. Nach der Berechnung eingeblendet: „Vegetationsflächen“.',
+    'Grünanteil aus Infrarot-Luftbildern. Das Luftbild zeigt die Draufsicht: Baumkronen zählen als Grün, auch wenn darunter Gehweg oder Fahrbahn liegt. „Grün schützen“ zieht ab, „Grün bevorzugen“ gibt Zuschlag, je mehr Grün, desto stärker. Nach der Berechnung eingeblendet: „Vegetationsflächen“.',
   w_intersection:
     'Zuschlag an Straßenecken: voll rund 5–8 m von der Bordsteinecke, bis zum Radius abnehmend.',
   w_parken:
