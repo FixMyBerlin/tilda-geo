@@ -258,7 +258,8 @@ def process_job(conn, engine, job_id: int, variant_id: int):
     cir_source = None
     veg_phase_ran = False
     # Run-level notes about missing data sources ({"factor", "reason"}), stored on
-    # the run (SpaceFinderRun.dataNotes) and shown in the app.
+    # the run (SpaceFinderRun.dataNotes) and shown in the app. The PostGIS loader
+    # collects its own (loader.data_notes), added after the scoring.
     data_notes: list[dict] = []
     if not vegetation_needed(use_case.weights):
         print("   ℹ️  w_vegetation=0 – vegetation computation skipped")
@@ -318,11 +319,7 @@ def process_job(conn, engine, job_id: int, variant_id: int):
     sealing_carriageways = None
     sealing_weighted = (use_case.weights.get("w_versiegelung", 0) or 0) > 0
     if use_case.exclude_carriageways or sealing_weighted:
-        try:
-            road_areas = compute_carriageway_areas(study_area, tilda_loader)
-        except Exception as e:
-            print(f"   ⚠️  Carriageway computation failed: {e}")
-            road_areas = None
+        road_areas = compute_carriageway_areas(study_area, tilda_loader)
         if use_case.exclude_carriageways:
             carriageways = road_areas
         if sealing_weighted:
@@ -354,8 +351,9 @@ def process_job(conn, engine, job_id: int, variant_id: int):
         user_datasets=cfg.get("user_datasets"),
         eigendaten_weights=cfg.get("eigendaten_weights"),
         progress_cb=_scoring_progress,
-        data_notes=data_notes,
     )
+    # Sources the loader could not read (the run went on without them).
+    data_notes.extend(loader.data_notes)
 
     # Coarse aggregate grid for low zoom levels (z < 16). Pure post-processing
     # of the already computed scores, no spatial joins.

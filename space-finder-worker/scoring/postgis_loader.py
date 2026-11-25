@@ -59,10 +59,77 @@ def _match_transit_tags(tags: dict) -> list[str] | None:
     return None
 
 
+# Source table → data source key of the run's data note ({"factor": key, "reason": …},
+# see `PostgisLoader._note_load_failure`). The app turns the key into a label
+# (app/src/shared/regionen/spaceFinderDataNotes.ts); keep both in sync.
+_DATA_SOURCES = {
+    "_buildings": "gebaeude",
+    "entrances": "eingaenge",
+    "bikelanes": "radwege",
+    "publicTransport": "oepnv",
+    "_places_squares": "plaetze",
+    "bicycleParking_points": "fahrradparken",
+    "_parking_intersection_corners": "kreuzungen",
+    "roads": "strassen",
+    "parkings": "kfz_parken",
+    "census_population_point": "zensus",
+    "poiClassification": "zielorte",
+    "_sealing_surfaces": "versiegelung",
+}
+
+_PARKING_CORNER_TABLES = [
+    "public._parking_intersection_corners",
+    "public._parking_kerbs",
+    "public._parking_roads",
+]
+
+
 class PostgisLoader:
+    """Reads the Flächenfinder inputs from PostGIS.
+
+    Error rule, the same for every loader: if a table cannot be read (the query
+    fails or the table is missing), the loader returns an empty result and adds a
+    note to `data_notes` (see `_note_load_failure`). The run goes on without that
+    data; the worker stores the notes on the run and the app shows them. A query
+    that runs and finds no rows is a valid empty result and adds no note.
+    """
+
     def __init__(self, engine):
         self.engine = engine
         self._cache: dict = {}
+        # Run-level notes ({"factor", "reason"}) for SpaceFinderRun.dataNotes.
+        self.data_notes: list[dict] = []
+
+    def _table_exists(self, table: str) -> bool:
+        """Whether `schema.table` exists. Raises if the check itself fails."""
+        schema, name = table.split(".", 1)
+        regclass = _sql_literal(f'{schema}."{name}"')
+        return bool(
+            pd.read_sql(f"SELECT to_regclass('{regclass}') IS NOT NULL AS ok", self.engine)
+            .iloc[0]["ok"]
+        )
+
+    def _note_load_failure(self, tables: str | list[str], exc: Exception) -> None:
+        """Logs a failed query and adds a data note for its source.
+
+        `tables` lists every table the query reads (`schema.table`), the main one
+        first: it names the source. The reason is `tabelle_fehlt` if one of them
+        is missing, else `abfrage_fehlgeschlagen`. The table check only runs here,
+        after a failure. Each source/reason pair is noted once per run.
+        """
+        tables = [tables] if isinstance(tables, str) else list(tables)
+        print(f"   ⚠️  PostGIS query {', '.join(tables)} failed: {exc}")
+        try:
+            missing = [t for t in tables if not self._table_exists(t)]
+        except Exception as check_exc:
+            print(f"   ⚠️  Table check failed: {check_exc}")
+            missing = []
+        if missing:
+            print(f"   ⚠️  Missing table(s): {', '.join(missing)}")
+        source = _DATA_SOURCES.get(tables[0].split(".", 1)[1], tables[0])
+        note = {"factor": source, "reason": "tabelle_fehlt" if missing else "abfrage_fehlgeschlagen"}
+        if note not in self.data_notes:
+            self.data_notes.append(note)
 
     def _read_table(self, table: str, polygon_4326: BaseGeometry, where: str = "") -> gpd.GeoDataFrame:
         """Read geometries of a `public` table that intersect the study area.
@@ -88,7 +155,7 @@ class PostgisLoader:
             print(f"   ✓ PostGIS: {len(gdf)} features from public.{table}")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS query public.{table} failed: {e}")
+            self._note_load_failure(f"public.{table}", e)
             return _empty()
 
     def load_buildings(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
@@ -110,7 +177,7 @@ class PostgisLoader:
             print(f"   ✓ PostGIS: {len(gdf)} buildings from public._buildings")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS query public._buildings failed: {e}")
+            self._note_load_failure("public._buildings", e)
             return _empty("EPSG:4326")
 
     def load_train_station_buildings(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
@@ -133,7 +200,7 @@ class PostgisLoader:
             print(f"   ✓ PostGIS: {len(gdf)} train station buildings from public._buildings")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS query public._buildings (train_station) failed: {e}")
+            self._note_load_failure("public._buildings", e)
             return _empty("EPSG:4326")
 
     def load_building_entrances(
@@ -153,7 +220,7 @@ class PostgisLoader:
         `mainEntranceValues` in the map style (`subcat_poi_plus_entrances.const.ts`).
 
         Returns `geom` (EPSG:4326) and the `entrance` column. The table is built by the
-        nightly topic `entrances`; if it is missing, an empty GeoDataFrame is returned.
+        nightly topic `entrances`; if it is missing, the run gets a data note (see class docstring).
         """
         wkt = polygon_4326.wkt
         kind_filter = ""
@@ -173,7 +240,7 @@ class PostgisLoader:
             print(f"   ✓ PostGIS: {len(gdf)} building entrances from public.entrances")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS query public.entrances (building) failed: {e}")
+            self._note_load_failure("public.entrances", e)
             return _empty("EPSG:4326")
 
     def load_cycleways(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
@@ -213,8 +280,8 @@ class PostgisLoader:
         the "Fahrrad- & Mikromobilitätsparken" layer (`layers/bicycleParking.ts`).
 
         Dependency: the table only exists if the bicycleParking topic was processed
-        for the region. If missing, `_read_table` returns an empty GeoDataFrame
-        (bikesharing then contributes 0).
+        for the region. If missing, bikesharing contributes 0 and the run gets a
+        data note (see class docstring).
         """
         gdf = self._read_table(
             "bicycleParking_points", polygon_4326, where=f"tags->>'kind' = '{BIKESHARING_KIND}'"
@@ -234,9 +301,8 @@ class PostgisLoader:
         must be in `road_classes`.
 
         Dependency: the `_parking_*` tables only exist if the parking topic was
-        processed for the region. If missing, an empty GeoDataFrame is returned
-        (the factor then contributes 0) – like the graceful fallback for missing
-        CIR tiles in vegetation.
+        processed for the region. If missing, the factor contributes 0 and the run
+        gets a data note (see class docstring).
 
         Geometry is in EPSG:5243; returned in EPSG:4326.
         """
@@ -263,7 +329,7 @@ class PostgisLoader:
             print(f"   ✓ PostGIS: {len(gdf)} intersection corners from _parking_intersection_corners")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS query _parking_intersection_corners failed: {e}")
+            self._note_load_failure(_PARKING_CORNER_TABLES, e)
             return _empty("EPSG:4326")
 
     def load_pedestrian_intersection_corners(
@@ -310,28 +376,20 @@ class PostgisLoader:
             print(f"   ✓ PostGIS: {len(gdf)} pedestrian zone corners from _parking_intersection_corners")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS query _parking_intersection_corners (pedestrian zone) failed: {e}")
+            self._note_load_failure(_PARKING_CORNER_TABLES, e)
             return _empty("EPSG:4326")
 
     def load_sealing_surfaces(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame | None:
         """OSM input for the sealing bonus from `public._sealing_surfaces`
         (processing topic `sealing`, see processing/topics/sealing).
 
-        Returns None when the table does not exist (topic never ran on this
-        server) – unlike the other loaders, which return an empty frame. The
-        caller then leaves the factor NaN and adds a data note to the run,
-        instead of scoring "nothing sealed anywhere". An existing but empty
-        table returns an empty frame (= nothing mapped there, share 0).
-        Query errors are raised, not swallowed.
+        Same error rule as the other loaders (data note on failure), but returns
+        None instead of an empty frame: the caller then leaves the factor NaN
+        instead of scoring "nothing sealed anywhere". An existing but empty table
+        returns an empty frame (= nothing mapped there, share 0).
 
         The SRID is read from the table itself (Find_SRID). Returned in EPSG:4326.
         """
-        exists = pd.read_sql(
-            "SELECT to_regclass('public._sealing_surfaces') IS NOT NULL AS ok", self.engine
-        ).iloc[0]["ok"]
-        if not exists:
-            print("   ⚠️  public._sealing_surfaces missing (processing topic 'sealing' has not run)")
-            return None
         wkt = polygon_4326.wkt
         sql = f"""
             SELECT sealing_group, surface_explicit, highway, width_m, crown_m,
@@ -344,7 +402,11 @@ class PostgisLoader:
                 Find_SRID('public', '_sealing_surfaces', 'geom')
             )
         """
-        gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
+        try:
+            gdf = gpd.read_postgis(sql, self.engine, geom_col="geom")
+        except Exception as e:
+            self._note_load_failure("public._sealing_surfaces", e)
+            return None
         if gdf.crs is None:
             gdf = gdf.set_crs("EPSG:4326")
         print(f"   ✓ PostGIS: {len(gdf)} features from public._sealing_surfaces")
@@ -444,7 +506,7 @@ class PostgisLoader:
             )
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS query roads/_parking_roads failed: {e}")
+            self._note_load_failure(["public.roads"] + (["public._parking_roads"] if has_parking_roads else []), e)
             return _empty("EPSG:4326")
 
     def load_car_parking(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
@@ -468,9 +530,8 @@ class PostgisLoader:
         `IS NULL` clause instead of a plain `NOT`.
 
         Dependency: the `parkings*` tables only exist if the parking topic was
-        processed for the region. If missing, an empty GeoDataFrame is returned
-        (the factor then contributes 0) – like the graceful fallback for the
-        intersection corners.
+        processed for the region. If missing, the factor contributes 0 and the run
+        gets a data note (see class docstring).
 
         Geometry is in EPSG:3857; returned in EPSG:4326.
         """
@@ -501,7 +562,7 @@ class PostgisLoader:
             print(f"   ✓ PostGIS: {len(gdf)} car parking features from parkings/parkings_separate")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS query parkings/parkings_separate failed: {e}")
+            self._note_load_failure(["public.parkings", "public.parkings_separate"], e)
             return _empty("EPSG:4326")
 
     def load_tempo30_roads(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
@@ -574,7 +635,7 @@ class PostgisLoader:
             )
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS query roads (maxspeed) failed: {e}")
+            self._note_load_failure(["public.roads"] + (["public._parking_roads"] if has_parking_roads else []), e)
             return _empty("EPSG:4326")
 
     def load_bicycle_parking(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
@@ -598,9 +659,8 @@ class PostgisLoader:
         (→ NaN → default reach).
 
         Dependency: the `bicycleParking_*` tables only exist if the
-        bicycleParking topic was processed for the region. If missing, an empty
-        GeoDataFrame is returned (the factor then contributes 0) – like the
-        graceful fallback for car parking.
+        bicycleParking topic was processed for the region. If missing, the factor
+        contributes 0 and the run gets a data note (see class docstring).
 
         Geometry is in EPSG:3857; returned in EPSG:4326.
         """
@@ -623,7 +683,7 @@ class PostgisLoader:
             print(f"   ✓ PostGIS: {len(gdf)} existing bicycle parking facilities from bicycleParking_points")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS query bicycleParking_points failed: {e}")
+            self._note_load_failure("public.bicycleParking_points", e)
             return _empty("EPSG:4326")
 
     def load_census_population(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
@@ -644,9 +704,8 @@ class PostgisLoader:
         Returned in EPSG:4326.
 
         Dependency: the table only exists if the data schema was imported on
-        this environment (see data-schema/README.md). If missing, an empty
-        GeoDataFrame is returned and the factor contributes 0 – like the
-        graceful fallback of the other loaders.
+        this environment (see data-schema/README.md). If missing, the factor
+        contributes 0 and the run gets a data note (see class docstring).
         """
         wkt = polygon_4326.wkt
         sql = f"""
@@ -662,7 +721,7 @@ class PostgisLoader:
             print(f"   ✓ PostGIS: {len(gdf)} census points from data.census_population_point")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS query data.census_population_point failed: {e}")
+            self._note_load_failure("data.census_population_point", e)
             return _empty("EPSG:4326")
 
     def load_target_locations(self, polygon_4326: BaseGeometry) -> gpd.GeoDataFrame:
@@ -679,9 +738,8 @@ class PostgisLoader:
         returned in EPSG:4326.
 
         Dependency: the table only exists if the poiClassification topic was
-        processed for the region. If missing, an empty GeoDataFrame is returned
-        and the factor contributes 0 – like the graceful fallback of the other
-        loaders.
+        processed for the region. If missing, the factor contributes 0 and the run
+        gets a data note (see class docstring).
         """
         wkt = polygon_4326.wkt
         bbox = f"ST_Transform(ST_GeomFromText('{wkt}', 4326), 3857)"
@@ -699,7 +757,7 @@ class PostgisLoader:
             print(f"   ✓ PostGIS: {len(gdf)} target locations from public.poiClassification")
             return gdf
         except Exception as e:
-            print(f"   ⚠️  PostGIS query public.poiClassification failed: {e}")
+            self._note_load_failure("public.poiClassification", e)
             return _empty("EPSG:4326")
 
     def features_from_polygon(self, polygon_4326: BaseGeometry, tags: dict) -> gpd.GeoDataFrame:

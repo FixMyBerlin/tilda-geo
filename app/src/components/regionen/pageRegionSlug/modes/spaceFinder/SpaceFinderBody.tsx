@@ -4,7 +4,7 @@ import { twJoin } from 'tailwind-merge'
 import { Callout } from '@/components/shared/Callout/Callout'
 import { comparableRunSnapshot } from '@/server/space-finder/factorFingerprint'
 import { areaInputFromRow } from '@/server/space-finder/mergeFactorConfig'
-import { spaceFinderDataNoteText } from '@/shared/regionen/spaceFinderDataNotes'
+import { isDataLoadNote, spaceFinderDataNoteText } from '@/shared/regionen/spaceFinderDataNotes'
 import { useSpaceFinderLayersActions } from '../../hooks/mapState/space-finder-layers-store'
 import { modePanelMutedClassName } from '../modePanel.const'
 import { SpaceFinderCandidatesSection } from './candidates/SpaceFinderCandidatesSection'
@@ -27,7 +27,12 @@ const StatusSection = ({ variant }: { variant: SpaceFinderVariantDetail }) => {
         </Callout>
       )}
       {latestRun?.dataNotes.map((note) => (
-        <Callout key={`${note.factor}:${note.reason}`} tone="notice" compact>
+        <Callout
+          key={`${note.factor}:${note.reason}`}
+          // Missing input data changes the result, so it stands out more than other notes.
+          tone={isDataLoadNote(note) ? 'warning' : 'notice'}
+          compact
+        >
           {spaceFinderDataNoteText(note)}
         </Callout>
       ))}

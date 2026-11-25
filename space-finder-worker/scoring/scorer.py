@@ -379,7 +379,6 @@ def run_flaechenfinder(
     user_datasets=None,
     eigendaten_weights=None,
     progress_cb=None,
-    data_notes=None,
 ):
     """Computes the H3 scoring grid with an MCE score per hexagon.
 
@@ -400,8 +399,9 @@ def run_flaechenfinder(
     surfaces for the sealing bonus, also when the carriageways are not excluded
     (they then count as sealed ground, otherwise they are deducted).
 
-    `data_notes` (optional list) collects run-level notes about missing data
-    sources as `{"factor": …, "reason": …}`; the worker stores them on the run.
+    Loading errors are not raised: the PostGIS loader returns an empty result
+    and collects a run-level note in `PostgisLoader.data_notes`, which the
+    worker stores on the run.
 
     `progress_cb` (optional) is called before each step run here
     (step:int 2..14, total:int, label:str) so the worker can pass the current step
@@ -588,38 +588,30 @@ def run_flaechenfinder(
         ]
         _transit_scores = []
         for _tname, _ttags, _tradius in _TRANSIT_TYPES:
-            try:
-                if _tname == "U-Bahn-Eingang":
-                    _stops = osm_loader.load_subway_entrances(study_area_geom)
-                elif _tname == "Bahnhofsgebäude":
-                    _stops = osm_loader.load_train_station_buildings(study_area_geom)
-                else:
-                    _stops = osm_loader.features_from_polygon(study_area_geom, _ttags)
-                if not len(_stops):
-                    _transit_scores.append(pd.Series(0.0, index=hex_proj.index))
-                    continue
-                _stops_p = _stops.to_crs("EPSG:25832")
-                _dist = _dist_to_union(centroids, _stops_p)
-                _score = _dist.apply(lambda d, r=_tradius: max(0.0, 100.0 * (1.0 - d / r)))
-                _transit_scores.append(_score)
-            except Exception as _e:
-                print(f"   ⚠️  {_tname}: {_e}")
+            if _tname == "U-Bahn-Eingang":
+                _stops = osm_loader.load_subway_entrances(study_area_geom)
+            elif _tname == "Bahnhofsgebäude":
+                _stops = osm_loader.load_train_station_buildings(study_area_geom)
+            else:
+                _stops = osm_loader.features_from_polygon(study_area_geom, _ttags)
+            if not len(_stops):
                 _transit_scores.append(pd.Series(0.0, index=hex_proj.index))
+                continue
+            _stops_p = _stops.to_crs("EPSG:25832")
+            _dist = _dist_to_union(centroids, _stops_p)
+            _score = _dist.apply(lambda d, r=_tradius: max(0.0, 100.0 * (1.0 - d / r)))
+            _transit_scores.append(_score)
         _oepnv_group_score = pd.concat(_transit_scores, axis=1).max(axis=1)
         del _transit_scores
 
         # Bikesharing (bicycleParking_points, kind=bicycle_rental): own group; like bus stops a
         # "last mile" access point, hence the same 30 m radius.
-        try:
-            _bike_stops = osm_loader.load_bikesharing(study_area_geom)
-            if len(_bike_stops):
-                _bike_stops_p = _bike_stops.to_crs("EPSG:25832")
-                _bike_dist = _dist_to_union(centroids, _bike_stops_p)
-                _bikesharing_score = _bike_dist.apply(lambda d: max(0.0, 100.0 * (1.0 - d / 30)))
-            else:
-                _bikesharing_score = pd.Series(0.0, index=hex_proj.index)
-        except Exception as _e:
-            print(f"   ⚠️  Bikesharing: {_e}")
+        _bike_stops = osm_loader.load_bikesharing(study_area_geom)
+        if len(_bike_stops):
+            _bike_stops_p = _bike_stops.to_crs("EPSG:25832")
+            _bike_dist = _dist_to_union(centroids, _bike_stops_p)
+            _bikesharing_score = _bike_dist.apply(lambda d: max(0.0, 100.0 * (1.0 - d / 30)))
+        else:
             _bikesharing_score = pd.Series(0.0, index=hex_proj.index)
 
         # Ratio between the two groups (see `oepnv_category_factors`): the more heavily
@@ -775,23 +767,14 @@ def run_flaechenfinder(
 
     # ── 12. Intersect sealed ground ("Versiegelung") ────────────────
     # Share of sealed ground per hexagon from OSM (public._sealing_surfaces), see
-    # scoring/sealing.py (no aerial image). Only with weight > 0. A missing table (topic never ran
-    # on this server) or a failed query leaves the factor NaN and adds a data
-    # note – an empty table means nothing is mapped there (share 0).
+    # scoring/sealing.py (no aerial image). Only with weight > 0. If the table cannot be read,
+    # the loader returns None and notes it on the run; the factor stays NaN – an empty table
+    # means nothing is mapped there (share 0).
     _step(12)
     hex_proj["versiegelung_anteil_pct"] = np.nan
     w_vers = use_case.weights.get("w_versiegelung", 0) or 0
     if w_vers > 0:
-        try:
-            surfaces = tilda_loader.load_sealing_surfaces(study_area_geom)
-        except Exception as e:
-            print(f"   ⚠️  Sealing query failed: {e}")
-            surfaces = None
-            if data_notes is not None:
-                data_notes.append({"factor": "versiegelung", "reason": "abfrage_fehlgeschlagen"})
-        else:
-            if surfaces is None and data_notes is not None:
-                data_notes.append({"factor": "versiegelung", "reason": "tabelle_fehlt"})
+        surfaces = tilda_loader.load_sealing_surfaces(study_area_geom)
         if surfaces is not None:
             share = compute_sealed_share(
                 hex_proj.geometry,
