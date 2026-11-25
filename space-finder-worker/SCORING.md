@@ -51,8 +51,7 @@ Core code: [`scoring/scorer.py`](scoring/scorer.py)
    - Carriageways count as sealed when "Fahrbahn ausschließen" is off and are
      deducted when it is on.
    - Stacks with Platz, Vegetation and Tempo 30. Only knows what is mapped in OSM.
-   - Without the table (topic never ran): NULL plus a run data note
-     (`SpaceFinderRun.dataNotes`), not 0.
+   - If the table cannot be read: NULL plus a run data note, not 0 (see below).
 5. **Hard exclusions** – regardless of the weighted score, `mce_gesamtscore`
    is set to 0 if any of these applies:
    - slope too steep (`score_hangneigung == 0`)
@@ -68,6 +67,16 @@ Core code: [`scoring/scorer.py`](scoring/scorer.py)
    | 40–60  | mittel         |
    | 60–80  | gut            |
    | 80–100 | sehr gut       |
+
+## Missing data
+
+A run never aborts because input data is missing. If a PostGIS table cannot be read (the
+query fails or the table is missing on this server), the loader returns an empty result
+and adds a run data note (`SpaceFinderRun.dataNotes`, reason `abfrage_fehlgeschlagen` or
+`tabelle_fehlt`); the factor then scores as if nothing were there. The same goes for the
+ÖPNV/bikesharing distance step and the carriageway buffering (`berechnung_fehlgeschlagen`).
+A query that runs and finds nothing adds no note. The app shows these notes as a warning
+above the result. Rule and source keys: `PostgisLoader` in `scoring/postgis_loader.py`.
 
 ## Zoom aggregation (display)
 

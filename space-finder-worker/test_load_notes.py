@@ -69,7 +69,7 @@ class LoadNotesTest(unittest.TestCase):
     def test_same_source_is_noted_once(self):
         def both(loader):
             loader.load_buildings(AREA)
-            loader.load_train_station_buildings(AREA)
+            loader.load_buildings(AREA)
 
         _result, notes = _run(both, _fails)
         self.assertEqual(notes, [{"factor": "gebaeude", "reason": "abfrage_fehlgeschlagen"}])
@@ -82,6 +82,36 @@ class LoadNotesTest(unittest.TestCase):
         ):
             loader.load_buildings(AREA)
         self.assertEqual(loader.data_notes, [{"factor": "gebaeude", "reason": "abfrage_fehlgeschlagen"}])
+
+    def test_tables_serving_several_factors_name_the_factor(self):
+        cases = {
+            "oepnv": lambda l: l.load_subway_entrances(AREA),
+            "bikesharing": lambda l: l.load_bikesharing(AREA),
+            "tempo30": lambda l: l.load_tempo30_roads(AREA),
+        }
+        for source, call in cases.items():
+            with self.subTest(source=source):
+                _result, notes = _run(call, _fails)
+                self.assertEqual(notes, [{"factor": source, "reason": "abfrage_fehlgeschlagen"}])
+
+    def test_notes_go_to_the_run_list_given_by_the_worker(self):
+        run_notes = [{"factor": "vegetation", "reason": "keine_luftbildquelle"}]
+        loader = PostgisLoader(engine=None, data_notes=run_notes)
+        with (
+            mock.patch("scoring.postgis_loader.gpd.read_postgis", side_effect=_fails),
+            mock.patch("scoring.postgis_loader.pd.read_sql", return_value=pd.DataFrame({"ok": [True]})),
+        ):
+            loader.load_buildings(AREA)
+        loader.add_data_note("fahrbahnen", "berechnung_fehlgeschlagen")
+        loader.add_data_note("fahrbahnen", "berechnung_fehlgeschlagen")
+        self.assertEqual(
+            run_notes,
+            [
+                {"factor": "vegetation", "reason": "keine_luftbildquelle"},
+                {"factor": "gebaeude", "reason": "abfrage_fehlgeschlagen"},
+                {"factor": "fahrbahnen", "reason": "berechnung_fehlgeschlagen"},
+            ],
+        )
 
 
 if __name__ == "__main__":

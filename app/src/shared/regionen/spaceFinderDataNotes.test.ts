@@ -52,6 +52,8 @@ describe('isDataLoadNote', () => {
   it('is true only for notes about data the worker could not read', () => {
     expect(isDataLoadNote({ factor: 'gebaeude', reason: 'abfrage_fehlgeschlagen' })).toBe(true)
     expect(isDataLoadNote({ factor: 'versiegelung', reason: 'tabelle_fehlt' })).toBe(true)
+    expect(isDataLoadNote({ factor: 'fahrbahnen', reason: 'berechnung_fehlgeschlagen' })).toBe(true)
     expect(isDataLoadNote({ factor: 'vegetation', reason: 'keine_luftbildquelle' })).toBe(false)
+    expect(isDataLoadNote({ factor: 'x', reason: 'constructor' })).toBe(false)
   })
 })

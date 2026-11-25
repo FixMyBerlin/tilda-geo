@@ -399,9 +399,10 @@ def run_flaechenfinder(
     surfaces for the sealing bonus, also when the carriageways are not excluded
     (they then count as sealed ground, otherwise they are deducted).
 
-    Loading errors are not raised: the PostGIS loader returns an empty result
-    and collects a run-level note in `PostgisLoader.data_notes`, which the
-    worker stores on the run.
+    Missing data does not abort the run: the PostGIS loader returns an empty
+    result for a table it cannot read, and the ÖPNV/bikesharing steps score 0 if
+    their distance step fails. Both add a run-level note to
+    `PostgisLoader.data_notes`, the list the worker stores on the run.
 
     `progress_cb` (optional) is called before each step run here
     (step:int 2..14, total:int, label:str) so the worker can pass the current step
@@ -587,6 +588,8 @@ def run_flaechenfinder(
             ("Bahnhofsgebäude",  None,                          100),
         ]
         _transit_scores = []
+        # Read errors are noted by the loader. A failure in the distance step below
+        # scores this stop type 0 and is noted on the run as well (no abort).
         for _tname, _ttags, _tradius in _TRANSIT_TYPES:
             if _tname == "U-Bahn-Eingang":
                 _stops = osm_loader.load_subway_entrances(study_area_geom)
@@ -597,9 +600,14 @@ def run_flaechenfinder(
             if not len(_stops):
                 _transit_scores.append(pd.Series(0.0, index=hex_proj.index))
                 continue
-            _stops_p = _stops.to_crs("EPSG:25832")
-            _dist = _dist_to_union(centroids, _stops_p)
-            _score = _dist.apply(lambda d, r=_tradius: max(0.0, 100.0 * (1.0 - d / r)))
+            try:
+                _stops_p = _stops.to_crs("EPSG:25832")
+                _dist = _dist_to_union(centroids, _stops_p)
+                _score = _dist.apply(lambda d, r=_tradius: max(0.0, 100.0 * (1.0 - d / r)))
+            except Exception as _e:
+                print(f"   ⚠️  {_tname}: {_e}")
+                osm_loader.add_data_note("oepnv", "berechnung_fehlgeschlagen")
+                _score = pd.Series(0.0, index=hex_proj.index)
             _transit_scores.append(_score)
         _oepnv_group_score = pd.concat(_transit_scores, axis=1).max(axis=1)
         del _transit_scores
@@ -607,12 +615,15 @@ def run_flaechenfinder(
         # Bikesharing (bicycleParking_points, kind=bicycle_rental): own group; like bus stops a
         # "last mile" access point, hence the same 30 m radius.
         _bike_stops = osm_loader.load_bikesharing(study_area_geom)
+        _bikesharing_score = pd.Series(0.0, index=hex_proj.index)
         if len(_bike_stops):
-            _bike_stops_p = _bike_stops.to_crs("EPSG:25832")
-            _bike_dist = _dist_to_union(centroids, _bike_stops_p)
-            _bikesharing_score = _bike_dist.apply(lambda d: max(0.0, 100.0 * (1.0 - d / 30)))
-        else:
-            _bikesharing_score = pd.Series(0.0, index=hex_proj.index)
+            try:
+                _bike_stops_p = _bike_stops.to_crs("EPSG:25832")
+                _bike_dist = _dist_to_union(centroids, _bike_stops_p)
+                _bikesharing_score = _bike_dist.apply(lambda d: max(0.0, 100.0 * (1.0 - d / 30)))
+            except Exception as _e:
+                print(f"   ⚠️  Bikesharing: {_e}")
+                osm_loader.add_data_note("bikesharing", "berechnung_fehlgeschlagen")
 
         # Ratio between the two groups (see `oepnv_category_factors`): the more heavily
         # weighted group contributes its sub-score fully, the weaker one proportionally.
