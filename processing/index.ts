@@ -1,6 +1,6 @@
 import { runAfterthoughts } from './steps/afterthoughts'
 import { updateCache } from './steps/cache'
-import { downloadFile, waitForFreshData } from './steps/download'
+import { downloadFile, updateStaleFile, waitForFreshData } from './steps/download'
 import { triggerPrivateApi } from './steps/externalTriggers'
 import { globalBboxFilter, nightlyTagFilter } from './steps/filter'
 import { generateTypes } from './steps/generateTypes'
@@ -22,8 +22,9 @@ async function main() {
     const processingId = await createProcessingEntry()
 
     logPadded('Processing: Download', berlinTimeString(new Date()))
-    await waitForFreshData()
+    const freshData = await waitForFreshData()
     let { fileName, fileChanged } = await downloadFile()
+    if (freshData === false && (await updateStaleFile(fileName))) fileChanged = true
     const sourceFileName = fileName
 
     logPadded('Processing: Filter', berlinTimeString(new Date()))

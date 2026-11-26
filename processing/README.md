@@ -27,6 +27,7 @@ Which data is used in the app is visible in the download modal (Download-Icon on
 ### Freshness of processed data
 
 - Data is processed every day ([cron job definition](/.github/workflows/generate-tiles.yml#L3-L6))
+  If Geofabrik has no fresh file after 2 hours, the run brings the existing file up to date with the OSM changes from openstreetmap.fr (see below).
 - Data is processed on every deploy/release
 - Data is processed on demand with the latest OSM data: run the GitHub workflow [Refresh OSM Data](/.github/workflows/refresh-osm-data.yml) or `/srv/refresh_osm_processing.sh` on the server.
   It applies the OSM changes since the last Geofabrik download ([minute diffs from openstreetmap.fr](https://download.openstreetmap.fr/replication/europe/germany/minute/), with user and changeset metadata) to the downloaded file, then starts processing with `SKIP_DOWNLOAD=1`.
