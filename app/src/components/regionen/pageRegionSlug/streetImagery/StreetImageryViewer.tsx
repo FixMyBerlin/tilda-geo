@@ -96,6 +96,10 @@ export const StreetImageryViewer = () => {
           onViewerPhoto={(viewerPhoto) => {
             setLoadedPhoto(viewerPhoto)
             setViewerPhoto(viewerPhoto)
+            // Only photos the viewer moves on to pan the map; the URL photo keeps the map position.
+            if (viewerPhoto.photoId !== photo.photoId) {
+              mainMap?.easeTo({ center: viewerPhoto.lngLat })
+            }
           }}
           onPhotoSelected={({ provider, photoId, sequenceId }) => {
             const known = streetImageryProviderIds.find((id) => id === provider)
@@ -104,7 +108,7 @@ export const StreetImageryViewer = () => {
             const sequence = sequenceId.startsWith('photo:') ? undefined : sequenceId
             setPhoto({ provider: known, id: photoId, sequence })
           }}
-          onEaseMapToPoint={(lng, lat) => mainMap?.easeTo({ center: [lng, lat] })}
+          onEaseMapToPoint={noop}
         />
       </div>
     </FloatingPhotoViewer>
