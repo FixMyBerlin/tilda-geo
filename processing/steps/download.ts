@@ -1,8 +1,9 @@
+import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { TZDate } from '@date-fns/tz'
 import { $ } from 'bun'
 import { format, getHours, subDays } from 'date-fns'
-import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
+import { OSM_DOWNLOAD_DIR, replicationMarkerPath } from '../constants/directories.const'
 import { checkSkipDownload } from '../utils/checkSkipDownload'
 import { debugWgetCommand } from '../utils/debugWget'
 import { ensureOAuthReady, fallbackToPublicDownload, getAuthHeaders } from '../utils/oauth'
@@ -14,6 +15,15 @@ import { readHashFromFile, writeHashForFile } from '../utils/persistentData'
  * @returns full path to the file
  */
 export const originalFilePath = (fileName: string) => join(OSM_DOWNLOAD_DIR, fileName)
+
+/** Consumes the marker of `scripts/updatePbf.ts`, so the file counts as changed exactly once. */
+async function takeReplicationMarker(fileName: string) {
+  const marker = Bun.file(replicationMarkerPath(originalFilePath(fileName)))
+  if (!(await marker.exists())) return false
+  console.log(`Download: File was updated with OSM changes (${(await marker.text()).trim()})`)
+  await marker.delete()
+  return true
+}
 
 /**
  * HEAD request to the download URL that retries network errors (e.g. a short `ECONNREFUSED` at Geofabrik).
@@ -143,7 +153,7 @@ export async function downloadFile() {
   const { fileName, fileExists, filePath, skipDownload } = await checkSkipDownload()
   if (skipDownload) {
     console.log('Download: ⏩ Skipping download because file exists and `SKIP_DOWNLOAD` is active')
-    return { fileName, fileChanged: false }
+    return { fileName, fileChanged: await takeReplicationMarker(fileName) }
   }
 
   // Ensure we have OAuth authentication if required and check if file has changed
@@ -159,7 +169,7 @@ export async function downloadFile() {
 
   if (eTag && fileExists && eTag === (await readHashFromFile(fileName))) {
     console.log('Download: ⏩ Skipped download because the file has not changed.')
-    return { fileName, fileChanged: false }
+    return { fileName, fileChanged: await takeReplicationMarker(fileName) }
   }
 
   if (!eTag) {
@@ -204,6 +214,9 @@ export async function downloadFile() {
     )
     throw new Error(`Download: Failed to download ${downloadMethod} file: ${error}`)
   }
+
+  // The fresh download replaces any file `scripts/updatePbf.ts` had updated.
+  await rm(replicationMarkerPath(filePath), { force: true })
 
   // Save etag if available
   if (eTag) {

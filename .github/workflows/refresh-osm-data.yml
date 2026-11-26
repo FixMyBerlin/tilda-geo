@@ -1,0 +1,36 @@
+name: Refresh OSM Data
+
+# Processes the latest OSM data outside the nightly run: applies the OSM changes since the last
+# Geofabrik download, then starts the regular processing (see refresh_osm_processing.sh).
+on:
+  workflow_dispatch:
+    inputs:
+      ENVIRONMENT:
+        type: choice
+        options: [staging, production]
+        required: true
+permissions:
+  contents: read
+
+# Two updates must not write the same file. The nightly run is guarded in the script, not here:
+# a shared group could cancel a pending nightly run.
+concurrency:
+  group: refresh-osm-data-${{ inputs.ENVIRONMENT }}
+
+jobs:
+  refresh-osm-data:
+    if: github.repository == 'FixMyBerlin/tilda-geo'
+    environment:
+      name: ${{ inputs.ENVIRONMENT }}
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Update OSM file and start processing
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USERNAME }}
+          password: ${{ secrets.SSH_PASSWORD }}
+          # The OSM file update takes a few minutes; the default timeout is 10 minutes.
+          command_timeout: 60m
+          script: /srv/refresh_osm_processing.sh
