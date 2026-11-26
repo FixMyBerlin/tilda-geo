@@ -44,7 +44,7 @@ const GRID_STROKE = '#e5e7eb' // gray-200
 const PARALLEL_AXIS_TOLERANCE_METERS = 15
 
 const formatMeters = (meters: number) =>
-  meters >= 10 ? `${meters.toFixed(0)} m` : `${meters.toFixed(1)} m`
+  meters >= 10 ? `${meters.toFixed(0)}\u00a0m` : `${meters.toFixed(1)}\u00a0m`
 
 const formatElevationRange = (elevations: number[]) => {
   const min = Math.min(...elevations)

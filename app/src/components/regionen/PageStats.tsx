@@ -31,9 +31,9 @@ export function PageStats() {
               <div key={region.name ?? undefined}>
                 <h1> {region.name}</h1>
                 <h2 className="text-gray-900">{`admin_level=${region.level}`}</h2>
-                Bikelanes ({sumLength(region.bikelane_length ?? {})} km):
+                Bikelanes ({sumLength(region.bikelane_length ?? {})}&nbsp;km):
                 <p>{JSON.stringify(region.bikelane_length, null, 2)}</p>
-                Roads ({sumLength(region.road_length ?? {})} km):
+                Roads ({sumLength(region.road_length ?? {})}&nbsp;km):
                 <p>{JSON.stringify(region.road_length, null, 2)}</p>
               </div>
             ))}

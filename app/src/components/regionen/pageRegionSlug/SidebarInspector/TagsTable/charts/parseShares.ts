@@ -20,7 +20,7 @@ export const parseShares = (input: unknown): Share[] | null => {
   const shares = entries.map((match) => {
     const [, rawPercent, label] = match!
     const percent = rawPercent === '<1' ? 0.5 : Number(rawPercent!.replace(',', '.'))
-    return { label: label!.trim(), percentText: `${rawPercent} %`, percent }
+    return { label: label!.trim(), percentText: `${rawPercent}\u00a0%`, percent }
   })
   const total = shares.reduce((sum, share) => sum + share.percent, 0)
   if (total <= 0) return null

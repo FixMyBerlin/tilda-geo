@@ -56,16 +56,16 @@ describe('measureSegments', () => {
 
 describe('formatting', () => {
   test('lengths', () => {
-    expect(formatLength(3.456)).toBe('3,46 m')
-    expect(formatLength(12.44)).toBe('12,4 m')
-    expect(formatLength(123.4)).toBe('123 m')
-    expect(formatLength(1234)).toBe('1,23 km')
+    expect(formatLength(3.456)).toBe('3,46\u00a0m')
+    expect(formatLength(12.44)).toBe('12,4\u00a0m')
+    expect(formatLength(123.4)).toBe('123\u00a0m')
+    expect(formatLength(1234)).toBe('1,23\u00a0km')
   })
 
   test('areas', () => {
-    expect(formatArea(35.21)).toBe('35,2 m²')
-    expect(formatArea(1234.4)).toBe('1.234 m²')
-    expect(formatArea(12_340)).toBe('1,23 ha')
-    expect(formatArea(1_234_000)).toBe('1,23 km²')
+    expect(formatArea(35.21)).toBe('35,2\u00a0m²')
+    expect(formatArea(1234.4)).toBe('1.234\u00a0m²')
+    expect(formatArea(12_340)).toBe('1,23\u00a0ha')
+    expect(formatArea(1_234_000)).toBe('1,23\u00a0km²')
   })
 })

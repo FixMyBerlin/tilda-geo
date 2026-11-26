@@ -35,18 +35,18 @@ const twoDecimals = formatter(2)
 
 /** `3,45 m` below 10 m, `12,4 m` below 100 m, `123 m` below 1 km, then `1,23 km`. */
 export const formatLength = (metres: number) => {
-  if (metres < 10) return `${twoDecimals.format(metres)} m`
-  if (metres < 100) return `${oneDecimal.format(metres)} m`
-  if (metres < 1000) return `${whole.format(metres)} m`
-  return `${twoDecimals.format(metres / 1000)} km`
+  if (metres < 10) return `${twoDecimals.format(metres)}\u00a0m`
+  if (metres < 100) return `${oneDecimal.format(metres)}\u00a0m`
+  if (metres < 1000) return `${whole.format(metres)}\u00a0m`
+  return `${twoDecimals.format(metres / 1000)}\u00a0km`
 }
 
 /** `35,2 m²` below 100 m², `1.234 m²` below 1 ha, `1,23 ha` below 1 km², then `1,23 km²`. */
 export const formatArea = (squareMetres: number) => {
-  if (squareMetres < 100) return `${oneDecimal.format(squareMetres)} m²`
-  if (squareMetres < 10_000) return `${whole.format(squareMetres)} m²`
-  if (squareMetres < 1_000_000) return `${twoDecimals.format(squareMetres / 10_000)} ha`
-  return `${twoDecimals.format(squareMetres / 1_000_000)} km²`
+  if (squareMetres < 100) return `${oneDecimal.format(squareMetres)}\u00a0m²`
+  if (squareMetres < 10_000) return `${whole.format(squareMetres)}\u00a0m²`
+  if (squareMetres < 1_000_000) return `${twoDecimals.format(squareMetres / 10_000)}\u00a0ha`
+  return `${twoDecimals.format(squareMetres / 1_000_000)}\u00a0km²`
 }
 
 /** The value a shape is measured for: the length of a line, the area of a polygon. */

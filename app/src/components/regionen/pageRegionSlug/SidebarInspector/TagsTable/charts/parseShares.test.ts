@@ -7,10 +7,10 @@ describe('parseShares', () => {
       '47 % Sonstige Wege (Gehwege, Wege durch Grünflächen, Plätze); 41 % Radweg; 10 % Keine Radinfrastruktur vorhanden; 2 % Gemeinsamer Geh- und Radweg mit Z240',
     )
     expect(shares?.map(({ label, percentText }) => [label, percentText])).toEqual([
-      ['Sonstige Wege (Gehwege, Wege durch Grünflächen, Plätze)', '47 %'],
-      ['Radweg', '41 %'],
-      ['Keine Radinfrastruktur vorhanden', '10 %'],
-      ['Gemeinsamer Geh- und Radweg mit Z240', '2 %'],
+      ['Sonstige Wege (Gehwege, Wege durch Grünflächen, Plätze)', '47\u00a0%'],
+      ['Radweg', '41\u00a0%'],
+      ['Keine Radinfrastruktur vorhanden', '10\u00a0%'],
+      ['Gemeinsamer Geh- und Radweg mit Z240', '2\u00a0%'],
     ])
   })
 
@@ -23,7 +23,7 @@ describe('parseShares', () => {
 
   test('reads <1 % as 0.5 and normalizes the widths to 100', () => {
     const shares = parseShares('88 % Radweg; 11 % Schutzstreifen; <1 % Kreuzungsbereich')
-    expect(shares?.[2]).toMatchObject({ label: 'Kreuzungsbereich', percentText: '<1 %' })
+    expect(shares?.[2]).toMatchObject({ label: 'Kreuzungsbereich', percentText: '<1\u00a0%' })
     expect(shares?.[2]?.width).toBeCloseTo((0.5 / 99.5) * 100)
     const totalWidth = shares!.reduce((sum, share) => sum + share.width, 0)
     expect(totalWidth).toBeCloseTo(100)
@@ -31,7 +31,7 @@ describe('parseShares', () => {
 
   test('parses a single entry', () => {
     expect(parseShares('100 % Radweg')).toEqual([
-      { label: 'Radweg', percentText: '100 %', width: 100 },
+      { label: 'Radweg', percentText: '100\u00a0%', width: 100 },
     ])
   })
 

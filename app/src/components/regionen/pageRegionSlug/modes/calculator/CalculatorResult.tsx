@@ -27,9 +27,7 @@ type Props = {
 }
 
 const wholeNumber = new Intl.NumberFormat('de-DE', { maximumFractionDigits: 0 })
-const kilometers = new Intl.NumberFormat('de-DE', {
-  style: 'unit',
-  unit: 'kilometer',
+const oneDecimal = new Intl.NumberFormat('de-DE', {
   minimumFractionDigits: 1,
   maximumFractionDigits: 1,
 })
@@ -37,9 +35,9 @@ const kilometers = new Intl.NumberFormat('de-DE', {
 const formatAmount = (column: CalculatorColumn, value: number) => {
   switch (column) {
     case 'length_directions':
-      return kilometers.format(value / 1000)
+      return `${oneDecimal.format(value / 1000)}\u00a0km`
     case 'area':
-      return `${wholeNumber.format(value)} m²`
+      return `${wholeNumber.format(value)}\u00a0m²`
     case 'objects':
     case 'missing':
       return wholeNumber.format(value)
