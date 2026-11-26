@@ -4,6 +4,12 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-11
 
+### `bikelanes`: `category` of `highway=cycleway` tagged as sidepath
+
+- `highway=cycleway` with `cycleway=sidepath` is `cycleway_adjoining` (with `is_sidepath=no`: `cycleway_isolated`), like `is_sidepath=yes`; before `needsClarification`. The other sidepath tags count too, so the mistagging `highway=cycleway` + `footway=sidewalk` (5 ways in Berlin) is `cycleway_adjoining` now.
+- These ways get the oneway default of adjoining cycleways (`oneway=implicit_yes`, `routing.oneway=yes`) and the todo `missing_oneway` instead of `needs_clarification`.
+- On a road, `cycleway:<side>=sidepath` stays `needsClarification`.
+
 ### `routing`: new attributes `tunnel`, `dual_carriageway`, `roundabout`
 
 - `tunnel` is the sanitized value of `roads` / `bikelanes` (`yes`, also for `tunnel=building_passage`).

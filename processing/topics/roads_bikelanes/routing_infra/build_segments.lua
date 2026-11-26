@@ -11,7 +11,7 @@ local reverse_linestring = require('topics.roads_bikelanes.routing_infra.reverse
 local LINE_DIRECTION = require('topics.roads_bikelanes.helper.line_direction')
 local SET = require('topics.helper.sets')
 local HIGHWAYS = require('topics.helper.highway_classes')
-local category_is_sidepath = require('topics.roads_bikelanes.bikelanes.categories.category_is_sidepath')
+local SIDEPATH = require('topics.roads_bikelanes.bikelanes.categories.category_is_sidepath')
 
 local road_highway_classes = SET.join_sets({
   HIGHWAYS.trunk_motorway_classes,
@@ -185,7 +185,7 @@ local function build_segments(context)
     -- omit the way: OSM sidewalks and derived sidepaths (`roads_bikelanes_roads.lua`, same check).
     -- Not for bikelane edges: `category_is_sidepath` is true when `parent_road` is set, which would
     -- drop the centerline-derived `footwayBicycleYes*` / `sidewalk:*` virtuals that join `bikelanes`.
-    if not category_is_sidepath(object_tags) then
+    if not SIDEPATH.category_is_sidepath(object_tags) then
       emit_path_edge(
         segments,
         object_tags,

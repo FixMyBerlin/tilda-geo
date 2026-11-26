@@ -96,6 +96,35 @@ describe('bikelane_categories', function()
       local category = categorize_bikelane(tags).id
       assert.are.equal(category, 'cycleway_adjoining')
     end)
+    it('cycleway=sidepath is an adjoining cycleway', function()
+      local tags = {
+        ['highway'] = 'cycleway',
+        ['cycleway'] = 'sidepath',
+      }
+      local category = categorize_bikelane(tags).id
+      assert.are.equal(category, 'cycleway_adjoining')
+    end)
+    it('cycleway=sidepath with is_sidepath=no is an isolated cycleway', function()
+      local tags = {
+        ['highway'] = 'cycleway',
+        ['cycleway'] = 'sidepath',
+        ['is_sidepath'] = 'no',
+      }
+      local category = categorize_bikelane(tags).id
+      assert.are.equal(category, 'cycleway_isolated')
+    end)
+    it('cycleway:right=sidepath on a road stays unclear', function()
+      local input_object = {
+        tags = {
+          highway = 'residential',
+          ['cycleway:right'] = 'sidepath',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local categorized = extract_categories_by_side(input_object)
+      assert.are.equal(categorized.right.category.id, 'needsClarification')
+    end)
     it('cycleway adjoining', function()
       local tags = {
         ['highway'] = 'cycleway',
