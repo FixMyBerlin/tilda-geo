@@ -8,6 +8,8 @@ local MAPILLARY_CSV = '/data/pseudoTagsData/mapillary_coverage.csv'
 local SIDEPATH_CSV = '/data/pseudoTagsData/is_sidepath_estimation.csv'
 -- Downloaded from the infravelo-radnetz repo, see pseudoTags/infraveloNetzSource/README.md.
 local RADNETZ_BERLIN_CSV = '/data/pseudoTagsData/infravelo_netz.csv'
+-- Downloaded from the infravelo-radnetz repo, see pseudoTags/cyclewayOnewayCorrectionsSource/README.md.
+local CYCLEWAY_ONEWAY_CORRECTIONS_CSV = '/data/pseudoTagsData/cycleway_oneway_corrections.csv'
 
 -- The CSV uses single letters; `route_relations` carries the readable class.
 local RADNETZ_BERLIN_CLASSES = {
@@ -105,6 +107,15 @@ local function merge_radnetz_berlin(merged, rows)
   end
 end
 
+local function merge_cycleway_oneway_corrections(merged, rows)
+  for _, row in ipairs(rows) do
+    local id = tonumber(row['osm_id'])
+    if id then
+      ensure_entry(merged, id).cycleway_oneway_correction = true
+    end
+  end
+end
+
 local function load_merged_pseudo_tags()
   local cached = nil
 
@@ -120,6 +131,10 @@ local function load_merged_pseudo_tags()
       merge_mapillary(cached, parse_csv_rows(MAPILLARY_CSV, 'load_merged_pseudo_tags.mapillary'))
       merge_sidepath(cached, parse_csv_rows(SIDEPATH_CSV, 'load_merged_pseudo_tags.sidepath'))
       merge_radnetz_berlin(cached, parse_csv_rows(RADNETZ_BERLIN_CSV, 'load_merged_pseudo_tags.radnetz_berlin'))
+      merge_cycleway_oneway_corrections(
+        cached,
+        parse_csv_rows(CYCLEWAY_ONEWAY_CORRECTIONS_CSV, 'load_merged_pseudo_tags.cycleway_oneway_corrections')
+      )
 
       local sample_id, sample_row = next(cached)
       local sample = {}

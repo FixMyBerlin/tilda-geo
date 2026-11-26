@@ -3,6 +3,7 @@ local SET = require('topics.helper.sets')
 local highway_classes = require('topics.helper.highway_classes')
 local contains_substring = require('topics.helper.contains_substring')
 local SIDE_LIFECYCLE = require('topics.roads_bikelanes.helper.transform_tags.side_lifecycle')
+local restricting_access_keys = require('topics.roads_bikelanes.helper.access_restriction').restricting_access_keys
 
 local ALLOWED_HIGHWAYS = SET.join_sets({
   highway_classes.trunk_motorway_classes,
@@ -15,9 +16,9 @@ local ALLOWED_HIGHWAYS = SET.join_sets({
 ---@return string[]
 local function restricted_access_tag_keys(tags)
   local restricted_tags = {}
-  if tags.access == 'no' then table.insert(restricted_tags, 'access') end
-  if tags.highway == 'cycleway' and tags.bicycle == 'no' then table.insert(restricted_tags, 'bicycle') end
-  if tags.highway == 'footway' and tags.foot == 'no' then table.insert(restricted_tags, 'foot') end
+  local access_key, mode_key = restricting_access_keys(tags.highway)
+  if tags[access_key] == 'no' then table.insert(restricted_tags, access_key) end
+  if mode_key and tags[mode_key] == 'no' then table.insert(restricted_tags, mode_key) end
   return restricted_tags
 end
 

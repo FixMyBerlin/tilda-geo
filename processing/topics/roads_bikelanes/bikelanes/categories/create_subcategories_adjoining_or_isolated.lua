@@ -5,11 +5,18 @@ local category_is_sidepath = require('topics.roads_bikelanes.bikelanes.categorie
 local function create_subcategories_adjoining_or_isolated(category)
   local bikelane_category = getmetatable(category)
 
+  -- The riding direction without a `oneway`-tag follows the position, not the category (StVO § 2 Abs. 4):
+  -- a path next to the road may only be used on the right in the direction of travel (left only with
+  -- a sign), a path away from roads in both directions.
+  -- Without position (`_adjoiningOrIsolated`) the category decides.
+  -- See https://github.com/FixMyBerlin/tilda-geo/pull/424.
+
   local adjoining = bikelane_category.new({
     id = category.id .. '_adjoining',
+    position = 'adjoining',
     desc = category.desc .. ' (adjoining)',
     infrastructureExists = category.infrastructureExists,
-    implicitOneWay = category.implicitOneWay,
+    implicitOneWay = true,
     implicitOneWayConfidence = category.implicitOneWayConfidence,
     copySurfaceSmoothnessFromParent = category.copySurfaceSmoothnessFromParent,
     bicycleSurface = category.bicycleSurface,
@@ -21,9 +28,10 @@ local function create_subcategories_adjoining_or_isolated(category)
 
   local isolated = bikelane_category.new({
     id = category.id .. '_isolated',
+    position = 'isolated',
     desc = category.desc .. ' (isolated)',
     infrastructureExists = category.infrastructureExists,
-    implicitOneWay = category.implicitOneWay,
+    implicitOneWay = false,
     implicitOneWayConfidence = category.implicitOneWayConfidence,
     copySurfaceSmoothnessFromParent = category.copySurfaceSmoothnessFromParent,
     bicycleSurface = category.bicycleSurface,
@@ -35,6 +43,7 @@ local function create_subcategories_adjoining_or_isolated(category)
 
   local adjoining_or_isolated = bikelane_category.new({
     id = category.id .. '_adjoiningOrIsolated',
+    position = 'adjoiningOrIsolated',
     desc = category.desc .. ' (adjoiningOrIsolated)',
     infrastructureExists = category.infrastructureExists,
     implicitOneWay = category.implicitOneWay,

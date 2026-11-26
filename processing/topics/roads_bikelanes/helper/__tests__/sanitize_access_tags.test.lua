@@ -27,6 +27,21 @@ describe('sanitize_access_tags.resolve (OSM access fallback chain)', function()
     assert.are.equal('no', resolve({ access = 'no' }, 'bus'))
   end)
 
+  it('reads bicycle as designated on a bicycle road without a bicycle tag', function()
+    assert.are.same({ 'designated', 'bicycle_road' }, { resolve({ bicycle_road = 'yes', vehicle = 'destination' }, 'bicycle') })
+    assert.are.equal('designated', resolve({ traffic_sign = 'DE:244.1,1020-30', vehicle = 'destination' }, 'bicycle'))
+    assert.are.equal('designated', resolve({ traffic_sign = 'DE:244.3', access = 'destination' }, 'bicycle'))
+    assert.are.equal('designated', sanitized_access({ bicycle_road = 'yes', vehicle = 'agricultural;forestry' }, 'bicycle'))
+  end)
+
+  it('lets an explicit bicycle tag win on a bicycle road', function()
+    assert.are.equal('no', resolve({ bicycle_road = 'yes', bicycle = 'no' }, 'bicycle'))
+  end)
+
+  it('keeps the motor vehicle chain on a bicycle road', function()
+    assert.are.equal('destination', resolve({ bicycle_road = 'yes', vehicle = 'destination' }, 'motor_vehicle'))
+  end)
+
   it('returns nil when nothing matches or the mode has no chain', function()
     assert.is_nil(resolve({}, 'bicycle'))
     assert.is_nil(resolve({ highway = 'residential' }, 'bicycle'))
@@ -59,6 +74,21 @@ describe('sanitize_access_tags.sanitize (allowlist per mode)', function()
     assert.are.equal('designated', sanitize('designated', 'bicycle'))
     assert.are.equal('use_sidepath', sanitize('use_sidepath', 'bicycle'))
     assert.are.equal('dismount', sanitize('dismount', 'bicycle'))
+  end)
+
+  it('keeps the bicycle values that do not allow cycling', function()
+    for _, value in ipairs({ 'no', 'destination', 'private', 'customers', 'delivery', 'permit' }) do
+      assert.are.equal(value, sanitize(value, 'bicycle'), value)
+      assert.is_nil(sanitize_access_tags.routable_bicycle_access[value], value)
+    end
+  end)
+
+  it('lists the routable bicycle values once, all of them published', function()
+    for value in pairs(sanitize_access_tags.routable_bicycle_access) do
+      assert.are.equal(value, sanitize(value, 'bicycle'), value)
+    end
+    assert.is_true(sanitize_access_tags.routable_bicycle_access.dismount)
+    assert.is_nil(sanitize_access_tags.routable_bicycle_access.no)
   end)
 
   it('drops values not allowlisted for the mode', function()

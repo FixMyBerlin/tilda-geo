@@ -70,12 +70,8 @@ export const QaDecisionData = ({ decisionData, indicator }: Props) => {
           <th scope="row" className="py-0.5 pr-2 pl-3 text-left font-semibold">
             Gesamt
           </th>
-          <td className={numberCell}>
-            {formatNumber(decisionData.reference)} {unit}
-          </td>
-          <td className={numberCell}>
-            {formatNumber(decisionData.current)} {unit}
-          </td>
+          <td className={numberCell}>{`${formatNumber(decisionData.reference)}\u00a0${unit}`}</td>
+          <td className={numberCell}>{`${formatNumber(decisionData.current)}\u00a0${unit}`}</td>
           <td className={twJoin(numberCell, 'pr-3')}>
             <QaChange amount={decisionData.difference} share={decisionData.deviation} unit={unit} />
           </td>
@@ -92,12 +88,8 @@ export const QaDecisionData = ({ decisionData, indicator }: Props) => {
                 <div className="truncate">{label}</div>
               )}
             </th>
-            <td className={numberCell}>
-              {formatNumber(reference)} {unit}
-            </td>
-            <td className={numberCell}>
-              {formatNumber(current)} {unit}
-            </td>
+            <td className={numberCell}>{`${formatNumber(reference)}\u00a0${unit}`}</td>
+            <td className={numberCell}>{`${formatNumber(current)}\u00a0${unit}`}</td>
             <td className={twJoin(numberCell, 'pr-3')}>
               <QaChange
                 amount={Math.abs(change)}

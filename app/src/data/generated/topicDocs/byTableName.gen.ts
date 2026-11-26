@@ -1523,13 +1523,13 @@ const data = {
             value: 'assumed_no',
             label: 'Wahrscheinlich beide Richtungen',
             description:
-              'Keine OSM-Angabe zur Verkehrsrichtung. Bei Radwegen und gemeinsamen Geh- und Radwegen nehmen wir beide Richtungen an. Außerorts sind straßenbegleitende Radwege oft in beide Richtungen freigegeben, ohne dass das in OSM steht; innerorts ist die Richtung meist angegeben.',
+              'Keine OSM-Angabe zur Verkehrsrichtung. Bei Radwegen, Geh- und Radwegen und Gehwegen mit „Radfahrer frei“ abseits der Straße nehmen wir beide Richtungen an, ebenso bei reinen Radwegen, deren Lage zur Straße unbekannt ist, und bei einem an der Straße getaggten Radweg (`cycleway:<side>=track`), wenn auf der anderen Straßenseite weder ein Radweg noch ein für Fahrräder freigegebener Gehweg getaggt ist.',
           },
           {
             value: 'implicit_yes',
             label: 'Eine Richtung (abgeleitet)',
             description:
-              'Keine OSM-Angabe zur Verkehrsrichtung. Aus der Führungsform abgeleitet, denn Schutz- und Radfahrstreifen sowie gemeinsam mit dem Kfz-Verkehr genutzte Fahrstreifen sind fast immer nur in eine Richtung befahrbar.',
+              'Keine OSM-Angabe zur Verkehrsrichtung. Aus der Führungsform abgeleitet, denn Schutz- und Radfahrstreifen sowie gemeinsam mit dem Kfz-Verkehr genutzte Fahrstreifen sind fast immer nur in eine Richtung befahrbar. Straßenbegleitende Radwege, Geh- und Radwege und Gehwege mit „Radfahrer frei“ dürfen nach StVO § 2 Abs. 4 nur rechts in Fahrtrichtung befahren werden, links nur mit Schild. Außerorts sind gemeinsame Geh- und Radwege oft per Schild in beide Richtungen freigegeben.',
           },
         ],
       },
@@ -1584,6 +1584,7 @@ const data = {
         key: 'separation_left',
         type: 'string',
         label: 'Abgrenzung (Links)',
+        description: 'Links des Radwegs in Fahrtrichtung, also links der Linie in ihrer Richtung.',
         values: [
           {
             value: 'no',
@@ -1671,6 +1672,8 @@ const data = {
         key: 'separation_right',
         type: 'string',
         label: 'Abgrenzung (Rechts)',
+        description:
+          'Rechts des Radwegs in Fahrtrichtung, also rechts der Linie in ihrer Richtung.',
         values: [
           {
             value: 'no',
@@ -1758,6 +1761,7 @@ const data = {
         key: 'marking_left',
         type: 'string',
         label: 'Markierung (Links)',
+        description: 'Links des Radwegs in Fahrtrichtung, also links der Linie in ihrer Richtung.',
         values: [
           {
             value: 'solid_line',
@@ -1789,6 +1793,8 @@ const data = {
         key: 'marking_right',
         type: 'string',
         label: 'Markierung (Rechts)',
+        description:
+          'Rechts des Radwegs in Fahrtrichtung, also rechts der Linie in ihrer Richtung.',
         values: [
           {
             value: 'solid_line',
@@ -1820,18 +1826,22 @@ const data = {
         key: 'buffer_left',
         type: 'meter',
         label: 'Schutzraum (Links)',
+        description: 'Links des Radwegs in Fahrtrichtung, also links der Linie in ihrer Richtung.',
         values: [],
       },
       {
         key: 'buffer_right',
         type: 'meter',
         label: 'Schutzraum (Rechts)',
+        description:
+          'Rechts des Radwegs in Fahrtrichtung, also rechts der Linie in ihrer Richtung.',
         values: [],
       },
       {
         key: 'traffic_mode_left',
         type: 'string',
         label: 'Verkehrsform (Links)',
+        description: 'Links des Radwegs in Fahrtrichtung, also links der Linie in ihrer Richtung.',
         values: [
           {
             value: 'bicycle',
@@ -1863,6 +1873,8 @@ const data = {
         key: 'traffic_mode_right',
         type: 'string',
         label: 'Verkehrsform (Rechts)',
+        description:
+          'Rechts des Radwegs in Fahrtrichtung, also rechts der Linie in ihrer Richtung.',
         values: [
           {
             value: 'bicycle',
@@ -2426,6 +2438,12 @@ const data = {
         markdown:
           'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Linie, bezogen auf ihre Richtung), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nAbgeleitete Geometrien zeigen in Fahrtrichtung. Sie folgt [`cycleway:<Seite>:oneway`](https://wiki.openstreetmap.org/wiki/DE:Key:cycleway:right:oneway), das sich auf die Zeichenrichtung des OSM-Ways bezieht (`yes` = mit, `-1` = gegen den Way):\n\n- Ohne Angabe an einer Straße ohne Einbahnregelung (Rechtsverkehr): rechte Geometrien laufen in OSM-Way-Richtung, linke gegen sie.\n- Ohne Angabe an einer Einbahnstraße (auch Kreisverkehr): beide Seiten laufen in Fahrtrichtung der Straße. Ein Radfahrstreifen in Gegenrichtung braucht deshalb `cycleway:<Seite>:oneway=-1`. Die alte Schreibweise `cycleway=opposite_lane` / `opposite_track` gilt als Gegenrichtung.\n- Mit Angabe gilt die Angabe, auch wenn sie vom Standard abweicht (z. B. `cycleway:left:oneway=yes`).\n- Radinfrastruktur in beide Richtungen (`cycleway:<Seite>:oneway=no`) hat keine Fahrtrichtung. Hier laufen linke Geometrien gegen die OSM-Way-Richtung, rechte mit ihr.\n\nBei Rechtsverkehr liegt die Radinfrastruktur deshalb in der Regel rechts ihrer Linie (`offset` negativ), auch auf der linken Straßenseite, deren Linie gegen den OSM-Way läuft. Liegt sie links von ihrer Linie (z. B. linker Radfahrstreifen an einer Einbahnstraße in Fahrtrichtung), ist `offset` positiv.\n\nRichtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich auf die Linienrichtung: Läuft die Linie gegen den OSM-Way, sind die Paare getauscht.\n\n**HINWEIS:** Der visuelle Versatz wirkt auf Linien-Ebenen und auf Beschriftungen und Icons entlang der Linie (Breite, Oberfläche, Brücke, Tunnel, Baustelle; sehr kurze Wege zeigen ihr Icon erst beim Hineinzoomen). Verkehrsschild-Beschriftungen liegen weiter auf der Mittellinie.\n',
       },
+      {
+        id: 'zugang-radverkehr',
+        title: 'Zugang Radverkehr im Routing (`access_bicycle`)',
+        markdown:
+          '## Was `routing` enthält\n\n`routing` ist ein Graph für Fahrrad-Router. Er enthält alle Zeilen aus `bikelanes`, `roads` und `roadsPathClasses`, bis auf die Ausnahmen unten. Jede Kante gehört zu genau einer Zeile dort (`source_table` und `source_id`). Sie trägt nur eine Auswahl der Werte, die ein Router braucht, zum Beispiel `category`, `road`, `surface`, `width`, `maxspeed` und `access_bicycle`. Alle anderen Werte bekommt man über einen Join auf die Zeile in der Quelltabelle.\n\n### Geometrie und Richtung\n\nJede Kante hat die Geometrie des OSM-Wegs. Ein Weg wird nicht nach Fahrtrichtung geteilt: Ein Weg, auf dem man in beide Richtungen fahren darf, ist eine Kante mit `oneway=no`. Bei `oneway=yes` zeigt die Linie in die erlaubte Richtung, ein OSM-Weg mit `oneway=-1` ist dafür umgedreht. `oneway_motor=yes` heißt: Autos fahren nur in Linienrichtung, Fahrräder in beide Richtungen, zum Beispiel in einer Einbahnstraße, die für den Radverkehr in Gegenrichtung frei ist.\n\nRadinfrastruktur, die an der Fahrbahn gemappt ist (zum Beispiel `cycleway:right=lane`), ist eine eigene Kante auf derselben Geometrie wie die Fahrbahn. Die Linie wird nicht verschoben. `side` sagt, auf welcher Seite die Radinfrastruktur liegt, `offset` den seitlichen Abstand zur Mittellinie (positiv links, negativ rechts). Die Linie zeigt in die Fahrtrichtung der Radinfrastruktur: rechts in Richtung des OSM-Wegs, links dagegen, wenn `cycleway:<side>:oneway` nichts anderes sagt. Auf einer Einbahnstraße zeigen beide Seiten in die Richtung der Fahrbahn.\n\nEin Weg, der in zwei Tabellen steht, ist nur einmal im Graphen. Ein Radweg in `roadsPathClasses` und `bikelanes` oder eine Fahrradstraße in `roads` und `bikelanes` ist eine Kante aus `bikelanes`.\n\n### Was nicht im Graphen ist\n\nDiese Zeilen sind nicht im Graphen:\n\n- Autobahnen und Schnellstraßen (`motorway`, `trunk`) und Radinfrastruktur, die an ihnen gemappt ist. Sie stehen in `roads`.\n- Die Fahrbahn von Kraftfahrstraßen (`motorroad=yes`), weil Radfahren dort verboten ist. Sie steht in `roads`. Ein Radweg, der an einer Kraftfahrstraße gemappt ist, ist eine eigene Kante.\n- Kanten mit einem Fahrrad-Zugang, den `access_bicycle` nicht abbilden kann, zum Beispiel `bicycle=limited`. Ein leeres Feld würde „Radfahren erlaubt“ bedeuten.\n- Kurze Wege ohne Anschluss an das übrige Netz und kurze lose Enden.\n\nWege, die TILDA gar nicht zeigt, fehlen in allen Tabellen und damit auch im Graphen, zum Beispiel private Wege, Zufahrten ohne Radinfrastruktur oder Mountainbike-Trails.\n\n## Router müssen `access_bicycle` auswerten\n\nDer Graph enthält auch Kanten, auf denen Radfahren nicht erlaubt ist, zum Beispiel eine Fahrbahn mit Radverbot oder eine Anliegerstraße. Sie sind enthalten, damit ein Router selbst entscheiden kann, zum Beispiel für ein Ziel an einer Anliegerstraße. Ein Fahrrad-Router muss sie über `access_bicycle` selbst herausfiltern.\n\n| `access_bicycle`                                                                              | Radfahren     |\n| --------------------------------------------------------------------------------------------- | ------------- |\n| leer                                                                                          | erlaubt       |\n| `yes`, `designated`, `permissive`, `use_sidepath`, `discouraged`, `dismount`                  | erlaubt       |\n| `no`, `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry` | nicht erlaubt |\n\n`use_sidepath` steht auf einer Fahrbahn mit benutzungspflichtigem Radweg daneben. Radfahren auf der Fahrbahn ist dann erlaubt, ein Router sollte aber den Radweg bevorzugen.\n',
+      },
     ],
   },
   bikelanesPresence: {
@@ -2861,6 +2879,12 @@ const data = {
         title: 'Versetzte Geometrien',
         markdown:
           'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Linie, bezogen auf ihre Richtung), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nAbgeleitete Geometrien zeigen in Fahrtrichtung. Sie folgt [`cycleway:<Seite>:oneway`](https://wiki.openstreetmap.org/wiki/DE:Key:cycleway:right:oneway), das sich auf die Zeichenrichtung des OSM-Ways bezieht (`yes` = mit, `-1` = gegen den Way):\n\n- Ohne Angabe an einer Straße ohne Einbahnregelung (Rechtsverkehr): rechte Geometrien laufen in OSM-Way-Richtung, linke gegen sie.\n- Ohne Angabe an einer Einbahnstraße (auch Kreisverkehr): beide Seiten laufen in Fahrtrichtung der Straße. Ein Radfahrstreifen in Gegenrichtung braucht deshalb `cycleway:<Seite>:oneway=-1`. Die alte Schreibweise `cycleway=opposite_lane` / `opposite_track` gilt als Gegenrichtung.\n- Mit Angabe gilt die Angabe, auch wenn sie vom Standard abweicht (z. B. `cycleway:left:oneway=yes`).\n- Radinfrastruktur in beide Richtungen (`cycleway:<Seite>:oneway=no`) hat keine Fahrtrichtung. Hier laufen linke Geometrien gegen die OSM-Way-Richtung, rechte mit ihr.\n\nBei Rechtsverkehr liegt die Radinfrastruktur deshalb in der Regel rechts ihrer Linie (`offset` negativ), auch auf der linken Straßenseite, deren Linie gegen den OSM-Way läuft. Liegt sie links von ihrer Linie (z. B. linker Radfahrstreifen an einer Einbahnstraße in Fahrtrichtung), ist `offset` positiv.\n\nRichtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich auf die Linienrichtung: Läuft die Linie gegen den OSM-Way, sind die Paare getauscht.\n\n**HINWEIS:** Der visuelle Versatz wirkt auf Linien-Ebenen und auf Beschriftungen und Icons entlang der Linie (Breite, Oberfläche, Brücke, Tunnel, Baustelle; sehr kurze Wege zeigen ihr Icon erst beim Hineinzoomen). Verkehrsschild-Beschriftungen liegen weiter auf der Mittellinie.\n',
+      },
+      {
+        id: 'zugang-radverkehr',
+        title: 'Zugang Radverkehr im Routing (`access_bicycle`)',
+        markdown:
+          '## Was `routing` enthält\n\n`routing` ist ein Graph für Fahrrad-Router. Er enthält alle Zeilen aus `bikelanes`, `roads` und `roadsPathClasses`, bis auf die Ausnahmen unten. Jede Kante gehört zu genau einer Zeile dort (`source_table` und `source_id`). Sie trägt nur eine Auswahl der Werte, die ein Router braucht, zum Beispiel `category`, `road`, `surface`, `width`, `maxspeed` und `access_bicycle`. Alle anderen Werte bekommt man über einen Join auf die Zeile in der Quelltabelle.\n\n### Geometrie und Richtung\n\nJede Kante hat die Geometrie des OSM-Wegs. Ein Weg wird nicht nach Fahrtrichtung geteilt: Ein Weg, auf dem man in beide Richtungen fahren darf, ist eine Kante mit `oneway=no`. Bei `oneway=yes` zeigt die Linie in die erlaubte Richtung, ein OSM-Weg mit `oneway=-1` ist dafür umgedreht. `oneway_motor=yes` heißt: Autos fahren nur in Linienrichtung, Fahrräder in beide Richtungen, zum Beispiel in einer Einbahnstraße, die für den Radverkehr in Gegenrichtung frei ist.\n\nRadinfrastruktur, die an der Fahrbahn gemappt ist (zum Beispiel `cycleway:right=lane`), ist eine eigene Kante auf derselben Geometrie wie die Fahrbahn. Die Linie wird nicht verschoben. `side` sagt, auf welcher Seite die Radinfrastruktur liegt, `offset` den seitlichen Abstand zur Mittellinie (positiv links, negativ rechts). Die Linie zeigt in die Fahrtrichtung der Radinfrastruktur: rechts in Richtung des OSM-Wegs, links dagegen, wenn `cycleway:<side>:oneway` nichts anderes sagt. Auf einer Einbahnstraße zeigen beide Seiten in die Richtung der Fahrbahn.\n\nEin Weg, der in zwei Tabellen steht, ist nur einmal im Graphen. Ein Radweg in `roadsPathClasses` und `bikelanes` oder eine Fahrradstraße in `roads` und `bikelanes` ist eine Kante aus `bikelanes`.\n\n### Was nicht im Graphen ist\n\nDiese Zeilen sind nicht im Graphen:\n\n- Autobahnen und Schnellstraßen (`motorway`, `trunk`) und Radinfrastruktur, die an ihnen gemappt ist. Sie stehen in `roads`.\n- Die Fahrbahn von Kraftfahrstraßen (`motorroad=yes`), weil Radfahren dort verboten ist. Sie steht in `roads`. Ein Radweg, der an einer Kraftfahrstraße gemappt ist, ist eine eigene Kante.\n- Kanten mit einem Fahrrad-Zugang, den `access_bicycle` nicht abbilden kann, zum Beispiel `bicycle=limited`. Ein leeres Feld würde „Radfahren erlaubt“ bedeuten.\n- Kurze Wege ohne Anschluss an das übrige Netz und kurze lose Enden.\n\nWege, die TILDA gar nicht zeigt, fehlen in allen Tabellen und damit auch im Graphen, zum Beispiel private Wege, Zufahrten ohne Radinfrastruktur oder Mountainbike-Trails.\n\n## Router müssen `access_bicycle` auswerten\n\nDer Graph enthält auch Kanten, auf denen Radfahren nicht erlaubt ist, zum Beispiel eine Fahrbahn mit Radverbot oder eine Anliegerstraße. Sie sind enthalten, damit ein Router selbst entscheiden kann, zum Beispiel für ein Ziel an einer Anliegerstraße. Ein Fahrrad-Router muss sie über `access_bicycle` selbst herausfiltern.\n\n| `access_bicycle`                                                                              | Radfahren     |\n| --------------------------------------------------------------------------------------------- | ------------- |\n| leer                                                                                          | erlaubt       |\n| `yes`, `designated`, `permissive`, `use_sidepath`, `discouraged`, `dismount`                  | erlaubt       |\n| `no`, `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry` | nicht erlaubt |\n\n`use_sidepath` steht auf einer Fahrbahn mit benutzungspflichtigem Radweg daneben. Radfahren auf der Fahrbahn ist dann erlaubt, ein Router sollte aber den Radweg bevorzugen.\n',
       },
     ],
   },
@@ -3537,6 +3561,12 @@ const data = {
         title: 'Versetzte Geometrien',
         markdown:
           'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Linie, bezogen auf ihre Richtung), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nAbgeleitete Geometrien zeigen in Fahrtrichtung. Sie folgt [`cycleway:<Seite>:oneway`](https://wiki.openstreetmap.org/wiki/DE:Key:cycleway:right:oneway), das sich auf die Zeichenrichtung des OSM-Ways bezieht (`yes` = mit, `-1` = gegen den Way):\n\n- Ohne Angabe an einer Straße ohne Einbahnregelung (Rechtsverkehr): rechte Geometrien laufen in OSM-Way-Richtung, linke gegen sie.\n- Ohne Angabe an einer Einbahnstraße (auch Kreisverkehr): beide Seiten laufen in Fahrtrichtung der Straße. Ein Radfahrstreifen in Gegenrichtung braucht deshalb `cycleway:<Seite>:oneway=-1`. Die alte Schreibweise `cycleway=opposite_lane` / `opposite_track` gilt als Gegenrichtung.\n- Mit Angabe gilt die Angabe, auch wenn sie vom Standard abweicht (z. B. `cycleway:left:oneway=yes`).\n- Radinfrastruktur in beide Richtungen (`cycleway:<Seite>:oneway=no`) hat keine Fahrtrichtung. Hier laufen linke Geometrien gegen die OSM-Way-Richtung, rechte mit ihr.\n\nBei Rechtsverkehr liegt die Radinfrastruktur deshalb in der Regel rechts ihrer Linie (`offset` negativ), auch auf der linken Straßenseite, deren Linie gegen den OSM-Way läuft. Liegt sie links von ihrer Linie (z. B. linker Radfahrstreifen an einer Einbahnstraße in Fahrtrichtung), ist `offset` positiv.\n\nRichtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich auf die Linienrichtung: Läuft die Linie gegen den OSM-Way, sind die Paare getauscht.\n\n**HINWEIS:** Der visuelle Versatz wirkt auf Linien-Ebenen und auf Beschriftungen und Icons entlang der Linie (Breite, Oberfläche, Brücke, Tunnel, Baustelle; sehr kurze Wege zeigen ihr Icon erst beim Hineinzoomen). Verkehrsschild-Beschriftungen liegen weiter auf der Mittellinie.\n',
+      },
+      {
+        id: 'zugang-radverkehr',
+        title: 'Zugang Radverkehr im Routing (`access_bicycle`)',
+        markdown:
+          '## Was `routing` enthält\n\n`routing` ist ein Graph für Fahrrad-Router. Er enthält alle Zeilen aus `bikelanes`, `roads` und `roadsPathClasses`, bis auf die Ausnahmen unten. Jede Kante gehört zu genau einer Zeile dort (`source_table` und `source_id`). Sie trägt nur eine Auswahl der Werte, die ein Router braucht, zum Beispiel `category`, `road`, `surface`, `width`, `maxspeed` und `access_bicycle`. Alle anderen Werte bekommt man über einen Join auf die Zeile in der Quelltabelle.\n\n### Geometrie und Richtung\n\nJede Kante hat die Geometrie des OSM-Wegs. Ein Weg wird nicht nach Fahrtrichtung geteilt: Ein Weg, auf dem man in beide Richtungen fahren darf, ist eine Kante mit `oneway=no`. Bei `oneway=yes` zeigt die Linie in die erlaubte Richtung, ein OSM-Weg mit `oneway=-1` ist dafür umgedreht. `oneway_motor=yes` heißt: Autos fahren nur in Linienrichtung, Fahrräder in beide Richtungen, zum Beispiel in einer Einbahnstraße, die für den Radverkehr in Gegenrichtung frei ist.\n\nRadinfrastruktur, die an der Fahrbahn gemappt ist (zum Beispiel `cycleway:right=lane`), ist eine eigene Kante auf derselben Geometrie wie die Fahrbahn. Die Linie wird nicht verschoben. `side` sagt, auf welcher Seite die Radinfrastruktur liegt, `offset` den seitlichen Abstand zur Mittellinie (positiv links, negativ rechts). Die Linie zeigt in die Fahrtrichtung der Radinfrastruktur: rechts in Richtung des OSM-Wegs, links dagegen, wenn `cycleway:<side>:oneway` nichts anderes sagt. Auf einer Einbahnstraße zeigen beide Seiten in die Richtung der Fahrbahn.\n\nEin Weg, der in zwei Tabellen steht, ist nur einmal im Graphen. Ein Radweg in `roadsPathClasses` und `bikelanes` oder eine Fahrradstraße in `roads` und `bikelanes` ist eine Kante aus `bikelanes`.\n\n### Was nicht im Graphen ist\n\nDiese Zeilen sind nicht im Graphen:\n\n- Autobahnen und Schnellstraßen (`motorway`, `trunk`) und Radinfrastruktur, die an ihnen gemappt ist. Sie stehen in `roads`.\n- Die Fahrbahn von Kraftfahrstraßen (`motorroad=yes`), weil Radfahren dort verboten ist. Sie steht in `roads`. Ein Radweg, der an einer Kraftfahrstraße gemappt ist, ist eine eigene Kante.\n- Kanten mit einem Fahrrad-Zugang, den `access_bicycle` nicht abbilden kann, zum Beispiel `bicycle=limited`. Ein leeres Feld würde „Radfahren erlaubt“ bedeuten.\n- Kurze Wege ohne Anschluss an das übrige Netz und kurze lose Enden.\n\nWege, die TILDA gar nicht zeigt, fehlen in allen Tabellen und damit auch im Graphen, zum Beispiel private Wege, Zufahrten ohne Radinfrastruktur oder Mountainbike-Trails.\n\n## Router müssen `access_bicycle` auswerten\n\nDer Graph enthält auch Kanten, auf denen Radfahren nicht erlaubt ist, zum Beispiel eine Fahrbahn mit Radverbot oder eine Anliegerstraße. Sie sind enthalten, damit ein Router selbst entscheiden kann, zum Beispiel für ein Ziel an einer Anliegerstraße. Ein Fahrrad-Router muss sie über `access_bicycle` selbst herausfiltern.\n\n| `access_bicycle`                                                                              | Radfahren     |\n| --------------------------------------------------------------------------------------------- | ------------- |\n| leer                                                                                          | erlaubt       |\n| `yes`, `designated`, `permissive`, `use_sidepath`, `discouraged`, `dismount`                  | erlaubt       |\n| `no`, `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry` | nicht erlaubt |\n\n`use_sidepath` steht auf einer Fahrbahn mit benutzungspflichtigem Radweg daneben. Radfahren auf der Fahrbahn ist dann erlaubt, ein Router sollte aber den Radweg bevorzugen.\n',
       },
     ],
   },
@@ -4483,6 +4513,12 @@ const data = {
         title: 'Versetzte Geometrien',
         markdown:
           'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Linie, bezogen auf ihre Richtung), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nAbgeleitete Geometrien zeigen in Fahrtrichtung. Sie folgt [`cycleway:<Seite>:oneway`](https://wiki.openstreetmap.org/wiki/DE:Key:cycleway:right:oneway), das sich auf die Zeichenrichtung des OSM-Ways bezieht (`yes` = mit, `-1` = gegen den Way):\n\n- Ohne Angabe an einer Straße ohne Einbahnregelung (Rechtsverkehr): rechte Geometrien laufen in OSM-Way-Richtung, linke gegen sie.\n- Ohne Angabe an einer Einbahnstraße (auch Kreisverkehr): beide Seiten laufen in Fahrtrichtung der Straße. Ein Radfahrstreifen in Gegenrichtung braucht deshalb `cycleway:<Seite>:oneway=-1`. Die alte Schreibweise `cycleway=opposite_lane` / `opposite_track` gilt als Gegenrichtung.\n- Mit Angabe gilt die Angabe, auch wenn sie vom Standard abweicht (z. B. `cycleway:left:oneway=yes`).\n- Radinfrastruktur in beide Richtungen (`cycleway:<Seite>:oneway=no`) hat keine Fahrtrichtung. Hier laufen linke Geometrien gegen die OSM-Way-Richtung, rechte mit ihr.\n\nBei Rechtsverkehr liegt die Radinfrastruktur deshalb in der Regel rechts ihrer Linie (`offset` negativ), auch auf der linken Straßenseite, deren Linie gegen den OSM-Way läuft. Liegt sie links von ihrer Linie (z. B. linker Radfahrstreifen an einer Einbahnstraße in Fahrtrichtung), ist `offset` positiv.\n\nRichtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich auf die Linienrichtung: Läuft die Linie gegen den OSM-Way, sind die Paare getauscht.\n\n**HINWEIS:** Der visuelle Versatz wirkt auf Linien-Ebenen und auf Beschriftungen und Icons entlang der Linie (Breite, Oberfläche, Brücke, Tunnel, Baustelle; sehr kurze Wege zeigen ihr Icon erst beim Hineinzoomen). Verkehrsschild-Beschriftungen liegen weiter auf der Mittellinie.\n',
+      },
+      {
+        id: 'zugang-radverkehr',
+        title: 'Zugang Radverkehr im Routing (`access_bicycle`)',
+        markdown:
+          '## Was `routing` enthält\n\n`routing` ist ein Graph für Fahrrad-Router. Er enthält alle Zeilen aus `bikelanes`, `roads` und `roadsPathClasses`, bis auf die Ausnahmen unten. Jede Kante gehört zu genau einer Zeile dort (`source_table` und `source_id`). Sie trägt nur eine Auswahl der Werte, die ein Router braucht, zum Beispiel `category`, `road`, `surface`, `width`, `maxspeed` und `access_bicycle`. Alle anderen Werte bekommt man über einen Join auf die Zeile in der Quelltabelle.\n\n### Geometrie und Richtung\n\nJede Kante hat die Geometrie des OSM-Wegs. Ein Weg wird nicht nach Fahrtrichtung geteilt: Ein Weg, auf dem man in beide Richtungen fahren darf, ist eine Kante mit `oneway=no`. Bei `oneway=yes` zeigt die Linie in die erlaubte Richtung, ein OSM-Weg mit `oneway=-1` ist dafür umgedreht. `oneway_motor=yes` heißt: Autos fahren nur in Linienrichtung, Fahrräder in beide Richtungen, zum Beispiel in einer Einbahnstraße, die für den Radverkehr in Gegenrichtung frei ist.\n\nRadinfrastruktur, die an der Fahrbahn gemappt ist (zum Beispiel `cycleway:right=lane`), ist eine eigene Kante auf derselben Geometrie wie die Fahrbahn. Die Linie wird nicht verschoben. `side` sagt, auf welcher Seite die Radinfrastruktur liegt, `offset` den seitlichen Abstand zur Mittellinie (positiv links, negativ rechts). Die Linie zeigt in die Fahrtrichtung der Radinfrastruktur: rechts in Richtung des OSM-Wegs, links dagegen, wenn `cycleway:<side>:oneway` nichts anderes sagt. Auf einer Einbahnstraße zeigen beide Seiten in die Richtung der Fahrbahn.\n\nEin Weg, der in zwei Tabellen steht, ist nur einmal im Graphen. Ein Radweg in `roadsPathClasses` und `bikelanes` oder eine Fahrradstraße in `roads` und `bikelanes` ist eine Kante aus `bikelanes`.\n\n### Was nicht im Graphen ist\n\nDiese Zeilen sind nicht im Graphen:\n\n- Autobahnen und Schnellstraßen (`motorway`, `trunk`) und Radinfrastruktur, die an ihnen gemappt ist. Sie stehen in `roads`.\n- Die Fahrbahn von Kraftfahrstraßen (`motorroad=yes`), weil Radfahren dort verboten ist. Sie steht in `roads`. Ein Radweg, der an einer Kraftfahrstraße gemappt ist, ist eine eigene Kante.\n- Kanten mit einem Fahrrad-Zugang, den `access_bicycle` nicht abbilden kann, zum Beispiel `bicycle=limited`. Ein leeres Feld würde „Radfahren erlaubt“ bedeuten.\n- Kurze Wege ohne Anschluss an das übrige Netz und kurze lose Enden.\n\nWege, die TILDA gar nicht zeigt, fehlen in allen Tabellen und damit auch im Graphen, zum Beispiel private Wege, Zufahrten ohne Radinfrastruktur oder Mountainbike-Trails.\n\n## Router müssen `access_bicycle` auswerten\n\nDer Graph enthält auch Kanten, auf denen Radfahren nicht erlaubt ist, zum Beispiel eine Fahrbahn mit Radverbot oder eine Anliegerstraße. Sie sind enthalten, damit ein Router selbst entscheiden kann, zum Beispiel für ein Ziel an einer Anliegerstraße. Ein Fahrrad-Router muss sie über `access_bicycle` selbst herausfiltern.\n\n| `access_bicycle`                                                                              | Radfahren     |\n| --------------------------------------------------------------------------------------------- | ------------- |\n| leer                                                                                          | erlaubt       |\n| `yes`, `designated`, `permissive`, `use_sidepath`, `discouraged`, `dismount`                  | erlaubt       |\n| `no`, `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry` | nicht erlaubt |\n\n`use_sidepath` steht auf einer Fahrbahn mit benutzungspflichtigem Radweg daneben. Radfahren auf der Fahrbahn ist dann erlaubt, ein Router sollte aber den Radweg bevorzugen.\n',
       },
     ],
   },
@@ -12501,6 +12537,12 @@ const data = {
         markdown:
           'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Linie, bezogen auf ihre Richtung), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nAbgeleitete Geometrien zeigen in Fahrtrichtung. Sie folgt [`cycleway:<Seite>:oneway`](https://wiki.openstreetmap.org/wiki/DE:Key:cycleway:right:oneway), das sich auf die Zeichenrichtung des OSM-Ways bezieht (`yes` = mit, `-1` = gegen den Way):\n\n- Ohne Angabe an einer Straße ohne Einbahnregelung (Rechtsverkehr): rechte Geometrien laufen in OSM-Way-Richtung, linke gegen sie.\n- Ohne Angabe an einer Einbahnstraße (auch Kreisverkehr): beide Seiten laufen in Fahrtrichtung der Straße. Ein Radfahrstreifen in Gegenrichtung braucht deshalb `cycleway:<Seite>:oneway=-1`. Die alte Schreibweise `cycleway=opposite_lane` / `opposite_track` gilt als Gegenrichtung.\n- Mit Angabe gilt die Angabe, auch wenn sie vom Standard abweicht (z. B. `cycleway:left:oneway=yes`).\n- Radinfrastruktur in beide Richtungen (`cycleway:<Seite>:oneway=no`) hat keine Fahrtrichtung. Hier laufen linke Geometrien gegen die OSM-Way-Richtung, rechte mit ihr.\n\nBei Rechtsverkehr liegt die Radinfrastruktur deshalb in der Regel rechts ihrer Linie (`offset` negativ), auch auf der linken Straßenseite, deren Linie gegen den OSM-Way läuft. Liegt sie links von ihrer Linie (z. B. linker Radfahrstreifen an einer Einbahnstraße in Fahrtrichtung), ist `offset` positiv.\n\nRichtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich auf die Linienrichtung: Läuft die Linie gegen den OSM-Way, sind die Paare getauscht.\n\n**HINWEIS:** Der visuelle Versatz wirkt auf Linien-Ebenen und auf Beschriftungen und Icons entlang der Linie (Breite, Oberfläche, Brücke, Tunnel, Baustelle; sehr kurze Wege zeigen ihr Icon erst beim Hineinzoomen). Verkehrsschild-Beschriftungen liegen weiter auf der Mittellinie.\n',
       },
+      {
+        id: 'zugang-radverkehr',
+        title: 'Zugang Radverkehr im Routing (`access_bicycle`)',
+        markdown:
+          '## Was `routing` enthält\n\n`routing` ist ein Graph für Fahrrad-Router. Er enthält alle Zeilen aus `bikelanes`, `roads` und `roadsPathClasses`, bis auf die Ausnahmen unten. Jede Kante gehört zu genau einer Zeile dort (`source_table` und `source_id`). Sie trägt nur eine Auswahl der Werte, die ein Router braucht, zum Beispiel `category`, `road`, `surface`, `width`, `maxspeed` und `access_bicycle`. Alle anderen Werte bekommt man über einen Join auf die Zeile in der Quelltabelle.\n\n### Geometrie und Richtung\n\nJede Kante hat die Geometrie des OSM-Wegs. Ein Weg wird nicht nach Fahrtrichtung geteilt: Ein Weg, auf dem man in beide Richtungen fahren darf, ist eine Kante mit `oneway=no`. Bei `oneway=yes` zeigt die Linie in die erlaubte Richtung, ein OSM-Weg mit `oneway=-1` ist dafür umgedreht. `oneway_motor=yes` heißt: Autos fahren nur in Linienrichtung, Fahrräder in beide Richtungen, zum Beispiel in einer Einbahnstraße, die für den Radverkehr in Gegenrichtung frei ist.\n\nRadinfrastruktur, die an der Fahrbahn gemappt ist (zum Beispiel `cycleway:right=lane`), ist eine eigene Kante auf derselben Geometrie wie die Fahrbahn. Die Linie wird nicht verschoben. `side` sagt, auf welcher Seite die Radinfrastruktur liegt, `offset` den seitlichen Abstand zur Mittellinie (positiv links, negativ rechts). Die Linie zeigt in die Fahrtrichtung der Radinfrastruktur: rechts in Richtung des OSM-Wegs, links dagegen, wenn `cycleway:<side>:oneway` nichts anderes sagt. Auf einer Einbahnstraße zeigen beide Seiten in die Richtung der Fahrbahn.\n\nEin Weg, der in zwei Tabellen steht, ist nur einmal im Graphen. Ein Radweg in `roadsPathClasses` und `bikelanes` oder eine Fahrradstraße in `roads` und `bikelanes` ist eine Kante aus `bikelanes`.\n\n### Was nicht im Graphen ist\n\nDiese Zeilen sind nicht im Graphen:\n\n- Autobahnen und Schnellstraßen (`motorway`, `trunk`) und Radinfrastruktur, die an ihnen gemappt ist. Sie stehen in `roads`.\n- Die Fahrbahn von Kraftfahrstraßen (`motorroad=yes`), weil Radfahren dort verboten ist. Sie steht in `roads`. Ein Radweg, der an einer Kraftfahrstraße gemappt ist, ist eine eigene Kante.\n- Kanten mit einem Fahrrad-Zugang, den `access_bicycle` nicht abbilden kann, zum Beispiel `bicycle=limited`. Ein leeres Feld würde „Radfahren erlaubt“ bedeuten.\n- Kurze Wege ohne Anschluss an das übrige Netz und kurze lose Enden.\n\nWege, die TILDA gar nicht zeigt, fehlen in allen Tabellen und damit auch im Graphen, zum Beispiel private Wege, Zufahrten ohne Radinfrastruktur oder Mountainbike-Trails.\n\n## Router müssen `access_bicycle` auswerten\n\nDer Graph enthält auch Kanten, auf denen Radfahren nicht erlaubt ist, zum Beispiel eine Fahrbahn mit Radverbot oder eine Anliegerstraße. Sie sind enthalten, damit ein Router selbst entscheiden kann, zum Beispiel für ein Ziel an einer Anliegerstraße. Ein Fahrrad-Router muss sie über `access_bicycle` selbst herausfiltern.\n\n| `access_bicycle`                                                                              | Radfahren     |\n| --------------------------------------------------------------------------------------------- | ------------- |\n| leer                                                                                          | erlaubt       |\n| `yes`, `designated`, `permissive`, `use_sidepath`, `discouraged`, `dismount`                  | erlaubt       |\n| `no`, `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry` | nicht erlaubt |\n\n`use_sidepath` steht auf einer Fahrbahn mit benutzungspflichtigem Radweg daneben. Radfahren auf der Fahrbahn ist dann erlaubt, ein Router sollte aber den Radweg bevorzugen.\n',
+      },
     ],
   },
   roadsPathClasses: {
@@ -13783,6 +13825,12 @@ const data = {
         markdown:
           'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Linie, bezogen auf ihre Richtung), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nAbgeleitete Geometrien zeigen in Fahrtrichtung. Sie folgt [`cycleway:<Seite>:oneway`](https://wiki.openstreetmap.org/wiki/DE:Key:cycleway:right:oneway), das sich auf die Zeichenrichtung des OSM-Ways bezieht (`yes` = mit, `-1` = gegen den Way):\n\n- Ohne Angabe an einer Straße ohne Einbahnregelung (Rechtsverkehr): rechte Geometrien laufen in OSM-Way-Richtung, linke gegen sie.\n- Ohne Angabe an einer Einbahnstraße (auch Kreisverkehr): beide Seiten laufen in Fahrtrichtung der Straße. Ein Radfahrstreifen in Gegenrichtung braucht deshalb `cycleway:<Seite>:oneway=-1`. Die alte Schreibweise `cycleway=opposite_lane` / `opposite_track` gilt als Gegenrichtung.\n- Mit Angabe gilt die Angabe, auch wenn sie vom Standard abweicht (z. B. `cycleway:left:oneway=yes`).\n- Radinfrastruktur in beide Richtungen (`cycleway:<Seite>:oneway=no`) hat keine Fahrtrichtung. Hier laufen linke Geometrien gegen die OSM-Way-Richtung, rechte mit ihr.\n\nBei Rechtsverkehr liegt die Radinfrastruktur deshalb in der Regel rechts ihrer Linie (`offset` negativ), auch auf der linken Straßenseite, deren Linie gegen den OSM-Way läuft. Liegt sie links von ihrer Linie (z. B. linker Radfahrstreifen an einer Einbahnstraße in Fahrtrichtung), ist `offset` positiv.\n\nRichtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich auf die Linienrichtung: Läuft die Linie gegen den OSM-Way, sind die Paare getauscht.\n\n**HINWEIS:** Der visuelle Versatz wirkt auf Linien-Ebenen und auf Beschriftungen und Icons entlang der Linie (Breite, Oberfläche, Brücke, Tunnel, Baustelle; sehr kurze Wege zeigen ihr Icon erst beim Hineinzoomen). Verkehrsschild-Beschriftungen liegen weiter auf der Mittellinie.\n',
       },
+      {
+        id: 'zugang-radverkehr',
+        title: 'Zugang Radverkehr im Routing (`access_bicycle`)',
+        markdown:
+          '## Was `routing` enthält\n\n`routing` ist ein Graph für Fahrrad-Router. Er enthält alle Zeilen aus `bikelanes`, `roads` und `roadsPathClasses`, bis auf die Ausnahmen unten. Jede Kante gehört zu genau einer Zeile dort (`source_table` und `source_id`). Sie trägt nur eine Auswahl der Werte, die ein Router braucht, zum Beispiel `category`, `road`, `surface`, `width`, `maxspeed` und `access_bicycle`. Alle anderen Werte bekommt man über einen Join auf die Zeile in der Quelltabelle.\n\n### Geometrie und Richtung\n\nJede Kante hat die Geometrie des OSM-Wegs. Ein Weg wird nicht nach Fahrtrichtung geteilt: Ein Weg, auf dem man in beide Richtungen fahren darf, ist eine Kante mit `oneway=no`. Bei `oneway=yes` zeigt die Linie in die erlaubte Richtung, ein OSM-Weg mit `oneway=-1` ist dafür umgedreht. `oneway_motor=yes` heißt: Autos fahren nur in Linienrichtung, Fahrräder in beide Richtungen, zum Beispiel in einer Einbahnstraße, die für den Radverkehr in Gegenrichtung frei ist.\n\nRadinfrastruktur, die an der Fahrbahn gemappt ist (zum Beispiel `cycleway:right=lane`), ist eine eigene Kante auf derselben Geometrie wie die Fahrbahn. Die Linie wird nicht verschoben. `side` sagt, auf welcher Seite die Radinfrastruktur liegt, `offset` den seitlichen Abstand zur Mittellinie (positiv links, negativ rechts). Die Linie zeigt in die Fahrtrichtung der Radinfrastruktur: rechts in Richtung des OSM-Wegs, links dagegen, wenn `cycleway:<side>:oneway` nichts anderes sagt. Auf einer Einbahnstraße zeigen beide Seiten in die Richtung der Fahrbahn.\n\nEin Weg, der in zwei Tabellen steht, ist nur einmal im Graphen. Ein Radweg in `roadsPathClasses` und `bikelanes` oder eine Fahrradstraße in `roads` und `bikelanes` ist eine Kante aus `bikelanes`.\n\n### Was nicht im Graphen ist\n\nDiese Zeilen sind nicht im Graphen:\n\n- Autobahnen und Schnellstraßen (`motorway`, `trunk`) und Radinfrastruktur, die an ihnen gemappt ist. Sie stehen in `roads`.\n- Die Fahrbahn von Kraftfahrstraßen (`motorroad=yes`), weil Radfahren dort verboten ist. Sie steht in `roads`. Ein Radweg, der an einer Kraftfahrstraße gemappt ist, ist eine eigene Kante.\n- Kanten mit einem Fahrrad-Zugang, den `access_bicycle` nicht abbilden kann, zum Beispiel `bicycle=limited`. Ein leeres Feld würde „Radfahren erlaubt“ bedeuten.\n- Kurze Wege ohne Anschluss an das übrige Netz und kurze lose Enden.\n\nWege, die TILDA gar nicht zeigt, fehlen in allen Tabellen und damit auch im Graphen, zum Beispiel private Wege, Zufahrten ohne Radinfrastruktur oder Mountainbike-Trails.\n\n## Router müssen `access_bicycle` auswerten\n\nDer Graph enthält auch Kanten, auf denen Radfahren nicht erlaubt ist, zum Beispiel eine Fahrbahn mit Radverbot oder eine Anliegerstraße. Sie sind enthalten, damit ein Router selbst entscheiden kann, zum Beispiel für ein Ziel an einer Anliegerstraße. Ein Fahrrad-Router muss sie über `access_bicycle` selbst herausfiltern.\n\n| `access_bicycle`                                                                              | Radfahren     |\n| --------------------------------------------------------------------------------------------- | ------------- |\n| leer                                                                                          | erlaubt       |\n| `yes`, `designated`, `permissive`, `use_sidepath`, `discouraged`, `dismount`                  | erlaubt       |\n| `no`, `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry` | nicht erlaubt |\n\n`use_sidepath` steht auf einer Fahrbahn mit benutzungspflichtigem Radweg daneben. Radfahren auf der Fahrbahn ist dann erlaubt, ein Router sollte aber den Radweg bevorzugen.\n',
+      },
     ],
   },
   routing: {
@@ -13791,7 +13839,7 @@ const data = {
     sourceIds: [],
     title: 'Routing',
     summary:
-      'Score-free road+bike edges for routing (one row per carriageway, bike lane or path), derived from roads_bikelanes infrastructure.',
+      'Straßen, Radinfrastruktur und Wege als Grundlage für Fahrrad-Routing, mit Fahrtrichtung, Radzugang und den Angaben, die ein Router zur Bewertung braucht.',
     groups: [],
     attributes: [
       {
@@ -13799,7 +13847,7 @@ const data = {
         type: 'string',
         label: 'Bauliche Führung',
         description:
-          'TILDA-Bikelane-Kategorie (maßgebliche Klassifikation). `mixedTrafficFoot` auf Wege-Kanten (`source_table=roadsPathClasses`), wenn keine Self-Kategorie vorliegt.',
+          'TILDA-Bikelane-Kategorie (maßgebliche Klassifikation). `mixedTrafficFoot` auf Wegen (`source_table=roadsPathClasses`), wenn keine Self-Kategorie vorliegt.',
         values: [
           {
             value: 'bicycleRoad',
@@ -13912,13 +13960,13 @@ const data = {
             value: 'mixedTrafficMotor',
             label: 'Mischverkehr mit Kfz-Verkehr',
             description:
-              'Verarbeitung zugewiesen (keine OSM-Kategorie). Fahrbahn-Kante ohne bauliche Radinfrastruktur.',
+              'Verarbeitung zugewiesen (keine OSM-Kategorie). Fahrbahn ohne bauliche Radinfrastruktur.',
           },
           {
             value: 'mixedTrafficFoot',
             label: 'Mischverkehr mit Fußverkehr',
             description:
-              'Verarbeitung zugewiesen auf Wege-Kanten (`source_table=roadsPathClasses`), wenn keine Self-Bikelane-Kategorie vorliegt.',
+              'Verarbeitung zugewiesen auf Wegen (`source_table=roadsPathClasses`), wenn keine Self-Bikelane-Kategorie vorliegt.',
           },
         ],
       },
@@ -14359,7 +14407,7 @@ const data = {
         label: 'Linien-Offset',
         purpose: 'rendering',
         description:
-          'Wie `bikelanes.offset`: Geometrie bleibt auf der Mittellinie; der Wert ist nur für die Kartendarstellung (`line-offset`). Fehlt auf der Mittellinie (`self`). Sonst halbe Straßenbreite (`road_width`: OSM `width`/`est_width`, sonst Highway-Default), positiv = links, negativ = rechts der Linie. Radinfrastruktur-Kanten (`source_table=bikelanes`) haben dieselbe Linienrichtung wie `bikelanes` (Fahrtrichtung; bei beiden Richtungen links gegen und rechts mit dem OSM-Way). Fahrbahn-Kanten haben keinen Versatz. Transformierte Bikelanes übernehmen den bereits berechneten Wert.',
+          'Wie `bikelanes.offset`: Geometrie bleibt auf der Mittellinie; der Wert ist nur für die Kartendarstellung (`line-offset`). Fehlt auf der Mittellinie (`self`). Sonst halbe Straßenbreite (`road_width`: OSM `width`/`est_width`, sonst Highway-Default), positiv = links, negativ = rechts der Linie. Abschnitte der Radinfrastruktur (`source_table=bikelanes`) haben dieselbe Linienrichtung wie `bikelanes` (Fahrtrichtung; bei beiden Richtungen links gegen und rechts mit dem OSM-Way). Fahrbahnen haben keinen Versatz. Transformierte Bikelanes übernehmen den bereits berechneten Wert.',
         chapterRefs: ['versetzte-geometrien'],
         values: [],
       },
@@ -14407,7 +14455,7 @@ const data = {
         label: 'Parent-Way',
         purpose: 'processing',
         description:
-          'OSM-Parent-Way (`way/N`) für Carriageway- und Infrastruktur-Kanten. Join-Schlüssel (indiziert).',
+          'OSM-Parent-Way (`way/N`) für Fahrbahnen und Radinfrastruktur. Join-Schlüssel (indiziert).',
         values: [],
       },
       {
@@ -14416,7 +14464,7 @@ const data = {
         label: 'Quelltabelle',
         purpose: 'processing',
         description:
-          'Kantentyp und TILDA-Tabelle, aus der fachliche Attribute gejoint werden (`bikelanes`, `roads`, `roadsPathClasses`). Join-Schlüssel.',
+          'Art des Abschnitts und TILDA-Tabelle, aus der fachliche Attribute gejoint werden (`bikelanes`, `roads`, `roadsPathClasses`). Join-Schlüssel.',
         values: [
           {
             value: 'bikelanes',
@@ -14430,7 +14478,7 @@ const data = {
             value: 'roadsPathClasses',
             label: 'Wege',
             description:
-              'Join-Ziel für Wege-Kanten (Kategorie-ID der Self-Cycleway-Zeile oder mixedTrafficFoot). Jede solche Kante muss in roadsPathClasses existieren (gleicher Skip-Helper wie der Path-Writer).',
+              'Join-Ziel für Wege (Kategorie-ID der Self-Cycleway-Zeile oder mixedTrafficFoot). Jeder solche Weg muss in roadsPathClasses existieren (gleicher Skip-Helper wie der Path-Writer).',
           },
         ],
       },
@@ -14610,19 +14658,65 @@ const data = {
         values: [],
       },
       {
-        key: 'access_bicycle',
+        key: 'informal',
         type: 'string',
-        label: 'Zugang Radverkehr',
+        label: 'Trampelpfad',
+        values: [
+          {
+            value: 'yes',
+            label: 'Weg als informeller Weg erfasst',
+          },
+        ],
+      },
+      {
+        key: 'tunnel',
+        type: 'string',
+        label: 'Tunnel',
+        values: [
+          {
+            value: 'yes',
+            label: 'Ja',
+            description:
+              'Wege mit `tunnel=yes` und Gebäudedurchgänge mit `tunnel=building_passage`.',
+          },
+        ],
+      },
+      {
+        key: 'dual_carriageway',
+        type: 'string',
+        label: 'Richtungsfahrbahn',
         description:
-          'Aufgelöster Fahrrad-Zugang (OSM-Kette `bicycle` → `vehicle` → `access`, Allowlist). Kein Roh-OSM-Wert. Router können `use_sidepath` und `dismount` am Graphen entscheiden; die Kanten bleiben enthalten. Auf Radinfrastruktur, die an der Fahrbahn-Mittellinie gemappt ist (`side=left`/`right`), leer: der Zugang der Fahrbahn (z. B. `use_sidepath`) gilt nicht für den Radweg selbst.',
+          '`yes`, wenn der Abschnitt zu einer Straße mit baulich getrennten Richtungsfahrbahnen gehört (ein OSM-Weg pro Fahrtrichtung). Sonst leer.',
         values: [
           {
             value: 'yes',
             label: 'Ja',
           },
+        ],
+      },
+      {
+        key: 'roundabout',
+        type: 'string',
+        label: 'Kreisverkehr',
+        description: '`yes`, wenn der Abschnitt Teil eines Kreisverkehrs ist. Sonst leer.',
+        values: [
           {
-            value: 'no',
-            label: 'Nein',
+            value: 'yes',
+            label: 'Ja',
+          },
+        ],
+      },
+      {
+        key: 'access_bicycle',
+        type: 'string',
+        label: 'Zugang Radverkehr',
+        description:
+          'Aufgelöster Fahrrad-Zugang (OSM-Kette `bicycle` → `vehicle` → `access`, Allowlist). Kein Roh-OSM-Wert. Leer: kein Zugangs-Tag, Radfahren ist erlaubt. Auf einer Fahrradstraße oder in einer Fahrradzone ohne eigenes `bicycle`-Tag ist der Wert `designated`: `vehicle=destination` gilt dort nur für Kfz („Anlieger frei“). Abschnitte mit `no`, `destination`, `private`, `customers`, `delivery`, `permit` oder `agricultural_or_forestry` sind im Graphen enthalten, Radfahren ist dort aber nicht erlaubt: Router filtern sie selbst. Auf Radinfrastruktur an der Fahrbahn-Mittellinie (`side=left`/`right`) leer.',
+        chapterRefs: ['zugang-radverkehr'],
+        values: [
+          {
+            value: 'yes',
+            label: 'Ja',
           },
           {
             value: 'designated',
@@ -14634,13 +14728,9 @@ const data = {
           },
           {
             value: 'use_sidepath',
-            label: 'Seitenweg benutzen',
+            label: 'Benutzungspflichtiger Radweg daneben',
             description:
-              'Fahrbahn rechtlich nicht vorgesehen; parallele Infrastruktur nutzen. Kante bleibt im Graphen.',
-          },
-          {
-            value: 'optional_sidepath',
-            label: 'Seitenweg optional',
+              'OSM-Wert auf der Fahrbahn. Neben der Fahrbahn liegt ein benutzungspflichtiger Radweg ([Zeichen 237 (Radweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:237), [Zeichen 240 (Gemeinsamer Geh- und Radweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:240) oder [Zeichen 241 (Getrennter Rad- und Gehweg)](https://trafficsigns.osm-verkehrswende.org/DE?signs=DE:241)). Die Fahrbahn zählt als routbar, ein Router sollte aber den Radweg daneben bevorzugen.',
           },
           {
             value: 'discouraged',
@@ -14649,6 +14739,46 @@ const data = {
           {
             value: 'dismount',
             label: 'Absteigen',
+          },
+          {
+            value: 'destination',
+            label: 'Anlieger frei',
+            description:
+              'Radfahren nicht erlaubt (Router filtern den Abschnitt), außer für Anlieger.',
+          },
+          {
+            value: 'private',
+            label: 'Privat',
+            description: 'Radfahren nicht erlaubt (Router filtern den Abschnitt).',
+          },
+          {
+            value: 'customers',
+            label: 'Kunden',
+            description:
+              'Radfahren nicht erlaubt (Router filtern den Abschnitt), außer für Kunden.',
+          },
+          {
+            value: 'delivery',
+            label: 'Lieferverkehr',
+            description:
+              'Radfahren nicht erlaubt (Router filtern den Abschnitt), außer für den Lieferverkehr.',
+          },
+          {
+            value: 'permit',
+            label: 'Mit Genehmigung',
+            description:
+              'Radfahren nicht erlaubt (Router filtern den Abschnitt), außer mit Genehmigung.',
+          },
+          {
+            value: 'agricultural_or_forestry',
+            label: 'Land- und Forstwirtschaft',
+            description:
+              'Radfahren nicht erlaubt (Router filtern den Abschnitt), nur land- oder forstwirtschaftlicher Verkehr (OSM `agricultural`, `forestry` und Kombinationen).',
+          },
+          {
+            value: 'no',
+            label: 'Nein',
+            description: 'Radfahren nicht erlaubt (Router filtern den Abschnitt).',
           },
         ],
       },
@@ -14671,6 +14801,12 @@ const data = {
         title: 'Versetzte Geometrien',
         markdown:
           'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Linie, bezogen auf ihre Richtung), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nAbgeleitete Geometrien zeigen in Fahrtrichtung. Sie folgt [`cycleway:<Seite>:oneway`](https://wiki.openstreetmap.org/wiki/DE:Key:cycleway:right:oneway), das sich auf die Zeichenrichtung des OSM-Ways bezieht (`yes` = mit, `-1` = gegen den Way):\n\n- Ohne Angabe an einer Straße ohne Einbahnregelung (Rechtsverkehr): rechte Geometrien laufen in OSM-Way-Richtung, linke gegen sie.\n- Ohne Angabe an einer Einbahnstraße (auch Kreisverkehr): beide Seiten laufen in Fahrtrichtung der Straße. Ein Radfahrstreifen in Gegenrichtung braucht deshalb `cycleway:<Seite>:oneway=-1`. Die alte Schreibweise `cycleway=opposite_lane` / `opposite_track` gilt als Gegenrichtung.\n- Mit Angabe gilt die Angabe, auch wenn sie vom Standard abweicht (z. B. `cycleway:left:oneway=yes`).\n- Radinfrastruktur in beide Richtungen (`cycleway:<Seite>:oneway=no`) hat keine Fahrtrichtung. Hier laufen linke Geometrien gegen die OSM-Way-Richtung, rechte mit ihr.\n\nBei Rechtsverkehr liegt die Radinfrastruktur deshalb in der Regel rechts ihrer Linie (`offset` negativ), auch auf der linken Straßenseite, deren Linie gegen den OSM-Way läuft. Liegt sie links von ihrer Linie (z. B. linker Radfahrstreifen an einer Einbahnstraße in Fahrtrichtung), ist `offset` positiv.\n\nRichtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich auf die Linienrichtung: Läuft die Linie gegen den OSM-Way, sind die Paare getauscht.\n\n**HINWEIS:** Der visuelle Versatz wirkt auf Linien-Ebenen und auf Beschriftungen und Icons entlang der Linie (Breite, Oberfläche, Brücke, Tunnel, Baustelle; sehr kurze Wege zeigen ihr Icon erst beim Hineinzoomen). Verkehrsschild-Beschriftungen liegen weiter auf der Mittellinie.\n',
+      },
+      {
+        id: 'zugang-radverkehr',
+        title: 'Zugang Radverkehr im Routing (`access_bicycle`)',
+        markdown:
+          '## Was `routing` enthält\n\n`routing` ist ein Graph für Fahrrad-Router. Er enthält alle Zeilen aus `bikelanes`, `roads` und `roadsPathClasses`, bis auf die Ausnahmen unten. Jede Kante gehört zu genau einer Zeile dort (`source_table` und `source_id`). Sie trägt nur eine Auswahl der Werte, die ein Router braucht, zum Beispiel `category`, `road`, `surface`, `width`, `maxspeed` und `access_bicycle`. Alle anderen Werte bekommt man über einen Join auf die Zeile in der Quelltabelle.\n\n### Geometrie und Richtung\n\nJede Kante hat die Geometrie des OSM-Wegs. Ein Weg wird nicht nach Fahrtrichtung geteilt: Ein Weg, auf dem man in beide Richtungen fahren darf, ist eine Kante mit `oneway=no`. Bei `oneway=yes` zeigt die Linie in die erlaubte Richtung, ein OSM-Weg mit `oneway=-1` ist dafür umgedreht. `oneway_motor=yes` heißt: Autos fahren nur in Linienrichtung, Fahrräder in beide Richtungen, zum Beispiel in einer Einbahnstraße, die für den Radverkehr in Gegenrichtung frei ist.\n\nRadinfrastruktur, die an der Fahrbahn gemappt ist (zum Beispiel `cycleway:right=lane`), ist eine eigene Kante auf derselben Geometrie wie die Fahrbahn. Die Linie wird nicht verschoben. `side` sagt, auf welcher Seite die Radinfrastruktur liegt, `offset` den seitlichen Abstand zur Mittellinie (positiv links, negativ rechts). Die Linie zeigt in die Fahrtrichtung der Radinfrastruktur: rechts in Richtung des OSM-Wegs, links dagegen, wenn `cycleway:<side>:oneway` nichts anderes sagt. Auf einer Einbahnstraße zeigen beide Seiten in die Richtung der Fahrbahn.\n\nEin Weg, der in zwei Tabellen steht, ist nur einmal im Graphen. Ein Radweg in `roadsPathClasses` und `bikelanes` oder eine Fahrradstraße in `roads` und `bikelanes` ist eine Kante aus `bikelanes`.\n\n### Was nicht im Graphen ist\n\nDiese Zeilen sind nicht im Graphen:\n\n- Autobahnen und Schnellstraßen (`motorway`, `trunk`) und Radinfrastruktur, die an ihnen gemappt ist. Sie stehen in `roads`.\n- Die Fahrbahn von Kraftfahrstraßen (`motorroad=yes`), weil Radfahren dort verboten ist. Sie steht in `roads`. Ein Radweg, der an einer Kraftfahrstraße gemappt ist, ist eine eigene Kante.\n- Kanten mit einem Fahrrad-Zugang, den `access_bicycle` nicht abbilden kann, zum Beispiel `bicycle=limited`. Ein leeres Feld würde „Radfahren erlaubt“ bedeuten.\n- Kurze Wege ohne Anschluss an das übrige Netz und kurze lose Enden.\n\nWege, die TILDA gar nicht zeigt, fehlen in allen Tabellen und damit auch im Graphen, zum Beispiel private Wege, Zufahrten ohne Radinfrastruktur oder Mountainbike-Trails.\n\n## Router müssen `access_bicycle` auswerten\n\nDer Graph enthält auch Kanten, auf denen Radfahren nicht erlaubt ist, zum Beispiel eine Fahrbahn mit Radverbot oder eine Anliegerstraße. Sie sind enthalten, damit ein Router selbst entscheiden kann, zum Beispiel für ein Ziel an einer Anliegerstraße. Ein Fahrrad-Router muss sie über `access_bicycle` selbst herausfiltern.\n\n| `access_bicycle`                                                                              | Radfahren     |\n| --------------------------------------------------------------------------------------------- | ------------- |\n| leer                                                                                          | erlaubt       |\n| `yes`, `designated`, `permissive`, `use_sidepath`, `discouraged`, `dismount`                  | erlaubt       |\n| `no`, `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry` | nicht erlaubt |\n\n`use_sidepath` steht auf einer Fahrbahn mit benutzungspflichtigem Radweg daneben. Radfahren auf der Fahrbahn ist dann erlaubt, ein Router sollte aber den Radweg bevorzugen.\n',
       },
     ],
   },
@@ -14735,6 +14871,12 @@ const data = {
         title: 'Versetzte Geometrien',
         markdown:
           'Ein Teil der Geometrien für Radinfrastruktur wird von der Straßen-Mittellinie abgeleitet (siehe Hinweise „Transformierte Geometrie“ im Inspektor in der Kartenansicht). Diese abgeleiteten Geometrien liegen in den Daten **auf der Straßen-Mittellinie** – sie werden nicht mehr nach links bzw. rechts verschoben. Das hält die Daten einfacher analysierbar, weil keine künstliche seitliche Verschiebung berücksichtigt werden muss.\n\nDen empfohlenen seitlichen Versatz stellt das Attribut `offset` bereit: ein vorzeichenbehafteter Wert in Metern (positiv = links, negativ = rechts der Linie, bezogen auf ihre Richtung), der im Processing aus der halben Straßenbreite berechnet wird. Der Versatz wird **rein visuell im Kartenstil** angewendet (`line-offset`), so dass die beiden Straßenseiten in der Karte weiterhin getrennt dargestellt werden.\n\nAbgeleitete Geometrien zeigen in Fahrtrichtung. Sie folgt [`cycleway:<Seite>:oneway`](https://wiki.openstreetmap.org/wiki/DE:Key:cycleway:right:oneway), das sich auf die Zeichenrichtung des OSM-Ways bezieht (`yes` = mit, `-1` = gegen den Way):\n\n- Ohne Angabe an einer Straße ohne Einbahnregelung (Rechtsverkehr): rechte Geometrien laufen in OSM-Way-Richtung, linke gegen sie.\n- Ohne Angabe an einer Einbahnstraße (auch Kreisverkehr): beide Seiten laufen in Fahrtrichtung der Straße. Ein Radfahrstreifen in Gegenrichtung braucht deshalb `cycleway:<Seite>:oneway=-1`. Die alte Schreibweise `cycleway=opposite_lane` / `opposite_track` gilt als Gegenrichtung.\n- Mit Angabe gilt die Angabe, auch wenn sie vom Standard abweicht (z. B. `cycleway:left:oneway=yes`).\n- Radinfrastruktur in beide Richtungen (`cycleway:<Seite>:oneway=no`) hat keine Fahrtrichtung. Hier laufen linke Geometrien gegen die OSM-Way-Richtung, rechte mit ihr.\n\nBei Rechtsverkehr liegt die Radinfrastruktur deshalb in der Regel rechts ihrer Linie (`offset` negativ), auch auf der linken Straßenseite, deren Linie gegen den OSM-Way läuft. Liegt sie links von ihrer Linie (z. B. linker Radfahrstreifen an einer Einbahnstraße in Fahrtrichtung), ist `offset` positiv.\n\nRichtungsabhängige Attribute (`mapillary_forward` / `mapillary_backward`, `traffic_sign_forward` / `traffic_sign_backward`) beziehen sich auf die Linienrichtung: Läuft die Linie gegen den OSM-Way, sind die Paare getauscht.\n\n**HINWEIS:** Der visuelle Versatz wirkt auf Linien-Ebenen und auf Beschriftungen und Icons entlang der Linie (Breite, Oberfläche, Brücke, Tunnel, Baustelle; sehr kurze Wege zeigen ihr Icon erst beim Hineinzoomen). Verkehrsschild-Beschriftungen liegen weiter auf der Mittellinie.\n',
+      },
+      {
+        id: 'zugang-radverkehr',
+        title: 'Zugang Radverkehr im Routing (`access_bicycle`)',
+        markdown:
+          '## Was `routing` enthält\n\n`routing` ist ein Graph für Fahrrad-Router. Er enthält alle Zeilen aus `bikelanes`, `roads` und `roadsPathClasses`, bis auf die Ausnahmen unten. Jede Kante gehört zu genau einer Zeile dort (`source_table` und `source_id`). Sie trägt nur eine Auswahl der Werte, die ein Router braucht, zum Beispiel `category`, `road`, `surface`, `width`, `maxspeed` und `access_bicycle`. Alle anderen Werte bekommt man über einen Join auf die Zeile in der Quelltabelle.\n\n### Geometrie und Richtung\n\nJede Kante hat die Geometrie des OSM-Wegs. Ein Weg wird nicht nach Fahrtrichtung geteilt: Ein Weg, auf dem man in beide Richtungen fahren darf, ist eine Kante mit `oneway=no`. Bei `oneway=yes` zeigt die Linie in die erlaubte Richtung, ein OSM-Weg mit `oneway=-1` ist dafür umgedreht. `oneway_motor=yes` heißt: Autos fahren nur in Linienrichtung, Fahrräder in beide Richtungen, zum Beispiel in einer Einbahnstraße, die für den Radverkehr in Gegenrichtung frei ist.\n\nRadinfrastruktur, die an der Fahrbahn gemappt ist (zum Beispiel `cycleway:right=lane`), ist eine eigene Kante auf derselben Geometrie wie die Fahrbahn. Die Linie wird nicht verschoben. `side` sagt, auf welcher Seite die Radinfrastruktur liegt, `offset` den seitlichen Abstand zur Mittellinie (positiv links, negativ rechts). Die Linie zeigt in die Fahrtrichtung der Radinfrastruktur: rechts in Richtung des OSM-Wegs, links dagegen, wenn `cycleway:<side>:oneway` nichts anderes sagt. Auf einer Einbahnstraße zeigen beide Seiten in die Richtung der Fahrbahn.\n\nEin Weg, der in zwei Tabellen steht, ist nur einmal im Graphen. Ein Radweg in `roadsPathClasses` und `bikelanes` oder eine Fahrradstraße in `roads` und `bikelanes` ist eine Kante aus `bikelanes`.\n\n### Was nicht im Graphen ist\n\nDiese Zeilen sind nicht im Graphen:\n\n- Autobahnen und Schnellstraßen (`motorway`, `trunk`) und Radinfrastruktur, die an ihnen gemappt ist. Sie stehen in `roads`.\n- Die Fahrbahn von Kraftfahrstraßen (`motorroad=yes`), weil Radfahren dort verboten ist. Sie steht in `roads`. Ein Radweg, der an einer Kraftfahrstraße gemappt ist, ist eine eigene Kante.\n- Kanten mit einem Fahrrad-Zugang, den `access_bicycle` nicht abbilden kann, zum Beispiel `bicycle=limited`. Ein leeres Feld würde „Radfahren erlaubt“ bedeuten.\n- Kurze Wege ohne Anschluss an das übrige Netz und kurze lose Enden.\n\nWege, die TILDA gar nicht zeigt, fehlen in allen Tabellen und damit auch im Graphen, zum Beispiel private Wege, Zufahrten ohne Radinfrastruktur oder Mountainbike-Trails.\n\n## Router müssen `access_bicycle` auswerten\n\nDer Graph enthält auch Kanten, auf denen Radfahren nicht erlaubt ist, zum Beispiel eine Fahrbahn mit Radverbot oder eine Anliegerstraße. Sie sind enthalten, damit ein Router selbst entscheiden kann, zum Beispiel für ein Ziel an einer Anliegerstraße. Ein Fahrrad-Router muss sie über `access_bicycle` selbst herausfiltern.\n\n| `access_bicycle`                                                                              | Radfahren     |\n| --------------------------------------------------------------------------------------------- | ------------- |\n| leer                                                                                          | erlaubt       |\n| `yes`, `designated`, `permissive`, `use_sidepath`, `discouraged`, `dismount`                  | erlaubt       |\n| `no`, `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry` | nicht erlaubt |\n\n`use_sidepath` steht auf einer Fahrbahn mit benutzungspflichtigem Radweg daneben. Radfahren auf der Fahrbahn ist dann erlaubt, ein Router sollte aber den Radweg bevorzugen.\n',
       },
     ],
   },

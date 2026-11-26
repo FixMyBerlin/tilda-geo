@@ -10,6 +10,7 @@ import type {
   MapDataOsmIdConfig,
   MapDataSourceInspectorEditor,
 } from '@/components/regionen/pageRegionSlug/mapData/types'
+import type { InspectorCharts } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/charts/inspectorChart.schema'
 import type { translations } from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/translations/translations.const'
 
 // a modified version of MapDataDatasetsSource from '../../src/regionen/[regionSlug]/_mapData/types'
@@ -30,7 +31,11 @@ type MapDataDatasetsSourceBase = {
       >
     | Omit<
         LineLayerSpecification &
-          Required<Pick<LineLayerSpecification, 'paint'>> & { beforeId?: string },
+          Required<Pick<LineLayerSpecification, 'paint'>> & {
+            beforeId?: string
+            /** @desc The direction arrows point against the geometry, e.g. for a counter direction. */
+            reverseDirectionArrows?: boolean
+          },
         'source'
       >
     | Omit<
@@ -65,6 +70,8 @@ type MapDataDatasetsSource = MapDataDatasetsSourceBase & {
         /** @desc Array of key strings OR `false` to list all available keys */
         documentedKeys: string[] | false
         editors?: MapDataSourceInspectorEditor[]
+        /** @desc See `SidebarInspector/TagsTable/charts/README.md` */
+        charts?: InspectorCharts
       } & (
         | { disableTranslations?: false; translations: typeof translations }
         | { disableTranslations: true; translations?: never }
@@ -135,6 +142,8 @@ export type MetaDataUser = MetaDataFileLevelMetadata &
         dataSourceType: 'local'
         /** @desc Change the tippecanoe settings  */
         geometricPrecision?: 'mask' | 'regular' | 'high' | null
+        /** @desc Lowest zoom level of the PMTiles (tippecanoe `--minimum-zoom`). Default: 7. Lower it for datasets that should be visible for all of Germany (5) */
+        minZoom?: number
         /** @desc Which file format to use for map rendering. Default: 'auto' (PMTiles for large files, GeoJSON for small) */
         mapRenderFormat?: 'pmtiles' | 'geojson' | 'auto'
         /** @desc Configuration for user-selectable datasets */
@@ -174,6 +183,8 @@ export type MetaDataSystemLayer = MetaDataFileLevelMetadata & {
   dataSourceType: 'local'
   /** @desc Change the tippecanoe settings  */
   geometricPrecision?: 'mask' | 'regular' | 'high' | null
+  /** @desc Lowest zoom level of the PMTiles (tippecanoe `--minimum-zoom`). Default: 7 */
+  minZoom?: number
   /** @desc Which file format to use for map rendering. Default: 'auto' (PMTiles for large files, GeoJSON for small) */
   mapRenderFormat?: 'pmtiles' | 'geojson'
   /** @desc Configuration for system layers (masks, etc.) - minimal properties, always active */

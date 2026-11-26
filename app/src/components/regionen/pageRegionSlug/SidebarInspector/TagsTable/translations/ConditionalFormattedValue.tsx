@@ -62,7 +62,7 @@ export const ConditionalFormattedValue = ({ sourceId, tagKey, tagValue }: Props)
     return (
       <span title={debugTitle}>
         <FormattedNumber value={numericValue} />
-        {suffix ? ` ${suffix}` : null}
+        {suffix ? `\u00a0${suffix}` : null}
       </span>
     )
   }

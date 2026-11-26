@@ -18,6 +18,10 @@ export type DirectionArrowLineEntry = {
   sourceId: string
   sourceLayer: string | undefined
   layerProps: LayerProps
+  /** Arrows against the geometry, with the `-reverse` patterns. */
+  reverseDirectionArrows?: boolean
+  /** `false`: no arrows, the line direction has no meaning for this data. */
+  directionArrows?: boolean
 }
 
 // Hit areas (`line-opacity: 0`) only catch clicks, they draw no line.
@@ -49,21 +53,26 @@ const selected = ['boolean', ['feature-state', 'selected'], false] satisfies Exp
  * a street on one centerline. Lines with another `line-offset` get their own layers.
  */
 export function buildDirectionArrowLayers(entries: DirectionArrowLineEntry[]) {
-  const groups = new Map<string, DirectionArrowLineEntry & { lines: LineLayerProps[] }>()
+  const groups = new Map<
+    string,
+    DirectionArrowLineEntry & { suffix: string; lines: LineLayerProps[] }
+  >()
   for (const entry of entries) {
+    if (entry.directionArrows === false) continue
     const line = entry.layerProps
     if (!isVisibleLine(line)) continue
     if (line.maxzoom !== undefined && line.maxzoom <= DIRECTION_ARROWS_SELECTED_MINZOOM) continue
     const offset = JSON.stringify(line.paint?.['line-offset'] ?? 0)
-    const key = `${entry.sourceKey}--${entry.sourceLayer ?? ''}--${offset}`
-    const group = groups.get(key) ?? { ...entry, lines: [] }
+    const suffix = entry.reverseDirectionArrows ? '-reverse' : ''
+    const key = `${entry.sourceKey}--${entry.sourceLayer ?? ''}--${offset}${suffix}`
+    const group = groups.get(key) ?? { ...entry, suffix, lines: [] }
     group.lines.push(line)
     groups.set(key, group)
   }
 
   const shownData = new Set<string>()
   return Array.from(groups.values()).flatMap(
-    ({ sourceKey, sourceId, sourceLayer, lines }, index) => {
+    ({ sourceKey, sourceId, sourceLayer, suffix, lines }, index) => {
       const filters = lines.map((line) => line.filter)
       const maxzooms = lines.map((line) => line.maxzoom)
       const maxzoom = maxzooms.every((zoom) => zoom !== undefined)
@@ -90,7 +99,7 @@ export function buildDirectionArrowLayers(entries: DirectionArrowLineEntry[]) {
         ...(maxzoom !== undefined && { maxzoom }),
         layout: { 'line-join': 'round' },
         paint: {
-          'line-pattern': pattern,
+          'line-pattern': `${pattern}${suffix}`,
           'line-width': heightPx,
           'line-opacity': opacity,
           ...(lineOffset !== undefined && { 'line-offset': lineOffset }),
@@ -104,7 +113,7 @@ export function buildDirectionArrowLayers(entries: DirectionArrowLineEntry[]) {
         0,
       ])
       // Map sources of the same data draw the faint arrows once.
-      const dataKey = `${sourceId}--${sourceLayer ?? ''}--${JSON.stringify(lineOffset ?? 0)}`
+      const dataKey = `${sourceId}--${sourceLayer ?? ''}--${JSON.stringify(lineOffset ?? 0)}${suffix}`
       if (shownData.has(dataKey)) return [selectedLayer]
       shownData.add(dataKey)
       return [

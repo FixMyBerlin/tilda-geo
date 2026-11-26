@@ -45,6 +45,18 @@ local function bikelane_reversed(tags)
   return side == 'left'
 end
 
+--- Whether a lane tagged on the road (`_side` left|right) lies left of its published line.
+--- A left lane lies left of a line that runs with the way, a right lane left of a line against it.
+---@param tags OsmTags transformed tags with `_side` left|right
+---@return boolean
+local function lane_left_of_line(tags)
+  local runs_with_way = not bikelane_reversed(tags)
+  if tags._side == 'left' then
+    return runs_with_way
+  end
+  return not runs_with_way
+end
+
 local FORWARD_BACKWARD_PAIRS = {
   { 'mapillary_forward', 'mapillary_backward' },
   { 'traffic_sign:forward', 'traffic_sign:backward' },
@@ -101,6 +113,7 @@ end
 return {
   way_reversed = way_reversed,
   bikelane_reversed = bikelane_reversed,
+  lane_left_of_line = lane_left_of_line,
   swap_lane_tags = swap_lane_tags,
   swap_way_tags = swap_way_tags,
   way_line = way_line,

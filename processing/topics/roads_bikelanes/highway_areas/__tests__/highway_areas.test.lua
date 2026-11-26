@@ -1,6 +1,6 @@
 describe('highway_areas', function()
   local is_highway_area = require('topics.roads_bikelanes.highway_areas.is_highway_area')
-  local EXIT = require('topics.roads_bikelanes.helper.exit_processing')
+  local exit_processing = require('topics.roads_bikelanes.helper.exit_processing')
 
   describe('is_highway_area', function()
     it('accepts closed ways with highway and area=yes', function()
@@ -45,21 +45,21 @@ describe('highway_areas', function()
 
   describe('exit_processing with include_areas', function()
     it('keeps area=yes when include_areas is true', function()
-      assert.is_false(EXIT.exit_processing({
+      assert.is_false(exit_processing({
         highway = 'pedestrian',
         area = 'yes',
       }, true))
     end)
 
     it('still skips disallowed highway classes', function()
-      assert.is_true(EXIT.exit_processing({
+      assert.is_true(exit_processing({
         highway = 'platform',
         area = 'yes',
       }, true))
     end)
 
     it('still skips piers', function()
-      assert.is_true(EXIT.exit_processing({
+      assert.is_true(exit_processing({
         highway = 'pedestrian',
         area = 'yes',
         man_made = 'pier',

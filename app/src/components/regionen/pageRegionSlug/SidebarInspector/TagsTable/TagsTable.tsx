@@ -2,6 +2,8 @@ import { twJoin } from 'tailwind-merge'
 import type { SourcesId } from '@/components/regionen/pageRegionSlug/mapData/mapDataSources/sources.const'
 import { parseMarkdownKey } from '@/components/shared/text/markdownKey'
 import type { InspectorFeatureProperty } from '../Inspector'
+import type { InspectorCharts } from './charts/inspectorChart.schema'
+import { TagsTableRowChart } from './charts/TagsTableRowChart'
 import { TagsTableRowColor, tableKeysColor } from './compositTableRows/TagsTableRowColor'
 import {
   TagsTableRowCompositConditionCategory,
@@ -61,9 +63,10 @@ type Props = {
   properties: InspectorFeatureProperty
   sourceDocumentedKeys: string[] | undefined | false
   sourceId: SourcesId | string // string = StaticDatasetsIds
+  charts?: InspectorCharts
 }
 
-export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props) => {
+export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId, charts }: Props) => {
   const keys = sourceDocumentedKeys === false ? Object.keys(properties) : sourceDocumentedKeys
 
   return (
@@ -103,6 +106,19 @@ export const TagsTable = ({ properties, sourceDocumentedKeys, sourceId }: Props)
 
           {keys?.map((key) => {
             const cleanedKey = cleanKey(key)
+
+            const chart = charts?.[cleanedKey]
+            if (chart) {
+              return (
+                <TagsTableRowChart
+                  key={cleanedKey}
+                  sourceId={sourceId}
+                  tagKey={key}
+                  properties={properties}
+                  chart={chart}
+                />
+              )
+            }
 
             // Handle _composit_ table rows and default case
             switch (cleanedKey) {

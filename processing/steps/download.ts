@@ -1,8 +1,9 @@
+import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { TZDate } from '@date-fns/tz'
 import { $ } from 'bun'
 import { format, getHours, subDays } from 'date-fns'
-import { OSM_DOWNLOAD_DIR } from '../constants/directories.const'
+import { OSM_DOWNLOAD_DIR, replicationMarkerPath } from '../constants/directories.const'
 import { checkSkipDownload } from '../utils/checkSkipDownload'
 import { debugWgetCommand } from '../utils/debugWget'
 import { ensureOAuthReady, fallbackToPublicDownload, getAuthHeaders } from '../utils/oauth'
@@ -14,6 +15,36 @@ import { readHashFromFile, writeHashForFile } from '../utils/persistentData'
  * @returns full path to the file
  */
 export const originalFilePath = (fileName: string) => join(OSM_DOWNLOAD_DIR, fileName)
+
+/** Consumes the marker of `scripts/updatePbf.ts`, so the file counts as changed exactly once. */
+async function takeReplicationMarker(fileName: string) {
+  const marker = Bun.file(replicationMarkerPath(originalFilePath(fileName)))
+  if (!(await marker.exists())) return false
+  console.log(`Download: File was updated with OSM changes (${(await marker.text()).trim()})`)
+  await marker.delete()
+  return true
+}
+
+/**
+ * HEAD request to the download URL that retries network errors (e.g. a short `ECONNREFUSED` at Geofabrik).
+ * HTTP error responses are returned as they are; only a failed connection is retried.
+ */
+async function headRequest(headers: Record<string, string>) {
+  const maxAttempts = 3
+  const retryMinutes = 2
+  for (let attempt = 1; ; attempt++) {
+    try {
+      return await fetch(params.pbfDownloadUrl, { method: 'HEAD', headers })
+    } catch (error) {
+      if (attempt >= maxAttempts) throw error
+      console.log(
+        `[WARN] Download: HEAD request failed (attempt ${attempt}/${maxAttempts}), retry in ${retryMinutes} min:`,
+        error instanceof Error ? error.message : error,
+      )
+      await new Promise((resolve) => setTimeout(resolve, retryMinutes * 1000 * 60))
+    }
+  }
+}
 
 /**
  * Wait for the given url to have fresh data as last modified.
@@ -46,11 +77,24 @@ export async function waitForFreshData() {
     // Debug logging for waitForFreshData wget command with redirect parameters
     debugWgetCommand(cookieCheck, 'waitForFreshData')
 
-    const response = await fetch(params.pbfDownloadUrl, {
-      method: 'HEAD',
-      headers: getAuthHeaders(cookieCheck?.httpCookie),
-    })
-    const lastModified = response.headers.get('Last-Modified')
+    let lastModified: string | null = null
+    try {
+      const response = await headRequest(getAuthHeaders(cookieCheck?.httpCookie))
+      lastModified = response.headers.get('Last-Modified')
+    } catch (error) {
+      // Server unreachable: count it as a try and check again after the timeout below.
+      console.log(
+        `[WARN] Download: \`waitForFreshData\` try ${tries}: server unreachable:`,
+        error instanceof Error ? error.message : error,
+      )
+      tries++
+      if (tries >= maxTries) {
+        console.log('[ERROR] Download: Server unreachable while waiting for fresh data.')
+        return false
+      }
+      await new Promise((resolve) => setTimeout(resolve, timeoutMinutes * 1000 * 60))
+      continue
+    }
     if (!lastModified) {
       console.log('[WARN] Download: No Last-Modified header found, continuing with existing file')
       return false
@@ -109,15 +153,12 @@ export async function downloadFile() {
   const { fileName, fileExists, filePath, skipDownload } = await checkSkipDownload()
   if (skipDownload) {
     console.log('Download: ⏩ Skipping download because file exists and `SKIP_DOWNLOAD` is active')
-    return { fileName, fileChanged: false }
+    return { fileName, fileChanged: await takeReplicationMarker(fileName) }
   }
 
   // Ensure we have OAuth authentication if required and check if file has changed
   const cookieCheck = await ensureOAuthReady()
-  const eTagResponse = await fetch(params.pbfDownloadUrl, {
-    method: 'HEAD',
-    headers: getAuthHeaders(cookieCheck?.httpCookie),
-  })
+  const eTagResponse = await headRequest(getAuthHeaders(cookieCheck?.httpCookie))
   if (!eTagResponse.ok) {
     console.log(
       `Download: ⚠️ Failed to get ETag, HTTP ${eTagResponse.status}: ${eTagResponse.statusText}`,
@@ -128,7 +169,7 @@ export async function downloadFile() {
 
   if (eTag && fileExists && eTag === (await readHashFromFile(fileName))) {
     console.log('Download: ⏩ Skipped download because the file has not changed.')
-    return { fileName, fileChanged: false }
+    return { fileName, fileChanged: await takeReplicationMarker(fileName) }
   }
 
   if (!eTag) {
@@ -173,6 +214,9 @@ export async function downloadFile() {
     )
     throw new Error(`Download: Failed to download ${downloadMethod} file: ${error}`)
   }
+
+  // The fresh download replaces any file `scripts/updatePbf.ts` had updated.
+  await rm(replicationMarkerPath(filePath), { force: true })
 
   // Save etag if available
   if (eTag) {

@@ -40,7 +40,8 @@ LABEL maintainer="FixMyCity - https://fixmycity.de"
 RUN echo "deb http://deb.debian.org/debian trixie-backports main" > /etc/apt/sources.list.d/backports.list
 RUN apt update && \
   apt install -y -t trixie-backports osm2pgsql osmium-tool curl && \
-  apt install -y wget python3 python3-requests && \
+  apt install -y wget python3 python3-requests python3-pyosmium && \
+  ln -s /usr/lib/python3-pyosmium/pyosmium-up-to-date /usr/local/bin/ && \
   apt upgrade -y
 
 # 'data' folder is root

@@ -29,6 +29,7 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
     licence: 'ODbL',
     promoteId: 'id',
     osmIdConfig: { osmTypeId: 'id' },
+    directionArrows: false,
     inspector: {
       enabled: true,
       highlightingKey: 'id',
@@ -70,6 +71,7 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
     licence: 'ODbL',
     promoteId: 'id',
     osmIdConfig: { osmTypeId: 'id' },
+    directionArrows: false,
     inspector: {
       enabled: true,
       highlightingKey: 'id',
@@ -90,6 +92,7 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
     licence: 'ODbL',
     promoteId: 'id',
     osmIdConfig: { osmTypeId: 'id' },
+    directionArrows: false,
     inspector: {
       enabled: true,
       highlightingKey: 'id',
@@ -115,6 +118,7 @@ export const sourcesParkingTilda: MapDataSource<SourcesParkingTildaId>[] = [
     licence: 'ODbL',
     promoteId: 'id',
     osmIdConfig: { osmTypeId: 'id' },
+    directionArrows: false,
     inspector: {
       enabled: true,
       highlightingKey: 'id',

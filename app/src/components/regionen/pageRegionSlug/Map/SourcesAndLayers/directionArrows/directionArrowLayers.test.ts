@@ -40,6 +40,15 @@ const matches = (filter: FilterSpecification, properties: Record<string, unknown
   } as never)
 
 describe('buildDirectionArrowLayers', () => {
+  test('no layers for sources without direction arrows', () => {
+    const layers = buildDirectionArrowLayers([
+      entry(line('parking'), { directionArrows: false }),
+      entry(line('road'), { sourceKey: 'roads', sourceId: 'roads' }),
+    ])
+    expect(layers.every((layer) => layer.source === 'roads')).toBe(true)
+    expect(layers).toHaveLength(2)
+  })
+
   test('one faint and one selected layer for the visible lines of a source, filters combined', () => {
     const layers = buildDirectionArrowLayers([
       entry(line('a', { filter: ['==', ['get', 'kind'], 'a'] })),
@@ -95,6 +104,19 @@ describe('buildDirectionArrowLayers', () => {
       undefined,
       3,
       3,
+    ])
+  })
+
+  test('reversed lines get their own layers with the reversed patterns', () => {
+    const layers = buildDirectionArrowLayers([
+      entry(line('forward')),
+      entry(line('backward'), { reverseDirectionArrows: true }),
+    ])
+    expect(layers.map((layer) => layer.paint?.['line-pattern'])).toEqual([
+      'pattern-direction-arrow-faint',
+      'pattern-direction-arrow-selected',
+      'pattern-direction-arrow-faint-reverse',
+      'pattern-direction-arrow-selected-reverse',
     ])
   })
 })

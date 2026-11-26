@@ -9,6 +9,7 @@ local bikelane_todo_categories = require('topics.roads_bikelanes.bikelanes.bikel
 local collect_todos = require('topics.helper.collect_todos')
 local derive_oneway = require('topics.roads_bikelanes.bikelanes.derive_oneway')
 local LINE_DIRECTION = require('topics.roads_bikelanes.helper.line_direction')
+local DIRECTION_SIDE = require('topics.helper.direction_side')
 local default_id = require('topics.helper.default_id')
 local derive_traffic_signs = require('topics.helper.derive_traffic_signs')
 local to_markdown_list = require('topics.helper.to_markdown_list')
@@ -18,7 +19,6 @@ local SANITIZE_ROAD_TAGS = require('topics.roads_bikelanes.helper.sanitize_road_
 local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
 local extract_public_tags = require('topics.helper.extract_public_tags')
 local CLEANER = require('topics.helper.sanitize_cleaner')
-local LOG_ERROR = require('topics.roads_bikelanes.roads_bikelanes_errors')
 local to_semicolon_list = require('topics.helper.to_semicolon_list')
 local DESC = require('topics.helper.tilda_description')
 local derive_traffic_mode = require('topics.roads_bikelanes.bikelanes.helper.derive_traffic_mode')
@@ -33,7 +33,16 @@ local footway_transformation = CenterLineTransformation.new({
   highway = 'footway',
   prefix = 'sidewalk',
   filter = function(tags)
-    return not (tags.footway == 'no' or tags.footway == 'separate')
+    -- `sidewalk:<side>=no|separate` unnests to `sidewalk`
+    if tags.sidewalk == 'no' or tags.sidewalk == 'separate' then return false end
+    -- Only sidewalks with bicycle access or any traffic sign are categorized.
+    -- The categories check which access or sign they need (e.g. DE:240, DE:1022-10; DE:239 alone matches none).
+    local has_bicycle_access = tags.bicycle == 'yes' or tags.bicycle == 'designated'
+    local has_traffic_sign = tags.traffic_sign ~= nil
+      or tags['traffic_sign:forward'] ~= nil
+      or tags['traffic_sign:backward'] ~= nil
+    if has_bicycle_access or has_traffic_sign then return true end
+    return false
   end,
   direction_reference = 'parent',
 })
@@ -50,30 +59,41 @@ local categorize_bikelane = bikelane_categories.categorize_bikelane
 ---@param result_tags OsmTags
 ---@param object_tags OsmTags
 ---@param log_overrides OsmTags
----@param object_geom OsmGeometry
-local function merge_bikelane_public_tags(result_tags, object_tags, log_overrides, object_geom)
+local function merge_bikelane_public_tags(result_tags, object_tags, log_overrides)
   local public_result_tags = extract_public_tags(result_tags)
   local cleaned_public, replaced_tags =
     CLEANER.separate_tags(public_result_tags, object_tags, log_overrides)
   for k in pairs(public_result_tags) do
     result_tags[k] = cleaned_public[k]
   end
-  LOG_ERROR.SANITIZED_VALUE(object_tags._type, object_tags._id, object_geom, replaced_tags, 'bikelanes')
+  -- Tags that were replaced by their sanitised value, for the bikelanes writer to log.
+  result_tags._replaced_tags = replaced_tags
 end
 
 ---@param object_tags OsmTags
----@param object_geom OsmGeometry
 ---@return OsmTags[]
-local function bikelanes(object_tags, object_geom)
+local function bikelanes(object_tags)
   ---@type OsmTags[]
   local result_bikelanes = {}
 
   ---@type TransformedObject[]
   local transformed_objects = get_transformed_objects(object_tags, transformations)
 
-  for _, transformed_tags in ipairs(transformed_objects) do
+  -- Categorize all sides first: the oneway fallback of a track on the road reads the other side.
+  local categories = {}
+  local side_has_cycling = { left = false, right = false }
+  for index, transformed_tags in ipairs(transformed_objects) do
     transformed_tags._length = object_tags._length
     local category = categorize_bikelane(transformed_tags)
+    categories[index] = category
+    if category ~= nil and side_has_cycling[transformed_tags._side] ~= nil
+      and (category.infrastructureExists or category.id == 'separate_geometry') then
+      side_has_cycling[transformed_tags._side] = true
+    end
+  end
+
+  for index, transformed_tags in ipairs(transformed_objects) do
+    local category = categories[index]
     if category ~= nil then
       local result_tags = {
         _side = transformed_tags._side,
@@ -93,7 +113,9 @@ local function bikelanes(object_tags, object_geom)
           width = parse_width(transformed_tags.width),
           width_source = transformed_tags['source:width'],
           width_effective = parse_width(transformed_tags['width:effective']),
-          oneway = derive_oneway(transformed_tags, category),
+          oneway = derive_oneway(transformed_tags, category, {
+            other_side_has_cycling = side_has_cycling[DIRECTION_SIDE.opposite_side(transformed_tags._side)],
+          }),
           bridge = SANITIZE_TAGS.boolean_yes(object_tags.bridge),
           tunnel = SANITIZE_TAGS.tunnel(object_tags.tunnel),
           surface_color = SANITIZE_ROAD_TAGS.surface_color(transformed_tags),
@@ -127,7 +149,7 @@ local function bikelanes(object_tags, object_geom)
           }),
         })
 
-        merge_table(result_tags, derive_traffic_mode(transformed_tags, object_tags, category.id, transformed_tags._side))
+        merge_table(result_tags, derive_traffic_mode(transformed_tags, object_tags, category.id))
         merge_table(result_tags, derive_traffic_signs(transformed_tags))
         local surface_tags = SURFACE_TAGS.derive(transformed_tags, category)
         merge_table(result_tags, derive_bikelane_surface(surface_tags, category))
@@ -151,9 +173,10 @@ local function bikelanes(object_tags, object_geom)
           -- (+ left / - right of its direction). The geometry itself stays on the road
           -- centerline; this value is exported as the `offset` attribute and consumed purely
           -- visually by the map style (`line-offset`). See topic-doc chapter `versetzte-geometrien`.
-          -- In right-hand traffic the lane usually lies to the right of its line (negative).
-          local lane_left_of_line = (transformed_tags._side == 'left') ~= line_reversed
-          result_tags.offset = (lane_left_of_line and 1 or -1) * road_width(object_tags) / 2
+          -- In right-hand traffic the lane usually lies to the right of its line (negative),
+          -- with the carriageway on its left.
+          local sign = LINE_DIRECTION.lane_left_of_line(transformed_tags) and 1 or -1
+          result_tags.offset = sign * road_width(object_tags) / 2
         elseif HIGHWAYS.path_classes[transformed_tags.highway]
           or HIGHWAYS.sidepath_highway_classes[transformed_tags.highway] then
           merge_table(
@@ -165,8 +188,7 @@ local function bikelanes(object_tags, object_geom)
         merge_bikelane_public_tags(
           result_tags,
           object_tags,
-          SANITIZE_ROAD_TAGS.log_source_overrides(transformed_tags),
-          object_geom
+          SANITIZE_ROAD_TAGS.log_source_overrides(transformed_tags)
         )
 
         local todos = collect_todos(bikelane_todo_categories, transformed_tags, result_tags)

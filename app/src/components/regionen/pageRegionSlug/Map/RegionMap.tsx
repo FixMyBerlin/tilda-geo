@@ -365,6 +365,11 @@ export const RegionMap = () => {
       {...drawMapProps}
       terrain={is3dActive ? { source: MAPTERHORN_DEM_SOURCE_ID, exaggeration: 1.5 } : undefined}
       minZoom={SIMPLIFY_MIN_ZOOM}
+      // MapLibre splits tiles beyond the source maxzoom down to `maxZoom - zoomLevelsToOverscale`
+      // and keeps only 16 px of geometry beyond each split tile's edge. A `line-offset` in meters
+      // pushes lines further than that, and they get cut at the tile edge. Splitting down to z16
+      // only (22 - 6) keeps offsets up to about 7 m whole; above z16 tiles are scaled instead.
+      zoomLevelsToOverscale={6}
       attributionControl={false}
     >
       {/* Order: <AllLayers> defines the stacking of the data layers; <AllSources> holds their Sources. */}

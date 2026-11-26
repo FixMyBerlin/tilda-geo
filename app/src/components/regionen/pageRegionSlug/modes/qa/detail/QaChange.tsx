@@ -33,7 +33,7 @@ export const QaChange = ({ amount, share, unit, direction }: Props) => {
     >
       <span className="font-semibold">
         {sign}
-        {formatNumber(amount)} {unit}
+        {`${formatNumber(amount)}\u00a0${unit}`}
       </span>
       <span className="font-normal">{formatShare.format(share)}</span>
     </span>

@@ -1,4 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
+import { bbox } from '@turf/turf'
 import type { Geometry } from 'geojson'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { reviewEntriesQueryOptions } from '@/server/regions/regionQueryOptions'
@@ -64,7 +65,13 @@ export const useReviewListEntries = () => {
         return true
       },
     )
-  const entries = matchingFilters.filter((entry) => passesExtent(entry.coordinates))
+    // The first vertex stays the hover/click position; the extent filter uses the whole
+    // geometry. Computed once here, not on every map move.
+    .map((entry) => {
+      const [minLng, minLat, maxLng, maxLat] = bbox(entry.feature.geometry)
+      return { ...entry, bbox: [minLng, minLat, maxLng, maxLat] as const }
+    })
+  const entries = matchingFilters.filter((entry) => passesExtent(entry.bbox))
 
   return { selectedListId, isLoading, isError, features, matchingFilters, entries }
 }

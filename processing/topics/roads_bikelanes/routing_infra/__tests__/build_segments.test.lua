@@ -1,4 +1,11 @@
-local build_segments = require('topics.roads_bikelanes.routing_infra.build_segments')
+local ACCESS = require('topics.roads_bikelanes.helper.access_restriction')
+local build_segments_of_context = require('topics.roads_bikelanes.routing_infra.build_segments')
+
+--- Most tests are about ways in all tables; they leave `access` out.
+local function build_segments(context)
+  context.access = context.access or ACCESS.IN_ALL_TABLES
+  return build_segments_of_context(context)
+end
 
 describe('build_segments carriageway edges', function()
   require('topics.helper.osm2pgsql')
@@ -237,30 +244,49 @@ describe('build_segments join keys', function()
   end)
 
   it('drops uncategorized indoor footways and steps that roadsPathClasses omits', function()
+    local indoor_footway_tags = { highway = 'footway', indoor = 'yes', _id = 12, _type = 'way' }
     local indoor_footway = build_segments({
-      object_tags = { highway = 'footway', indoor = 'yes', _id = 12, _type = 'way' },
+      object_tags = indoor_footway_tags,
       object_geom = line_geom,
       cycleways = {},
       shared_result_tags = { road = 'footway' },
+      access = ACCESS.decide(indoor_footway_tags),
     })
+    local indoor_steps_tags = { highway = 'steps', indoor = 'yes', _id = 13, _type = 'way' }
     local indoor_steps = build_segments({
-      object_tags = { highway = 'steps', indoor = 'yes', _id = 13, _type = 'way' },
+      object_tags = indoor_steps_tags,
       object_geom = line_geom,
       cycleways = {},
       shared_result_tags = { road = 'footway_steps' },
+      access = ACCESS.decide(indoor_steps_tags),
     })
     assert.are.equal(#indoor_footway, 0)
     assert.are.equal(#indoor_steps, 0)
   end)
 
   it('drops uncategorized destination footways that roadsPathClasses omits', function()
+    local tags = { highway = 'footway', access = 'destination', _id = 14, _type = 'way' }
     local segments = build_segments({
-      object_tags = { highway = 'footway', access = 'destination', _id = 14, _type = 'way' },
+      object_tags = tags,
       object_geom = line_geom,
       cycleways = {},
       shared_result_tags = { road = 'footway' },
+      access = ACCESS.decide(tags),
     })
     assert.are.equal(#segments, 0)
+  end)
+
+  it('keeps destination footways with explicit bicycle permission public (way/6194793)', function()
+    local tags = { highway = 'footway', access = 'destination', bicycle = 'yes', _id = 16, _type = 'way' }
+    local segments = build_segments({
+      object_tags = tags,
+      object_geom = line_geom,
+      cycleways = {},
+      shared_result_tags = { road = 'footway' },
+      access = ACCESS.decide(tags),
+    })
+    assert.are.equal(#segments, 1)
+    assert.are.equal(segments[1].source_table, 'roadsPathClasses')
   end)
 
   it('keeps outdoor uncategorized footways as mixedTrafficFoot', function()
@@ -432,5 +458,66 @@ describe('build_segments join keys', function()
     assert.are.equal(segments[1].category, 'needsClarification')
     assert.are.equal(segments[1].source_table, 'roadsPathClasses')
     assert.are.equal(segments[1].source_id, 'way/23')
+  end)
+end)
+
+describe('build_segments with a restricted way', function()
+  require('topics.helper.osm2pgsql')
+
+  local line_geom = {}
+  function line_geom:reverse()
+    return self
+  end
+
+  local right_lane = {
+    _id = 'way/20/cycleway/right',
+    _side = 'right',
+    _infrastructureExists = true,
+    category = 'cyclewayOnHighway_exclusive',
+    prefix = 'cycleway',
+  }
+
+  ---@param access AccessDecision
+  ---@param highway string
+  ---@param cycleways table[]
+  local function segments_for(access, highway, cycleways)
+    return build_segments({
+      object_tags = { highway = highway, _id = 20, _type = 'way' },
+      object_geom = line_geom,
+      cycleways = cycleways,
+      shared_result_tags = { road = highway },
+      access = access,
+    })
+  end
+
+  local bikelanes_only = ACCESS.in_bikelanes_only('x=y', false)
+
+  it('only in bikelanes: keeps the bikelane edge and drops the carriageway edge', function()
+    local segments = segments_for(bikelanes_only, 'residential', { right_lane })
+    assert.are.equal(1, #segments)
+    assert.are.equal('bikelanes', segments[1].source_table)
+  end)
+
+  it('only in bikelanes: drops the path edge', function()
+    assert.are.equal(0, #segments_for(bikelanes_only, 'footway', {}))
+  end)
+
+  it('only in bikelanes: keeps the bikelane edge of an informal path with infrastructure', function()
+    local segments = segments_for(ACCESS.in_bikelanes_only('informal=yes', true), 'path', {
+      {
+        _id = 'way/20',
+        _side = 'self',
+        _infrastructureExists = true,
+        category = 'footAndCyclewayShared_isolated',
+      },
+    })
+    assert.are.equal(1, #segments)
+    assert.are.equal('bikelanes', segments[1].source_table)
+  end)
+
+  it('in all tables: keeps both edges', function()
+    assert.are.equal(1, #segments_for(ACCESS.IN_ALL_TABLES, 'residential', {}))
+    assert.are.equal(2, #segments_for(ACCESS.IN_ALL_TABLES, 'residential', { right_lane }))
+    assert.are.equal(1, #segments_for(ACCESS.IN_ALL_TABLES, 'footway', {}))
   end)
 end)

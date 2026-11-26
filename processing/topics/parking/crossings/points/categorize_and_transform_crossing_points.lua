@@ -1,6 +1,7 @@
 local CLONE = require('topics.helper.clones')
 local log = require('topics.helper.log')
 local merge_table = require('topics.helper.merge_table')
+local DIRECTION_SIDE = require('topics.helper.direction_side')
 local transform_point_direction_tags = require('topics.parking.crossings.points.transform_point_direction_tags')
 local crossing_point_categories = require('topics.parking.crossings.points.crossing_point_categories')
 
@@ -46,7 +47,7 @@ local function categorize_and_transform_crossing_points(object)
       if(category.side_schema == 'side_suffix') then
         for _, side in ipairs({ 'left', 'right' }) do
           local side_key = category.side_key .. ':' .. side
-          local other_side_key = (side == 'left' and category.side_key .. ':right') or category.side_key .. ':left'
+          local other_side_key = category.side_key .. ':' .. DIRECTION_SIDE.opposite_side(side)
           local both_key = category.side_key .. ':both'
 
           if object.tags[side_key] or object.tags[both_key] then

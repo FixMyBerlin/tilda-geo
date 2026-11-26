@@ -3,9 +3,11 @@ local default_id = require('topics.helper.default_id')
 local round = require('topics.helper.round')
 local extract_public_tags = require('topics.helper.extract_public_tags')
 local transform_lifecycle_tags = require('topics.roads_bikelanes.helper.transform_tags.transform_lifecycle_tags')
+local transform_access_values = require('topics.roads_bikelanes.helper.transform_tags.transform_access_values')
 local result_tags = require('topics.roads_bikelanes.helper.result_tags')
 local road_generalization = require('topics.roads_bikelanes.roads.road_generalization')
-local EXIT = require('topics.roads_bikelanes.helper.exit_processing')
+local exit_processing = require('topics.roads_bikelanes.helper.exit_processing')
+local ACCESS = require('topics.roads_bikelanes.helper.access_restriction')
 local SANITIZE_ROAD_TAGS = require('topics.roads_bikelanes.helper.sanitize_road_tags')
 local CLEANER = require('topics.helper.sanitize_cleaner')
 local LOG_ERROR = require('topics.roads_bikelanes.roads_bikelanes_errors')
@@ -22,7 +24,13 @@ local function process_highway_area(object)
   ---@type OsmTags
   local object_tags = object.tags
   transform_lifecycle_tags(object_tags)
-  if EXIT.exit_processing(object_tags, true) then
+  if exit_processing(object_tags, true) then
+    return
+  end
+  transform_access_values(object_tags)
+  -- Areas have no routing edges and no bike infrastructure: they are in `highway_areas` unless the
+  -- way is in no table.
+  if not ACCESS.decide(object_tags).in_any_table then
     return
   end
 

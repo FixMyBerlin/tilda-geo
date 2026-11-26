@@ -8,7 +8,7 @@ describe('bikelanes', function()
   local function run_bikelanes(input_object)
     input_object.tags._id = input_object.id
     input_object.tags._type = input_object.type
-    return bikelanes(input_object.tags, input_object)
+    return bikelanes(input_object.tags)
   end
 
   describe('Handle `traffic_sign`:', function()
@@ -656,6 +656,25 @@ describe('bikelanes', function()
       assert.are.equal(result[1].traffic_mode_left, nil)
       assert.are.equal(result[1].traffic_mode_right, 'parking')
     end)
+
+    it('apply parking on the kerb side of a left lane on oneway=yes', function()
+      local input_object = {
+        tags = {
+          highway = 'primary',
+          oneway = 'yes',
+          ['cycleway:left'] = 'lane',
+          ['cycleway:left:lane'] = 'advisory',
+          ['parking:left'] = 'street_side',
+        },
+        id = 1,
+        type = 'way'
+      }
+      local result = run_bikelanes(input_object)
+      assert.are.equal(result[1].category, 'cyclewayOnHighway_advisory')
+      assert.are.equal(result[1].traffic_mode_left, 'parking')
+      assert.are.equal(result[1].traffic_mode_right, nil)
+      assert.is_true(result[1].offset > 0)
+    end)
   end)
 
   describe('`oneway=-1` roads:', function()
@@ -750,7 +769,7 @@ describe('bikelanes', function()
       )
     end)
 
-    it('assumes one direction for a lane and both directions for a track', function()
+    it('assumes one direction for a lane and for a track with a lane on the other side', function()
       local result = run_bikelanes({
         tags = { highway = 'secondary', ['cycleway:left'] = 'track', ['cycleway:right'] = 'lane', ['cycleway:right:lane'] = 'exclusive' },
         id = 1,
@@ -758,8 +777,144 @@ describe('bikelanes', function()
       })
       local by_side = {}
       for _, row in ipairs(result) do by_side[row._side] = row end
-      assert.are.equal('assumed_no', by_side.left.oneway)
+      assert.are.equal('implicit_yes', by_side.left.oneway)
       assert.are.equal('implicit_yes', by_side.right.oneway)
     end)
+
+    describe('a track tagged on the road follows the other side:', function()
+      local function oneway_by_side(tags)
+        local by_side = {}
+        for _, row in ipairs(run_bikelanes({ tags = tags, id = 1, type = 'way' })) do
+          if row._side ~= 'self' then by_side[row._side] = row.oneway end
+        end
+        return by_side
+      end
+
+      it('is one-way with a track on both sides', function()
+        assert.are.same({ left = 'implicit_yes', right = 'implicit_yes' }, oneway_by_side({ highway = 'secondary', cycleway = 'track' }))
+        assert.are.same({ left = 'implicit_yes', right = 'implicit_yes' }, oneway_by_side({ highway = 'secondary', ['cycleway:both'] = 'track' }))
+      end)
+
+      it('is one-way with a separately mapped path on the other side', function()
+        assert.are.equal('implicit_yes', oneway_by_side({ highway = 'secondary', ['cycleway:left'] = 'separate', ['cycleway:right'] = 'track' }).right)
+      end)
+
+      it('is one-way with a sidewalk open to bicycles on the other side', function()
+        assert.are.equal('implicit_yes', oneway_by_side({ highway = 'secondary', ['cycleway:right'] = 'track', sidewalk = 'both', ['sidewalk:left:bicycle'] = 'yes' }).right)
+        assert.are.equal('assumed_no', oneway_by_side({ highway = 'secondary', ['cycleway:right'] = 'track', sidewalk = 'both', ['sidewalk:left:bicycle'] = 'no' }).right)
+      end)
+
+      it('is two-way without cycle infrastructure on the other side', function()
+        assert.are.equal('assumed_no', oneway_by_side({ highway = 'secondary', ['cycleway:right'] = 'track' }).right)
+        assert.are.equal('assumed_no', oneway_by_side({ highway = 'secondary', ['cycleway:left'] = 'no', ['cycleway:right'] = 'track' }).right)
+        assert.are.equal('assumed_no', oneway_by_side({ highway = 'secondary', ['cycleway:right'] = 'track', ['cycleway:right:segregated'] = 'no' }).right)
+      end)
+
+      it('reads the other side from its category: no cycle infrastructure expected there on a one-way road', function()
+        assert.are.equal('assumed_no', oneway_by_side({ highway = 'secondary', oneway = 'yes', cycleway = 'track' }).right)
+      end)
+
+      it('keeps an explicit direction', function()
+        assert.are.equal('yes', oneway_by_side({ highway = 'secondary', ['cycleway:right'] = 'track', ['cycleway:right:oneway'] = 'yes' }).right)
+        assert.are.equal('no', oneway_by_side({ highway = 'secondary', cycleway = 'track', ['cycleway:left:oneway'] = 'no' }).left)
+      end)
+    end)
   end)
+
+  describe('Sidewalks mapped on the road (`sidewalk:<side>=*`):', function()
+    ---@param sidewalk_tags table `sidewalk:right:*` tags without the prefix
+    ---@return table|nil the bikelane of the right sidewalk
+    local function right_sidewalk(sidewalk_tags)
+      local tags = { highway = 'residential', ['sidewalk:right'] = 'lane' }
+      for key, value in pairs(sidewalk_tags) do
+        tags['sidewalk:right:' .. key] = value
+      end
+      for _, result in ipairs(run_bikelanes({ tags = tags, id = 1, type = 'way' })) do
+        if result._id == 'way/1/sidewalk/right' then return result end
+      end
+      return nil
+    end
+
+    -- https://www.openstreetmap.org/way/828479376
+    it('is no bikelane with a physical separation but without bicycle access (Hegemeisterweg)', function()
+      local input_object = {
+        tags = {
+          highway = 'residential',
+          bicycle = 'designated',
+          bicycle_road = 'yes',
+          vehicle = 'destination',
+          traffic_sign = 'DE:244.1,1020-30',
+          ['sidewalk:left'] = 'no',
+          ['sidewalk:right'] = 'lane',
+          ['sidewalk:right:separation:left'] = 'bump',
+          ['sidewalk:right:surface'] = 'asphalt',
+        },
+        id = 1,
+        type = 'way',
+      }
+      local result = run_bikelanes(input_object)
+      assert.are.equal(#result, 1)
+      assert.are.equal(result[1].category, 'bicycleRoad_vehicleDestination')
+    end)
+
+    it('is no bikelane with parking on the left but without bicycle access', function()
+      assert.are.equal(right_sidewalk({ ['traffic_mode:left'] = 'parking' }), nil)
+    end)
+
+    it('is no bikelane with a pedestrian-only sign', function()
+      assert.are.equal(right_sidewalk({ traffic_sign = 'DE:239', ['separation:left'] = 'bump' }), nil)
+    end)
+
+    it('is no bikelane when the sidewalk is mapped separately', function()
+      local result = run_bikelanes({
+        tags = { highway = 'residential', ['sidewalk:right'] = 'separate', ['sidewalk:right:bicycle'] = 'yes' },
+        id = 1,
+        type = 'way',
+      })
+      assert.are.equal(#result, 0)
+    end)
+
+    it('is footwayBicycleYes with bicycle=yes, also with a physical separation', function()
+      assert.are.equal(right_sidewalk({ bicycle = 'yes' }).category, 'footwayBicycleYes_adjoining')
+      assert.are.equal(right_sidewalk({ bicycle = 'yes', ['separation:left'] = 'bump' }).category, 'footwayBicycleYes_adjoining')
+    end)
+
+    it('is footwayBicycleYes with the sign DE:1022-10 only', function()
+      assert.are.equal(right_sidewalk({ traffic_sign = 'DE:239,1022-10' }).category, 'footwayBicycleYes_adjoining')
+    end)
+
+    it('is footAndCyclewayShared with the sign DE:240 only', function()
+      assert.are.equal(right_sidewalk({ traffic_sign = 'DE:240', ['separation:left'] = 'bump' }).category, 'footAndCyclewayShared_adjoining')
+    end)
+
+    it('is footAndCyclewayShared with bicycle=designated + foot=designated + segregated=no, not PBL', function()
+      local result = right_sidewalk({
+        bicycle = 'designated',
+        foot = 'designated',
+        segregated = 'no',
+        ['separation:left'] = 'bump',
+      })
+      assert.are.equal(result.category, 'footAndCyclewayShared_adjoining')
+    end)
+
+    it('is footAndCyclewaySegregated with bicycle=designated + foot=designated + segregated=yes', function()
+      local result = right_sidewalk({ bicycle = 'designated', foot = 'designated', segregated = 'yes' })
+      assert.are.equal(result.category, 'footAndCyclewaySegregated_adjoining')
+    end)
+
+    it('is needsClarification with bicycle=designated only, also with a physical separation', function()
+      assert.are.equal(right_sidewalk({ bicycle = 'designated', ['separation:left'] = 'bump' }).category, 'needsClarification')
+    end)
+
+    it('compared to a cycleway lane with a physical separation, which is PBL', function()
+      local result = run_bikelanes({
+        tags = { highway = 'residential', ['cycleway:right'] = 'lane', ['cycleway:right:separation:left'] = 'bump' },
+        id = 1,
+        type = 'way',
+      })
+      assert.are.equal(result[1]._id, 'way/1/cycleway/right')
+      assert.are.equal(result[1].category, 'cyclewayOnHighwayProtected')
+    end)
+  end)
+
 end)

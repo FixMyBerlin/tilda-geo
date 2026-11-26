@@ -9,7 +9,7 @@ local SANITIZE_TAGS = require('topics.helper.sanitize_tags')
 ---@return SharedResultTags
 local function result_tags_roads_bikelanes(object_tags)
   local road_result_tags = {
-    name = SANITIZE_TAGS.safe_string(object_tags.name or object_tags.ref or object_tags['is_sidepath:of:name'] or object_tags['street:name']),
+    name = SANITIZE_TAGS.road_name(object_tags),
     length = object_tags._length,
     area = object_tags._area,
     lifecycle = object_tags.lifecycle,

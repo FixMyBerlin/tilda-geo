@@ -87,6 +87,8 @@ type MapDataSourceShared<TIds> = {
   osmIdConfig: MapDataOsmIdConfig
   /** @desc Inspector: Enable and configure Inspector */
   inspector: MapDataSourceInspector
+  /** @desc `false`: lines draw no direction arrows, for data where the line direction has no meaning */
+  directionArrows?: false
 }
 
 /** Processing tables; tile URL via `getMapDataSourceTilesUrl` (`atlas_generalized_*` PG functions). */

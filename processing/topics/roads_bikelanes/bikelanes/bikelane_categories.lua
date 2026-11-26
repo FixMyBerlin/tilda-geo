@@ -4,6 +4,7 @@ local SET = require('topics.helper.sets')
 local category_is_sidepath = require('topics.roads_bikelanes.bikelanes.categories.category_is_sidepath')
 local create_subcategories_adjoining_or_isolated = require('topics.roads_bikelanes.bikelanes.categories.create_subcategories_adjoining_or_isolated')
 local sanitize_traffic_sign = require('topics.helper.sanitize_traffic_sign')
+local is_bicycle_road = require('topics.roads_bikelanes.helper.is_bicycle_road')
 local derive_traffic_signs = require('topics.helper.derive_traffic_signs')
 local derive_smoothness = require('topics.helper.derive_smoothness')
 local highway_classes = require('topics.helper.highway_classes')
@@ -12,6 +13,7 @@ local SANITIZE_ROAD_TAGS = require('topics.roads_bikelanes.helper.sanitize_road_
 local SANITIZE_VALUES = require('topics.helper.sanitize_values')
 local inspect = require('inspect')
 local extract_value_from_lanes = require('topics.roads_bikelanes.bikelanes.helper.extract_value_from_lanes')
+local carriageway_side = require('topics.roads_bikelanes.bikelanes.helper.carriageway_side')
 
 local is_crossing_pattern -- forward declaration for use in category conditions below
 
@@ -43,6 +45,7 @@ BikelaneCategory.__index = BikelaneCategory
 --- implicitOneWayConfidence: 'high'|'medium'|'low'|'not_applicable',
 --- copySurfaceSmoothnessFromParent: boolean, -- Whether this category should copy surface/smoothness values from parent highway
 --- bicycleSurface?: BikelaneBicycleSurface, -- How `surface:bicycle` applies, see `derive_bikelane_surface_tags`; nil ignores it
+--- position?: 'adjoining'|'isolated'|'adjoiningOrIsolated', -- Set by `create_subcategories_adjoining_or_isolated`
 --- condition: fun(tags: OsmTags): (boolean|nil),
 --- process: fun(tags: OsmTags): (OsmTags|nil)|nil, -- Optional function to process tags after categorization
 --- }
@@ -57,6 +60,7 @@ function BikelaneCategory.new(args)
   self.implicitOneWayConfidence = args.implicitOneWayConfidence
   self.copySurfaceSmoothnessFromParent = args.copySurfaceSmoothnessFromParent
   self.bicycleSurface = args.bicycleSurface
+  self.position = args.position
   self.condition = args.condition
   self.process = args.process
   return self
@@ -149,13 +153,7 @@ local bicycleRoad = BikelaneCategory.new({
   copySurfaceSmoothnessFromParent = true,
   bicycleSurface = 'strip',
   condition = function(tags)
-    if tags.bicycle_road == 'yes' then
-      return true
-    end
-    local traffic_sign = sanitize_traffic_sign(tags.traffic_sign)
-    if osm2pgsql.has_prefix(traffic_sign, 'DE:244') then
-      return true
-    end
+    return is_bicycle_road(tags)
   end
 })
 
@@ -687,6 +685,12 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
 
     -- Only target sidepath like ways
     if not category_is_sidepath(tags) then return false end
+    -- PBLs are mapped as `cycleway:<side>=lane|track` (becomes `highway=cycleway`) or as a separate `highway=cycleway`
+    -- (or `highway=path` + `bicycle=designated`), never on a sidewalk (`sidewalk:<side>=*` becomes `highway=footway`)
+    -- or other highways
+    local is_cycleway = tags.highway == 'cycleway'
+    local is_designated_path = tags.highway == 'path' and tags.bicycle == 'designated'
+    if not is_cycleway and not is_designated_path then return false end
     -- 'Schutzstreifen' cannot be PBLs
     if tags['lane'] == 'advisory' then return false end
     -- Share busways should not be PBLs
@@ -697,12 +701,20 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
       'bollard', 'flex_post', 'vertical_panel', 'studs', 'bump', 'planter', 'fence', 'jersey_barrier', 'guard_rail'
     })
 
-    -- Has to have physical separation left
-    local traffic_mode_right = SANITIZE_ROAD_TAGS.traffic_mode(tags, 'right')
-    local separation_left = SANITIZE_ROAD_TAGS.separation(tags, 'left')
-    if separation_left ~= SANITIZE_VALUES.disallowed and allowed_separation_values[separation_left] then
+    -- The second left/right (`separation:left`, `traffic_mode:left`) is relative to the riding direction.
+    -- The carriageway usually lies left of the lane but right of it e.g. for `cycleway:left` on `oneway=yes`.
+    local road_side, far_side = carriageway_side(tags)
+
+    ---@param side 'left'|'right'
+    local function physically_separated(side)
+      return allowed_separation_values[SANITIZE_ROAD_TAGS.separation(tags, side)] ~= nil
+    end
+    local motor_vehicle_on_far_side = SANITIZE_ROAD_TAGS.traffic_mode(tags, far_side) == 'motor_vehicle'
+
+    -- Has to have physical separation towards the carriageway
+    if physically_separated(road_side) then
       -- But not in edge cases, when the separation protects a cyclewayOnHighwayBetweenLanes, see https://www.openstreetmap.org/way/80706109/history
-      if traffic_mode_right == 'motor_vehicle' then
+      if motor_vehicle_on_far_side then
         return false
       end
       -- But not when `segregated` is present, as it indicates infrastructure that is
@@ -713,9 +725,8 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
       return true
     end
 
-    -- Parked cars are treated as physical separation when left of the bikelane
-    local traffic_mode_left = SANITIZE_ROAD_TAGS.traffic_mode(tags, 'left')
-    if traffic_mode_left == 'parking' then
+    -- Parked cars are treated as physical separation when between the bikelane and the carriageway
+    if SANITIZE_ROAD_TAGS.traffic_mode(tags, road_side) == 'parking' then
       -- But not when `segregated` is present, as it indicates infrastructure that is
       -- not on the road ('Seitenraum'), in which case the parking condition does not apply
       if tags.segregated ~= nil then
@@ -724,12 +735,8 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
       return true
     end
 
-    -- For counter flow bikelanes with motorized traffic on the right, has to have physical separation right
-    local separation_right = SANITIZE_ROAD_TAGS.separation(tags, 'right')
-    if traffic_mode_right == 'motor_vehicle'
-      and separation_right ~= SANITIZE_VALUES.disallowed
-      and allowed_separation_values[separation_right]
-    then
+    -- Motor traffic on the other side (e.g. a lane between two motor vehicle lanes) needs physical separation there
+    if motor_vehicle_on_far_side and physically_separated(far_side) then
       return true
     end
   end

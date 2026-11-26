@@ -4,6 +4,73 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-11
 
+### `routing`: new attributes `tunnel`, `dual_carriageway`, `roundabout`
+
+- `tunnel` is the sanitized value of `roads` / `bikelanes` (`yes`, also for `tunnel=building_passage`).
+- `dual_carriageway=yes` when the edge belongs to one carriageway of a road with separated directions (`roads.oneway=yes_dual_carriageway`).
+- `roundabout=yes` for ways with `junction=roundabout|circular`.
+
+### `bikelanes`: `category`, `traffic_mode_left|right` – carriageway side of lanes on the road
+
+- For lanes and tracks tagged on the road (`cycleway:left|right|both`), the second left/right (`…:separation:left`, `…:traffic_mode:left`, buffer, marking) is read in the riding direction of the lane ([Key:separation](https://wiki.openstreetmap.org/wiki/Key:separation)). The carriageway is usually left of the lane, but right of it when the lane rides with its line on the left side of the way, e.g. `cycleway:left=lane` on `oneway=yes` or `cycleway:right=lane` on `oneway=-1`. Before, the carriageway was always assumed on the left.
+- `cyclewayOnHighwayProtected` needs the physical separation (or `traffic_mode=parking`) on the carriageway side now. Example: `oneway=yes` + `cycleway:left=lane` + `cycleway:left:separation:right=bollard` is protected, `…:separation:left=bollard` (kerb side) is not.
+- Without an explicit `traffic_mode`, `parking:<side>` of the road becomes `traffic_mode_left` (kerb side) when the carriageway is right of the lane; before always `traffic_mode_right`.
+- `separation_left|right`, `buffer_left|right`, `marking_left|right` and `traffic_mode_left|right` are published unchanged; they are relative to the published line in riding direction.
+- Separately mapped cycleways ridden against their drawing direction (`oneway=-1`, `oneway:bicycle=-1`) have the road on the right of the way: `cyclewayOnHighwayProtected` checks `separation:right` there. No such way in Berlin has a separation that counts.
+- A wrong `cycleway:left:oneway=yes` or `cycleway:both:oneway=yes` on a two-way road turns the left lane around, so its carriageway is right. In Berlin the FMC cases are corrected before (see the correction CSV below); other such tags give a wrong carriageway side until they are fixed in OSM.
+- A contraflow lane on the left of a `oneway=yes` road (`oneway:bicycle=no`) needs `cycleway:left:oneway=-1`. Without it the lane is read as riding with the cars, and its detail tags and parking come out mirrored. About 50 Berlin ways are listed for mapping in FixMyBerlin/infravelo-radnetz#15 and #18.
+
+### `bikelanes`: corrected direction of FMC cycleway oneway tags in Berlin (temporary)
+
+- Ways in `cycleway-oneway-corrections.csv` (FixMyBerlin/infravelo-radnetz, `osm-cleanup/oneway-2026-11/`, about 2,400 Berlin ways) are corrected before the direction is derived: `cycleway:both|left:oneway=yes`, `cycleway:oneway=yes` and `cycleway:right:oneway=yes` are dropped, a track on a corrected side gets its side default (`cycleway:left:oneway=-1`, `cycleway:right:oneway=yes`). Same change as the planned OSM edit.
+- Ways last edited on or after 2026-11-22 are used as tagged. The list is regenerated in that repo; TILDA downloads it on every run.
+- Temporary: removed once the OSM edit is done (FixMyBerlin/infravelo-radnetz#12, #13).
+
+### `bikelanes`, `roads`, `bikelanesPresence`: sidewalks and `cyclewayOnHighwayProtected`
+
+- A protected bikelane (PBL) comes only from `cycleway:<side>=lane|track` on the road, a separately mapped `highway=cycleway`, or a separately mapped `highway=path` with `bicycle=designated`. Before, other ways with a physical separation (`separation:left=bump|bollard|…`) or parking on the left were PBLs, too: sidewalks mapped on the road (`sidewalk:<side>=*`), footways and e.g. `highway=service` sidepaths.
+- A sidewalk mapped on the road (`sidewalk:<side>=*`) is only a bikelane with `sidewalk:<side>:bicycle=yes|designated` or a traffic sign; the category follows from these tags as for separately mapped sidewalks (e.g. `bicycle=yes` or `DE:1022-10` is `footwayBicycleYes_*`, `DE:240` is `footAndCyclewayShared_*`). Example: `sidewalk:right=lane` + `sidewalk:right:separation:left=bump` without bicycle tags was a PBL, now it is no bikelane.
+- `sidewalk:<side>=separate|no` with bicycle tags no longer adds a bikelane on the road. The separately mapped sidewalk is a bikelane only with its own bicycle tags; in Berlin 26 separate sidewalks have none, so their bicycle access is no longer shown until they are tagged.
+- `bikelane_left|right` in `roads` and `bikelanesPresence` follow: a road whose only bikelane was such a sidewalk is `not_expected` (e.g. Fahrradstraßen) or `missing` (roads with `sidewalk:<side>=separate` and no `cycleway:<side>` tags).
+
+### Access: `roads`, `roadsPathClasses`, `bikelanes`, `routing`
+
+#### Which ways are public
+
+- Which ways are not public is decided in one place now (`helper/access_restriction.lua`), for all four tables.
+- `access=destination|customers` (also `foot` on a footway, `bicycle` on a cycleway) no longer takes a way out of `roads` / `roadsPathClasses` when cycling is allowed explicitly on the way itself (`bicycle`, else `vehicle`, else `access`, is `yes`, `designated`, `permissive`, `discouraged` or `dismount`), e.g. `access=destination` with `bicycle=yes`. `use_sidepath` does not count: like `cycleway=separate` it points to a path next to the way. Before, `routing` had the carriageway or path edge of such a way without a row in `roads` / `roadsPathClasses` to join.
+- `highway=service` ways without `service` or with `service=alley` stay public, as before. Service ways with any other `service` value (`driveway`, `parking_aisle`, `emergency_access`, `drive-through`, …) are now public when they have bike infrastructure of their own, e.g. `traffic_sign=DE:240` (`footAndCyclewayShared_*`).
+- `bicycle:left|right|both` no longer keeps such a service way public: no bikelane category reads these keys. `bicycle=designated` still does.
+- `indoor=yes` and `informal=yes` ways with bike infrastructure of their own are public in `roads` / `roadsPathClasses` too (they were already in `bikelanes`).
+- A way that is not public for `roads` / `roadsPathClasses` (`indoor` or `informal` without bike infrastructure of its own, `access=destination|customers` without permission to cycle on the way) no longer has a carriageway or path edge in `routing` either. For `indoor` and `informal` this holds even with a `bicycle` tag.
+- `roads.road` can now be `service_driveway`, `service_parking_aisle` or `service_emergency_access`: service ways with bike infrastructure of their own or `bicycle=designated`. `service=parking_aisle` was misspelled in the road classification and became `service_uncategorized` before.
+- `access=no` (also `foot=no` on a footway) no longer drops a way when cycling is explicitly allowed on the way itself (same values as above, not `use_sidepath`), e.g. a forest track with `access=no` + `bicycle=yes` or a Fahrradstraße with `access=no` + `bicycle=designated`. `access=no` + `bicycle=use_sidepath` is mostly a closed road at a construction site and stays out. `bicycle=no` on a cycleway still drops it. Refs [tilda-geo#409](https://github.com/FixMyBerlin/tilda-geo/issues/409), [radinfra.de#15](https://github.com/FixMyBerlin/radinfra.de/issues/15).
+- `access=private|delivery|permit` (also `foot` on a footway, `bicycle` on a cycleway) no longer drops a way with `bicycle=designated` (resolved via `vehicle`), e.g. a signposted cycle path (Z240) through a private area. `bicycle=yes` does not lift them.
+- A way whose resolved `bicycle` access does not allow cycling (`bicycle=no`, `vehicle=destination`, `vehicle=private`, …) is public in all four tables, see `routing` below.
+- On a bicycle road (`bicycle_road=yes`, or `traffic_sign=DE:244*` like the `bicycleRoad` category, including the Fahrradzone DE:244.3; an explicit `bicycle_road=no` wins over the sign) without a `bicycle` tag, `bicycle` reads as `designated`: cycling is always allowed there, and `vehicle=destination` or `access=destination` means „Anlieger frei“ for motor vehicles. Before, such a Fahrradstraße had `access_bicycle=destination` in `routing`, `access=destination` took it out of `roads`, and `access=no` dropped it. An explicit `bicycle=*` still wins. About 86 ways in Germany, 5 in Berlin.
+- Only `access` restricts a way (it includes pedestrians), plus `foot` on a footway and `bicycle` on a cycleway. `vehicle`, `motor_vehicle` and `bicycle` elsewhere never do: `access=private` drops a way, `vehicle=private` keeps all its rows with `access_bicycle=private`.
+- `access=no` is decided with the other access values, after the `construction:` prefix is removed: `construction:access=no` now drops a way like `construction:access=private`.
+
+#### Access values
+
+- Access values are mapped on all access keys before (`transform_access_values`), so `roads` and `routing` see the same values and fewer edges are dropped for an unpublished value:
+  - `unknown` and `optional_sidepath` read as no tag. `access=unknown` ways keep their `routing` edge now. `optional_sidepath` is no longer an `access_bicycle` value: the carriageway is mixed traffic, `cycleway=separate` shows the path next to it.
+  - `official` reads as `designated`; `military`, `emergency`, `psv`, `bus` as `no`; `residents`, `employees`, `restricted` as `private`.
+  - `bicycle=mtb` (mountain bike trails, mostly `path` / `track` with `mtb:scale`) drops the way from all tables: TILDA looks at everyday cycling.
+  - A list reads as its most open value: `agricultural;destination` as `destination`, `private;delivery` as `delivery`.
+  - Numbers for Germany: [tilda-geo#425](https://github.com/FixMyBerlin/tilda-geo/pull/425), section „Zugangswerte vereinheitlichen“.
+
+#### `routing`: `access_bicycle`
+
+- New edges: carriageway and path edges where cycling is not allowed (resolved `bicycle` access `no`, `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry`, e.g. `bicycle=no`, `vehicle=destination`, `vehicle=private`) are in `routing`. They have `access_bicycle` set to that value. Routers filter on `access_bicycle`: empty (no access tag) or `yes`, `designated`, `permissive`, `use_sidepath`, `discouraged`, `dismount` allows cycling, every other value does not. Motorway and trunk stay out.
+- The carriageway of a `motorroad=yes` (Kraftfahrstraße) is no longer in `routing`, like motorway and trunk: cycling is prohibited there, whatever `bicycle` says. Before, a `primary` with `motorroad=yes` was a carriageway edge, often with `access_bicycle=no`. Bike infrastructure tagged on the way (`cycleway:<side>=track|lane`) keeps its own edge. The `roads` row stays. Numbers for Germany: [tilda-geo#425](https://github.com/FixMyBerlin/tilda-geo/pull/425), section „Kraftfahrstraßen“.
+- `access_bicycle` has the new values `destination`, `private`, `customers`, `delivery`, `permit`, `agricultural_or_forestry` (it had `no` before). Lanes on the centerline (`side=left|right`) do not inherit the carriageway access.
+- An edge whose bicycle access value is still not published after the mapping above (e.g. `bicycle=limited`, `access=foot`) is not in `routing`.
+
+### `bikelanes`: `oneway` without a tag follows the position
+
+- Without `oneway` / `oneway:bicycle`, paths next to a road (`*_adjoining`) are `implicit_yes` and paths away from roads (`*_isolated`) `assumed_no`, as in StVO § 2 Abs. 4; `*_adjoiningOrIsolated` keep the category default. A track tagged on the road (`cycleway:<side>=track`) follows the other side of the road instead: `implicit_yes` when that side has cycling infrastructure (lane, track, `separate`, a sidewalk open to bicycles), `assumed_no` when it has none. Before, the category alone decided: `cycleway_adjoining` was `assumed_no`; `footAndCyclewayShared_isolated`, `footAndCyclewaySegregated_isolated` and `footwayBicycleYes_isolated` were `implicit_yes`. In Germany about 6,230 km change to `implicit_yes` and 1,070 km to `assumed_no`. Trade-off and numbers: https://github.com/FixMyBerlin/tilda-geo/pull/424.
+
 ### `roads`, `roadsPathClasses`, `bikeSuitability`, `bikelanes`, `bikelanes_presence`, `routing`: line direction on `oneway=-1`
 
 - Lines of a way tagged `oneway=-1` or `oneway:bicycle=-1` point in the direction of travel now, so the published `oneway=yes` holds for the line. Before, `-1` was published as `yes` while the line kept the drawing direction of the way, so it pointed against the traffic. This applies to the way's own rows: `roads`, `roadsPathClasses`, `bikeSuitability`, `bikelanes_presence` and the `bikelanes` row of the way itself. With `oneway=-1` and `oneway:bicycle=no` (e.g. a Fahrradstraße with two-way cycling) the line follows the motor vehicle direction. Lanes tagged on the road keep their rule; `todos_lines` keep the drawing direction.
@@ -65,9 +132,10 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 - `width` and `width_effective` are empty for `0`: new helper `parse_width`. So `offset` and the parking road width use the highway fallback then. `buffer_*` keeps `0`.
 - New `todos_lines` id `unusual_width` for `roads` and `bikelanes`: a `width` we can't read, `0` or negative, or above 50 m (published as it is). Table-only. When the `bikelanes` row of the way itself has the todo, `roads` does not list it a second time. `check_date`, `check_date:width`, `survey:date`, `survey:date:width` or `survey_date` closes it, also on the road of a lane.
 
-### `routing`
+### `routing`: sanitized tags, `informal`
 
 - Carriageway and path edges publish the sanitized values of `roads` / `roadsPathClasses` instead of raw OSM tags. `width` is a number in meters or empty (was the OSM text, e.g. `5,7`, which aborted the export). `surface` uses the same values as `roads` (e.g. `dirt` is now `ground`). `smoothness` is also derived from `surface` and other tags, like in `roads`.
+- New tag `informal` (`yes` when present), like on `bikelanes`, `roads` and `roadsPathClasses`. Ways with `informal=yes` are in `routing` only when they have own bike infrastructure, so these edges are now marked.
 - `prefix`, `parent_road`, `adjoining_road`, `adjoining_maxspeed` no longer read an OSM tag of the same name. No change in the data: no way in Germany has these tags (2026-10).
 
 ## 2026-10
@@ -165,7 +233,7 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 - Left/right bike lanes stay on the road centerline like `bikelanes`: left (`offset` > 0) runs against the OSM way, right runs with it.
 - Carriageway edges always use `mixedTrafficMotor` (assigned in processing, never a `bikelanes.category`). Path edges keep a non-infra self category id when present, else `mixedTrafficFoot`. Unclear / non-indexable `bikelanes.category` values are still emitted when cycling is allowed.
 - Self bike infra on the centerline (Fahrradstraße, Fußgängerzone Rad frei, shared path on a service road) replaces the carriageway edge. A Mittellage lane (`cyclewayOnHighwayBetweenLanes`, unclear Mittellage as `needsClarification`) is added next to the carriageway edge instead.
-- Dropped when cycling is not allowed (`bicycle` access `no`/`private`/…), when `informal=yes` and bicycle access is unresolved, when own or parent `highway` is `motorway`/`trunk` (including `_link`), or when a path edge would not enter `roadsPathClasses` (OSM sidewalk/sidepath, indoor, informal, destination/customers access — same helper as the roads writer).
+- Dropped when cycling is not allowed (`bicycle` access `no`/`private`/…), when `informal=yes` and bicycle access is unresolved, when own or parent `highway` is `motorway`/`trunk` (including `_link`) or the carriageway has `motorroad=yes`, or when a path edge would not enter `roadsPathClasses` (OSM sidewalk/sidepath, indoor, informal, destination/customers access — same helper as the roads writer).
 - Tags: `category`, `road`, `parent_road`, `maxspeed` (carriageway own speed), `adjoining_road`, `adjoining_maxspeed` (motor road beside the bike infra: on `side=self` same value as `bikelanes`, on `side=left|right` the parent road's class and speed from `bikelanes.parent_road` / `parent_maxspeed`), `access_bicycle` (resolved bicycle access, including `use_sidepath` and `dismount`; those edges stay in the graph; not set on left/right lanes, which do not inherit the carriageway's access), `prefix`, `offset` (left/right lanes only; same visual sideways shift as `bikelanes`), `side`, `oneway`, `oneway_motor`, plus `name`/`length`/`surface`/`smoothness`/`width` when present. Docs: `topic-docs/roads_bikelanes/routing.yaml`.
 - Join keys in `tags` (same `id`/`tags`/`meta`/`geom`/`minzoom` shape as other rendering tables; `parent_id` and `source_id` have expression indexes): `parent_id`, `source_table`, `source_id`. Path edges always join `roadsPathClasses`.
 - `minzoom`: major TILDA `road` classes → 8; minor roads → 10 if length ≥ 250 m else 12; paths/tracks/service/sidepaths → 12 if length ≥ 500 m else 13.

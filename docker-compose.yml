@@ -37,6 +37,15 @@ services:
     depends_on:
       db:
         condition: service_healthy
+  # Applies the latest OSM changes to the downloaded PBF. Only runs on demand: refresh_osm_processing.sh
+  pbf-update:
+    image: ${ECR_REGISTRY}/tilda/processing:${ENVIRONMENT}-latest
+    profiles: [manual]
+    command: ['bun', '/processing/scripts/updatePbf.ts']
+    environment:
+      PROCESS_GEOFABRIK_DOWNLOAD_URL: ${PROCESS_GEOFABRIK_DOWNLOAD_URL}
+    volumes:
+      - osmfiles:/data
   app:
     image: ${ECR_REGISTRY}/tilda/app:${ENVIRONMENT}-latest
     container_name: app

@@ -1,4 +1,8 @@
 import { z } from 'zod'
+import {
+  type InspectorCharts,
+  inspectorChartsSchema,
+} from '@/components/regionen/pageRegionSlug/SidebarInspector/TagsTable/charts/inspectorChart.schema'
 import type { Prisma } from '@/prisma/generated/client'
 import type { StaticDatasetLayer } from '@/scripts/StaticDatasets/types'
 
@@ -39,6 +43,7 @@ const inspectorEnabledSchema = z.looseObject({
   documentedKeys: z.union([z.array(z.string()), z.literal(false)]),
   editors: z.array(inspectorEditorSchema).optional(),
   disableTranslations: z.boolean().optional(),
+  charts: inspectorChartsSchema.optional(),
 })
 
 const inspectorSchema = z.union([inspectorEnabledSchema, z.object({ enabled: z.literal(false) })])
@@ -92,6 +97,7 @@ export type MapDatasetUploadConfigEntry = {
         documentedKeys: string[] | false
         editors?: z.infer<typeof inspectorEditorSchema>[]
         disableTranslations?: boolean
+        charts?: InspectorCharts
       }
   legends?: z.infer<typeof legendSchema>[] | null
   osmIdConfig?: z.infer<typeof osmIdConfigSchema> | null

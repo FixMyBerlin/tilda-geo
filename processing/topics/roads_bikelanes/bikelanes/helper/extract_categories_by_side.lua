@@ -2,6 +2,7 @@ local bikelane_categories = require('topics.roads_bikelanes.bikelanes.bikelane_c
 local transformations = require('topics.roads_bikelanes.bikelanes.transformations')
 
 ---Helper function to extract categories and tags by side from bikelanes input
+---Only builds the `cycleway:<side>=*` sides; for sidewalks on the road (`sidewalk:<side>=*`) test `extract_bikelanes` itself.
 ---@param input_object table The input object with tags, id, type, etc.
 ---@return table CategoriesBySide
 local function extract_categories_by_side(input_object)

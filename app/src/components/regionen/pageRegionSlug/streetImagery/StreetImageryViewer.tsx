@@ -58,6 +58,8 @@ export const StreetImageryViewer = () => {
     <FloatingPhotoViewer
       title={providerById[photo.providerId].label}
       storageKey="tilda-street-imagery-viewer"
+      // TILDA's focus colour instead of the package's fuchsia.
+      resizeHandleColor="var(--color-yellow-500)"
       // Top left, right of the layer controls (their width plus the map's inset).
       defaultPosition={{ corner: 'top-left', left: isDesktop ? 240 : 8, top: isDesktop ? 12 : 64 }}
       // TILDA shows single photos; the package's suggested views and history are not used.
@@ -94,6 +96,10 @@ export const StreetImageryViewer = () => {
           onViewerPhoto={(viewerPhoto) => {
             setLoadedPhoto(viewerPhoto)
             setViewerPhoto(viewerPhoto)
+            // Only photos the viewer moves on to pan the map; the URL photo keeps the map position.
+            if (viewerPhoto.photoId !== photo.photoId) {
+              mainMap?.easeTo({ center: viewerPhoto.lngLat })
+            }
           }}
           onPhotoSelected={({ provider, photoId, sequenceId }) => {
             const known = streetImageryProviderIds.find((id) => id === provider)
@@ -102,7 +108,7 @@ export const StreetImageryViewer = () => {
             const sequence = sequenceId.startsWith('photo:') ? undefined : sequenceId
             setPhoto({ provider: known, id: photoId, sequence })
           }}
-          onEaseMapToPoint={(lng, lat) => mainMap?.easeTo({ center: [lng, lat] })}
+          onEaseMapToPoint={noop}
         />
       </div>
     </FloatingPhotoViewer>

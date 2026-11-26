@@ -2,6 +2,7 @@ local SET = require('topics.helper.sets')
 local SANITIZE_ROAD_TAGS = require('topics.roads_bikelanes.helper.sanitize_road_tags')
 local SANITIZE_PARKING_TAGS = require('topics.parking.helper.sanitize_parking_tags')
 local CLEANER = require('topics.helper.sanitize_cleaner')
+local carriageway_side = require('topics.roads_bikelanes.bikelanes.helper.carriageway_side')
 
 local DIRECTIONAL_PARKING_INFERENCE_CATEGORIES = SET.set({
   'cyclewayOnHighway_advisory',
@@ -39,10 +40,9 @@ end
 
 ---@param bikelaneTags OsmTags
 ---@param centerlineTags OsmTags
----@param categoryId string
----@param side SideKey
+---@param categoryId string|nil
 ---@return DeriveTrafficModeResult
-local function derive_traffic_mode(bikelaneTags, centerlineTags, categoryId, side)
+local function derive_traffic_mode(bikelaneTags, centerlineTags, categoryId)
   local traffic_mode_left = CLEANER.remove_disallowed_value(SANITIZE_ROAD_TAGS.traffic_mode(bikelaneTags, 'left'))
   local traffic_mode_right = CLEANER.remove_disallowed_value(SANITIZE_ROAD_TAGS.traffic_mode(bikelaneTags, 'right'))
 
@@ -59,11 +59,12 @@ local function derive_traffic_mode(bikelaneTags, centerlineTags, categoryId, sid
   end
 
   if DIRECTIONAL_PARKING_INFERENCE_CATEGORIES[categoryId] ~= nil then
-    traffic_mode_left = nil
-    traffic_mode_right = infer_traffic_mode_from_parking(centerlineTags, side)
+    -- `parking:<side>` of the road lies on the kerb side of the lane, away from the carriageway.
+    local _, far_side = carriageway_side(bikelaneTags)
+    return { ['traffic_mode_' .. far_side] = infer_traffic_mode_from_parking(centerlineTags, bikelaneTags._side) }
   end
 
-  return { traffic_mode_left = traffic_mode_left, traffic_mode_right = traffic_mode_right }
+  return {}
 end
 
 return derive_traffic_mode

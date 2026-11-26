@@ -1,15 +1,8 @@
 local SET = require('topics.helper.sets')
+local is_roundabout = require('topics.helper.is_roundabout')
 
 -- `1` and `true` mean `yes`: https://wiki.openstreetmap.org/wiki/Key:oneway
 local YES_ALIASES = SET.set({ '1', 'true' })
--- Roundabouts without `oneway` become `oneway=yes`; `oneway=no` overrides it. The two values differ in the wiki:
--- * `junction=roundabout` implies `oneway=yes`, so the tag is a real default that is almost never mapped:
---   https://wiki.openstreetmap.org/wiki/Tag:junction=roundabout
--- * `junction=circular` requires `oneway` to be tagged, because some of them have two-way traffic:
---   https://wiki.openstreetmap.org/wiki/Tag:junction=circular
---   So `yes` may be wrong there. We accept that guess: we expect `oneway` to be mapped on these,
---   and `oneway=no` where the circular junction is not one-way.
-local ONEWAY_JUNCTIONS = SET.set({ 'roundabout', 'circular' })
 
 local ONEWAY_KEYS = { 'oneway', 'oneway:bicycle' }
 for _, prefix in ipairs({ 'cycleway', 'sidewalk' }) do
@@ -30,7 +23,14 @@ local function normalize_oneway_tags(tags)
       tags[key] = 'yes'
     end
   end
-  if tags.oneway == nil and ONEWAY_JUNCTIONS[tags.junction] then
+  -- Roundabouts without `oneway` become `oneway=yes`; `oneway=no` overrides it. The two values differ in the wiki:
+  -- * `junction=roundabout` implies `oneway=yes`, so the tag is a real default that is almost never mapped:
+  --   https://wiki.openstreetmap.org/wiki/Tag:junction=roundabout
+  -- * `junction=circular` requires `oneway` to be tagged, because some of them have two-way traffic:
+  --   https://wiki.openstreetmap.org/wiki/Tag:junction=circular
+  --   So `yes` may be wrong there. We accept that guess: we expect `oneway` to be mapped on these,
+  --   and `oneway=no` where the circular junction is not one-way.
+  if tags.oneway == nil and is_roundabout(tags) then
     tags.oneway = 'yes'
   end
 end

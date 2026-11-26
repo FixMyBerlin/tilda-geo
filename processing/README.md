@@ -19,7 +19,7 @@ See [`index.ts`](./index.ts) for more.
 
 ### Freshness of source data
 
-The data is updated daily based on OSM extracts provided by [Geofabrik for Germany](https://download.geofabrik.de/europe/germany.html).
+The data is updated daily based on OSM extracts provided by [Geofabrik for Germany](https://download.geofabrik.de/europe/germany/).
 It includes OSM changes up until ~20:00 h of teh previous day.
 The processing should be finished at about 6:00 h of the current day (+/- 2 h).
 Which data is used in the app is visible in the download modal (Download-Icon on the bottom right of the map).
@@ -28,6 +28,10 @@ Which data is used in the app is visible in the download modal (Download-Icon on
 
 - Data is processed every day ([cron job definition](/.github/workflows/generate-tiles.yml#L3-L6))
 - Data is processed on every deploy/release
+- Data is processed on demand with the latest OSM data: run the GitHub workflow [Refresh OSM Data](/.github/workflows/refresh-osm-data.yml) or `/srv/refresh_osm_processing.sh` on the server.
+  It applies the OSM changes since the last Geofabrik download ([minute diffs from openstreetmap.fr](https://download.openstreetmap.fr/replication/europe/germany/minute/), with user and changeset metadata) to the downloaded file, then starts processing with `SKIP_DOWNLOAD=1`.
+  The next nightly run downloads a fresh Geofabrik file again.
+  Not checked yet: openstreetmap.fr and Geofabrik cut Germany with different polygons, so objects near the border may stay outdated until the next nightly run.
 
 ## Preview
 

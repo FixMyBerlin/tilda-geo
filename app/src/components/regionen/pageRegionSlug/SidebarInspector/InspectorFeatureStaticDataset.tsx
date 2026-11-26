@@ -42,6 +42,7 @@ export const InspectorFeatureStaticDataset = ({ sourceKey, feature }: InspectorF
           properties={feature.properties}
           sourceDocumentedKeys={sourceData.inspector.documentedKeys}
           sourceId={sourceId}
+          charts={sourceData.inspector.charts}
         />
 
         <ToolsWrapper>

@@ -13,6 +13,16 @@ a way is **innerorts** (inside a settlement area) or **außerorts**. Same round-
 > not used downstream yet. It is a heuristic (see the generator's README), hence the value is
 > `assumed_yes` / `assumed_no`.
 
+### Planned consumer: oneway fallback of shared foot and cycle paths
+
+Shared foot and cycle paths next to a road (`footAndCyclewayShared_adjoining`) without `oneway` /
+`oneway:bicycle` get the oneway
+fallback `implicit_yes` (one direction, StVO § 2 Abs. 4). Outside settlements that is often wrong: in
+Brandenburg 61 % of the tagged ones are two-way, over 600 km with a two-way sign (1000-3x); in Berlin
+31 %. Once `_in_settlement_area` is attached again, we recommend `assumed_no` for these paths outside
+settlements (`derive_oneway.lua`). Numbers and trade-off:
+https://github.com/FixMyBerlin/tilda-geo/pull/424
+
 ## Round-trip
 
 1. **Export (afterthoughts, this run)** — [exportSettlementAreaData.ts](exportSettlementAreaData.ts)

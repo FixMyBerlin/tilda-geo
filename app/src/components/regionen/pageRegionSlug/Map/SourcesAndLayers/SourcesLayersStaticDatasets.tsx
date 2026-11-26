@@ -54,6 +54,7 @@ export const LayersStaticDatasets = () => {
         sourceKey,
         sourceId: sourceKey,
         sourceLayer,
+        reverseDirectionArrows: layer.type === 'line' && layer.reverseDirectionArrows,
         layerProps: buildUploadLayerProps({
           layer: layer as RenderableUploadLayer,
           layerId,
