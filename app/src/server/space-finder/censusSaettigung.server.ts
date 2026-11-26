@@ -37,7 +37,7 @@ const METRIC_SRID = Prisma.raw('25832')
 /** Source CRS of `data.census_population_point` and `public._buildings`. */
 const SOURCE_SRID = Prisma.raw('5243')
 
-/** Emergency brake: the area is capped at 25 km², but a request in the create dialog must
+/** Emergency brake: the area is capped at 26 km², but a request in the create dialog must
  * never hang. Otherwise Prisma aborts the transaction after its own 5 s, before the statement
  * timeout could even kick in. */
 const STATEMENT_TIMEOUT_MS = Prisma.raw('30000')
