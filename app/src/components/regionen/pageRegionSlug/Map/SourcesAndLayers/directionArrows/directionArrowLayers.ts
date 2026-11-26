@@ -20,6 +20,8 @@ export type DirectionArrowLineEntry = {
   layerProps: LayerProps
   /** Arrows against the geometry, with the `-reverse` patterns. */
   reverseDirectionArrows?: boolean
+  /** `false`: no arrows, the line direction has no meaning for this data. */
+  directionArrows?: boolean
 }
 
 // Hit areas (`line-opacity: 0`) only catch clicks, they draw no line.
@@ -56,6 +58,7 @@ export function buildDirectionArrowLayers(entries: DirectionArrowLineEntry[]) {
     DirectionArrowLineEntry & { suffix: string; lines: LineLayerProps[] }
   >()
   for (const entry of entries) {
+    if (entry.directionArrows === false) continue
     const line = entry.layerProps
     if (!isVisibleLine(line)) continue
     if (line.maxzoom !== undefined && line.maxzoom <= DIRECTION_ARROWS_SELECTED_MINZOOM) continue

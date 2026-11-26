@@ -91,6 +91,7 @@ export function buildTildaLayerEntries({
   const entries = Array.from(layers, ([layerId, { visible, sourceId, ...layerConfig }]) => ({
     layerId,
     sourceId,
+    directionArrows: getSourceData(sourceId).directionArrows !== false,
     sourceKey: layerConfig.sourceKey,
     sourceLayer: layerConfig.layer['source-layer'],
     visible,

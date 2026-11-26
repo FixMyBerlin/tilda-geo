@@ -19,6 +19,7 @@ export const sourcesParkingLars: MapDataSource<SourcesParkingLarsId>[] = [
     minzoom: 4,
     promoteId: 'id',
     osmIdConfig: { osmType: 'osm_type', osmId: 'osm_id' },
+    directionArrows: false,
     inspector: {
       enabled: true,
       highlightingKey: 'id',
@@ -67,6 +68,7 @@ export const sourcesParkingLars: MapDataSource<SourcesParkingLarsId>[] = [
     minzoom: 4,
     promoteId: undefined,
     osmIdConfig: undefined,
+    directionArrows: false,
     inspector: { enabled: false }, // Those layers have no properties anyways
   },
   {
@@ -80,6 +82,7 @@ export const sourcesParkingLars: MapDataSource<SourcesParkingLarsId>[] = [
     maxzoom: 22,
     minzoom: 4,
     osmIdConfig: { osmType: 'osm_type', osmId: 'osm_id' },
+    directionArrows: false,
     inspector: {
       enabled: true,
       highlightingKey: 'id',
@@ -115,6 +118,7 @@ export const sourcesParkingLars: MapDataSource<SourcesParkingLarsId>[] = [
     minzoom: 4,
     promoteId: 'id',
     osmIdConfig: undefined,
+    directionArrows: false,
     inspector: {
       enabled: true,
       highlightingKey: 'id',

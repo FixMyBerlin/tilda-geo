@@ -40,6 +40,15 @@ const matches = (filter: FilterSpecification, properties: Record<string, unknown
   } as never)
 
 describe('buildDirectionArrowLayers', () => {
+  test('no layers for sources without direction arrows', () => {
+    const layers = buildDirectionArrowLayers([
+      entry(line('parking'), { directionArrows: false }),
+      entry(line('road'), { sourceKey: 'roads', sourceId: 'roads' }),
+    ])
+    expect(layers.every((layer) => layer.source === 'roads')).toBe(true)
+    expect(layers).toHaveLength(2)
+  })
+
   test('one faint and one selected layer for the visible lines of a source, filters combined', () => {
     const layers = buildDirectionArrowLayers([
       entry(line('a', { filter: ['==', ['get', 'kind'], 'a'] })),
