@@ -188,6 +188,7 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
           regionAndDatasetFolder,
           api,
           appEnv,
+          instance,
         )
         break
       }
@@ -210,6 +211,7 @@ for (const { datasetFolderPath, regionFolder, datasetFolder } of datasetFileFold
           regionAndDatasetFolder,
           api,
           appEnv,
+          instance,
         )
         break
       }

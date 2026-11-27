@@ -1,3 +1,4 @@
+import type { AppInstance } from '@/components/shared/utils/appInstances.const'
 import { getStaticDatasetUrlForEnvironment } from '@/components/shared/utils/getStaticDatasetUrl'
 import type { EnvironmentValues } from '@/server/envSchema'
 import { createUpload, type StaticDatasetsApiConfig } from '../api'
@@ -24,6 +25,7 @@ export async function processLocalSource(
   regionAndDatasetFolder: string,
   api: StaticDatasetsApiConfig,
   appEnv: EnvironmentValues,
+  instance: AppInstance,
 ) {
   console.log(`  Uploading GeoJSON file to S3...`)
   const geojsonUrl = await uploadFileToS3(transformedFilepath, uploadSlug, appEnv)
@@ -70,7 +72,7 @@ export async function processLocalSource(
     hideDownloadLink: metaData.hideDownloadLink ?? false,
     configs: metaData.configs,
     mapRenderFormat: renderFormat,
-    mapRenderUrl: getStaticDatasetUrlForEnvironment(uploadSlug, renderFormat, appEnv),
+    mapRenderUrl: getStaticDatasetUrlForEnvironment(uploadSlug, renderFormat, appEnv, instance),
     pmtilesUrl,
     geojsonUrl,
     githubUrl: `https://github.com/FixMyBerlin/tilda-static-data/tree/main/geojson/${regionAndDatasetFolder}`,

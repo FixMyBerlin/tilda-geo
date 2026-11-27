@@ -1,3 +1,4 @@
+import type { AppInstance } from '@/components/shared/utils/appInstances.const'
 import { getStaticDatasetUrlForEnvironment } from '@/components/shared/utils/getStaticDatasetUrl'
 import type { EnvironmentValues } from '@/server/envSchema'
 import { createUpload, type StaticDatasetsApiConfig } from '../api'
@@ -11,6 +12,7 @@ export async function processExternalSource(
   regionAndDatasetFolder: string,
   api: StaticDatasetsApiConfig,
   appEnv: EnvironmentValues,
+  instance: AppInstance,
 ) {
   const { externalSourceUrl, cacheTtlSeconds, mapRenderFormat } = metaData
 
@@ -22,14 +24,14 @@ export async function processExternalSource(
     hideDownloadLink: metaData.hideDownloadLink ?? false,
     configs: metaData.configs,
     mapRenderFormat,
-    mapRenderUrl: getStaticDatasetUrlForEnvironment(uploadSlug, mapRenderFormat, appEnv),
+    mapRenderUrl: getStaticDatasetUrlForEnvironment(uploadSlug, mapRenderFormat, appEnv, instance),
     pmtilesUrl:
       mapRenderFormat === 'pmtiles'
-        ? getStaticDatasetUrlForEnvironment(uploadSlug, 'pmtiles', appEnv)
+        ? getStaticDatasetUrlForEnvironment(uploadSlug, 'pmtiles', appEnv, instance)
         : null,
     geojsonUrl:
       mapRenderFormat === 'geojson'
-        ? getStaticDatasetUrlForEnvironment(uploadSlug, 'geojson', appEnv)
+        ? getStaticDatasetUrlForEnvironment(uploadSlug, 'geojson', appEnv, instance)
         : null,
     githubUrl: `https://github.com/FixMyBerlin/tilda-static-data/tree/main/geojson/${regionAndDatasetFolder}`,
     externalSourceUrl,

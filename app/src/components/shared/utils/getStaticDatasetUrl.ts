@@ -3,6 +3,7 @@ import {
   staticDatasetUploadFormats,
 } from '@/server/api/uploads/staticDatasetUploadFormats.const'
 import type { EnvironmentValues } from '@/server/envSchema'
+import type { AppInstance } from './appInstances.const'
 import { getAppBaseUrl } from './getAppBaseUrl'
 
 const staticDatasetSlugTrailingExtensionRe = new RegExp(
@@ -25,6 +26,7 @@ export const getStaticDatasetUrlForEnvironment = (
   staticDatasetSlug: string,
   format: StaticDatasetUploadFormat,
   environment: EnvironmentValues,
+  instance: AppInstance,
 ) => {
-  return getAppBaseUrl(pathForStaticDataset(staticDatasetSlug, format), environment)
+  return getAppBaseUrl(pathForStaticDataset(staticDatasetSlug, format), environment, instance)
 }
