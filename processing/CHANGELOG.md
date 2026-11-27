@@ -10,6 +10,11 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 - These ways get the oneway default of adjoining cycleways (`oneway=implicit_yes`, `routing.oneway=yes`) and the todo `missing_oneway` instead of `needs_clarification`.
 - On a road, `cycleway:<side>=sidepath` stays `needsClarification`.
 
+### `bikelanes`: `category` of `highway=cycleway` with `traffic_sign=none`
+
+- `highway=cycleway` with `traffic_sign=none` ('anderer Radweg', no mandatory-use sign) is `cycleway_adjoiningOrIsolated` (or `_adjoining` / `_isolated` with sidepath tags); before `needsClarification`.
+- `highway=cycleway` without any `traffic_sign` stays `needsClarification`.
+
 ### `routing`: new attributes `tunnel`, `dual_carriageway`, `roundabout`
 
 - `tunnel` is the sanitized value of `roads` / `bikelanes` (`yes`, also for `tunnel=building_passage`).
