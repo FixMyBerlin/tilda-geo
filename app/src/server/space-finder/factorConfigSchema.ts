@@ -18,6 +18,7 @@ const variantFactorConfigShape = {
   cir_source: z.enum(['auto', 'bayern', 'bb', 'berlin', 'hessen']).optional(),
   max_cyclepath_dist_m: z.number().optional(),
   exclude_carriageways: z.boolean().optional(),
+  exclude_courtyards: z.boolean().optional(),
   intersection_radius_m: z.number().optional(),
   parken_radius_m: z.number().optional(),
   tempo30_tolerance_m: z.number().optional(),

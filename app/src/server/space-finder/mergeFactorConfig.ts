@@ -16,6 +16,7 @@ export type VariantFactorConfig = {
   cir_source?: 'auto' | 'bayern' | 'bb' | 'berlin' | 'hessen'
   max_cyclepath_dist_m?: number
   exclude_carriageways?: boolean
+  exclude_courtyards?: boolean
   intersection_radius_m?: number
   parken_radius_m?: number
   tempo30_tolerance_m?: number

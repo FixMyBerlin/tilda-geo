@@ -235,6 +235,10 @@ class UseCaseConfig:
     # Plain on/off switch (no weight) — off by default (non-breaking).
     exclude_carriageways: bool = False
 
+    # Exclude courtyards: hard-exclude hexagons in courtyards fully enclosed by buildings
+    # (see scoring/courtyards.py). Plain on/off switch, off by default.
+    exclude_courtyards: bool = False
+
     # Minimum score for a hexagon to belong to a contiguous candidate area
     # (area search). Cluster = neighboring hexagons with
     # mce_gesamtscore >= this threshold; their total area is stored in
@@ -343,4 +347,5 @@ def use_case_from_dict(cfg: dict) -> UseCaseConfig:
         ),
         min_score_threshold=float(cfg.get("min_score_threshold", 60.0)),
         exclude_carriageways=bool(cfg.get("exclude_carriageways", False)),
+        exclude_courtyards=bool(cfg.get("exclude_courtyards", False)),
     )

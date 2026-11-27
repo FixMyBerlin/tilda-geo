@@ -24,6 +24,7 @@ from .geometry import (
     weighted_proximity_sum,
 )
 from .carriageways import compute_tempo30_carriageways
+from .courtyards import courtyard_coverage, courtyard_flags, courtyard_polygons
 from .sealing import compute_sealed_share, sealing_bonus_factor
 from .tilda import TildaLoader
 
@@ -95,6 +96,7 @@ def aggregate_hexagons(hex_proj: gpd.GeoDataFrame, target_res: int = AGG_H3_RES)
     # Same reasoning as for "gebaeude": on the coarse aggregate grid a per-fine-cell
     # flag is not meaningful.
     agg["fahrbahn"] = False
+    agg["hinterhof"] = False
     agg["eigendaten_ausschluss"] = False
     # The per-dataset breakdown is a fine-grid detail as well.
     agg["eigendaten_details"] = None
@@ -491,6 +493,19 @@ def run_flaechenfinder(
                 .to_numpy()
             )
         hex_proj["gebaeude"] = (coverage / hex_area) >= GEBAEUDE_EXCLUSION_COVERAGE
+        # "Hinterhöfe ausschließen" (checkbox, no weight): hexagons in a courtyard fully
+        # enclosed by buildings are hard-excluded like buildings (see scoring.courtyards).
+        # Cells already flagged as building keep only that reason.
+        if use_case.exclude_courtyards:
+            courtyards = courtyard_polygons(buildings_proj.geometry.to_numpy())
+            yard_share = courtyard_coverage(hex_proj.geometry.to_numpy(), courtyards)
+            hex_proj["hinterhof"] = (
+                courtyard_flags(yard_share, coverage / hex_area) & ~hex_proj["gebaeude"].to_numpy()
+            )
+            print(f"   Hinterhöfe: {len(courtyards)} Höfe, {int(hex_proj['hinterhof'].sum())} Hexagone ausgeschlossen")
+            del courtyards, yard_share
+        else:
+            hex_proj["hinterhof"] = False
         if keep_buildings:
             buildings_for_demand = buildings_proj[["geometry"]].reset_index(drop=True)
             # Train station buildings have no residents: census points must not snap onto
@@ -502,6 +517,7 @@ def run_flaechenfinder(
         del hexes, pairs, buildings_proj
     else:
         hex_proj["gebaeude"] = False
+        hex_proj["hinterhof"] = False
     del buildings
 
     # "Fahrbahnen ausschließen" (checkbox, no weight): the road surfaces pre-buffered
@@ -1245,7 +1261,8 @@ def run_flaechenfinder(
     exclusion = (
         (hex_proj["score_hangneigung"]       == 0) |
         hex_proj["gebaeude"] |
-        hex_proj["fahrbahn"]
+        hex_proj["fahrbahn"] |
+        hex_proj["hinterhof"]
     )
     apply_bebauung_exclusion(hex_proj, exclusion)
 

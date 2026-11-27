@@ -71,6 +71,7 @@ BEGIN
             eignungsklasse,
             gebaeude,
             fahrbahn,
+            hinterhof,
             eigendaten_ausschluss,
             eigendaten_details,
             ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom

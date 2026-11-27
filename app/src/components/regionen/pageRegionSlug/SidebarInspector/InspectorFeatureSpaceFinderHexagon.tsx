@@ -112,6 +112,10 @@ const EXCLUSION_REASONS: { check: (props: Record<string, any>) => boolean; text:
     text: 'Auf dieser Fläche verläuft eine Straße – eine Bebauung ist hier nicht möglich.',
   },
   {
+    check: (props) => !!props.hinterhof,
+    text: 'Diese Fläche liegt in einem von Gebäuden umschlossenen Hinterhof – sie ist öffentlich nicht zugänglich.',
+  },
+  {
     check: (props) => props.score_hangneigung === 0,
     text: 'Diese Fläche ist zu steil (Geländeneigung > 10°) – eine Bebauung ist hier nicht möglich.',
   },

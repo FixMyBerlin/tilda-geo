@@ -24,6 +24,7 @@ const exclusionReasons = (props: CandidateProperties) => {
   const reasons: string[] = []
   if (props.gebaeude) reasons.push('Gebäude')
   if (props.fahrbahn) reasons.push('Straße')
+  if (props.hinterhof) reasons.push('Hinterhof')
   if (props.score_hangneigung === 0) reasons.push('Zu steil')
   // Which dataset excludes it is listed with the Teilscores.
   if (props.eigendaten_ausschluss) reasons.push('Eigene Daten')

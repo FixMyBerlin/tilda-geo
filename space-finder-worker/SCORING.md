@@ -57,6 +57,7 @@ Core code: [`scoring/scorer.py`](scoring/scorer.py)
    - slope too steep (`score_hangneigung == 0`)
    - cycleway farther away than `max_cyclepath_dist_m` (default 50 m)
    - building overlap (`gebaeude`)
+   - courtyard fully enclosed by buildings (`hinterhof`), only with "Hinterhöfe ausschließen" (see `scoring/courtyards.py`)
 6. **Classification** – `eignungsklasse` is binned from `mce_gesamtscore`
    (`_KLASSE_BINS`/`_KLASSE_LABELS`):
 

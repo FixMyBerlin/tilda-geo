@@ -88,6 +88,10 @@ const PARKING_DATA_HINT = 'Keine Parkdaten für dieses Gebiet verfügbar — Fak
 const CARRIAGEWAYS_HELP =
   'Straßenflächen (aus erfasster oder geschätzter Breite) werden ausgeschlossen. Nach der Berechnung eingeblendet: „Fahrbahnen“.'
 
+/** „Hinterhöfe ausschließen“: courtyards fully enclosed by buildings (`scoring/courtyards.py`). */
+const COURTYARDS_HELP =
+  'Höfe, die ringsum von Gebäuden umschlossen sind, werden ausgeschlossen. Offene Höfe (U-Form, Zeilenbau) bleiben. Grundlage sind die Gebäude aus OpenStreetMap.'
+
 /** Tempo 30 rewards hexagons ON the carriageway, which „Fahrbahnen ausschließen“ removes — so the
  * worker ignores the weight then (`tempo30_active` in scorer.py) and the row is greyed out. */
 const TEMPO30_EXCLUDED_HINT =
@@ -678,6 +682,17 @@ const FactorFields = ({
                 ? CARRIAGEWAYS_HELP
                 : `${CARRIAGEWAYS_HELP} In diesem Gebiet gibt es keine Parkdaten: Grundstückszufahrten, Parkplatzgassen und Wege zählen hier nicht mit.`}
             </InfoTooltip>
+          </label>
+          <label className="flex items-center gap-1 text-xs text-gray-600">
+            <input
+              type="checkbox"
+              checked={config.exclude_courtyards ?? false}
+              disabled={readOnly}
+              onChange={(e) => setField('exclude_courtyards', e.target.checked)}
+              className="rounded border-gray-300"
+            />
+            <span>Hinterhöfe ausschließen</span>
+            <InfoTooltip>{COURTYARDS_HELP}</InfoTooltip>
           </label>
         </div>
       </div>

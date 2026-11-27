@@ -45,6 +45,7 @@ async function ensureSpaceFinderSchema() {
       score_bewohnerbedarf    real,
       eignungsklasse          text,
       fahrbahn                boolean NOT NULL DEFAULT false,
+      hinterhof               boolean NOT NULL DEFAULT false,
       eigendaten_ausschluss   boolean NOT NULL DEFAULT false,
       eigendaten_details      text
     );`)
@@ -105,6 +106,11 @@ async function ensureSpaceFinderSchema() {
   // (public._parking_roads, else public.roads); only set when the checkbox was active.
   await geoDataClient.$executeRawUnsafe(
     `ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS fahrbahn boolean NOT NULL DEFAULT false;`,
+  )
+  // "Hinterhöfe ausschließen": hexagon lies in a courtyard fully enclosed by buildings;
+  // only set when the checkbox was active.
+  await geoDataClient.$executeRawUnsafe(
+    `ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS hinterhof boolean NOT NULL DEFAULT false;`,
   )
   // H3 resolution of the row: BASE (13) for high zoom levels, AGG (11) as coarse
   // aggregate below. space_finder_hexagons picks per zoom level.
@@ -223,6 +229,7 @@ async function registerHexagonsFunction() {
           eignungsklasse,
           gebaeude,
           fahrbahn,
+          hinterhof,
           eigendaten_ausschluss,
           eigendaten_details,
           ST_AsMVTGeom(geom, bounds, 4096, 256, true) AS geom

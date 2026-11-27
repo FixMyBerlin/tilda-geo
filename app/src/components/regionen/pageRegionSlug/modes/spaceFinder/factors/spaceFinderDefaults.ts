@@ -34,6 +34,7 @@ export const DEFAULT_FACTOR_TEMPLATE: VariantFactorConfig = {
   cir_source: 'auto' as const,
   max_cyclepath_dist_m: 50,
   exclude_carriageways: false,
+  exclude_courtyards: false,
   intersection_radius_m: 20,
   parken_radius_m: 15,
   tempo30_tolerance_m: 2,

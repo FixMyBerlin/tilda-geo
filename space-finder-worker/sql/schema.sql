@@ -104,6 +104,11 @@ ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS gebaeude boo
 -- fine grid (res 13).
 ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS fahrbahn boolean NOT NULL DEFAULT false;
 
+-- Does the hexagon lie in a courtyard fully enclosed by buildings? Only set when
+-- „Hinterhöfe ausschließen" was active; such cells are hard-excluded
+-- (mce_gesamtscore = 0). Only set on the fine grid (res 13).
+ALTER TABLE space_finder.scenario_hexagons ADD COLUMN IF NOT EXISTS hinterhof boolean NOT NULL DEFAULT false;
+
 -- Does the hexagon lie in the exclusion area of user areas (user upload, dataset with
 -- mode = exclude_inside/exclude_outside)? Only set in that case;
 -- such cells are hard-excluded (mce_gesamtscore = 0). The flag
