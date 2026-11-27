@@ -1,5 +1,5 @@
 describe('condition_syntax', function()
-  local SYNTAX = require('topics.parking.helper.condition_syntax')
+  local SYNTAX = require('topics.helper.condition_syntax')
 
   describe('normalize', function()
     it('rewrites unambiguous mapper mistakes', function()

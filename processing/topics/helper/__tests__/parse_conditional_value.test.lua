@@ -1,5 +1,5 @@
 describe('parse_conditional_value', function()
-  local parse_conditional_value = require('topics.parking.helper.parse_conditional_value')
+  local parse_conditional_value = require('topics.helper.parse_conditional_value')
   local log = require('topics.helper.log')
   it('parses single conditional value and returns list with one entry', function()
     local result = parse_conditional_value('loading_only @ (Mo-Fr 08:00-18:00)')

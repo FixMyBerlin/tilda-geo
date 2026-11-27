@@ -1,5 +1,5 @@
 describe('is_valid_conditional_value', function()
-  local is_valid_conditional_value = require('topics.parking.helper.is_valid_conditional_value')
+  local is_valid_conditional_value = require('topics.helper.is_valid_conditional_value')
 
   it('accepts well-formed conditional values', function()
     assert.is_true(is_valid_conditional_value('loading_only @ (Mo-Fr 08:00-18:00)'))

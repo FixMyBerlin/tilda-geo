@@ -7,10 +7,10 @@
 -- Rule: `condition_category` details only hold data we processed. See `condition_detail_tokens.lua`
 -- (comments, durations, access values) and `condition_syntax.lua` (weekdays, times, vocabulary).
 
-local CONDITION_SYNTAX = require('topics.parking.helper.condition_syntax')
+local CONDITION_SYNTAX = require('topics.helper.condition_syntax')
 local DETAIL_TOKENS = require('topics.parking.helper.condition_detail_tokens')
-local is_valid_conditional_value = require('topics.parking.helper.is_valid_conditional_value')
-local parse_conditional_value = require('topics.parking.helper.parse_conditional_value')
+local is_valid_conditional_value = require('topics.helper.is_valid_conditional_value')
+local parse_conditional_value = require('topics.helper.parse_conditional_value')
 local vehicle_class_list = require('topics.parking.helper.vehicle_classes')
 
 local M = {}

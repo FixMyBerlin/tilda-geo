@@ -4,7 +4,7 @@
 -- We do not validate how the pieces combine. We only check that every atom (split at space, `,`, `;`)
 -- is a form we know: weekday, time range, month, number, operator, or a word from `VOCABULARY`.
 -- Complex but valid conditions pass; broken ones (`12:00.18:00`, `Mo-S`, `07:00-??:??`) have an unknown atom.
--- Unknown atoms are replaced by `other_condition` in `condition_category` and the tag is logged to `parking_errors`.
+-- Parking replaces unknown atoms by `other_condition` in `condition_category` and logs the tag to `parking_errors`.
 
 local M = {}
 
@@ -42,7 +42,7 @@ for _, word in ipairs({
   'motorcar', 'passenger_car', 'disabled', 'car_sharing', 'motorcycle', 'goods', 'hgv', 'bus', 'tourist_bus',
   'coach', 'psv', 'taxi', 'motorhome', 'emergency', 'agricultural', 'forestry', 'military', 'hazmat',
   'trailer', 'caravan', 'bicycle', 'moped', 'mofa', 'motor_vehicle', 'vehicle',
-  -- our own tokens (`condition_detail_tokens.lua`)
+  -- parking tokens (`topics/parking/helper/condition_detail_tokens.lua`)
   'large_events', 'doctors', 'illegible', 'mobile_library', 'other_comment', 'other_condition',
 }) do
   VOCABULARY[word] = true
