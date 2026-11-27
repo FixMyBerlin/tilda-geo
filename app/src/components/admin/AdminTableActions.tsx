@@ -7,11 +7,11 @@ import {
 import type { ReactNode } from 'react'
 import { useState } from 'react'
 import { twJoin, twMerge } from 'tailwind-merge'
-import {
-  type AdminDeleteConfirmProps,
-  AdminDeleteConfirmDialog,
-} from '@/components/admin/AdminDeleteButton'
 import type { AdminLinkTarget } from '@/components/admin/aside/AdminAsideActions'
+import {
+  DeleteConfirmDialog,
+  type DeleteConfirmProps,
+} from '@/components/shared/dialog/DeleteConfirmDialog'
 import { Link } from '@/components/shared/links/Link'
 
 const compactButtonClassName =
@@ -84,13 +84,13 @@ export const AdminTableExternalLink = ({
   )
 }
 
-type AdminTableDeleteButtonProps = AdminDeleteConfirmProps & {
+type AdminTableDeleteButtonProps = DeleteConfirmProps & {
   /** Accessible name + tooltip, e.g. „Region berlin löschen“. */
   label: string
   disabled?: boolean
 }
 
-/** Icon-only row delete; confirms in a danger `ConfirmDialog`. */
+/** Icon-only row delete; confirms in `DeleteConfirmDialog`. */
 export const AdminTableDeleteButton = ({
   label,
   disabled,
@@ -110,7 +110,7 @@ export const AdminTableDeleteButton = ({
         <TrashIcon aria-hidden="true" className="size-4" />
         <span className="sr-only">{label}</span>
       </button>
-      <AdminDeleteConfirmDialog open={open} setOpen={setOpen} {...confirm} />
+      <DeleteConfirmDialog open={open} setOpen={setOpen} {...confirm} />
     </>
   )
 }

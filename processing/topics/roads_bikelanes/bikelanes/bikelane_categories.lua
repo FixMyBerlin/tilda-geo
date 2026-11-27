@@ -1,7 +1,7 @@
 local DESC = require('topics.helper.tilda_description')
 local contains_substring = require('topics.helper.contains_substring')
 local SET = require('topics.helper.sets')
-local category_is_sidepath = require('topics.roads_bikelanes.bikelanes.categories.category_is_sidepath')
+local SIDEPATH = require('topics.roads_bikelanes.bikelanes.categories.category_is_sidepath')
 local create_subcategories_adjoining_or_isolated = require('topics.roads_bikelanes.bikelanes.categories.create_subcategories_adjoining_or_isolated')
 local sanitize_traffic_sign = require('topics.helper.sanitize_traffic_sign')
 local is_bicycle_road = require('topics.roads_bikelanes.helper.is_bicycle_road')
@@ -408,11 +408,18 @@ local cyclewaySeparated = BikelaneCategory.new({
     if is_crossing_pattern(tags) then return false end
 
     -- CASE: Centerline
-    -- traffic_sign=DE:237, 'Radweg', https://wiki.openstreetmap.org/wiki/DE:Tag:traffic%20sign=DE:237
-    -- cycleway=track, https://wiki.openstreetmap.org/wiki/DE:Tag:cycleway=track
-    -- cycleway=opposite_track, https://wiki.openstreetmap.org/wiki/DE:Tag:cycleway=opposite_track
-    if tags.highway == 'cycleway' and (tags.cycleway == 'track' or tags.cycleway == 'opposite_track' or tags.is_sidepath) then
-      return true
+    if tags.highway == 'cycleway' then
+      -- cycleway=track, https://wiki.openstreetmap.org/wiki/DE:Tag:cycleway=track
+      -- cycleway=opposite_track, https://wiki.openstreetmap.org/wiki/DE:Tag:cycleway=opposite_track
+      if tags.cycleway == 'track' or tags.cycleway == 'opposite_track' then return true end
+
+      -- is_sidepath=yes|no: the sub-categories split this into adjoining and isolated.
+      if tags.is_sidepath then return true end
+
+      -- cycleway=sidepath, https://wiki.openstreetmap.org/wiki/Tag:cycleway=sidepath
+      -- Only separately mapped ways: a side object of a road (parent_road) with `cycleway:<side>=sidepath`
+      -- has no known meaning and stays unclear. Tags only, not category_is_sidepath, for the same reason.
+      if not tags.parent_road and SIDEPATH.is_tagged_as_sidepath(tags) then return true end
     end
 
     -- CASE: Unsigned cycleway ('anderer Radweg')
@@ -426,6 +433,7 @@ local cyclewaySeparated = BikelaneCategory.new({
     end
 
     -- CASE: Everything that has a traffic sign DE:237
+    -- 'Radweg', https://wiki.openstreetmap.org/wiki/DE:Tag:traffic%20sign=DE:237
     -- Sometimes users add a `traffic_sign=DE:237` right on the `highway=secondard` but it should be `cycleway:right:traffic_sign`
     -- We only allow the follow highway tags. This will still produce false positives but less so.
     -- And looking at the parent_road and left|right|nil|both tags for this is way to complex.
@@ -684,7 +692,7 @@ local cyclewayOnHighwayProtected = BikelaneCategory.new({
     if is_crossing_pattern(tags) then return false end
 
     -- Only target sidepath like ways
-    if not category_is_sidepath(tags) then return false end
+    if not SIDEPATH.category_is_sidepath(tags) then return false end
     -- PBLs are mapped as `cycleway:<side>=lane|track` (becomes `highway=cycleway`) or as a separate `highway=cycleway`
     -- (or `highway=path` + `bicycle=designated`), never on a sidewalk (`sidewalk:<side>=*` becomes `highway=footway`)
     -- or other highways

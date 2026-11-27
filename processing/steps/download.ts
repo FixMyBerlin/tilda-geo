@@ -4,6 +4,7 @@ import { TZDate } from '@date-fns/tz'
 import { $ } from 'bun'
 import { format, getHours, subDays } from 'date-fns'
 import { OSM_DOWNLOAD_DIR, replicationMarkerPath } from '../constants/directories.const'
+import { applyOsmChanges } from '../utils/applyOsmChanges'
 import { checkSkipDownload } from '../utils/checkSkipDownload'
 import { debugWgetCommand } from '../utils/debugWget'
 import { ensureOAuthReady, fallbackToPublicDownload, getAuthHeaders } from '../utils/oauth'
@@ -16,7 +17,7 @@ import { readHashFromFile, writeHashForFile } from '../utils/persistentData'
  */
 export const originalFilePath = (fileName: string) => join(OSM_DOWNLOAD_DIR, fileName)
 
-/** Consumes the marker of `scripts/updatePbf.ts`, so the file counts as changed exactly once. */
+/** Consumes the marker of `utils/applyOsmChanges.ts`, so the file counts as changed exactly once. */
 async function takeReplicationMarker(fileName: string) {
   const marker = Bun.file(replicationMarkerPath(originalFilePath(fileName)))
   if (!(await marker.exists())) return false
@@ -49,7 +50,7 @@ async function headRequest(headers: Record<string, string>) {
 /**
  * Wait for the given url to have fresh data as last modified.
  * Accepts data from today or data from yesterday if created after 20:00.
- * @returns true if the file has been updated with fresh data, false otherwise
+ * @returns true for fresh data, false if none came (`updateStaleFile` covers that), undefined if waiting is off
  */
 export async function waitForFreshData() {
   if (!params.waitForFreshData) {
@@ -57,9 +58,10 @@ export async function waitForFreshData() {
     return
   }
 
-  // Check every 20 minutes for 2 hours, then continue with the existing file.
-  // The nightly run starts around 23:30 UTC, about when Geofabrik publishes. A file that is not there
-  // after 2 hours did not come that night (production, Aug–Oct 2026), so waiting longer only delays the run.
+  // Check every 20 minutes for 2 hours, then `updateStaleFile` brings the existing file up to date.
+  // The nightly run starts around 23:10 UTC (GitHub starts the 23:00 cron late), when the Geofabrik file is almost always there already.
+  // A file that is not there after 2 hours did not come that night (production, Aug–Nov 2026).
+  // 2 hours of waiting, the update (a few minutes) and the run (up to 3.5 hours) end before 06:00 Berlin time.
   const maxTries = 7
   const timeoutMinutes = 20
 
@@ -89,7 +91,7 @@ export async function waitForFreshData() {
       )
       tries++
       if (tries >= maxTries) {
-        console.log('[ERROR] Download: Server unreachable while waiting for fresh data.')
+        console.log('[WARN] Download: Server unreachable while waiting for fresh data.')
         return false
       }
       await new Promise((resolve) => setTimeout(resolve, timeoutMinutes * 1000 * 60))
@@ -134,8 +136,8 @@ export async function waitForFreshData() {
     // If we exceeded the maximum number of tries, return false
     if (tries >= maxTries) {
       console.log(
-        '[ERROR] Download: Timeout exceeded while waiting for fresh data.',
-        `Now using file from ${lastModifiedDate.toISOString()}`,
+        '[WARN] Download: Timeout exceeded while waiting for fresh data.',
+        `Geofabrik file is from ${lastModifiedDate.toISOString()}`,
       )
       return false
     }
@@ -143,6 +145,24 @@ export async function waitForFreshData() {
     // Wait for the timeout
     await new Promise((resolve) => setTimeout(resolve, timeoutMinutes * 1000 * 60))
   }
+}
+
+/**
+ * Geofabrik has no fresh file: bring the file of `downloadFile` up to date with OSM changes.
+ * Runs after the download, so a Geofabrik file that is not fresh but newer than ours is updated, not replaced.
+ * A failed update is not fatal: the run continues with the file as it is.
+ * @returns true if the file was updated
+ */
+export async function updateStaleFile(fileName: string) {
+  const filePath = originalFilePath(fileName)
+  if (!(await Bun.file(filePath).exists())) return false
+  try {
+    if (await applyOsmChanges(filePath)) return await takeReplicationMarker(fileName)
+  } catch (error) {
+    console.log('[WARN] Download: Updating the file with OSM changes failed:', error)
+  }
+  console.log('Download: Continuing with the file as it is')
+  return false
 }
 
 /**
@@ -158,7 +178,14 @@ export async function downloadFile() {
 
   // Ensure we have OAuth authentication if required and check if file has changed
   const cookieCheck = await ensureOAuthReady()
-  const eTagResponse = await headRequest(getAuthHeaders(cookieCheck?.httpCookie))
+  let eTagResponse: Response
+  try {
+    eTagResponse = await headRequest(getAuthHeaders(cookieCheck?.httpCookie))
+  } catch (error) {
+    if (!fileExists) throw error
+    console.log('[WARN] Download: Server unreachable, continuing with the existing file:', error)
+    return { fileName, fileChanged: await takeReplicationMarker(fileName) }
+  }
   if (!eTagResponse.ok) {
     console.log(
       `Download: ⚠️ Failed to get ETag, HTTP ${eTagResponse.status}: ${eTagResponse.statusText}`,
@@ -215,7 +242,7 @@ export async function downloadFile() {
     throw new Error(`Download: Failed to download ${downloadMethod} file: ${error}`)
   }
 
-  // The fresh download replaces any file `scripts/updatePbf.ts` had updated.
+  // The fresh download replaces any file `utils/applyOsmChanges.ts` had updated.
   await rm(replicationMarkerPath(filePath), { force: true })
 
   // Save etag if available

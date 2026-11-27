@@ -13,13 +13,13 @@ import { useModeDetailSelection } from '@/components/regionen/pageRegionSlug/mod
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
 import { SvgNotesCheckmark } from '@/components/regionen/pageRegionSlug/SidebarInspector/icons/SvgNotesCheckmark'
 import { SvgNotesQuestionmark } from '@/components/regionen/pageRegionSlug/SidebarInspector/icons/SvgNotesQuestionmark'
+import { DeleteConfirmDialog } from '@/components/shared/dialog/DeleteConfirmDialog'
 import { MarkdownEditorField } from '@/components/shared/form/fields/MarkdownEditorField'
 import { TextField } from '@/components/shared/form/fields/TextField'
 import { Form } from '@/components/shared/form/Form'
 import { notesButtonStyle } from '@/components/shared/links/styles'
 import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
 import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
-import { toastError } from '@/components/shared/toast/toastError'
 import { sanitizeHtml } from '@/components/shared/utils/sanitizeHtml'
 import type { DeleteNoteInputType, UpdateNoteInputType } from '@/server/notes/notes.functions'
 import { deleteNoteFn, updateNoteFn } from '@/server/notes/notes.functions'
@@ -41,6 +41,7 @@ export const EditNoteForm = ({ note }: Props) => {
   const queryClient = useQueryClient()
   const queryKeyMap = useInternalNotesQueryKey()
   const [open, setOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const region = useRegion()
   const { clearModeDetail } = useModeDetailSelection()
 
@@ -58,7 +59,7 @@ export const EditNoteForm = ({ note }: Props) => {
       setOpen(false)
     },
   })
-  const { mutate: deleteNoteMutation } = useMutation({
+  const { mutateAsync: deleteNoteMutation } = useMutation({
     mutationFn: (input: DeleteNoteInputType) => deleteNoteFn({ data: input }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: queryKeyMap })
@@ -67,7 +68,6 @@ export const EditNoteForm = ({ note }: Props) => {
       setOpen(false)
       clearModeDetail()
     },
-    onError: (error) => toastError(error, 'Hinweis konnte nicht gelöscht werden'),
   })
 
   const isAuthor = useIsAuthor(note.author?.id ?? '')
@@ -99,14 +99,7 @@ export const EditNoteForm = ({ note }: Props) => {
           <button
             type="button"
             title="Hinweis löschen"
-            onClick={() => {
-              if (window.confirm('Sind Sie sicher, dass Sie diesen Hinweis löschen möchten?')) {
-                deleteNoteMutation({
-                  regionSlug: region.slug,
-                  noteId: note.id,
-                })
-              }
-            }}
+            onClick={() => setDeleteOpen(true)}
             className={twMerge(notesButtonStyle, 'hover:bg-orange-400')}
           >
             <TrashIcon className="size-6" />
@@ -219,6 +212,15 @@ export const EditNoteForm = ({ note }: Props) => {
             </>
           )}
         </Form>
+        <DeleteConfirmDialog
+          open={deleteOpen}
+          setOpen={setDeleteOpen}
+          title={`Hinweis „${note.subject}“ löschen?`}
+          description="Der Hinweis und alle Antworten werden gelöscht. Das lässt sich nicht rückgängig machen."
+          onDelete={async () => {
+            await deleteNoteMutation({ regionSlug: region.slug, noteId: note.id })
+          }}
+        />
       </ModalDialog>
     </>
   )

@@ -5,12 +5,12 @@ import {
   mapControlIconClassName,
   mobileMapIconButtonClassName,
 } from '@/components/regionen/pageRegionSlug/mobile/mobileControlButton.const'
+import { DeleteConfirmDialog } from '@/components/shared/dialog/DeleteConfirmDialog'
 import { MarkdownEditorField } from '@/components/shared/form/fields/MarkdownEditorField'
 import { Form } from '@/components/shared/form/Form'
 import { notesButtonStyle } from '@/components/shared/links/styles'
 import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
 import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
-import { toastError } from '@/components/shared/toast/toastError'
 import { ModeFormSubmit } from './ModeFormSubmit'
 import type { ModeAccentMode } from './modeIdentity'
 import { useIsAuthor } from './notes/detail/utils/useIsAuthor'
@@ -32,7 +32,7 @@ type Props = {
 export const ModeCommentEditButton = ({ authorId, body, mode, onSave, onDelete }: Props) => {
   const formId = useId()
   const [open, setOpen] = useState(false)
-  const [isDeleting, setIsDeleting] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const isAuthor = useIsAuthor(authorId)
   if (!isAuthor) return null
 
@@ -62,20 +62,7 @@ export const ModeCommentEditButton = ({ authorId, body, mode, onSave, onDelete }
             <button
               type="button"
               title="Kommentar löschen"
-              disabled={isDeleting}
-              onClick={async () => {
-                if (!window.confirm('Sind Sie sicher, dass Sie diesen Kommentar löschen möchten?'))
-                  return
-                setIsDeleting(true)
-                try {
-                  await onDelete()
-                  setOpen(false)
-                } catch (error) {
-                  toastError(error, 'Kommentar konnte nicht gelöscht werden')
-                } finally {
-                  setIsDeleting(false)
-                }
-              }}
+              onClick={() => setDeleteOpen(true)}
               className={notesButtonStyle}
             >
               <TrashIcon className="size-6" />
@@ -116,6 +103,18 @@ export const ModeCommentEditButton = ({ authorId, body, mode, onSave, onDelete }
             />
           )}
         </Form>
+        {onDelete ? (
+          <DeleteConfirmDialog
+            open={deleteOpen}
+            setOpen={setDeleteOpen}
+            title="Kommentar löschen?"
+            description="Der Kommentar wird gelöscht. Das lässt sich nicht rückgängig machen."
+            onDelete={async () => {
+              await onDelete()
+              setOpen(false)
+            }}
+          />
+        ) : null}
       </ModalDialog>
     </>
   )

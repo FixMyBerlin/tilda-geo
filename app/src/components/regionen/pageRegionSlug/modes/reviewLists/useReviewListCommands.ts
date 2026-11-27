@@ -27,6 +27,8 @@ type ReviewListCommandsInput = {
   lists: ReviewListForRegion[]
   selectedListId: number | undefined
   onSelect: (listId: number) => void
+  /** Runs after the selected list was deleted, e.g. to drop its id from the URL. */
+  onDeleted: () => void
 }
 
 export const useReviewListCommands = ({
@@ -34,6 +36,7 @@ export const useReviewListCommands = ({
   lists,
   selectedListId,
   onSelect,
+  onDeleted,
 }: ReviewListCommandsInput) => {
   const [uploadError, setUploadError] = useState<string | null>(null)
   const [uploadModalOpen, setUploadModalOpen] = useState(false)
@@ -69,6 +72,7 @@ export const useReviewListCommands = ({
       ['review-lists', 'getReviewEntriesForList'],
     ],
     onAfterCreate: (list) => onSelect(list.id),
+    onAfterDelete: onDeleted,
   })
 
   const importFromS3 = useMutation({

@@ -57,6 +57,13 @@ export const ConfirmDialog = ({
     }
   }
 
+  // A closed dialog forgets its last error, so reopening starts clean.
+  const close = () => {
+    if (pending) return
+    setError(null)
+    setOpen(false)
+  }
+
   return (
     <ModalDialog
       title={title}
@@ -66,10 +73,7 @@ export const ConfirmDialog = ({
         iconClass: tone === 'danger' ? 'text-red-600' : 'text-gray-600',
       }}
       open={open}
-      setOpen={(value) => {
-        if (pending) return
-        setOpen(value)
-      }}
+      setOpen={(value) => (value ? setOpen(true) : close())}
       primaryAction={
         <>
           <button
@@ -85,7 +89,7 @@ export const ConfirmDialog = ({
           </button>
           <button
             type="button"
-            onClick={() => setOpen(false)}
+            onClick={close}
             disabled={pending}
             className={twJoin(
               buttonStylesSecondary,

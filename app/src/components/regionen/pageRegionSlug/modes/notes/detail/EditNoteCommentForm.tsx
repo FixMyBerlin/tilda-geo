@@ -9,12 +9,12 @@ import {
 } from '@/components/regionen/pageRegionSlug/mobile/mobileControlButton.const'
 import { useInternalNotesQueryKey } from '@/components/regionen/pageRegionSlug/modes/notes/useInternalNotesQueryKey'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
+import { DeleteConfirmDialog } from '@/components/shared/dialog/DeleteConfirmDialog'
 import { MarkdownEditorField } from '@/components/shared/form/fields/MarkdownEditorField'
 import { Form } from '@/components/shared/form/Form'
 import { notesButtonStyle } from '@/components/shared/links/styles'
 import { ModalDialog } from '@/components/shared/Modal/ModalDialog'
 import { captureModalOpenOrigin } from '@/components/shared/motion/modalOpenOrigin'
-import { toastError } from '@/components/shared/toast/toastError'
 import { sanitizeHtml } from '@/components/shared/utils/sanitizeHtml'
 import type {
   DeleteNoteCommentInputType,
@@ -36,6 +36,7 @@ export const EditNoteCommentForm = ({ comment }: Props) => {
   const queryClient = useQueryClient()
   const queryKeyMap = useInternalNotesQueryKey()
   const [open, setOpen] = useState(false)
+  const [deleteOpen, setDeleteOpen] = useState(false)
   const region = useRegion()
 
   const {
@@ -52,7 +53,7 @@ export const EditNoteCommentForm = ({ comment }: Props) => {
       setOpen(false)
     },
   })
-  const { mutate: deleteNoteCommentMutation } = useMutation({
+  const { mutateAsync: deleteNoteCommentMutation } = useMutation({
     mutationFn: (input: DeleteNoteCommentInputType) => deleteNoteCommentFn({ data: input }),
     onSuccess: () => {
       queryClient.invalidateQueries({
@@ -61,7 +62,6 @@ export const EditNoteCommentForm = ({ comment }: Props) => {
       queryClient.invalidateQueries({ queryKey: queryKeyMap })
       setOpen(false)
     },
-    onError: (error) => toastError(error, 'Kommentar konnte nicht gelöscht werden'),
   })
 
   const isAuthor = useIsAuthor(comment.author.id)
@@ -93,15 +93,8 @@ export const EditNoteCommentForm = ({ comment }: Props) => {
         footerStart={
           <button
             type="button"
-            title="Kommentar löschen"
-            onClick={() => {
-              if (window.confirm('Sind Sie sicher, dass Sie diesen Kommentar löschen möchten?')) {
-                deleteNoteCommentMutation({
-                  regionSlug: region.slug,
-                  commentId: comment.id,
-                })
-              }
-            }}
+            title="Antwort löschen"
+            onClick={() => setDeleteOpen(true)}
             className={twMerge(notesButtonStyle, 'hover:bg-orange-400')}
           >
             <TrashIcon className="size-6" />
@@ -149,6 +142,15 @@ export const EditNoteCommentForm = ({ comment }: Props) => {
             </>
           )}
         </Form>
+        <DeleteConfirmDialog
+          open={deleteOpen}
+          setOpen={setDeleteOpen}
+          title="Antwort löschen?"
+          description="Die Antwort wird gelöscht. Das lässt sich nicht rückgängig machen."
+          onDelete={async () => {
+            await deleteNoteCommentMutation({ regionSlug: region.slug, commentId: comment.id })
+          }}
+        />
       </ModalDialog>
     </>
   )

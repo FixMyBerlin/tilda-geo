@@ -4,7 +4,7 @@
 export const OSM_DOWNLOAD_DIR = '/data/downloads'
 
 /**
- * Marker next to a downloaded PBF: `scripts/updatePbf.ts` applied OSM changes that no processing run used yet.
+ * Marker next to a downloaded PBF: `utils/applyOsmChanges.ts` applied OSM changes that no processing run used yet.
  */
 export const replicationMarkerPath = (pbfPath: string) => `${pbfPath}.replication`
 

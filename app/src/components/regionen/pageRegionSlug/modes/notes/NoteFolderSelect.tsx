@@ -1,7 +1,9 @@
 import { Menu, MenuButton, MenuHeading, MenuItem, MenuItems, MenuSection } from '@headlessui/react'
 import { EllipsisHorizontalIcon, PlusIcon } from '@heroicons/react/24/outline'
+import { useState } from 'react'
 import { twJoin } from 'tailwind-merge'
 import { useRegion } from '@/components/regionen/pageRegionSlug/regionUtils/useRegion'
+import { DeleteConfirmDialog } from '@/components/shared/dialog/DeleteConfirmDialog'
 import { formatNumber } from '@/components/shared/utils/formatNumber'
 import type { NoteFolderForRegion } from '@/server/notes/queries/getNoteFoldersForRegion.server'
 import { mapOverlayMenuClassName } from '../../mapOverlayChrome.const'
@@ -108,90 +110,109 @@ export const NoteFolderManageMenu = ({
 }) => {
   const region = useRegion()
   const downloadBase = `/api/notes/${region.slug}/download`
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  // Kept from the click, so the dialog keeps naming and deleting this item while the list refetches.
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null)
 
   return (
-    <Menu as="div">
-      <MenuButton aria-label="Ordner verwalten" className={modePanelHeaderIconButtonClassName}>
-        <EllipsisHorizontalIcon className="size-5" aria-hidden="true" />
-      </MenuButton>
-      <MenuItems
-        anchor="bottom end"
-        modal={false}
-        className={twJoin('z-40 min-w-48 py-1 [--anchor-gap:8px]', mapOverlayMenuClassName)}
-      >
-        {selectedFolder ? (
+    <>
+      <Menu as="div">
+        <MenuButton aria-label="Ordner verwalten" className={modePanelHeaderIconButtonClassName}>
+          <EllipsisHorizontalIcon className="size-5" aria-hidden="true" />
+        </MenuButton>
+        <MenuItems
+          anchor="bottom end"
+          modal={false}
+          className={twJoin('z-40 min-w-48 py-1 [--anchor-gap:8px]', mapOverlayMenuClassName)}
+        >
+          {selectedFolder ? (
+            <MenuSection>
+              <MenuHeading className={menuHeadingClassName}>Hinweise des Ordners</MenuHeading>
+              <MenuItem>
+                <a
+                  href={`${downloadBase}?format=csv&folderId=${selectedFolder.id}`}
+                  download
+                  className={menuItemClassName}
+                >
+                  Herunterladen (CSV)
+                </a>
+              </MenuItem>
+              <MenuItem>
+                <a
+                  href={`${downloadBase}?format=geojson&folderId=${selectedFolder.id}`}
+                  download
+                  className={menuItemClassName}
+                >
+                  Herunterladen (GeoJSON)
+                </a>
+              </MenuItem>
+            </MenuSection>
+          ) : null}
           <MenuSection>
-            <MenuHeading className={menuHeadingClassName}>Hinweise des Ordners</MenuHeading>
+            <MenuHeading className={menuHeadingClassName}>Alle Hinweise der Region</MenuHeading>
             <MenuItem>
-              <a
-                href={`${downloadBase}?format=csv&folderId=${selectedFolder.id}`}
-                download
-                className={menuItemClassName}
-              >
+              <a href={`${downloadBase}?format=csv`} download className={menuItemClassName}>
                 Herunterladen (CSV)
               </a>
             </MenuItem>
             <MenuItem>
-              <a
-                href={`${downloadBase}?format=geojson&folderId=${selectedFolder.id}`}
-                download
-                className={menuItemClassName}
-              >
+              <a href={`${downloadBase}?format=geojson`} download className={menuItemClassName}>
                 Herunterladen (GeoJSON)
               </a>
             </MenuItem>
           </MenuSection>
-        ) : null}
-        <MenuSection>
-          <MenuHeading className={menuHeadingClassName}>Alle Hinweise der Region</MenuHeading>
-          <MenuItem>
-            <a href={`${downloadBase}?format=csv`} download className={menuItemClassName}>
-              Herunterladen (CSV)
-            </a>
-          </MenuItem>
-          <MenuItem>
-            <a href={`${downloadBase}?format=geojson`} download className={menuItemClassName}>
-              Herunterladen (GeoJSON)
-            </a>
-          </MenuItem>
-        </MenuSection>
-        <MenuSection>
-          <MenuHeading className={menuHeadingClassName}>Ordner</MenuHeading>
-          <MenuItem>
-            <button
-              type="button"
-              onClick={(event) => openNameModal('rename', event.currentTarget)}
-              className={menuItemClassName}
-            >
-              Umbenennen
-            </button>
-          </MenuItem>
-          <MenuItem
-            disabled={
-              remove.isPending ||
-              (selectedFolder?.noteCount ?? 0) > 0 ||
-              (selectedFolder?.regions.length ?? 0) > 1
-            }
-          >
-            <button
-              type="button"
-              title={
-                selectedFolder && selectedFolder.noteCount > 0
-                  ? 'Nur leere Ordner können gelöscht werden'
-                  : selectedFolder && selectedFolder.regions.length > 1
-                    ? 'Ordner mit mehreren Regionen können nur im Admin-Bereich gelöscht werden'
-                    : undefined
+          <MenuSection>
+            <MenuHeading className={menuHeadingClassName}>Ordner</MenuHeading>
+            <MenuItem>
+              <button
+                type="button"
+                onClick={(event) => openNameModal('rename', event.currentTarget)}
+                className={menuItemClassName}
+              >
+                Umbenennen
+              </button>
+            </MenuItem>
+            <MenuItem
+              disabled={
+                remove.isPending ||
+                !selectedFolder ||
+                (selectedFolder?.noteCount ?? 0) > 0 ||
+                (selectedFolder?.regions.length ?? 0) > 1
               }
-              onClick={() => {
-                if (selectedFolder) remove.mutate(selectedFolder.id)
-              }}
-              className={menuItemClassName}
             >
-              Löschen
-            </button>
-          </MenuItem>
-        </MenuSection>
-      </MenuItems>
-    </Menu>
+              <button
+                type="button"
+                title={
+                  selectedFolder && selectedFolder.noteCount > 0
+                    ? 'Nur leere Ordner können gelöscht werden'
+                    : selectedFolder && selectedFolder.regions.length > 1
+                      ? 'Ordner mit mehreren Regionen können nur im Admin-Bereich gelöscht werden'
+                      : undefined
+                }
+                onClick={() => {
+                  if (!selectedFolder) return
+                  setDeleteTarget({ id: selectedFolder.id, name: selectedFolder.name })
+                  setDeleteOpen(true)
+                }}
+                className={menuItemClassName}
+              >
+                Löschen
+              </button>
+            </MenuItem>
+          </MenuSection>
+        </MenuItems>
+      </Menu>
+      {deleteTarget ? (
+        <DeleteConfirmDialog
+          open={deleteOpen}
+          setOpen={setDeleteOpen}
+          title={`Ordner „${deleteTarget.name}“ löschen?`}
+          description="Der leere Ordner wird gelöscht. Das lässt sich nicht rückgängig machen."
+          onDelete={async () => {
+            await remove.mutateAsync(deleteTarget.id)
+          }}
+        />
+      ) : null}
+    </>
   )
 }

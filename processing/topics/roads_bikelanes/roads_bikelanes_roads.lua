@@ -12,7 +12,7 @@ local to_todo_tags = require('topics.helper.to_todo_tags')
 local categorize_bike_suitability = require('topics.roads_bikelanes.roads.bike_suitability')
 local road_classification_road_value = require('topics.roads_bikelanes.roads.road_classification_road_value')
 local transform_highway_path_with_foot_or_bicycle_no = require('topics.roads_bikelanes.helper.transform_tags.transform_highway_path_with_foot_or_bicycle_no')
-local category_is_sidepath = require('topics.roads_bikelanes.bikelanes.categories.category_is_sidepath')
+local SIDEPATH = require('topics.roads_bikelanes.bikelanes.categories.category_is_sidepath')
 local self_bikelane_has_todo = require('topics.roads_bikelanes.helper.self_bikelane_has_todo')
 local SANITIZE_ROAD_TAGS = require('topics.roads_bikelanes.helper.sanitize_road_tags')
 local CLEANER = require('topics.helper.sanitize_cleaner')
@@ -42,7 +42,7 @@ local function roads_bikelanes_roads(context)
   -- `build_segments.lua` and `routing_infra/README.md` § Join symmetry): ways that are not in
   -- `roads` (`context.access.in_roads`), OSM sidewalks and derived sidepaths.
   if not context.access.in_roads then return end
-  if category_is_sidepath(object_tags) then return end
+  if SIDEPATH.category_is_sidepath(object_tags) then return end
 
   local result_tags = merge_table({}, context.shared_result_tags)
   merge_table(result_tags, context.cycleway_presence)

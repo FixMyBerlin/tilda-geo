@@ -13,7 +13,7 @@
 -- The CSV `adjoining_maxspeed` belongs to the CSV class. Keep it only when that class is
 -- the one we publish.
 
-local category_is_sidepath = require('topics.roads_bikelanes.bikelanes.categories.category_is_sidepath')
+local SIDEPATH = require('topics.roads_bikelanes.bikelanes.categories.category_is_sidepath')
 local bikelane_categories = require('topics.roads_bikelanes.bikelanes.bikelane_categories')
 local adjoining_sources = require('topics.roads_bikelanes.pseudo_tags_sidepath.adjoining_sources')
 
@@ -24,7 +24,7 @@ local adjoining_sources = require('topics.roads_bikelanes.pseudo_tags_sidepath.a
 ---@param tags OsmTags
 ---@return boolean
 local function has_sidepath_context(object_tags, tags)
-  return object_tags._is_sidepath == 'assumed_yes' or not not category_is_sidepath(tags)
+  return object_tags._is_sidepath == 'assumed_yes' or SIDEPATH.category_is_sidepath(tags)
 end
 
 ---@class AdjoiningContext

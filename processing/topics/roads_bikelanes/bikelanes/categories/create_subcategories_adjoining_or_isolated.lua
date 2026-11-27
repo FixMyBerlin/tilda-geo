@@ -1,4 +1,4 @@
-local category_is_sidepath = require('topics.roads_bikelanes.bikelanes.categories.category_is_sidepath')
+local SIDEPATH = require('topics.roads_bikelanes.bikelanes.categories.category_is_sidepath')
 
 ---@param category table BikelaneCategory instance
 ---@return table, table, table
@@ -21,7 +21,7 @@ local function create_subcategories_adjoining_or_isolated(category)
     copySurfaceSmoothnessFromParent = category.copySurfaceSmoothnessFromParent,
     bicycleSurface = category.bicycleSurface,
     condition = function(tags)
-      return category:is_active(tags) and category_is_sidepath(tags) and tags.is_sidepath ~= 'no'
+      return category:is_active(tags) and SIDEPATH.category_is_sidepath(tags) and tags.is_sidepath ~= 'no'
     end,
     process = category.process,
   })
@@ -51,7 +51,7 @@ local function create_subcategories_adjoining_or_isolated(category)
     copySurfaceSmoothnessFromParent = category.copySurfaceSmoothnessFromParent,
     bicycleSurface = category.bicycleSurface,
     condition = function(tags)
-      return category:is_active(tags) and not category_is_sidepath(tags) and tags.is_sidepath ~= 'no' and tags.highway ~= 'service' and tags.highway ~= 'track'
+      return category:is_active(tags) and not SIDEPATH.category_is_sidepath(tags) and tags.is_sidepath ~= 'no' and tags.highway ~= 'service' and tags.highway ~= 'track'
     end,
     process = category.process,
   })

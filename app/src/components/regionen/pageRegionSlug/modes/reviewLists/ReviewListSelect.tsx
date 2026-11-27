@@ -1,6 +1,8 @@
 import { Menu, MenuButton, MenuHeading, MenuItem, MenuItems, MenuSection } from '@headlessui/react'
 import { EllipsisHorizontalIcon, PlusIcon } from '@heroicons/react/24/outline'
+import { useState } from 'react'
 import { twJoin } from 'tailwind-merge'
+import { DeleteConfirmDialog } from '@/components/shared/dialog/DeleteConfirmDialog'
 import { formatNumber } from '@/components/shared/utils/formatNumber'
 import type { ReviewListForRegion } from '@/server/review-lists/queries/getReviewListsForRegion.server'
 import { mapOverlayMenuClassName } from '../../mapOverlayChrome.const'
@@ -107,6 +109,10 @@ export const ReviewListManageMenu = ({
   regionSlug: string
   commands: ReviewListCommands
 }) => {
+  const [deleteOpen, setDeleteOpen] = useState(false)
+  // Kept from the click, so the dialog keeps naming and deleting this item while the list refetches.
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; name: string } | null>(null)
+
   return (
     <>
       <Menu as="div">
@@ -149,6 +155,7 @@ export const ReviewListManageMenu = ({
             <MenuItem
               disabled={
                 remove.isPending ||
+                !selectedList ||
                 (selectedList?.entryCount ?? 0) > 0 ||
                 (selectedList?.regions.length ?? 0) > 1
               }
@@ -163,7 +170,9 @@ export const ReviewListManageMenu = ({
                       : undefined
                 }
                 onClick={() => {
-                  if (selectedList) remove.mutate(selectedList.id)
+                  if (!selectedList) return
+                  setDeleteTarget({ id: selectedList.id, name: selectedList.name })
+                  setDeleteOpen(true)
                 }}
                 className={menuItemClassName}
               >
@@ -173,6 +182,17 @@ export const ReviewListManageMenu = ({
           </MenuSection>
         </MenuItems>
       </Menu>
+      {deleteTarget ? (
+        <DeleteConfirmDialog
+          open={deleteOpen}
+          setOpen={setDeleteOpen}
+          title={`Prüfliste „${deleteTarget.name}“ löschen?`}
+          description="Die leere Prüfliste wird gelöscht. Das lässt sich nicht rückgängig machen."
+          onDelete={async () => {
+            await remove.mutateAsync(deleteTarget.id)
+          }}
+        />
+      ) : null}
       <ReviewListGeojsonUploadModal
         open={uploadModalOpen}
         isPending={uploadPending}
