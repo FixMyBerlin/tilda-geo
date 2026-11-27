@@ -19,6 +19,7 @@ import {
 } from '@/lib/spaceFinderUserGeojson'
 import { factorFingerprint, factorsDiffer } from '@/server/space-finder/factorFingerprint'
 import {
+  DEFAULT_EIGENDATEN_WEIGHT,
   syncEigendatenWeights,
   type VariantFactorConfig,
 } from '@/server/space-finder/mergeFactorConfig'
@@ -121,9 +122,16 @@ const eigendatenChipValue = (config: FactorConfig) => {
   }
   const points = weightToPoints(config.eigendaten_weights?.[dataset.id])
   return `${mode === 'penalty' ? '−' : '+'}${points}`
+    if (!isExclusionOn(config.eigendaten_weights?.[dataset.id])) return 'aus'
 }
 
-/** What an exclusion mode does — it has no strength, so this replaces the slider. */
+/**
+ * An exclusion has no strength: its `eigendaten_weights` value only switches it on (> 0) or off
+ * (0) in this variant. Same rule as `combine_eigendaten` in the worker.
+ */
+const isExclusionOn = (weight: number | undefined) => (weight ?? DEFAULT_EIGENDATEN_WEIGHT) > 0
+
+/** What an exclusion mode does — shown next to its on/off switch instead of a slider. */
 const EIGENDATEN_EXCLUDE_TEXT: Partial<Record<UserDataset['mode'], string>> = {
   exclude_inside: 'Flächen innerhalb dieses Datensatzes werden ausgeschlossen.',
   exclude_outside: 'Nur Flächen innerhalb dieses Datensatzes bleiben zulässig.',
@@ -131,8 +139,8 @@ const EIGENDATEN_EXCLUDE_TEXT: Partial<Record<UserDataset['mode'], string>> = {
 
 /**
  * One "Eigene Daten" dataset in the factors block: name, mode (display only — it belongs to the
- * Planungsgebiet and is set there), strength for bonus/penalty (belongs to the variant) and the
- * note when features lie outside the Planungsgebiet.
+ * Planungsgebiet and is set there), strength for bonus/penalty or on/off for the exclusions (both
+ * belong to the variant) and the note when features lie outside the Planungsgebiet.
  */
 const EigendatenDatasetBlock = ({
   dataset,
@@ -172,8 +180,22 @@ const EigendatenDatasetBlock = ({
         </span>
       </div>
       {coverageMessage && <UserDatasetCoverageHint message={coverageMessage} />}
-      {!isSoft && EIGENDATEN_EXCLUDE_TEXT[dataset.mode] && (
-        <p className="text-xs text-gray-500">{EIGENDATEN_EXCLUDE_TEXT[dataset.mode]}</p>
+      {!isSoft && (
+        <label className="flex items-start gap-1.5 text-xs text-gray-600">
+          <input
+            type="checkbox"
+            checked={isExclusionOn(weight)}
+            disabled={readOnly}
+            onChange={(e) => setWeight(e.target.checked ? DEFAULT_EIGENDATEN_WEIGHT : 0)}
+            className="mt-0.5 rounded border-gray-300"
+          />
+          <span>
+            In dieser Variante anwenden
+            {EIGENDATEN_EXCLUDE_TEXT[dataset.mode] && (
+              <span className="block text-gray-500">{EIGENDATEN_EXCLUDE_TEXT[dataset.mode]}</span>
+            )}
+          </span>
+        </label>
       )}
       {isSoft && (
         <ModifierSlider

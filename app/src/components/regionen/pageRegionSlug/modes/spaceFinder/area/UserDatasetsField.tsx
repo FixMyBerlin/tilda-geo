@@ -175,9 +175,10 @@ export const UserDatasetsField = ({
         </ul>
       )}
 
-      {datasets.some((dataset) => dataset.mode === 'bonus' || dataset.mode === 'penalty') && (
+      {datasets.length > 0 && (
         <p className="text-xs text-gray-500">
-          Die Stärke von Bonus und Abzug stellt jede Variante bei den Faktoren ein.
+          Die Stärke von Bonus und Abzug und ob ein Ausschluss wirkt, stellt jede Variante bei den
+          Faktoren ein.
         </p>
       )}
 

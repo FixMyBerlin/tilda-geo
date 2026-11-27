@@ -73,6 +73,18 @@ class TestCombineEigendaten(unittest.TestCase):
         self.assertEqual(list(score), [20.0, 20.0, 0.0, 0.0])
         self.assertEqual(list(delta), [20.0, 20.0, 0.0, 0.0])
 
+    def test_exclusion_switched_off_by_zero_weight(self):
+        datasets = [
+            {"id": "a", "mode": "exclude_inside"},
+            {"id": "b", "mode": "exclude_outside"},
+        ]
+        distances = {"a": dist(0, 20, 20, 20), "b": dist(30, 0, 0, 30)}
+        _, _, exclude, details = combine_eigendaten(
+            datasets, distances, {"a": 0, "b": 0.1}, INDEX
+        )
+        self.assertEqual(list(exclude), [True, False, False, True])  # only b
+        self.assertEqual(json.loads(details.iloc[0]), [{"id": "b", "x": 1}])
+
     def test_dataset_without_features_is_skipped(self):
         score, _, exclude, _ = combine_eigendaten(
             [{"id": "leer", "mode": "exclude_outside"}], {}, {}, INDEX

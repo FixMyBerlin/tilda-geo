@@ -274,6 +274,7 @@ USER_DATASET_MODES = ("bonus", "penalty", "exclude_inside", "exclude_outside")
 
 
 # ── Defaults / validation ─────────────────────────────────────────────────────
+# For the exclusions, eigendaten_weights[id] = 0 switches them off in that variant.
 
 # Two kinds of weights (see scorer.py):
 #   Criteria (w_cyclepath/w_slope/w_transit) enter the weighted average of the

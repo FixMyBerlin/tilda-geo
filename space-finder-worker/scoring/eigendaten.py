@@ -7,6 +7,8 @@ geometry (NaN = no dataset / no objects). The dataset's mode determines the effe
   exclude_inside    → hexagon inside → mce = 0
   exclude_outside   → hexagon outside → mce = 0 (mask for allowed zones)
 
+For the exclusion modes the weight is only a per-variant switch: 0 = off, > 0 or missing = on.
+
 Multiple datasets add up their bonuses/penalties and combine their exclusions with OR.
 Kept separate from the scorer as a pure function without geodata dependencies so it can be
 tested on its own.
@@ -49,6 +51,8 @@ def combine_eigendaten(
             continue
         inside = dist.notna() & (dist <= 0)
 
+        if mode in ("exclude_inside", "exclude_outside") and (weights.get(ds_id, 1) or 0) <= 0:
+            continue  # exclusion switched off in this variant
         if mode == "exclude_inside":
             hit = inside
         elif mode == "exclude_outside":

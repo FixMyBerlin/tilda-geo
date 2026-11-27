@@ -4,8 +4,9 @@ import type { Prisma } from '@/prisma/generated/client'
 /** Variant assumptions without geometry (stored on SpaceFinderVariant.factorConfig). */
 export type VariantFactorConfig = {
   name?: string
-  /** Strength (0–1) per "Eigene Daten" dataset, key = `UserDataset.id`. Only applies to the
-   * bonus/penalty modes; name, mode and geometry belong to the Planungsgebiet. */
+  /** Strength (0–1) per "Eigene Daten" dataset, key = `UserDataset.id`. For bonus/penalty it is
+   * the strength; for the exclusion modes it only switches the exclusion on (> 0) or off (0) in
+   * this variant. Name, mode and geometry belong to the Planungsgebiet. */
   eigendaten_weights?: Record<string, number>
   h3_resolution?: number
   dem_source?: 'srtm' | 'dgm1' | 'mapterhorn'
