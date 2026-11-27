@@ -122,11 +122,11 @@ const eigendatenChipValue = (config: FactorConfig) => {
   if (datasets.length !== 1 || !dataset) return `${datasets.length} Datensätze`
   const mode = dataset.mode
   if (mode === 'exclude_inside' || mode === 'exclude_outside') {
+    if (!isExclusionOn(config.eigendaten_weights?.[dataset.id])) return 'aus'
     return USER_DATASET_MODE_OPTIONS.find(([value]) => value === mode)?.[1] ?? mode
   }
   const points = weightToPoints(config.eigendaten_weights?.[dataset.id])
   return `${mode === 'penalty' ? '−' : '+'}${points}`
-    if (!isExclusionOn(config.eigendaten_weights?.[dataset.id])) return 'aus'
 }
 
 /**
