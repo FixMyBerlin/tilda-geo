@@ -50,6 +50,8 @@ export const PageModeReviewLists = () => {
     lists,
     selectedListId,
     onSelect: onSelectList,
+    onDeleted: () =>
+      setReviewListsModeParam({ ...reviewListsMode, key: undefined, move: undefined }),
   })
 
   const isComposing = reviewListsMode.new === true

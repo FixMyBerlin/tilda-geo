@@ -14,6 +14,8 @@ type NoteFolderCommandsInput = {
   folders: NoteFolderForRegion[]
   selectedFolderId: number | undefined
   onSelect: (folderId: number) => void
+  /** Runs after the selected folder was deleted, e.g. to drop its id from the URL. */
+  onDeleted: () => void
 }
 
 export const useNoteFolderCommands = ({
@@ -21,6 +23,7 @@ export const useNoteFolderCommands = ({
   folders,
   selectedFolderId,
   onSelect,
+  onDeleted,
 }: NoteFolderCommandsInput) => {
   const [nameModal, setNameModal] = useState<'create' | 'rename' | null>(null)
 
@@ -37,6 +40,7 @@ export const useNoteFolderCommands = ({
     deleteFn: (id) => deleteNoteFolderFn({ data: { regionSlug, folderId: id } }),
     invalidateKeys: [noteFoldersQueryOptions(regionSlug).queryKey, internalNotesQueryKey],
     onAfterCreate: (folder) => onSelect(folder.id),
+    onAfterDelete: onDeleted,
   })
 
   return {

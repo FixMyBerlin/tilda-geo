@@ -106,6 +106,7 @@ export const PageModeNotes = () => {
     folders,
     selectedFolderId,
     onSelect: onSelectFolder,
+    onDeleted: () => setNotesModeParam({ ...notesMode, key: undefined }),
   })
 
   const selectedNoteId = selected ? Number(selected.id) : undefined
