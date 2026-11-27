@@ -17,6 +17,13 @@ describe('sanitize_condition_tags', function()
     assert.are.same({ ['restriction:conditional'] = value }, result.dropped_tags)
   end)
 
+  it('reads `@` without spaces and reports it (rewritten)', function()
+    local result = SANITIZE.sanitize({ ['maxstay:conditional'] = '2h@(Mo-Sa 08:00-20:00)' })
+    assert.is_nil(result.invalid)
+    assert.are.same(result.rewritten_tags, { ['maxstay:conditional'] = '2h@(Mo-Sa 08:00-20:00)' })
+    assert.is_nil(result.dropped_tags)
+  end)
+
   it('rewrites clear mistakes in conditions (rewritten)', function()
     local result = SANITIZE.sanitize({ ['restriction:conditional'] = 'no_stopping @ (Mo-FR 7:00-9:00); loading_only @ (weightrating>7.5)' })
     assert.are.equal('no_stopping @ (Mo-Fr 07:00-09:00); loading_only @ (maxweightrating > 7.5)', result.tags['restriction:conditional'])

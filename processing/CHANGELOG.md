@@ -4,6 +4,11 @@ Manual and incomplete list of changes to processing output. Attribute documentat
 
 ## 2026-11
 
+### `parkings`, `parkings_separate`, `off_street_parking_*`: `condition_category` of conditional values without spaces around `@`
+
+- `*:conditional` values written without spaces around `@` (`maxstay:conditional=3 hours@(07:00-22:00)`, `fee:conditional=yes@Mo-Sa 09:00-19:00`) or with a non-breaking space next to `@` get the same `condition_category` as the spaced spelling; before `invalid`. In `parking_errors` they move from `SANITIZED_VALUE` to `REWRITTEN_VALUE`, so mappers still see the spelling to fix.
+- Germany (OSM data of 2026-10-27): 255 parking sides or areas move from `invalid` to a real category; categories that were readable before do not change. Berlin has 11 such parking objects, Lörrach none.
+
 ### `bikelanes`: `category` of `highway=cycleway` tagged as sidepath
 
 - `highway=cycleway` with `cycleway=sidepath` is `cycleway_adjoining` (with `is_sidepath=no`: `cycleway_isolated`), like `is_sidepath=yes`; before `needsClarification`. The other sidepath tags count too, so the mistagging `highway=cycleway` + `footway=sidewalk` (5 ways in Berlin) is `cycleway_adjoining` now.

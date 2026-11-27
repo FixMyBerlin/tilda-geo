@@ -1,4 +1,5 @@
 -- Strict syntax check for OSM conditional values: `value @ (condition); value @ condition; ...`
+-- Spaces around `@` are optional (`30@(22:00-06:00)`).
 -- We reject what we can not interpret reliably instead of passing broken fragments through to `condition_category`.
 -- Invalid examples from OSM:
 --   'no_stopping @ (Mo-Sa 07:00-19:00; PH off)...)' — stray closing bracket
@@ -42,9 +43,9 @@ end
 ---@param part string
 ---@return boolean
 local function is_valid_part(part)
-  local value, condition = part:match('^(.-)%s+@%s+%((.*)%)$')
+  local value, condition = part:match('^(.-)%s*@%s*%((.*)%)$')
   if not value then
-    value, condition = part:match('^(.-)%s+@%s+(.+)$')
+    value, condition = part:match('^(.-)%s*@%s*(.+)$')
   end
   if not value or not condition then return false end
 
@@ -58,9 +59,10 @@ end
 ---@param value string|nil
 ---@return boolean
 local function is_valid_conditional_value(value)
-  if not value or type(value) ~= 'string' or trim(value) == '' then
-    return false
-  end
+  if not value or type(value) ~= 'string' then return false end
+  -- Non-breaking spaces count as spaces, like in `parse_conditional_value`.
+  value = value:gsub('\194\160', ' '):gsub('\226\128\175', ' ')
+  if trim(value) == '' then return false end
 
   local parts = split_parts(value)
   if not parts then return false end

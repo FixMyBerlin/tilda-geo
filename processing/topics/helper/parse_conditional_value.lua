@@ -1,5 +1,6 @@
 -- Parse OSM conditional tag values in format: value1 @ (condition1); value2 @ (condition2); ...
 -- Examples: 'no_stopping @ (Mo-Fr 06:00-09:00)', 'loading_only @ (08:00-18:00)'
+-- Spaces around `@` are optional (`30@(22:00-06:00)`); non-breaking spaces count as spaces.
 
 local function trim(str)
   return str:match('^%s*(.-)%s*$')
@@ -15,6 +16,7 @@ local function parse_conditional_value(value)
   if not value or type(value) ~= 'string' then
     return nil
   end
+  value = value:gsub('\194\160', ' '):gsub('\226\128\175', ' ')
 
   local results = {}
 
@@ -55,10 +57,10 @@ local function parse_conditional_value(value)
   local parts = separate_conditional_values(value, ';')
 
   for _, part in ipairs(parts) do
-    local value_part, condition_part = part:match('^%s*(.-)%s+@%s+%((.-)%)%s*$')
+    local value_part, condition_part = part:match('^%s*(.-)%s*@%s*%((.-)%)%s*$')
 
     if not value_part or not condition_part then
-      value_part, condition_part = part:match('^%s*(.-)%s+@%s+(.+)%s*$')
+      value_part, condition_part = part:match('^%s*(.-)%s*@%s*(.+)%s*$')
     end
 
     if value_part and condition_part then

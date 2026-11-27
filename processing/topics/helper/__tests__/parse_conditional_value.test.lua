@@ -22,6 +22,15 @@ describe('parse_conditional_value', function()
     assert.are.equal(result[1].condition, 'Mo-Fr 08:00-18:00')
   end)
 
+  it('accepts `@` without spaces and non-breaking spaces', function()
+    assert.are.same(parse_conditional_value('30@(22:00-06:00)'), { { value = '30', condition = '22:00-06:00' } })
+    assert.are.same(parse_conditional_value('none@agricultural'), { { value = 'none', condition = 'agricultural' } })
+    assert.are.same(
+      parse_conditional_value('no_parking\194\160@ (Mo-Fr 07:00-17:00)'),
+      { { value = 'no_parking', condition = 'Mo-Fr 07:00-17:00' } }
+    )
+  end)
+
   it('returns nil for invalid format', function()
     local result = parse_conditional_value('invalid_format')
     assert.are.equal(result, nil)

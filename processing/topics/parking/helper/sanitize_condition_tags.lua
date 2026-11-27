@@ -85,6 +85,10 @@ function M.sanitize(tags)
 
     local parts = {}
     local was_dropped, was_rewritten, changed = false, false, false
+    -- `2h@(…)` or a non-breaking space: read like `2h @ (…)`, but report it
+    if value:find('%S@') or value:find('@%S') or value:find('\194\160') or value:find('\226\128\175') then
+      was_rewritten = true
+    end
     for _, entry in ipairs(entries) do
       local condition = CONDITION_SYNTAX.normalize(entry.condition)
       if condition ~= entry.condition then was_rewritten = true end

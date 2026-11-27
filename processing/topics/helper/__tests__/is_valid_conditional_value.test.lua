@@ -10,6 +10,12 @@ describe('is_valid_conditional_value', function()
   end)
 
   -- Real values from OSM Berlin (2026-09-25)
+  it('accepts `@` without spaces and non-breaking spaces', function()
+    assert.is_true(is_valid_conditional_value('30@(22:00-06:00)'))
+    assert.is_true(is_valid_conditional_value('2h @Mo-Fr 08:00-18:00, Sa 08:00-14:00'))
+    assert.is_true(is_valid_conditional_value('no_parking\194\160@ (Mo-Fr 07:00-17:00)'))
+  end)
+
   it('rejects unbalanced brackets', function()
     assert.is_false(is_valid_conditional_value('no_parking @ (Mo-Fr 06:00-20;00, Sa 06:00-15:00)...)'))
     assert.is_false(is_valid_conditional_value('no_stopping @ (Mo-Sa 07:00-19:00; PH off)...)'))
