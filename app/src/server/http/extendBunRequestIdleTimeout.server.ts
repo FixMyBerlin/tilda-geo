@@ -7,8 +7,8 @@
  * srvx/Bun request (`request.runtime.bun.server`, set by the Bun adapter). `0` disables the idle timeout.
  *
  * Routes that build a large response before the first byte (exports, warm-cache, data-schema import, MCP)
- * pass `0`: their duration depends on the data size, and Traefik's forwarding timeouts in
- * `docker-compose.network.yml` are the outer limit.
+ * pass `0`: their duration depends on the data size. Traefik's timeouts in `docker-compose.network.yml`
+ * limit only the client connection; the handler keeps running after Traefik gives up.
  */
 type BunServerWithTimeout = {
   timeout: (request: Request, seconds: number) => void

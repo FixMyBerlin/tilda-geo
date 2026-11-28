@@ -1,5 +1,5 @@
 import { exec, execFile } from 'node:child_process'
-import { createReadStream } from 'node:fs'
+import type { FileHandle } from 'node:fs/promises'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { createFileRoute } from '@tanstack/react-router'
@@ -84,6 +84,11 @@ const exportSearchSchema = z.object({
   format: z.enum(formats),
 })
 
+// Export files reach several GB; 1 MB reads keep the number of pulls small.
+const EXPORT_STREAM_CHUNK_BYTES = 1024 * 1024
+// While the file streams: a download that keeps moving runs as long as it needs, a stalled one is closed.
+const EXPORT_STREAM_IDLE_TIMEOUT_SECONDS = 120
+
 const createExportRunId = () =>
   `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`
 
@@ -108,30 +113,38 @@ const createExportFileResponseStream = ({
   logPrefix: string
   requestStartedAt: number
 }) => {
-  const nodeStream = createReadStream(outputFilePath)
+  let fileHandle: FileHandle | undefined
   let bytesStreamed = 0
   let didCleanup = false
   const cleanupFile = (reason: string) => {
     if (didCleanup) return
     didCleanup = true
-    void unlinkExportFile(outputFilePath, logPrefix, reason)
+    void (async () => {
+      await fileHandle?.close().catch(() => undefined)
+      await unlinkExportFile(outputFilePath, logPrefix, reason)
+    })()
   }
 
+  // Pull-based: the next chunk is read from disk only when the client has taken the last one.
+  // Multi-GB exports to slow clients would otherwise be buffered in memory.
   return new ReadableStream<Uint8Array>({
-    start(controller) {
-      nodeStream.on('data', (chunk: Buffer) => {
-        bytesStreamed += chunk.length
-        controller.enqueue(new Uint8Array(chunk))
-      })
-      nodeStream.on('end', () => {
-        controller.close()
-        console.info(logPrefix, 'stream completed', {
-          bytesStreamed,
-          totalDurationMs: Date.now() - requestStartedAt,
-        })
-        cleanupFile('stream_completed')
-      })
-      nodeStream.on('error', (streamError) => {
+    async pull(controller) {
+      try {
+        fileHandle ??= await fs.open(outputFilePath, 'r')
+        const chunk = new Uint8Array(EXPORT_STREAM_CHUNK_BYTES)
+        const { bytesRead } = await fileHandle.read(chunk, 0, chunk.length, null)
+        if (bytesRead === 0) {
+          controller.close()
+          console.info(logPrefix, 'stream completed', {
+            bytesStreamed,
+            totalDurationMs: Date.now() - requestStartedAt,
+          })
+          cleanupFile('stream_completed')
+          return
+        }
+        bytesStreamed += bytesRead
+        controller.enqueue(chunk.subarray(0, bytesRead))
+      } catch (streamError) {
         console.error(logPrefix, 'stream failed', {
           bytesStreamed,
           totalDurationMs: Date.now() - requestStartedAt,
@@ -139,10 +152,9 @@ const createExportFileResponseStream = ({
         })
         controller.error(streamError)
         cleanupFile('stream_failed')
-      })
+      }
     },
     cancel(cancelReason) {
-      nodeStream.destroy()
       console.warn(logPrefix, 'stream canceled by client', {
         bytesStreamed,
         totalDurationMs: Date.now() - requestStartedAt,
@@ -291,7 +303,11 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
               3857
             )
           `.replaceAll('"', '\\"')
-        const outputFilePath = path.resolve('public', 'temp', `export-temp-${Date.now()}.${format}`)
+        const outputFilePath = path.resolve(
+          'public',
+          'temp',
+          `export-temp-${exportRunId}.${format}`,
+        )
         const dbConnection = `PG:"${getBaseDatabaseUrl()}"`
         const layerName = regionSlug && regionSlug !== 'noRegion' ? regionSlug : undefined
 
@@ -422,6 +438,8 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
           contentLength: outputStats.size,
           totalDurationMs: Date.now() - requestStartedAt,
         })
+
+        extendBunRequestIdleTimeout(request, EXPORT_STREAM_IDLE_TIMEOUT_SECONDS)
 
         return new Response(
           createExportFileResponseStream({
