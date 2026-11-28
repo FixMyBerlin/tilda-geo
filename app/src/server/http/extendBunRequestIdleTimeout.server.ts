@@ -1,19 +1,15 @@
 /**
  * Bun idle-timeout workaround for long “time-to-first-byte” handlers (FixMyBerlin/private-issues#3218).
  *
- * Symptom: large `/api/export/...` requests (e.g. Deutschland `bikelanes`) logged `start export` but never
- * `prepared export`; clients saw empty replies (~12s), Traefik 502 (~34s), or broken Chrome downloads.
- * Generation via ogr2ogr was fine — the HTTP connection was closed while the handler sent zero bytes.
+ * `Bun.serve` defaults to ~10s `idleTimeout`: a handler that sends no response bytes for that long gets its
+ * connection closed (empty reply, or a 502 from Traefik). Nitro’s Bun preset does not expose a global
+ * idle-timeout config, so slow routes opt in per request via `server.timeout(request, seconds)` on the
+ * srvx/Bun request (`request.runtime.bun.server`, set by the Bun adapter). `0` disables the idle timeout.
  *
- * Cause: `Bun.serve` defaults to ~10s `idleTimeout` (no response bytes = idle). Nitro’s Bun preset does not
- * expose a global idle-timeout config; a compose `NITRO_BUN_IDLE_TIMEOUT` env var would not reach Bun.
- *
- * Fix: opt in per route via `server.timeout(request, seconds)` on the srvx/Bun request
- * (`request.runtime.bun.server`, set by the Bun adapter). Tune `EXPORT_IDLE_TIMEOUT_SECONDS` below.
- * Other slow routes (e.g. warm-cache) can call this with a higher value or `0` to disable.
+ * Routes that build a large response before the first byte (exports, warm-cache, data-schema import, MCP)
+ * pass `0`: their duration depends on the data size, and Traefik's forwarding timeouts in
+ * `docker-compose.network.yml` are the outer limit.
  */
-const EXPORT_IDLE_TIMEOUT_SECONDS = 120
-
 type BunServerWithTimeout = {
   timeout: (request: Request, seconds: number) => void
 }
@@ -26,10 +22,7 @@ type RequestWithBunRuntime = Request & {
   }
 }
 
-export const extendBunRequestIdleTimeout = (
-  request: Request,
-  seconds = EXPORT_IDLE_TIMEOUT_SECONDS,
-) => {
+export const extendBunRequestIdleTimeout = (request: Request, seconds: number) => {
   const server = (request as RequestWithBunRuntime).runtime?.bun?.server
   if (!server?.timeout) return
 

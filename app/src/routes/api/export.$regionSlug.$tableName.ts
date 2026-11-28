@@ -161,7 +161,8 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
   server: {
     handlers: {
       GET: async ({ request, params }) => {
-        extendBunRequestIdleTimeout(request)
+        // Whole-region exports (e.g. Deutschland `routing`) run ogr2ogr for minutes before the first byte.
+        extendBunRequestIdleTimeout(request, 0)
 
         const exportRunId = createExportRunId()
         const logPrefix = `[EXPORT:${exportRunId}]`

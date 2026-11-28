@@ -30,16 +30,18 @@ services:
       - '--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web'
       - '--certificatesresolvers.letsencrypt.acme.email=dev-team@fixmycity.de'
       - '--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json'
-      # Long-running exports can take >20s before first byte.
-      # Keep upstream response/header timeouts comfortably above that.
+      # Whole-region exports (Deutschland `routing`, `roads`) run ogr2ogr for 2–4 min before the
+      # first byte. Keep the response header timeout well above that.
       - '--serversTransport.forwardingTimeouts.dialTimeout=100s'
-      - '--serversTransport.forwardingTimeouts.responseHeaderTimeout=300s'
+      - '--serversTransport.forwardingTimeouts.responseHeaderTimeout=900s'
       - '--serversTransport.forwardingTimeouts.idleConnTimeout=300s'
-      # Keep client-facing read/write windows permissive for large downloads.
       - '--entrypoints.websecure.transport.respondingTimeouts.readTimeout=300s'
-      - '--entrypoints.websecure.transport.respondingTimeouts.writeTimeout=300s'
       - '--entrypoints.web.transport.respondingTimeouts.readTimeout=300s'
-      - '--entrypoints.web.transport.respondingTimeouts.writeTimeout=300s'
+      # writeTimeout counts from the request to the last response byte, so it caps generation plus
+      # download. Exports of several GB need longer than any fixed window on slow connections:
+      # 0 = no limit (Traefik's default).
+      - '--entrypoints.websecure.transport.respondingTimeouts.writeTimeout=0s'
+      - '--entrypoints.web.transport.respondingTimeouts.writeTimeout=0s'
     ports:
       - '80:80'
       - '443:443'
