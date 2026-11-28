@@ -81,7 +81,7 @@ export const SubcategoryCheckbox = ({ categoryId, subcategory, disabled }: Props
               : 'cursor-pointer text-yellow-500 focus:ring-2 focus:ring-yellow-500 focus:ring-offset-0 focus:outline-none',
           )}
           disabled={disabled}
-          defaultChecked={styleConfig.active}
+          checked={styleConfig.active}
           onChange={(event) =>
             toggleActive({
               event,
