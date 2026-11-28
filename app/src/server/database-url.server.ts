@@ -41,6 +41,17 @@ export function getBaseDatabaseUrl() {
   return `postgresql://${encodeCredential(user)}:${encodeCredential(password)}@${host}:${port}/${name}`
 }
 
+// For CLI tools (ogr2ogr, pg_restore): the URL has no password; it goes into the child's
+// environment as PGPASSWORD, so it shows up neither in the process list nor in error messages
+// that quote the command line.
+export function getDatabaseCliConnection() {
+  const { host, user, password, name, port } = getDatabaseConfig()
+  return {
+    url: `postgresql://${encodeCredential(user)}@${host}:${port}/${name}`,
+    env: { ...process.env, PGPASSWORD: password },
+  }
+}
+
 // Note: The ?schema=prisma parameter is used by Prisma CLI (migrations, introspection, studio)
 // For runtime queries via Pool adapter, we set search_path directly in db/index.ts
 export function getPrismaCliDatabaseUrl() {

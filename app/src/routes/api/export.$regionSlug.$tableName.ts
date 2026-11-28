@@ -15,7 +15,7 @@ import { guardRegionMembership } from '@/server/api/util/authGuards.server'
 import { compareApiKeyTimingSafe } from '@/server/api/util/checkApiKey.server'
 import { corsHeaders } from '@/server/api/util/cors'
 import { getProcessingMeta } from '@/server/api/util/getProcessingMeta.server'
-import { getBaseDatabaseUrl } from '@/server/database-url.server'
+import { getDatabaseCliConnection } from '@/server/database-url.server'
 import { extendBunRequestIdleTimeout } from '@/server/http/extendBunRequestIdleTimeout.server'
 import { geoDataClient } from '@/server/prisma-client.server'
 import { getRegion } from '@/server/regions/queries/getRegion.server'
@@ -314,6 +314,7 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
 
         const ogrFormat = ogrFormats[format]
         // Export output is WGS84 (GeoJSON RFC 7946; public API contract)
+        const dbConnection = getDatabaseCliConnection()
         const ogrArgs = [
           '-f',
           ogrFormat.driver,
@@ -325,7 +326,7 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
           sqlQuery,
           ...(layerName ? ['-nln', layerName] : []),
           outputFilePath,
-          `PG:${getBaseDatabaseUrl()}`,
+          `PG:${dbConnection.url}`,
         ]
 
         const ogrStartedAt = Date.now()
@@ -333,7 +334,11 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
         const ogrResult = await new Promise<'done' | 'client_gone'>((resolve, reject) => {
           // `signal` kills ogr2ogr when the client disconnects; a whole-region export would
           // otherwise keep the database busy and write several GB for nobody.
-          const ogrOptions = { maxBuffer: 1024 * 1024 * 50, signal: request.signal }
+          const ogrOptions = {
+            maxBuffer: 1024 * 1024 * 50,
+            signal: request.signal,
+            env: dbConnection.env,
+          }
           execFile('ogr2ogr', ogrArgs, ogrOptions, (error, stdout, stderr) => {
             ogrDurationMs = Date.now() - ogrStartedAt
             if (error && request.signal.aborted) {

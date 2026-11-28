@@ -1,4 +1,4 @@
-import { getBaseDatabaseUrl } from '@/server/database-url.server'
+import { getDatabaseCliConnection } from '@/server/database-url.server'
 import db from '@/server/db.server'
 import { assertDataSchemaTableName } from './dataSchemaS3Keys'
 
@@ -39,18 +39,19 @@ async function dropTableIfExists(table: string) {
 }
 
 async function restoreDumpFile(dumpPath: string) {
+  const dbConnection = getDatabaseCliConnection()
   let proc
   try {
     proc = Bun.spawn(
       [
         'pg_restore',
-        `--dbname=${getBaseDatabaseUrl()}`,
+        `--dbname=${dbConnection.url}`,
         '--single-transaction',
         '--no-owner',
         '--no-privileges',
         dumpPath,
       ],
-      { stdout: 'pipe', stderr: 'pipe' },
+      { stdout: 'pipe', stderr: 'pipe', env: dbConnection.env },
     )
   } catch (error: unknown) {
     throwIfPgRestoreMissing(error)
