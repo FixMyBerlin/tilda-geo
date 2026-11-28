@@ -302,33 +302,44 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
               (SELECT ST_SetSRID(ST_MakeEnvelope(${minlon}, ${minlat}, ${maxlon}, ${maxlat}), 4326)),
               3857
             )
-          `.replaceAll('"', '\\"')
+          `
         const outputFilePath = path.resolve(
           'public',
           'temp',
           `export-temp-${exportRunId}.${format}`,
         )
-        const dbConnection = `PG:"${getBaseDatabaseUrl()}"`
         const layerName = regionSlug && regionSlug !== 'noRegion' ? regionSlug : undefined
 
         const isGdalAvailable = await checkGdalVersion()
 
         const ogrFormat = ogrFormats[format]
         // Export output is WGS84 (GeoJSON RFC 7946; public API contract)
-        const ogrCommand = `ogr2ogr \
-            -f "${ogrFormat.driver}" \
-            -t_srs EPSG:4326 \
-            -lco COORDINATE_PRECISION=8 \
-            -sql "${sqlQuery}" \
-            ${layerName ? `-nln ${layerName}` : ''} \
-            "${outputFilePath}" \
-            ${dbConnection}`
+        const ogrArgs = [
+          '-f',
+          ogrFormat.driver,
+          '-t_srs',
+          'EPSG:4326',
+          '-lco',
+          'COORDINATE_PRECISION=8',
+          '-sql',
+          sqlQuery,
+          ...(layerName ? ['-nln', layerName] : []),
+          outputFilePath,
+          `PG:${getBaseDatabaseUrl()}`,
+        ]
 
         const ogrStartedAt = Date.now()
         let ogrDurationMs = 0
-        await new Promise<void>((resolve, reject) => {
-          exec(ogrCommand, { maxBuffer: 1024 * 1024 * 50 }, (error, stdout, stderr) => {
+        const ogrResult = await new Promise<'done' | 'client_gone'>((resolve, reject) => {
+          // `signal` kills ogr2ogr when the client disconnects; a whole-region export would
+          // otherwise keep the database busy and write several GB for nobody.
+          const ogrOptions = { maxBuffer: 1024 * 1024 * 50, signal: request.signal }
+          execFile('ogr2ogr', ogrArgs, ogrOptions, (error, stdout, stderr) => {
             ogrDurationMs = Date.now() - ogrStartedAt
+            if (error && request.signal.aborted) {
+              resolve('client_gone')
+              return
+            }
             if (error) {
               console.error(logPrefix, 'ogr2ogr failed', {
                 ogrDurationMs,
@@ -345,9 +356,19 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
             if (stdout && isDev) {
               console.info('[EXPORT] ogr2ogr stdout:', stdout)
             }
-            resolve()
+            resolve('done')
           })
         })
+
+        if (ogrResult === 'client_gone') {
+          console.warn(logPrefix, 'client disconnected, ogr2ogr stopped', {
+            ogrDurationMs,
+            totalDurationMs: Date.now() - requestStartedAt,
+          })
+          await unlinkExportFile(outputFilePath, logPrefix, 'client_disconnected')
+          // Nobody reads this response; 499 marks the case in logs.
+          return new Response(null, { status: 499, headers: corsHeaders })
+        }
 
         let metadataEditDurationMs = 0
         if (isGdalAvailable) {
