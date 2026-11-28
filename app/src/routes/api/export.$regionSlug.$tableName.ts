@@ -96,6 +96,8 @@ const unlinkExportFile = async (outputFilePath: string, logPrefix: string, reaso
   try {
     await fs.unlink(outputFilePath)
   } catch (unlinkError) {
+    // ogr2ogr stopped before it created the file: nothing to remove.
+    if ((unlinkError as NodeJS.ErrnoException).code === 'ENOENT') return
     console.warn(logPrefix, 'failed to remove temp export file', {
       outputFilePath,
       reason,
