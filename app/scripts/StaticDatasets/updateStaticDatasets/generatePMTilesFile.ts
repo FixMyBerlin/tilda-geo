@@ -82,26 +82,28 @@ export const generatePMTilesFile = (
     '--drop-densest-as-needed',
     // https://github.com/felt/tippecanoe#zoom-levels
     '--extend-zooms-if-still-dropping',
+    // MapLibre Tiles (MLT) instead of MVT, see https://github.com/birkskyum/manby#maplibre-tiles
+    // The PMTiles header gets tile type MLT; the app reads it and sets `encoding: 'mlt'` (`pmtilesProtocol.ts`)
+    // Default `--mlt-profile=web` (MapLibre GL JS 5.12+). With gzip it makes the smallest files on our data;
+    // `min-size` (FSST, FastPFOR) only wins without gzip, and then the files are larger.
+    '--tile-format=mlt',
     inputFullFile,
   ]
 
-  // Host PATH tippecanoe (brew locally). Do not docker-run this from the app.
-  // See app/README.md#host-binaries-local-vs-server
-  const { success, exitCode, stdout, stderr } = Bun.spawnSync(['tippecanoe', ...parameters], {
+  // Host PATH manby (cargo locally), which takes tippecanoe's options. tippecanoe cannot write MLT.
+  // Do not docker-run this from the app. See app/README.md#host-binaries-local-vs-server
+  const { success, exitCode, stdout, stderr } = Bun.spawnSync(['manby', ...parameters], {
     stdout: 'pipe',
     stderr: 'pipe',
   })
   if (!success) {
-    console.error(
-      styleText('red', '  ERROR: tippecanoe failed. This needs to be fixed manually!'),
-      {
-        success,
-        exitCode,
-        stdout: stdout.toString(),
-        stderr: stderr.toString(),
-        command: `tippecanoe ${parameters.join(' ')}`,
-      },
-    )
+    console.error(styleText('red', '  ERROR: manby failed. This needs to be fixed manually!'), {
+      success,
+      exitCode,
+      stdout: stdout.toString(),
+      stderr: stderr.toString(),
+      command: `manby ${parameters.join(' ')}`,
+    })
   }
 
   return outputFullFile

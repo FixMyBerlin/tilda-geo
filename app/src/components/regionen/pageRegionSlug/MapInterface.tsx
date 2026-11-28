@@ -1,6 +1,5 @@
 import { StreetImageryLocaleProvider } from '@osm-editor-kit/street-imagery-react'
 import { addProtocol, removeProtocol } from 'maplibre-gl'
-import { Protocol } from 'pmtiles'
 import { useEffect } from 'react'
 import { useBreakpoint } from '@/components/shared/hooks/viewport/useBreakpoint'
 import { BackgroundLegend } from './background/BackgroundLegend'
@@ -10,9 +9,10 @@ import { RegionDataModals } from './DownloadModal/RegionDataModals'
 import { useBg3dParam } from './hooks/useQueryState/useBg3dParam'
 import { LoadingIndicator } from './LoadingIndicator/LoadingIndicator'
 import { MapNavigationButtons } from './Map/MapNavigationButtons'
-import './Map/maplibreWorker'
 import { RegionMap } from './Map/RegionMap'
+import './Map/maplibreWorker'
 import { PlaceSearch } from './Map/Search/PlaceSearch'
+import { createPmtilesProtocolAction } from './Map/SourcesAndLayers/utils/pmtilesProtocol'
 import {
   mapOverlayBottomRightControlsClassName,
   mapOverlayControlStackClassName,
@@ -33,8 +33,7 @@ export const MapInterface = () => {
   const { is3dActive } = useBg3dParam()
 
   useEffect(function registerPmtilesProtocolOnMount() {
-    const protocol = new Protocol()
-    addProtocol('pmtiles', protocol.tile)
+    addProtocol('pmtiles', createPmtilesProtocolAction())
     return function removePmtilesProtocolOnUnmount() {
       removeProtocol('pmtiles')
     }

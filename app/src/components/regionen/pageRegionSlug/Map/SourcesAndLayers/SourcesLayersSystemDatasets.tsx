@@ -8,7 +8,7 @@ import {
 } from '@/components/regionen/pageRegionSlug/utils/sourceKeyUtils/sourceKeyUtilsStaticDataset'
 import { isMaskLayer } from '../utils/maskLayerUtils'
 import { buildUploadLayerProps, type RenderableUploadLayer } from './utils/buildUploadLayerProps'
-import { createPmtilesUrl } from './utils/createPmtilesUrl'
+import { createPmtilesUrl } from './utils/pmtilesProtocol'
 
 // Renders systemLayer datasets that are always active and hidden from UI.
 // These datasets are not controlled by URL parameters and are always visible.
