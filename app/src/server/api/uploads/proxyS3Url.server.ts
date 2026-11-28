@@ -1,7 +1,40 @@
 import type { GetObjectCommandOutput } from '@aws-sdk/client-s3'
-import { GetObjectCommand, S3Client } from '@aws-sdk/client-s3'
+import { GetObjectCommand, HeadObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import type { GetObjectCommandInput } from '@aws-sdk/client-s3/dist-types/commands/GetObjectCommand'
 import { getOptimalCompression } from '@/scripts/StaticDatasets/updateStaticDatasets/getOptimalCompression'
+import { corsHeaders } from '@/server/api/util/cors'
+
+function s3ErrorResponse(e: unknown) {
+  const metadata =
+    e && typeof e === 'object' && '$metadata' in e
+      ? (e as { $metadata: { httpStatusCode?: number } }).$metadata
+      : undefined
+  const message = e instanceof Error ? e.message : String(e)
+
+  // Handle 304 Not Modified for conditional requests
+  if (metadata?.httpStatusCode === 304) {
+    return new Response(null, { status: 304, headers: corsHeaders })
+  }
+
+  return Response.json(
+    { source: 'S3', statusText: message },
+    { status: metadata?.httpStatusCode ?? 500, headers: corsHeaders },
+  )
+}
+
+/** The headers that GET and HEAD of a file have in common. */
+function fileHeaders(file: { contentType?: string; etag?: string; lastModified?: Date }) {
+  return {
+    ...corsHeaders,
+    'Content-Type': file.contentType ?? '',
+    // Prevent MIME sniffing; the served Content-Type is partly upload-controlled (region logos).
+    'X-Content-Type-Options': 'nosniff',
+    ETag: file.etag ?? '', // S3 ETag for cache validation
+    // 1 hour cache for both file types. The route makes it `private` for non-public uploads.
+    'Cache-Control': 'public, max-age=3600, must-revalidate',
+    ...(file.lastModified ? { 'Last-Modified': file.lastModified.toUTCString() } : {}),
+  }
+}
 
 /**
  * Proxies S3 URLs with optimal compression and caching headers.
@@ -33,32 +66,41 @@ export async function proxyS3Url(request: Request, url: string, downloadFilename
     sendParams.IfNoneMatch = ifNoneMatch
   }
 
+  // HEAD (e.g. an app checks for a new version by ETag / Last-Modified) must not transfer the file.
+  if (request.method === 'HEAD') {
+    try {
+      const head = await s3Client.send(
+        new HeadObjectCommand({
+          Bucket: sendParams.Bucket,
+          Key: sendParams.Key,
+          IfNoneMatch: ifNoneMatch ?? undefined,
+        }),
+      )
+      const isGeojson = url.endsWith('.geojson')
+      return new Response(null, {
+        status: 200,
+        headers: {
+          ...fileHeaders({
+            contentType: isGeojson ? 'application/geo+json' : head.ContentType,
+            etag: head.ETag,
+            lastModified: head.LastModified,
+          }),
+          // The size of the stored file; a GET of a GeoJSON may send it compressed.
+          ...(head.ContentLength !== undefined && !isGeojson
+            ? { 'Content-Length': String(head.ContentLength) }
+            : {}),
+        },
+      })
+    } catch (e: unknown) {
+      return s3ErrorResponse(e)
+    }
+  }
+
   let response: GetObjectCommandOutput
   try {
     response = await s3Client.send(new GetObjectCommand(sendParams))
   } catch (e: unknown) {
-    const metadata =
-      e && typeof e === 'object' && '$metadata' in e
-        ? (e as { $metadata: { httpStatusCode?: number } }).$metadata
-        : undefined
-    const message = e instanceof Error ? e.message : String(e)
-
-    // Handle 304 Not Modified for conditional requests
-    if (metadata?.httpStatusCode === 304) {
-      return new Response(null, {
-        status: 304,
-        headers: {
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, Accept-Encoding',
-        },
-      })
-    }
-
-    return Response.json(
-      { source: 'S3', statusText: message },
-      { status: metadata?.httpStatusCode ?? 500 },
-    )
+    return s3ErrorResponse(e)
   }
 
   // @ts-expect-error - S3 SDK Body type is complex and not fully typed
@@ -83,17 +125,9 @@ export async function proxyS3Url(request: Request, url: string, downloadFilename
 
   const contentEncoding =
     ContentEncoding && ContentEncoding !== 'identity' ? ContentEncoding : undefined
-  const headers: HeadersInit = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, Accept-Encoding',
+  const headers: Record<string, string> = {
+    ...fileHeaders({ contentType: ContentType, etag: ETag, lastModified: response.LastModified }),
     'Content-Length': String(ContentLength ?? 0),
-    'Content-Type': ContentType ?? '',
-    // Prevent MIME sniffing; the served Content-Type is partly upload-controlled (region logos).
-    'X-Content-Type-Options': 'nosniff',
-    ETag: ETag ?? '', // S3 ETag for cache validation
-    'Cache-Control': 'public, max-age=3600, must-revalidate', // 1 hour cache for both file types
-    ...(response.LastModified ? { 'Last-Modified': response.LastModified.toUTCString() } : {}),
     ...(contentEncoding ? { 'Content-Encoding': contentEncoding } : {}),
   }
 

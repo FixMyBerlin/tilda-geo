@@ -4,6 +4,8 @@ import { gunzipSync } from 'node:zlib'
 import { z } from 'zod'
 import type { MapDataSourceExternalRenderFormat } from '@/scripts/StaticDatasets/types'
 import { getOptimalCompression } from '@/scripts/StaticDatasets/updateStaticDatasets/getOptimalCompression'
+import { ifNoneMatchHasEtag } from '@/server/api/uploads/privateCaching.server'
+import { corsHeaders } from '@/server/api/util/cors'
 
 const CACHE_DIR = path.join(process.cwd(), 'public', 'temp', 'uploads-cache')
 
@@ -27,6 +29,15 @@ function getCachedResponse(
     return null
   }
   const fileStats = fs.statSync(cachedFilePath)
+  // 304 and HEAD need no file content: the cached file is not read.
+  const early = conditionalOrHeadResponse(
+    request,
+    format,
+    metadata,
+    fileStats.size,
+    fileStats.mtime,
+  )
+  if (early) return early
   const fileBuffer = fs.readFileSync(cachedFilePath)
   return buildResponse(request, fileBuffer, format, metadata, fileStats.mtime)
 }
@@ -90,7 +101,7 @@ export async function proxyExternalUrl(
     const message = error instanceof Error ? error.message : String(error)
     return Response.json(
       { source: 'external', statusText: `Failed to fetch: ${message}` },
-      { status: 500 },
+      { status: 500, headers: corsHeaders },
     )
   }
 
@@ -105,7 +116,7 @@ export async function proxyExternalUrl(
   if (!response.ok) {
     return Response.json(
       { source: 'external', statusText: response.statusText },
-      { status: response.status },
+      { status: response.status, headers: corsHeaders },
     )
   }
 
@@ -131,7 +142,7 @@ export async function proxyExternalUrl(
       const message = error instanceof Error ? error.message : String(error)
       return Response.json(
         { source: 'external', statusText: `Failed to decompress: ${message}` },
-        { status: 500 },
+        { status: 500, headers: corsHeaders },
       )
     }
   }
@@ -168,7 +179,56 @@ export async function proxyExternalUrl(
   // Get file stats for mtime fallback
   const fileStats = fs.statSync(newCacheFilePath)
 
+  const early = conditionalOrHeadResponse(
+    request,
+    format,
+    newMetadata,
+    fileBuffer.length,
+    fileStats.mtime,
+  )
+  if (early) return early
   return buildResponse(request, fileBuffer, format, newMetadata, fileStats.mtime)
+}
+
+function lastModifiedOf(metadata: CacheMetadata, fileMtime: Date) {
+  return metadata.sourceLastModified
+    ? new Date(metadata.sourceLastModified).toUTCString()
+    : fileMtime.toUTCString()
+}
+
+/**
+ * `304` for a matching `If-None-Match` (only when the source sent an ETag), and the headers of
+ * a `HEAD` without the body. The file is not read, compressed or sent. A GeoJSON `HEAD` has no
+ * `Content-Length`, because a `GET` may send it compressed.
+ */
+function conditionalOrHeadResponse(
+  request: Request,
+  format: MapDataSourceExternalRenderFormat,
+  metadata: CacheMetadata,
+  fileSize: number,
+  fileMtime: Date,
+) {
+  const headers = {
+    ...corsHeaders,
+    ...(metadata.etag && { ETag: metadata.etag }),
+    'Cache-Control': `public, max-age=${metadata.ttl}, must-revalidate`,
+    'Last-Modified': lastModifiedOf(metadata, fileMtime),
+  }
+  if (ifNoneMatchHasEtag(request, metadata.etag)) {
+    return new Response(null, { status: 304, headers })
+  }
+  if (request.method !== 'HEAD') return null
+
+  return new Response(null, {
+    status: 200,
+    headers: {
+      ...headers,
+      'Content-Type': format === 'geojson' ? 'application/geo+json' : 'application/x-protobuf',
+      ...(format === 'pmtiles' && { 'Accept-Ranges': 'bytes', 'Content-Length': String(fileSize) }),
+      'X-Data-Last-Fetched': new Date(metadata.lastFetched).toISOString(),
+      ...(metadata.sourceLastModified && { 'X-Source-Last-Modified': metadata.sourceLastModified }),
+    },
+  })
 }
 
 function buildResponse(
@@ -192,18 +252,14 @@ function buildResponse(
         return new Response(chunk, {
           status: 206,
           headers: {
-            'Access-Control-Allow-Origin': '*',
-            'Access-Control-Allow-Methods': 'GET',
-            'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, Accept-Encoding',
+            ...corsHeaders,
             'Content-Range': `bytes ${start}-${end}/${fileBuffer.length}`,
             'Content-Length': String(chunk.length),
             'Content-Type': 'application/x-protobuf',
             'Accept-Ranges': 'bytes',
             ...(metadata.etag && { ETag: metadata.etag }),
             'Cache-Control': `public, max-age=${metadata.ttl}, must-revalidate`,
-            'Last-Modified': metadata.sourceLastModified
-              ? new Date(metadata.sourceLastModified).toUTCString()
-              : fileMtime.toUTCString(),
+            'Last-Modified': lastModifiedOf(metadata, fileMtime),
           },
         })
       }
@@ -231,17 +287,13 @@ function buildResponse(
   }
 
   const headers: HeadersInit = {
-    'Access-Control-Allow-Origin': '*',
-    'Access-Control-Allow-Methods': 'GET',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization, Accept, Accept-Encoding',
+    ...corsHeaders,
     'Content-Length': String(contentLength),
     'Content-Type': format === 'geojson' ? 'application/geo+json' : 'application/x-protobuf',
     ...(format === 'pmtiles' && { 'Accept-Ranges': 'bytes' }),
     ...(metadata.etag && { ETag: metadata.etag }),
     'Cache-Control': `public, max-age=${metadata.ttl}, must-revalidate`,
-    'Last-Modified': metadata.sourceLastModified
-      ? new Date(metadata.sourceLastModified).toUTCString()
-      : fileMtime.toUTCString(),
+    'Last-Modified': lastModifiedOf(metadata, fileMtime),
     'X-Data-Last-Fetched': new Date(metadata.lastFetched).toISOString(),
     ...(metadata.sourceLastModified && { 'X-Source-Last-Modified': metadata.sourceLastModified }),
     ...(contentEncoding &&

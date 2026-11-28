@@ -63,7 +63,7 @@ function toExternalApiError(error: unknown) {
  * The JSON error answer with the headers of the external API (CORS, never cached). A 401 names the
  * scheme (`WWW-Authenticate`), a 429 says when to retry.
  */
-function externalApiErrorResponse(error: unknown, headers?: HeadersInit) {
+export function externalApiErrorResponse(error: unknown, headers?: HeadersInit) {
   const apiError = toExternalApiError(error)
   const responseHeaders = mergeHeaders(headers, corsHeaders, noStoreHeaders, apiError.headers ?? {})
   if (apiError.status === 401) responseHeaders.set('WWW-Authenticate', 'Bearer')

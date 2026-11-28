@@ -6,6 +6,7 @@ import type {
   MetaDataUser,
 } from '@/scripts/StaticDatasets/types'
 import { getAppSession } from '@/server/auth/session.server'
+import { memberRegionIds } from '@/server/authorization/isAdminOrRegionMember.server'
 import db from '@/server/db.server'
 import {
   categoryPresentationForConfigCategory,
@@ -111,8 +112,8 @@ async function getFilteredUploadsForRegion(
   } else if (session.role === 'ADMIN') {
     filtered = uploads
   } else {
-    const memberships = await db.membership.findMany({ where: { userId: session.userId } })
-    const membershipRegionIds = memberships.map((m) => m.regionId)
+    // Same member rule as the file route: a membership of a DEACTIVATED region does not count.
+    const membershipRegionIds = await memberRegionIds(session.userId)
     filtered = uploads.filter(
       (upload) => upload.public || upload.regions.some((r) => membershipRegionIds.includes(r.id)),
     )

@@ -11,7 +11,7 @@ import { getExportDownloadFilename } from '@/server/api/export/getExportDownload
 import { formats, ogrFormats } from '@/server/api/export/ogrFormats.const'
 import { resolveExportBbox } from '@/server/api/export/resolveExportBbox.server'
 import { badRequestJson, notFoundJson } from '@/server/api/util/apiJsonResponses.server'
-import { guardAdmin, guardRegionMembership } from '@/server/api/util/authGuards.server'
+import { guardRegionMembership } from '@/server/api/util/authGuards.server'
 import { compareApiKeyTimingSafe } from '@/server/api/util/checkApiKey.server'
 import { corsHeaders } from '@/server/api/util/cors'
 import { getProcessingMeta } from '@/server/api/util/getProcessingMeta.server'
@@ -222,14 +222,11 @@ export const Route = createFileRoute('/api/export/$regionSlug/$tableName')({
         })
 
         if (!compareApiKeyTimingSafe(apiKey)) {
-          const authResponse =
-            region.status === 'DEACTIVATED'
-              ? await guardAdmin(request.headers, corsHeaders)
-              : await guardRegionMembership({
-                  headers: request.headers,
-                  regionIds: [region.id],
-                  responseHeaders: corsHeaders,
-                })
+          const authResponse = await guardRegionMembership({
+            headers: request.headers,
+            regionIds: [region.id],
+            responseHeaders: corsHeaders,
+          })
           if (authResponse) {
             console.warn(logPrefix, 'access denied', { regionSlug, tableName })
             return authResponse
