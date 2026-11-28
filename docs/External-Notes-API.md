@@ -2,54 +2,23 @@
 
 HTTP API for TILDA's internal notes, made for the iD editor fork (cross-origin, from the browser). It offers what a mapper does on the map: list the notes of one folder, read a note with its comments, write a note, comment, resolve / reopen. Edit, delete and folders stay in TILDA.
 
-Code: `app/src/routes/api/auth.osm-token.ts`, `app/src/routes/api/notes.$regionSlug.$folderId*.ts`, `app/src/server/api/notes/externalNotes.server.ts`, `app/src/server/api/auth/osmToken.server.ts`. Access rules: [Permissions.md](Permissions.md).
+Code: `app/src/routes/api/notes.$regionSlug.$folderId*.ts`, `app/src/server/api/notes/externalNotes.server.ts`. The token exchange, the shared errors, the rate limit and CORS are in [External-API-Token.md](External-API-Token.md). Access rules: [Permissions.md](Permissions.md).
 
 ## Auth
 
-The client proves the user's OSM identity once and gets a TILDA token.
+The client exchanges the user's OSM access token for a TILDA token of scope `notes` (`POST /api/auth/osm-token?scope=notes`, valid 1 hour; only OSM applications on the [allow-list](External-API-Token.md#allowed-osm-apps) get one) and sends it as `Authorization: Bearer <TILDA token>` with every notes request. Exchange, token rules and example: [External-API-Token.md](External-API-Token.md#exchange). A token of another scope (`uploads`) is refused with `401 invalid_token`.
 
-1. `POST /api/auth/osm-token` with the user's **OSM OAuth2 access token** (the one iD already has; it needs the `read_prefs` scope).
-2. TILDA asks OSM whose token it is (`/api/0.6/user/details.json`), finds the TILDA user with that OSM id and returns a **TILDA token** (valid 1 hour, scope `notes`).
-3. All notes requests send `Authorization: Bearer <TILDA token>`.
-
-TILDA never stores or logs the OSM token, and stores only a hash of its own token. All TILDA environments (development, staging, production) verify against production OSM (`api.openstreetmap.org`).
-
-The token only says who the user is. Role and region membership are checked on every request, so removing a membership works at once. When the token expires (`401 token_expired`), call the session endpoint again.
-
-```http
-POST /api/auth/osm-token
-Authorization: Bearer <OSM access token>
-```
-
-```json
-201
-{
-  "token": "tildageode_ext_6f1c…",
-  "tokenType": "Bearer",
-  "scope": "notes",
-  "expiresAt": "2026-10-01T13:00:00.000Z",
-  "user": { "id": "cm9x…", "osmId": 11881, "name": "Mia Mapper" }
-}
-```
+The token only says who the user is. Role and region membership are checked on every request. When the token expires (`401 token_expired`), exchange the OSM token again.
 
 ## Errors
 
-Every error is JSON `{ "error": "<code>", "message": "<English text>" }`; `invalid_input` adds `info` with the fields.
+All errors are JSON `{ "error": "<code>", "message": "<English text>" }`. The codes of the token, the member check and the rate limit (`missing_token`, `invalid_token`, `token_expired`, `not_member`, `invalid_input`, `rate_limited`, …) are in [External-API-Token.md](External-API-Token.md#errors). Notes add:
 
-| Status | `error`             | Meaning                                                   | What the client does                   |
-| ------ | ------------------- | --------------------------------------------------------- | -------------------------------------- |
-| 401    | `missing_token`     | No `Authorization: Bearer` header                         | Log in                                 |
-| 401    | `invalid_osm_token` | Session: OSM rejected the token                           | Log in to OSM again                    |
-| 403    | `no_tilda_user`     | Session: this OSM account has no TILDA account yet        | "Sign in to TILDA once"                |
-| 502    | `osm_unavailable`   | Session: OSM could not be asked                           | Retry later                            |
-| 401    | `invalid_token`     | Unknown TILDA token                                       | Request a new session                  |
-| 401    | `token_expired`     | TILDA token expired                                       | Request a new session, repeat the call |
-| 403    | `not_member`        | The user is not a member of the region (and not an admin) | "Ask for access to the region"         |
-| 404    | `region_not_found`  | Unknown or deactivated region                             | Config error                           |
-| 404    | `folder_not_found`  | The folder is not linked to this region                   | Config error                           |
-| 404    | `note_not_found`    | The note is not in this folder                            | Reload the list                        |
-| 400    | `invalid_input`     | Body, query or path parameter not valid                   | Fix the request                        |
-| 429    | `rate_limited`      | More than 20 failed auth attempts per minute from this IP | Wait a minute                          |
+| Status | `error`            | Meaning                                 | What the client does |
+| ------ | ------------------ | --------------------------------------- | -------------------- |
+| 404    | `region_not_found` | Unknown or deactivated region           | Config error         |
+| 404    | `folder_not_found` | The folder is not linked to this region | Config error         |
+| 404    | `note_not_found`   | The note is not in this folder          | Reload the list      |
 
 ## Endpoints
 
@@ -149,10 +118,7 @@ Answer: `200` with the note as in "Read". Any member may resolve and reopen.
 
 ## CORS
 
-Only these routes answer cross-origin requests from a browser. Any origin may call them (`Access-Control-Allow-Origin: *`); the token and the member checks behind it are the access check.
-
-- Preflight (`OPTIONS`): `204` with `Access-Control-Allow-Methods: GET, POST, PATCH, OPTIONS` and `Access-Control-Allow-Headers: Authorization, Content-Type`.
-- No cookies are used: send requests without `credentials`.
+Any origin may call these routes, no cookies are used, see [External-API-Token.md](External-API-Token.md#cors). The preflight (`OPTIONS`) answers `204` with `Access-Control-Allow-Methods: GET, POST, PATCH, OPTIONS` and `Access-Control-Allow-Headers: Authorization, Content-Type`.
 
 ## Example (browser)
 
@@ -160,7 +126,7 @@ Only these routes answer cross-origin requests from a browser. Any origin may ca
 const origin = 'https://staging.tilda-geo.de'
 const base = `${origin}/api/notes/berlin/7`
 
-const session = await fetch(`${origin}/api/auth/osm-token`, {
+const session = await fetch(`${origin}/api/auth/osm-token?scope=notes`, {
   method: 'POST',
   headers: { Authorization: `Bearer ${osmAccessToken}` },
 }).then((response) => response.json())
@@ -180,5 +146,4 @@ await fetch(`${base}/42`, { method: 'PATCH', headers, body: JSON.stringify({ res
 
 ## Operations
 
-- Table `ExternalApiToken` (hash, user, scope, expiry). Expired rows are deleted whenever a new token is issued. To end all external sessions of a user, delete their rows.
-- Writes appear in the audit log with the user and `changeSource: EXTERNAL_API`.
+Writes appear in the audit log with the user and `changeSource: EXTERNAL_API`. Token storage and cleanup: [External-API-Token.md](External-API-Token.md#operations).

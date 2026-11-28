@@ -14,8 +14,7 @@ type OsmUserDetailsResult =
 
 /**
  * Who an OSM OAuth2 access token belongs to (`/user/details.json`, needs the `read_prefs` scope).
- * Used by the OSM login and by the external API token exchange. The access token is only passed
- * on to OSM — never store or log it.
+ * Used by the OSM login. The access token is only passed on to OSM — never store or log it.
  */
 export async function fetchOsmUserDetails(accessToken: string): Promise<OsmUserDetailsResult> {
   const response = await fetch(getOsmApiUrl('/user/details.json'), {

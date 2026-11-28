@@ -10,9 +10,10 @@
  * (b) forge `AuditLog.ipAddress`. We therefore take the **rightmost** entry — the value written by
  * the nearest trusted proxy, which the client cannot influence.
  *
- * ASSUMPTION: exactly one trusted reverse proxy sits in front of the app (the standard nginx setup;
- * the `x-real-ip` fallback below implies the same). If you add another hop in front (e.g. a CDN such
- * as Cloudflare ahead of nginx), the real client IP moves one position to the left — adjust the
+ * ASSUMPTION: exactly one trusted reverse proxy sits in front of the app (Traefik in production, see
+ * `docker-compose.network.yml`; by default it drops a client's own `X-Forwarded-For` and writes the
+ * peer IP; the `x-real-ip` fallback below implies the same). If you add another hop in front (e.g. a CDN such
+ * as Cloudflare ahead of Traefik), the real client IP moves one position to the left — adjust the
  * offset from the right accordingly, or read that CDN's spoof-proof header instead
  * (e.g. `CF-Connecting-IP`, `Fly-Client-IP`).
  */

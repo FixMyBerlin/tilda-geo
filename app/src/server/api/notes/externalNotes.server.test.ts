@@ -43,8 +43,11 @@ import {
   listExternalNotes,
   updateExternalNote,
 } from '@/server/api/notes/externalNotes.server'
-import { externalApiPreflightResponse } from '@/server/api/util/externalApiCors.server'
-import { handleExternalApiRequest } from '@/server/api/util/externalApiResponses.server'
+import {
+  externalApiPreflightResponse,
+  handleExternalApiRequest,
+} from '@/server/api/util/externalApiResponses.server'
+import { resetFailedAuthRateLimits } from '@/server/api/util/failedAuthRateLimit.server'
 
 const TOKEN = 'tildageode_ext_test'
 const BASE = 'https://tilda-geo.de/api/notes/berlin/7'
@@ -103,6 +106,7 @@ function asMember(isMember: boolean) {
 }
 
 beforeEach(() => {
+  resetFailedAuthRateLimits()
   auditContexts.length = 0
   for (const model of Object.values(db)) {
     for (const fn of Object.values(model)) fn.mockReset()
@@ -245,6 +249,17 @@ describe('external notes API: token', () => {
     const result = await run(() => listExternalNotes(missing, folderParams))
     expect(result.response.status).toBe(401)
     expect(result.body.error).toBe('missing_token')
+  })
+
+  test('a token of scope uploads is refused (and answers 401 with WWW-Authenticate)', async () => {
+    db.externalApiToken.findUnique.mockResolvedValue(tokenRow({ scope: 'uploads' }))
+    const req = request(BASE)
+    const { response, body } = await run(() => listExternalNotes(req, folderParams))
+
+    expect(response.status).toBe(401)
+    expect(body.error).toBe('invalid_token')
+    expect(response.headers.get('WWW-Authenticate')).toBe('Bearer')
+    expect(db.note.findMany).not.toHaveBeenCalled()
   })
 
   test('an admin API token is not accepted', async () => {

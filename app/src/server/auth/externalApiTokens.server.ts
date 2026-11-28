@@ -1,5 +1,6 @@
 import { createHash, randomBytes } from 'node:crypto'
 import {
+  EXTERNAL_API_TOKEN_EXPIRED_RETENTION_MS,
   EXTERNAL_API_TOKEN_PREFIX,
   EXTERNAL_API_TOKEN_TTL_MS,
   type ExternalApiTokenScope,
@@ -10,7 +11,7 @@ import db from '@/server/db.server'
 const LAST_USED_UPDATE_INTERVAL_MS = 5 * 60 * 1000
 
 /**
- * ExternalApiToken: short-lived Bearer tokens for the external notes API, issued by the token exchange
+ * ExternalApiToken: short-lived Bearer tokens for the external API (notes, uploads), issued by the token exchange
  * (`exchangeOsmToken`) to a TILDA user who proved their OSM identity. Like AdminApiToken,
  * tokens are high-entropy random strings of which we only store the SHA-256 hash. A token carries
  * a user and a scope, no permissions: role and region membership are read on every request.
@@ -28,8 +29,11 @@ export async function createExternalApiToken(input: {
   scope: ExternalApiTokenScope
 }) {
   const now = Date.now()
-  // Expired tokens are useless; clearing them here keeps the table small without a cron job.
-  await db.externalApiToken.deleteMany({ where: { expiresAt: { lt: new Date(now) } } })
+  // Clearing old tokens here keeps the table small without a cron job. Tokens that expired
+  // recently stay, so they still answer `token_expired`.
+  await db.externalApiToken.deleteMany({
+    where: { expiresAt: { lt: new Date(now - EXTERNAL_API_TOKEN_EXPIRED_RETENTION_MS) } },
+  })
 
   const token = generateToken()
   const expiresAt = new Date(now + EXTERNAL_API_TOKEN_TTL_MS)

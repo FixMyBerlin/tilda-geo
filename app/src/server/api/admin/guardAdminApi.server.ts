@@ -1,11 +1,14 @@
 import { UserRoleEnum } from '@/prisma/generated/client'
 import { verifyAdminApiToken } from '@/server/admin/adminApiTokens.server'
 import {
+  failedAuthRateLimitKey,
+  failedAuthRetryAfterSeconds,
   getClientIp,
-  isAdminApiAuthRateLimited,
-  recordFailedAdminApiAuth,
-} from '@/server/api/admin/adminApiAuthRateLimit.server'
+  isFailedAuthRateLimited,
+  recordFailedAuth,
+} from '@/server/api/util/failedAuthRateLimit.server'
 import type { AuditChangeSource } from '@/server/audit/auditChangeSources.const'
+import { bearerToken } from '@/server/auth/externalSession.server'
 import type { AdminApiCaller } from '@/server/auth/memberCaller.server'
 
 export type AdminApiAuth = {
@@ -24,44 +27,41 @@ type GuardResult =
  * attribution (userId = token owner, changeSource API, adminTokenId) for write endpoints.
  */
 export async function guardAdminApi(request: Request): Promise<GuardResult> {
-  const clientIp = getClientIp(request)
-  if (isAdminApiAuthRateLimited(clientIp)) {
+  // Verified first, like the external API: a valid token works even when the IP is limited
+  // (a bad client behind the same NAT must not lock out the admin); only failed attempts get 429.
+  const token = bearerToken(request)
+  const verified = token ? await verifyAdminApiToken(token) : null
+  if (verified) {
     return {
-      access: false,
-      auth: null,
-      response: Response.json({ message: 'Too many requests' }, { status: 429 }),
+      access: true,
+      auth: {
+        tokenId: verified.tokenId,
+        createdById: verified.createdById,
+        changeSource: 'API',
+      },
+      response: null,
     }
   }
 
-  const header = request.headers.get('authorization') ?? request.headers.get('Authorization')
-  const match = header?.match(/^Bearer\s+(.+)$/i)
-  if (!match?.[1]) {
-    recordFailedAdminApiAuth(clientIp)
+  const rateLimitKey = failedAuthRateLimitKey(request, 'admin')
+  if (rateLimitKey && isFailedAuthRateLimited(rateLimitKey)) {
     return {
       access: false,
       auth: null,
-      response: Response.json({ message: 'Unauthorized' }, { status: 401 }),
+      response: Response.json(
+        { message: 'Too many requests' },
+        {
+          status: 429,
+          headers: { 'Retry-After': String(failedAuthRetryAfterSeconds(rateLimitKey)) },
+        },
+      ),
     }
   }
-
-  const verified = await verifyAdminApiToken(match[1].trim())
-  if (!verified) {
-    recordFailedAdminApiAuth(clientIp)
-    return {
-      access: false,
-      auth: null,
-      response: Response.json({ message: 'Unauthorized' }, { status: 401 }),
-    }
-  }
-
+  if (rateLimitKey) recordFailedAuth(rateLimitKey)
   return {
-    access: true,
-    auth: {
-      tokenId: verified.tokenId,
-      createdById: verified.createdById,
-      changeSource: 'API',
-    },
-    response: null,
+    access: false,
+    auth: null,
+    response: Response.json({ message: 'Unauthorized' }, { status: 401 }),
   }
 }
 
